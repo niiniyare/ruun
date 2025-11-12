@@ -361,3 +361,153 @@ templ SearchInput(props InputProps) {
 		})
 	</div>
 }
+
+// TextareaProps defines the properties for the Textarea component
+type TextareaProps struct {
+	ID           string
+	Name         string
+	Value        string
+	Placeholder  string
+	Rows         int
+	Cols         int
+	Required     bool
+	Disabled     bool
+	Readonly     bool
+	Error        bool
+	Class        string
+	MinLength    int
+	MaxLength    int
+	Resize       bool
+	AutoResize   bool
+	// HTMX attributes
+	HXPost       string
+	HXGet        string
+	HXTarget     string
+	HXSwap       string
+	HXTrigger    string
+	// Alpine.js attributes
+	AlpineModel  string
+	AlpineChange string
+	AlpineBlur   string
+	AlpineFocus  string
+}
+
+// textareaClasses generates Tailwind CSS classes for the textarea
+func textareaClasses(props TextareaProps) string {
+	var classes []string
+
+	// Base classes
+	classes = append(classes,
+		"flex",
+		"w-full",
+		"rounded-md",
+		"border",
+		"border-input",
+		"bg-background",
+		"px-3",
+		"py-2",
+		"text-sm",
+		"ring-offset-background",
+		"placeholder:text-muted-foreground",
+		"focus-visible:outline-none",
+		"focus-visible:ring-2",
+		"focus-visible:ring-ring",
+		"focus-visible:ring-offset-2",
+		"disabled:cursor-not-allowed",
+		"disabled:opacity-50",
+	)
+
+	// Resize behavior
+	if !props.Resize {
+		classes = append(classes, "resize-none")
+	}
+
+	// Error state
+	if props.Error {
+		classes = append(classes, "border-destructive", "focus-visible:ring-destructive")
+	}
+
+	// Auto-resize support
+	if props.AutoResize {
+		classes = append(classes, "min-h-[80px]")
+	}
+
+	// Custom classes
+	if props.Class != "" {
+		classes = append(classes, props.Class)
+	}
+
+	return strings.Join(classes, " ")
+}
+
+// Textarea renders an accessible, styled textarea component
+templ Textarea(props TextareaProps) {
+	<textarea
+		if props.ID != "" {
+			id={ props.ID }
+		}
+		if props.Name != "" {
+			name={ props.Name }
+		}
+		if props.Placeholder != "" {
+			placeholder={ props.Placeholder }
+		}
+		if props.Rows > 0 {
+			rows={ strconv.Itoa(props.Rows) }
+		}
+		if props.Cols > 0 {
+			cols={ strconv.Itoa(props.Cols) }
+		}
+		if props.Required {
+			required
+		}
+		if props.Disabled {
+			disabled
+		}
+		if props.Readonly {
+			readonly
+		}
+		if props.MinLength > 0 {
+			minlength={ strconv.Itoa(props.MinLength) }
+		}
+		if props.MaxLength > 0 {
+			maxlength={ strconv.Itoa(props.MaxLength) }
+		}
+		class={ textareaClasses(props) }
+		if props.HXPost != "" {
+			hx-post={ props.HXPost }
+		}
+		if props.HXGet != "" {
+			hx-get={ props.HXGet }
+		}
+		if props.HXTarget != "" {
+			hx-target={ props.HXTarget }
+		}
+		if props.HXSwap != "" {
+			hx-swap={ props.HXSwap }
+		}
+		if props.HXTrigger != "" {
+			hx-trigger={ props.HXTrigger }
+		}
+		if props.AlpineModel != "" {
+			x-model={ props.AlpineModel }
+		}
+		if props.AlpineChange != "" {
+			x-on:change={ props.AlpineChange }
+		}
+		if props.AlpineBlur != "" {
+			x-on:blur={ props.AlpineBlur }
+		}
+		if props.AlpineFocus != "" {
+			x-on:focus={ props.AlpineFocus }
+		}
+		if props.AutoResize {
+			x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
+			x-init="resize()"
+			x-on:input="resize()"
+		}
+		if props.Error {
+			aria-invalid="true"
+		}
+	>{ props.Value }</textarea>
+}

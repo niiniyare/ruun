@@ -1,207 +1,172 @@
 package molecules
 
 import (
-	"strings"
+	"fmt"
 	"strconv"
+	"strings"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 
-// FormFieldType defines the input type for the form field
-type FormFieldType string
-
-const (
-	FormFieldText     FormFieldType = "text"
-	FormFieldEmail    FormFieldType = "email"
-	FormFieldPassword FormFieldType = "password"
-	FormFieldNumber   FormFieldType = "number"
-	FormFieldSearch   FormFieldType = "search"
-	FormFieldTextarea FormFieldType = "textarea"
-	FormFieldSelect   FormFieldType = "select"
-	FormFieldTags     FormFieldType = "tags"
-)
-
-// FormFieldSize defines the size variants for form fields
-type FormFieldSize string
-
-const (
-	FormFieldSizeSM FormFieldSize = "sm"
-	FormFieldSizeMD FormFieldSize = "md"
-	FormFieldSizeLG FormFieldSize = "lg"
-)
-
-// SelectOption represents an option for select fields
-type SelectOption struct {
-	Value    string
-	Label    string
-	Disabled bool
-	Selected bool
-}
-
-// FormFieldProps defines the properties for the FormField component
-type FormFieldProps struct {
-	Type         FormFieldType
-	Size         FormFieldSize
-	ID           string
-	Name         string
-	Label        string
-	Value        string
-	Placeholder  string
-	HelpText     string
-	ErrorText    string
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Class        string
-	// Input-specific props
-	MinLength    int
-	MaxLength    int
-	Min          string
-	Max          string
-	Step         string
-	Pattern      string
-	Autocomplete string
-	// Select-specific props
-	Options      []SelectOption
-	Multiple     bool
-	// Textarea-specific props
-	Rows         int
-	Cols         int
-	// Tags-specific props
-	TagsEditable bool
-	TagsOptions  []SelectOption
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-}
-
-// formFieldClasses generates container classes for the form field
-func formFieldClasses(props FormFieldProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes, "space-y-2")
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// labelClasses generates classes for the label
-func labelClasses(props FormFieldProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes, "block", "text-sm", "font-medium", "leading-none")
-
-	// Required indicator
-	if props.Required {
-		classes = append(classes, "after:content-['*']", "after:ml-0.5", "after:text-destructive")
-	}
-
-	// Error state
-	if props.ErrorText != "" {
-		classes = append(classes, "text-destructive")
-	} else {
-		classes = append(classes, "text-foreground")
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// helpTextClasses generates classes for help text
-func helpTextClasses(props FormFieldProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes, "text-xs")
-
-	// Color based on state
-	if props.ErrorText != "" {
-		classes = append(classes, "text-destructive")
-	} else {
-		classes = append(classes, "text-muted-foreground")
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// FormField renders a complete form field with label, input, and help text
+// FormField renders a comprehensive enterprise-grade form field  
 templ FormField(props FormFieldProps) {
-	<div class={ formFieldClasses(props) }>
-		// Label
-		if props.Label != "" {
-			<label
-				if props.ID != "" {
-					for={ props.ID }
-				}
-				class={ labelClasses(props) }
-			>
-				{ props.Label }
-			</label>
+	
+	<div 
+		class={ formFieldClasses(props) }
+		if props.Condition != "" {
+			x-show={ props.Condition }
+		}
+		if props.ID != "" {
+			data-field-id={ props.ID }
+		}
+		data-field-type={ string(props.Type) }
+	>
+		// Label section (not rendered for checkbox which handles its own label)
+		if props.Label != "" && props.Type != FormFieldCheckbox {
+			@renderLabel(props)
 		}
 
-		// Input based on type
-		switch props.Type {
-		case FormFieldText:
-			@atoms.TextInput(atoms.InputProps{
-				Type:         atoms.InputTypeText,
-				Size:         atoms.InputSize(props.Size),
-				ID:           props.ID,
-				Name:         props.Name,
-				Value:        props.Value,
-				Placeholder:  props.Placeholder,
-				Required:     props.Required,
-				Disabled:     props.Disabled,
-				Readonly:     props.Readonly,
-				Error:        props.ErrorText != "",
-				MinLength:    props.MinLength,
-				MaxLength:    props.MaxLength,
-				Pattern:      props.Pattern,
-				Autocomplete: props.Autocomplete,
-				HXPost:       props.HXPost,
-				HXGet:        props.HXGet,
-				HXTarget:     props.HXTarget,
-				HXSwap:       props.HXSwap,
-				HXTrigger:    props.HXTrigger,
-				AlpineModel:  props.AlpineModel,
-				AlpineChange: props.AlpineChange,
-				AlpineBlur:   props.AlpineBlur,
-				AlpineFocus:  props.AlpineFocus,
-			})
-		case FormFieldEmail:
-			@atoms.EmailInput(atoms.InputProps{
-				Size:         atoms.InputSize(props.Size),
-				ID:           props.ID,
-				Name:         props.Name,
-				Value:        props.Value,
-				Placeholder:  props.Placeholder,
-				Required:     props.Required,
-				Disabled:     props.Disabled,
-				Readonly:     props.Readonly,
-				Error:        props.ErrorText != "",
-				MaxLength:    props.MaxLength,
-				HXPost:       props.HXPost,
-				HXGet:        props.HXGet,
-				HXTarget:     props.HXTarget,
-				HXSwap:       props.HXSwap,
-				HXTrigger:    props.HXTrigger,
-				AlpineModel:  props.AlpineModel,
-				AlpineChange: props.AlpineChange,
-				AlpineBlur:   props.AlpineBlur,
-				AlpineFocus:  props.AlpineFocus,
-			})
-		case FormFieldPassword:
+		// Input wrapper for icons, prefix, suffix
+		<div class={ inputWrapperClasses(props) }>
+			// Prefix icon or text
+			if props.PrefixIcon != "" || props.Prefix != "" {
+				@renderPrefix(props)
+			}
+
+			// Main input field based on type
+			@renderInput(props)
+
+			// Suffix icon, copy button, or show password toggle
+			if props.SuffixIcon != "" || props.Suffix != "" || props.CopyButton || (props.Type == FormFieldPassword && props.ShowPassword) {
+				@renderSuffix(props)
+			}
+
+			// Loading indicator
+			if props.Loading {
+				@renderLoadingIndicator(props)
+			}
+		</div>
+
+		// Character count
+		if props.CharacterCount && (props.Type == FormFieldText || props.Type == FormFieldTextarea) && props.MaxLength > 0 {
+			@renderCharacterCount(props)
+		}
+
+		// Helper text, error, success, or warning messages
+		@renderMessages(props)
+
+		// Tooltip
+		if props.Tooltip != "" {
+			@renderTooltip(props)
+		}
+	</div>
+}
+
+// renderLabel renders the field label with accessibility features
+templ renderLabel(props FormFieldProps) {
+	<label
+		if props.ID != "" {
+			for={ props.ID }
+		}
+		class={ labelClasses(props) }
+		if props.Tooltip != "" {
+			data-tooltip={ props.Tooltip }
+		}
+	>
+		// Icon before label
+		if props.Icon != "" && props.IconPosition == "left" {
+			<span class="inline-flex items-center mr-1.5">
+				<i class={ "icon-" + props.Icon } aria-hidden="true"></i>
+			</span>
+		}
+
+		// Label text
+		<span>{ props.Label }</span>
+
+		// Required indicator
+		if props.Required {
+			<span class="text-destructive ml-1" aria-label="required">*</span>
+		}
+
+		// Icon after label
+		if props.Icon != "" && props.IconPosition == "right" {
+			<span class="inline-flex items-center ml-1.5">
+				<i class={ "icon-" + props.Icon } aria-hidden="true"></i>
+			</span>
+		}
+
+		// Info tooltip icon
+		if props.Tooltip != "" {
+			<span class="ml-1.5 inline-flex items-center cursor-help" title={ props.Tooltip }>
+				<svg class="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+				</svg>
+			</span>
+		}
+	</label>
+}
+
+// renderInput renders the appropriate input based on field type
+templ renderInput(props FormFieldProps) {
+	switch props.Type {
+	case FormFieldText: @renderTextInput(props, atoms.InputTypeText)
+	case FormFieldEmail: @renderTextInput(props, atoms.InputTypeEmail) 
+	case FormFieldPassword: @renderPasswordInput(props)
+	case FormFieldNumber: @renderNumberInput(props)
+	case FormFieldSearch: @renderTextInput(props, atoms.InputTypeSearch)
+	case FormFieldURL: @renderTextInput(props, atoms.InputTypeURL)
+	case FormFieldTel: @renderTextInput(props, atoms.InputTypeTel)
+	case FormFieldRadio: @renderRadioGroup(props)
+	case FormFieldCheckbox: @renderCheckbox(props)
+	case FormFieldCheckboxGroup: @renderCheckboxGroup(props)
+	case FormFieldSelect: @renderSelect(props)
+	case FormFieldMultiSelect: @renderMultiSelect(props)
+	case FormFieldAutoComplete: @renderAutoComplete(props)
+	case FormFieldDate: @renderDatePicker(props)
+	case FormFieldTime: @renderTimePicker(props)
+	case FormFieldDateTime: @renderDateTimePicker(props)
+	case FormFieldDateRange: @renderDateRangePicker(props)
+	case FormFieldTextarea: @renderTextarea(props)
+	case FormFieldTags: @renderTags(props)
+	case FormFieldFile: @renderFileInput(props)
+	case FormFieldRange: @renderRangeInput(props)
+	case FormFieldColor: @renderColorInput(props)
+	default: @renderTextInput(props, atoms.InputTypeText)
+	}
+}
+
+// renderTextInput renders standard text-based inputs
+templ renderTextInput(props FormFieldProps, inputType atoms.InputType) {
+	@atoms.TextInput(atoms.InputProps{
+		Type:         inputType,
+		Size:         atoms.InputSize(props.Size),
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Placeholder:  props.Placeholder,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		MinLength:    props.MinLength,
+		MaxLength:    props.MaxLength,
+		Pattern:      props.Pattern,
+		Autocomplete: props.Autocomplete,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderPasswordInput renders password input with show/hide toggle
+templ renderPasswordInput(props FormFieldProps) {
+	if props.ShowPassword {
+		<div class="relative" x-data="{ showPassword: false }">
 			@atoms.PasswordInput(atoms.InputProps{
 				Size:         atoms.InputSize(props.Size),
 				ID:           props.ID,
@@ -224,75 +189,425 @@ templ FormField(props FormFieldProps) {
 				AlpineBlur:   props.AlpineBlur,
 				AlpineFocus:  props.AlpineFocus,
 			})
-		case FormFieldNumber:
-			@atoms.NumberInput(atoms.InputProps{
-				Size:         atoms.InputSize(props.Size),
-				ID:           props.ID,
-				Name:         props.Name,
-				Value:        props.Value,
-				Placeholder:  props.Placeholder,
-				Required:     props.Required,
-				Disabled:     props.Disabled,
-				Readonly:     props.Readonly,
-				Error:        props.ErrorText != "",
-				Min:          props.Min,
-				Max:          props.Max,
-				Step:         props.Step,
-				HXPost:       props.HXPost,
-				HXGet:        props.HXGet,
-				HXTarget:     props.HXTarget,
-				HXSwap:       props.HXSwap,
-				HXTrigger:    props.HXTrigger,
-				AlpineModel:  props.AlpineModel,
-				AlpineChange: props.AlpineChange,
-				AlpineBlur:   props.AlpineBlur,
-				AlpineFocus:  props.AlpineFocus,
-			})
-		case FormFieldSearch:
-			@atoms.SearchInput(atoms.InputProps{
-				Size:         atoms.InputSize(props.Size),
-				ID:           props.ID,
-				Name:         props.Name,
-				Value:        props.Value,
-				Placeholder:  props.Placeholder,
-				Required:     props.Required,
-				Disabled:     props.Disabled,
-				Readonly:     props.Readonly,
-				Error:        props.ErrorText != "",
-				MaxLength:    props.MaxLength,
-				HXPost:       props.HXPost,
-				HXGet:        props.HXGet,
-				HXTarget:     props.HXTarget,
-				HXSwap:       props.HXSwap,
-				HXTrigger:    props.HXTrigger,
-				AlpineModel:  props.AlpineModel,
-				AlpineChange: props.AlpineChange,
-				AlpineBlur:   props.AlpineBlur,
-				AlpineFocus:  props.AlpineFocus,
-			})
-		case FormFieldTextarea:
-			@textareaInput(props)
-		case FormFieldSelect:
-			@selectInput(props)
-		case FormFieldTags:
-			@tagsInput(props)
-		}
-
-		// Help text or error message
-		if props.ErrorText != "" {
-			<p class={ helpTextClasses(props) }>
-				{ props.ErrorText }
-			</p>
-		} else if props.HelpText != "" {
-			<p class={ helpTextClasses(props) }>
-				{ props.HelpText }
-			</p>
-		}
-	</div>
+		</div>
+	} else {
+		@atoms.PasswordInput(atoms.InputProps{
+			Size:         atoms.InputSize(props.Size),
+			ID:           props.ID,
+			Name:         props.Name,
+			Value:        props.Value,
+			Placeholder:  props.Placeholder,
+			Required:     props.Required,
+			Disabled:     props.Disabled,
+			Readonly:     props.Readonly,
+			Error:        props.ErrorText != "",
+			MinLength:    props.MinLength,
+			MaxLength:    props.MaxLength,
+			HXPost:       props.HXPost,
+			HXGet:        props.HXGet,
+			HXTarget:     props.HXTarget,
+			HXSwap:       props.HXSwap,
+			HXTrigger:    props.HXTrigger,
+			AlpineModel:  props.AlpineModel,
+			AlpineChange: props.AlpineChange,
+			AlpineBlur:   props.AlpineBlur,
+			AlpineFocus:  props.AlpineFocus,
+		})
+	}
 }
 
-// textareaInput renders a textarea input
-templ textareaInput(props FormFieldProps) {
+// renderNumberInput renders number input
+templ renderNumberInput(props FormFieldProps) {
+	@atoms.NumberInput(atoms.InputProps{
+		Size:         atoms.InputSize(props.Size),
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Placeholder:  props.Placeholder,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		Min:          props.Min,
+		Max:          props.Max,
+		Step:         props.Step,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderRadioGroup renders radio button group
+templ renderRadioGroup(props FormFieldProps) {
+	@atoms.RadioGroup(atoms.RadioProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.GetSelectedValue(),
+		Options:      convertToRadioOptions(props.Options),
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		Inline:       props.Inline,
+		Columns:      props.Columns,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderCheckbox renders single checkbox
+templ renderCheckbox(props FormFieldProps) {
+	@atoms.Checkbox(atoms.CheckboxProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Checked:      props.Value != "" || len(props.Values) > 0,
+		Label:        props.Label,
+		Description:  props.HelpText,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderCheckboxGroup renders checkbox group
+templ renderCheckboxGroup(props FormFieldProps) {
+	@atoms.CheckboxGroup(atoms.CheckboxGroupProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Values:       props.GetSelectedValues(),
+		Options:      convertToCheckboxOptions(props.Options),
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		Inline:       props.Inline,
+		Columns:      props.Columns,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderSelect renders standard select dropdown
+templ renderSelect(props FormFieldProps) {
+	<select
+		if props.ID != "" {
+			id={ props.ID }
+		}
+		if props.Name != "" {
+			name={ props.Name }
+		}
+		if props.Required {
+			required
+		}
+		if props.Disabled {
+			disabled
+		}
+		if props.Readonly {
+			readonly
+		}
+		if props.Multiple {
+			multiple
+		}
+		class={ selectClasses(props) }
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		if props.AriaDescribedBy != "" {
+			aria-describedby={ props.AriaDescribedBy }
+		}
+		if props.ErrorText != "" {
+			aria-invalid="true"
+		}
+		if props.TabIndex != 0 {
+			tabindex={ strconv.Itoa(props.TabIndex) }
+		}
+		if props.HXPost != "" {
+			hx-post={ props.HXPost }
+		}
+		if props.HXGet != "" {
+			hx-get={ props.HXGet }
+		}
+		if props.HXTarget != "" {
+			hx-target={ props.HXTarget }
+		}
+		if props.HXSwap != "" {
+			hx-swap={ props.HXSwap }
+		}
+		if props.HXTrigger != "" {
+			hx-trigger={ props.HXTrigger }
+		}
+		if props.AlpineModel != "" {
+			x-model={ props.AlpineModel }
+		}
+		if props.AlpineChange != "" {
+			x-on:change={ props.AlpineChange }
+		}
+	>
+		if props.Placeholder != "" && !props.Multiple {
+			<option value="" disabled selected={ props.Value == "" }>
+				{ props.Placeholder }
+			</option>
+		}
+		
+		// Group options if grouping is enabled
+		if props.GroupOptions {
+			@renderGroupedOptions(props.Options)
+		} else {
+			@renderFlatOptions(props.Options, props.Value)
+		}
+	</select>
+}
+
+// renderFlatOptions renders ungrouped options
+templ renderFlatOptions(options []SelectOption, selectedValue string) {
+	for _, option := range options {
+		<option
+			value={ option.Value }
+			if option.Disabled {
+				disabled
+			}
+			if option.Selected || option.Value == selectedValue {
+				selected
+			}
+			if option.Description != "" {
+				title={ option.Description }
+			}
+		>
+			{ option.Label }
+		</option>
+	}
+}
+
+// renderGroupedOptions renders grouped options
+templ renderGroupedOptions(options []SelectOption) {
+	// Group options by their Group field
+	for groupName, groupOptions := range groupOptionsByName(options) {
+		if groupName != "" {
+			<optgroup label={ groupName }>
+				for _, option := range groupOptions {
+					<option
+						value={ option.Value }
+						if option.Disabled {
+							disabled
+						}
+						if option.Selected {
+							selected
+						}
+					>
+						{ option.Label }
+					</option>
+				}
+			</optgroup>
+		} else {
+			// Ungrouped options
+			for _, option := range groupOptions {
+				<option
+					value={ option.Value }
+					if option.Disabled {
+						disabled
+					}
+					if option.Selected {
+						selected
+					}
+				>
+					{ option.Label }
+				</option>
+			}
+		}
+	}
+}
+
+// renderMultiSelect renders multi-select component
+templ renderMultiSelect(props FormFieldProps) {
+	@atoms.MultiSelect(atoms.SelectProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Values:       props.GetSelectedValues(),
+		Options:      convertToSelectOptions(props.Options),
+		Placeholder:  props.Placeholder,
+		Searchable:   props.Searchable,
+		Clearable:    props.Clearable,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderAutoComplete renders autocomplete component
+templ renderAutoComplete(props FormFieldProps) {
+	@atoms.AutoComplete(atoms.AutoCompleteProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Options:      convertToAutoCompleteOptions(props.Options),
+		Placeholder:  props.Placeholder,
+		MinChars:     props.MinChars,
+		MaxResults:   props.MaxResults,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		SearchURL:    props.SearchURL,
+		Debounce:     props.Debounce,
+		ShowClear:    props.ShowClear,
+		ShowIcon:     props.ShowIcon,
+		FreeForm:     props.FreeForm,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderDatePicker renders date picker
+templ renderDatePicker(props FormFieldProps) {
+	@atoms.DatePicker(atoms.DatePickerProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Placeholder:  props.Placeholder,
+		Min:          props.MinDate,
+		Max:          props.MaxDate,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		ShowCalendar: props.ShowCalendar,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderTimePicker renders time picker
+templ renderTimePicker(props FormFieldProps) {
+	@atoms.TimePicker(atoms.TimePickerProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Placeholder:  props.Placeholder,
+		Min:          props.Min,
+		Max:          props.Max,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		Format24:     props.Format24,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderDateTimePicker renders datetime picker
+templ renderDateTimePicker(props FormFieldProps) {
+	@atoms.DateTimePicker(atoms.DateTimePickerProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Placeholder:  props.Placeholder,
+		Min:          props.Min,
+		Max:          props.Max,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderDateRangePicker renders date range picker
+templ renderDateRangePicker(props FormFieldProps) {
+	@atoms.DateRangePicker(atoms.DateRangePickerProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		StartDate:    props.StartDate,
+		EndDate:      props.EndDate,
+		Placeholder:  props.Placeholder,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.ErrorText != "",
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}
+
+// renderTextarea renders textarea input
+templ renderTextarea(props FormFieldProps) {
 	<textarea
 		if props.ID != "" {
 			id={ props.ID }
@@ -314,8 +629,6 @@ templ textareaInput(props FormFieldProps) {
 		}
 		if props.Rows > 0 {
 			rows={ strconv.Itoa(props.Rows) }
-		} else {
-			rows="3"
 		}
 		if props.Cols > 0 {
 			cols={ strconv.Itoa(props.Cols) }
@@ -327,6 +640,18 @@ templ textareaInput(props FormFieldProps) {
 			maxlength={ strconv.Itoa(props.MaxLength) }
 		}
 		class={ textareaClasses(props) }
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		if props.AriaDescribedBy != "" {
+			aria-describedby={ props.AriaDescribedBy }
+		}
+		if props.ErrorText != "" {
+			aria-invalid="true"
+		}
+		if props.TabIndex != 0 {
+			tabindex={ strconv.Itoa(props.TabIndex) }
+		}
 		if props.HXPost != "" {
 			hx-post={ props.HXPost }
 		}
@@ -354,173 +679,19 @@ templ textareaInput(props FormFieldProps) {
 		if props.AlpineFocus != "" {
 			x-on:focus={ props.AlpineFocus }
 		}
-		if props.ErrorText != "" {
-			aria-invalid="true"
+		if props.AlpineInput != "" {
+			x-on:input={ props.AlpineInput }
+		}
+		if props.AutoResize {
+			x-data
+			x-init="$el.style.height = $el.scrollHeight + 'px'"
+			x-on:input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
 		}
 	>{ props.Value }</textarea>
 }
 
-// textareaClasses generates classes for textarea
-func textareaClasses(props FormFieldProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"flex",
-		"w-full",
-		"rounded-md",
-		"border",
-		"border-input",
-		"bg-background",
-		"px-3",
-		"py-2",
-		"text-sm",
-		"ring-offset-background",
-		"placeholder:text-muted-foreground",
-		"focus-visible:outline-none",
-		"focus-visible:ring-2",
-		"focus-visible:ring-ring",
-		"focus-visible:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-		"resize-none",
-	)
-
-	// Error state
-	if props.ErrorText != "" {
-		classes = append(classes, "border-destructive", "focus-visible:ring-destructive")
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// selectInput renders a select dropdown
-templ selectInput(props FormFieldProps) {
-	<select
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		if props.Name != "" {
-			name={ props.Name }
-		}
-		if props.Required {
-			required
-		}
-		if props.Disabled {
-			disabled
-		}
-		if props.Multiple {
-			multiple
-		}
-		class={ selectClasses(props) }
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-		if props.HXTrigger != "" {
-			hx-trigger={ props.HXTrigger }
-		}
-		if props.AlpineModel != "" {
-			x-model={ props.AlpineModel }
-		}
-		if props.AlpineChange != "" {
-			x-on:change={ props.AlpineChange }
-		}
-		if props.ErrorText != "" {
-			aria-invalid="true"
-		}
-	>
-		if props.Placeholder != "" && !props.Multiple {
-			<option value="" disabled selected={ props.Value == "" }>
-				{ props.Placeholder }
-			</option>
-		}
-		for _, option := range props.Options {
-			<option
-				value={ option.Value }
-				if option.Disabled {
-					disabled
-				}
-				if option.Selected || option.Value == props.Value {
-					selected
-				}
-			>
-				{ option.Label }
-			</option>
-		}
-	</select>
-}
-
-// selectClasses generates classes for select
-func selectClasses(props FormFieldProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"flex",
-		"w-full",
-		"rounded-md",
-		"border",
-		"border-input",
-		"bg-background",
-		"px-3",
-		"py-2",
-		"text-sm",
-		"ring-offset-background",
-		"focus-visible:outline-none",
-		"focus-visible:ring-2",
-		"focus-visible:ring-ring",
-		"focus-visible:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-	)
-
-	// Add height based on size
-	switch props.Size {
-	case FormFieldSizeSM:
-		classes = append(classes, "h-8")
-	case FormFieldSizeMD:
-		classes = append(classes, "h-10")
-	case FormFieldSizeLG:
-		classes = append(classes, "h-11")
-	default:
-		classes = append(classes, "h-10")
-	}
-
-	// Error state
-	if props.ErrorText != "" {
-		classes = append(classes, "border-destructive", "focus-visible:ring-destructive")
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// getTagsErrorClass returns the error class for tags input
-func getTagsErrorClass(hasError bool) string {
-	if hasError {
-		return "border-destructive focus-within:ring-destructive"
-	}
-	return ""
-}
-
-// getSelectableTagsErrorClass returns the error class for selectable tags
-func getSelectableTagsErrorClass(hasError bool) string {
-	if hasError {
-		return "border-destructive"
-	}
-	return ""
-}
-
-// tagsInput renders a tags input using the Tags component
-templ tagsInput(props FormFieldProps) {
+// renderTags renders tags input
+templ renderTags(props FormFieldProps) {
 	if props.TagsEditable {
 		@atoms.EditableTags(atoms.TagsProps{
 			Placeholder: props.Placeholder,
@@ -545,16 +716,451 @@ templ tagsInput(props FormFieldProps) {
 	}
 }
 
-// Helper function to convert SelectOptions to TagProps
-func convertSelectOptionsToTagProps(options []SelectOption) []atoms.TagProps {
-	tags := make([]atoms.TagProps, len(options))
-	for i, option := range options {
-		tags[i] = atoms.TagProps{
-			Text:     option.Label,
-			Value:    option.Value,
-			Selected: option.Selected,
-			Disabled: option.Disabled,
+// renderFileInput renders file upload input
+templ renderFileInput(props FormFieldProps) {
+	<div class="file-input-wrapper">
+		<input
+			type="file"
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			if props.Name != "" {
+				name={ props.Name }
+			}
+			if props.Accept != "" {
+				accept={ props.Accept }
+			}
+			if props.MultipleFiles {
+				multiple
+			}
+			if props.Required {
+				required
+			}
+			if props.Disabled {
+				disabled
+			}
+			class={ fileInputClasses(props) }
+			if props.MaxFileSize > 0 {
+				data-max-size={ strconv.FormatInt(props.MaxFileSize, 10) }
+			}
+			if props.AlpineChange != "" {
+				x-on:change={ props.AlpineChange }
+			}
+		/>
+		if props.DropZone {
+			<div class="dropzone" x-data="fileUpload()">
+				<p class="text-sm text-muted-foreground">
+					Drop files here or click to upload
+				</p>
+			</div>
+		}
+	</div>
+}
+
+// renderRangeInput renders range slider
+templ renderRangeInput(props FormFieldProps) {
+	<div class="range-input-wrapper" x-data={ fmt.Sprintf("{ value: '%s' }", props.Value) }>
+		<input
+			type="range"
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			if props.Name != "" {
+				name={ props.Name }
+			}
+			if props.Min != "" {
+				min={ props.Min }
+			}
+			if props.Max != "" {
+				max={ props.Max }
+			}
+			if props.Step != "" {
+				step={ props.Step }
+			}
+			if props.Value != "" {
+				value={ props.Value }
+			}
+			if props.Required {
+				required
+			}
+			if props.Disabled {
+				disabled
+			}
+			class={ rangeInputClasses(props) }
+			x-model="value"
+		/>
+		if props.ShowValue {
+			<output class="range-value" x-text="value"></output>
+		}
+		if props.ShowMinMax {
+			<div class="flex justify-between text-xs text-muted-foreground mt-1">
+				<span>{ props.Min }</span>
+				<span>{ props.Max }</span>
+			</div>
+		}
+	</div>
+}
+
+// renderColorInput renders color picker
+templ renderColorInput(props FormFieldProps) {
+	<div class="color-input-wrapper" x-data={ fmt.Sprintf("{ color: '%s' }", props.Value) }>
+		<input
+			type="color"
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			if props.Name != "" {
+				name={ props.Name }
+			}
+			if props.Value != "" {
+				value={ props.Value }
+			}
+			if props.Required {
+				required
+			}
+			if props.Disabled {
+				disabled
+			}
+			class={ colorInputClasses(props) }
+			x-model="color"
+		/>
+		<input
+			type="text"
+			x-model="color"
+			class="ml-2 px-2 py-1 text-sm border rounded"
+			placeholder="#000000"
+		/>
+	</div>
+}
+
+// renderPrefix renders prefix icon or text
+templ renderPrefix(props FormFieldProps) {
+	<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+		if props.PrefixIcon != "" {
+			<i class={ "icon-" + props.PrefixIcon + " text-muted-foreground" } aria-hidden="true"></i>
+		} else if props.Prefix != "" {
+			<span class="text-sm text-muted-foreground">{ props.Prefix }</span>
+		}
+	</div>
+}
+
+// renderSuffix renders suffix icon, copy button, or password toggle
+templ renderSuffix(props FormFieldProps) {
+	<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+		if props.Type == FormFieldPassword && props.ShowPassword {
+			<button
+				type="button"
+				class="text-muted-foreground hover:text-foreground focus:outline-none"
+				x-data="{ show: false }"
+				x-on:click="show = !show; $refs.passwordInput.type = show ? 'text' : 'password'"
+				aria-label="Toggle password visibility"
+			>
+				<svg x-show="!show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+				</svg>
+				<svg x-show="show" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+				</svg>
+			</button>
+		} else if props.CopyButton {
+			<button
+				type="button"
+				class="text-muted-foreground hover:text-foreground focus:outline-none"
+				x-data="{ copied: false }"
+				x-on:click="navigator.clipboard.writeText($refs.input.value); copied = true; setTimeout(() => copied = false, 2000)"
+				aria-label="Copy to clipboard"
+			>
+				<svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+				</svg>
+				<svg x-show="copied" class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+				</svg>
+			</button>
+		} else if props.SuffixIcon != "" {
+			<i class={ "icon-" + props.SuffixIcon + " text-muted-foreground" } aria-hidden="true"></i>
+		} else if props.Suffix != "" {
+			<span class="text-sm text-muted-foreground">{ props.Suffix }</span>
+		}
+	</div>
+}
+
+// renderLoadingIndicator renders loading spinner
+templ renderLoadingIndicator(props FormFieldProps) {
+	<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+		<svg class="animate-spin h-4 w-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+			<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+		</svg>
+	</div>
+}
+
+// renderCharacterCount renders character counter
+templ renderCharacterCount(props FormFieldProps) {
+	<div class="flex justify-end mt-1">
+		<span 
+			class="text-xs text-muted-foreground"
+			x-data={ fmt.Sprintf("{ count: %d }", len(props.Value)) }
+			x-text={ fmt.Sprintf("`${count}/%d`", props.MaxLength) }
+		>
+			{ fmt.Sprintf("%d/%d", len(props.Value), props.MaxLength) }
+		</span>
+	</div>
+}
+
+// renderMessages renders helper text, errors, success, or warnings
+templ renderMessages(props FormFieldProps) {
+	if props.Type != FormFieldCheckbox {
+		// Error message (highest priority)
+		if props.ErrorText != "" {
+			<p 
+				id={ props.ID + "-error" }
+				class={ helperTextClasses(props, "error") }
+				role="alert"
+				aria-live="polite"
+			>
+				<svg class="inline w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+				</svg>
+				{ props.ErrorText }
+			</p>
+		} else if props.SuccessText != "" {
+			// Success message
+			<p 
+				id={ props.ID + "-success" }
+				class={ helperTextClasses(props, "success") }
+				role="status"
+			>
+				<svg class="inline w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+				</svg>
+				{ props.SuccessText }
+			</p>
+		} else if props.WarningText != "" {
+			// Warning message
+			<p 
+				id={ props.ID + "-warning" }
+				class={ helperTextClasses(props, "warning") }
+				role="status"
+			>
+				<svg class="inline w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+				</svg>
+				{ props.WarningText }
+			</p>
+		} else if props.HelpText != "" && props.Type != FormFieldCheckboxGroup {
+			// Help text
+			<p 
+				id={ props.ID + "-help" }
+				class={ helperTextClasses(props, "help") }
+			>
+				{ props.HelpText }
+			</p>
+		}
+		
+		// Description (always shown if present, below other messages)
+		if props.Description != "" {
+			<div class="mt-2 text-xs text-muted-foreground prose prose-sm">
+				@templ.Raw(props.Description)
+			</div>
 		}
 	}
-	return tags
 }
+
+// renderTooltip renders tooltip element
+templ renderTooltip(props FormFieldProps) {
+	<div 
+		class="tooltip hidden absolute z-50 px-2 py-1 text-xs bg-popover text-popover-foreground border rounded shadow-lg"
+		role="tooltip"
+		id={ props.ID + "-tooltip" }
+	>
+		{ props.Tooltip }
+	</div>
+}
+
+// Additional class generation functions
+
+func textareaClasses(props FormFieldProps) string {
+	var classes []string
+
+	// Base classes
+	classes = append(classes,
+		"flex",
+		"w-full",
+		roundedClasses(props.Rounded),
+		"border",
+		"border-input",
+		"bg-background",
+		"px-3",
+		"py-2",
+		"text-sm",
+		"ring-offset-background",
+		"placeholder:text-muted-foreground",
+		"focus-visible:outline-none",
+		"focus-visible:ring-2",
+		"focus-visible:ring-ring",
+		"focus-visible:ring-offset-2",
+		"disabled:cursor-not-allowed",
+		"disabled:opacity-50",
+	)
+
+	// Resizable
+	if !props.Resizable {
+		classes = append(classes, "resize-none")
+	}
+
+	// Size variants
+	switch props.Size {
+	case FormFieldSizeSM:
+		classes = append(classes, "text-xs", "px-2", "py-1")
+	case FormFieldSizeLG:
+		classes = append(classes, "text-base", "px-4", "py-3")
+	case FormFieldSizeXL:
+		classes = append(classes, "text-lg", "px-4", "py-3")
+	}
+
+	// Error state
+	if props.ErrorText != "" {
+		classes = append(classes, "border-destructive", "focus-visible:ring-destructive")
+	} else if props.SuccessText != "" {
+		classes = append(classes, "border-success", "focus-visible:ring-success")
+	}
+
+	// Custom input class
+	if props.InputClass != "" {
+		classes = append(classes, props.InputClass)
+	}
+
+	return strings.Join(classes, " ")
+}
+
+func selectClasses(props FormFieldProps) string {
+	var classes []string
+
+	// Base classes
+	classes = append(classes,
+		"flex",
+		"w-full",
+		roundedClasses(props.Rounded),
+		"border",
+		"border-input",
+		"bg-background",
+		"px-3",
+		"py-2",
+		"text-sm",
+		"ring-offset-background",
+		"focus-visible:outline-none",
+		"focus-visible:ring-2",
+		"focus-visible:ring-ring",
+		"focus-visible:ring-offset-2",
+		"disabled:cursor-not-allowed",
+		"disabled:opacity-50",
+	)
+
+	// Size-based height
+	switch props.Size {
+	case FormFieldSizeSM:
+		classes = append(classes, "h-8", "text-xs")
+	case FormFieldSizeMD:
+		classes = append(classes, "h-10")
+	case FormFieldSizeLG:
+		classes = append(classes, "h-11", "text-base")
+	case FormFieldSizeXL:
+		classes = append(classes, "h-12", "text-lg")
+	default:
+		classes = append(classes, "h-10")
+	}
+
+	// State colors
+	if props.ErrorText != "" {
+		classes = append(classes, "border-destructive", "focus-visible:ring-destructive")
+	} else if props.SuccessText != "" {
+		classes = append(classes, "border-success", "focus-visible:ring-success")
+	}
+
+	// Custom input class
+	if props.InputClass != "" {
+		classes = append(classes, props.InputClass)
+	}
+
+	return strings.Join(classes, " ")
+}
+
+func fileInputClasses(props FormFieldProps) string {
+	var classes []string
+
+	classes = append(classes,
+		"block",
+		"w-full",
+		"text-sm",
+		"text-foreground",
+		"file:mr-4",
+		"file:py-2",
+		"file:px-4",
+		roundedClasses(props.Rounded),
+		"file:border-0",
+		"file:text-sm",
+		"file:font-medium",
+		"file:bg-primary",
+		"file:text-primary-foreground",
+		"hover:file:bg-primary/90",
+		"disabled:opacity-50",
+		"disabled:cursor-not-allowed",
+	)
+
+	if props.ErrorText != "" {
+		classes = append(classes, "border-destructive")
+	}
+
+	return strings.Join(classes, " ")
+}
+
+func rangeInputClasses(props FormFieldProps) string {
+	var classes []string
+
+	classes = append(classes,
+		"w-full",
+		"h-2",
+		"bg-secondary",
+		"rounded-lg",
+		"appearance-none",
+		"cursor-pointer",
+		"disabled:opacity-50",
+		"disabled:cursor-not-allowed",
+	)
+
+	return strings.Join(classes, " ")
+}
+
+func colorInputClasses(props FormFieldProps) string {
+	var classes []string
+
+	classes = append(classes,
+		"h-10",
+		"w-20",
+		roundedClasses(props.Rounded),
+		"border",
+		"border-input",
+		"cursor-pointer",
+		"disabled:opacity-50",
+		"disabled:cursor-not-allowed",
+	)
+
+	return strings.Join(classes, " ")
+}
+
+func getTagsErrorClass(hasError bool) string {
+	if hasError {
+		return "border-destructive focus-within:ring-destructive"
+	}
+	return ""
+}
+
+func getSelectableTagsErrorClass(hasError bool) string {
+	if hasError {
+		return "border-destructive"
+	}
+	return ""
+}
+

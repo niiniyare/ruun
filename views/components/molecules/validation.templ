@@ -15,18 +15,7 @@ const (
 	ValidationInfo    ValidationMessageType = "info"
 )
 
-// ValidationRule represents a single validation rule
-type ValidationRule struct {
-	Name        string                 `json:"name"`
-	Type        string                 `json:"type"`        // "required", "minLength", "maxLength", "pattern", "custom"
-	Value       interface{}            `json:"value"`       // Rule value (e.g., min length number, pattern string)
-	Message     string                 `json:"message"`     // Custom error message
-	Condition   string                 `json:"condition"`   // Optional condition for when rule applies
-	Async       bool                   `json:"async"`       // Whether this rule requires server validation
-	Debounce    int                    `json:"debounce"`    // Debounce time for async validation (ms)
-	// i18n
-	MessageKey  string                 `json:"messageKey"`  // i18n key for message
-}
+// Note: ValidationRule is defined in form.go to avoid conflicts
 
 // ValidationResult represents the result of validation
 type ValidationResult struct {

@@ -1,0 +1,263 @@
+package atoms
+
+import (
+	"strings"
+)
+
+// RadioOption represents a single radio button option
+type RadioOption struct {
+	Value       string `json:"value"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Disabled    bool   `json:"disabled"`
+	Icon        string `json:"icon"`
+}
+
+// RadioProps defines the properties for the RadioGroup component
+type RadioProps struct {
+	ID           string
+	Name         string
+	Value        string // Selected value
+	Options      []RadioOption
+	Required     bool
+	Disabled     bool
+	Readonly     bool
+	Error        bool
+	Class        string
+	// Layout options
+	Inline       bool   // Horizontal vs vertical layout
+	Columns      int    // Number of columns for grid layout
+	// HTMX attributes
+	HXPost       string
+	HXGet        string
+	HXTarget     string
+	HXSwap       string
+	HXTrigger    string
+	// Alpine.js attributes
+	AlpineModel  string
+	AlpineChange string
+	AlpineBlur   string
+	AlpineFocus  string
+}
+
+// radioGroupClasses generates Tailwind CSS classes for the radio group container
+func radioGroupClasses(props RadioProps) string {
+	var classes []string
+
+	// Base container classes
+	classes = append(classes, "radio-group")
+
+	// Layout classes
+	if props.Inline {
+		classes = append(classes, "flex", "flex-wrap", "gap-4")
+	} else if props.Columns > 1 {
+		classes = append(classes, "grid", "gap-4")
+		switch props.Columns {
+		case 2:
+			classes = append(classes, "grid-cols-2")
+		case 3:
+			classes = append(classes, "grid-cols-3")
+		case 4:
+			classes = append(classes, "grid-cols-4")
+		default:
+			classes = append(classes, "grid-cols-2")
+		}
+	} else {
+		classes = append(classes, "space-y-3")
+	}
+
+	// State classes
+	if props.Disabled {
+		classes = append(classes, "opacity-50", "cursor-not-allowed")
+	}
+
+	// Custom classes
+	if props.Class != "" {
+		classes = append(classes, props.Class)
+	}
+
+	return strings.Join(classes, " ")
+}
+
+// radioOptionClasses generates Tailwind CSS classes for individual radio options
+func radioOptionClasses(props RadioProps, option RadioOption) string {
+	var classes []string
+
+	// Base classes for the option container
+	classes = append(classes,
+		"radio-option",
+		"flex",
+		"items-start",
+		"gap-3",
+		"p-3",
+		"rounded-lg",
+		"border",
+		"transition-colors",
+		"cursor-pointer",
+		"hover:bg-accent",
+		"focus-within:ring-2",
+		"focus-within:ring-ring",
+		"focus-within:ring-offset-2",
+	)
+
+	// State-based styling
+	isSelected := props.Value == option.Value
+	if isSelected {
+		classes = append(classes,
+			"border-primary",
+			"bg-primary/5",
+		)
+	} else {
+		classes = append(classes,
+			"border-input",
+			"bg-background",
+		)
+	}
+
+	// Disabled state
+	if props.Disabled || option.Disabled {
+		classes = append(classes,
+			"opacity-50",
+			"cursor-not-allowed",
+			"hover:bg-background",
+		)
+	}
+
+	// Error state
+	if props.Error {
+		classes = append(classes, "border-destructive")
+	}
+
+	return strings.Join(classes, " ")
+}
+
+// radioInputClasses generates Tailwind CSS classes for the radio input
+func radioInputClasses() string {
+	return strings.Join([]string{
+		"h-4",
+		"w-4",
+		"rounded-full",
+		"border",
+		"border-primary",
+		"text-primary",
+		"focus:ring-2",
+		"focus:ring-ring",
+		"focus:ring-offset-2",
+		"disabled:cursor-not-allowed",
+		"disabled:opacity-50",
+	}, " ")
+}
+
+// RadioGroup renders an accessible radio button group component
+templ RadioGroup(props RadioProps) {
+	<div
+		class={ radioGroupClasses(props) }
+		if props.ID != "" {
+			id={ props.ID + "-group" }
+		}
+		role="radiogroup"
+		if props.Required {
+			aria-required="true"
+		}
+		if props.Error {
+			aria-invalid="true"
+		}
+	>
+		for _, option := range props.Options {
+			<label
+				class={ radioOptionClasses(props, option) }
+				for={ props.ID + "-" + option.Value }
+			>
+				<input
+					type="radio"
+					id={ props.ID + "-" + option.Value }
+					name={ props.Name }
+					value={ option.Value }
+					if props.Value == option.Value {
+						checked
+					}
+					if props.Required {
+						required
+					}
+					if props.Disabled || option.Disabled {
+						disabled
+					}
+					if props.Readonly {
+						readonly
+					}
+					class={ radioInputClasses() }
+					if props.HXPost != "" {
+						hx-post={ props.HXPost }
+					}
+					if props.HXGet != "" {
+						hx-get={ props.HXGet }
+					}
+					if props.HXTarget != "" {
+						hx-target={ props.HXTarget }
+					}
+					if props.HXSwap != "" {
+						hx-swap={ props.HXSwap }
+					}
+					if props.HXTrigger != "" {
+						hx-trigger={ props.HXTrigger }
+					}
+					if props.AlpineModel != "" {
+						x-model={ props.AlpineModel }
+					}
+					if props.AlpineChange != "" {
+						x-on:change={ props.AlpineChange }
+					}
+					if props.AlpineBlur != "" {
+						x-on:blur={ props.AlpineBlur }
+					}
+					if props.AlpineFocus != "" {
+						x-on:focus={ props.AlpineFocus }
+					}
+				/>
+				<div class="flex-1 min-w-0">
+					<div class="flex items-center gap-2">
+						if option.Icon != "" {
+							<span class="text-muted-foreground">
+								<!-- Icon would be rendered here -->
+								<span class="sr-only">{ option.Icon }</span>
+							</span>
+						}
+						<span class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+							{ option.Label }
+						</span>
+					</div>
+					if option.Description != "" {
+						<p class="text-xs text-muted-foreground mt-1">
+							{ option.Description }
+						</p>
+					}
+				</div>
+			</label>
+		}
+	</div>
+}
+
+// RadioGroupInline renders radio buttons in a horizontal layout
+templ RadioGroupInline(props RadioProps) {
+	@RadioGroup(RadioProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Value:        props.Value,
+		Options:      props.Options,
+		Required:     props.Required,
+		Disabled:     props.Disabled,
+		Readonly:     props.Readonly,
+		Error:        props.Error,
+		Class:        props.Class,
+		Inline:       true,
+		HXPost:       props.HXPost,
+		HXGet:        props.HXGet,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineModel:  props.AlpineModel,
+		AlpineChange: props.AlpineChange,
+		AlpineBlur:   props.AlpineBlur,
+		AlpineFocus:  props.AlpineFocus,
+	})
+}

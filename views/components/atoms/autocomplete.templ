@@ -1,0 +1,492 @@
+package atoms
+
+import (
+	"strings"
+	"fmt"
+)
+
+// AutoCompleteOption represents an option in the autocomplete dropdown
+type AutoCompleteOption struct {
+	Value       string `json:"value"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Disabled    bool   `json:"disabled"`
+	Icon        string `json:"icon"`
+	Meta        string `json:"meta"` // Additional metadata to display
+}
+
+// AutoCompleteProps defines the properties for the AutoComplete component
+type AutoCompleteProps struct {
+	ID           string
+	Name         string
+	Value        string // Selected value
+	DisplayValue string // Display value (may differ from value)
+	Options      []AutoCompleteOption
+	Placeholder  string
+	MinChars     int    // Minimum characters before showing suggestions
+	MaxResults   int    // Maximum number of results to show
+	Required     bool
+	Disabled     bool
+	Readonly     bool
+	Error        bool
+	Class        string
+	// Search configuration
+	SearchURL    string // URL for dynamic option loading via HTMX
+	Debounce     int    // Debounce delay in milliseconds
+	// Display options
+	ShowClear    bool   // Show clear button
+	ShowIcon     bool   // Show search icon
+	FreeForm     bool   // Allow free-form text entry
+	// HTMX attributes
+	HXPost       string
+	HXGet        string
+	HXTarget     string
+	HXSwap       string
+	HXTrigger    string
+	// Alpine.js attributes
+	AlpineModel  string
+	AlpineChange string
+	AlpineBlur   string
+	AlpineFocus  string
+}
+
+// autoCompleteClasses generates Tailwind CSS classes for the autocomplete container
+func autoCompleteClasses(props AutoCompleteProps) string {
+	var classes []string
+
+	// Base classes
+	classes = append(classes,
+		"autocomplete",
+		"relative",
+		"w-full",
+	)
+
+	// Custom classes
+	if props.Class != "" {
+		classes = append(classes, props.Class)
+	}
+
+	return strings.Join(classes, " ")
+}
+
+// autoCompleteInputClasses generates Tailwind CSS classes for the input
+func autoCompleteInputClasses(props AutoCompleteProps) string {
+	var classes []string
+
+	// Base classes
+	classes = append(classes,
+		"flex",
+		"w-full",
+		"rounded-md",
+		"border",
+		"border-input",
+		"bg-background",
+		"text-sm",
+		"ring-offset-background",
+		"file:border-0",
+		"file:bg-transparent",
+		"file:text-sm",
+		"file:font-medium",
+		"placeholder:text-muted-foreground",
+		"focus-visible:outline-none",
+		"focus-visible:ring-2",
+		"focus-visible:ring-ring",
+		"focus-visible:ring-offset-2",
+		"disabled:cursor-not-allowed",
+		"disabled:opacity-50",
+	)
+
+	// Padding based on whether icons are shown
+	if props.ShowIcon && props.ShowClear {
+		classes = append(classes, "pl-10", "pr-10", "py-2")
+	} else if props.ShowIcon || props.ShowClear {
+		classes = append(classes, "px-10", "py-2")
+	} else {
+		classes = append(classes, "px-3", "py-2")
+	}
+
+	// Error state
+	if props.Error {
+		classes = append(classes, "border-destructive")
+	}
+
+	return strings.Join(classes, " ")
+}
+
+// autoCompleteDropdownClasses generates Tailwind CSS classes for the dropdown
+func autoCompleteDropdownClasses() string {
+	return strings.Join([]string{
+		"absolute",
+		"z-50",
+		"w-full",
+		"mt-1",
+		"max-h-60",
+		"overflow-auto",
+		"rounded-md",
+		"border",
+		"bg-popover",
+		"p-1",
+		"text-popover-foreground",
+		"shadow-md",
+	}, " ")
+}
+
+// autoCompleteOptionClasses generates Tailwind CSS classes for dropdown options
+func autoCompleteOptionClasses(option AutoCompleteOption, isHighlighted bool) string {
+	var classes []string
+
+	// Base classes
+	classes = append(classes,
+		"relative",
+		"flex",
+		"w-full",
+		"cursor-default",
+		"select-none",
+		"items-start",
+		"rounded-sm",
+		"px-2",
+		"py-1.5",
+		"text-sm",
+		"outline-none",
+	)
+
+	// State classes
+	if isHighlighted {
+		classes = append(classes, "bg-accent", "text-accent-foreground")
+	} else {
+		classes = append(classes,
+			"hover:bg-accent",
+			"hover:text-accent-foreground",
+		)
+	}
+
+	// Disabled state
+	if option.Disabled {
+		classes = append(classes, "pointer-events-none", "opacity-50")
+	}
+
+	return strings.Join(classes, " ")
+}
+
+// generateAutoCompleteAlpineData generates Alpine.js data for the autocomplete component
+func generateAutoCompleteAlpineData(props AutoCompleteProps) string {
+	debounce := props.Debounce
+	if debounce == 0 {
+		debounce = 300 // Default 300ms debounce
+	}
+
+	minChars := props.MinChars
+	if minChars == 0 {
+		minChars = 1 // Default minimum 1 character
+	}
+
+	maxResults := props.MaxResults
+	if maxResults == 0 {
+		maxResults = 10 // Default maximum 10 results
+	}
+
+	return fmt.Sprintf(`{
+		open: false,
+		query: '%s',
+		selectedValue: '%s',
+		highlightedIndex: -1,
+		options: %s,
+		loading: false,
+		
+		init() {
+			this.$watch('query', (value) => {
+				if (value.length >= %d) {
+					this.searchOptions();
+				} else {
+					this.open = false;
+				}
+			});
+		},
+		
+		searchOptions() {
+			if (this.query.length < %d) {
+				this.open = false;
+				return;
+			}
+			
+			this.loading = true;
+			this.highlightedIndex = -1;
+			
+			// Debounced search
+			clearTimeout(this.searchTimeout);
+			this.searchTimeout = setTimeout(() => {
+				this.performSearch();
+			}, %d);
+		},
+		
+		performSearch() {
+			if ('%s' && this.query.length >= %d) {
+				// HTMX will handle the search request
+				this.open = true;
+			} else {
+				// Filter local options
+				const filtered = this.filterLocalOptions(this.query);
+				this.options = filtered.slice(0, %d);
+				this.open = filtered.length > 0;
+			}
+			this.loading = false;
+		},
+		
+		filterLocalOptions(query) {
+			const searchTerm = query.toLowerCase();
+			return %s.filter(option => 
+				option.label.toLowerCase().includes(searchTerm) ||
+				(option.description && option.description.toLowerCase().includes(searchTerm))
+			);
+		},
+		
+		selectOption(option) {
+			this.selectedValue = option.value;
+			this.query = option.label;
+			this.open = false;
+			this.highlightedIndex = -1;
+			this.%s = option.value;
+		},
+		
+		clearSelection() {
+			this.selectedValue = '';
+			this.query = '';
+			this.open = false;
+			this.%s = '';
+		},
+		
+		handleKeydown(event) {
+			if (!this.open) return;
+			
+			switch (event.key) {
+				case 'ArrowDown':
+					event.preventDefault();
+					this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.options.length - 1);
+					break;
+				case 'ArrowUp':
+					event.preventDefault();
+					this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1);
+					break;
+				case 'Enter':
+					event.preventDefault();
+					if (this.highlightedIndex >= 0 && this.options[this.highlightedIndex]) {
+						this.selectOption(this.options[this.highlightedIndex]);
+					}
+					break;
+				case 'Escape':
+					this.open = false;
+					this.highlightedIndex = -1;
+					break;
+			}
+		},
+		
+		onFocus() {
+			if (this.query.length >= %d) {
+				this.open = true;
+			}
+		},
+		
+		onBlur() {
+			// Delay to allow option selection
+			setTimeout(() => {
+				this.open = false;
+				this.highlightedIndex = -1;
+			}, 200);
+		}
+	}`, 
+		props.DisplayValue,
+		props.Value,
+		formatOptionsForAlpine(props.Options),
+		minChars,
+		minChars,
+		debounce,
+		props.SearchURL,
+		minChars,
+		maxResults,
+		formatOptionsForAlpine(props.Options),
+		strings.TrimPrefix(props.AlpineModel, "x-model="),
+		strings.TrimPrefix(props.AlpineModel, "x-model="),
+		minChars)
+}
+
+// formatOptionsForAlpine formats options for Alpine.js data
+func formatOptionsForAlpine(options []AutoCompleteOption) string {
+	if len(options) == 0 {
+		return "[]"
+	}
+
+	var optionsStr []string
+	for _, option := range options {
+		optionStr := fmt.Sprintf(`{
+			value: '%s',
+			label: '%s',
+			description: '%s',
+			disabled: %t,
+			icon: '%s',
+			meta: '%s'
+		}`, 
+			option.Value,
+			option.Label,
+			option.Description,
+			option.Disabled,
+			option.Icon,
+			option.Meta)
+		optionsStr = append(optionsStr, optionStr)
+	}
+
+	return "[" + strings.Join(optionsStr, ",") + "]"
+}
+
+// AutoComplete renders an autocomplete input component
+templ AutoComplete(props AutoCompleteProps) {
+	<div
+		class={ autoCompleteClasses(props) }
+		if props.ID != "" {
+			id={ props.ID + "-container" }
+		}
+		x-data={ generateAutoCompleteAlpineData(props) }
+		@click.outside="onBlur()"
+	>
+		<!-- Hidden input for form submission -->
+		<input type="hidden" name={ props.Name } x-model="selectedValue"/>
+		
+		<!-- Input container -->
+		<div class="relative">
+			<!-- Search icon -->
+			if props.ShowIcon {
+				<div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<circle cx="11" cy="11" r="8"></circle>
+						<path d="m21 21-4.35-4.35"></path>
+					</svg>
+				</div>
+			}
+			
+			<!-- Input field -->
+			<input
+				type="text"
+				if props.ID != "" {
+					id={ props.ID }
+				}
+				x-model="query"
+				@input="searchOptions()"
+				@keydown="handleKeydown($event)"
+				@focus="onFocus()"
+				@blur="onBlur()"
+				if props.Placeholder != "" {
+					placeholder={ props.Placeholder }
+				}
+				if props.Required {
+					required
+				}
+				if props.Disabled {
+					disabled
+				}
+				if props.Readonly {
+					readonly
+				}
+				class={ autoCompleteInputClasses(props) }
+				autocomplete="off"
+				if props.HXPost != "" {
+					hx-post={ props.HXPost }
+				}
+				if props.HXGet != "" {
+					hx-get={ props.HXGet }
+				}
+				if props.HXTarget != "" {
+					hx-target={ props.HXTarget }
+				}
+				if props.HXSwap != "" {
+					hx-swap={ props.HXSwap }
+				}
+				if props.HXTrigger != "" {
+					hx-trigger={ props.HXTrigger }
+				}
+				if props.SearchURL != "" {
+					hx-get={ props.SearchURL }
+					hx-trigger="input changed delay:300ms"
+					hx-target="#{ props.ID }-options"
+					hx-swap="innerHTML"
+					hx-indicator="#{ props.ID }-loading"
+				}
+				if props.AlpineChange != "" {
+					x-on:change={ props.AlpineChange }
+				}
+				if props.AlpineBlur != "" {
+					x-on:blur={ props.AlpineBlur }
+				}
+				if props.AlpineFocus != "" {
+					x-on:focus={ props.AlpineFocus }
+				}
+			/>
+			
+			<!-- Clear button -->
+			if props.ShowClear {
+				<button
+					type="button"
+					@click="clearSelection()"
+					x-show="selectedValue !== ''"
+					class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+				>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			}
+			
+			<!-- Loading indicator -->
+			<div 
+				id={ props.ID + "-loading" }
+				class="absolute right-3 top-1/2 transform -translate-y-1/2"
+				x-show="loading"
+				style="display: none;"
+			>
+				<svg class="w-4 h-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+				</svg>
+			</div>
+		</div>
+		
+		<!-- Dropdown -->
+		<div
+			class={ autoCompleteDropdownClasses() }
+			x-show="open && options.length > 0"
+			x-transition
+		>
+			<!-- Options container -->
+			<div id={ props.ID + "-options" }>
+				<template x-for="(option, index) in options" :key="option.value">
+					<div
+						class="relative flex w-full cursor-default select-none items-start rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+						x-bind:class="{ 'bg-accent text-accent-foreground': index === highlightedIndex }"
+						@click="selectOption(option)"
+						@mouseenter="highlightedIndex = index"
+					>
+						<!-- Option content -->
+						<div class="flex-1 min-w-0">
+							<div class="flex items-center gap-2">
+								<template x-if="option.icon">
+									<span class="text-muted-foreground" x-text="option.icon"></span>
+								</template>
+								<span class="truncate" x-text="option.label"></span>
+								<template x-if="option.meta">
+									<span class="text-xs text-muted-foreground" x-text="option.meta"></span>
+								</template>
+							</div>
+							<template x-if="option.description">
+								<p class="text-xs text-muted-foreground truncate mt-0.5" x-text="option.description"></p>
+							</template>
+						</div>
+					</div>
+				</template>
+			</div>
+			
+			<!-- No results message -->
+			<div x-show="open && options.length === 0 && !loading" class="px-2 py-1.5 text-sm text-muted-foreground">
+				No results found
+			</div>
+		</div>
+	</div>
+}
