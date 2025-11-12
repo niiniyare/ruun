@@ -585,7 +585,7 @@ func (suite *ActionTestSuite) TestActionAccessibility() {
 		Type: ActionSubmit,
 		Text: "Submit Form",
 	}
-	
+
 	// Basic validation that action can be created
 	suite.Require().Equal("accessible-action", action.ID)
 	suite.Require().Equal(ActionSubmit, action.Type)
@@ -633,7 +633,7 @@ func (suite *ActionTestSuite) TestActionExecutionContext() {
 		Type: ActionSubmit,
 		Text: "Submit with Context",
 	}
-	
+
 	// Basic validation that action has proper context setup
 	suite.Require().Equal("context-action", action.ID)
 	suite.Require().Equal(ActionSubmit, action.Type)

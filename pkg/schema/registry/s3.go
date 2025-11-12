@@ -64,7 +64,6 @@ func (s3s *S3Storage) Get(ctx context.Context, id string) ([]byte, error) {
 		Bucket: aws.String(s3s.bucket),
 		Key:    aws.String(key),
 	})
-
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
 			return nil, fmt.Errorf("schema %s not found", id)
@@ -103,7 +102,6 @@ func (s3s *S3Storage) Set(ctx context.Context, id string, data []byte) error {
 			"type":      "schema",
 		},
 	})
-
 	if err != nil {
 		return fmt.Errorf("failed to store schema %s in S3: %w", id, err)
 	}
@@ -124,7 +122,6 @@ func (s3s *S3Storage) Delete(ctx context.Context, id string) error {
 		Bucket: aws.String(s3s.bucket),
 		Key:    aws.String(key),
 	})
-
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
 			return fmt.Errorf("schema %s not found", id)
@@ -137,7 +134,6 @@ func (s3s *S3Storage) Delete(ctx context.Context, id string) error {
 		Bucket: aws.String(s3s.bucket),
 		Key:    aws.String(key),
 	})
-
 	if err != nil {
 		return fmt.Errorf("failed to delete schema %s from S3: %w", id, err)
 	}
@@ -199,7 +195,6 @@ func (s3s *S3Storage) Exists(ctx context.Context, id string) (bool, error) {
 		Bucket: aws.String(s3s.bucket),
 		Key:    aws.String(key),
 	})
-
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
 			return false, nil
@@ -426,7 +421,6 @@ func (s3s *S3Storage) GetObjectInfo(ctx context.Context, id string) (*S3ObjectIn
 		Bucket: aws.String(s3s.bucket),
 		Key:    aws.String(key),
 	})
-
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
 			return nil, fmt.Errorf("schema %s not found", id)
@@ -486,7 +480,6 @@ func (s3s *S3Storage) SetWithMetadata(ctx context.Context, id string, data []byt
 		ContentType: aws.String("application/json"),
 		Metadata:    finalMetadata,
 	})
-
 	if err != nil {
 		return fmt.Errorf("failed to store schema %s with metadata in S3: %w", id, err)
 	}

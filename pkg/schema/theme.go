@@ -100,14 +100,14 @@ type AccessibilityConfig struct {
 
 // ThemeMeta contains theme metadata and organizational information.
 type ThemeMeta struct {
-	Tags       []string               `json:"tags,omitempty"`
-	License    string                 `json:"license,omitempty"`
-	Repository string                 `json:"repository,omitempty" validate:"url"`
-	Homepage   string                 `json:"homepage,omitempty" validate:"url"`
-	Preview    string                 `json:"preview,omitempty" validate:"url"` // Preview image URL
+	Tags       []string       `json:"tags,omitempty"`
+	License    string         `json:"license,omitempty"`
+	Repository string         `json:"repository,omitempty" validate:"url"`
+	Homepage   string         `json:"homepage,omitempty" validate:"url"`
+	Preview    string         `json:"preview,omitempty" validate:"url"` // Preview image URL
 	CustomData map[string]any `json:"customData,omitempty"`
-	CreatedAt  time.Time              `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time              `json:"updatedAt,omitempty"`
+	CreatedAt  time.Time      `json:"createdAt,omitempty"`
+	UpdatedAt  time.Time      `json:"updatedAt,omitempty"`
 }
 
 // ThemeOverrides represents customizations that can be applied to a base theme.
@@ -132,13 +132,13 @@ type ThemeOverrides struct {
 // TenantConfig represents tenant-specific theming configuration.
 // Enables multi-tenant theme customization with tenant isolation.
 type TenantConfig struct {
-	TenantID    string                 `json:"tenantId" validate:"required"`
-	BaseThemeID string                 `json:"baseThemeId" validate:"required"`
-	Overrides   *ThemeOverrides        `json:"overrides,omitempty"`
-	Metadata    map[string]any `json:"metadata,omitempty"`
-	Active      bool                   `json:"active"`
-	CreatedAt   time.Time              `json:"createdAt"`
-	UpdatedAt   time.Time              `json:"updatedAt"`
+	TenantID    string          `json:"tenantId" validate:"required"`
+	BaseThemeID string          `json:"baseThemeId" validate:"required"`
+	Overrides   *ThemeOverrides `json:"overrides,omitempty"`
+	Metadata    map[string]any  `json:"metadata,omitempty"`
+	Active      bool            `json:"active"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	UpdatedAt   time.Time       `json:"updatedAt"`
 }
 
 // ThemeCacheEntry represents a cached theme with timestamp
@@ -1375,7 +1375,7 @@ func ExportTheme(theme *Theme) ([]byte, error) {
 	if theme == nil {
 		return nil, NewValidationError("theme", "theme is required")
 	}
-	
+
 	// Export with pretty formatting and sorted keys for consistency
 	return json.MarshalIndent(theme, "", "  ")
 }
@@ -1385,17 +1385,17 @@ func ImportTheme(data []byte) (*Theme, error) {
 	if len(data) == 0 {
 		return nil, NewValidationError("data", "theme data is required")
 	}
-	
+
 	var theme Theme
 	if err := json.Unmarshal(data, &theme); err != nil {
 		return nil, WrapError(err, "theme_unmarshal_failed", "failed to unmarshal theme")
 	}
-	
+
 	// Validate the imported theme
 	if err := ValidateTheme(&theme); err != nil {
 		return nil, WrapError(err, "theme_validation_failed", "imported theme validation failed")
 	}
-	
+
 	return &theme, nil
 }
 

@@ -66,7 +66,7 @@ func (tc *TranslationCatalog) LoadEmbeddedTranslations() error {
 		}
 
 		locale := strings.TrimSuffix(file.Name(), ".json")
-		
+
 		data, err := translationFiles.ReadFile("translations/" + file.Name())
 		if err != nil {
 			continue // Skip failed files
@@ -95,7 +95,7 @@ func (tc *TranslationCatalog) HasLocale(locale string) bool {
 func (tc *TranslationCatalog) GetAvailableLocales() []string {
 	tc.mu.RLock()
 	defer tc.mu.RUnlock()
-	
+
 	locales := make([]string, 0, len(tc.locales))
 	for locale := range tc.locales {
 		locales = append(locales, locale)
@@ -275,12 +275,12 @@ func (tc *TranslationCatalog) IsRTL(locale string) bool {
 		"fa": true, // Persian/Farsi
 		"ur": true, // Urdu
 	}
-	
+
 	// Check both full locale and language part
 	if rtlLocales[locale] {
 		return true
 	}
-	
+
 	lang := strings.Split(locale, "-")[0]
 	return rtlLocales[lang]
 }

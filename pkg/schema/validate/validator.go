@@ -118,7 +118,7 @@ type EnrichedSchemaInterface interface {
 
 // Validator provides server-side validation for schema data
 type Validator struct {
-	db                  Database // Optional database for uniqueness checks
+	db                  Database            // Optional database for uniqueness checks
 	businessRulesEngine BusinessRulesEngine // Optional business rules engine
 }
 
@@ -819,7 +819,7 @@ func (v *Validator) validateFile(field FieldInterface, value any) []string {
 // Custom validation
 func (v *Validator) validateCustom(field FieldInterface, value any) []string {
 	var errors []string
-	
+
 	validation := field.GetValidation()
 	if validation == nil || validation.Custom == "" {
 		return errors
@@ -832,7 +832,6 @@ func (v *Validator) validateCustom(field FieldInterface, value any) []string {
 
 	return errors
 }
-
 
 // Check if value is empty
 func (v *Validator) isEmpty(value any) bool {
@@ -980,22 +979,22 @@ func (v *Validator) checkUniqueness(field FieldInterface, value any) error {
 	if v.db == nil {
 		return nil // No database configured, skip uniqueness check
 	}
-	
+
 	// Determine table and column for uniqueness check
 	// This could be enhanced to support custom table/column mapping
 	tableName := "entities" // Default table
 	columnName := field.GetName()
-	
+
 	// Check if value already exists
 	exists, err := v.db.Exists(context.Background(), tableName, columnName, value)
 	if err != nil {
 		return fmt.Errorf("uniqueness check failed: %w", err)
 	}
-	
+
 	if exists {
 		return fmt.Errorf("value already exists")
 	}
-	
+
 	return nil
 }
 

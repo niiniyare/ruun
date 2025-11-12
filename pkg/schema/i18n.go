@@ -270,7 +270,6 @@ func (s *Schema) ApplySchemaI18nLocalization(schemaI18n *SchemaI18n, locale stri
 	return localizedSchema, nil
 }
 
-
 // GetLocalizedTooltip returns localized tooltip for a field
 func (f *Field) GetLocalizedTooltip(locale string) string {
 	if f.I18n != nil && f.I18n.Tooltip != nil {
@@ -443,4 +442,3 @@ func (i *I18nManager) LoadDefaultTranslations() error {
 
 	return nil
 }
-

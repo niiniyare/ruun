@@ -676,7 +676,7 @@ func TestI18nManager_interpolateMessage(t *testing.T) {
 		},
 		{
 			name:           "multiple params",
-			locale:         "en-US", 
+			locale:         "en-US",
 			fallbackLocale: "en",
 			message:        "{{field}} must be between {{min}} and {{max}}",
 			params:         map[string]any{"field": "Age", "min": 18, "max": 65},
@@ -685,7 +685,7 @@ func TestI18nManager_interpolateMessage(t *testing.T) {
 		{
 			name:           "no interpolation needed",
 			locale:         "en-US",
-			fallbackLocale: "en", 
+			fallbackLocale: "en",
 			message:        "This is a simple message",
 			params:         map[string]any{},
 			want:           "This is a simple message",
@@ -701,4 +701,3 @@ func TestI18nManager_interpolateMessage(t *testing.T) {
 		})
 	}
 }
-

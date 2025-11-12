@@ -110,7 +110,6 @@ func (m *MockS3Client) ListObjectsV2(ctx context.Context, params *s3.ListObjects
 }
 
 func TestNewS3Storage(t *testing.T) {
-
 	tests := []struct {
 		name    string
 		config  S3Config

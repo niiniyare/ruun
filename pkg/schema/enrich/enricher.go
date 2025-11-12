@@ -163,7 +163,7 @@ func (e *DefaultEnricher) Enrich(ctx context.Context, s *schema.Schema, opts ...
 			// When not filtered, work directly with the original fields
 			field = &s.Fields[i]
 		}
-		
+
 		if field == nil {
 			continue // Skip if field not found
 		}
@@ -290,7 +290,7 @@ func (e *DefaultEnricher) EnrichWithLocale(ctx context.Context, schemaObj *schem
 	// Apply embedded translations to all fields
 	for i := range localizedSchema.Fields {
 		field := &localizedSchema.Fields[i]
-		
+
 		// Localize field labels using embedded translations
 		field.Label = field.GetLocalizedLabel(locale)
 		field.Placeholder = field.GetLocalizedPlaceholder(locale)
@@ -308,7 +308,7 @@ func (e *DefaultEnricher) EnrichWithLocale(ctx context.Context, schemaObj *schem
 	// Note: Schema-level translations should be handled via SchemaI18n struct
 	// using the ApplySchemaI18nLocalization method. The I18n field on Schema
 	// is for configuration (locale, date formats, etc.), not translations.
-	// 
+	//
 	// For schema-level title/description translations, use:
 	// schemaI18n := &schema.SchemaI18n{
 	//     Title: map[string]string{"en": "English Title", "es": "Título Español"},

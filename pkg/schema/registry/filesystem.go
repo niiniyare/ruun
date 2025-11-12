@@ -16,13 +16,13 @@ type FilesystemStorage struct {
 // NewFilesystemStorage creates a new filesystem storage backend
 func NewFilesystemStorage(basePath string) (*FilesystemStorage, error) {
 	// Ensure the base directory exists
-	if err := os.MkdirAll(basePath, 0755); err != nil {
+	if err := os.MkdirAll(basePath, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create base directory %s: %w", basePath, err)
 	}
 
 	// Verify the directory is writable
 	testFile := filepath.Join(basePath, ".write_test")
-	if err := os.WriteFile(testFile, []byte("test"), 0644); err != nil {
+	if err := os.WriteFile(testFile, []byte("test"), 0o644); err != nil {
 		return nil, fmt.Errorf("base directory %s is not writable: %w", basePath, err)
 	}
 	os.Remove(testFile) // Clean up test file
@@ -79,13 +79,13 @@ func (fs *FilesystemStorage) Set(ctx context.Context, id string, data []byte) er
 
 	// Ensure the directory exists
 	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create directory for schema %s: %w", id, err)
 	}
 
 	// Write to temporary file first for atomic operation
 	tempPath := filePath + ".tmp"
-	if err := os.WriteFile(tempPath, data, 0644); err != nil {
+	if err := os.WriteFile(tempPath, data, 0o644); err != nil {
 		return fmt.Errorf("failed to write temporary file for schema %s: %w", id, err)
 	}
 
@@ -165,7 +165,6 @@ func (fs *FilesystemStorage) List(ctx context.Context) ([]string, error) {
 		schemaIDs = append(schemaIDs, schemaID)
 		return nil
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to list schemas: %w", err)
 	}
@@ -278,7 +277,6 @@ func (fs *FilesystemStorage) Stats(ctx context.Context) (*StorageStats, error) {
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to calculate storage stats: %w", err)
 	}

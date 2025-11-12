@@ -200,8 +200,6 @@ func (p *Parser) strictValidate(s *schema.Schema) error {
 		}
 	}
 
-	
-
 	return nil
 }
 
@@ -228,7 +226,6 @@ func (p *Parser) setDefaults(s *schema.Schema) {
 		p.setLayoutDefaults(s.Layout)
 	}
 
-	
 	// Set defaults for other components like tables, forms, etc.
 	p.setPageComponentDefaults(s)
 }
@@ -303,17 +300,17 @@ func (p *Parser) setFieldDefaults(f *schema.Field) {
 		if f.Validation == nil {
 			f.Validation = &schema.FieldValidation{}
 		}
-		
+
 		// Initialize file validation if needed
 		if f.Validation.File == nil {
 			f.Validation.File = &schema.FileValidation{}
 		}
-		
+
 		// Set default max size if not specified (10MB default)
 		if f.Validation.File.MaxSize == 0 {
 			f.Validation.File.MaxSize = 10 * 1024 * 1024 // 10MB
 		}
-		
+
 		// Set accepted file types based on field type
 		if len(f.Validation.File.Accept) == 0 {
 			if f.Type == schema.FieldImage {
@@ -520,7 +517,7 @@ func validateConditionFieldReferences(condition *schema.ConditionGroup, fieldNam
 	return nil
 }
 
-// setComponentDefaults sets defaults for page body components  
+// setComponentDefaults sets defaults for page body components
 func (p *Parser) setComponentDefaults(body any) {
 	// Set defaults for various component types when Body field is properly typed
 	// For now this is a placeholder since Body is interface{}

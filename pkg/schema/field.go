@@ -83,7 +83,7 @@ func (f *Field) GetLocalizedLabel(locale string) string {
 			return label
 		}
 	}
-	
+
 	// Use embedded translations with field ID as key
 	return T_Field(locale, f.Name)
 }
@@ -96,16 +96,16 @@ func (f *Field) GetLocalizedPlaceholder(locale string) string {
 			return placeholder
 		}
 	}
-	
+
 	// For placeholder, fallback to field-specific key or empty
 	placeholderKey := f.Name + "Placeholder"
 	placeholder := T_Field(locale, placeholderKey)
-	
+
 	// If no specific placeholder translation exists, return the original or empty
 	if placeholder == humanizeFieldID(placeholderKey) {
 		return f.Placeholder // Return original placeholder
 	}
-	
+
 	return placeholder
 }
 
@@ -117,16 +117,16 @@ func (f *Field) GetLocalizedHelp(locale string) string {
 			return help
 		}
 	}
-	
+
 	// For help text, fallback to field-specific key or empty
 	helpKey := f.Name + "Help"
 	help := T_Field(locale, helpKey)
-	
+
 	// If no specific help translation exists, return the original or empty
 	if help == humanizeFieldID(helpKey) {
 		return f.Help // Return original help text
 	}
-	
+
 	return help
 }
 
@@ -138,16 +138,16 @@ func (f *Field) GetLocalizedDescription(locale string) string {
 			return desc
 		}
 	}
-	
+
 	// For description, fallback to field-specific key or empty
 	descKey := f.Name + "Description"
 	desc := T_Field(locale, descKey)
-	
+
 	// If no specific description translation exists, return the original or empty
 	if desc == humanizeFieldID(descKey) {
 		return f.Description // Return original description
 	}
-	
+
 	return desc
 }
 
@@ -1142,7 +1142,7 @@ func (f *Field) validateString(value string) error {
 			"%s must be at least %d characters", f.Label, *v.MinLength)
 	}
 	if v.MaxLength != nil && len(value) > *v.MaxLength {
-			msg := ""
+		msg := ""
 		if v.Messages != nil {
 			msg = v.Messages.MaxLength
 		}

@@ -23,7 +23,7 @@ type Runtime struct {
 	renderer    schema.RuntimeRenderer          // UI rendering implementation
 	validator   schema.RuntimeValidator         // Validation implementation
 	conditional schema.RuntimeConditionalEngine // Conditional logic implementation
-	
+
 	// Internationalization
 	currentLocale string // Current locale for the runtime instance
 
@@ -232,7 +232,7 @@ func (r *Runtime) HandleFieldChange(ctx context.Context, fieldName string, newVa
 	if field == nil {
 		return fmt.Errorf("field %s not found", fieldName)
 	}
-	
+
 	// Check if field is editable
 	if field.Runtime != nil && !field.Runtime.Editable {
 		return fmt.Errorf("field %s is read-only", fieldName)
@@ -983,7 +983,7 @@ func NewRuntimeWithLocale(enrichedSchema *schema.Schema, locale string) *Runtime
 func (r *Runtime) GetCurrentLocale() string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	if r.currentLocale == "" {
 		return "en" // Default fallback
 	}
@@ -1008,7 +1008,7 @@ func (r *Runtime) SetLocale(ctx context.Context, locale string) error {
 func (r *Runtime) DetectUserLocale(userPreferences []string) string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	
+
 	bestLocale := schema.T_DetectLocale(userPreferences)
 	r.currentLocale = bestLocale
 	return bestLocale
@@ -1022,7 +1022,7 @@ func (r *Runtime) localizeValidationErrors(errors []string) []string {
 
 	locale := r.GetCurrentLocale()
 	localizedErrors := make([]string, len(errors))
-	
+
 	for i, errorMsg := range errors {
 		// Try to map common validation error patterns to translation keys
 		translationKey := r.mapErrorToTranslationKey(errorMsg)
@@ -1033,7 +1033,7 @@ func (r *Runtime) localizeValidationErrors(errors []string) []string {
 			localizedErrors[i] = errorMsg
 		}
 	}
-	
+
 	return localizedErrors
 }
 
@@ -1041,32 +1041,32 @@ func (r *Runtime) localizeValidationErrors(errors []string) []string {
 func (r *Runtime) mapErrorToTranslationKey(errorMsg string) string {
 	// Map common English validation messages to translation keys
 	errorMap := map[string]string{
-		"This field is required":                    "required",
-		"field is required":                        "required", 
-		"required":                                 "required",
-		"Must be a valid email address":           "invalidEmail",
-		"Must be a valid email":                   "invalidEmail",
-		"invalid email":                           "invalidEmail",
-		"Passwords do not match":                  "passwordMismatch",
-		"passwords must match":                    "passwordMismatch",
-		"Must be a valid phone number":            "invalidPhone",
-		"invalid phone":                           "invalidPhone",
-		"Must be a valid URL":                     "invalidUrl",
-		"invalid url":                             "invalidUrl",
-		"Must be a valid date":                    "invalidDate",
-		"invalid date":                            "invalidDate",
-		"Must be a valid number":                  "invalidNumber",
-		"invalid number":                          "invalidNumber",
-		"Invalid format":                          "patternMismatch",
-		"This value is already taken":             "uniqueViolation",
-		"value already exists":                    "uniqueViolation",
+		"This field is required":        "required",
+		"field is required":             "required",
+		"required":                      "required",
+		"Must be a valid email address": "invalidEmail",
+		"Must be a valid email":         "invalidEmail",
+		"invalid email":                 "invalidEmail",
+		"Passwords do not match":        "passwordMismatch",
+		"passwords must match":          "passwordMismatch",
+		"Must be a valid phone number":  "invalidPhone",
+		"invalid phone":                 "invalidPhone",
+		"Must be a valid URL":           "invalidUrl",
+		"invalid url":                   "invalidUrl",
+		"Must be a valid date":          "invalidDate",
+		"invalid date":                  "invalidDate",
+		"Must be a valid number":        "invalidNumber",
+		"invalid number":                "invalidNumber",
+		"Invalid format":                "patternMismatch",
+		"This value is already taken":   "uniqueViolation",
+		"value already exists":          "uniqueViolation",
 	}
-	
+
 	// Check exact matches first
 	if key, exists := errorMap[errorMsg]; exists {
 		return key
 	}
-	
+
 	// Check partial matches for parameterized messages
 	lowerMsg := strings.ToLower(errorMsg)
 	if strings.Contains(lowerMsg, "must be at least") && strings.Contains(lowerMsg, "character") {
@@ -1081,7 +1081,7 @@ func (r *Runtime) mapErrorToTranslationKey(errorMsg string) string {
 	if strings.Contains(lowerMsg, "must be no more than") && !strings.Contains(lowerMsg, "character") {
 		return "numberMax"
 	}
-	
+
 	// No mapping found
 	return ""
 }

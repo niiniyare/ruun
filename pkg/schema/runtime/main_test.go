@@ -55,12 +55,12 @@ type MockValidator struct{}
 
 func (mv *MockValidator) ValidateField(ctx context.Context, field *schema.Field, value any, allData map[string]any) []string {
 	var errors []string
-	
+
 	// Required field validation
 	if field.Required && (value == nil || value == "") {
 		errors = append(errors, field.Label+" is required")
 	}
-	
+
 	// Email validation
 	if field.Type == schema.FieldEmail && value != nil {
 		email := value.(string)
@@ -68,13 +68,13 @@ func (mv *MockValidator) ValidateField(ctx context.Context, field *schema.Field,
 			errors = append(errors, "Invalid email format")
 		}
 	}
-	
+
 	return errors
 }
 
 func (mv *MockValidator) ValidateAllFields(ctx context.Context, schema *schema.Schema, data map[string]any) map[string][]string {
 	errors := make(map[string][]string)
-	
+
 	for _, field := range schema.Fields {
 		value, _ := data[field.Name]
 		fieldErrors := mv.ValidateField(ctx, &field, value, data)
@@ -82,7 +82,7 @@ func (mv *MockValidator) ValidateAllFields(ctx context.Context, schema *schema.S
 			errors[field.Name] = fieldErrors
 		}
 	}
-	
+
 	return errors
 }
 

@@ -547,7 +547,6 @@ func NewDeleteAction(id, text string) *ActionBuilder {
 		WithConfirmation("Are you sure you want to delete this item?", "Confirm Deletion")
 }
 
-
 // convertLegacyConditional converts legacy Conditional to condition.ConditionGroup
 // This is for backward compatibility with the old conditional format
 func convertLegacyConditional(cond *Conditional) *condition.ConditionGroup {
@@ -559,7 +558,7 @@ func convertLegacyConditional(cond *Conditional) *condition.ConditionGroup {
 	if cond.Show != nil {
 		return convertConditionGroup(cond.Show)
 	}
-	
+
 	// If there's a hide condition, invert it for visibility
 	if cond.Hide != nil {
 		hideGroup := convertConditionGroup(cond.Hide)

@@ -40,7 +40,7 @@ func (s *RuntimeTestSuite) TestNewRuntime() {
 	require.Equal(s.T(), schema, runtime.schema, "Runtime schema should be set correctly")
 	require.NotNil(s.T(), runtime.state, "Runtime state should be initialized")
 	require.NotNil(s.T(), runtime.events, "Runtime events should be initialized")
-	
+
 	// Test with validator
 	runtimeWithValidator := createTestRuntimeWithValidator()
 	require.NotNil(s.T(), runtimeWithValidator.validator, "Runtime with validator should have validator initialized")
