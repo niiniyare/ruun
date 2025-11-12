@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/stretchr/testify/suite"
 )
 

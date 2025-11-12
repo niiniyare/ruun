@@ -79,9 +79,9 @@ package handlers
 import (
     "os"
     "github.com/gofiber/fiber/v2"
-    "github.com/niiniyare/erp/pkg/schema/parse"
-    "github.com/niiniyare/erp/pkg/schema/validate"
-    "github.com/niiniyare/erp/views"
+    "github.com/niiniyare/ruun/pkg/schema/parse"
+    "github.com/niiniyare/ruun/pkg/schema/validate"
+    "github.com/niiniyare/ruun/views"
 )
 
 // ShowContactForm displays the form
@@ -140,7 +140,7 @@ func SubmitContact(c *fiber.Ctx) error {
 ```go
 package views
 
-import "github.com/niiniyare/erp/pkg/schema"
+import "github.com/niiniyare/ruun/pkg/schema"
 
 // FormPage renders complete form page
 templ FormPage(s *schema.Schema, data map[string]any) {

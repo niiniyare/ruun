@@ -18,7 +18,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 func main() {
@@ -76,7 +76,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 func main() {
@@ -129,7 +129,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 func main() {
@@ -203,7 +203,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 func main() {
@@ -278,7 +278,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 func main() {
@@ -348,7 +348,7 @@ import (
     "testing"
     
     "github.com/stretchr/testify/suite"
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 type ThemeTestSuite struct {

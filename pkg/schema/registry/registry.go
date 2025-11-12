@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/schema"
-	"github.com/niiniyare/erp/pkg/schema/parse"
+	"github.com/niiniyare/ruun/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema/parse"
 )
 
 // Storage defines the interface for schema storage backends

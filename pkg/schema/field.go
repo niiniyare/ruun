@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // Field represents a form input or UI component
@@ -232,10 +232,11 @@ const (
 // FieldValidation defines validation rules for a field
 type FieldValidation struct {
 	// String validation
-	MinLength *int   `json:"minLength,omitempty"` // Minimum string length
-	MaxLength *int   `json:"maxLength,omitempty"` // Maximum string length
-	Pattern   string `json:"pattern,omitempty"`   // Regex pattern
-	Format    string `json:"format,omitempty"`    // Format validator (email, url, uuid, date, datetime, time)
+	MinLength      *int   `json:"minLength,omitempty"`      // Minimum string length
+	MaxLength      *int   `json:"maxLength,omitempty"`      // Maximum string length
+	Pattern        string `json:"pattern,omitempty"`        // Regex pattern
+	PatternMessage string `json:"patternMessage,omitempty"` // Custom message for pattern validation
+	Format         string `json:"format,omitempty"`         // Format validator (email, url, uuid, date, datetime, time)
 
 	// Number validation
 	Min          *float64 `json:"min,omitempty"`          // Minimum value
@@ -256,6 +257,9 @@ type FieldValidation struct {
 	// File validation
 	File  *FileValidation  `json:"file,omitempty"`  // File upload validation
 	Image *ImageValidation `json:"image,omitempty"` // Image upload validation
+
+	// Database constraints
+	Unique bool `json:"unique,omitempty"` // Database uniqueness constraint
 
 	// Custom validation (uses condition engine formula syntax)
 	Custom   string    `json:"custom,omitempty"` // Custom validation formula
@@ -488,6 +492,7 @@ type FieldI18n struct {
 	Label       map[string]string `json:"label,omitempty"`       // Localized labels
 	Placeholder map[string]string `json:"placeholder,omitempty"` // Localized placeholders
 	Help        map[string]string `json:"help,omitempty"`        // Localized help text
+	Description map[string]string `json:"description,omitempty"` // Localized descriptions
 	Tooltip     map[string]string `json:"tooltip,omitempty"`     // Localized tooltips
 	Error       map[string]string `json:"error,omitempty"`       // Localized error messages
 	// settings

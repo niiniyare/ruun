@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )

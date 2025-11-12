@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // ValidatorFunc represents a custom validation function

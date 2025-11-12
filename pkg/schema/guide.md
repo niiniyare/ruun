@@ -2118,7 +2118,7 @@ package components
 
 import (
     "context"
-    "github.com/niiniyare/erp/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema"
 )
 
 templ SchemaForm(s *schema.Schema, state map[string]any, errors map[string][]string) {
@@ -2667,10 +2667,10 @@ This guide provides a comprehensive overview of the ERP Schema Package for UI im
 
 - **Example Implementations**: See `pkg/schema/examples/` for reference implementations
 - **API Documentation**: Full API docs at `/docs/api/schema/`  
-- **Community Support**: Join discussions at `https://github.com/niiniyare/erp/discussions`
+- **Community Support**: Join discussions at `https://github.com/niiniyare/ruun/discussions`
 
 ---
 
 **Last Updated**: November 2025  
 **Version**: 1.0.0  
-**Package Version**: github.com/niiniyare/erp/pkg/schema@v1.0.0
+**Package Version**: github.com/niiniyare/ruun/pkg/schema@v1.0.0

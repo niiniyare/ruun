@@ -2897,8 +2897,8 @@ type ActionButtonProps struct {
 package user_table
 
 import "fmt"
-import "github.com/niiniyare/erp/web/components/atoms/buttons"
-import "github.com/niiniyare/erp/web/components/atoms/badges"
+import "github.com/niiniyare/ruun/web/components/atoms/buttons"
+import "github.com/niiniyare/ruun/web/components/atoms/badges"
 
 // UserTable - User management table with sorting, filtering, and pagination
 //

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // Mock implementations are shared from registry_test.go
@@ -965,7 +965,6 @@ func TestValidator_CheckUniqueness(t *testing.T) {
 	}
 
 	validator := NewValidator(db)
-	ctx := context.Background()
 
 	field := &MockField{
 		name:      "username",
@@ -976,31 +975,22 @@ func TestValidator_CheckUniqueness(t *testing.T) {
 	}
 
 	// Test unique value
-	unique, err := validator.checkUniqueness(ctx, field, "new_value")
+	err := validator.checkUniqueness(field, "new_value")
 	if err != nil {
 		t.Errorf("checkUniqueness() unexpected error: %v", err)
-	}
-	if !unique {
-		t.Error("checkUniqueness() should return true for unique value")
 	}
 
 	// Test non-unique value
-	unique, err = validator.checkUniqueness(ctx, field, "existing_value")
-	if err != nil {
-		t.Errorf("checkUniqueness() unexpected error: %v", err)
-	}
-	if unique {
-		t.Error("checkUniqueness() should return false for non-unique value")
+	err = validator.checkUniqueness(field, "existing_value")
+	if err == nil {
+		t.Error("checkUniqueness() should return error for non-unique value")
 	}
 
 	// Test without database
 	validatorNoDB := NewValidator(nil)
-	unique, err = validatorNoDB.checkUniqueness(ctx, field, "any_value")
+	err = validatorNoDB.checkUniqueness(field, "any_value")
 	if err != nil {
-		t.Errorf("checkUniqueness() unexpected error: %v", err)
-	}
-	if !unique {
-		t.Error("checkUniqueness() should return true when no database is set")
+		t.Errorf("checkUniqueness() should not return error when no database is set: %v", err)
 	}
 }
 

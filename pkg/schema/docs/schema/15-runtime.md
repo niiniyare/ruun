@@ -66,8 +66,8 @@ import (
     "sync"
     "time"
     
-    "github.com/niiniyare/erp/pkg/schema"
-    "github.com/niiniyare/erp/pkg/schema/validate"
+    "github.com/niiniyare/ruun/pkg/schema"
+    "github.com/niiniyare/ruun/pkg/schema/validate"
 )
 
 // Runtime manages the execution of an enriched schema
@@ -306,7 +306,7 @@ func (s *State) Subscribe(observer StateObserver) func() {
 
 ```go
 // Runtime uses the schema validation system for consistent validation
-import "github.com/niiniyare/erp/pkg/schema/validate"
+import "github.com/niiniyare/ruun/pkg/schema/validate"
 
 // Runtime validation leverages the schema's built-in validator
 func (r *Runtime) ValidateField(ctx context.Context, fieldName string, value interface{}) []string {

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // MockStorage for testing

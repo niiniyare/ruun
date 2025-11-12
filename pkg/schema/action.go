@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // Action represents a button or actionable element in the form

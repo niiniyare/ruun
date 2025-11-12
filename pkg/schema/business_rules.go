@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // BusinessRule represents a business logic rule that can be applied to schemas
@@ -468,10 +468,15 @@ func (bre *BusinessRuleEngine) calculateFieldValue(ctx context.Context, schema *
 
 			// Use the condition package's expression evaluator for formula calculation
 			evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-			result, err := bre.evaluator.EvaluateFormula(ctx, formula, evalCtx)
+			rule := &condition.ConditionRule{
+				ID: "formula-calculation",
+				If: formula,
+			}
+			boolResult, err := bre.evaluator.Evaluate(ctx, rule, evalCtx)
 			if err != nil {
 				return NewValidationError("formula_evaluation_failed", fmt.Sprintf("failed to evaluate formula %s: %v", formula, err))
 			}
+			result := any(boolResult)
 
 			// Set the calculated value as the field default
 			schema.Fields[i].Default = result

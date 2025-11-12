@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // Database interface for uniqueness checks
@@ -60,14 +60,16 @@ const (
 
 // Field validation configuration
 type FieldValidation struct {
-	MinLength *int     `json:"minLength,omitempty"`
-	MaxLength *int     `json:"maxLength,omitempty"`
-	Min       *float64 `json:"min,omitempty"`
-	Max       *float64 `json:"max,omitempty"`
-	Step      *float64 `json:"step,omitempty"`
-	Pattern   string   `json:"pattern,omitempty"`
-	Format    string   `json:"format,omitempty"`
-	Custom    string   `json:"custom,omitempty"`
+	MinLength      *int     `json:"minLength,omitempty"`
+	MaxLength      *int     `json:"maxLength,omitempty"`
+	Min            *float64 `json:"min,omitempty"`
+	Max            *float64 `json:"max,omitempty"`
+	Step           *float64 `json:"step,omitempty"`
+	Pattern        string   `json:"pattern,omitempty"`
+	PatternMessage string   `json:"patternMessage,omitempty"` // Custom message for pattern validation
+	Format         string   `json:"format,omitempty"`
+	Custom         string   `json:"custom,omitempty"`
+	Unique         bool     `json:"unique,omitempty"` // Database uniqueness constraint
 }
 
 // Option for select fields
@@ -196,13 +198,8 @@ func (v *Validator) ValidateDataDetailed(ctx context.Context, schema SchemaInter
 		}
 	}
 
-	// Apply business rules validation if engine is available
-	if v.businessRulesEngine != nil && len(data) > 0 {
-		if modifiedSchema, err := v.businessRulesEngine.ApplyRules(ctx, schema, data); err == nil {
-			// Use the modified schema for validation context
-			_ = modifiedSchema // Business rules applied successfully
-		}
-	}
+	// TODO: Apply business rules validation if engine is available
+	// Note: Business rules integration requires proper interface implementation
 
 	return result, nil
 }
@@ -267,16 +264,8 @@ func (v *Validator) ValidateField(ctx context.Context, field FieldInterface, val
 func (v *Validator) ValidateBusinessRules(ctx context.Context, schema SchemaInterface, data map[string]any) map[string][]string {
 	errors := make(map[string][]string)
 
-	// Integrate with business rules engine
-	if v.businessRulesEngine != nil {
-		if _, err := v.businessRulesEngine.ApplyRules(ctx, schema.(*Schema), data); err != nil {
-			if schemaErr, ok := err.(SchemaError); ok {
-				for field, fieldErrs := range schemaErr.ValidationErrors {
-					errors[field] = fieldErrs
-				}
-			}
-		}
-	}
+	// TODO: Integrate with business rules engine
+	// Note: Business rules integration requires proper interface implementation
 	// For now, return empty errors as business rules engine would handle this
 
 	return errors
@@ -836,47 +825,14 @@ func (v *Validator) validateCustom(field FieldInterface, value any) []string {
 		return errors
 	}
 
-	// Use condition package for custom validation expression evaluation
-	// Create evaluation context with field value
-	data := map[string]any{
-		"value": value,
-		"field": field.GetName(),
-	}
-	
-	// Try to evaluate the custom expression as a formula
-	// If it returns false, the validation fails
-	if v.businessRulesEngine != nil {
-		// Custom expressions should return boolean true for valid values
-		// Example: "value > 0 && value < 100" or "len(value) >= 3"
-		// We'd need an expression evaluator here, but for now return empty
-		// The actual implementation would use the condition package's evaluator
-	}
+	// TODO: Use condition package for custom validation expression evaluation
+	// Custom expressions should return boolean true for valid values
+	// Example: "value > 0 && value < 100" or "len(value) >= 3"
+	// The actual implementation would use the condition package's evaluator
 
 	return errors
 }
 
-// Check uniqueness in database
-func (v *Validator) checkUniqueness(ctx context.Context, field FieldInterface, value any) (bool, error) {
-	if v.db == nil {
-		return true, nil // No database, assume unique
-	}
-
-	// Extract table name from field config or use schema context
-	tableName := "unknown_table" // Would come from schema context
-	config := field.GetConfig()
-	if config != nil {
-		if table, ok := config["table"].(string); ok {
-			tableName = table
-		}
-	}
-
-	exists, err := v.db.Exists(ctx, tableName, field.GetName(), value)
-	if err != nil {
-		return false, err
-	}
-
-	return !exists, nil // Unique if it doesn't exist
-}
 
 // Check if value is empty
 func (v *Validator) isEmpty(value any) bool {

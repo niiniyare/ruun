@@ -10,7 +10,7 @@ Converts schemas to HTML using type-safe templ components.
 // views/form.templ
 package views
 
-import "github.com/niiniyare/erp/pkg/schema"
+import "github.com/niiniyare/ruun/pkg/schema"
 
 templ FormPage(s *schema.Schema, data map[string]any) {
     <!DOCTYPE html>

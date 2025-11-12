@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // EventHandler manages runtime events with dependency injection

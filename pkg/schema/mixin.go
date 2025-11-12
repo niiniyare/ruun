@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // Mixin represents a reusable collection of fields and validation rules

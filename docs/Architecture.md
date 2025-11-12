@@ -6997,7 +6997,7 @@ import (
     "context"
     
     "github.com/stretchr/testify/suite"
-    "github.com/niiniyare/erp/ui/components"
+    "github.com/niiniyare/ruun/ui/components"
 )
 
 type ButtonTestSuite struct {

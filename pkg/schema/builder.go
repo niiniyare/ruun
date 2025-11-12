@@ -3,7 +3,7 @@ package schema
 import (
 	"context"
 
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // Builder provides a fluent interface for building schemas programmatically

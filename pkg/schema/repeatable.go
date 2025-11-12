@@ -6,8 +6,8 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/niiniyare/erp/internal/shared/logger"
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/logger"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // RepeatableField extends the existing Field type to support repeatable/array fields

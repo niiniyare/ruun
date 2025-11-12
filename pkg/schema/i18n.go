@@ -270,35 +270,6 @@ func (s *Schema) ApplySchemaI18nLocalization(schemaI18n *SchemaI18n, locale stri
 	return localizedSchema, nil
 }
 
-// GetLocalizedLabel returns localized label for a field
-func (f *Field) GetLocalizedLabel(locale string) string {
-	if f.I18n != nil && f.I18n.Label != nil {
-		if label, exists := f.I18n.Label[locale]; exists {
-			return label
-		}
-	}
-	return f.Label // Fallback to default
-}
-
-// GetLocalizedPlaceholder returns localized placeholder for a field
-func (f *Field) GetLocalizedPlaceholder(locale string) string {
-	if f.I18n != nil && f.I18n.Placeholder != nil {
-		if placeholder, exists := f.I18n.Placeholder[locale]; exists {
-			return placeholder
-		}
-	}
-	return f.Placeholder // Fallback to default
-}
-
-// GetLocalizedHelp returns localized help text for a field
-func (f *Field) GetLocalizedHelp(locale string) string {
-	if f.I18n != nil && f.I18n.Help != nil {
-		if help, exists := f.I18n.Help[locale]; exists {
-			return help
-		}
-	}
-	return f.Help // Fallback to default
-}
 
 // GetLocalizedTooltip returns localized tooltip for a field
 func (f *Field) GetLocalizedTooltip(locale string) string {

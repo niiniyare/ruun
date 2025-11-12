@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/condition"
+	"github.com/niiniyare/ruun/pkg/condition"
 )
 
 // Security defines security and access control configuration

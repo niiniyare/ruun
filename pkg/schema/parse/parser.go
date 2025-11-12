@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // Parser converts JSON to Go structs with configurable behavior
@@ -200,28 +200,7 @@ func (p *Parser) strictValidate(s *schema.Schema) error {
 		}
 	}
 
-	// Validate field references in conditional logic exist
-	fieldNames := make(map[string]bool)
-	for _, field := range s.Fields {
-		fieldNames[field.Name] = true
-	}
 	
-	// Check that fields referenced in business rules exist
-	for _, rule := range s.BusinessRules {
-		if rule.Condition != nil {
-			// Validate that fields referenced in conditions exist
-			if err := validateConditionFieldReferences(rule.Condition, fieldNames); err != nil {
-				return fmt.Errorf("business rule %s: %w", rule.ID, err)
-			}
-		}
-		
-		// Validate action targets exist
-		for _, action := range rule.Actions {
-			if action.Target != "" && !fieldNames[action.Target] {
-				return fmt.Errorf("business rule %s action references non-existent field: %s", rule.ID, action.Target)
-			}
-		}
-	}
 
 	return nil
 }
@@ -249,10 +228,6 @@ func (p *Parser) setDefaults(s *schema.Schema) {
 		p.setLayoutDefaults(s.Layout)
 	}
 
-	// Set component defaults for page body elements
-	if s.Body != nil {
-		p.setComponentDefaults(s.Body)
-	}
 	
 	// Set defaults for other components like tables, forms, etc.
 	p.setPageComponentDefaults(s)
@@ -329,20 +304,22 @@ func (p *Parser) setFieldDefaults(f *schema.Field) {
 			f.Validation = &schema.FieldValidation{}
 		}
 		
+		// Initialize file validation if needed
+		if f.Validation.File == nil {
+			f.Validation.File = &schema.FileValidation{}
+		}
+		
 		// Set default max size if not specified (10MB default)
-		if f.Validation.MaxSize == nil {
-			defaultSize := int64(10 * 1024 * 1024) // 10MB
-			f.Validation.MaxSize = &defaultSize
+		if f.Validation.File.MaxSize == 0 {
+			f.Validation.File.MaxSize = 10 * 1024 * 1024 // 10MB
 		}
 		
 		// Set accepted file types based on field type
-		if f.Validation.Accept == nil {
+		if len(f.Validation.File.Accept) == 0 {
 			if f.Type == schema.FieldImage {
-				accept := "image/*"
-				f.Validation.Accept = &accept
+				f.Validation.File.Accept = []string{"image/*"}
 			} else {
-				accept := "*/*"
-				f.Validation.Accept = &accept
+				f.Validation.File.Accept = []string{"*/*"}
 			}
 		}
 	}

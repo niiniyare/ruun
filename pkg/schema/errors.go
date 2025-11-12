@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/niiniyare/erp/internal/shared/logger"
+	"github.com/niiniyare/ruun/pkg/logger"
 )
 
 // Core error types for schema validation and processing

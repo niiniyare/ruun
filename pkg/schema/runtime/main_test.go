@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // Helper function to create a test schema

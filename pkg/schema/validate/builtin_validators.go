@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/niiniyare/erp/internal/shared/format"
+	"github.com/niiniyare/ruun/pkg/shared"
 )
 
 // registerBuiltInValidators registers common validators using existing packages
@@ -72,7 +72,7 @@ func (r *ValidationRegistry) registerBuiltInValidators() {
 
 		layout, hasLayout := params["layout"].(string)
 		if !hasLayout {
-			layout = format.ISO8601Date
+			layout = shared.ISO8601Date
 		}
 
 		_, err := time.Parse(layout, str)
@@ -89,13 +89,13 @@ func (r *ValidationRegistry) registerBuiltInValidators() {
 			return NewValidationError("time_range", "time_range validator requires string value", "invalid_type")
 		}
 
-		t, err := format.ParseDuration(str)
+		t, err := shared.ParseDuration(str)
 		if err != nil {
 			return NewValidationError("time_range", "invalid duration format", "invalid_duration")
 		}
 
 		if minDuration, hasMin := params["min"].(string); hasMin {
-			min, err := format.ParseDuration(minDuration)
+			min, err := shared.ParseDuration(minDuration)
 			if err != nil {
 				return NewValidationError("time_range", "invalid minimum duration", "invalid_min_duration")
 			}
@@ -105,7 +105,7 @@ func (r *ValidationRegistry) registerBuiltInValidators() {
 		}
 
 		if maxDuration, hasMax := params["max"].(string); hasMax {
-			max, err := format.ParseDuration(maxDuration)
+			max, err := shared.ParseDuration(maxDuration)
 			if err != nil {
 				return NewValidationError("time_range", "invalid maximum duration", "invalid_max_duration")
 			}
@@ -144,13 +144,13 @@ func (r *ValidationRegistry) registerBuiltInValidators() {
 			}
 
 			var err error
-			timeVal, err = time.Parse(format.ISO8601Date, str)
+			timeVal, err = time.Parse(shared.ISO8601Date, str)
 			if err != nil {
 				return NewValidationError("business_day", "invalid date format for business day validation", "invalid_date")
 			}
 		}
 
-		if !format.IsBusinessDay(timeVal) {
+		if !shared.IsBusinessDay(timeVal) {
 			return NewValidationError("business_day", "date must be a business day (Monday-Friday)", "not_business_day")
 		}
 		return nil
@@ -194,7 +194,7 @@ func (r *CrossFieldValidationRegistry) registerBuiltInValidators() {
 			case time.Time:
 				start = v
 			case string:
-				start, err = time.Parse(format.ISO8601Date, v)
+				start, err = time.Parse(shared.ISO8601Date, v)
 				if err != nil {
 					return NewValidationError("start_date", "invalid start date format", "invalid_start_date")
 				}
@@ -206,7 +206,7 @@ func (r *CrossFieldValidationRegistry) registerBuiltInValidators() {
 			case time.Time:
 				end = v
 			case string:
-				end, err = time.Parse(format.ISO8601Date, v)
+				end, err = time.Parse(shared.ISO8601Date, v)
 				if err != nil {
 					return NewValidationError("end_date", "invalid end date format", "invalid_end_date")
 				}
@@ -256,14 +256,14 @@ func (r *CrossFieldValidationRegistry) registerBuiltInValidators() {
 				case time.Time:
 					dateTime = v
 				case string:
-					dateTime, err = time.Parse(format.ISO8601Date, v)
+					dateTime, err = time.Parse(shared.ISO8601Date, v)
 					if err != nil {
 						return NewValidationError("date", "invalid date format", "invalid_date")
 					}
 				}
 
 				// Check if it's a business day
-				if !format.IsBusinessDay(dateTime) {
+				if !shared.IsBusinessDay(dateTime) {
 					return NewValidationError("date", "date must be a business day", "not_business_day")
 				}
 			}

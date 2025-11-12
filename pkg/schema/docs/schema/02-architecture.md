@@ -208,7 +208,7 @@ func HandleForm(c *fiber.Ctx) error {
 ## Package Structure
 
 ```
-github.com/niiniyare/erp/
+github.com/niiniyare/ruun/
 │
 ├── pkg/
 │   ├── condition/          # Business rules engine

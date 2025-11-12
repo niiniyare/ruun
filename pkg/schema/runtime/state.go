@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // State holds runtime form state and tracks user interactions

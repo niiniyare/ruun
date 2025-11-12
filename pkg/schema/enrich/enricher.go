@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/niiniyare/erp/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/schema"
 )
 
 // User represents a user in the system for enrichment purposes
@@ -305,15 +305,16 @@ func (e *DefaultEnricher) EnrichWithLocale(ctx context.Context, schemaObj *schem
 		action.Text = schema.T_Action(locale, action.ID)
 	}
 
-	// Localize schema-level content if I18n is available
-	if localizedSchema.I18n != nil {
-		if title, exists := localizedSchema.I18n.Title[locale]; exists && title != "" {
-			localizedSchema.Title = title
-		}
-		if desc, exists := localizedSchema.I18n.Description[locale]; exists && desc != "" {
-			localizedSchema.Description = desc
-		}
-	}
+	// Note: Schema-level translations should be handled via SchemaI18n struct
+	// using the ApplySchemaI18nLocalization method. The I18n field on Schema
+	// is for configuration (locale, date formats, etc.), not translations.
+	// 
+	// For schema-level title/description translations, use:
+	// schemaI18n := &schema.SchemaI18n{
+	//     Title: map[string]string{"en": "English Title", "es": "Título Español"},
+	//     Description: map[string]string{"en": "English Desc", "es": "Descripción Español"},
+	// }
+	// localizedSchema, err := schema.ApplySchemaI18nLocalization(schemaI18n, locale)
 
 	// Then enrich with user context
 	enrichedSchema, err := e.EnrichWithUser(ctx, localizedSchema, user)
