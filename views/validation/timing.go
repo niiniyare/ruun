@@ -1,4 +1,4 @@
-package views
+package validation
 
 import (
 	"context"
@@ -142,6 +142,37 @@ func (d *FieldDebouncer) GetPendingCount() int {
 	return len(d.timers)
 }
 
+// StateManager interface to avoid circular dependency
+type StateManager interface {
+	SetFieldErrors(fieldName string, errors []string)
+	ClearFieldErrors(fieldName string)
+	SetFieldTouched(fieldName string, touched bool)
+	GetAllValues() map[string]any
+	GetFieldErrors(fieldName string) []string
+	IsFieldTouched(fieldName string) bool
+}
+
+// ValidationSummary provides a comprehensive view of validation states
+type ValidationSummary struct {
+	States            map[string]ValidationState `json:"states"`
+	LastValidated     map[string]time.Time       `json:"lastValidated"`
+	TotalFields       int                        `json:"totalFields"`
+	ValidFields       int                        `json:"validFields"`
+	InvalidFields     int                        `json:"invalidFields"`
+	ValidatingFields  int                        `json:"validatingFields"`
+	WarningFields     int                        `json:"warningFields"`
+}
+
+// IsFormValid returns true if all fields are valid (no invalid or validating fields)
+func (vs ValidationSummary) IsFormValid() bool {
+	return vs.InvalidFields == 0 && vs.ValidatingFields == 0
+}
+
+// IsFormValidating returns true if any fields are currently validating
+func (vs ValidationSummary) IsFormValidating() bool {
+	return vs.ValidatingFields > 0
+}
+
 // ValidationStateManager manages validation states with timing information
 // EXTENDS the existing StateManager with validation-specific state tracking
 type ValidationStateManager struct {
@@ -151,7 +182,7 @@ type ValidationStateManager struct {
 	pendingValidations map[string]context.CancelFunc
 	
 	// Integration with existing state manager
-	stateManager *StateManager
+	stateManager StateManager
 	
 	// Thread safety
 	mu sync.RWMutex
@@ -161,7 +192,7 @@ type ValidationStateManager struct {
 // We use the same type from the parent package to avoid duplication
 
 // NewValidationStateManager creates a validation state manager that extends StateManager
-func NewValidationStateManager(stateManager *StateManager) *ValidationStateManager {
+func NewValidationStateManager(stateManager StateManager) *ValidationStateManager {
 	return &ValidationStateManager{
 		validationStates:   make(map[string]ValidationState),
 		validationTimes:    make(map[string]time.Time),
@@ -346,5 +377,3 @@ func (vsm *ValidationStateManager) GetValidationSummary() ValidationSummary {
 	return summary
 }
 
-// ValidationSummary is defined in parent views package (views/state.go)
-// We use the same type from the parent package to avoid duplication

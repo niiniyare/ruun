@@ -1,17 +1,46 @@
-package views
+package validation
 
 import (
 	"sync"
 	"time"
 )
 
+// ValidationState represents the validation state of a field
+type ValidationState int
+
+const (
+	ValidationStateIdle       ValidationState = iota // No validation activity
+	ValidationStateValidating                        // Currently validating
+	ValidationStateValid                             // Validation passed
+	ValidationStateInvalid                           // Validation failed
+	ValidationStateWarning                           // Validation warning
+)
+
+// String returns string representation of validation state
+func (vs ValidationState) String() string {
+	switch vs {
+	case ValidationStateIdle:
+		return "idle"
+	case ValidationStateValidating:
+		return "validating"
+	case ValidationStateValid:
+		return "valid"
+	case ValidationStateInvalid:
+		return "invalid"
+	case ValidationStateWarning:
+		return "warning"
+	default:
+		return "unknown"
+	}
+}
+
 // ValidationEvent represents a validation state change event
 type ValidationEvent struct {
-	FieldName string            `json:"fieldName"`
-	EventType ValidationEventType `json:"eventType"`
-	State     ValidationState   `json:"state"`
-	Errors    []string          `json:"errors,omitempty"`
-	Timestamp time.Time         `json:"timestamp"`
+	FieldName string                 `json:"fieldName"`
+	EventType ValidationEventType    `json:"eventType"`
+	State     ValidationState        `json:"state"`
+	Errors    []string               `json:"errors,omitempty"`
+	Timestamp time.Time              `json:"timestamp"`
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 }
 

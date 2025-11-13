@@ -9,6 +9,7 @@ import (
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
+	"github.com/niiniyare/ruun/views/validation"
 )
 
 // TemplateRenderer implements schema.RuntimeRenderer using Templ components
@@ -18,12 +19,12 @@ type TemplateRenderer struct {
 	registry     *ComponentRegistry
 	mapper       *FieldMapper
 	schema       *schema.Schema
-	stateManager *StateManager                // Form state management
-	orchestrator *UIValidationOrchestrator    // UI validation orchestration
+	stateManager *StateManager                      // Form state management
+	orchestrator *validation.UIValidationOrchestrator // UI validation orchestration
 }
 
 // NewTemplateRenderer creates a new template renderer with dependencies
-func NewTemplateRenderer(registry *ComponentRegistry, mapper *FieldMapper, s *schema.Schema, stateManager *StateManager, orchestrator *UIValidationOrchestrator) *TemplateRenderer {
+func NewTemplateRenderer(registry *ComponentRegistry, mapper *FieldMapper, s *schema.Schema, stateManager *StateManager, orchestrator *validation.UIValidationOrchestrator) *TemplateRenderer {
 	return &TemplateRenderer{
 		registry:     registry,
 		mapper:       mapper,
@@ -617,31 +618,36 @@ func (r *TemplateRenderer) enhancePropsWithValidation(field *schema.Field, props
 	if r.mapper.HasClientValidationRules(field) {
 		clientRules := r.mapper.ExtractClientValidationRules(field)
 		
-		// Add client validation attributes to props
-		if props.Attributes == nil {
-			props.Attributes = make(map[string]string)
-		}
+		// Add client validation attributes as HTMX data attributes
+		// Since FormFieldProps doesn't have Attributes field, we'll use class-based approach
+		validationClasses := make([]string, 0)
 		
-		// Add validation trigger attributes
+		// Add validation data as Alpine.js bindings for client-side validation
 		if clientRules.Required {
-			props.Attributes["data-validate-required"] = "true"
+			validationClasses = append(validationClasses, "validate-required")
 		}
 		if clientRules.MinLength != nil {
-			props.Attributes["data-validate-min-length"] = fmt.Sprintf("%d", *clientRules.MinLength)
+			validationClasses = append(validationClasses, fmt.Sprintf("validate-min-length-%d", *clientRules.MinLength))
 		}
 		if clientRules.MaxLength != nil {
-			props.Attributes["data-validate-max-length"] = fmt.Sprintf("%d", *clientRules.MaxLength)
+			validationClasses = append(validationClasses, fmt.Sprintf("validate-max-length-%d", *clientRules.MaxLength))
 		}
 		if clientRules.Pattern != "" {
-			props.Attributes["data-validate-pattern"] = clientRules.Pattern
+			validationClasses = append(validationClasses, "validate-pattern")
 		}
 		if clientRules.Format != "" {
-			props.Attributes["data-validate-format"] = clientRules.Format
+			validationClasses = append(validationClasses, fmt.Sprintf("validate-format-%s", clientRules.Format))
 		}
 		
-		// Add debounce timing
-		props.Attributes["data-validate-debounce"] = "300"
-		props.Attributes["data-field-name"] = fieldName
+		// Add validation classes to existing class string
+		if len(validationClasses) > 0 {
+			validationClassStr := strings.Join(validationClasses, " ")
+			if props.Class != "" {
+				props.Class += " " + validationClassStr
+			} else {
+				props.Class = validationClassStr
+			}
+		}
 	}
 }
 
@@ -677,15 +683,15 @@ func (r *TemplateRenderer) buildFieldContainerAttributes(field *schema.Field) st
 }
 
 // getValidationStateClass returns CSS class for validation state
-func (r *TemplateRenderer) getValidationStateClass(state ValidationState) string {
+func (r *TemplateRenderer) getValidationStateClass(state validation.ValidationState) string {
 	switch state {
-	case ValidationStateValidating:
+	case validation.ValidationStateValidating:
 		return "field-validating"
-	case ValidationStateValid:
+	case validation.ValidationStateValid:
 		return "field-valid"
-	case ValidationStateInvalid:
+	case validation.ValidationStateInvalid:
 		return "field-invalid"
-	case ValidationStateWarning:
+	case validation.ValidationStateWarning:
 		return "field-warning"
 	default:
 		return ""

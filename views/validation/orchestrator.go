@@ -1,4 +1,4 @@
-package views
+package validation
 
 import (
 	"context"
@@ -127,28 +127,28 @@ func (o *UIValidationOrchestrator) ValidateFieldWithUI(
 	// Use existing schema validation based on trigger
 	switch trigger {
 	case ValidationTriggerImmediate:
-		return o.validateImmediate(ctx, field, value, config)
+		return o.validateImmediate(ctx, &field, value, config)
 	case ValidationTriggerDebounced:
-		return o.validateDebounced(ctx, field, value, config)
+		return o.validateDebounced(ctx, &field, value, config)
 	case ValidationTriggerOnBlur:
-		return o.validateOnBlur(ctx, field, value, config)
+		return o.validateOnBlur(ctx, &field, value, config)
 	case ValidationTriggerOnSubmit:
-		return o.validateOnSubmit(ctx, field, value, config)
+		return o.validateOnSubmit(ctx, &field, value, config)
 	default:
-		return o.validateImmediate(ctx, field, value, config)
+		return o.validateImmediate(ctx, &field, value, config)
 	}
 }
 
 // validateImmediate performs immediate validation using existing schema validation
 func (o *UIValidationOrchestrator) validateImmediate(
 	ctx context.Context,
-	field schema.Field,
+	field *schema.Field,
 	value interface{},
 	config *ValidationConfig,
 ) error {
 	// REUSE: Use existing schema RuntimeValidator interface
 	allData := o.stateMgr.GetAllValues()
-	errors := o.validator.ValidateField(ctx, &field, value, allData)
+	errors := o.validator.ValidateField(ctx, field, value, allData)
 
 	fieldName := field.Name
 
@@ -176,7 +176,7 @@ func (o *UIValidationOrchestrator) validateImmediate(
 // validateDebounced performs debounced validation for better UX
 func (o *UIValidationOrchestrator) validateDebounced(
 	ctx context.Context,
-	field schema.Field,
+	field *schema.Field,
 	value interface{},
 	config *ValidationConfig,
 ) error {
@@ -207,7 +207,7 @@ func (o *UIValidationOrchestrator) validateDebounced(
 // validateOnBlur performs validation on field blur event
 func (o *UIValidationOrchestrator) validateOnBlur(
 	ctx context.Context,
-	field schema.Field,
+	field *schema.Field,
 	value interface{},
 	config *ValidationConfig,
 ) error {
@@ -220,7 +220,7 @@ func (o *UIValidationOrchestrator) validateOnBlur(
 // validateOnSubmit performs validation only on form submission
 func (o *UIValidationOrchestrator) validateOnSubmit(
 	ctx context.Context,
-	field schema.Field,
+	field *schema.Field,
 	value interface{},
 	config *ValidationConfig,
 ) error {

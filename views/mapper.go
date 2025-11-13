@@ -1028,7 +1028,7 @@ func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) ClientVa
 }
 
 // extractClientCustomRule attempts to extract client-side executable custom validation
-func (m *FieldMapper) extractClientCustomRule(customExpr string, messages *schema.ValidationMessages) *ClientValidationRule {
+func (m *FieldMapper) extractClientCustomRule(customExpr string, messages any) *ClientValidationRule {
 	// For complex expressions, mark as async (server-side validation)
 	return &ClientValidationRule{
 		Type:    "async_custom",
@@ -1074,7 +1074,7 @@ func (m *FieldMapper) extractFieldTypeClientRules(field *schema.Field, rules *Cl
 }
 
 // getCustomRuleMessage extracts the appropriate error message for custom rules
-func (m *FieldMapper) getCustomRuleMessage(messages *schema.ValidationMessages, ruleType string) string {
+func (m *FieldMapper) getCustomRuleMessage(messages any, ruleType string) string {
 	if messages == nil {
 		return "Validation failed"
 	}
