@@ -151,6 +151,14 @@ func (sm *StateManager) IsFieldDirty(fieldName string) bool {
 	return sm.dirty[fieldName]
 }
 
+// SetFieldDirty manually sets the dirty state for a field
+func (sm *StateManager) SetFieldDirty(fieldName string, dirty bool) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	sm.dirty[fieldName] = dirty
+}
+
 // SetValue updates a field value and recalculates dirty state
 func (sm *StateManager) SetValue(fieldName string, value any) error {
 	sm.mu.Lock()
@@ -410,7 +418,7 @@ func (sm *StateManager) valuesEqual(a, b any) bool {
 		}
 	}
 
-	// Handle interface{} arrays
+	// Handle any arrays
 	if aSlice, aOk := a.([]any); aOk {
 		if bSlice, bOk := b.([]any); bOk {
 			return sm.interfaceSlicesEqual(aSlice, bSlice)
@@ -434,7 +442,7 @@ func (sm *StateManager) stringSlicesEqual(a, b []string) bool {
 	return true
 }
 
-// interfaceSlicesEqual compares interface{} slices for equality
+// interfaceSlicesEqual compares any slices for equality
 func (sm *StateManager) interfaceSlicesEqual(a, b []any) bool {
 	if len(a) != len(b) {
 		return false

@@ -520,7 +520,7 @@ func validateConditionFieldReferences(condition *schema.ConditionGroup, fieldNam
 // setComponentDefaults sets defaults for page body components
 func (p *Parser) setComponentDefaults(body any) {
 	// Set defaults for various component types when Body field is properly typed
-	// For now this is a placeholder since Body is interface{}
+	// For now this is a placeholder since Body is any
 	// This would set defaults for things like tables, forms, grids, etc.
 }
 

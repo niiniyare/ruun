@@ -45,7 +45,7 @@ type ErrorDetail struct {
 	Type        ErrorType              `json:"type"`
 	Severity    ErrorSeverity          `json:"severity"`
 	Timestamp   string                 `json:"timestamp"`
-	Context     map[string]interface{} `json:"context"`
+	Context     map[string]any `json:"context"`
 	Suggestions []string               `json:"suggestions"`
 	HelpURL     string                 `json:"helpUrl"`
 	Retryable   bool                   `json:"retryable"`

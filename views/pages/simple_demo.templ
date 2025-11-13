@@ -205,7 +205,7 @@ templ SimpleDemoPage() {
 							Rows: []organisms.TableRow{
 								{
 									ID: "1",
-									Data: map[string]interface{}{
+									Data: map[string]any{
 										"name":   "John Doe",
 										"email":  "john@example.com", 
 										"role":   "Admin",
@@ -214,7 +214,7 @@ templ SimpleDemoPage() {
 								},
 								{
 									ID: "2", 
-									Data: map[string]interface{}{
+									Data: map[string]any{
 										"name":   "Jane Smith",
 										"email":  "jane@example.com",
 										"role":   "User", 
@@ -223,7 +223,7 @@ templ SimpleDemoPage() {
 								},
 								{
 									ID: "3",
-									Data: map[string]interface{}{
+									Data: map[string]any{
 										"name":   "Bob Johnson",
 										"email":  "bob@example.com",
 										"role":   "Manager",

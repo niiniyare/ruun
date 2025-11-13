@@ -41,7 +41,7 @@ type ValidationMessage struct {
 	Message string                 `json:"message"`
 	Field   string                 `json:"field"`
 	Code    string                 `json:"code"`
-	Details map[string]interface{} `json:"details"`
+	Details map[string]any `json:"details"`
 }
 
 // ValidationProps defines properties for validation components

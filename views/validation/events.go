@@ -41,7 +41,7 @@ type ValidationEvent struct {
 	State     ValidationState        `json:"state"`
 	Errors    []string               `json:"errors,omitempty"`
 	Timestamp time.Time              `json:"timestamp"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Metadata  map[string]any `json:"metadata,omitempty"`
 }
 
 // ValidationEventType defines types of validation events
@@ -122,7 +122,7 @@ func (b *ValidationEventBus) EmitValidationStart(fieldName string) {
 		EventType: ValidationEventStart,
 		State:     ValidationStateValidating,
 		Timestamp: time.Now(),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"trigger": "user_input",
 		},
 	}
@@ -137,7 +137,7 @@ func (b *ValidationEventBus) EmitValidationSuccess(fieldName string) {
 		EventType: ValidationEventSuccess,
 		State:     ValidationStateValid,
 		Timestamp: time.Now(),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"result": "valid",
 		},
 	}
@@ -153,7 +153,7 @@ func (b *ValidationEventBus) EmitValidationError(fieldName string, errors []stri
 		State:     ValidationStateInvalid,
 		Errors:    errors,
 		Timestamp: time.Now(),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"errorCount": len(errors),
 			"result":     "invalid",
 		},
@@ -169,7 +169,7 @@ func (b *ValidationEventBus) EmitValidationCancel(fieldName string) {
 		EventType: ValidationEventCancel,
 		State:     ValidationStateIdle,
 		Timestamp: time.Now(),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"reason": "debounce_cancel",
 		},
 	}
@@ -184,7 +184,7 @@ func (b *ValidationEventBus) EmitValidationClear(fieldName string) {
 		EventType: ValidationEventClear,
 		State:     ValidationStateIdle,
 		Timestamp: time.Now(),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"action": "clear_errors",
 		},
 	}
@@ -333,7 +333,7 @@ func (b *ValidationEventBus) HasListenersForField(fieldName string) bool {
 }
 
 // EmitCustomEvent emits a custom validation event with metadata
-func (b *ValidationEventBus) EmitCustomEvent(fieldName string, eventType ValidationEventType, state ValidationState, metadata map[string]interface{}) {
+func (b *ValidationEventBus) EmitCustomEvent(fieldName string, eventType ValidationEventType, state ValidationState, metadata map[string]any) {
 	event := ValidationEvent{
 		FieldName: fieldName,
 		EventType: eventType,

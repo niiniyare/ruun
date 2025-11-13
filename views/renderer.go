@@ -596,6 +596,7 @@ type ButtonProps struct {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // enhancePropsWithValidation enhances FormField props with validation orchestration data
+// ENHANCED with comprehensive theme-aware validation token integration
 func (r *TemplateRenderer) enhancePropsWithValidation(field *schema.Field, props *molecules.FormFieldProps) {
 	if r.orchestrator == nil {
 		return
@@ -603,8 +604,26 @@ func (r *TemplateRenderer) enhancePropsWithValidation(field *schema.Field, props
 	
 	fieldName := field.Name
 	
-	// Add validation state CSS classes
+	// Get current validation state from orchestrator
 	validationState := r.orchestrator.GetValidationStateForField(fieldName)
+	
+	// Set validation state and loading indicator
+	props.ValidationState = validationState
+	props.ValidationLoading = r.orchestrator.IsFieldValidating(fieldName)
+	
+	// Determine dark mode state from context
+	darkMode := r.determineContextDarkMode(field, props)
+	props.DarkMode = darkMode
+	
+	// Resolve and apply comprehensive validation tokens using mapper's token resolution
+	r.resolveFieldValidationTokens(field, props, validationState, darkMode)
+	
+	// Set theme ID from context for token resolution
+	if themeID := r.getThemeIDFromContext(field); themeID != "" {
+		props.ThemeID = themeID
+	}
+	
+	// Add validation state CSS classes (legacy support)
 	validationClass := r.getValidationStateClass(validationState)
 	if validationClass != "" {
 		if props.Class != "" {
@@ -614,30 +633,24 @@ func (r *TemplateRenderer) enhancePropsWithValidation(field *schema.Field, props
 		}
 	}
 	
+	// Set current validation errors from orchestrator
+	if errors := r.orchestrator.GetFieldErrors(fieldName); len(errors) > 0 {
+		props.Errors = errors
+	}
+	
 	// Add client validation rules if enabled
 	if r.mapper.HasClientValidationRules(field) {
 		clientRules := r.mapper.ExtractClientValidationRules(field)
+		props.ClientRules = &clientRules
 		
-		// Add client validation attributes as HTMX data attributes
-		// Since FormFieldProps doesn't have Attributes field, we'll use class-based approach
-		validationClasses := make([]string, 0)
+		// Configure validation endpoint for async validation
+		if r.orchestrator.HasAsyncValidation(fieldName) {
+			props.OnValidate = r.buildValidationEndpoint(fieldName)
+			props.ValidationDebounce = r.orchestrator.GetDebounceTimeForField(fieldName)
+		}
 		
-		// Add validation data as Alpine.js bindings for client-side validation
-		if clientRules.Required {
-			validationClasses = append(validationClasses, "validate-required")
-		}
-		if clientRules.MinLength != nil {
-			validationClasses = append(validationClasses, fmt.Sprintf("validate-min-length-%d", *clientRules.MinLength))
-		}
-		if clientRules.MaxLength != nil {
-			validationClasses = append(validationClasses, fmt.Sprintf("validate-max-length-%d", *clientRules.MaxLength))
-		}
-		if clientRules.Pattern != "" {
-			validationClasses = append(validationClasses, "validate-pattern")
-		}
-		if clientRules.Format != "" {
-			validationClasses = append(validationClasses, fmt.Sprintf("validate-format-%s", clientRules.Format))
-		}
+		// Add client validation attributes as CSS classes
+		validationClasses := r.buildValidationClasses(clientRules)
 		
 		// Add validation classes to existing class string
 		if len(validationClasses) > 0 {
@@ -649,6 +662,35 @@ func (r *TemplateRenderer) enhancePropsWithValidation(field *schema.Field, props
 			}
 		}
 	}
+}
+
+// resolveFieldValidationTokens resolves and applies comprehensive validation tokens using mapper's token resolution
+func (r *TemplateRenderer) resolveFieldValidationTokens(
+	field *schema.Field, 
+	props *molecules.FormFieldProps, 
+	validationState validation.ValidationState,
+	darkMode bool,
+) {
+	if r.mapper == nil {
+		return
+	}
+	
+	// Use mapper's comprehensive token resolution system
+	ctx := context.Background()
+	resolvedTokens := r.mapper.ResolveFieldTokens(ctx, *props, darkMode)
+	
+	// Set resolved tokens on props
+	if props.Tokens == nil {
+		props.Tokens = make(map[string]string)
+	}
+	
+	// Apply all resolved tokens
+	for tokenKey, tokenValue := range resolvedTokens {
+		props.Tokens[tokenKey] = tokenValue
+	}
+	
+	// Ensure validation state-specific tokens are applied
+	r.ensureValidationStateTokens(props, validationState, darkMode)
 }
 
 // buildFieldContainerAttributes builds HTML attributes for field containers with validation state
@@ -696,4 +738,348 @@ func (r *TemplateRenderer) getValidationStateClass(state validation.ValidationSt
 	default:
 		return ""
 	}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// THEME-AWARE VALIDATION TOKEN RESOLUTION METHODS (ENHANCED)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// determineContextDarkMode determines dark mode state from multiple sources
+func (r *TemplateRenderer) determineContextDarkMode(field *schema.Field, props *molecules.FormFieldProps) bool {
+	// Check if already set on props (highest priority)
+	if props.DarkMode {
+		return true
+	}
+	
+	// Check field-specific dark mode setting
+	if field.Config != nil {
+		if darkMode, exists := field.Config["darkMode"]; exists {
+			if dark, ok := darkMode.(bool); ok {
+				return dark
+			}
+		}
+	}
+	
+	// Schema Config doesn't contain darkMode - would need to be added if required
+	// if r.schema != nil && r.schema.Config != nil {
+	//   // Add darkMode field to Config struct if needed
+	// }
+	
+	// Check state manager for user preference
+	if r.stateManager != nil {
+		if darkModeValue := r.stateManager.GetValue("darkMode"); darkModeValue != nil {
+			if dark, ok := darkModeValue.(bool); ok {
+				return dark
+			}
+		}
+	}
+	
+	return false
+}
+
+// getThemeIDFromContext extracts theme ID from various context sources
+func (r *TemplateRenderer) getThemeIDFromContext(field *schema.Field) string {
+	// Check field-specific theme ID
+	if field.Config != nil {
+		if themeID, exists := field.Config["themeId"]; exists {
+			if theme, ok := themeID.(string); ok {
+				return theme
+			}
+		}
+	}
+	
+	// Schema Config doesn't contain themeId - would need to be added if required
+	// if r.schema != nil && r.schema.Config != nil {
+	//   // Add themeId field to Config struct if needed
+	// }
+	
+	// Check state manager for user theme selection
+	if r.stateManager != nil {
+		if themeValue := r.stateManager.GetValue("theme"); themeValue != nil {
+			if theme, ok := themeValue.(string); ok {
+				return theme
+			}
+		}
+	}
+	
+	return "default"
+}
+
+// buildValidationClasses builds CSS classes for client-side validation
+func (r *TemplateRenderer) buildValidationClasses(clientRules molecules.ClientValidationRules) []string {
+	var validationClasses []string
+	
+	if clientRules.Required {
+		validationClasses = append(validationClasses, "validate-required")
+	}
+	
+	if clientRules.MinLength != nil {
+		validationClasses = append(validationClasses, fmt.Sprintf("validate-min-length-%d", *clientRules.MinLength))
+	}
+	
+	if clientRules.MaxLength != nil {
+		validationClasses = append(validationClasses, fmt.Sprintf("validate-max-length-%d", *clientRules.MaxLength))
+	}
+	
+	if clientRules.Pattern != "" {
+		validationClasses = append(validationClasses, "validate-pattern")
+	}
+	
+	if clientRules.Format != "" {
+		validationClasses = append(validationClasses, fmt.Sprintf("validate-format-%s", clientRules.Format))
+	}
+	
+	if clientRules.Min != nil {
+		validationClasses = append(validationClasses, fmt.Sprintf("validate-min-%.2f", *clientRules.Min))
+	}
+	
+	if clientRules.Max != nil {
+		validationClasses = append(validationClasses, fmt.Sprintf("validate-max-%.2f", *clientRules.Max))
+	}
+	
+	return validationClasses
+}
+
+// ensureValidationStateTokens ensures validation state-specific tokens are properly set
+func (r *TemplateRenderer) ensureValidationStateTokens(
+	props *molecules.FormFieldProps, 
+	validationState validation.ValidationState,
+	darkMode bool,
+) {
+	// Ensure validation state tokens exist with fallbacks
+	validationStateTokens := r.getValidationStateTokens(validationState, darkMode)
+	
+	for tokenKey, tokenValue := range validationStateTokens {
+		// Only set if not already resolved by mapper
+		if _, exists := props.Tokens[tokenKey]; !exists {
+			props.Tokens[tokenKey] = tokenValue
+		}
+	}
+}
+
+// getValidationStateTokens returns fallback validation tokens for a specific state
+func (r *TemplateRenderer) getValidationStateTokens(state validation.ValidationState, darkMode bool) map[string]string {
+	// Base colors (light mode defaults)
+	baseTokens := map[string]string{
+		molecules.TokenFieldBackground: "#ffffff",
+		molecules.TokenFieldBorder:     "#e5e7eb", 
+		molecules.TokenFieldText:       "#111827",
+		molecules.TokenFieldRadius:     "0.375rem",
+		molecules.TokenFieldSpacing:    "0.75rem",
+		molecules.TokenFieldShadow:     "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+	}
+	
+	// Apply dark mode base tokens if enabled
+	if darkMode {
+		baseTokens[molecules.TokenFieldBackground] = "#111827"
+		baseTokens[molecules.TokenFieldBorder] = "#374151"
+		baseTokens[molecules.TokenFieldText] = "#f9fafb"
+		baseTokens[molecules.TokenFieldShadow] = "0 1px 2px 0 rgb(0 0 0 / 0.25)"
+	}
+	
+	// Apply validation state-specific tokens
+	switch state {
+	case validation.ValidationStateValidating:
+		borderColor := "#f59e0b"
+		if darkMode {
+			borderColor = "#fbbf24"
+		}
+		baseTokens[molecules.TokenFieldBorder] = borderColor
+		baseTokens[molecules.TokenValidationLoading+".color"] = borderColor
+		baseTokens[molecules.TokenValidationLoading+".message"] = "Validating..."
+		baseTokens[molecules.TokenValidationLoading+".icon"] = "⟳"
+		
+	case validation.ValidationStateValid:
+		borderColor := "#16a34a"
+		if darkMode {
+			borderColor = "#22c55e"
+		}
+		baseTokens[molecules.TokenFieldBorder] = borderColor
+		baseTokens[molecules.TokenValidationSuccess+".color"] = borderColor
+		baseTokens[molecules.TokenValidationSuccess+".message"] = "Valid"
+		baseTokens[molecules.TokenValidationSuccess+".icon"] = "✓"
+		
+	case validation.ValidationStateInvalid:
+		borderColor := "#dc2626"
+		if darkMode {
+			borderColor = "#ef4444"
+		}
+		baseTokens[molecules.TokenFieldBorder] = borderColor
+		baseTokens[molecules.TokenValidationError+".color"] = borderColor
+		baseTokens[molecules.TokenValidationError+".message"] = "Invalid"
+		baseTokens[molecules.TokenValidationError+".icon"] = "✗"
+		
+	case validation.ValidationStateWarning:
+		borderColor := "#d97706"
+		if darkMode {
+			borderColor = "#f59e0b"
+		}
+		baseTokens[molecules.TokenFieldBorder] = borderColor
+		baseTokens[molecules.TokenValidationWarning+".color"] = borderColor
+		baseTokens[molecules.TokenValidationWarning+".message"] = "Warning"
+		baseTokens[molecules.TokenValidationWarning+".icon"] = "⚠"
+	}
+	
+	return baseTokens
+}
+
+// validationStateToString converts validation state enum to string for token lookup
+func (r *TemplateRenderer) validationStateToString(state validation.ValidationState) string {
+	switch state {
+	case validation.ValidationStateValidating:
+		return "validating"
+	case validation.ValidationStateValid:
+		return "valid"
+	case validation.ValidationStateInvalid:
+		return "invalid"
+	case validation.ValidationStateWarning:
+		return "warning"
+	default:
+		return "idle"
+	}
+}
+
+// renderFormFieldWithTheme renders a form field with comprehensive theme-aware token resolution
+// This is the enhanced rendering method that integrates with the theme coordination layer
+func (r *TemplateRenderer) renderFormFieldWithTheme(
+	ctx context.Context,
+	field *schema.Field, 
+	value any, 
+	errors []string, 
+	touched, dirty bool,
+	themeContext map[string]any,
+) (string, error) {
+	// Convert field to FormField props with enhanced token resolution
+	props, err := r.mapper.ConvertField(field, value, errors, touched, dirty)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert field %s: %w", field.Name, err)
+	}
+	
+	// Apply theme context to props
+	if themeID, exists := themeContext["themeId"]; exists {
+		if theme, ok := themeID.(string); ok {
+			props.ThemeID = theme
+		}
+	}
+	
+	if darkMode, exists := themeContext["darkMode"]; exists {
+		if dark, ok := darkMode.(bool); ok {
+			props.DarkMode = dark
+		}
+	}
+	
+	// Enhance props with validation orchestration data and theme-aware tokens
+	r.enhancePropsWithValidation(field, &props)
+	
+	// Resolve component renderer for this field type
+	renderer, err := r.registry.Resolve(field)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve renderer for field %s (type: %s): %w", field.Name, field.Type, err)
+	}
+	
+	// Render using the resolved component with theme-aware tokens
+	html, err := renderer.Render(ctx, props)
+	if err != nil {
+		return "", fmt.Errorf("failed to render field %s: %w", field.Name, err)
+	}
+	
+	return html, nil
+}
+
+// SetThemeManager sets a theme manager for enhanced theme coordination
+// This integrates with the theme coordination layer for multi-tenant support
+func (r *TemplateRenderer) SetThemeManager(themeManager interface{}) {
+	// This would integrate with the theme coordination manager
+	// For now, this is a placeholder for future theme manager integration
+}
+
+// GetThemeContext extracts theme context from various sources for field rendering
+func (r *TemplateRenderer) GetThemeContext(field *schema.Field) map[string]any {
+	themeContext := make(map[string]any)
+	
+	// Extract theme ID
+	themeID := r.getThemeIDFromContext(field)
+	themeContext["themeId"] = themeID
+	
+	// Extract dark mode setting
+	darkMode := r.determineContextDarkMode(field, &molecules.FormFieldProps{})
+	themeContext["darkMode"] = darkMode
+	
+	// Extract tenant context if available  
+	// if r.schema != nil && r.schema.Config != nil {
+	//   // Schema Config doesn't contain tenant - would need to be added if required
+	// }
+	
+	return themeContext
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENHANCED RENDERING METHODS WITH THEME COORDINATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+// RenderFieldWithThemeContext renders a field with explicit theme context
+// This is an enhanced version of RenderField that accepts theme context
+func (r *TemplateRenderer) RenderFieldWithThemeContext(
+	ctx context.Context,
+	field *schema.Field,
+	value any,
+	errors []string,
+	touched, dirty bool,
+	themeContext map[string]any,
+) (string, error) {
+	return r.renderFormFieldWithTheme(ctx, field, value, errors, touched, dirty, themeContext)
+}
+
+// GetContextForValidation extracts validation context including theme information
+func (r *TemplateRenderer) GetContextForValidation(field *schema.Field) map[string]any {
+	validationContext := make(map[string]any)
+	
+	// Include theme context
+	themeContext := r.GetThemeContext(field)
+	for key, value := range themeContext {
+		validationContext[key] = value
+	}
+	
+	// Include validation state
+	if r.orchestrator != nil {
+		validationState := r.orchestrator.GetValidationStateForField(field.Name)
+		validationContext["validationState"] = validationState
+		validationContext["isValidating"] = r.orchestrator.IsFieldValidating(field.Name)
+		validationContext["hasAsyncValidation"] = r.orchestrator.HasAsyncValidation(field.Name)
+	}
+	
+	return validationContext
+}
+
+// buildValidationEndpoint builds HTMX validation endpoint URL for a field
+func (r *TemplateRenderer) buildValidationEndpoint(fieldName string) string {
+	// Get base validation endpoint from schema config
+	baseEndpoint := "/api/validate"
+	
+	// if r.schema != nil && r.schema.Config != nil {
+	//   // Schema Config doesn't contain validationEndpoint - would need to be added if required
+	// }
+	
+	// Add field-specific path
+	return fmt.Sprintf("%s/field/%s", baseEndpoint, fieldName)
+}
+
+// Helper methods for token resolution
+
+
+// getValidationTokenSystem returns the validation token system interface
+func (r *TemplateRenderer) getValidationTokenSystem() (interface{ 
+	GetValidationTokensForState(string) map[string]string
+	GetDarkModeValidationTokens(string) map[string]string
+}, bool) {
+	// This would integrate with the tokens/validation_tokens.go package
+	// For now, return false to use fallback values
+	return nil, false
+}
+
+// resolveTokenToActualValue attempts to resolve token reference to actual CSS value
+func (r *TemplateRenderer) resolveTokenToActualValue(tokenRef string) string {
+	// This would integrate with the full token resolution system
+	// For now, return the token reference itself
+	return tokenRef
 }

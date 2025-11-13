@@ -932,7 +932,7 @@ func organismComponentsDemo() templ.Component {
 			Rows: []organisms.TableRow{
 				{
 					ID: "1",
-					Data: map[string]interface{}{
+					Data: map[string]any{
 						"name":   "John Doe",
 						"email":  "john@example.com",
 						"role":   "admin",
@@ -941,7 +941,7 @@ func organismComponentsDemo() templ.Component {
 				},
 				{
 					ID: "2",
-					Data: map[string]interface{}{
+					Data: map[string]any{
 						"name":   "Jane Smith",
 						"email":  "jane@example.com",
 						"role":   "user",
@@ -950,7 +950,7 @@ func organismComponentsDemo() templ.Component {
 				},
 				{
 					ID: "3",
-					Data: map[string]interface{}{
+					Data: map[string]any{
 						"name":   "Bob Johnson",
 						"email":  "bob@example.com",
 						"role":   "viewer",

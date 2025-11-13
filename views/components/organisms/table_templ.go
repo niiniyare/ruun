@@ -81,7 +81,7 @@ type TableColumn struct {
 // TableRow represents a table row with data and metadata
 type TableRow struct {
 	ID       string                    // Row identifier
-	Data     map[string]interface{}    // Row data
+	Data     map[string]any    // Row data
 	Selected bool                      // Whether row is selected
 	Class    string                    // Additional CSS classes
 	URL      string                    // URL for clickable rows
@@ -1622,7 +1622,7 @@ func getBadgeVariant(value string, badgeMap map[string]atoms.BadgeVariant) atoms
 	return atoms.BadgeDefault
 }
 
-func getStringValue(value interface{}) string {
+func getStringValue(value any) string {
 	if value == nil {
 		return ""
 	}

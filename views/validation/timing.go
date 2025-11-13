@@ -150,6 +150,11 @@ type StateManager interface {
 	GetAllValues() map[string]any
 	GetFieldErrors(fieldName string) []string
 	IsFieldTouched(fieldName string) bool
+	// Additional methods needed for validation orchestration
+	GetValue(fieldName string) any
+	SetValue(fieldName string, value any) error
+	IsFieldDirty(fieldName string) bool
+	SetFieldDirty(fieldName string, dirty bool)
 }
 
 // ValidationSummary provides a comprehensive view of validation states

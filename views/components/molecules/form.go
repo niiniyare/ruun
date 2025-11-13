@@ -1,14 +1,17 @@
 package molecules
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"html"
+	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/validation"
 )
 
 // FormFieldType defines the input type for the form field
@@ -66,6 +69,23 @@ const (
 	FormFieldVariantFilled  FormFieldVariant = "filled"
 )
 
+// Token keys for validation states and field styling
+const (
+	TokenFieldBackground   = "components.field.background"
+	TokenFieldBorder       = "components.field.border"
+	TokenFieldText         = "components.field.text"
+	TokenFieldLabel        = "components.field.label"
+	TokenFieldPlaceholder  = "components.field.placeholder"
+	TokenFieldHelp         = "components.field.help"
+	TokenValidationLoading = "components.field.validation.loading"
+	TokenValidationSuccess = "components.field.validation.success"
+	TokenValidationError   = "components.field.validation.error"
+	TokenValidationWarning = "components.field.validation.warning"
+	TokenFieldRadius       = "components.field.radius"
+	TokenFieldSpacing      = "components.field.spacing"
+	TokenFieldShadow       = "components.field.shadow"
+)
+
 // SelectOption represents an option for select fields
 type SelectOption struct {
 	Value       string
@@ -81,7 +101,7 @@ type SelectOption struct {
 // ValidationRule defines a validation rule
 type ValidationRule struct {
 	Type    string // required, minLength, maxLength, pattern, custom, etc.
-	Value   interface{}
+	Value   any
 	Message string
 }
 
@@ -122,6 +142,14 @@ type FormFieldProps struct {
 	ValidateOnBlur  bool
 	ValidateOnInput bool
 	DebounceMs      int // Debounce validation
+
+	// NEW: Validation state integration
+	ValidationState    validation.ValidationState `json:"validationState,omitempty"`    // idle, validating, valid, invalid, warning
+	ValidationLoading  bool                       `json:"validationLoading,omitempty"`  // Async validation in progress
+	ClientRules        *ClientValidationRules     `json:"clientRules,omitempty"`        // For immediate client-side validation
+	OnValidate         string                     `json:"onValidate,omitempty"`         // HTMX validation endpoint
+	ValidationDebounce int                        `json:"validationDebounce,omitempty"` // Debounce timing in ms
+	Errors             []string                   `json:"errors,omitempty"`             // Current validation errors
 
 	// Input constraints
 	MinLength    int
@@ -259,9 +287,39 @@ type FormFieldProps struct {
 	Locale string
 	RTL    bool
 
+	// NEW: Token-based theming (replaces legacy CSS classes)
+	Tokens         map[string]string `json:"tokens,omitempty"`         // Resolved token values
+	ThemeID        string            `json:"themeID,omitempty"`        // Active theme identifier
+	TokenOverrides map[string]string `json:"tokenOverrides,omitempty"` // Tenant-specific token overrides
+	DarkMode       bool              `json:"darkMode,omitempty"`       // Dark mode preference
+
 	// Conditional rendering
-	Condition    string   // Alpine.js expression for conditional display
+	Condition    string   // Condition.Condition expression for conditional display
 	Dependencies []string // Field IDs this field depends on
+}
+
+// ClientValidationRules represents validation rules that can be executed client-side
+type ClientValidationRules struct {
+	FieldName    string                 `json:"fieldName"`
+	Required     bool                   `json:"required"`
+	MinLength    *int                   `json:"minLength,omitempty"`
+	MaxLength    *int                   `json:"maxLength,omitempty"`
+	Min          *float64               `json:"min,omitempty"`
+	Max          *float64               `json:"max,omitempty"`
+	Step         *float64               `json:"step,omitempty"`
+	Pattern      string                 `json:"pattern,omitempty"`
+	PatternFlags string                 `json:"patternFlags,omitempty"`
+	Format       string                 `json:"format,omitempty"` // email, url, phone, etc.
+	CustomRules  []ClientValidationRule `json:"customRules,omitempty"`
+}
+
+// ClientValidationRule represents a single client-side validation rule
+type ClientValidationRule struct {
+	Type       string `json:"type"`                 // Type of validation
+	Value      any    `json:"value"`                // Rule value/parameter
+	Message    string `json:"message"`              // Error message
+	Expression string `json:"expression,omitempty"` // JS expression for custom rules
+	Async      bool   `json:"async"`                // Whether this rule requires async validation
 }
 
 // Validation and utility methods
@@ -500,9 +558,16 @@ func generateFieldID(name string, fieldType FormFieldType) string {
 	return fmt.Sprintf("field-%s", strings.ReplaceAll(name, " ", "-"))
 }
 
+// generateRandomInt returns a cryptographically secure random integer between 0 and 999999.
 func generateRandomInt() int {
-	// In production, use crypto/rand
-	return 12345 // Placeholder
+	// Define upper limit (exclusive)
+	max := big.NewInt(1_000_000) // e.g., generate numbers in [0, 999999]
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		// Handle error gracefully, or fallback to pseudorandom
+		panic("failed to generate secure random int: " + err.Error())
+	}
+	return int(n.Int64())
 }
 
 // Class generation functions

@@ -26,12 +26,12 @@ type SchemaField struct {
 	Required    bool        `json:"required"`
 	ReadOnly    bool        `json:"readOnly"`
 	Hidden      bool        `json:"hidden"`
-	Default     interface{} `json:"default"`
+	Default     any `json:"default"`
 	// Validation
 	MinLength int         `json:"minLength"`
 	MaxLength int         `json:"maxLength"`
-	Min       interface{} `json:"min"`
-	Max       interface{} `json:"max"`
+	Min       any `json:"min"`
+	Max       any `json:"max"`
 	Pattern   string      `json:"pattern"`
 	// Options for select/radio fields
 	Options []SchemaFieldOption `json:"options"`
@@ -48,7 +48,7 @@ type SchemaField struct {
 	// Conditional logic
 	Conditions []SchemaFieldCondition `json:"conditions"`
 	// Custom attributes
-	Attributes map[string]interface{} `json:"attributes"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 // SchemaFieldOption represents an option for select fields
@@ -73,7 +73,7 @@ type SchemaFieldI18n struct {
 type SchemaFieldCondition struct {
 	Field    string      `json:"field"`    // Field name to watch
 	Operator string      `json:"operator"` // eq, ne, gt, lt, in, etc.
-	Value    interface{} `json:"value"`    // Value to compare
+	Value    any `json:"value"`    // Value to compare
 	Action   string      `json:"action"`   // show, hide, require, disable
 }
 
@@ -111,7 +111,7 @@ type SchemaFormDefinition struct {
 	ValidateURL string `json:"validateURL"`
 	LoadURL     string `json:"loadURL"`
 	// Custom attributes
-	Attributes map[string]interface{} `json:"attributes"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 // SchemaFormValidation represents form validation configuration
@@ -127,7 +127,7 @@ type SchemaFormValidation struct {
 // SchemaFormProps defines properties for schema-driven forms
 type SchemaFormProps struct {
 	Schema   SchemaFormDefinition   `json:"schema"`
-	Data     map[string]interface{} `json:"data"`     // Pre-filled data
+	Data     map[string]any `json:"data"`     // Pre-filled data
 	Errors   map[string]string      `json:"errors"`   // Validation errors
 	Locale   string                 `json:"locale"`   // Current locale
 	ReadOnly bool                   `json:"readOnly"` // Read-only mode
@@ -675,11 +675,11 @@ func getFieldBlurValidation(onBlur bool, fieldName string) string {
 	return ""
 }
 
-func getSchemaFormData(data map[string]interface{}) map[string]interface{} {
+func getSchemaFormData(data map[string]any) map[string]any {
 	if data != nil {
 		return data
 	}
-	return make(map[string]interface{})
+	return make(map[string]any)
 }
 
 // Helper functions
@@ -714,7 +714,7 @@ func getFieldDescription(field SchemaField, locale string) string {
 	return field.Description
 }
 
-func getFieldValue(fieldName string, data map[string]interface{}) string {
+func getFieldValue(fieldName string, data map[string]any) string {
 	if value, exists := data[fieldName]; exists && value != nil {
 		return convertToString(value)
 	}
@@ -728,7 +728,7 @@ func getFieldError(fieldName string, errors map[string]string) string {
 	return ""
 }
 
-func convertToString(value interface{}) string {
+func convertToString(value any) string {
 	if value == nil {
 		return ""
 	}
@@ -765,7 +765,7 @@ func extractFieldsFromSections(sections []SchemaFormSection) []SchemaField {
 // Convenience components
 
 // SimpleSchemaForm renders a basic schema form
-func SimpleSchemaForm(schema SchemaFormDefinition, data map[string]interface{}) templ.Component {
+func SimpleSchemaForm(schema SchemaFormDefinition, data map[string]any) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -799,7 +799,7 @@ func SimpleSchemaForm(schema SchemaFormDefinition, data map[string]interface{}) 
 }
 
 // ReadOnlySchemaForm renders a read-only schema form
-func ReadOnlySchemaForm(schema SchemaFormDefinition, data map[string]interface{}) templ.Component {
+func ReadOnlySchemaForm(schema SchemaFormDefinition, data map[string]any) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -834,7 +834,7 @@ func ReadOnlySchemaForm(schema SchemaFormDefinition, data map[string]interface{}
 }
 
 // DebugSchemaForm renders a schema form with debug information
-func DebugSchemaForm(schema SchemaFormDefinition, data map[string]interface{}) templ.Component {
+func DebugSchemaForm(schema SchemaFormDefinition, data map[string]any) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
