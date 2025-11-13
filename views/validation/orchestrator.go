@@ -390,7 +390,7 @@ func (o *UIValidationOrchestrator) buildHTMXValidationAttributes(fieldName strin
 	
 	// Set validation state attributes
 	attributes["hx-trigger"] = o.getHTMXTriggerForField(fieldName)
-	attributes["data-validation-state"] = string(state)
+	attributes["data-validation-state"] = state.String()
 	
 	// Add debounce timing for async validation
 	if o.HasAsyncValidation(fieldName) {
@@ -950,7 +950,7 @@ func (o *UIValidationOrchestrator) HandleAlpineFieldValidation(
 	// Build Alpine.js validation response
 	response := &AlpineValidationResponse{
 		FieldName:       fieldName,
-		ValidationState: string(o.GetValidationStateForField(fieldName)),
+		ValidationState: o.GetValidationStateForField(fieldName).String(),
 		IsValid:         err == nil,
 		Errors:          o.GetFieldErrors(fieldName),
 		IsValidating:    o.IsFieldValidating(fieldName),
@@ -959,7 +959,7 @@ func (o *UIValidationOrchestrator) HandleAlpineFieldValidation(
 		
 		// Alpine.js specific data
 		AlpineData: map[string]any{
-			"validationState": string(o.GetValidationStateForField(fieldName)),
+			"validationState": o.GetValidationStateForField(fieldName).String(),
 			"hasErrors":       len(o.GetFieldErrors(fieldName)) > 0,
 			"isValidating":    o.IsFieldValidating(fieldName),
 			"debounceTime":    o.GetDebounceTimeForField(fieldName),

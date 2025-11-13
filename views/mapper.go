@@ -1616,7 +1616,7 @@ func (m *FieldMapper) ResolveFieldTokens(
 	darkMode bool,
 ) map[string]string {
 	// Build cache key for performance
-	cacheKey := m.buildTokenCacheKey(props.Name, string(props.ValidationState), props.ThemeID, darkMode)
+	cacheKey := m.buildTokenCacheKey(props.Name, props.ValidationState.String(), props.ThemeID, darkMode)
 	
 	// Check cache first
 	if m.tokenRegistry != nil {
