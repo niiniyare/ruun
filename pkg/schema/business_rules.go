@@ -476,10 +476,10 @@ func (bre *BusinessRuleEngine) calculateFieldValue(ctx context.Context, schema *
 				if !qtyOk || !priceOk {
 					return NewValidationError("formula_evaluation_failed", "missing required variables quantity or unit_price")
 				}
-				
+
 				qtyFloat, qtyIsNum := qty.(float64)
 				priceFloat, priceIsNum := price.(float64)
-				
+
 				// Try int conversion if float64 didn't work
 				if !qtyIsNum {
 					if qtyInt, ok := qty.(int); ok {
@@ -493,11 +493,11 @@ func (bre *BusinessRuleEngine) calculateFieldValue(ctx context.Context, schema *
 						priceIsNum = true
 					}
 				}
-				
+
 				if !qtyIsNum || !priceIsNum {
 					return NewValidationError("formula_evaluation_failed", "variables must be numeric")
 				}
-				
+
 				calcResult = qtyFloat * priceFloat
 			default:
 				return NewValidationError("formula_evaluation_failed", fmt.Sprintf("unsupported formula: %s", formula))

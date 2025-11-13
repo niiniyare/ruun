@@ -108,7 +108,7 @@ func (suite *ThemeTestSuite) TestThemeWithAllComponents() {
 	theme := &Theme{
 		ID:          "complete-theme-id",
 		Name:        "Complete Theme",
-		Version:     "2.0.0",
+		Version:     "2.0.0", // TODO: Validate thee version for the future
 		Description: "A complete theme with all components",
 		Tokens:      GetDefaultTokens(),
 
@@ -147,10 +147,9 @@ func BenchmarkTokenResolution(b *testing.B) {
 	ctx := context.Background()
 	tokenRef := TokenReference("semantic.colors.background.default")
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := registry.ResolveToken(ctx, tokenRef)
 		if err != nil {
 			b.Fatal("Token resolution failed:", err)
@@ -194,10 +193,9 @@ func BenchmarkTokenResolutionConcurrent(b *testing.B) {
 func BenchmarkThemeRegistration(b *testing.B) {
 	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		theme := &Theme{
 			ID:      fmt.Sprintf("bench-theme-%d", i),
 			Name:    fmt.Sprintf("Benchmark Theme %d", i),
@@ -218,7 +216,7 @@ func BenchmarkThemeRetrieval(b *testing.B) {
 	ctx := context.Background()
 
 	// Pre-populate with themes
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		theme := &Theme{
 			ID:      fmt.Sprintf("theme-%d", i),
 			Name:    fmt.Sprintf("Theme %d", i),
@@ -228,10 +226,9 @@ func BenchmarkThemeRetrieval(b *testing.B) {
 		manager.RegisterTheme(theme)
 	}
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := 0; b.Loop(); i++ {
 		themeID := fmt.Sprintf("theme-%d", i%100)
 		_, err := manager.GetTheme(ctx, themeID)
 		if err != nil {
@@ -258,10 +255,9 @@ func BenchmarkThemeCloning(b *testing.B) {
 		},
 	}
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := deepCopyTheme(theme)
 		if err != nil {
 			b.Fatal("Theme cloning failed:", err)
@@ -274,7 +270,7 @@ func BenchmarkCacheOperations(b *testing.B) {
 	cache := NewThemeCache(1000, 5*time.Minute)
 
 	// Pre-populate cache
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		theme := &Theme{
 			ID:      fmt.Sprintf("cache-theme-%d", i),
 			Name:    fmt.Sprintf("Cache Theme %d", i),
@@ -288,14 +284,14 @@ func BenchmarkCacheOperations(b *testing.B) {
 	b.ReportAllocs()
 
 	b.Run("Get", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; b.Loop(); i++ {
 			key := fmt.Sprintf("cache-theme-%d", i%100)
 			_, _ = cache.Get(key)
 		}
 	})
 
 	b.Run("Set", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := 0; b.Loop(); i++ {
 			theme := &Theme{
 				ID:      fmt.Sprintf("new-theme-%d", i),
 				Name:    fmt.Sprintf("New Theme %d", i),
@@ -332,10 +328,9 @@ func BenchmarkTokenCompilation(b *testing.B) {
 	registry := NewTokenRegistry()
 	tokens := GetDefaultTokens()
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		err := registry.SetTokens(tokens)
 		if err != nil {
 			b.Fatal("Token compilation failed:", err)
@@ -370,10 +365,9 @@ func BenchmarkThemeOverrides(b *testing.B) {
 		CustomCSS: ".custom { color: #override; ",
 	}
 
-	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := manager.GetThemeWithOverrides(ctx, "base-override-theme", overrides)
 		if err != nil {
 			b.Fatal("Theme override failed:", err)
@@ -387,7 +381,7 @@ func BenchmarkConcurrentThemeAccess(b *testing.B) {
 	ctx := context.Background()
 
 	// Pre-populate with themes
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		theme := &Theme{
 			ID:      fmt.Sprintf("concurrent-theme-%d", i),
 			Name:    fmt.Sprintf("Concurrent Theme %d", i),
