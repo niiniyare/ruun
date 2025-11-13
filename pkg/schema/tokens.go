@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 )
@@ -13,10 +14,45 @@ import (
 // Example: "colors.primary.base" references the base primary color.
 type TokenReference string
 
-// IsReference checks if the value is a token reference (starts with { and ends with }).
+// IsReference checks if the value is a token reference (contains dots indicating a path).
 func (t TokenReference) IsReference() bool {
 	s := string(t)
-	return len(s) >= 3 && strings.HasPrefix(s, "") && strings.HasSuffix(s, "")
+	// A token reference should contain at least one dot and not be an empty string
+	// Examples: "colors.primary.base", "semantic.colors.background.default"
+	// Exclude CSS values like "2.25rem", "#ffffff", "hsl(...)", "rgb(...)", etc.
+	if len(s) == 0 {
+		return false
+	}
+	
+	// Not a reference if it starts with common CSS value patterns
+	if strings.HasPrefix(s, "#") || strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
+		return false
+	}
+	
+	// Not a reference if it looks like a CSS unit (number + unit)
+	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") || 
+	   strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
+		return false
+	}
+	
+	// Not a reference if it's a pure number (with or without decimal)
+	if matched, _ := regexp.MatchString(`^\d+(\.\d+)?$`, s); matched {
+		return false
+	}
+	
+	// Not a reference if it contains spaces (CSS values often have spaces)
+	if strings.Contains(s, " ") {
+		return false
+	}
+	
+	// Must contain dots to be a valid token path
+	if !strings.Contains(s, ".") {
+		return false
+	}
+	
+	// Should have at least 2 parts when split by dots (e.g., "colors.primary")
+	parts := strings.Split(s, ".")
+	return len(parts) >= 2
 }
 
 // Path extracts the token path from a reference.
@@ -25,8 +61,8 @@ func (t TokenReference) Path() string {
 	if !t.IsReference() {
 		return string(t)
 	}
-	s := string(t)
-	return strings.Trim(s, "")
+	// No need to trim braces since we don't use them anymore
+	return string(t)
 }
 
 // String returns the string representation of the token reference.
@@ -36,8 +72,29 @@ func (t TokenReference) String() string {
 
 // Validate checks if the token reference is well-formed.
 func (t TokenReference) Validate() error {
-	if !t.IsReference() {
-		return nil // Non-references are always valid
+	s := string(t)
+	
+	// If it's clearly a CSS value (starts with # or contains spaces), it's valid
+	if strings.HasPrefix(s, "#") || strings.Contains(s, " ") || 
+	   strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
+		return nil
+	}
+	
+	// If it ends with CSS units, it's valid
+	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") || 
+	   strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
+		return nil
+	}
+	
+	// If it's a pure number, it's valid
+	if matched, _ := regexp.MatchString(`^\d+(\.\d+)?$`, s); matched {
+		return nil
+	}
+	
+	// If we get here, it's either a valid token reference or an invalid one
+	// Token references must contain at least one dot
+	if !strings.Contains(s, ".") {
+		return NewValidationError("invalid_token_path", "token path must contain at least one dot")
 	}
 
 	path := t.Path()

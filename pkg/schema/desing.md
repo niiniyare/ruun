@@ -170,24 +170,24 @@ These map global tokens to semantic meaning.
 {
   "color": {
     "background": {
-      "default": "{color.gray.50}",
-      "subtle": "{color.gray.100}",
-      "emphasis": "{color.gray.200}"
+      "default": "color.gray.50",
+      "subtle": "color.gray.100",
+      "emphasis": "color.gray.200"
     },
     "text": {
-      "default": "{color.gray.900}",
-      "subtle": "{color.gray.600}",
-      "disabled": "{color.gray.400}"
+      "default": "color.gray.900",
+      "subtle": "color.gray.600",
+      "disabled": "color.gray.400"
     },
     "border": {
-      "default": "{color.gray.300}",
-      "focus": "{color.blue.500}"
+      "default": "color.gray.300",
+      "focus": "color.blue.500"
     },
     "feedback": {
-      "success": "{color.green.500}",
-      "error": "{color.red.500}",
-      "warning": "{color.yellow.500}",
-      "info": "{color.blue.500}"
+      "success": "color.green.500",
+      "error": "color.red.500",
+      "warning": "color.yellow.500",
+      "info": "color.blue.500"
     }
   }
 }
@@ -201,29 +201,29 @@ These define how components consume semantic tokens.
 {
   "button": {
     "primary": {
-      "background": "{color.primary}",
-      "text": "{color.primary-foreground}",
+      "background": "color.primary",
+      "text": "color.primary-foreground",
       "border": "transparent",
-      "hover-background": "{color.primary.dark}",
-      "padding-x": "{spacing.4}",
-      "padding-y": "{spacing.2}",
-      "border-radius": "{radius.md}"
+      "hover-background": "color.primary.dark",
+      "padding-x": "spacing.4",
+      "padding-y": "spacing.2",
+      "border-radius": "radius.md"
     },
     "secondary": {
-      "background": "{color.secondary}",
-      "text": "{color.secondary-foreground}",
-      "border": "{color.border}"
+      "background": "color.secondary",
+      "text": "color.secondary-foreground",
+      "border": "color.border"
     }
   },
   "input": {
-    "background": "{color.background.default}",
-    "text": "{color.text.default}",
-    "border": "{color.border.default}",
-    "focus-border": "{color.border.focus}",
-    "placeholder": "{color.text.subtle}",
-    "padding-x": "{spacing.3}",
-    "padding-y": "{spacing.2}",
-    "height": "{size.10}"
+    "background": "color.background.default",
+    "text": "color.text.default",
+    "border": "color.border.default",
+    "focus-border": "color.border.focus",
+    "placeholder": "color.text.subtle",
+    "padding-x": "spacing.3",
+    "padding-y": "spacing.2",
+    "height": "size.10"
   }
 }
 ```

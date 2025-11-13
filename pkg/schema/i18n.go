@@ -10,6 +10,22 @@ import (
 	"text/template"
 )
 
+// I18n defines internationalization configuration
+type I18n struct {
+	Enabled          bool              `json:"enabled"` // Enable i18n
+	DefaultLocale    string            `json:"defaultLocale" validate:"locale" example:"en-US"`
+	SupportedLocales []string          `json:"supportedLocales" validate:"dive,locale"`
+	Translations     map[string]string `json:"translations,omitempty"` // Translation keys
+	DateFormat       string            `json:"dateFormat,omitempty" example:"MM/DD/YYYY"`
+	TimeFormat       string            `json:"timeFormat,omitempty" example:"HH:mm:ss"`
+	NumberFormat     string            `json:"numberFormat,omitempty" example:"1,000.00"`
+	CurrencyFormat   string            `json:"currencyFormat,omitempty" example:"$1,000.00"`
+	Currency         string            `json:"currency,omitempty" validate:"iso4217" example:"USD"`
+	Direction        string            `json:"direction,omitempty" validate:"oneof=ltr rtl" example:"ltr"`
+	FallbackLocale   string            `json:"fallbackLocale,omitempty" validate:"locale"`
+	LoadPath         string            `json:"loadPath,omitempty"` // Path to translation files
+}
+
 // SchemaI18n holds schema-level translations (matches docs structure)
 type SchemaI18n struct {
 	Title       map[string]string `json:"title,omitempty"`       // Localized schema titles
@@ -182,18 +198,26 @@ func (i *I18nManager) interpolateMessage(message string, params map[string]any) 
 		return message
 	}
 
+	// Support both {{name}} and {{.name}} formats by converting {{name}} to {{.name}}
+	result := message
+	for key := range params {
+		oldFormat := fmt.Sprintf("{{%s}}", key)
+		newFormat := fmt.Sprintf("{{.%s}}", key)
+		result = strings.ReplaceAll(result, oldFormat, newFormat)
+	}
+
 	// Use Go's template engine for interpolation
-	tmpl, err := template.New("message").Parse(message)
+	tmpl, err := template.New("message").Parse(result)
 	if err != nil {
 		return message // Return original if template parsing fails
 	}
 
-	var result strings.Builder
-	if err := tmpl.Execute(&result, params); err != nil {
+	var output strings.Builder
+	if err := tmpl.Execute(&output, params); err != nil {
 		return message // Return original if execution fails
 	}
 
-	return result.String()
+	return output.String()
 }
 
 // SetLocale changes the current locale

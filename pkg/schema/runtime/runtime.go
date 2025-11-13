@@ -272,8 +272,13 @@ func (r *Runtime) HandleFieldChange(ctx context.Context, fieldName string, newVa
 		field := r.getField(fieldName)
 		if field != nil {
 			errors := r.validator.ValidateField(ctx, field, newValue, r.state.GetAll())
+			// Get current locale without locking (we already have lock)
+			locale := r.currentLocale
+			if locale == "" {
+				locale = "en" // Default fallback
+			}
 			// Localize validation messages using embedded translations
-			localizedErrors := r.localizeValidationErrors(errors)
+			localizedErrors := r.localizeValidationErrorsWithLocale(errors, locale)
 			r.state.SetErrors(fieldName, localizedErrors)
 		}
 	}
@@ -309,8 +314,13 @@ func (r *Runtime) HandleFieldBlur(ctx context.Context, fieldName string, value a
 		field := r.getField(fieldName)
 		if field != nil {
 			errors := r.validator.ValidateField(ctx, field, value, r.state.GetAll())
+			// Get current locale without locking (we already have lock)
+			locale := r.currentLocale
+			if locale == "" {
+				locale = "en" // Default fallback
+			}
 			// Localize validation messages using embedded translations
-			localizedErrors := r.localizeValidationErrors(errors)
+			localizedErrors := r.localizeValidationErrorsWithLocale(errors, locale)
 			r.state.SetErrors(fieldName, localizedErrors)
 		}
 	}
@@ -349,9 +359,13 @@ func (r *Runtime) HandleSubmit(ctx context.Context) error {
 		allErrors := r.validator.ValidateAllFields(ctx, r.schema, r.state.GetAll())
 
 		// Update state with validation errors
+		locale := r.currentLocale
+		if locale == "" {
+			locale = "en" // Default fallback
+		}
 		for field, errors := range allErrors {
 			// Localize validation messages using embedded translations
-			localizedErrors := r.localizeValidationErrors(errors)
+			localizedErrors := r.localizeValidationErrorsWithLocale(errors, locale)
 			r.state.SetErrors(field, localizedErrors)
 		}
 
@@ -1016,11 +1030,16 @@ func (r *Runtime) DetectUserLocale(userPreferences []string) string {
 
 // localizeValidationErrors translates validation error messages to current locale
 func (r *Runtime) localizeValidationErrors(errors []string) []string {
+	locale := r.GetCurrentLocale()
+	return r.localizeValidationErrorsWithLocale(errors, locale)
+}
+
+// localizeValidationErrorsWithLocale translates validation error messages with provided locale
+func (r *Runtime) localizeValidationErrorsWithLocale(errors []string, locale string) []string {
 	if len(errors) == 0 {
 		return errors
 	}
 
-	locale := r.GetCurrentLocale()
 	localizedErrors := make([]string, len(errors))
 
 	for i, errorMsg := range errors {

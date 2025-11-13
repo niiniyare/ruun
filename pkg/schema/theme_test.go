@@ -49,11 +49,11 @@ func (suite *ThemeTestSuite) TestTokens() {
 }
 
 func (suite *ThemeTestSuite) TestTokenReference() {
-	ref := TokenReference("{colors.primary.base}")
+	ref := TokenReference("colors.primary.base")
 
 	suite.Require().True(ref.IsReference())
 	suite.Require().Equal("colors.primary.base", ref.Path())
-	suite.Require().Equal("{colors.primary.base}", ref.String())
+	suite.Require().Equal("colors.primary.base", ref.String())
 
 	// Test non-reference
 	nonRef := TokenReference("#123456")
@@ -145,7 +145,7 @@ func BenchmarkTokenResolution(b *testing.B) {
 	}
 
 	ctx := context.Background()
-	tokenRef := TokenReference("{semantic.colors.background.default}")
+	tokenRef := TokenReference("semantic.colors.background.default")
 
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -168,11 +168,11 @@ func BenchmarkTokenResolutionConcurrent(b *testing.B) {
 
 	ctx := context.Background()
 	tokenRefs := []TokenReference{
-		"{semantic.colors.background.default}",
-		"{semantic.colors.text.default}",
-		"{semantic.spacing.component.default}",
-		"{components.button.primary.background}",
-		"{primitives.colors.blue.500}",
+		"semantic.colors.background.default",
+		"semantic.colors.text.default",
+		"semantic.spacing.component.default",
+		"components.button.primary.background",
+		"primitives.colors.blue.500",
 	}
 
 	b.ResetTimer()
@@ -367,7 +367,7 @@ func BenchmarkThemeOverrides(b *testing.B) {
 			"button.borderRadius": "12px",
 			"input.height":        "44px",
 		},
-		CustomCSS: ".custom { color: #override; }",
+		CustomCSS: ".custom { color: #override; ",
 	}
 
 	b.ResetTimer()
@@ -436,10 +436,10 @@ func TestTokenResolutionPerformance(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	tokenRef := TokenReference("{semantic.colors.background.default}")
+	tokenRef := TokenReference("semantic.colors.background.default")
 
 	// Warm up
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		_, _ = registry.ResolveToken(ctx, tokenRef)
 	}
 
@@ -447,7 +447,7 @@ func TestTokenResolutionPerformance(t *testing.T) {
 	iterations := 1000
 	durations := make([]time.Duration, iterations)
 
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		start := time.Now()
 		_, err := registry.ResolveToken(ctx, tokenRef)
 		durations[i] = time.Since(start)
@@ -482,7 +482,7 @@ func TestConcurrentSafety(t *testing.T) {
 	errorChan := make(chan error, 100)
 
 	// Concurrent theme operations
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()

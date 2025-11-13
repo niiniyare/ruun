@@ -85,28 +85,28 @@ func main() {
     ctx := context.Background()
     
     // Resolve individual tokens
-    primaryColor, err := registry.ResolveToken(ctx, schema.TokenReference("{colors.blue.500}"))
+    primaryColor, err := registry.ResolveToken(ctx, schema.TokenReference("colors.blue.500"))
     if err != nil {
         log.Fatal("Token resolution failed:", err)
     }
     fmt.Printf("Primary color: %s\n", primaryColor)
     
     // Resolve semantic tokens
-    bgColor, err := registry.ResolveToken(ctx, schema.TokenReference("{semantic.colors.background.default}"))
+    bgColor, err := registry.ResolveToken(ctx, schema.TokenReference("semantic.colors.background.default"))
     if err != nil {
         log.Fatal("Semantic token resolution failed:", err)
     }
     fmt.Printf("Background color: %s\n", bgColor)
     
     // Resolve component tokens
-    buttonBg, err := registry.ResolveToken(ctx, schema.TokenReference("{components.button.primary.background}"))
+    buttonBg, err := registry.ResolveToken(ctx, schema.TokenReference("components.button.primary.background"))
     if err != nil {
         log.Fatal("Component token resolution failed:", err)
     }
     fmt.Printf("Button background: %s\n", buttonBg)
     
     // Invalid token reference (will error)
-    _, err = registry.ResolveToken(ctx, schema.TokenReference("{invalid.token.path}"))
+    _, err = registry.ResolveToken(ctx, schema.TokenReference("invalid.token.path"))
     if err != nil {
         fmt.Printf("Expected error for invalid token: %v\n", err)
     }
@@ -367,7 +367,7 @@ func (suite *ThemeTestSuite) TestTokenResolution() {
     registry := schema.GetDefaultRegistry()
     
     // Valid token resolution
-    resolved, err := registry.ResolveToken(suite.ctx, schema.TokenReference("{colors.blue.500}"))
+    resolved, err := registry.ResolveToken(suite.ctx, schema.TokenReference("colors.blue.500"))
     suite.NoError(err)
     suite.NotEmpty(resolved)
     
@@ -375,7 +375,7 @@ func (suite *ThemeTestSuite) TestTokenResolution() {
     tokens := schema.GetDefaultTokens()
     
     // Create circular reference (this would be caught by validation)
-    tokens.Semantic.Colors.Background.Default = schema.TokenReference("{semantic.colors.background.default}")
+    tokens.Semantic.Colors.Background.Default = schema.TokenReference("semantic.colors.background.default")
     
     err = registry.SetTokens(tokens)
     suite.Error(err, "Should detect circular reference")
@@ -441,13 +441,13 @@ func (suite *ThemeTestSuite) TestThemeOverrides() {
         TokenOverrides: map[string]string{
             "colors.primary.500": "#custom-color",
         },
-        CustomCSS: ".custom { color: red; }",
+        CustomCSS: ".custom { color: red; ",
     }
     
     customTheme, err := suite.manager.GetThemeWithOverrides(suite.ctx, "base", overrides)
     suite.NoError(err)
     suite.NotNil(customTheme)
-    suite.Contains(customTheme.CustomCSS, ".custom { color: red; }")
+    suite.Contains(customTheme.CustomCSS, ".custom { color: red; ")
 }
 
 // Benchmark token resolution performance
@@ -455,7 +455,7 @@ func BenchmarkTokenResolution(b *testing.B) {
     registry := schema.GetDefaultRegistry()
     ctx := context.Background()
     
-    tokenRef := schema.TokenReference("{semantic.colors.background.default}")
+    tokenRef := schema.TokenReference("semantic.colors.background.default")
     
     b.ResetTimer()
     for i := 0; i < b.N; i++ {
@@ -482,11 +482,11 @@ Follow these naming and design conventions for consistency across the ERP system
 ### Token Path Conventions
 ```go
 // ✅ Good - Semantic token usage
-background := resolver.ResolveToken(ctx, "{semantic.colors.background.default}")
-primaryBtn := resolver.ResolveToken(ctx, "{components.button.primary.background}")
+background := resolver.ResolveToken(ctx, "semantic.colors.background.default")
+primaryBtn := resolver.ResolveToken(ctx, "components.button.primary.background")
 
 // ❌ Avoid - Direct primitive access
-blueColor := resolver.ResolveToken(ctx, "{colors.blue.500}")
+blueColor := resolver.ResolveToken(ctx, "colors.blue.500")
 ```
 
 ### Token Naming Structure
@@ -546,13 +546,13 @@ field.Theme = &FieldTheme{
 ```go
 // New token-based approach
 field.Tokens = map[string]schema.TokenReference{
-    "background": "{semantic.colors.background.default}",
-    "border":     "{semantic.colors.border.default}",
-    "text":       "{semantic.colors.text.primary}",
+    "background": "semantic.colors.background.default",
+    "border":     "semantic.colors.border.default",
+    "text":       "semantic.colors.text.primary",
 }
 
 // Or resolve directly
-bg, _ := registry.ResolveToken(ctx, "{semantic.colors.background.default}")
+bg, _ := registry.ResolveToken(ctx, "semantic.colors.background.default")
 ```
 
 ### Migration Helper

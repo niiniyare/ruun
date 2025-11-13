@@ -84,8 +84,14 @@ func (f *Field) GetLocalizedLabel(locale string) string {
 		}
 	}
 
-	// Use embedded translations with field ID as key
-	return T_Field(locale, f.Name)
+	// Try embedded translations with field ID as key
+	embeddedTranslation := T_Field(locale, f.Name)
+	// If embedded translation is just humanized field name, prefer field's default label
+	if embeddedTranslation == humanizeFieldID(f.Name) && f.Label != "" {
+		return f.Label
+	}
+
+	return embeddedTranslation
 }
 
 // GetLocalizedPlaceholder returns the placeholder text in the specified locale

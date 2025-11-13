@@ -939,3 +939,175 @@ func (m *FieldMapper) applyThemeOverrides(themeOverride map[string]interface{}, 
 		}
 	}
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Client Validation Rule Extraction (EXTENSION)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ClientValidationRules represents validation rules that can be executed client-side
+type ClientValidationRules struct {
+	FieldName    string                  `json:"fieldName"`
+	Required     bool                    `json:"required"`
+	MinLength    *int                    `json:"minLength,omitempty"`
+	MaxLength    *int                    `json:"maxLength,omitempty"`
+	Min          *float64                `json:"min,omitempty"`
+	Max          *float64                `json:"max,omitempty"`
+	Step         *float64                `json:"step,omitempty"`
+	Pattern      string                  `json:"pattern,omitempty"`
+	PatternFlags string                  `json:"patternFlags,omitempty"`
+	Format       string                  `json:"format,omitempty"` // email, url, phone, etc.
+	CustomRules  []ClientValidationRule  `json:"customRules,omitempty"`
+}
+
+// ClientValidationRule represents a single client-side validation rule
+type ClientValidationRule struct {
+	Type        string      `json:"type"`        // Type of validation
+	Value       interface{} `json:"value"`       // Rule value/parameter
+	Message     string      `json:"message"`     // Error message
+	Expression  string      `json:"expression,omitempty"` // JS expression for custom rules
+	Async       bool        `json:"async"`       // Whether this rule requires async validation
+}
+
+// ExtractClientValidationRules extracts validation rules that can be validated client-side
+// REUSES existing schema validation configuration to generate client rules
+func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) ClientValidationRules {
+	rules := ClientValidationRules{
+		FieldName: field.Name,
+		Required:  field.Required,
+	}
+	
+	// Extract rules that can be validated client-side
+	if field.Validation != nil {
+		v := field.Validation
+		
+		// String length constraints
+		if v.MinLength != nil {
+			rules.MinLength = v.MinLength
+		}
+		if v.MaxLength != nil {
+			rules.MaxLength = v.MaxLength
+		}
+		
+		// Numeric constraints
+		if v.Min != nil {
+			rules.Min = v.Min
+		}
+		if v.Max != nil {
+			rules.Max = v.Max
+		}
+		if v.Step != nil {
+			rules.Step = v.Step
+		}
+		
+		// Pattern validation
+		if v.Pattern != "" {
+			rules.Pattern = v.Pattern
+		}
+		
+		// Format validation (can be handled client-side)
+		if v.Format != "" {
+			switch v.Format {
+			case "email", "url", "phone", "date", "time", "datetime", "color":
+				rules.Format = v.Format
+			}
+		}
+		
+		// Extract client-validatable custom rules
+		if v.Custom != "" {
+			clientRule := m.extractClientCustomRule(v.Custom, v.Messages)
+			if clientRule != nil {
+				rules.CustomRules = append(rules.CustomRules, *clientRule)
+			}
+		}
+	}
+	
+	// Extract field-type specific client rules
+	m.extractFieldTypeClientRules(field, &rules)
+	
+	return rules
+}
+
+// extractClientCustomRule attempts to extract client-side executable custom validation
+func (m *FieldMapper) extractClientCustomRule(customExpr string, messages *schema.ValidationMessages) *ClientValidationRule {
+	// For complex expressions, mark as async (server-side validation)
+	return &ClientValidationRule{
+		Type:    "async_custom",
+		Value:   customExpr,
+		Message: m.getCustomRuleMessage(messages, "custom"),
+		Async:   true,
+	}
+}
+
+// extractFieldTypeClientRules extracts field-type-specific client validation rules
+func (m *FieldMapper) extractFieldTypeClientRules(field *schema.Field, rules *ClientValidationRules) {
+	switch field.Type {
+	case schema.FieldEmail:
+		rules.CustomRules = append(rules.CustomRules, ClientValidationRule{
+			Type:    "email_format",
+			Message: "Please enter a valid email address",
+			Async:   false,
+		})
+		
+	case schema.FieldURL:
+		rules.CustomRules = append(rules.CustomRules, ClientValidationRule{
+			Type:    "url_format",
+			Message: "Please enter a valid URL",
+			Async:   false,
+		})
+		
+	case schema.FieldPhone:
+		rules.CustomRules = append(rules.CustomRules, ClientValidationRule{
+			Type:    "phone_format",
+			Message: "Please enter a valid phone number",
+			Async:   false,
+		})
+	}
+	
+	// Add uniqueness validation if specified
+	if field.Validation != nil && field.Validation.Unique {
+		rules.CustomRules = append(rules.CustomRules, ClientValidationRule{
+			Type:    "uniqueness",
+			Message: "This value must be unique",
+			Async:   true, // Uniqueness validation requires database check
+		})
+	}
+}
+
+// getCustomRuleMessage extracts the appropriate error message for custom rules
+func (m *FieldMapper) getCustomRuleMessage(messages *schema.ValidationMessages, ruleType string) string {
+	if messages == nil {
+		return "Validation failed"
+	}
+	
+	// Fallback to generic validation message
+	return "Please enter a valid value"
+}
+
+// GetClientValidationConfig returns client validation configuration for a field
+func (m *FieldMapper) GetClientValidationConfig(field *schema.Field) map[string]interface{} {
+	rules := m.ExtractClientValidationRules(field)
+	
+	config := map[string]interface{}{
+		"fieldName":    rules.FieldName,
+		"required":     rules.Required,
+		"rules":        rules,
+		"realTime":     true, // Enable real-time client validation
+		"debounceMs":   300,  // Default debounce timing
+	}
+	
+	return config
+}
+
+// HasClientValidationRules checks if a field has any client-side validation rules
+func (m *FieldMapper) HasClientValidationRules(field *schema.Field) bool {
+	rules := m.ExtractClientValidationRules(field)
+	
+	return rules.Required ||
+		rules.MinLength != nil ||
+		rules.MaxLength != nil ||
+		rules.Min != nil ||
+		rules.Max != nil ||
+		rules.Pattern != "" ||
+		rules.Format != "" ||
+		len(rules.CustomRules) > 0
+}

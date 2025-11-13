@@ -13,33 +13,64 @@ import (
 
 // TemplateRenderer implements schema.RuntimeRenderer using Templ components
 // This is the main bridge between the pure schema system and the Views layer
+// EXTENDED with UI validation orchestration
 type TemplateRenderer struct {
-	registry *ComponentRegistry
-	mapper   *FieldMapper
-	schema   *schema.Schema
+	registry     *ComponentRegistry
+	mapper       *FieldMapper
+	schema       *schema.Schema
+	stateManager *StateManager                // Form state management
+	orchestrator *UIValidationOrchestrator    // UI validation orchestration
 }
 
 // NewTemplateRenderer creates a new template renderer with dependencies
-func NewTemplateRenderer(registry *ComponentRegistry, mapper *FieldMapper, s *schema.Schema) *TemplateRenderer {
+func NewTemplateRenderer(registry *ComponentRegistry, mapper *FieldMapper, s *schema.Schema, stateManager *StateManager, orchestrator *UIValidationOrchestrator) *TemplateRenderer {
 	return &TemplateRenderer{
-		registry: registry,
-		mapper:   mapper,
-		schema:   s,
+		registry:     registry,
+		mapper:       mapper,
+		schema:       s,
+		stateManager: stateManager,
+		orchestrator: orchestrator,
 	}
 }
 
 // RenderField implements schema.RuntimeRenderer.RenderField
 // Renders a single field with schema context and current state values
+// ENHANCED with validation orchestration integration
 func (r *TemplateRenderer) RenderField(ctx context.Context, field *schema.Field, value any, errors []string, touched, dirty bool) (string, error) {
 	if field == nil {
 		return "", fmt.Errorf("field cannot be nil")
 	}
 
-	// Convert schema field to FormField props
-	props, err := r.mapper.ConvertField(field, value, errors, touched, dirty)
+	// Use state manager for real validation states if available
+	var realValue any = value
+	var realErrors []string = errors
+	var realTouched bool = touched
+	var realDirty bool = dirty
+	
+	if r.stateManager != nil {
+		// Get actual state from state manager
+		realValue = r.stateManager.GetValue(field.Name)
+		realErrors = r.stateManager.GetFieldErrors(field.Name)
+		realTouched = r.stateManager.IsFieldTouched(field.Name)
+		realDirty = r.stateManager.IsFieldDirty(field.Name)
+		
+		// Override with provided values if they are explicitly set
+		if value != nil {
+			realValue = value
+		}
+		if len(errors) > 0 {
+			realErrors = errors
+		}
+	}
+
+	// Convert schema field to FormField props with real validation state
+	props, err := r.mapper.ConvertField(field, realValue, realErrors, realTouched, realDirty)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert field %s: %w", field.Name, err)
 	}
+	
+	// Enhance props with validation orchestration data
+	r.enhancePropsWithValidation(field, &props)
 
 	// Resolve component renderer for this field type
 	renderer, err := r.registry.Resolve(field)
@@ -220,17 +251,29 @@ func (r *TemplateRenderer) RenderStep(ctx context.Context, step *schema.Step, fi
 // Helper methods for internal rendering
 
 // renderFormFields renders a list of fields with current state
+// ENHANCED with state manager integration
 func (r *TemplateRenderer) renderFormFields(ctx context.Context, fields []schema.Field, state map[string]any, formErrors map[string][]string) (string, error) {
 	var fieldsHTML strings.Builder
 
 	for _, field := range fields {
-		// Get field state
-		value := getFieldValue(state, field.Name)
-		errors := getFieldErrors(formErrors, field.Name)
-
-		// For now, assume touched and dirty are false - would be managed by state manager
-		touched := false
-		dirty := false
+		// Get field state (use state manager if available, fallback to provided state)
+		var value any
+		var errors []string
+		var touched, dirty bool
+		
+		if r.stateManager != nil {
+			// Use state manager for accurate field state
+			value = r.stateManager.GetValue(field.Name)
+			errors = r.stateManager.GetFieldErrors(field.Name)
+			touched = r.stateManager.IsFieldTouched(field.Name)
+			dirty = r.stateManager.IsFieldDirty(field.Name)
+		} else {
+			// Fallback to provided state
+			value = getFieldValue(state, field.Name)
+			errors = getFieldErrors(formErrors, field.Name)
+			touched = false
+			dirty = false
+		}
 
 		// Render individual field
 		fieldHTML, err := r.RenderField(ctx, &field, value, errors, touched, dirty)
@@ -238,8 +281,9 @@ func (r *TemplateRenderer) renderFormFields(ctx context.Context, fields []schema
 			return "", fmt.Errorf("failed to render field %s: %w", field.Name, err)
 		}
 
-		// Wrap field in container
-		fieldsHTML.WriteString(fmt.Sprintf(`<div class="field-container" data-field="%s">`, field.Name))
+		// Wrap field in container with validation state attributes
+		containerAttrs := r.buildFieldContainerAttributes(&field)
+		fieldsHTML.WriteString(fmt.Sprintf(`<div class="field-container" data-field="%s"%s>`, field.Name, containerAttrs))
 		fieldsHTML.WriteString(fieldHTML)
 		fieldsHTML.WriteString("</div>\n")
 	}
@@ -544,4 +588,106 @@ type ButtonProps struct {
 	Enabled bool
 	ID      string
 	Class   string
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI Validation Integration Methods (EXTENSION)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// enhancePropsWithValidation enhances FormField props with validation orchestration data
+func (r *TemplateRenderer) enhancePropsWithValidation(field *schema.Field, props *molecules.FormFieldProps) {
+	if r.orchestrator == nil {
+		return
+	}
+	
+	fieldName := field.Name
+	
+	// Add validation state CSS classes
+	validationState := r.orchestrator.GetValidationStateForField(fieldName)
+	validationClass := r.getValidationStateClass(validationState)
+	if validationClass != "" {
+		if props.Class != "" {
+			props.Class += " " + validationClass
+		} else {
+			props.Class = validationClass
+		}
+	}
+	
+	// Add client validation rules if enabled
+	if r.mapper.HasClientValidationRules(field) {
+		clientRules := r.mapper.ExtractClientValidationRules(field)
+		
+		// Add client validation attributes to props
+		if props.Attributes == nil {
+			props.Attributes = make(map[string]string)
+		}
+		
+		// Add validation trigger attributes
+		if clientRules.Required {
+			props.Attributes["data-validate-required"] = "true"
+		}
+		if clientRules.MinLength != nil {
+			props.Attributes["data-validate-min-length"] = fmt.Sprintf("%d", *clientRules.MinLength)
+		}
+		if clientRules.MaxLength != nil {
+			props.Attributes["data-validate-max-length"] = fmt.Sprintf("%d", *clientRules.MaxLength)
+		}
+		if clientRules.Pattern != "" {
+			props.Attributes["data-validate-pattern"] = clientRules.Pattern
+		}
+		if clientRules.Format != "" {
+			props.Attributes["data-validate-format"] = clientRules.Format
+		}
+		
+		// Add debounce timing
+		props.Attributes["data-validate-debounce"] = "300"
+		props.Attributes["data-field-name"] = fieldName
+	}
+}
+
+// buildFieldContainerAttributes builds HTML attributes for field containers with validation state
+func (r *TemplateRenderer) buildFieldContainerAttributes(field *schema.Field) string {
+	if r.orchestrator == nil {
+		return ""
+	}
+	
+	fieldName := field.Name
+	validationState := r.orchestrator.GetValidationStateForField(fieldName)
+	
+	var attrs []string
+	
+	// Add validation state attribute
+	attrs = append(attrs, fmt.Sprintf(`data-validation-state="%s"`, validationState.String()))
+	
+	// Add pending validation indicator
+	if r.orchestrator.IsValidationInProgress() {
+		pendingFields := r.orchestrator.GetPendingValidations()
+		for _, pending := range pendingFields {
+			if pending == fieldName {
+				attrs = append(attrs, `data-validation-pending="true"`)
+				break
+			}
+		}
+	}
+	
+	if len(attrs) > 0 {
+		return " " + strings.Join(attrs, " ")
+	}
+	return ""
+}
+
+// getValidationStateClass returns CSS class for validation state
+func (r *TemplateRenderer) getValidationStateClass(state ValidationState) string {
+	switch state {
+	case ValidationStateValidating:
+		return "field-validating"
+	case ValidationStateValid:
+		return "field-valid"
+	case ValidationStateInvalid:
+		return "field-invalid"
+	case ValidationStateWarning:
+		return "field-warning"
+	default:
+		return ""
+	}
 }

@@ -195,22 +195,6 @@ type Events struct {
 	OnFieldValidate string `json:"onFieldValidate,omitempty" validate:"js_function"` // Field validated
 }
 
-// I18n defines internationalization configuration
-type I18n struct {
-	Enabled          bool              `json:"enabled"` // Enable i18n
-	DefaultLocale    string            `json:"defaultLocale" validate:"locale" example:"en-US"`
-	SupportedLocales []string          `json:"supportedLocales" validate:"dive,locale"`
-	Translations     map[string]string `json:"translations,omitempty"` // Translation keys
-	DateFormat       string            `json:"dateFormat,omitempty" example:"MM/DD/YYYY"`
-	TimeFormat       string            `json:"timeFormat,omitempty" example:"HH:mm:ss"`
-	NumberFormat     string            `json:"numberFormat,omitempty" example:"1,000.00"`
-	CurrencyFormat   string            `json:"currencyFormat,omitempty" example:"$1,000.00"`
-	Currency         string            `json:"currency,omitempty" validate:"iso4217" example:"USD"`
-	Direction        string            `json:"direction,omitempty" validate:"oneof=ltr rtl" example:"ltr"`
-	FallbackLocale   string            `json:"fallbackLocale,omitempty" validate:"locale"`
-	LoadPath         string            `json:"loadPath,omitempty"` // Path to translation files
-}
-
 // HTMX defines HTMX integration for the entire form
 type HTMX struct {
 	Enabled   bool              `json:"enabled"` // Enable HTMX

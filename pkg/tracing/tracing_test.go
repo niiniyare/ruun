@@ -1076,7 +1076,7 @@ func (s *ServiceTestSuite) TestProtocols() {
 			require.NotNil(s.T(), ctx)
 
 			// Cleanup - shutdown may timeout if no collector is running
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 			err = service.Shutdown(shutdownCtx)
 

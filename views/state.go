@@ -4,12 +4,43 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/niiniyare/ruun/pkg/schema"
 )
 
+// ValidationState represents the validation state of a field (for UI orchestration)
+type ValidationState int
+
+const (
+	ValidationStateIdle       ValidationState = iota // No validation activity
+	ValidationStateValidating                        // Currently validating
+	ValidationStateValid                             // Validation passed
+	ValidationStateInvalid                           // Validation failed
+	ValidationStateWarning                           // Validation warning
+)
+
+// String returns string representation of validation state
+func (vs ValidationState) String() string {
+	switch vs {
+	case ValidationStateIdle:
+		return "idle"
+	case ValidationStateValidating:
+		return "validating"
+	case ValidationStateValid:
+		return "valid"
+	case ValidationStateInvalid:
+		return "invalid"
+	case ValidationStateWarning:
+		return "warning"
+	default:
+		return "unknown"
+	}
+}
+
 // StateManager manages form state including values, errors, and validation state
 // This provides thread-safe state management for form interactions
+// EXTENDED with UI validation orchestration state tracking
 type StateManager struct {
 	mu sync.RWMutex
 
@@ -19,6 +50,10 @@ type StateManager struct {
 	touched     map[string]bool
 	dirty       map[string]bool
 	initialData map[string]any
+	
+	// NEW: UI validation orchestration state tracking
+	validationStates map[string]ValidationState // Tracks validation UI states
+	validationTimes  map[string]time.Time       // Last validation timestamp
 }
 
 // NewStateManager creates a new state manager with initial data
@@ -34,6 +69,10 @@ func NewStateManager(s *schema.Schema, initialData map[string]any) *StateManager
 		touched:     make(map[string]bool),
 		dirty:       make(map[string]bool),
 		initialData: make(map[string]any),
+		
+		// NEW: Initialize validation orchestration state
+		validationStates: make(map[string]ValidationState),
+		validationTimes:  make(map[string]time.Time),
 	}
 
 	// Copy initial data
@@ -480,4 +519,162 @@ func (sm *StateManager) SetInitialValue(fieldName string, value any) {
 	// Recalculate dirty state
 	currentValue := sm.values[fieldName]
 	sm.dirty[fieldName] = !sm.valuesEqual(value, currentValue)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI Validation Orchestration Methods (EXTENSION)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// SetValidationState sets the validation UI state for a field
+func (sm *StateManager) SetValidationState(fieldName string, state ValidationState) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	
+	sm.validationStates[fieldName] = state
+	sm.validationTimes[fieldName] = time.Now()
+}
+
+// GetValidationState returns the current validation state for a field
+func (sm *StateManager) GetValidationState(fieldName string) ValidationState {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	if state, exists := sm.validationStates[fieldName]; exists {
+		return state
+	}
+	return ValidationStateIdle
+}
+
+// SetValidationTime sets the last validation time for a field
+func (sm *StateManager) SetValidationTime(fieldName string, t time.Time) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	
+	sm.validationTimes[fieldName] = t
+}
+
+// GetValidationTime returns the last validation time for a field
+func (sm *StateManager) GetValidationTime(fieldName string) time.Time {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	return sm.validationTimes[fieldName]
+}
+
+// HasFieldsInState checks if any fields are in the specified validation state
+func (sm *StateManager) HasFieldsInState(state ValidationState) bool {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	for _, fieldState := range sm.validationStates {
+		if fieldState == state {
+			return true
+		}
+	}
+	return false
+}
+
+// GetFieldsInState returns list of fields in the specified validation state
+func (sm *StateManager) GetFieldsInState(state ValidationState) []string {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	fields := make([]string, 0)
+	for fieldName, fieldState := range sm.validationStates {
+		if fieldState == state {
+			fields = append(fields, fieldName)
+		}
+	}
+	return fields
+}
+
+// GetAllValidationStates returns all current validation states
+func (sm *StateManager) GetAllValidationStates() map[string]ValidationState {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	states := make(map[string]ValidationState)
+	for fieldName, state := range sm.validationStates {
+		states[fieldName] = state
+	}
+	return states
+}
+
+// ClearValidationState clears validation state for a field
+func (sm *StateManager) ClearValidationState(fieldName string) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	
+	delete(sm.validationStates, fieldName)
+	delete(sm.validationTimes, fieldName)
+}
+
+// ClearAllValidationStates clears all validation states
+func (sm *StateManager) ClearAllValidationStates() {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	
+	sm.validationStates = make(map[string]ValidationState)
+	sm.validationTimes = make(map[string]time.Time)
+}
+
+// IsValidationInProgress checks if any field is currently being validated
+func (sm *StateManager) IsValidationInProgress() bool {
+	return sm.HasFieldsInState(ValidationStateValidating)
+}
+
+// GetValidationSummary returns a comprehensive validation state summary
+type ValidationSummary struct {
+	States            map[string]ValidationState `json:"states"`
+	LastValidated     map[string]time.Time       `json:"lastValidated"`
+	TotalFields       int                        `json:"totalFields"`
+	ValidFields       int                        `json:"validFields"`
+	InvalidFields     int                        `json:"invalidFields"`
+	ValidatingFields  int                        `json:"validatingFields"`
+	WarningFields     int                        `json:"warningFields"`
+}
+
+// IsFormValid returns true if all fields are valid (no invalid or validating fields)
+func (vs ValidationSummary) IsFormValid() bool {
+	return vs.InvalidFields == 0 && vs.ValidatingFields == 0
+}
+
+// IsFormValidating returns true if any fields are currently validating
+func (vs ValidationSummary) IsFormValidating() bool {
+	return vs.ValidatingFields > 0
+}
+
+// GetValidationSummary returns a comprehensive validation summary
+func (sm *StateManager) GetValidationSummary() ValidationSummary {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
+	
+	summary := ValidationSummary{
+		States:         make(map[string]ValidationState),
+		LastValidated:  make(map[string]time.Time),
+		TotalFields:    len(sm.validationStates),
+	}
+	
+	// Copy current states and count them
+	for fieldName, state := range sm.validationStates {
+		summary.States[fieldName] = state
+		
+		switch state {
+		case ValidationStateValid:
+			summary.ValidFields++
+		case ValidationStateInvalid:
+			summary.InvalidFields++
+		case ValidationStateValidating:
+			summary.ValidatingFields++
+		case ValidationStateWarning:
+			summary.WarningFields++
+		}
+	}
+	
+	// Copy validation times
+	for fieldName, t := range sm.validationTimes {
+		summary.LastValidated[fieldName] = t
+	}
+	
+	return summary
 }

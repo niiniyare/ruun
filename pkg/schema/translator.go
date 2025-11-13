@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-//go:embed translations/*.json
+//go:embed locale/*.json
 var translationFiles embed.FS
 
 // TranslationCatalog holds all locale translations with embedded files
@@ -55,7 +55,7 @@ func (tc *TranslationCatalog) LoadEmbeddedTranslations() error {
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
 
-	files, err := translationFiles.ReadDir("translations")
+	files, err := translationFiles.ReadDir("locale")
 	if err != nil {
 		return fmt.Errorf("failed to read translation directory: %w", err)
 	}
@@ -67,7 +67,7 @@ func (tc *TranslationCatalog) LoadEmbeddedTranslations() error {
 
 		locale := strings.TrimSuffix(file.Name(), ".json")
 
-		data, err := translationFiles.ReadFile("translations/" + file.Name())
+		data, err := translationFiles.ReadFile("locale/" + file.Name())
 		if err != nil {
 			continue // Skip failed files
 		}
@@ -250,6 +250,9 @@ func humanizeFieldID(fieldID string) string {
 	if fieldID == "" {
 		return ""
 	}
+
+	// Replace underscores with spaces first
+	fieldID = strings.ReplaceAll(fieldID, "_", " ")
 
 	// Convert camelCase to space-separated words
 	var result strings.Builder

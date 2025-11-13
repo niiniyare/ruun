@@ -502,6 +502,8 @@ func (suite *BusinessRulesTestSuite) TestCalculationActions() {
 		ID:    "test_schema",
 		Title: "Test Schema",
 		Fields: []Field{
+			{Name: "quantity", Type: FieldNumber, Readonly: false},
+			{Name: "unit_price", Type: FieldNumber, Readonly: false},
 			{Name: "calculated_field", Type: FieldNumber, Readonly: false},
 		},
 	}
@@ -523,10 +525,13 @@ func (suite *BusinessRulesTestSuite) TestCalculationActions() {
 	err := suite.engine.AddRule(rule)
 	require.NoError(suite.T(), err)
 
-	modifiedSchema, err := suite.engine.ApplyRules(suite.ctx, schema, map[string]any{})
+	modifiedSchema, err := suite.engine.ApplyRules(suite.ctx, schema, map[string]any{
+		"quantity": 10,
+		"unit_price": 5.99,
+	})
 	require.NoError(suite.T(), err)
 
-	require.True(suite.T(), modifiedSchema.Fields[0].Readonly) // Calculated fields should be readonly
+	require.True(suite.T(), modifiedSchema.Fields[2].Readonly) // Calculated fields should be readonly
 }
 
 // Test disabled rules
