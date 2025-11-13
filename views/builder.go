@@ -18,6 +18,7 @@ type RuntimeBuilder struct {
 	config       *RuntimeConfig
 	initialData  map[string]any
 	locale       string
+	theme        *schema.Theme // Design tokens and theming
 }
 
 // RuntimeConfig holds view-specific configuration options
@@ -73,6 +74,12 @@ func (b *RuntimeBuilder) WithLocale(locale string) *RuntimeBuilder {
 	return b
 }
 
+// WithTheme sets the design tokens theme for component styling
+func (b *RuntimeBuilder) WithTheme(theme *schema.Theme) *RuntimeBuilder {
+	b.theme = theme
+	return b
+}
+
 // Build creates a ready-to-use runtime instance
 func (b *RuntimeBuilder) Build() (*Runtime, error) {
 	// Initialize components if not done
@@ -80,8 +87,11 @@ func (b *RuntimeBuilder) Build() (*Runtime, error) {
 		b.registry.RegisterDefaults()
 	}
 
-	// Create field mapper with schema context
+	// Create field mapper with schema context and theme support
 	mapper := NewFieldMapper(b.schema, b.locale)
+	if b.theme != nil {
+		mapper = mapper.WithTheme(b.theme)
+	}
 
 	// Create template renderer with registry and mapper
 	b.renderer = &TemplateRenderer{

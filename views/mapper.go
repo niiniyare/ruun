@@ -14,6 +14,7 @@ import (
 type FieldMapper struct {
 	schema *schema.Schema
 	locale string
+	theme  *schema.Theme // Design tokens for styling
 }
 
 // NewFieldMapper creates a new field mapper with schema context and locale
@@ -21,7 +22,14 @@ func NewFieldMapper(s *schema.Schema, locale string) *FieldMapper {
 	return &FieldMapper{
 		schema: s,
 		locale: locale,
+		theme:  nil, // Set via WithTheme
 	}
+}
+
+// WithTheme sets the theme for design token integration
+func (m *FieldMapper) WithTheme(theme *schema.Theme) *FieldMapper {
+	m.theme = theme
+	return m
 }
 
 // ConvertField converts a schema.Field to molecules.FormFieldProps
@@ -90,6 +98,9 @@ func (m *FieldMapper) ConvertField(
 
 	// Map styling and layout
 	m.mapStyling(field, &props)
+
+	// Apply design tokens to styling
+	m.applyDesignTokens(field, &props)
 
 	// Apply defaults and normalization
 	props.NormalizeDefaults()
@@ -642,4 +653,289 @@ func (m *FieldMapper) buildActionClasses(action *schema.Action) string {
 	}
 
 	return strings.Join(classes, " ")
+}
+
+// Design token integration methods
+
+// applyDesignTokens applies theme-based design tokens to form field props
+func (m *FieldMapper) applyDesignTokens(field *schema.Field, props *molecules.FormFieldProps) {
+	if m.theme == nil || m.theme.Tokens == nil {
+		return // No theme available
+	}
+
+	tokens := m.theme.Tokens
+
+	// Apply component-level token overrides if available
+	if tokens.Components != nil {
+		m.applyComponentTokens(field, props, tokens.Components)
+	}
+
+	// Apply semantic token mappings
+	if tokens.Semantic != nil {
+		m.applySemanticTokens(field, props, tokens.Semantic)
+	}
+
+	// Apply field-specific styling from schema
+	m.applyFieldStyling(field, props)
+}
+
+// applyComponentTokens applies component-specific design tokens
+func (m *FieldMapper) applyComponentTokens(field *schema.Field, props *molecules.FormFieldProps, components *schema.ComponentTokens) {
+	if components == nil {
+		return
+	}
+
+	// Apply form component tokens
+	if components.Form != nil {
+		formTokens := components.Form
+
+		// Apply border radius from form tokens
+		if formTokens.BorderRadius != "" {
+			props.Rounded = m.resolveTokenReference(string(formTokens.BorderRadius))
+		}
+	}
+
+	// Apply input component tokens
+	if components.Input != nil {
+		inputTokens := components.Input
+
+		// Apply border radius from input tokens
+		if inputTokens.BorderRadius != "" {
+			props.Rounded = m.resolveTokenReference(string(inputTokens.BorderRadius))
+		}
+
+		// Apply input styling from tokens
+		var inputClasses []string
+
+		// Background and focus states
+		if inputTokens.Background != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("bg-%s", m.resolveTokenReference(string(inputTokens.Background))))
+		}
+		if inputTokens.BackgroundFocus != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("focus:bg-%s", m.resolveTokenReference(string(inputTokens.BackgroundFocus))))
+		}
+
+		// Border and focus states
+		if inputTokens.Border != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("border-%s", m.resolveTokenReference(string(inputTokens.Border))))
+		}
+		if inputTokens.BorderFocus != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("focus:border-%s", m.resolveTokenReference(string(inputTokens.BorderFocus))))
+		}
+
+		// Error border for invalid state
+		if inputTokens.BorderError != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("invalid:border-%s", m.resolveTokenReference(string(inputTokens.BorderError))))
+		}
+
+		// Text color and placeholder
+		if inputTokens.Color != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("text-%s", m.resolveTokenReference(string(inputTokens.Color))))
+		}
+		if inputTokens.Placeholder != "" {
+			inputClasses = append(inputClasses, fmt.Sprintf("placeholder:%s", m.resolveTokenReference(string(inputTokens.Placeholder))))
+		}
+
+		// Apply input classes
+		if len(inputClasses) > 0 {
+			tokenClasses := strings.Join(inputClasses, " ")
+			if props.InputClass != "" {
+				props.InputClass += " " + tokenClasses
+			} else {
+				props.InputClass = tokenClasses
+			}
+		}
+	}
+}
+
+// applySemanticTokens applies semantic design tokens for consistent theming
+func (m *FieldMapper) applySemanticTokens(field *schema.Field, props *molecules.FormFieldProps, semantic *schema.SemanticTokens) {
+	if semantic == nil {
+		return
+	}
+
+	// Apply color semantics
+	if semantic.Colors != nil {
+		// Apply interactive states
+		if semantic.Colors.Interactive != nil && semantic.Colors.Interactive.Primary != nil {
+			var classes []string
+
+			// Focus states (primary interactive colors)
+			if semantic.Colors.Interactive.Primary.Focus != "" {
+				classes = append(classes, fmt.Sprintf("focus:border-%s", m.resolveTokenReference(string(semantic.Colors.Interactive.Primary.Focus))))
+			}
+
+			// Hover states for interactive fields
+			if m.isInteractiveField(field.Type) && semantic.Colors.Interactive.Primary.Hover != "" {
+				classes = append(classes, fmt.Sprintf("hover:border-%s", m.resolveTokenReference(string(semantic.Colors.Interactive.Primary.Hover))))
+			}
+
+			// Add semantic classes to input
+			if len(classes) > 0 {
+				semanticClasses := strings.Join(classes, " ")
+				if props.InputClass != "" {
+					props.InputClass += " " + semanticClasses
+				} else {
+					props.InputClass = semanticClasses
+				}
+			}
+		}
+
+		// Apply feedback colors
+		if semantic.Colors.Feedback != nil && semantic.Colors.Feedback.Error != nil {
+			// Error states
+			if semantic.Colors.Feedback.Error.Default != "" {
+				errorClass := fmt.Sprintf("invalid:border-%s", m.resolveTokenReference(string(semantic.Colors.Feedback.Error.Default)))
+				if props.ErrorClass != "" {
+					props.ErrorClass += " " + errorClass
+				} else {
+					props.ErrorClass = errorClass
+				}
+			}
+		}
+	}
+
+	// Apply spacing tokens
+	if semantic.Spacing != nil && semantic.Spacing.Component != nil {
+		// Apply consistent component spacing (use default spacing)
+		if semantic.Spacing.Component.Default != "" {
+			gapClass := fmt.Sprintf("gap-%s", m.resolveTokenReference(string(semantic.Spacing.Component.Default)))
+			if props.WrapperClass != "" {
+				props.WrapperClass += " " + gapClass
+			} else {
+				props.WrapperClass = gapClass
+			}
+		}
+	}
+}
+
+// applyFieldStyling applies field-specific styling from schema.Field.Style
+func (m *FieldMapper) applyFieldStyling(field *schema.Field, props *molecules.FormFieldProps) {
+	// Field styling is already handled in mapStyling method
+	// This method can be used for additional token-based field styling
+
+	// Apply field-level theme overrides if present
+	if field.Config != nil {
+		// Check for theme override configuration
+		if themeOverride, exists := field.Config["theme"]; exists {
+			if themeMap, ok := themeOverride.(map[string]interface{}); ok {
+				m.applyThemeOverrides(themeMap, props)
+			}
+		}
+	}
+}
+
+// Helper methods for token integration
+
+// resolveTokenReference resolves a token reference to its actual value
+func (m *FieldMapper) resolveTokenReference(tokenRef string) string {
+	if m.theme == nil || m.theme.Tokens == nil {
+		return tokenRef
+	}
+
+	// Simple token reference resolution
+	// In a full implementation, this would traverse the token hierarchy
+	// For now, return the reference as a CSS custom property
+	if strings.HasPrefix(tokenRef, "{") && strings.HasSuffix(tokenRef, "}") {
+		// Convert {semantic.spacing.md} to var(--semantic-spacing-md)
+		cleanRef := strings.Trim(tokenRef, "{}")
+		cssVar := strings.ReplaceAll(cleanRef, ".", "-")
+		return fmt.Sprintf("var(--%s)", cssVar)
+	}
+
+	return tokenRef
+}
+
+// getFieldTypeClass returns type-specific CSS class based on field type
+func (m *FieldMapper) getFieldTypeClass(fieldType schema.FieldType) string {
+	// Map field types to basic CSS classes
+	// In a full implementation, these would be configurable via tokens
+	typeClasses := map[schema.FieldType]string{
+		schema.FieldText:         "input-text",
+		schema.FieldEmail:        "input-email",
+		schema.FieldPassword:     "input-password",
+		schema.FieldNumber:       "input-number",
+		schema.FieldSelect:       "input-select",
+		schema.FieldMultiSelect:  "input-multi-select",
+		schema.FieldTextarea:     "input-textarea",
+		schema.FieldCheckbox:     "input-checkbox",
+		schema.FieldRadio:        "input-radio",
+		schema.FieldAutoComplete: "input-autocomplete",
+		schema.FieldFile:         "input-file",
+		schema.FieldDate:         "input-date",
+		schema.FieldTime:         "input-time",
+		schema.FieldDateTime:     "input-datetime",
+		schema.FieldSlider:       "input-slider",
+		schema.FieldColor:        "input-color",
+		schema.FieldTags:         "input-tags",
+	}
+
+	if class, exists := typeClasses[fieldType]; exists {
+		return class
+	}
+
+	// Fallback to general input class
+	return "input-default"
+}
+
+// isInteractiveField checks if a field type supports interactive states
+func (m *FieldMapper) isInteractiveField(fieldType schema.FieldType) bool {
+	interactiveTypes := map[schema.FieldType]bool{
+		schema.FieldText:         true,
+		schema.FieldEmail:        true,
+		schema.FieldPassword:     true,
+		schema.FieldNumber:       true,
+		schema.FieldSelect:       true,
+		schema.FieldMultiSelect:  true,
+		schema.FieldTextarea:     true,
+		schema.FieldAutoComplete: true,
+		schema.FieldSlider:       true,
+		schema.FieldCheckbox:     true,
+		schema.FieldRadio:        true,
+	}
+
+	return interactiveTypes[fieldType]
+}
+
+// applyThemeOverrides applies field-level theme overrides
+func (m *FieldMapper) applyThemeOverrides(themeOverride map[string]interface{}, props *molecules.FormFieldProps) {
+	// Apply class overrides
+	if class, exists := themeOverride["class"]; exists {
+		if classStr, ok := class.(string); ok {
+			if props.Class != "" {
+				props.Class += " " + classStr
+			} else {
+				props.Class = classStr
+			}
+		}
+	}
+
+	// Apply input class overrides
+	if inputClass, exists := themeOverride["inputClass"]; exists {
+		if inputClassStr, ok := inputClass.(string); ok {
+			if props.InputClass != "" {
+				props.InputClass += " " + inputClassStr
+			} else {
+				props.InputClass = inputClassStr
+			}
+		}
+	}
+
+	// Apply label class overrides
+	if labelClass, exists := themeOverride["labelClass"]; exists {
+		if labelClassStr, ok := labelClass.(string); ok {
+			if props.LabelClass != "" {
+				props.LabelClass += " " + labelClassStr
+			} else {
+				props.LabelClass = labelClassStr
+			}
+		}
+	}
+
+	// Apply rounded overrides
+	if rounded, exists := themeOverride["rounded"]; exists {
+		if roundedStr, ok := rounded.(string); ok {
+			props.Rounded = roundedStr
+		}
+	}
 }

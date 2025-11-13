@@ -3,6 +3,7 @@ package views
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/molecules"
@@ -243,40 +244,21 @@ func (r *TypedFormFieldRenderer) SupportsType(fieldType schema.FieldType) bool {
 	return true
 }
 
-// renderFormField is a placeholder for actual templ rendering
-// In the real implementation, this would use the templ system to render
+// renderFormField uses actual Templ rendering to render the FormField molecule
 func renderFormField(props molecules.FormFieldProps) string {
-	// This is a simplified representation
-	// In the actual implementation, you'd use:
-	// return molecules.FormField(props).Render(context.Background(), &strings.Builder{})
-
-	var class string = "form-field"
-	if props.Class != "" {
-		class += " " + props.Class
+	// Use templ to render the FormField component
+	var buf strings.Builder
+	err := molecules.FormField(props).Render(context.Background(), &buf)
+	if err != nil {
+		// Fallback to error display in case of rendering failure
+		return fmt.Sprintf(`<div class="form-field-error" data-error="render-failed">Failed to render field: %s</div>`, err.Error())
 	}
-
-	var fieldType string = string(props.Type)
-	var required string = ""
-	if props.Required {
-		required = ` required`
-	}
-
-	var disabled string = ""
-	if props.Disabled {
-		disabled = ` disabled`
-	}
-
-	// Basic HTML structure - in real implementation this would use templ
-	return fmt.Sprintf(`<div class="%s" data-field-type="%s">
-		<label for="%s">%s%s</label>
-		<input type="%s" id="%s" name="%s" value="%s" placeholder="%s"%s%s />
-	</div>`,
-		class, fieldType, props.ID, props.Label, required,
-		getHTMLInputType(props.Type), props.ID, props.Name, props.Value, props.Placeholder,
-		required, disabled)
+	return buf.String()
 }
 
-// getHTMLInputType maps FormFieldType to HTML input type
+// getHTMLInputType maps FormFieldType to HTML input type (deprecated)
+// This function is kept for backward compatibility but should not be used
+// now that we're using real Templ components that handle type mapping internally
 func getHTMLInputType(fieldType molecules.FormFieldType) string {
 	mappings := map[molecules.FormFieldType]string{
 		molecules.FormFieldText:     "text",

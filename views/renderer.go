@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/niiniyare/ruun/pkg/schema"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
 )
 
 // TemplateRenderer implements schema.RuntimeRenderer using Templ components
@@ -351,15 +354,20 @@ func (r *TemplateRenderer) renderSectionsLayout(ctx context.Context, layout *sch
 	return r.renderFormFields(ctx, fieldValuesFromPointers(fields), state, nil)
 }
 
-// renderActionButton renders an action as a button
+// renderActionButton renders an action using the Button Templ component
 func (r *TemplateRenderer) renderActionButton(props ButtonProps) string {
-	var disabled string
-	if !props.Enabled {
-		disabled = " disabled"
-	}
+	// Convert to atoms.ButtonProps
+	buttonProps := r.convertToButtonProps(props)
 
-	return fmt.Sprintf(`<button type="%s" class="btn btn-%s"%s>%s</button>`,
-		props.Type, props.Variant, disabled, props.Text)
+	// Use templ to render the Button component with text content
+	var buf strings.Builder
+	err := atoms.Button(buttonProps, templ.Raw(props.Text)).Render(context.Background(), &buf)
+	if err != nil {
+		// Fallback to basic button HTML in case of rendering failure
+		return fmt.Sprintf(`<button type="%s" class="btn btn-%s"%s>%s</button>`,
+			props.Type, props.Variant, r.getDisabledAttr(props.Enabled), props.Text)
+	}
+	return buf.String()
 }
 
 // Helper functions
@@ -381,31 +389,43 @@ func getFieldErrors(errors map[string][]string, fieldName string) []string {
 }
 
 // RenderErrors implements schema.RuntimeRenderer.RenderErrors
-// Renders validation errors for display
+// Renders validation errors using the ValidationMessages Templ component
 func (r *TemplateRenderer) RenderErrors(ctx context.Context, errors map[string][]string) (string, error) {
 	if len(errors) == 0 {
 		return "", nil
 	}
 
-	var errorsHTML strings.Builder
-	errorsHTML.WriteString(`<div class="form-errors">`)
-
+	// Convert errors map to ValidationMessages format
+	var messages []molecules.ValidationMessage
 	for fieldName, fieldErrors := range errors {
-		if len(fieldErrors) > 0 {
-			errorsHTML.WriteString(fmt.Sprintf(`<div class="field-errors" data-field="%s">`, fieldName))
-			errorsHTML.WriteString(fmt.Sprintf(`<span class="field-name">%s:</span>`, fieldName))
-			errorsHTML.WriteString(`<ul class="error-list">`)
-
-			for _, err := range fieldErrors {
-				errorsHTML.WriteString(fmt.Sprintf(`<li class="error-item">%s</li>`, err))
-			}
-
-			errorsHTML.WriteString(`</ul></div>`)
+		for _, err := range fieldErrors {
+			messages = append(messages, molecules.ValidationMessage{
+				Type:    molecules.ValidationError,
+				Message: err,
+				Field:   fieldName,
+				Code:    "validation_error",
+			})
 		}
 	}
 
-	errorsHTML.WriteString(`</div>`)
-	return errorsHTML.String(), nil
+	// Create validation props
+	validationProps := molecules.ValidationProps{
+		Messages:     messages,
+		ShowSuccess:  false,
+		ShowWarnings: false,
+		Inline:       false,
+		Position:     "bottom",
+		Class:        "form-errors",
+	}
+
+	// Use templ to render the ValidationMessages component
+	var buf strings.Builder
+	err := molecules.ValidationMessages(validationProps).Render(ctx, &buf)
+	if err != nil {
+		// Fallback to basic HTML in case of rendering failure
+		return r.renderErrorsFallback(errors), nil
+	}
+	return buf.String(), nil
 }
 
 // RenderGroup implements schema.RuntimeRenderer.RenderGroup
@@ -452,6 +472,68 @@ func fieldValuesFromPointers(fields []*schema.Field) []schema.Field {
 		result[i] = *field
 	}
 	return result
+}
+
+// convertToButtonProps converts internal ButtonProps to atoms.ButtonProps
+func (r *TemplateRenderer) convertToButtonProps(props ButtonProps) atoms.ButtonProps {
+	// Map variant strings to atoms.ButtonVariant
+	var variant atoms.ButtonVariant
+	switch props.Variant {
+	case "primary":
+		variant = atoms.ButtonPrimary
+	case "secondary":
+		variant = atoms.ButtonSecondary
+	case "destructive":
+		variant = atoms.ButtonDestructive
+	case "outline":
+		variant = atoms.ButtonOutline
+	case "ghost":
+		variant = atoms.ButtonGhost
+	case "link":
+		variant = atoms.ButtonLink
+	default:
+		variant = atoms.ButtonPrimary
+	}
+
+	return atoms.ButtonProps{
+		Variant:  variant,
+		Size:     atoms.ButtonSizeMD, // Default size
+		Type:     props.Type,
+		Disabled: !props.Enabled,
+		Class:    props.Class,
+		ID:       props.ID,
+	}
+}
+
+// getDisabledAttr returns disabled attribute string for fallback HTML
+func (r *TemplateRenderer) getDisabledAttr(enabled bool) string {
+	if !enabled {
+		return " disabled"
+	}
+	return ""
+}
+
+// renderErrorsFallback provides fallback error rendering when Templ fails
+func (r *TemplateRenderer) renderErrorsFallback(errors map[string][]string) string {
+	var errorsHTML strings.Builder
+	errorsHTML.WriteString(`<div class="form-errors">`)
+
+	for fieldName, fieldErrors := range errors {
+		if len(fieldErrors) > 0 {
+			errorsHTML.WriteString(fmt.Sprintf(`<div class="field-errors" data-field="%s">`, fieldName))
+			errorsHTML.WriteString(fmt.Sprintf(`<span class="field-name">%s:</span>`, fieldName))
+			errorsHTML.WriteString(`<ul class="error-list">`)
+
+			for _, err := range fieldErrors {
+				errorsHTML.WriteString(fmt.Sprintf(`<li class="error-item">%s</li>`, err))
+			}
+
+			errorsHTML.WriteString(`</ul></div>`)
+		}
+	}
+
+	errorsHTML.WriteString(`</div>`)
+	return errorsHTML.String()
 }
 
 // ButtonProps represents button properties for action rendering
