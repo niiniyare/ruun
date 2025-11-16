@@ -52,32 +52,32 @@ type ThemeContextHelper struct {
 // ThemeContextOptions holds configuration for theme context extraction
 type ThemeContextOptions struct {
 	// Theme extraction
-	ThemeHeader           string   // HTTP header for theme ID (e.g., "X-Theme-ID")
-	DarkModeHeader        string   // HTTP header for dark mode (e.g., "X-Dark-Mode")
-	TenantHeader          string   // HTTP header for tenant (e.g., "X-Tenant-ID")
-	ThemeQueryParam       string   // URL query param for theme (e.g., "theme")
-	DarkModeQueryParam    string   // URL query param for dark mode (e.g., "dark")
-	
+	ThemeHeader        string // HTTP header for theme ID (e.g., "X-Theme-ID")
+	DarkModeHeader     string // HTTP header for dark mode (e.g., "X-Dark-Mode")
+	TenantHeader       string // HTTP header for tenant (e.g., "X-Tenant-ID")
+	ThemeQueryParam    string // URL query param for theme (e.g., "theme")
+	DarkModeQueryParam string // URL query param for dark mode (e.g., "dark")
+
 	// Cookie settings
-	ThemeCookie           string   // Cookie name for theme preference
-	DarkModeCookie        string   // Cookie name for dark mode preference
-	CookieMaxAge          int      // Cookie max age in seconds
-	CookieSecure          bool     // Cookie secure flag
-	CookieSameSite        http.SameSite // Cookie SameSite policy
-	
+	ThemeCookie    string        // Cookie name for theme preference
+	DarkModeCookie string        // Cookie name for dark mode preference
+	CookieMaxAge   int           // Cookie max age in seconds
+	CookieSecure   bool          // Cookie secure flag
+	CookieSameSite http.SameSite // Cookie SameSite policy
+
 	// Session integration
-	SessionThemeKey       string   // Session key for theme
-	SessionDarkModeKey    string   // Session key for dark mode
-	SessionTenantKey      string   // Session key for tenant
-	
+	SessionThemeKey    string // Session key for theme
+	SessionDarkModeKey string // Session key for dark mode
+	SessionTenantKey   string // Session key for tenant
+
 	// Auto-detection
-	AutoDetectDarkMode    bool     // Auto-detect dark mode from user agent/headers
-	AutoDetectTheme       bool     // Auto-detect theme from user preferences
-	
+	AutoDetectDarkMode bool // Auto-detect dark mode from user agent/headers
+	AutoDetectTheme    bool // Auto-detect theme from user preferences
+
 	// Fallbacks
-	DefaultTheme          string   // Default theme if none specified
-	DefaultDarkMode       bool     // Default dark mode if none specified
-	FallbackStrategies    []string // Fallback strategies ("header", "cookie", "session", "default")
+	DefaultTheme       string   // Default theme if none specified
+	DefaultDarkMode    bool     // Default dark mode if none specified
+	FallbackStrategies []string // Fallback strategies ("header", "cookie", "session", "default")
 }
 
 // NewThemeContextHelper creates a new theme context helper
@@ -110,28 +110,28 @@ func (h *ThemeContextHelper) ExtractThemeContext(
 	if options == nil {
 		options = h.getDefaultOptions()
 	}
-	
+
 	themeContext := make(map[string]any)
-	
+
 	// Extract theme ID using fallback strategy
 	themeID := h.extractThemeID(r, options)
 	themeContext["themeId"] = themeID
-	
+
 	// Extract dark mode preference
 	darkMode := h.extractDarkMode(r, options)
 	themeContext["darkMode"] = darkMode
-	
+
 	// Extract tenant context
 	tenant := h.extractTenant(r, options)
 	if tenant != "" {
 		themeContext["tenant"] = tenant
 	}
-	
+
 	// Extract user ID if available
 	if userID := h.extractUserID(r); userID != "" {
 		themeContext["userId"] = userID
 	}
-	
+
 	// Auto-detect preferences if enabled
 	if options.AutoDetectDarkMode {
 		autoDetectedDarkMode := h.autoDetectDarkMode(r)
@@ -139,10 +139,10 @@ func (h *ThemeContextHelper) ExtractThemeContext(
 			themeContext["autoDetectedDarkMode"] = autoDetectedDarkMode
 		}
 	}
-	
+
 	// Set theme context in HTTP context
 	enrichedCtx := h.setThemeContextInContext(ctx, themeContext)
-	
+
 	// Coordinate with theme manager
 	if h.themeManager != nil {
 		err := h.coordinateThemeState(enrichedCtx, themeID, darkMode, tenant)
@@ -150,34 +150,34 @@ func (h *ThemeContextHelper) ExtractThemeContext(
 			return enrichedCtx, themeContext, fmt.Errorf("theme coordination failed: %w", err)
 		}
 	}
-	
+
 	return enrichedCtx, themeContext, nil
 }
 
 // GetThemeContextFromContext extracts theme context from Go context
 func (h *ThemeContextHelper) GetThemeContextFromContext(ctx context.Context) map[string]any {
 	themeContext := make(map[string]any)
-	
+
 	// Extract theme ID
 	if themeID := ctx.Value(h.contextKeys.ThemeID); themeID != nil {
 		themeContext["themeId"] = themeID
 	}
-	
+
 	// Extract dark mode
 	if darkMode := ctx.Value(h.contextKeys.DarkMode); darkMode != nil {
 		themeContext["darkMode"] = darkMode
 	}
-	
+
 	// Extract tenant
 	if tenant := ctx.Value(h.contextKeys.Tenant); tenant != nil {
 		themeContext["tenant"] = tenant
 	}
-	
+
 	// Extract user ID
 	if userID := ctx.Value(h.contextKeys.UserID); userID != nil {
 		themeContext["userId"] = userID
 	}
-	
+
 	return themeContext
 }
 
@@ -189,13 +189,13 @@ func (h *ThemeContextHelper) CreateThemeAwareFieldContext(
 ) (context.Context, map[string]any, error) {
 	// Get base theme context
 	themeContext := h.GetThemeContextFromContext(ctx)
-	
+
 	// Add field-specific context
 	fieldContext := make(map[string]any)
 	for key, value := range themeContext {
 		fieldContext[key] = value
 	}
-	
+
 	// Add validation context
 	if h.orchestrator != nil {
 		validationContext := h.orchestrator.GetContextForValidation(field)
@@ -203,15 +203,15 @@ func (h *ThemeContextHelper) CreateThemeAwareFieldContext(
 			fieldContext[key] = value
 		}
 	}
-	
+
 	// Add form state context
 	if formState != nil {
 		fieldContext["formState"] = formState
 	}
-	
+
 	// Set field context in Go context
 	enrichedCtx := context.WithValue(ctx, h.contextKeys.FormState, fieldContext)
-	
+
 	return enrichedCtx, fieldContext, nil
 }
 
@@ -224,10 +224,10 @@ func (h *ThemeContextHelper) ResolveFieldTokensWithContext(
 	if h.renderer == nil || h.renderer.mapper == nil {
 		return make(map[string]string), fmt.Errorf("renderer or mapper not available")
 	}
-	
+
 	// Get theme context
 	themeContext := h.GetThemeContextFromContext(ctx)
-	
+
 	// Extract dark mode from context
 	darkMode := false
 	if dm, exists := themeContext["darkMode"]; exists {
@@ -235,10 +235,10 @@ func (h *ThemeContextHelper) ResolveFieldTokensWithContext(
 			darkMode = dark
 		}
 	}
-	
+
 	// Resolve tokens using mapper's comprehensive resolution
 	resolvedTokens := h.renderer.mapper.ResolveFieldTokens(ctx, props, darkMode)
-	
+
 	return resolvedTokens, nil
 }
 
@@ -251,7 +251,7 @@ func (h *ThemeContextHelper) ThemeMiddleware(options *ThemeContextOptions) func(
 	if options == nil {
 		options = h.getDefaultOptions()
 	}
-	
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Extract theme context
@@ -260,10 +260,10 @@ func (h *ThemeContextHelper) ThemeMiddleware(options *ThemeContextOptions) func(
 				// Log error but continue with defaults
 				ctx = h.setDefaultThemeContext(r.Context())
 			}
-			
+
 			// Set theme cookies if they've changed
 			h.updateThemeCookies(w, themeContext, options)
-			
+
 			// Continue with enriched context
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -355,17 +355,17 @@ func (h *ThemeContextHelper) extractTenant(r *http.Request, options *ThemeContex
 	if tenant := r.Header.Get(options.TenantHeader); tenant != "" {
 		return tenant
 	}
-	
+
 	// Try session
 	if tenant := h.extractFromSession(r, options.SessionTenantKey); tenant != "" {
 		return tenant
 	}
-	
+
 	// Try to extract from subdomain
 	if tenant := h.extractTenantFromHost(r.Host); tenant != "" {
 		return tenant
 	}
-	
+
 	return ""
 }
 
@@ -386,12 +386,12 @@ func (h *ThemeContextHelper) autoDetectDarkMode(r *http.Request) bool {
 	if strings.Contains(accept, "prefers-color-scheme=dark") {
 		return true
 	}
-	
+
 	// Check for SEC-CH-Prefers-Color-Scheme header (Client Hints)
 	if colorScheme := r.Header.Get("SEC-CH-Prefers-Color-Scheme"); colorScheme == "dark" {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -416,20 +416,20 @@ func (h *FormRenderingHelper) RenderFieldWithTheme(
 	if h.contextHelper.renderer == nil {
 		return "", fmt.Errorf("renderer not available")
 	}
-	
+
 	// Create field context
 	fieldCtx, _, err := h.contextHelper.CreateThemeAwareFieldContext(h.context, field, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create field context: %w", err)
 	}
-	
+
 	// Use enhanced renderer method - renderer is already *TemplateRenderer
 	if h.contextHelper.renderer != nil {
 		// TODO:INTEGRATION_FIX - RenderFieldWithThemeContext method needs to be implemented
 		// For now, use standard RenderField method
 		return h.contextHelper.renderer.RenderField(fieldCtx, field, value, errors, touched, dirty)
 	}
-	
+
 	// Fallback error if no renderer available
 	return "", fmt.Errorf("no renderer available")
 }
@@ -456,7 +456,7 @@ func (h *ValidationHelper) ValidateFieldWithTheme(
 	if h.orchestrator == nil {
 		return fmt.Errorf("orchestrator not available")
 	}
-	
+
 	// TODO:INTEGRATION_FIX - Theme-aware validation integration needs proper interface
 	// For now, use standard validation method
 	return h.orchestrator.ValidateFieldWithUI(h.context, fieldName, value, trigger)
@@ -469,47 +469,47 @@ func (h *ValidationHelper) ValidateFieldWithTheme(
 // getDefaultOptions returns default theme context options
 func (h *ThemeContextHelper) getDefaultOptions() *ThemeContextOptions {
 	return &ThemeContextOptions{
-		ThemeHeader:         "X-Theme-ID",
-		DarkModeHeader:      "X-Dark-Mode",
-		TenantHeader:        "X-Tenant-ID",
-		ThemeQueryParam:     "theme",
-		DarkModeQueryParam:  "dark",
-		ThemeCookie:         "ruun_theme",
-		DarkModeCookie:      "ruun_dark_mode",
-		CookieMaxAge:        86400 * 30, // 30 days
-		CookieSecure:        true,
-		CookieSameSite:      http.SameSiteStrictMode,
-		SessionThemeKey:     "theme",
-		SessionDarkModeKey:  "dark_mode",
-		SessionTenantKey:    "tenant",
-		AutoDetectDarkMode:  true,
-		AutoDetectTheme:     false,
-		DefaultTheme:        h.defaultTheme,
-		DefaultDarkMode:     h.defaultDarkMode,
-		FallbackStrategies:  []string{"header", "query", "cookie", "session", "default"},
+		ThemeHeader:        "X-Theme-ID",
+		DarkModeHeader:     "X-Dark-Mode",
+		TenantHeader:       "X-Tenant-ID",
+		ThemeQueryParam:    "theme",
+		DarkModeQueryParam: "dark",
+		ThemeCookie:        "ruun_theme",
+		DarkModeCookie:     "ruun_dark_mode",
+		CookieMaxAge:       86400 * 30, // 30 days
+		CookieSecure:       true,
+		CookieSameSite:     http.SameSiteStrictMode,
+		SessionThemeKey:    "theme",
+		SessionDarkModeKey: "dark_mode",
+		SessionTenantKey:   "tenant",
+		AutoDetectDarkMode: true,
+		AutoDetectTheme:    false,
+		DefaultTheme:       h.defaultTheme,
+		DefaultDarkMode:    h.defaultDarkMode,
+		FallbackStrategies: []string{"header", "query", "cookie", "session", "default"},
 	}
 }
 
 // setThemeContextInContext sets theme context in Go context
 func (h *ThemeContextHelper) setThemeContextInContext(ctx context.Context, themeContext map[string]any) context.Context {
 	enrichedCtx := ctx
-	
+
 	if themeID, exists := themeContext["themeId"]; exists {
 		enrichedCtx = context.WithValue(enrichedCtx, h.contextKeys.ThemeID, themeID)
 	}
-	
+
 	if darkMode, exists := themeContext["darkMode"]; exists {
 		enrichedCtx = context.WithValue(enrichedCtx, h.contextKeys.DarkMode, darkMode)
 	}
-	
+
 	if tenant, exists := themeContext["tenant"]; exists {
 		enrichedCtx = context.WithValue(enrichedCtx, h.contextKeys.Tenant, tenant)
 	}
-	
+
 	if userID, exists := themeContext["userId"]; exists {
 		enrichedCtx = context.WithValue(enrichedCtx, h.contextKeys.UserID, userID)
 	}
-	
+
 	return enrichedCtx
 }
 
@@ -527,7 +527,7 @@ func (h *ThemeContextHelper) coordinateThemeState(ctx context.Context, themeID s
 	if h.themeManager == nil {
 		return nil
 	}
-	
+
 	options := &theme.ThemeOptions{
 		DarkMode: darkMode,
 		Tenant:   tenant,
@@ -535,7 +535,7 @@ func (h *ThemeContextHelper) coordinateThemeState(ctx context.Context, themeID s
 			"requestTime": time.Now(),
 		},
 	}
-	
+
 	return h.themeManager.SetActiveTheme(ctx, "request", themeID, options)
 }
 
@@ -554,7 +554,7 @@ func (h *ThemeContextHelper) updateThemeCookies(w http.ResponseWriter, themeCont
 			})
 		}
 	}
-	
+
 	// Set dark mode cookie
 	if darkMode, exists := themeContext["darkMode"]; exists {
 		if dark, ok := darkMode.(bool); ok {

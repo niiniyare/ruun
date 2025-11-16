@@ -17,64 +17,64 @@ type ThemeCoordinationManager struct {
 	// Core theme management
 	activeThemes    map[string]*ActiveTheme // Context-based active themes
 	tokenResolver   *TokenResolver          // Three-tier token resolution
-	darkModeManager *DarkModeManager       // Dark mode detection and management
-	
+	darkModeManager *DarkModeManager        // Dark mode detection and management
+
 	// Multi-tenant support
-	tenantResolver *TenantResolver         // Tenant-specific theme resolution
-	
+	tenantResolver *TenantResolver // Tenant-specific theme resolution
+
 	// Event system
-	eventBus        *ThemeEventBus         // Theme change events
-	changeListeners []ThemeChangeListener  // Change event listeners
-	
+	eventBus        *ThemeEventBus        // Theme change events
+	changeListeners []ThemeChangeListener // Change event listeners
+
 	// Configuration
 	config *ThemeManagerConfig
-	
+
 	// Thread safety
 	mu sync.RWMutex
 }
 
 // ActiveTheme represents an active theme context
 type ActiveTheme struct {
-	ID               string                 // Theme identifier
-	Tenant           string                 // Tenant/organization context
-	DarkMode         bool                  // Dark mode state
-	ValidationTokens *schema.DesignTokens  // Resolved validation tokens
-	LastUpdated      time.Time             // Last update timestamp
-	Context          map[string]any // Additional context data
+	ID               string               // Theme identifier
+	Tenant           string               // Tenant/organization context
+	DarkMode         bool                 // Dark mode state
+	ValidationTokens *schema.DesignTokens // Resolved validation tokens
+	LastUpdated      time.Time            // Last update timestamp
+	Context          map[string]any       // Additional context data
 }
 
 // TokenResolver handles three-tier token resolution with validation state awareness
 type TokenResolver struct {
-	baseTokens      *schema.DesignTokens   // Base design tokens
-	validationTokens *schema.DesignTokens  // Validation-specific tokens
-	overrideCache   map[string]map[string]string // Cached token overrides
-	
+	baseTokens       *schema.DesignTokens         // Base design tokens
+	validationTokens *schema.DesignTokens         // Validation-specific tokens
+	overrideCache    map[string]map[string]string // Cached token overrides
+
 	// Dark mode token mappings
 	darkModeOverrides map[string]map[string]string
-	
+
 	mu sync.RWMutex
 }
 
 // DarkModeManager handles dark mode detection and synchronization
 type DarkModeManager struct {
 	// Detection strategies
-	systemDetection   bool                    // Use system preference detection
-	userPreferences   map[string]bool         // User-specific dark mode preferences
-	tenantDefaults    map[string]bool         // Tenant default dark mode settings
-	
+	systemDetection bool            // Use system preference detection
+	userPreferences map[string]bool // User-specific dark mode preferences
+	tenantDefaults  map[string]bool // Tenant default dark mode settings
+
 	// Auto-detection
 	autoDetectionEnabled bool
 	detectionInterval    time.Duration
-	
+
 	mu sync.RWMutex
 }
 
 // TenantResolver provides multi-tenant theme resolution
 type TenantResolver struct {
-	tenantThemes     map[string]string       // Tenant -> Theme ID mapping
-	tenantOverrides  map[string]map[string]string // Tenant-specific token overrides
-	defaultTheme     string                  // Default theme for unknown tenants
-	
+	tenantThemes    map[string]string            // Tenant -> Theme ID mapping
+	tenantOverrides map[string]map[string]string // Tenant-specific token overrides
+	defaultTheme    string                       // Default theme for unknown tenants
+
 	mu sync.RWMutex
 }
 
@@ -86,11 +86,11 @@ type ThemeEventBus struct {
 
 // ThemeEvent represents a theme change event
 type ThemeEvent struct {
-	Type      string                 // Event type (change, toggle, etc.)
-	ThemeID   string                 // Theme identifier
-	Context   string                 // Context (tenant, user, etc.)
-	DarkMode  bool                  // Dark mode state
-	Timestamp time.Time             // Event timestamp
+	Type      string         // Event type (change, toggle, etc.)
+	ThemeID   string         // Theme identifier
+	Context   string         // Context (tenant, user, etc.)
+	DarkMode  bool           // Dark mode state
+	Timestamp time.Time      // Event timestamp
 	Data      map[string]any // Additional event data
 }
 
@@ -100,24 +100,24 @@ type ThemeChangeListener func(themeID string, darkMode bool)
 // ThemeManagerConfig holds theme manager configuration
 type ThemeManagerConfig struct {
 	// Default settings
-	DefaultTheme         string        // Default theme ID
-	DefaultDarkMode      bool         // Default dark mode state
-	
+	DefaultTheme    string // Default theme ID
+	DefaultDarkMode bool   // Default dark mode state
+
 	// Auto-detection
-	EnableSystemDetection bool        // Enable system dark mode detection
+	EnableSystemDetection bool          // Enable system dark mode detection
 	DetectionInterval     time.Duration // Dark mode detection interval
-	
+
 	// Multi-tenant support
-	EnableMultiTenant     bool         // Enable multi-tenant themes
-	TenantContextField    string       // Field name for tenant context
-	
+	EnableMultiTenant  bool   // Enable multi-tenant themes
+	TenantContextField string // Field name for tenant context
+
 	// Performance
-	EnableTokenCaching    bool         // Enable token resolution caching
-	CacheExpiration      time.Duration // Token cache expiration
-	
+	EnableTokenCaching bool          // Enable token resolution caching
+	CacheExpiration    time.Duration // Token cache expiration
+
 	// Validation integration
-	ValidateTokenContrast bool         // Validate color contrast for accessibility
-	EnableThemeEvents     bool         // Enable theme change events
+	ValidateTokenContrast bool // Validate color contrast for accessibility
+	EnableThemeEvents     bool // Enable theme change events
 }
 
 // NewThemeCoordinationManager creates a new theme coordination manager
@@ -134,7 +134,7 @@ func NewThemeCoordinationManager() *ThemeCoordinationManager {
 		ValidateTokenContrast: true,
 		EnableThemeEvents:     true,
 	}
-	
+
 	manager := &ThemeCoordinationManager{
 		activeThemes:    make(map[string]*ActiveTheme),
 		tokenResolver:   NewTokenResolver(),
@@ -144,15 +144,15 @@ func NewThemeCoordinationManager() *ThemeCoordinationManager {
 		changeListeners: make([]ThemeChangeListener, 0),
 		config:          config,
 	}
-	
+
 	// Initialize with validation tokens
 	manager.tokenResolver.LoadValidationTokens(tokens.ValidationTokens)
-	
+
 	// Start auto-detection if enabled
 	if config.EnableSystemDetection {
 		manager.darkModeManager.StartAutoDetection(config.DetectionInterval)
 	}
-	
+
 	return manager
 }
 
@@ -164,18 +164,18 @@ func NewThemeCoordinationManager() *ThemeCoordinationManager {
 func (m *ThemeCoordinationManager) GetActiveTheme(context string) string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	if activeTheme, exists := m.activeThemes[context]; exists {
 		return activeTheme.ID
 	}
-	
+
 	// Check tenant-specific theme
 	if m.config.EnableMultiTenant {
 		if themeID := m.tenantResolver.GetThemeForTenant(context); themeID != "" {
 			return themeID
 		}
 	}
-	
+
 	return m.config.DefaultTheme
 }
 
@@ -183,11 +183,11 @@ func (m *ThemeCoordinationManager) GetActiveTheme(context string) string {
 func (m *ThemeCoordinationManager) IsDarkModeEnabled(context string) bool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	if activeTheme, exists := m.activeThemes[context]; exists {
 		return activeTheme.DarkMode
 	}
-	
+
 	// Check dark mode manager
 	return m.darkModeManager.IsDarkModeEnabled(context)
 }
@@ -197,10 +197,10 @@ func (m *ThemeCoordinationManager) GetThemeTokens(themeID string, validationStat
 	// Get base validation tokens for the state
 	stateStr := m.validationStateToString(validationState)
 	baseTokens := m.getValidationTokensForState(stateStr)
-	
+
 	// Apply theme-specific overrides
 	themeTokens := m.tokenResolver.ResolveThemeTokens(themeID, baseTokens)
-	
+
 	// Apply tenant-specific overrides if enabled
 	if m.config.EnableMultiTenant {
 		tenantOverrides := m.tenantResolver.GetTenantTokenOverrides(themeID)
@@ -208,7 +208,7 @@ func (m *ThemeCoordinationManager) GetThemeTokens(themeID string, validationStat
 			themeTokens[key] = value
 		}
 	}
-	
+
 	return themeTokens
 }
 
@@ -216,7 +216,7 @@ func (m *ThemeCoordinationManager) GetThemeTokens(themeID string, validationStat
 func (m *ThemeCoordinationManager) SubscribeToThemeChanges(callback func(themeID string, darkMode bool)) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.changeListeners = append(m.changeListeners, callback)
 }
 
@@ -233,15 +233,15 @@ func (m *ThemeCoordinationManager) SetActiveTheme(
 ) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	// Validate theme exists
 	if !m.validateThemeExists(themeID) {
 		return fmt.Errorf("theme %s not found", themeID)
 	}
-	
+
 	// Resolve options
 	opts := m.resolveThemeOptions(options)
-	
+
 	// Create active theme
 	activeTheme := &ActiveTheme{
 		ID:               themeID,
@@ -251,10 +251,10 @@ func (m *ThemeCoordinationManager) SetActiveTheme(
 		LastUpdated:      time.Now(),
 		Context:          opts.Context,
 	}
-	
+
 	// Store active theme
 	m.activeThemes[contextName] = activeTheme
-	
+
 	// Emit theme change event
 	if m.config.EnableThemeEvents {
 		event := ThemeEvent{
@@ -270,10 +270,10 @@ func (m *ThemeCoordinationManager) SetActiveTheme(
 		}
 		m.eventBus.Emit("theme_change", event)
 	}
-	
+
 	// Notify listeners
 	m.notifyThemeChange(themeID, opts.DarkMode)
-	
+
 	return nil
 }
 
@@ -284,22 +284,22 @@ func (m *ThemeCoordinationManager) ToggleDarkMode(
 ) (bool, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	activeTheme, exists := m.activeThemes[contextName]
 	if !exists {
 		return false, fmt.Errorf("no active theme for context %s", contextName)
 	}
-	
+
 	// Toggle dark mode
 	activeTheme.DarkMode = !activeTheme.DarkMode
 	activeTheme.LastUpdated = time.Now()
-	
+
 	// Update validation tokens for new dark mode state
 	activeTheme.ValidationTokens = m.tokenResolver.GetValidationTokens(activeTheme.ID, activeTheme.DarkMode)
-	
+
 	// Update dark mode manager
 	m.darkModeManager.SetDarkMode(contextName, activeTheme.DarkMode)
-	
+
 	// Emit dark mode toggle event
 	if m.config.EnableThemeEvents {
 		event := ThemeEvent{
@@ -314,10 +314,10 @@ func (m *ThemeCoordinationManager) ToggleDarkMode(
 		}
 		m.eventBus.Emit("dark_mode_toggle", event)
 	}
-	
+
 	// Notify listeners
 	m.notifyThemeChange(activeTheme.ID, activeTheme.DarkMode)
-	
+
 	return activeTheme.DarkMode, nil
 }
 
@@ -328,13 +328,13 @@ func (m *ThemeCoordinationManager) GetValidationTokensForState(
 ) map[string]string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	// Get active theme
 	activeTheme := m.getActiveThemeForContext(contextName)
-	
+
 	// Get validation state tokens
 	stateTokens := m.GetThemeTokens(activeTheme.ID, validationState)
-	
+
 	// Apply dark mode overrides if needed
 	if activeTheme.DarkMode {
 		darkTokens := m.getDarkModeValidationTokens(activeTheme.ID, validationState)
@@ -342,7 +342,7 @@ func (m *ThemeCoordinationManager) GetValidationTokensForState(
 			stateTokens[key] = value
 		}
 	}
-	
+
 	return stateTokens
 }
 
@@ -360,17 +360,17 @@ func (m *ThemeCoordinationManager) RegisterTenant(
 
 // ThemeOptions holds options for theme setting
 type ThemeOptions struct {
-	DarkMode bool                   // Dark mode preference
-	Tenant   string                 // Tenant context
+	DarkMode bool           // Dark mode preference
+	Tenant   string         // Tenant context
 	Context  map[string]any // Additional context
 }
 
 // TenantThemeConfig holds tenant-specific theme configuration
 type TenantThemeConfig struct {
 	DefaultTheme    string            // Default theme for tenant
-	DefaultDarkMode bool             // Default dark mode for tenant
+	DefaultDarkMode bool              // Default dark mode for tenant
 	TokenOverrides  map[string]string // Tenant-specific token overrides
-	AllowedThemes   []string         // Allowed themes for tenant
+	AllowedThemes   []string          // Allowed themes for tenant
 }
 
 // resolveThemeOptions resolves theme options with defaults
@@ -382,11 +382,11 @@ func (m *ThemeCoordinationManager) resolveThemeOptions(options *ThemeOptions) *T
 			Context:  make(map[string]any),
 		}
 	}
-	
+
 	if options.Context == nil {
 		options.Context = make(map[string]any)
 	}
-	
+
 	return options
 }
 
@@ -402,7 +402,7 @@ func (m *ThemeCoordinationManager) getActiveThemeForContext(contextName string) 
 	if activeTheme, exists := m.activeThemes[contextName]; exists {
 		return activeTheme
 	}
-	
+
 	// Return default active theme
 	return &ActiveTheme{
 		ID:       m.config.DefaultTheme,
@@ -444,7 +444,7 @@ func (m *ThemeCoordinationManager) getValidationTokensForState(stateStr string) 
 		"border":     "#e5e7eb",
 		"text":       "#111827",
 	}
-	
+
 	switch stateStr {
 	case "validating":
 		baseTokens["border"] = "#f59e0b"
@@ -459,7 +459,7 @@ func (m *ThemeCoordinationManager) getValidationTokensForState(stateStr string) 
 		baseTokens["border"] = "#d97706"
 		baseTokens["icon"] = "⚠"
 	}
-	
+
 	return baseTokens
 }
 
@@ -471,7 +471,7 @@ func (m *ThemeCoordinationManager) getDarkModeTokensForState(stateStr string) ma
 		"border":     "#374151",
 		"text":       "#f9fafb",
 	}
-	
+
 	switch stateStr {
 	case "validating":
 		darkTokens["border"] = "#fbbf24"
@@ -482,7 +482,7 @@ func (m *ThemeCoordinationManager) getDarkModeTokensForState(stateStr string) ma
 	case "warning":
 		darkTokens["border"] = "#f59e0b"
 	}
-	
+
 	return darkTokens
 }
 
@@ -548,20 +548,20 @@ func (r *TokenResolver) LoadValidationTokens(validationTokens *schema.DesignToke
 func (r *TokenResolver) ResolveThemeTokens(themeID string, baseTokens map[string]string) map[string]string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	
+
 	// Start with base tokens
 	resolved := make(map[string]string)
 	for key, value := range baseTokens {
 		resolved[key] = value
 	}
-	
+
 	// Apply cached overrides if available
 	if overrides, exists := r.overrideCache[themeID]; exists {
 		for key, value := range overrides {
 			resolved[key] = value
 		}
 	}
-	
+
 	return resolved
 }
 
@@ -580,17 +580,17 @@ func (r *TokenResolver) GetValidationTokens(themeID string, darkMode bool) *sche
 func (d *DarkModeManager) IsDarkModeEnabled(context string) bool {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	
+
 	// Check user preferences first
 	if darkMode, exists := d.userPreferences[context]; exists {
 		return darkMode
 	}
-	
+
 	// Check tenant defaults
 	if darkMode, exists := d.tenantDefaults[context]; exists {
 		return darkMode
 	}
-	
+
 	// Default to false
 	return false
 }
@@ -608,7 +608,7 @@ func (d *DarkModeManager) StartAutoDetection(interval time.Duration) {
 	d.autoDetectionEnabled = true
 	d.detectionInterval = interval
 	d.mu.Unlock()
-	
+
 	// In a full implementation, this would start a goroutine for system detection
 }
 
@@ -620,11 +620,11 @@ func (d *DarkModeManager) StartAutoDetection(interval time.Duration) {
 func (t *TenantResolver) GetThemeForTenant(tenant string) string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	if theme, exists := t.tenantThemes[tenant]; exists {
 		return theme
 	}
-	
+
 	return t.defaultTheme
 }
 
@@ -632,11 +632,11 @@ func (t *TenantResolver) GetThemeForTenant(tenant string) string {
 func (t *TenantResolver) GetTenantTokenOverrides(tenant string) map[string]string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	
+
 	if overrides, exists := t.tenantOverrides[tenant]; exists {
 		return overrides
 	}
-	
+
 	return make(map[string]string)
 }
 
@@ -644,22 +644,22 @@ func (t *TenantResolver) GetTenantTokenOverrides(tenant string) map[string]strin
 func (t *TenantResolver) RegisterTenant(tenantID string, config *TenantThemeConfig) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	t.tenantThemes[tenantID] = config.DefaultTheme
 	t.tenantOverrides[tenantID] = config.TokenOverrides
-	
+
 	return nil
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// THEME EVENT BUS METHODS  
+// THEME EVENT BUS METHODS
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Emit emits a theme event
 func (e *ThemeEventBus) Emit(eventType string, event ThemeEvent) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	if listeners, exists := e.listeners[eventType]; exists {
 		for _, listener := range listeners {
 			go listener(event)
@@ -671,10 +671,10 @@ func (e *ThemeEventBus) Emit(eventType string, event ThemeEvent) {
 func (e *ThemeEventBus) Subscribe(eventType string, listener func(event ThemeEvent)) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	if _, exists := e.listeners[eventType]; !exists {
 		e.listeners[eventType] = make([]func(event ThemeEvent), 0)
 	}
-	
+
 	e.listeners[eventType] = append(e.listeners[eventType], listener)
 }

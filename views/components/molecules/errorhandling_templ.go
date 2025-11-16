@@ -39,16 +39,16 @@ const (
 
 // ErrorDetail represents detailed error information
 type ErrorDetail struct {
-	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`
-	Field       string                 `json:"field"`
-	Type        ErrorType              `json:"type"`
-	Severity    ErrorSeverity          `json:"severity"`
-	Timestamp   string                 `json:"timestamp"`
+	Code        string         `json:"code"`
+	Message     string         `json:"message"`
+	Field       string         `json:"field"`
+	Type        ErrorType      `json:"type"`
+	Severity    ErrorSeverity  `json:"severity"`
+	Timestamp   string         `json:"timestamp"`
 	Context     map[string]any `json:"context"`
-	Suggestions []string               `json:"suggestions"`
-	HelpURL     string                 `json:"helpUrl"`
-	Retryable   bool                   `json:"retryable"`
+	Suggestions []string       `json:"suggestions"`
+	HelpURL     string         `json:"helpUrl"`
+	Retryable   bool           `json:"retryable"`
 }
 
 // ErrorBoundaryProps defines properties for error boundaries

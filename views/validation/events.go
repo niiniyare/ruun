@@ -36,12 +36,12 @@ func (vs ValidationState) String() string {
 
 // ValidationEvent represents a validation state change event
 type ValidationEvent struct {
-	FieldName string                 `json:"fieldName"`
-	EventType ValidationEventType    `json:"eventType"`
-	State     ValidationState        `json:"state"`
-	Errors    []string               `json:"errors,omitempty"`
-	Timestamp time.Time              `json:"timestamp"`
-	Metadata  map[string]any `json:"metadata,omitempty"`
+	FieldName string              `json:"fieldName"`
+	EventType ValidationEventType `json:"eventType"`
+	State     ValidationState     `json:"state"`
+	Errors    []string            `json:"errors,omitempty"`
+	Timestamp time.Time           `json:"timestamp"`
+	Metadata  map[string]any      `json:"metadata,omitempty"`
 }
 
 // ValidationEventType defines types of validation events
@@ -63,14 +63,14 @@ type ValidationEventListener func(event ValidationEvent)
 type ValidationEventBus struct {
 	// Field-specific listeners
 	listeners map[string][]ValidationEventListener
-	
+
 	// Global listeners (listen to all fields)
 	globalListeners []ValidationEventListener
-	
+
 	// Event history for debugging
 	eventHistory []ValidationEvent
 	maxHistory   int
-	
+
 	// Thread safety
 	mu sync.RWMutex
 }
@@ -89,7 +89,7 @@ func NewValidationEventBus() *ValidationEventBus {
 func (b *ValidationEventBus) AddListener(fieldName string, listener ValidationEventListener) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	
+
 	if fieldName == "*" {
 		// Global listener - listens to all field events
 		b.globalListeners = append(b.globalListeners, listener)
@@ -107,7 +107,7 @@ func (b *ValidationEventBus) AddListener(fieldName string, listener ValidationEv
 func (b *ValidationEventBus) RemoveListener(fieldName string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	
+
 	if fieldName == "*" {
 		b.globalListeners = make([]ValidationEventListener, 0)
 	} else {
@@ -126,7 +126,7 @@ func (b *ValidationEventBus) EmitValidationStart(fieldName string) {
 			"trigger": "user_input",
 		},
 	}
-	
+
 	b.emitEvent(event)
 }
 
@@ -141,7 +141,7 @@ func (b *ValidationEventBus) EmitValidationSuccess(fieldName string) {
 			"result": "valid",
 		},
 	}
-	
+
 	b.emitEvent(event)
 }
 
@@ -158,7 +158,7 @@ func (b *ValidationEventBus) EmitValidationError(fieldName string, errors []stri
 			"result":     "invalid",
 		},
 	}
-	
+
 	b.emitEvent(event)
 }
 
@@ -173,7 +173,7 @@ func (b *ValidationEventBus) EmitValidationCancel(fieldName string) {
 			"reason": "debounce_cancel",
 		},
 	}
-	
+
 	b.emitEvent(event)
 }
 
@@ -188,29 +188,29 @@ func (b *ValidationEventBus) EmitValidationClear(fieldName string) {
 			"action": "clear_errors",
 		},
 	}
-	
+
 	b.emitEvent(event)
 }
 
 // emitEvent sends an event to all relevant listeners
 func (b *ValidationEventBus) emitEvent(event ValidationEvent) {
 	b.mu.Lock()
-	
+
 	// Add to event history
 	b.addToHistory(event)
-	
+
 	// Get listeners while holding lock
 	fieldListeners := make([]ValidationEventListener, 0)
 	if listeners, exists := b.listeners[event.FieldName]; exists {
 		fieldListeners = make([]ValidationEventListener, len(listeners))
 		copy(fieldListeners, listeners)
 	}
-	
+
 	globalListeners := make([]ValidationEventListener, len(b.globalListeners))
 	copy(globalListeners, b.globalListeners)
-	
+
 	b.mu.Unlock()
-	
+
 	// Emit to field-specific listeners
 	for _, listener := range fieldListeners {
 		go func(l ValidationEventListener) {
@@ -223,7 +223,7 @@ func (b *ValidationEventBus) emitEvent(event ValidationEvent) {
 			l(event)
 		}(listener)
 	}
-	
+
 	// Emit to global listeners
 	for _, listener := range globalListeners {
 		go func(l ValidationEventListener) {
@@ -241,7 +241,7 @@ func (b *ValidationEventBus) emitEvent(event ValidationEvent) {
 // addToHistory adds event to history with size limit
 func (b *ValidationEventBus) addToHistory(event ValidationEvent) {
 	b.eventHistory = append(b.eventHistory, event)
-	
+
 	// Keep only the last maxHistory events
 	if len(b.eventHistory) > b.maxHistory {
 		b.eventHistory = b.eventHistory[len(b.eventHistory)-b.maxHistory:]
@@ -252,11 +252,11 @@ func (b *ValidationEventBus) addToHistory(event ValidationEvent) {
 func (b *ValidationEventBus) GetEventHistory() []ValidationEvent {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	
+
 	// Return a copy to prevent external modification
 	history := make([]ValidationEvent, len(b.eventHistory))
 	copy(history, b.eventHistory)
-	
+
 	return history
 }
 
@@ -264,14 +264,14 @@ func (b *ValidationEventBus) GetEventHistory() []ValidationEvent {
 func (b *ValidationEventBus) GetEventsForField(fieldName string) []ValidationEvent {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	
+
 	fieldEvents := make([]ValidationEvent, 0)
 	for _, event := range b.eventHistory {
 		if event.FieldName == fieldName {
 			fieldEvents = append(fieldEvents, event)
 		}
 	}
-	
+
 	return fieldEvents
 }
 
@@ -279,7 +279,7 @@ func (b *ValidationEventBus) GetEventsForField(fieldName string) []ValidationEve
 func (b *ValidationEventBus) ClearHistory() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	
+
 	b.eventHistory = make([]ValidationEvent, 0)
 }
 
@@ -308,15 +308,15 @@ func (b *ValidationEventBus) ConnectToGlobalValidationState(updateFunc func(Vali
 func (b *ValidationEventBus) GetListenerCount() map[string]int {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	
+
 	counts := make(map[string]int)
-	
+
 	for fieldName, listeners := range b.listeners {
 		counts[fieldName] = len(listeners)
 	}
-	
+
 	counts["*"] = len(b.globalListeners)
-	
+
 	return counts
 }
 
@@ -324,11 +324,11 @@ func (b *ValidationEventBus) GetListenerCount() map[string]int {
 func (b *ValidationEventBus) HasListenersForField(fieldName string) bool {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	
+
 	if listeners, exists := b.listeners[fieldName]; exists && len(listeners) > 0 {
 		return true
 	}
-	
+
 	return len(b.globalListeners) > 0
 }
 
@@ -341,7 +341,7 @@ func (b *ValidationEventBus) EmitCustomEvent(fieldName string, eventType Validat
 		Timestamp: time.Now(),
 		Metadata:  metadata,
 	}
-	
+
 	b.emitEvent(event)
 }
 
@@ -349,23 +349,23 @@ func (b *ValidationEventBus) EmitCustomEvent(fieldName string, eventType Validat
 func (b *ValidationEventBus) GetValidationSummary() map[string]ValidationState {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-	
+
 	summary := make(map[string]ValidationState)
-	
+
 	// Get the latest state for each field from event history
 	fieldStates := make(map[string]ValidationEvent)
-	
+
 	for _, event := range b.eventHistory {
 		// Keep only the most recent event per field
 		if existing, exists := fieldStates[event.FieldName]; !exists || event.Timestamp.After(existing.Timestamp) {
 			fieldStates[event.FieldName] = event
 		}
 	}
-	
+
 	// Extract states
 	for fieldName, event := range fieldStates {
 		summary[fieldName] = event.State
 	}
-	
+
 	return summary
 }

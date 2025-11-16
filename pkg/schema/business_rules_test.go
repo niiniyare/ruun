@@ -526,7 +526,7 @@ func (suite *BusinessRulesTestSuite) TestCalculationActions() {
 	require.NoError(suite.T(), err)
 
 	modifiedSchema, err := suite.engine.ApplyRules(suite.ctx, schema, map[string]any{
-		"quantity": 10,
+		"quantity":   10,
 		"unit_price": 5.99,
 	})
 	require.NoError(suite.T(), err)

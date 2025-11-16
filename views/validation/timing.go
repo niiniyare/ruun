@@ -11,13 +11,13 @@ import (
 type FieldDebouncer struct {
 	// Active timers for each field
 	timers map[string]*time.Timer
-	
+
 	// Cancellation contexts for each field
 	contexts map[string]context.CancelFunc
-	
+
 	// Configuration
 	defaultDelay time.Duration
-	
+
 	// Thread safety
 	mu sync.RWMutex
 }
@@ -44,19 +44,19 @@ func (d *FieldDebouncer) WithDefaultDelay(delay time.Duration) *FieldDebouncer {
 func (d *FieldDebouncer) ScheduleValidation(fieldName string, delay time.Duration, validationFunc func()) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	
+
 	// Use default delay if none specified
 	if delay <= 0 {
 		delay = d.defaultDelay
 	}
-	
+
 	// Cancel existing timer for this field
 	d.cancelFieldUnsafe(fieldName)
-	
+
 	// Create new context for this validation
 	ctx, cancel := context.WithCancel(context.Background())
 	d.contexts[fieldName] = cancel
-	
+
 	// Create timer for debounced execution
 	timer := time.AfterFunc(delay, func() {
 		// Check if context was cancelled before executing
@@ -66,7 +66,7 @@ func (d *FieldDebouncer) ScheduleValidation(fieldName string, delay time.Duratio
 		default:
 			// Execute validation
 			validationFunc()
-			
+
 			// Clean up after execution
 			d.mu.Lock()
 			delete(d.timers, fieldName)
@@ -74,7 +74,7 @@ func (d *FieldDebouncer) ScheduleValidation(fieldName string, delay time.Duratio
 			d.mu.Unlock()
 		}
 	})
-	
+
 	d.timers[fieldName] = timer
 }
 
@@ -82,7 +82,7 @@ func (d *FieldDebouncer) ScheduleValidation(fieldName string, delay time.Duratio
 func (d *FieldDebouncer) CancelValidation(fieldName string) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	
+
 	d.cancelFieldUnsafe(fieldName)
 }
 
@@ -93,7 +93,7 @@ func (d *FieldDebouncer) cancelFieldUnsafe(fieldName string) {
 		timer.Stop()
 		delete(d.timers, fieldName)
 	}
-	
+
 	// Cancel context
 	if cancel, exists := d.contexts[fieldName]; exists {
 		cancel()
@@ -105,7 +105,7 @@ func (d *FieldDebouncer) cancelFieldUnsafe(fieldName string) {
 func (d *FieldDebouncer) CancelAllValidations() {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	
+
 	// Cancel all timers
 	for fieldName := range d.timers {
 		d.cancelFieldUnsafe(fieldName)
@@ -116,7 +116,7 @@ func (d *FieldDebouncer) CancelAllValidations() {
 func (d *FieldDebouncer) IsValidationPending(fieldName string) bool {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	
+
 	_, exists := d.timers[fieldName]
 	return exists
 }
@@ -125,12 +125,12 @@ func (d *FieldDebouncer) IsValidationPending(fieldName string) bool {
 func (d *FieldDebouncer) GetPendingFields() []string {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	
+
 	fields := make([]string, 0, len(d.timers))
 	for fieldName := range d.timers {
 		fields = append(fields, fieldName)
 	}
-	
+
 	return fields
 }
 
@@ -138,7 +138,7 @@ func (d *FieldDebouncer) GetPendingFields() []string {
 func (d *FieldDebouncer) GetPendingCount() int {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	
+
 	return len(d.timers)
 }
 
@@ -159,13 +159,13 @@ type StateManager interface {
 
 // ValidationSummary provides a comprehensive view of validation states
 type ValidationSummary struct {
-	States            map[string]ValidationState `json:"states"`
-	LastValidated     map[string]time.Time       `json:"lastValidated"`
-	TotalFields       int                        `json:"totalFields"`
-	ValidFields       int                        `json:"validFields"`
-	InvalidFields     int                        `json:"invalidFields"`
-	ValidatingFields  int                        `json:"validatingFields"`
-	WarningFields     int                        `json:"warningFields"`
+	States           map[string]ValidationState `json:"states"`
+	LastValidated    map[string]time.Time       `json:"lastValidated"`
+	TotalFields      int                        `json:"totalFields"`
+	ValidFields      int                        `json:"validFields"`
+	InvalidFields    int                        `json:"invalidFields"`
+	ValidatingFields int                        `json:"validatingFields"`
+	WarningFields    int                        `json:"warningFields"`
 }
 
 // IsFormValid returns true if all fields are valid (no invalid or validating fields)
@@ -182,13 +182,13 @@ func (vs ValidationSummary) IsFormValidating() bool {
 // EXTENDS the existing StateManager with validation-specific state tracking
 type ValidationStateManager struct {
 	// Enhanced validation states
-	validationStates map[string]ValidationState
-	validationTimes  map[string]time.Time
+	validationStates   map[string]ValidationState
+	validationTimes    map[string]time.Time
 	pendingValidations map[string]context.CancelFunc
-	
+
 	// Integration with existing state manager
 	stateManager StateManager
-	
+
 	// Thread safety
 	mu sync.RWMutex
 }
@@ -210,7 +210,7 @@ func NewValidationStateManager(stateManager StateManager) *ValidationStateManage
 func (vsm *ValidationStateManager) SetValidationState(fieldName string, state ValidationState) {
 	vsm.mu.Lock()
 	defer vsm.mu.Unlock()
-	
+
 	vsm.validationStates[fieldName] = state
 	vsm.validationTimes[fieldName] = time.Now()
 }
@@ -219,7 +219,7 @@ func (vsm *ValidationStateManager) SetValidationState(fieldName string, state Va
 func (vsm *ValidationStateManager) GetValidationState(fieldName string) ValidationState {
 	vsm.mu.RLock()
 	defer vsm.mu.RUnlock()
-	
+
 	if state, exists := vsm.validationStates[fieldName]; exists {
 		return state
 	}
@@ -230,7 +230,7 @@ func (vsm *ValidationStateManager) GetValidationState(fieldName string) Validati
 func (vsm *ValidationStateManager) SetValidationTime(fieldName string, t time.Time) {
 	vsm.mu.Lock()
 	defer vsm.mu.Unlock()
-	
+
 	vsm.validationTimes[fieldName] = t
 }
 
@@ -238,7 +238,7 @@ func (vsm *ValidationStateManager) SetValidationTime(fieldName string, t time.Ti
 func (vsm *ValidationStateManager) GetValidationTime(fieldName string) time.Time {
 	vsm.mu.RLock()
 	defer vsm.mu.RUnlock()
-	
+
 	return vsm.validationTimes[fieldName]
 }
 
@@ -246,7 +246,7 @@ func (vsm *ValidationStateManager) GetValidationTime(fieldName string) time.Time
 func (vsm *ValidationStateManager) HasFieldsInState(state ValidationState) bool {
 	vsm.mu.RLock()
 	defer vsm.mu.RUnlock()
-	
+
 	for _, fieldState := range vsm.validationStates {
 		if fieldState == state {
 			return true
@@ -259,7 +259,7 @@ func (vsm *ValidationStateManager) HasFieldsInState(state ValidationState) bool 
 func (vsm *ValidationStateManager) GetFieldsInState(state ValidationState) []string {
 	vsm.mu.RLock()
 	defer vsm.mu.RUnlock()
-	
+
 	fields := make([]string, 0)
 	for fieldName, fieldState := range vsm.validationStates {
 		if fieldState == state {
@@ -273,7 +273,7 @@ func (vsm *ValidationStateManager) GetFieldsInState(state ValidationState) []str
 func (vsm *ValidationStateManager) GetAllValidationStates() map[string]ValidationState {
 	vsm.mu.RLock()
 	defer vsm.mu.RUnlock()
-	
+
 	states := make(map[string]ValidationState)
 	for fieldName, state := range vsm.validationStates {
 		states[fieldName] = state
@@ -285,7 +285,7 @@ func (vsm *ValidationStateManager) GetAllValidationStates() map[string]Validatio
 func (vsm *ValidationStateManager) ClearValidationState(fieldName string) {
 	vsm.mu.Lock()
 	defer vsm.mu.Unlock()
-	
+
 	delete(vsm.validationStates, fieldName)
 	delete(vsm.validationTimes, fieldName)
 }
@@ -294,7 +294,7 @@ func (vsm *ValidationStateManager) ClearValidationState(fieldName string) {
 func (vsm *ValidationStateManager) ClearAllValidationStates() {
 	vsm.mu.Lock()
 	defer vsm.mu.Unlock()
-	
+
 	vsm.validationStates = make(map[string]ValidationState)
 	vsm.validationTimes = make(map[string]time.Time)
 }
@@ -350,17 +350,17 @@ func (vsm *ValidationStateManager) IsFieldTouched(fieldName string) bool {
 func (vsm *ValidationStateManager) GetValidationSummary() ValidationSummary {
 	vsm.mu.RLock()
 	defer vsm.mu.RUnlock()
-	
+
 	summary := ValidationSummary{
-		States:         make(map[string]ValidationState),
-		LastValidated:  make(map[string]time.Time),
-		TotalFields:    len(vsm.validationStates),
+		States:        make(map[string]ValidationState),
+		LastValidated: make(map[string]time.Time),
+		TotalFields:   len(vsm.validationStates),
 	}
-	
+
 	// Copy current states
 	for fieldName, state := range vsm.validationStates {
 		summary.States[fieldName] = state
-		
+
 		// Count states
 		switch state {
 		case ValidationStateValid:
@@ -373,12 +373,11 @@ func (vsm *ValidationStateManager) GetValidationSummary() ValidationSummary {
 			summary.WarningFields++
 		}
 	}
-	
+
 	// Copy validation times
 	for fieldName, t := range vsm.validationTimes {
 		summary.LastValidated[fieldName] = t
 	}
-	
+
 	return summary
 }
-

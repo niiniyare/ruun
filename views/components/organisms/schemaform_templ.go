@@ -18,21 +18,21 @@ import (
 
 // SchemaField represents a field from the ERP schema system
 type SchemaField struct {
-	Name        string      `json:"name"`
-	Type        string      `json:"type"`
-	Label       string      `json:"label"`
-	Description string      `json:"description"`
-	Placeholder string      `json:"placeholder"`
-	Required    bool        `json:"required"`
-	ReadOnly    bool        `json:"readOnly"`
-	Hidden      bool        `json:"hidden"`
-	Default     any `json:"default"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Placeholder string `json:"placeholder"`
+	Required    bool   `json:"required"`
+	ReadOnly    bool   `json:"readOnly"`
+	Hidden      bool   `json:"hidden"`
+	Default     any    `json:"default"`
 	// Validation
-	MinLength int         `json:"minLength"`
-	MaxLength int         `json:"maxLength"`
-	Min       any `json:"min"`
-	Max       any `json:"max"`
-	Pattern   string      `json:"pattern"`
+	MinLength int    `json:"minLength"`
+	MaxLength int    `json:"maxLength"`
+	Min       any    `json:"min"`
+	Max       any    `json:"max"`
+	Pattern   string `json:"pattern"`
 	// Options for select/radio fields
 	Options []SchemaFieldOption `json:"options"`
 	// Relationships
@@ -71,10 +71,10 @@ type SchemaFieldI18n struct {
 
 // SchemaFieldCondition represents conditional field logic
 type SchemaFieldCondition struct {
-	Field    string      `json:"field"`    // Field name to watch
-	Operator string      `json:"operator"` // eq, ne, gt, lt, in, etc.
-	Value    any `json:"value"`    // Value to compare
-	Action   string      `json:"action"`   // show, hide, require, disable
+	Field    string `json:"field"`    // Field name to watch
+	Operator string `json:"operator"` // eq, ne, gt, lt, in, etc.
+	Value    any    `json:"value"`    // Value to compare
+	Action   string `json:"action"`   // show, hide, require, disable
 }
 
 // SchemaFormSection represents a form section
@@ -126,14 +126,14 @@ type SchemaFormValidation struct {
 
 // SchemaFormProps defines properties for schema-driven forms
 type SchemaFormProps struct {
-	Schema   SchemaFormDefinition   `json:"schema"`
-	Data     map[string]any `json:"data"`     // Pre-filled data
-	Errors   map[string]string      `json:"errors"`   // Validation errors
-	Locale   string                 `json:"locale"`   // Current locale
-	ReadOnly bool                   `json:"readOnly"` // Read-only mode
-	Debug    bool                   `json:"debug"`    // Debug mode
-	Class    string                 `json:"class"`
-	ID       string                 `json:"id"`
+	Schema   SchemaFormDefinition `json:"schema"`
+	Data     map[string]any       `json:"data"`     // Pre-filled data
+	Errors   map[string]string    `json:"errors"`   // Validation errors
+	Locale   string               `json:"locale"`   // Current locale
+	ReadOnly bool                 `json:"readOnly"` // Read-only mode
+	Debug    bool                 `json:"debug"`    // Debug mode
+	Class    string               `json:"class"`
+	ID       string               `json:"id"`
 	// HTMX configuration
 	HXTarget string `json:"hxTarget"`
 	HXSwap   string `json:"hxSwap"`

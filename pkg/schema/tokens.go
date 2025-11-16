@@ -23,33 +23,33 @@ func (t TokenReference) IsReference() bool {
 	if len(s) == 0 {
 		return false
 	}
-	
+
 	// Not a reference if it starts with common CSS value patterns
 	if strings.HasPrefix(s, "#") || strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
 		return false
 	}
-	
+
 	// Not a reference if it looks like a CSS unit (number + unit)
-	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") || 
-	   strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
+	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") ||
+		strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
 		return false
 	}
-	
+
 	// Not a reference if it's a pure number (with or without decimal)
 	if matched, _ := regexp.MatchString(`^\d+(\.\d+)?$`, s); matched {
 		return false
 	}
-	
+
 	// Not a reference if it contains spaces (CSS values often have spaces)
 	if strings.Contains(s, " ") {
 		return false
 	}
-	
+
 	// Must contain dots to be a valid token path
 	if !strings.Contains(s, ".") {
 		return false
 	}
-	
+
 	// Should have at least 2 parts when split by dots (e.g., "colors.primary")
 	parts := strings.Split(s, ".")
 	return len(parts) >= 2
@@ -73,24 +73,24 @@ func (t TokenReference) String() string {
 // Validate checks if the token reference is well-formed.
 func (t TokenReference) Validate() error {
 	s := string(t)
-	
+
 	// If it's clearly a CSS value (starts with # or contains spaces), it's valid
-	if strings.HasPrefix(s, "#") || strings.Contains(s, " ") || 
-	   strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
+	if strings.HasPrefix(s, "#") || strings.Contains(s, " ") ||
+		strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
 		return nil
 	}
-	
+
 	// If it ends with CSS units, it's valid
-	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") || 
-	   strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
+	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") ||
+		strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
 		return nil
 	}
-	
+
 	// If it's a pure number, it's valid
 	if matched, _ := regexp.MatchString(`^\d+(\.\d+)?$`, s); matched {
 		return nil
 	}
-	
+
 	// If we get here, it's either a valid token reference or an invalid one
 	// Token references must contain at least one dot
 	if !strings.Contains(s, ".") {

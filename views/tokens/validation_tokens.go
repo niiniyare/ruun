@@ -10,7 +10,7 @@ var ValidationTokens = &schema.DesignTokens{
 			// Base color palette for validation states
 			Gray: &schema.GrayScale{
 				Scale50:  "#f9fafb",
-				Scale100: "#f3f4f6", 
+				Scale100: "#f3f4f6",
 				Scale200: "#e5e7eb",
 				Scale300: "#d1d5db",
 				Scale400: "#9ca3af",
@@ -23,7 +23,7 @@ var ValidationTokens = &schema.DesignTokens{
 			Blue: &schema.ColorScale{
 				Scale50:  "#eff6ff",
 				Scale100: "#dbeafe",
-				Scale200: "#bfdbfe", 
+				Scale200: "#bfdbfe",
 				Scale300: "#93c5fd",
 				Scale400: "#60a5fa",
 				Scale500: "#3b82f6",
@@ -72,11 +72,11 @@ var ValidationTokens = &schema.DesignTokens{
 			White: "#ffffff",
 			Black: "#000000",
 		},
-		
+
 		Spacing: &schema.SpacingScale{
 			None: "0",
 			XS:   "0.25rem",
-			SM:   "0.5rem", 
+			SM:   "0.5rem",
 			MD:   "0.75rem",
 			LG:   "1rem",
 			XL:   "1.5rem",
@@ -84,11 +84,11 @@ var ValidationTokens = &schema.DesignTokens{
 			XXXL: "3rem",
 			Huge: "4rem",
 		},
-		
+
 		Typography: &schema.TypographyPrimitives{
 			FontSizes: &schema.FontSizeScale{
 				XS:   "0.75rem",
-				SM:   "0.875rem", 
+				SM:   "0.875rem",
 				Base: "1rem",
 				LG:   "1.125rem",
 				XL:   "1.25rem",
@@ -99,19 +99,19 @@ var ValidationTokens = &schema.DesignTokens{
 			FontWeights: &schema.FontWeightScale{
 				Thin:      "100",
 				Light:     "300",
-				Normal:    "400", 
+				Normal:    "400",
 				Medium:    "500",
 				Semibold:  "600",
 				Bold:      "700",
 				Extrabold: "800",
 			},
 		},
-		
+
 		Borders: &schema.BorderPrimitives{
 			Width: &schema.BorderWidthScale{
 				None:   "0",
 				Thin:   "1px",
-				Medium: "2px", 
+				Medium: "2px",
 				Thick:  "4px",
 			},
 			Radius: &schema.BorderRadiusScale{
@@ -123,7 +123,7 @@ var ValidationTokens = &schema.DesignTokens{
 				Full: "9999px",
 			},
 		},
-		
+
 		Shadows: &schema.ShadowScale{
 			None:  "none",
 			SM:    "0 1px 2px 0 rgb(0 0 0 / 0.05)",
@@ -133,7 +133,7 @@ var ValidationTokens = &schema.DesignTokens{
 			XXL:   "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
 			Inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.06)",
 		},
-		
+
 		Animations: &schema.AnimationPrimitives{
 			Duration: &schema.AnimationDurationScale{
 				Fast:   "150ms",
@@ -143,12 +143,12 @@ var ValidationTokens = &schema.DesignTokens{
 			Easing: &schema.AnimationEasingScale{
 				Linear:    "linear",
 				EaseIn:    "cubic-bezier(0.4, 0.0, 1, 1)",
-				EaseOut:   "cubic-bezier(0, 0, 0.2, 1)", 
+				EaseOut:   "cubic-bezier(0, 0, 0.2, 1)",
 				EaseInOut: "cubic-bezier(0.4, 0, 0.2, 1)",
 			},
 		},
 	},
-	
+
 	Semantic: &schema.SemanticTokens{
 		Colors: &schema.SemanticColors{
 			Background: &schema.BackgroundColors{
@@ -187,7 +187,7 @@ var ValidationTokens = &schema.DesignTokens{
 				},
 				Error: &schema.FeedbackColorSet{
 					Default: schema.TokenReference("primitives.colors.red.600"),
-					Subtle:  schema.TokenReference("primitives.colors.red.100"), 
+					Subtle:  schema.TokenReference("primitives.colors.red.100"),
 					Strong:  schema.TokenReference("primitives.colors.red.800"),
 				},
 				Warning: &schema.FeedbackColorSet{
@@ -202,7 +202,7 @@ var ValidationTokens = &schema.DesignTokens{
 				},
 			},
 		},
-		
+
 		Typography: &schema.SemanticTypography{
 			Body: &schema.BodyTokens{
 				Large: &schema.TypographyToken{

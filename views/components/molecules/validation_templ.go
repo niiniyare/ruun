@@ -37,11 +37,11 @@ type ValidationResult struct {
 
 // ValidationMessage represents a single validation message
 type ValidationMessage struct {
-	Type    ValidationMessageType  `json:"type"`
-	Message string                 `json:"message"`
-	Field   string                 `json:"field"`
-	Code    string                 `json:"code"`
-	Details map[string]any `json:"details"`
+	Type    ValidationMessageType `json:"type"`
+	Message string                `json:"message"`
+	Field   string                `json:"field"`
+	Code    string                `json:"code"`
+	Details map[string]any        `json:"details"`
 }
 
 // ValidationProps defines properties for validation components

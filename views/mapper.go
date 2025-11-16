@@ -965,11 +965,11 @@ func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) molecule
 		FieldName: field.Name,
 		Required:  field.Required,
 	}
-	
+
 	// Extract rules that can be validated client-side
 	if field.Validation != nil {
 		v := field.Validation
-		
+
 		// String length constraints
 		if v.MinLength != nil {
 			rules.MinLength = v.MinLength
@@ -977,7 +977,7 @@ func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) molecule
 		if v.MaxLength != nil {
 			rules.MaxLength = v.MaxLength
 		}
-		
+
 		// Numeric constraints
 		if v.Min != nil {
 			rules.Min = v.Min
@@ -988,12 +988,12 @@ func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) molecule
 		if v.Step != nil {
 			rules.Step = v.Step
 		}
-		
+
 		// Pattern validation
 		if v.Pattern != "" {
 			rules.Pattern = v.Pattern
 		}
-		
+
 		// Format validation (can be handled client-side)
 		if v.Format != "" {
 			switch v.Format {
@@ -1001,7 +1001,7 @@ func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) molecule
 				rules.Format = v.Format
 			}
 		}
-		
+
 		// Extract client-validatable custom rules
 		if v.Custom != "" {
 			clientRule := m.extractClientCustomRule(v.Custom, v.Messages)
@@ -1010,10 +1010,10 @@ func (m *FieldMapper) ExtractClientValidationRules(field *schema.Field) molecule
 			}
 		}
 	}
-	
+
 	// Extract field-type specific client rules
 	m.extractFieldTypeClientRules(field, &rules)
-	
+
 	return rules
 }
 
@@ -1037,14 +1037,14 @@ func (m *FieldMapper) extractFieldTypeClientRules(field *schema.Field, rules *mo
 			Message: "Please enter a valid email address",
 			Async:   false,
 		})
-		
+
 	case schema.FieldURL:
 		rules.CustomRules = append(rules.CustomRules, molecules.ClientValidationRule{
 			Type:    "url_format",
 			Message: "Please enter a valid URL",
 			Async:   false,
 		})
-		
+
 	case schema.FieldPhone:
 		rules.CustomRules = append(rules.CustomRules, molecules.ClientValidationRule{
 			Type:    "phone_format",
@@ -1052,7 +1052,7 @@ func (m *FieldMapper) extractFieldTypeClientRules(field *schema.Field, rules *mo
 			Async:   false,
 		})
 	}
-	
+
 	// Add uniqueness validation if specified
 	if field.Validation != nil && field.Validation.Unique {
 		rules.CustomRules = append(rules.CustomRules, molecules.ClientValidationRule{
@@ -1068,7 +1068,7 @@ func (m *FieldMapper) getCustomRuleMessage(messages any, ruleType string) string
 	if messages == nil {
 		return "Validation failed"
 	}
-	
+
 	// Fallback to generic validation message
 	return "Please enter a valid value"
 }
@@ -1076,22 +1076,22 @@ func (m *FieldMapper) getCustomRuleMessage(messages any, ruleType string) string
 // GetClientValidationConfig returns client validation configuration for a field
 func (m *FieldMapper) GetClientValidationConfig(field *schema.Field) map[string]any {
 	rules := m.ExtractClientValidationRules(field)
-	
+
 	config := map[string]any{
-		"fieldName":    rules.FieldName,
-		"required":     rules.Required,
-		"rules":        rules,
-		"realTime":     true, // Enable real-time client validation
-		"debounceMs":   300,  // Default debounce timing
+		"fieldName":  rules.FieldName,
+		"required":   rules.Required,
+		"rules":      rules,
+		"realTime":   true, // Enable real-time client validation
+		"debounceMs": 300,  // Default debounce timing
 	}
-	
+
 	return config
 }
 
 // HasClientValidationRules checks if a field has any client-side validation rules
 func (m *FieldMapper) HasClientValidationRules(field *schema.Field) bool {
 	rules := m.ExtractClientValidationRules(field)
-	
+
 	return rules.Required ||
 		rules.MinLength != nil ||
 		rules.MaxLength != nil ||
@@ -1116,10 +1116,10 @@ type TokenRegistry interface {
 
 // DefaultTokenRegistry provides a default implementation
 type DefaultTokenRegistry struct {
-	baseTokens     *schema.DesignTokens
-	tokenCache     map[string]map[string]string
-	cacheExpiry    map[string]time.Time
-	cacheMutex     sync.RWMutex
+	baseTokens      *schema.DesignTokens
+	tokenCache      map[string]map[string]string
+	cacheExpiry     map[string]time.Time
+	cacheMutex      sync.RWMutex
 	cacheExpiration time.Duration
 }
 
@@ -1137,12 +1137,12 @@ func NewDefaultTokenRegistry() *DefaultTokenRegistry {
 func (r *DefaultTokenRegistry) ResolveToken(ctx context.Context, tokenRef schema.TokenReference) (string, error) {
 	// Parse token reference (e.g., "components.field.background.default")
 	tokenPath := string(tokenRef)
-	
+
 	// Try to resolve from validation tokens
 	if value := r.resolveFromDesignTokens(tokenPath); value != "" {
 		return value, nil
 	}
-	
+
 	// Return empty if not found (caller should handle fallback)
 	return "", fmt.Errorf("token not found: %s", tokenPath)
 }
@@ -1150,7 +1150,7 @@ func (r *DefaultTokenRegistry) ResolveToken(ctx context.Context, tokenRef schema
 // ResolveTokens resolves multiple token references
 func (r *DefaultTokenRegistry) ResolveTokens(ctx context.Context, tokenRefs map[string]schema.TokenReference) (map[string]string, error) {
 	resolved := make(map[string]string)
-	
+
 	for key, tokenRef := range tokenRefs {
 		value, err := r.ResolveToken(ctx, tokenRef)
 		if err == nil {
@@ -1158,7 +1158,7 @@ func (r *DefaultTokenRegistry) ResolveTokens(ctx context.Context, tokenRefs map[
 		}
 		// Skip tokens that can't be resolved (fallbacks will be used)
 	}
-	
+
 	return resolved, nil
 }
 
@@ -1166,7 +1166,7 @@ func (r *DefaultTokenRegistry) ResolveTokens(ctx context.Context, tokenRefs map[
 func (r *DefaultTokenRegistry) GetCachedTokens(cacheKey string) (map[string]string, bool) {
 	r.cacheMutex.RLock()
 	defer r.cacheMutex.RUnlock()
-	
+
 	// Check if cache entry exists and is not expired
 	if expiry, exists := r.cacheExpiry[cacheKey]; exists {
 		if time.Now().Before(expiry) {
@@ -1175,7 +1175,7 @@ func (r *DefaultTokenRegistry) GetCachedTokens(cacheKey string) (map[string]stri
 			}
 		}
 	}
-	
+
 	return nil, false
 }
 
@@ -1183,7 +1183,7 @@ func (r *DefaultTokenRegistry) GetCachedTokens(cacheKey string) (map[string]stri
 func (r *DefaultTokenRegistry) SetCachedTokens(cacheKey string, tokens map[string]string, expiry time.Duration) {
 	r.cacheMutex.Lock()
 	defer r.cacheMutex.Unlock()
-	
+
 	r.tokenCache[cacheKey] = tokens
 	r.cacheExpiry[cacheKey] = time.Now().Add(expiry)
 }
@@ -1193,12 +1193,12 @@ func (r *DefaultTokenRegistry) resolveFromDesignTokens(tokenPath string) string 
 	if r.baseTokens == nil {
 		return ""
 	}
-	
+
 	parts := strings.Split(tokenPath, ".")
 	if len(parts) < 2 {
 		return ""
 	}
-	
+
 	switch parts[0] {
 	case "primitives":
 		return r.resolvePrimitiveToken(parts[1:])
@@ -1216,7 +1216,7 @@ func (r *DefaultTokenRegistry) resolvePrimitiveToken(parts []string) string {
 	if r.baseTokens.Primitives == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	switch parts[0] {
 	case "colors":
 		return r.resolvePrimitiveColor(parts[1:])
@@ -1231,7 +1231,7 @@ func (r *DefaultTokenRegistry) resolvePrimitiveToken(parts []string) string {
 	case "shadow":
 		return r.resolvePrimitiveShadow(parts[1:])
 	}
-	
+
 	return ""
 }
 
@@ -1240,10 +1240,10 @@ func (r *DefaultTokenRegistry) resolvePrimitiveColor(parts []string) string {
 	if r.baseTokens.Primitives.Colors == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	colorGroup := parts[0]
 	colorKey := parts[1]
-	
+
 	switch colorGroup {
 	case "gray":
 		if r.baseTokens.Primitives.Colors.Gray != nil {
@@ -1276,7 +1276,7 @@ func (r *DefaultTokenRegistry) resolvePrimitiveColor(parts []string) string {
 			}
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1285,10 +1285,10 @@ func (r *DefaultTokenRegistry) resolvePrimitiveTypography(parts []string) string
 	if r.baseTokens.Primitives.Typography == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	typoGroup := parts[0]
 	typoKey := parts[1]
-	
+
 	switch typoGroup {
 	case "fontSizes":
 		if r.baseTokens.Primitives.Typography.FontSizes != nil {
@@ -1309,7 +1309,7 @@ func (r *DefaultTokenRegistry) resolvePrimitiveTypography(parts []string) string
 			}
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1318,13 +1318,13 @@ func (r *DefaultTokenRegistry) resolvePrimitiveSpacing(parts []string) string {
 	if r.baseTokens.Primitives.Spacing == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	if parts[0] == "spacing" && r.baseTokens.Primitives.Spacing != nil {
 		if value := getSpacingFromScale(r.baseTokens.Primitives.Spacing, parts[1]); value != "" {
 			return value
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1333,10 +1333,10 @@ func (r *DefaultTokenRegistry) resolvePrimitiveBorder(parts []string) string {
 	if r.baseTokens.Primitives.Borders == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	borderGroup := parts[0]
 	borderKey := parts[1]
-	
+
 	switch borderGroup {
 	case "width":
 		if r.baseTokens.Primitives.Borders.Width != nil {
@@ -1351,19 +1351,19 @@ func (r *DefaultTokenRegistry) resolvePrimitiveBorder(parts []string) string {
 			}
 		}
 	}
-	
+
 	return ""
 }
 
-// resolvePrimitiveAnimation resolves primitive animation tokens  
+// resolvePrimitiveAnimation resolves primitive animation tokens
 func (r *DefaultTokenRegistry) resolvePrimitiveAnimation(parts []string) string {
 	if r.baseTokens.Primitives.Animations == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	animGroup := parts[0]
 	animKey := parts[1]
-	
+
 	switch animGroup {
 	case "duration":
 		if r.baseTokens.Primitives.Animations.Duration != nil {
@@ -1374,7 +1374,7 @@ func (r *DefaultTokenRegistry) resolvePrimitiveAnimation(parts []string) string 
 			return getEasingFromScale(r.baseTokens.Primitives.Animations.Easing, animKey)
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1383,7 +1383,7 @@ func (r *DefaultTokenRegistry) resolvePrimitiveShadow(parts []string) string {
 	if r.baseTokens.Primitives.Shadows == nil || len(parts) < 1 {
 		return ""
 	}
-	
+
 	// Shadow tokens don't have nested groups, they're direct scale values
 	shadowKey := parts[0]
 	return getShadowFromScale(r.baseTokens.Primitives.Shadows, shadowKey)
@@ -1394,7 +1394,7 @@ func (r *DefaultTokenRegistry) resolveSemanticToken(parts []string) string {
 	if r.baseTokens.Semantic == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	switch parts[0] {
 	case "colors":
 		return r.resolveSemanticColor(parts[1:])
@@ -1405,7 +1405,7 @@ func (r *DefaultTokenRegistry) resolveSemanticToken(parts []string) string {
 	case "animation":
 		return r.resolveSemanticInteractive(parts[1:])
 	}
-	
+
 	return ""
 }
 
@@ -1414,12 +1414,12 @@ func (r *DefaultTokenRegistry) resolveSemanticColor(parts []string) string {
 	if r.baseTokens.Semantic.Colors == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	colorGroup := parts[0]
 	colorKey := parts[1]
-	
+
 	var tokenRef string
-	
+
 	switch colorGroup {
 	case "background":
 		if r.baseTokens.Semantic.Colors.Background != nil {
@@ -1442,12 +1442,12 @@ func (r *DefaultTokenRegistry) resolveSemanticColor(parts []string) string {
 			tokenRef = string(getFeedbackColorFromStruct(r.baseTokens.Semantic.Colors.Feedback, colorKey))
 		}
 	}
-	
+
 	// If token reference found, resolve it recursively
 	if tokenRef != "" {
 		return r.resolveFromDesignTokens(tokenRef)
 	}
-	
+
 	return ""
 }
 
@@ -1456,12 +1456,12 @@ func (r *DefaultTokenRegistry) resolveSemanticTypography(parts []string) string 
 	if r.baseTokens.Semantic.Typography == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	typoGroup := parts[0]
 	typoKey := parts[1]
-	
+
 	var tokenRef string
-	
+
 	switch typoGroup {
 	case "body":
 		if r.baseTokens.Semantic.Typography.Body != nil {
@@ -1476,11 +1476,11 @@ func (r *DefaultTokenRegistry) resolveSemanticTypography(parts []string) string 
 			tokenRef = string(getCaptionTypographyFromStruct(r.baseTokens.Semantic.Typography.Captions, typoKey))
 		}
 	}
-	
+
 	if tokenRef != "" {
 		return r.resolveFromDesignTokens(tokenRef)
 	}
-	
+
 	return ""
 }
 
@@ -1489,14 +1489,14 @@ func (r *DefaultTokenRegistry) resolveSemanticSpacing(parts []string) string {
 	if r.baseTokens.Semantic.Spacing == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	if parts[0] == "component" && r.baseTokens.Semantic.Spacing.Component != nil {
 		tokenRef := string(getComponentSpacingFromStruct(r.baseTokens.Semantic.Spacing.Component, parts[1]))
 		if tokenRef != "" {
 			return r.resolveFromDesignTokens(tokenRef)
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1505,7 +1505,7 @@ func (r *DefaultTokenRegistry) resolveSemanticInteractive(parts []string) string
 	if r.baseTokens.Semantic.Interactive == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	// Handle interactive tokens like borderRadius, shadow
 	switch parts[0] {
 	case "borderRadius":
@@ -1523,7 +1523,7 @@ func (r *DefaultTokenRegistry) resolveSemanticInteractive(parts []string) string
 			}
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1532,7 +1532,7 @@ func (r *DefaultTokenRegistry) resolveComponentToken(parts []string) string {
 	if r.baseTokens.Components == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	switch parts[0] {
 	case "input":
 		return r.resolveInputComponentToken(parts[1:])
@@ -1541,7 +1541,7 @@ func (r *DefaultTokenRegistry) resolveComponentToken(parts []string) string {
 	case "form":
 		return r.resolveFormComponentToken(parts[1:])
 	}
-	
+
 	return ""
 }
 
@@ -1550,7 +1550,7 @@ func (r *DefaultTokenRegistry) resolveInputComponentToken(parts []string) string
 	if r.baseTokens.Components.Input == nil || len(parts) == 0 {
 		return ""
 	}
-	
+
 	// Return input token references - these are TokenReferences that need resolution
 	switch parts[0] {
 	case "background":
@@ -1580,11 +1580,11 @@ func (r *DefaultTokenRegistry) resolveButtonComponentToken(parts []string) strin
 	if r.baseTokens.Components.Button == nil || len(parts) < 2 {
 		return ""
 	}
-	
+
 	// Handle button variants like primary.background, secondary.hover, etc.
 	variant := parts[0]
 	prop := parts[1]
-	
+
 	switch variant {
 	case "primary":
 		if r.baseTokens.Components.Button.Primary != nil {
@@ -1598,12 +1598,12 @@ func (r *DefaultTokenRegistry) resolveButtonComponentToken(parts []string) strin
 	return ""
 }
 
-// resolveFormComponentToken resolves form component tokens  
+// resolveFormComponentToken resolves form component tokens
 func (r *DefaultTokenRegistry) resolveFormComponentToken(parts []string) string {
 	if r.baseTokens.Components.Form == nil || len(parts) == 0 {
 		return ""
 	}
-	
+
 	// Form tokens would be handled here when defined in schema
 	return ""
 }
@@ -1611,34 +1611,34 @@ func (r *DefaultTokenRegistry) resolveFormComponentToken(parts []string) string 
 // ResolveFieldTokens resolves tokens for a field with validation state and dark mode support
 // This is the main method called by the renderer and FormField component
 func (m *FieldMapper) ResolveFieldTokens(
-	ctx context.Context, 
-	props molecules.FormFieldProps, 
+	ctx context.Context,
+	props molecules.FormFieldProps,
 	darkMode bool,
 ) map[string]string {
 	// Build cache key for performance
 	cacheKey := m.buildTokenCacheKey(props.Name, props.ValidationState.String(), props.ThemeID, darkMode)
-	
+
 	// Check cache first
 	if m.tokenRegistry != nil {
 		if cachedTokens, found := m.tokenRegistry.GetCachedTokens(cacheKey); found {
 			return cachedTokens
 		}
 	}
-	
+
 	// Build base token references
 	baseTokenRefs := m.buildBaseTokenReferences(props)
-	
+
 	// Apply validation-specific token refs
 	validationTokenRefs := m.buildValidationTokenReferences(props.ValidationState)
 	for key, ref := range validationTokenRefs {
 		baseTokenRefs[key] = ref
 	}
-	
+
 	// Merge in explicit props.Tokens overrides (highest precedence)
 	for key, value := range props.Tokens {
 		baseTokenRefs[key] = schema.TokenReference(value)
 	}
-	
+
 	// Resolve tokens with token registry
 	var resolved map[string]string
 	if m.tokenRegistry != nil {
@@ -1647,7 +1647,7 @@ func (m *FieldMapper) ResolveFieldTokens(
 		// Fallback resolution without registry
 		resolved = m.fallbackTokenResolution(baseTokenRefs)
 	}
-	
+
 	// Apply dark mode overrides if requested
 	if darkMode {
 		darkOverrides := m.getDarkModeTokenOverrides(props.ValidationState)
@@ -1661,17 +1661,17 @@ func (m *FieldMapper) ResolveFieldTokens(
 			}
 		}
 	}
-	
+
 	// Apply tenant-specific overrides from props.TokenOverrides
 	for key, value := range props.TokenOverrides {
 		resolved[key] = value
 	}
-	
+
 	// Cache resolved tokens
 	if m.tokenRegistry != nil {
 		m.tokenRegistry.SetCachedTokens(cacheKey, resolved, 5*time.Minute)
 	}
-	
+
 	return resolved
 }
 
@@ -1693,58 +1693,58 @@ func (m *FieldMapper) buildBaseTokenReferences(props molecules.FormFieldProps) m
 		molecules.TokenFieldSpacing:     "components.field.spacing.padding",
 		molecules.TokenFieldShadow:      "components.field.shadow.default",
 	}
-	
+
 	// Add field state-specific tokens
 	if props.Disabled {
 		baseTokens[molecules.TokenFieldBackground] = "components.field.background.disabled"
 		baseTokens[molecules.TokenFieldText] = "components.field.text.disabled"
 		baseTokens[molecules.TokenFieldLabel] = "components.field.label.color.disabled"
 	}
-	
+
 	if props.Readonly {
 		baseTokens[molecules.TokenFieldBackground] = "components.field.background.readonly"
 		baseTokens[molecules.TokenFieldText] = "components.field.text.readonly"
 	}
-	
+
 	return baseTokens
 }
 
 // buildValidationTokenReferences builds validation-specific token references
 func (m *FieldMapper) buildValidationTokenReferences(state validation.ValidationState) map[string]schema.TokenReference {
 	validationTokens := make(map[string]schema.TokenReference)
-	
+
 	switch state {
 	case validation.ValidationStateValidating:
 		validationTokens[molecules.TokenFieldBorder] = "components.field.border.color.validating"
 		validationTokens[molecules.TokenValidationLoading] = "components.field.validation.loading.color"
 		validationTokens[molecules.TokenValidationLoading+".icon"] = "components.field.validation.loading.icon"
 		validationTokens[molecules.TokenValidationLoading+".message"] = "components.field.validation.loading.message"
-		
+
 	case validation.ValidationStateValid:
 		validationTokens[molecules.TokenFieldBorder] = "components.field.border.color.valid"
 		validationTokens[molecules.TokenValidationSuccess] = "components.field.validation.success.color"
 		validationTokens[molecules.TokenValidationSuccess+".icon"] = "components.field.validation.success.icon"
 		validationTokens[molecules.TokenValidationSuccess+".message"] = "components.field.validation.success.message"
-		
+
 	case validation.ValidationStateInvalid:
 		validationTokens[molecules.TokenFieldBorder] = "components.field.border.color.invalid"
 		validationTokens[molecules.TokenValidationError] = "components.field.validation.error.color"
 		validationTokens[molecules.TokenValidationError+".icon"] = "components.field.validation.error.icon"
 		validationTokens[molecules.TokenValidationError+".message"] = "components.field.validation.error.message"
-		
+
 	case validation.ValidationStateWarning:
 		validationTokens[molecules.TokenFieldBorder] = "components.field.border.color.warning"
 		validationTokens[molecules.TokenValidationWarning] = "components.field.validation.warning.color"
 		validationTokens[molecules.TokenValidationWarning+".icon"] = "components.field.validation.warning.icon"
 		validationTokens[molecules.TokenValidationWarning+".message"] = "components.field.validation.warning.message"
 	}
-	
+
 	return validationTokens
 }
 
 // getDarkModeTokenOverrides returns dark mode token overrides
 func (m *FieldMapper) getDarkModeTokenOverrides(state validation.ValidationState) map[string]string {
-	// Return empty map for now - dark mode overrides would be implemented 
+	// Return empty map for now - dark mode overrides would be implemented
 	// based on the specific design system requirements
 	return make(map[string]string)
 }
@@ -1768,22 +1768,22 @@ func (m *FieldMapper) validationStateToString(state validation.ValidationState) 
 // fallbackTokenResolution provides fallback when no token registry is available
 func (m *FieldMapper) fallbackTokenResolution(tokenRefs map[string]schema.TokenReference) map[string]string {
 	resolved := make(map[string]string)
-	
+
 	// Provide basic fallback values
 	fallbackValues := map[string]string{
-		molecules.TokenFieldBackground:        "#ffffff",
-		molecules.TokenFieldBorder:           "#e5e7eb",
-		molecules.TokenFieldText:             "#111827",
-		molecules.TokenFieldLabel:            "#111827",
-		molecules.TokenFieldPlaceholder:      "#9ca3af",
-		molecules.TokenFieldHelp:             "#6b7280",
-		molecules.TokenFieldRadius:           "0.375rem",
-		molecules.TokenFieldSpacing:          "0.75rem",
-		molecules.TokenFieldShadow:           "none",
-		molecules.TokenValidationLoading:     "#f59e0b",
-		molecules.TokenValidationSuccess:     "#16a34a",
-		molecules.TokenValidationError:       "#dc2626",
-		molecules.TokenValidationWarning:     "#d97706",
+		molecules.TokenFieldBackground:                "#ffffff",
+		molecules.TokenFieldBorder:                    "#e5e7eb",
+		molecules.TokenFieldText:                      "#111827",
+		molecules.TokenFieldLabel:                     "#111827",
+		molecules.TokenFieldPlaceholder:               "#9ca3af",
+		molecules.TokenFieldHelp:                      "#6b7280",
+		molecules.TokenFieldRadius:                    "0.375rem",
+		molecules.TokenFieldSpacing:                   "0.75rem",
+		molecules.TokenFieldShadow:                    "none",
+		molecules.TokenValidationLoading:              "#f59e0b",
+		molecules.TokenValidationSuccess:              "#16a34a",
+		molecules.TokenValidationError:                "#dc2626",
+		molecules.TokenValidationWarning:              "#d97706",
 		molecules.TokenValidationLoading + ".icon":    "⟳",
 		molecules.TokenValidationSuccess + ".icon":    "✓",
 		molecules.TokenValidationError + ".icon":      "✗",
@@ -1793,35 +1793,34 @@ func (m *FieldMapper) fallbackTokenResolution(tokenRefs map[string]schema.TokenR
 		molecules.TokenValidationError + ".message":   "Invalid",
 		molecules.TokenValidationWarning + ".message": "Warning",
 	}
-	
+
 	for key := range tokenRefs {
 		if fallback, exists := fallbackValues[key]; exists {
 			resolved[key] = fallback
 		}
 	}
-	
+
 	return resolved
 }
 
 // fallbackTokenValue provides a fallback value for a single token
 func (m *FieldMapper) fallbackTokenValue(tokenRef string) string {
 	fallbackMap := map[string]string{
-		"semantic.colors.background.primary":   "#111827",
-		"semantic.colors.text.primary":         "#f9fafb",
-		"semantic.colors.border.primary":       "#374151",
-		"semantic.colors.validation.loading":   "#fbbf24",
-		"semantic.colors.validation.success":   "#22c55e",
-		"semantic.colors.validation.error":     "#ef4444",
-		"semantic.colors.validation.warning":   "#f59e0b",
+		"semantic.colors.background.primary": "#111827",
+		"semantic.colors.text.primary":       "#f9fafb",
+		"semantic.colors.border.primary":     "#374151",
+		"semantic.colors.validation.loading": "#fbbf24",
+		"semantic.colors.validation.success": "#22c55e",
+		"semantic.colors.validation.error":   "#ef4444",
+		"semantic.colors.validation.warning": "#f59e0b",
 	}
-	
+
 	if fallback, exists := fallbackMap[tokenRef]; exists {
 		return fallback
 	}
-	
+
 	return ""
 }
-
 
 // AddTokenRegistryToFieldMapper is a helper to initialize the token registry
 var defaultTokenRegistry *DefaultTokenRegistry
@@ -2244,7 +2243,7 @@ func getBodyTypographyFromStruct(body *schema.BodyTokens, key string) schema.Tok
 	return ""
 }
 
-// getLabelTypographyFromStruct safely gets label typography from struct  
+// getLabelTypographyFromStruct safely gets label typography from struct
 func getLabelTypographyFromStruct(labels *schema.LabelTokens, key string) schema.TokenReference {
 	if labels == nil {
 		return ""

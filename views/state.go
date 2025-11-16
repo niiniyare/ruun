@@ -50,7 +50,7 @@ type StateManager struct {
 	touched     map[string]bool
 	dirty       map[string]bool
 	initialData map[string]any
-	
+
 	// NEW: UI validation orchestration state tracking
 	validationStates map[string]ValidationState // Tracks validation UI states
 	validationTimes  map[string]time.Time       // Last validation timestamp
@@ -69,7 +69,7 @@ func NewStateManager(s *schema.Schema, initialData map[string]any) *StateManager
 		touched:     make(map[string]bool),
 		dirty:       make(map[string]bool),
 		initialData: make(map[string]any),
-		
+
 		// NEW: Initialize validation orchestration state
 		validationStates: make(map[string]ValidationState),
 		validationTimes:  make(map[string]time.Time),
@@ -537,7 +537,7 @@ func (sm *StateManager) SetInitialValue(fieldName string, value any) {
 func (sm *StateManager) SetValidationState(fieldName string, state ValidationState) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
-	
+
 	sm.validationStates[fieldName] = state
 	sm.validationTimes[fieldName] = time.Now()
 }
@@ -546,7 +546,7 @@ func (sm *StateManager) SetValidationState(fieldName string, state ValidationSta
 func (sm *StateManager) GetValidationState(fieldName string) ValidationState {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	if state, exists := sm.validationStates[fieldName]; exists {
 		return state
 	}
@@ -557,7 +557,7 @@ func (sm *StateManager) GetValidationState(fieldName string) ValidationState {
 func (sm *StateManager) SetValidationTime(fieldName string, t time.Time) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
-	
+
 	sm.validationTimes[fieldName] = t
 }
 
@@ -565,7 +565,7 @@ func (sm *StateManager) SetValidationTime(fieldName string, t time.Time) {
 func (sm *StateManager) GetValidationTime(fieldName string) time.Time {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	return sm.validationTimes[fieldName]
 }
 
@@ -573,7 +573,7 @@ func (sm *StateManager) GetValidationTime(fieldName string) time.Time {
 func (sm *StateManager) HasFieldsInState(state ValidationState) bool {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	for _, fieldState := range sm.validationStates {
 		if fieldState == state {
 			return true
@@ -586,7 +586,7 @@ func (sm *StateManager) HasFieldsInState(state ValidationState) bool {
 func (sm *StateManager) GetFieldsInState(state ValidationState) []string {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	fields := make([]string, 0)
 	for fieldName, fieldState := range sm.validationStates {
 		if fieldState == state {
@@ -600,7 +600,7 @@ func (sm *StateManager) GetFieldsInState(state ValidationState) []string {
 func (sm *StateManager) GetAllValidationStates() map[string]ValidationState {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	states := make(map[string]ValidationState)
 	for fieldName, state := range sm.validationStates {
 		states[fieldName] = state
@@ -612,7 +612,7 @@ func (sm *StateManager) GetAllValidationStates() map[string]ValidationState {
 func (sm *StateManager) ClearValidationState(fieldName string) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
-	
+
 	delete(sm.validationStates, fieldName)
 	delete(sm.validationTimes, fieldName)
 }
@@ -621,7 +621,7 @@ func (sm *StateManager) ClearValidationState(fieldName string) {
 func (sm *StateManager) ClearAllValidationStates() {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
-	
+
 	sm.validationStates = make(map[string]ValidationState)
 	sm.validationTimes = make(map[string]time.Time)
 }
@@ -633,13 +633,13 @@ func (sm *StateManager) IsValidationInProgress() bool {
 
 // GetValidationSummary returns a comprehensive validation state summary
 type ValidationSummary struct {
-	States            map[string]ValidationState `json:"states"`
-	LastValidated     map[string]time.Time       `json:"lastValidated"`
-	TotalFields       int                        `json:"totalFields"`
-	ValidFields       int                        `json:"validFields"`
-	InvalidFields     int                        `json:"invalidFields"`
-	ValidatingFields  int                        `json:"validatingFields"`
-	WarningFields     int                        `json:"warningFields"`
+	States           map[string]ValidationState `json:"states"`
+	LastValidated    map[string]time.Time       `json:"lastValidated"`
+	TotalFields      int                        `json:"totalFields"`
+	ValidFields      int                        `json:"validFields"`
+	InvalidFields    int                        `json:"invalidFields"`
+	ValidatingFields int                        `json:"validatingFields"`
+	WarningFields    int                        `json:"warningFields"`
 }
 
 // IsFormValid returns true if all fields are valid (no invalid or validating fields)
@@ -656,17 +656,17 @@ func (vs ValidationSummary) IsFormValidating() bool {
 func (sm *StateManager) GetValidationSummary() ValidationSummary {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
-	
+
 	summary := ValidationSummary{
-		States:         make(map[string]ValidationState),
-		LastValidated:  make(map[string]time.Time),
-		TotalFields:    len(sm.validationStates),
+		States:        make(map[string]ValidationState),
+		LastValidated: make(map[string]time.Time),
+		TotalFields:   len(sm.validationStates),
 	}
-	
+
 	// Copy current states and count them
 	for fieldName, state := range sm.validationStates {
 		summary.States[fieldName] = state
-		
+
 		switch state {
 		case ValidationStateValid:
 			summary.ValidFields++
@@ -678,11 +678,11 @@ func (sm *StateManager) GetValidationSummary() ValidationSummary {
 			summary.WarningFields++
 		}
 	}
-	
+
 	// Copy validation times
 	for fieldName, t := range sm.validationTimes {
 		summary.LastValidated[fieldName] = t
 	}
-	
+
 	return summary
 }

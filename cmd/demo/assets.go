@@ -557,22 +557,22 @@ document.addEventListener('htmx:afterRequest', function(e) {
 function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
-    notification.style.cssText = \`
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: \${type === 'success' ? 'var(--semantic-feedback-success-default)' : 
-                     type === 'error' ? 'var(--semantic-feedback-error-default)' : 
-                     'var(--semantic-interactive-primary-default)'};
-        color: var(--semantic-text-inverted);
-        padding: var(--spacing-md);
-        border-radius: var(--border-radius-md);
-        font-weight: var(--font-weight-medium);
-        z-index: 1000;
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: all var(--animation-duration-normal) var(--animation-easing);
-    \`;
+    let backgroundColor = type === 'success' ? 'var(--semantic-feedback-success-default)' : 
+                         type === 'error' ? 'var(--semantic-feedback-error-default)' : 
+                         'var(--semantic-interactive-primary-default)';
+    notification.style.cssText = 
+        'position: fixed;' +
+        'top: 20px;' +
+        'right: 20px;' +
+        'background: ' + backgroundColor + ';' +
+        'color: var(--semantic-text-inverted);' +
+        'padding: var(--spacing-md);' +
+        'border-radius: var(--border-radius-md);' +
+        'font-weight: var(--font-weight-medium);' +
+        'z-index: 1000;' +
+        'opacity: 0;' +
+        'transform: translateY(-10px);' +
+        'transition: all var(--animation-duration-normal) var(--animation-easing);';
     notification.textContent = message;
     
     document.body.appendChild(notification);

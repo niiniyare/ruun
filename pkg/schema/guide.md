@@ -73,7 +73,7 @@ The ERP Schema Package is a comprehensive, UI-agnostic system for building dynam
 
 ```
 pkg/schema/
-├── Core Schema System
+ Core Schema System
 │   ├── schema.go              # Main Schema struct (1,333 lines)
 │   ├── field.go               # Field system (1,752 lines)
 │   ├── action.go              # Actions/buttons
@@ -81,7 +81,7 @@ pkg/schema/
 │   ├── builder.go             # Fluent API
 │   └── runtime.go             # Runtime interfaces
 │
-├── Runtime Subsystems
+  Runtime Subsystems
 │   ├── runtime/               # Runtime execution
 │   │   ├── runtime.go         # Main orchestrator (950 lines)
 │   │   ├── state.go           # State management (694 lines)
@@ -95,12 +95,12 @@ pkg/schema/
 │   ├── enrich/                # Permission system
 │   └── parse/                 # JSON parsing
 │
-├── Design System
+  Design System
 │   ├── theme.go               # Theme management
 │   ├── tokens.go              # Design tokens
 │   └── i18n.go                # Internationalization
 │
-└── Enterprise Features
+  Enterprise Features
     ├── business_rules.go      # Business logic
     ├── enterprise.go          # Advanced features
     └── mixin.go               # Reusable components
@@ -2654,23 +2654,9 @@ This guide provides a comprehensive overview of the ERP Schema Package for UI im
 - **Secure**: Built with security and multi-tenancy in mind
 - **Maintainable**: Clean interfaces and separation of concerns
 
-### Next Steps
-
-1. **Choose Your Integration**: Select React, Templ, Go Templates, or another framework
-2. **Implement Core Interfaces**: Start with RuntimeRenderer for your chosen framework  
-3. **Add Validation**: Implement RuntimeValidator for your validation needs
-4. **Enable Conditionals**: Add RuntimeConditionalEngine for dynamic behavior
-5. **Apply Theming**: Use the design token system for consistent styling
-6. **Test Thoroughly**: Implement comprehensive tests for your integration
-
-### Resources
-
-- **Example Implementations**: See `pkg/schema/examples/` for reference implementations
-- **API Documentation**: Full API docs at `/docs/api/schema/`  
-- **Community Support**: Join discussions at `https://github.com/niiniyare/ruun/discussions`
 
 ---
 
 **Last Updated**: November 2025  
 **Version**: 1.0.0  
-**Package Version**: github.com/niiniyare/ruun/pkg/schema@v1.0.0
+**Package Version**: `github.com/niiniyare/ruun/pkg/schema`
