@@ -22,7 +22,7 @@ templ FormField(props FormFieldProps) {
 			data-field-id={ props.ID }
 		}
 		data-field-type={ string(props.Type) }
-		data-validation-state={ string(props.ValidationState) }
+		data-validation-state={ props.ValidationState.String() }
 		if props.ThemeID != "" {
 			data-theme-id={ props.ThemeID }
 		}
@@ -329,7 +329,6 @@ templ renderTextInput(props FormFieldProps, inputType atoms.InputType) {
 		AlpineChange: props.AlpineChange,
 		AlpineBlur:   props.AlpineBlur,
 		AlpineFocus:  props.AlpineFocus,
-		Style:        getInputFieldStyles(props),
 		Class:        getInputValidationClasses(props),
 	})
 }
