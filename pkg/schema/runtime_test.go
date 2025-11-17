@@ -236,12 +236,12 @@ func (s *RuntimeTestSuite) TestConditionalLogic() {
 	}
 	runtime := NewRuntime(conditionalSchema)
 	// Initialize
-	err := Initialize(s.ctx, map[string]any{
+	err := runtime.Initialize(s.ctx, map[string]any{
 		"show_field": false,
 	})
 	require.NoError(s.T(), err, "Initialize should not fail")
 	// Test applying conditional logic
-	err = ApplyConditionalLogic(s.ctx)
+	err = runtime.ApplyConditionalLogic(s.ctx)
 	require.NoError(s.T(), err, "ApplyConditionalLogic() should not return error")
 }
 // TestEventHandling tests custom event handler registration
@@ -256,9 +256,9 @@ func (s *RuntimeTestSuite) TestEventHandling() {
 	eventTriggered := false
 	expectedField := "name"
 	expectedValue := "Test Name"
-	s.RegisterEventHandler(EventChange, func(ctx context.Context, event *Event) error {
+	s.runtime.RegisterEventHandler(EventChange, func(ctx context.Context, event *Event) error {
 		eventTriggered = true
-		require.Equal(s.T(), expectedField, event.Field, "Event field should match")
+		require.Equal(s.T(), expectedField, event.FieldName, "Event field should match")
 		require.Equal(s.T(), expectedValue, event.Value, "Event value should match")
 		return nil
 	})
@@ -329,20 +329,20 @@ func (s *RuntimeTestSuite) TestEnrichedSchemaIntegration() {
 	}
 	runtime := NewRuntime(enrichedSchema)
 	// Initialize
-	err := Initialize(s.ctx, map[string]any{})
+	err := runtime.Initialize(s.ctx, map[string]any{})
 	require.NoError(s.T(), err, "Initialize should not fail")
 	// Test editing public field (should work)
-	err = HandleFieldChange(s.ctx, "public_field", "test value")
+	err = runtime.HandleFieldChange(s.ctx, "public_field", "test value")
 	require.NoError(s.T(), err, "Should be able to edit public field")
 	// Test editing readonly field (should fail)
-	err = HandleFieldChange(s.ctx, "readonly_field", "test value")
+	err = runtime.HandleFieldChange(s.ctx, "readonly_field", "test value")
 	require.Error(s.T(), err, "Should not be able to edit readonly field")
 	// Test validation only processes visible fields
-	allErrors := ValidateCurrentState(s.ctx)
+	allErrors := runtime.ValidateCurrentState(s.ctx)
 	_, hasHidden := allErrors["hidden_field"]
 	require.False(s.T(), hasHidden, "Hidden field should not be validated")
 	// Test stats reflect visible fields correctly
-	stats := GetStats()
+	stats := runtime.GetStats()
 	require.Equal(s.T(), 2, stats.VisibleFields, "Expected 2 visible fields (public and readonly)")
 }
 // Helper method to create a test schema

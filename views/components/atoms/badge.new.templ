@@ -1,0 +1,401 @@
+// views/components/atoms/badge.new.templ
+package atoms
+
+import (
+	"encoding/json"
+	"strconv"
+
+	"fmt"
+)
+
+// BadgeMode represents the badge display mode
+type BadgeMode string
+
+const (
+	BadgeModeText   BadgeMode = "text"
+	BadgeModeDot    BadgeMode = "dot"
+	BadgeModeRibbon BadgeMode = "ribbon"
+)
+
+// BadgePosition represents the corner position
+type BadgePosition string
+
+const (
+	BadgePositionTopRight    BadgePosition = "top-right"
+	BadgePositionTopLeft     BadgePosition = "top-left"
+	BadgePositionBottomRight BadgePosition = "bottom-right"
+	BadgePositionBottomLeft  BadgePosition = "bottom-left"
+)
+
+// BadgeLevel represents the prompt/status type
+type BadgeLevel string
+
+const (
+	BadgeLevelDefault BadgeLevel = "default"
+	BadgeLevelPrimary BadgeLevel = "primary"
+	BadgeLevelSuccess BadgeLevel = "success"
+	BadgeLevelWarning BadgeLevel = "warning"
+	BadgeLevelDanger  BadgeLevel = "danger"
+	BadgeLevelInfo    BadgeLevel = "info"
+)
+
+// BadgeProps defines the properties for the Badge component
+type BadgeProps struct {
+	ClassName     string        // Additional CSS classes
+	Text          interface{}   // Text content (string or number)
+	Size          int           // Size in pixels (default: auto)
+	Mode          BadgeMode     // Badge type: text, dot, ribbon
+	Offset        []interface{} // Position offset [x, y]
+	Position      BadgePosition // Corner position
+	OverflowCount int           // Max count before showing "+"
+	VisibleOn     string        // Condition expression for visibility
+	Animation     bool          // Enable animation
+	Style         string        // Custom inline styles
+	Level         BadgeLevel    // Status level for coloring
+}
+
+// GetText returns the display text with overflow handling
+func (p BadgeProps) GetText() string {
+	if p.Text == nil {
+		return ""
+	}
+
+	// Handle numeric overflow
+	if num, ok := p.Text.(int); ok {
+		if p.OverflowCount > 0 && num > p.OverflowCount {
+			return fmt.Sprintf("%d+", p.OverflowCount)
+		}
+		return strconv.Itoa(num)
+	}
+
+	if num, ok := p.Text.(float64); ok {
+		intNum := int(num)
+		if p.OverflowCount > 0 && intNum > p.OverflowCount {
+			return fmt.Sprintf("%d+", p.OverflowCount)
+		}
+		return strconv.Itoa(intNum)
+	}
+
+	return fmt.Sprint(p.Text)
+}
+
+// GetPositionClasses returns Tailwind classes for positioning
+func (p BadgeProps) GetPositionClasses() string {
+	switch p.Position {
+	case BadgePositionTopRight:
+		return "top-0 right-0"
+	case BadgePositionTopLeft:
+		return "top-0 left-0"
+	case BadgePositionBottomRight:
+		return "bottom-0 right-0"
+	case BadgePositionBottomLeft:
+		return "bottom-0 left-0"
+	default:
+		return "top-0 right-0" // default to top-right
+	}
+}
+
+// GetOffsetStyle returns CSS transform for offset positioning
+func (p BadgeProps) GetOffsetStyle() string {
+	if len(p.Offset) != 2 {
+		return ""
+	}
+
+	x := p.formatOffsetValue(p.Offset[0])
+	y := p.formatOffsetValue(p.Offset[1])
+
+	return fmt.Sprintf("transform: translate(%s, %s);", x, y)
+}
+
+func (p BadgeProps) formatOffsetValue(val interface{}) string {
+	switch v := val.(type) {
+	case int:
+		return fmt.Sprintf("%dpx", v)
+	case float64:
+		return fmt.Sprintf("%dpx", int(v))
+	case string:
+		return v
+	default:
+		return "0"
+	}
+}
+
+// GetLevelClasses returns Tailwind classes based on level
+func (p BadgeProps) GetLevelClasses() string {
+	switch p.Level {
+	case BadgeLevelPrimary:
+		return "bg-blue-500 text-white"
+	case BadgeLevelSuccess:
+		return "bg-green-500 text-white"
+	case BadgeLevelWarning:
+		return "bg-yellow-500 text-white"
+	case BadgeLevelDanger:
+		return "bg-red-500 text-white"
+	case BadgeLevelInfo:
+		return "bg-cyan-500 text-white"
+	default:
+		return "bg-gray-500 text-white"
+	}
+}
+
+// GetModeClasses returns Tailwind classes based on mode
+func (p BadgeProps) GetModeClasses() string {
+	switch p.Mode {
+	case BadgeModeDot:
+		return "w-2 h-2 rounded-full"
+	case BadgeModeRibbon:
+		return "px-3 py-1 text-xs font-medium"
+	default: // text mode
+		return "px-2 py-0.5 text-xs font-medium rounded-full min-w-[20px] text-center"
+	}
+}
+
+// GetSizeStyle returns size styling if specified
+func (p BadgeProps) GetSizeStyle() string {
+	if p.Size > 0 {
+		if p.Mode == BadgeModeDot {
+			return fmt.Sprintf("width: %dpx; height: %dpx;", p.Size, p.Size)
+		}
+		return fmt.Sprintf("font-size: %dpx;", p.Size)
+	}
+	return ""
+}
+
+// GetAnimationClasses returns animation classes
+func (p BadgeProps) GetAnimationClasses() string {
+	if p.Animation {
+		return "animate-pulse"
+	}
+	return ""
+}
+
+// Badge renders a badge/corner mark component
+templ Badge(props BadgeProps) {
+	<span
+		class={
+			"inline-flex items-center justify-center",
+			props.GetModeClasses(),
+			props.GetLevelClasses(),
+			props.GetAnimationClasses(),
+			props.ClassName,
+		}
+		if props.VisibleOn != "" {
+			x-show={ props.VisibleOn }
+		}
+		style={
+			props.GetSizeStyle(),
+			props.Style,
+		}
+	>
+		if props.Mode != BadgeModeDot {
+			{ props.GetText() }
+		}
+	</span>
+}
+
+// BadgeWrapper wraps content with a positioned badge
+templ BadgeWrapper(content templ.Component, badge BadgeProps) {
+	<div class="relative inline-block">
+		@content
+		<span
+			class={
+				"absolute",
+				badge.GetPositionClasses(),
+				"-translate-y-1/2 translate-x-1/2",
+			}
+			style={ badge.GetOffsetStyle() }
+		>
+			@Badge(badge)
+		</span>
+	</div>
+}
+
+// Badge represents the JSON schema for Badge component
+type Badge struct {
+	ClassName     string        `json:"className,omitempty"`
+	Text          interface{}   `json:"text,omitempty"`
+	Size          int           `json:"size,omitempty"`
+	Mode          string        `json:"mode,omitempty"`
+	Offset        []interface{} `json:"offset,omitempty"`
+	Position      string        `json:"position,omitempty"`
+	OverflowCount int           `json:"overflowCount,omitempty"`
+	VisibleOn     string        `json:"visibleOn,omitempty"`
+	Animation     bool          `json:"animation,omitempty"`
+	Style         string        `json:"style,omitempty"`
+	Level         string        `json:"level,omitempty"`
+}
+
+// ToProps converts Badge to BadgeProps
+func (s Badge) ToProps() BadgeProps {
+	props := BadgeProps{
+		ClassName:     s.ClassName,
+		Text:          s.Text,
+		Size:          s.Size,
+		Offset:        s.Offset,
+		OverflowCount: s.OverflowCount,
+		VisibleOn:     s.VisibleOn,
+		Animation:     s.Animation,
+		Style:         s.Style,
+	}
+
+	// Convert mode string to BadgeMode
+	switch s.Mode {
+	case "text":
+		props.Mode = BadgeModeText
+	case "dot":
+		props.Mode = BadgeModeDot
+	case "ribbon":
+		props.Mode = BadgeModeRibbon
+	default:
+		props.Mode = BadgeModeText
+	}
+
+	// Convert position string to BadgePosition
+	switch s.Position {
+	case "top-right":
+		props.Position = BadgePositionTopRight
+	case "top-left":
+		props.Position = BadgePositionTopLeft
+	case "bottom-right":
+		props.Position = BadgePositionBottomRight
+	case "bottom-left":
+		props.Position = BadgePositionBottomLeft
+	default:
+		props.Position = BadgePositionTopRight
+	}
+
+	// Convert level string to BadgeLevel
+	switch s.Level {
+	case "primary":
+		props.Level = BadgeLevelPrimary
+	case "success":
+		props.Level = BadgeLevelSuccess
+	case "warning":
+		props.Level = BadgeLevelWarning
+	case "danger":
+		props.Level = BadgeLevelDanger
+	case "info":
+		props.Level = BadgeLevelInfo
+	default:
+		props.Level = BadgeLevelDefault
+	}
+
+	return props
+}
+
+// BadgeFromJSON creates a Badge component from JSON string
+func BadgeFromJSON(jsonStr string) (BadgeProps, error) {
+	var schema Badge
+	if err := json.Unmarshal([]byte(jsonStr), &schema); err != nil {
+		return BadgeProps{}, fmt.Errorf("failed to unmarshal badge JSON: %w", err)
+	}
+	return schema.ToProps(), nil
+}
+
+// Example JSON configurations
+const (
+	ExampleNotificationBadge = `{
+		"text": 5,
+		"mode": "text",
+		"position": "top-right",
+		"level": "danger",
+		"animation": true
+	}`
+
+	ExampleOverflowBadge = `{
+		"text": 150,
+		"mode": "text",
+		"position": "top-right",
+		"overflowCount": 99,
+		"level": "primary"
+	}`
+
+	ExampleStatusDot = `{
+		"mode": "dot",
+		"position": "bottom-right",
+		"level": "success"
+	}`
+
+	ExampleDynamicBadge = `{
+		"text": 3,
+		"mode": "text",
+		"position": "top-right",
+		"visibleOn": "unreadCount > 0",
+		"level": "danger"
+	}`
+
+	ExampleCustomOffsetBadge = `{
+		"text": "NEW",
+		"mode": "text",
+		"position": "top-right",
+		"offset": [10, -5],
+		"level": "success"
+	}`
+)
+
+// RenderBadgeFrom renders a Badge from JSON schema at runtime
+templ BadgeFrom(schemaJSON string) {
+	if props, err := BadgeFromJSON(schemaJSON); err == nil {
+		@Badge(props)
+	} else {
+		<span class="text-red-500 text-xs">Invalid badge schema: { err.Error() }</span>
+	}
+}
+
+// Example: Dynamic badge rendering from database/API
+templ DynamicBadgeExample() {
+	<div class="p-8 space-y-6" x-data="{ badges: [] }">
+		<h2 class="text-2xl font-bold">-Driven Badges</h2>
+		
+		<div class="grid grid-cols-2 gap-4">
+			<!-- Notification Badge -->
+			<div class="border p-4 rounded">
+				<h3 class="font-semibold mb-2">Notification Badge</h3>
+				@BadgeWrapper(
+					buttonExample("Messages"),
+					func() BadgeProps {
+						props, _ := BadgeFromJSON(ExampleNotificationBadge)
+						return props
+					}(),
+				)
+			</div>
+			
+			<!-- Overflow Badge -->
+			<div class="border p-4 rounded">
+				<h3 class="font-semibold mb-2">Overflow Badge</h3>
+				@BadgeWrapper(
+					buttonExample("Notifications"),
+					func() BadgeProps {
+						props, _ := BadgeFromJSON(ExampleOverflowBadge)
+						return props
+					}(),
+				)
+			</div>
+			
+			<!-- Status Dot -->
+			<div class="border p-4 rounded">
+				<h3 class="font-semibold mb-2">Status Dot</h3>
+				@BadgeWrapper(
+					avatarExample(),
+					func() BadgeProps {
+						props, _ := BadgeFromJSON(ExampleStatusDot)
+						return props
+					}(),
+				)
+			</div>
+			
+			<!-- Custom Offset -->
+			<div class="border p-4 rounded">
+				<h3 class="font-semibold mb-2">Custom Offset</h3>
+				@BadgeWrapper(
+					buttonExample("Updates"),
+					func() BadgeProps {
+						props, _ := BadgeFromJSON(ExampleCustomOffsetBadge)
+						return props
+					}(),
+				)
+			</div>
+		</div>
+	</div>
+}
+

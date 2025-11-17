@@ -1,6 +1,8 @@
 package atoms
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -27,25 +29,36 @@ const (
 	ButtonSizeXL ButtonSize = "xl"
 )
 
-// ButtonProps defines the properties for the Button component
+// ButtonProps defines the properties for the unified Button component
 type ButtonProps struct {
-	Variant     ButtonVariant
-	Size        ButtonSize
-	Type        string // "button", "submit", "reset"
-	Disabled    bool
-	Loading     bool
-	Icon        string
-	IconLeft    string
-	IconRight   string
-	Class       string
-	ID          string
-	Name        string
-	Value       string
-	HXPost      string // HTMX post URL
-	HXGet       string // HTMX get URL
-	HXTarget    string // HTMX target
-	HXSwap      string // HTMX swap strategy
-	AlpineClick string // Alpine.js click handler
+	// Styling
+	Variant ButtonVariant
+	Size    ButtonSize
+	Class   string
+	ID      string
+	
+	// Content
+	Text      string // Simple text content (alternative to children)
+	Icon      string // Single icon (for icon-only buttons)
+	IconLeft  string
+	IconRight string
+	
+	// Button attributes
+	Type     string // "button", "submit", "reset"
+	Name     string
+	Value    string
+	Disabled bool
+	Loading  bool
+	
+	// HTMX attributes
+	HXPost    string
+	HXGet     string
+	HXTarget  string
+	HXSwap    string
+	HXTrigger string
+	
+	// Alpine.js attributes
+	AlpineClick string
 }
 
 // buttonClasses generates Tailwind CSS classes for the button based on props
@@ -53,7 +66,7 @@ func buttonClasses(props ButtonProps) string {
 	var classes []string
 
 	// Base classes using schema tokens
-	classes = append(classes, 
+	classes = append(classes,
 		"inline-flex",
 		"items-center",
 		"justify-center",
@@ -151,6 +164,9 @@ templ Button(props ButtonProps, children ...templ.Component) {
 		if props.HXSwap != "" {
 			hx-swap={ props.HXSwap }
 		}
+		if props.HXTrigger != "" {
+			hx-trigger={ props.HXTrigger }
+		}
 		if props.AlpineClick != "" {
 			x-on:click={ props.AlpineClick }
 		}
@@ -158,31 +174,41 @@ templ Button(props ButtonProps, children ...templ.Component) {
 			aria-label="Loading..."
 		}
 	>
-		// Loading icon
-		if props.Loading {
-			@LoadingIcon()
-		}
-		
-		// Left icon
-		if !props.Loading && props.IconLeft != "" {
-			@Icon(IconProps{Name: props.IconLeft, Size: IconSizeSM, Class: "mr-2"})
-		}
-		
-		// Single icon (for icon-only buttons)
-		if !props.Loading && props.Icon != "" && len(children) == 0 {
-			@Icon(IconProps{Name: props.Icon, Size: IconSizeMD})
-		}
-		
-		// Button content
-		for _, child := range children {
-			@child
-		}
-		
-		// Right icon
-		if !props.Loading && props.IconRight != "" {
-			@Icon(IconProps{Name: props.IconRight, Size: IconSizeSM, Class: "ml-2"})
-		}
+		@buttonContent(props, children...)
 	</button>
+}
+
+// buttonContent renders the internal content of the button
+templ buttonContent(props ButtonProps, children ...templ.Component) {
+	// Loading icon
+	if props.Loading {
+		@LoadingIcon()
+	}
+	
+	// Left icon
+	if !props.Loading && props.IconLeft != "" {
+		@Icon(IconProps{Name: props.IconLeft, Size: IconSizeSM, Class: "mr-2"})
+	}
+	
+	// Single icon (for icon-only buttons)
+	if !props.Loading && props.Icon != "" && len(children) == 0 && props.Text == "" {
+		@Icon(IconProps{Name: props.Icon, Size: IconSizeMD})
+	}
+	
+	// Simple text content (if no children)
+	if props.Text != "" && len(children) == 0 {
+		{ props.Text }
+	}
+	
+	// Button content (children take precedence)
+	for _, child := range children {
+		@child
+	}
+	
+	// Right icon
+	if !props.Loading && props.IconRight != "" {
+		@Icon(IconProps{Name: props.IconRight, Size: IconSizeSM, Class: "ml-2"})
+	}
 }
 
 // Convenience components for common button variants
@@ -194,6 +220,7 @@ templ PrimaryButton(props ButtonProps, children ...templ.Component) {
 		Type:        props.Type,
 		Disabled:    props.Disabled,
 		Loading:     props.Loading,
+		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
@@ -205,6 +232,7 @@ templ PrimaryButton(props ButtonProps, children ...templ.Component) {
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
 		HXSwap:      props.HXSwap,
+		HXTrigger:   props.HXTrigger,
 		AlpineClick: props.AlpineClick,
 	}, children...)
 }
@@ -216,6 +244,7 @@ templ SecondaryButton(props ButtonProps, children ...templ.Component) {
 		Type:        props.Type,
 		Disabled:    props.Disabled,
 		Loading:     props.Loading,
+		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
@@ -227,6 +256,7 @@ templ SecondaryButton(props ButtonProps, children ...templ.Component) {
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
 		HXSwap:      props.HXSwap,
+		HXTrigger:   props.HXTrigger,
 		AlpineClick: props.AlpineClick,
 	}, children...)
 }
@@ -238,6 +268,7 @@ templ DestructiveButton(props ButtonProps, children ...templ.Component) {
 		Type:        props.Type,
 		Disabled:    props.Disabled,
 		Loading:     props.Loading,
+		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
@@ -249,6 +280,7 @@ templ DestructiveButton(props ButtonProps, children ...templ.Component) {
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
 		HXSwap:      props.HXSwap,
+		HXTrigger:   props.HXTrigger,
 		AlpineClick: props.AlpineClick,
 	}, children...)
 }
@@ -276,4 +308,468 @@ templ LoadingIcon() {
 			d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 		></path>
 	</svg>
+}
+
+// Fluent API Builder Pattern
+
+// ButtonBuilder provides a fluent interface for building buttons
+type ButtonBuilder struct {
+	props ButtonProps
+}
+
+// NewButton creates a new button builder with default values
+func NewButton() *ButtonBuilder {
+	return &ButtonBuilder{
+		props: ButtonProps{
+			Variant: ButtonPrimary,
+			Size:    ButtonSizeMD,
+			Type:    "button",
+		},
+	}
+}
+
+// Styling methods
+func (b *ButtonBuilder) Primary() *ButtonBuilder {
+	b.props.Variant = ButtonPrimary
+	return b
+}
+
+func (b *ButtonBuilder) Secondary() *ButtonBuilder {
+	b.props.Variant = ButtonSecondary
+	return b
+}
+
+func (b *ButtonBuilder) Destructive() *ButtonBuilder {
+	b.props.Variant = ButtonDestructive
+	return b
+}
+
+func (b *ButtonBuilder) Outline() *ButtonBuilder {
+	b.props.Variant = ButtonOutline
+	return b
+}
+
+func (b *ButtonBuilder) Ghost() *ButtonBuilder {
+	b.props.Variant = ButtonGhost
+	return b
+}
+
+func (b *ButtonBuilder) Link() *ButtonBuilder {
+	b.props.Variant = ButtonLink
+	return b
+}
+
+func (b *ButtonBuilder) ExtraSmall() *ButtonBuilder {
+	b.props.Size = ButtonSizeXS
+	return b
+}
+
+func (b *ButtonBuilder) Small() *ButtonBuilder {
+	b.props.Size = ButtonSizeSM
+	return b
+}
+
+func (b *ButtonBuilder) Medium() *ButtonBuilder {
+	b.props.Size = ButtonSizeMD
+	return b
+}
+
+func (b *ButtonBuilder) Large() *ButtonBuilder {
+	b.props.Size = ButtonSizeLG
+	return b
+}
+
+func (b *ButtonBuilder) ExtraLarge() *ButtonBuilder {
+	b.props.Size = ButtonSizeXL
+	return b
+}
+
+// Content methods
+func (b *ButtonBuilder) WithText(text string) *ButtonBuilder {
+	b.props.Text = text
+	return b
+}
+
+func (b *ButtonBuilder) WithIcon(icon string) *ButtonBuilder {
+	b.props.Icon = icon
+	return b
+}
+
+func (b *ButtonBuilder) WithIconLeft(icon string) *ButtonBuilder {
+	b.props.IconLeft = icon
+	return b
+}
+
+func (b *ButtonBuilder) WithIconRight(icon string) *ButtonBuilder {
+	b.props.IconRight = icon
+	return b
+}
+
+func (b *ButtonBuilder) WithClass(class string) *ButtonBuilder {
+	b.props.Class = class
+	return b
+}
+
+func (b *ButtonBuilder) WithID(id string) *ButtonBuilder {
+	b.props.ID = id
+	return b
+}
+
+// Button attribute methods
+func (b *ButtonBuilder) AsSubmit() *ButtonBuilder {
+	b.props.Type = "submit"
+	return b
+}
+
+func (b *ButtonBuilder) AsReset() *ButtonBuilder {
+	b.props.Type = "reset"
+	return b
+}
+
+func (b *ButtonBuilder) WithName(name string) *ButtonBuilder {
+	b.props.Name = name
+	return b
+}
+
+func (b *ButtonBuilder) WithValue(value string) *ButtonBuilder {
+	b.props.Value = value
+	return b
+}
+
+func (b *ButtonBuilder) Disabled() *ButtonBuilder {
+	b.props.Disabled = true
+	return b
+}
+
+func (b *ButtonBuilder) Loading() *ButtonBuilder {
+	b.props.Loading = true
+	return b
+}
+
+// HTMX methods
+func (b *ButtonBuilder) HXPost(url string) *ButtonBuilder {
+	b.props.HXPost = url
+	return b
+}
+
+func (b *ButtonBuilder) HXGet(url string) *ButtonBuilder {
+	b.props.HXGet = url
+	return b
+}
+
+func (b *ButtonBuilder) HXTarget(target string) *ButtonBuilder {
+	b.props.HXTarget = target
+	return b
+}
+
+func (b *ButtonBuilder) HXSwap(swap string) *ButtonBuilder {
+	b.props.HXSwap = swap
+	return b
+}
+
+func (b *ButtonBuilder) HXTrigger(trigger string) *ButtonBuilder {
+	b.props.HXTrigger = trigger
+	return b
+}
+
+// Alpine.js methods
+func (b *ButtonBuilder) OnClick(handler string) *ButtonBuilder {
+	b.props.AlpineClick = handler
+	return b
+}
+
+// Build returns the final ButtonProps
+func (b *ButtonBuilder) Build() ButtonProps {
+	return b.props
+}
+
+// Functional Options Pattern
+
+// ButtonOption is a function that modifies ButtonProps
+type ButtonOption func(*ButtonProps)
+
+// NewButtonWithOptions creates a ButtonProps with functional options
+func NewButtonWithOptions(opts ...ButtonOption) ButtonProps {
+	props := ButtonProps{
+		Variant: ButtonPrimary,
+		Size:    ButtonSizeMD,
+		Type:    "button",
+	}
+	for _, opt := range opts {
+		opt(&props)
+	}
+	return props
+}
+
+// Variant options
+func WithVariant(variant ButtonVariant) ButtonOption {
+	return func(p *ButtonProps) { p.Variant = variant }
+}
+
+func WithPrimary() ButtonOption {
+	return func(p *ButtonProps) { p.Variant = ButtonPrimary }
+}
+
+func WithSecondary() ButtonOption {
+	return func(p *ButtonProps) { p.Variant = ButtonSecondary }
+}
+
+func WithDestructive() ButtonOption {
+	return func(p *ButtonProps) { p.Variant = ButtonDestructive }
+}
+
+func WithOutline() ButtonOption {
+	return func(p *ButtonProps) { p.Variant = ButtonOutline }
+}
+
+func WithGhost() ButtonOption {
+	return func(p *ButtonProps) { p.Variant = ButtonGhost }
+}
+
+func WithLink() ButtonOption {
+	return func(p *ButtonProps) { p.Variant = ButtonLink }
+}
+
+// Size options
+func WithSize(size ButtonSize) ButtonOption {
+	return func(p *ButtonProps) { p.Size = size }
+}
+
+func WithExtraSmall() ButtonOption {
+	return func(p *ButtonProps) { p.Size = ButtonSizeXS }
+}
+
+func WithSmall() ButtonOption {
+	return func(p *ButtonProps) { p.Size = ButtonSizeSM }
+}
+
+func WithMedium() ButtonOption {
+	return func(p *ButtonProps) { p.Size = ButtonSizeMD }
+}
+
+func WithLarge() ButtonOption {
+	return func(p *ButtonProps) { p.Size = ButtonSizeLG }
+}
+
+func WithExtraLarge() ButtonOption {
+	return func(p *ButtonProps) { p.Size = ButtonSizeXL }
+}
+
+// Content options
+func WithButtonText(text string) ButtonOption {
+	return func(p *ButtonProps) { p.Text = text }
+}
+
+func WithButtonIcon(icon string) ButtonOption {
+	return func(p *ButtonProps) { p.Icon = icon }
+}
+
+func WithButtonIconLeft(icon string) ButtonOption {
+	return func(p *ButtonProps) { p.IconLeft = icon }
+}
+
+func WithButtonIconRight(icon string) ButtonOption {
+	return func(p *ButtonProps) { p.IconRight = icon }
+}
+
+func WithButtonClass(class string) ButtonOption {
+	return func(p *ButtonProps) { p.Class = class }
+}
+
+func WithButtonID(id string) ButtonOption {
+	return func(p *ButtonProps) { p.ID = id }
+}
+
+// Button attribute options
+func AsSubmit() ButtonOption {
+	return func(p *ButtonProps) { p.Type = "submit" }
+}
+
+func AsReset() ButtonOption {
+	return func(p *ButtonProps) { p.Type = "reset" }
+}
+
+func WithButtonName(name string) ButtonOption {
+	return func(p *ButtonProps) { p.Name = name }
+}
+
+func WithButtonValue(value string) ButtonOption {
+	return func(p *ButtonProps) { p.Value = value }
+}
+
+func AsDisabled() ButtonOption {
+	return func(p *ButtonProps) { p.Disabled = true }
+}
+
+func AsLoading() ButtonOption {
+	return func(p *ButtonProps) { p.Loading = true }
+}
+
+// HTMX options
+func WithButtonHXPost(url string) ButtonOption {
+	return func(p *ButtonProps) { p.HXPost = url }
+}
+
+func WithButtonHXGet(url string) ButtonOption {
+	return func(p *ButtonProps) { p.HXGet = url }
+}
+
+func WithButtonHXTarget(target string) ButtonOption {
+	return func(p *ButtonProps) { p.HXTarget = target }
+}
+
+func WithButtonHXSwap(swap string) ButtonOption {
+	return func(p *ButtonProps) { p.HXSwap = swap }
+}
+
+func WithButtonHXTrigger(trigger string) ButtonOption {
+	return func(p *ButtonProps) { p.HXTrigger = trigger }
+}
+
+// Alpine.js options
+func WithButtonAlpineClick(handler string) ButtonOption {
+	return func(p *ButtonProps) { p.AlpineClick = handler }
+}
+
+// JSON Schema Support
+
+// ButtonSchema represents the JSON schema for Button component
+type ButtonSchema struct {
+	Variant     string `json:"variant,omitempty"`
+	Size        string `json:"size,omitempty"`
+	Class       string `json:"class,omitempty"`
+	ID          string `json:"id,omitempty"`
+	Text        string `json:"text,omitempty"`
+	Icon        string `json:"icon,omitempty"`
+	IconLeft    string `json:"iconLeft,omitempty"`
+	IconRight   string `json:"iconRight,omitempty"`
+	Type        string `json:"type,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Value       string `json:"value,omitempty"`
+	Disabled    bool   `json:"disabled,omitempty"`
+	Loading     bool   `json:"loading,omitempty"`
+	HXPost      string `json:"hxPost,omitempty"`
+	HXGet       string `json:"hxGet,omitempty"`
+	HXTarget    string `json:"hxTarget,omitempty"`
+	HXSwap      string `json:"hxSwap,omitempty"`
+	HXTrigger   string `json:"hxTrigger,omitempty"`
+	AlpineClick string `json:"alpineClick,omitempty"`
+}
+
+// ToProps converts ButtonSchema to ButtonProps
+func (s ButtonSchema) ToProps() ButtonProps {
+	props := ButtonProps{
+		Class:       s.Class,
+		ID:          s.ID,
+		Text:        s.Text,
+		Icon:        s.Icon,
+		IconLeft:    s.IconLeft,
+		IconRight:   s.IconRight,
+		Type:        s.Type,
+		Name:        s.Name,
+		Value:       s.Value,
+		Disabled:    s.Disabled,
+		Loading:     s.Loading,
+		HXPost:      s.HXPost,
+		HXGet:       s.HXGet,
+		HXTarget:    s.HXTarget,
+		HXSwap:      s.HXSwap,
+		HXTrigger:   s.HXTrigger,
+		AlpineClick: s.AlpineClick,
+	}
+
+	// Convert variant string to ButtonVariant
+	switch s.Variant {
+	case "primary":
+		props.Variant = ButtonPrimary
+	case "secondary":
+		props.Variant = ButtonSecondary
+	case "destructive":
+		props.Variant = ButtonDestructive
+	case "outline":
+		props.Variant = ButtonOutline
+	case "ghost":
+		props.Variant = ButtonGhost
+	case "link":
+		props.Variant = ButtonLink
+	default:
+		props.Variant = ButtonPrimary
+	}
+
+	// Convert size string to ButtonSize
+	switch s.Size {
+	case "xs":
+		props.Size = ButtonSizeXS
+	case "sm":
+		props.Size = ButtonSizeSM
+	case "md":
+		props.Size = ButtonSizeMD
+	case "lg":
+		props.Size = ButtonSizeLG
+	case "xl":
+		props.Size = ButtonSizeXL
+	default:
+		props.Size = ButtonSizeMD
+	}
+
+	// Default type if not specified
+	if props.Type == "" {
+		props.Type = "button"
+	}
+
+	return props
+}
+
+// ButtonFromJSON creates a Button component from JSON string
+func ButtonFromJSON(jsonStr string) (ButtonProps, error) {
+	var schema ButtonSchema
+	if err := json.Unmarshal([]byte(jsonStr), &schema); err != nil {
+		return ButtonProps{}, fmt.Errorf("failed to unmarshal button JSON: %w", err)
+	}
+	return schema.ToProps(), nil
+}
+
+// Example JSON configurations
+const (
+	ExamplePrimaryButton = `{
+		"text": "Save Changes",
+		"variant": "primary",
+		"iconLeft": "save"
+	}`
+
+	ExampleLoadingButton = `{
+		"text": "Submitting...",
+		"variant": "primary",
+		"loading": true
+	}`
+
+	ExampleHTMXButton = `{
+		"text": "Load More",
+		"variant": "secondary",
+		"hxGet": "/api/items",
+		"hxTarget": "#items-list",
+		"hxSwap": "beforeend"
+	}`
+
+	ExampleIconButton = `{
+		"icon": "trash",
+		"variant": "destructive",
+		"size": "sm"
+	}`
+
+	ExampleSubmitButton = `{
+		"text": "Submit Form",
+		"variant": "primary",
+		"type": "submit",
+		"iconRight": "arrow-right"
+	}`
+)
+
+// ButtonFrom renders a Button from JSON schema at runtime
+templ ButtonFrom(schemaJSON string) {
+	if props, err := ButtonFromJSON(schemaJSON); err == nil {
+		@Button(props)
+	} else {
+		<span class="text-red-500 text-xs">Invalid button schema: { err.Error() }</span>
+	}
 }

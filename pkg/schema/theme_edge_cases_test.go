@@ -46,7 +46,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestCircularReferenceDetection() {
 		},
 	}
 	// Setting tokens with circular references should fail
-	err := suite.SetTokens(tokens)
+	err := suite.registry.SetTokens(tokens)
 	suite.Error(err, "Should detect circular reference")
 	suite.Contains(err.Error(), "circular reference", "Error should mention circular reference")
 }
@@ -74,13 +74,13 @@ func (suite *ThemeEdgeCasesTestSuite) TestDeepCircularReferenceDetection() {
 			},
 		},
 	}
-	err := suite.SetTokens(tokens)
+	err := suite.registry.SetTokens(tokens)
 	suite.Error(err, "Should detect deep circular reference")
 	suite.Contains(err.Error(), "circular reference", "Error should mention circular reference")
 }
 // ==================== Token Path Error Handling ====================
 func (suite *ThemeEdgeCasesTestSuite) TestInvalidTokenPaths() {
-	err := suite.SetTokens(GetDefaultTokens())
+	err := suite.registry.SetTokens(GetDefaultTokens())
 	suite.NoError(err)
 	testCases := []struct {
 		name     string
@@ -95,7 +95,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestInvalidTokenPaths() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			_, err := suite.ResolveToken(suite.ctx, tc.tokenRef)
+			_, err := suite.registry.ResolveToken(suite.ctx, tc.tokenRef)
 			suite.Error(err, "Should fail for invalid token: %s", tc.tokenRef)
 			suite.Contains(err.Error(), tc.errorMsg, "Error should contain expected message")
 		})
@@ -336,10 +336,10 @@ func (suite *ThemeEdgeCasesTestSuite) TestTokenResolutionTimeout() {
 	// Create a context with timeout
 	ctx, cancel := context.WithTimeout(suite.ctx, 1*time.Millisecond)
 	defer cancel()
-	err := suite.SetTokens(GetDefaultTokens())
+	err := suite.registry.SetTokens(GetDefaultTokens())
 	suite.NoError(err)
 	// This might timeout on slow systems
-	_, err = suite.ResolveToken(ctx, TokenReference("semantic.colors.background.default"))
+	_, err = suite.registry.ResolveToken(ctx, TokenReference("semantic.colors.background.default"))
 	// Don't assert error as it may or may not timeout depending on system speed
 	if err != nil {
 		suite.Contains(err.Error(), "context deadline exceeded", "If error occurs, should be timeout")

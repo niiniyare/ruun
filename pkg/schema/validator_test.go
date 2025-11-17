@@ -1,6 +1,7 @@
 package schema
 import (
 	"context"
+	"strings"
 	"testing"
 )
 // Mock implementations are shared from registry_test.go
@@ -676,15 +677,12 @@ func TestValidator_cleanValue(t *testing.T) {
 	}
 }
 func TestNewValidationError(t *testing.T) {
-	err := NewValidationError("email", "Invalid email format", "email_format")
-	if err.Field != "email" {
-		t.Errorf("NewValidationError() Field = %s, want email", err.Field)
+	err := NewValidationError("email_format", "Invalid email format")
+	if err.Code() != "email_format" {
+		t.Errorf("NewValidationError() Code = %s, want email_format", err.Code())
 	}
-	if err.Message != "Invalid email format" {
-		t.Errorf("NewValidationError() Message = %s, want 'Invalid email format'", err.Message)
-	}
-	if err.Code != "email_format" {
-		t.Errorf("NewValidationError() Code = %s, want email_format", err.Code)
+	if !strings.Contains(err.Error(), "Invalid email format") {
+		t.Errorf("NewValidationError() Error = %s, want to contain 'Invalid email format'", err.Error())
 	}
 	expectedError := "email: Invalid email format"
 	if err.Error() != expectedError {
@@ -974,9 +972,9 @@ type MockEnrichedField struct {
 }
 func (f *MockEnrichedField) GetRuntime() FieldRuntime {
 	if f.runtime == nil {
-		return nil
+		return FieldRuntime{}
 	}
-	return f.runtime
+	return *f.runtime
 }
 // MockEnrichedSchema implements EnrichedSchemaInterface for testing
 type MockEnrichedSchema struct {

@@ -37,10 +37,10 @@ func TestNewValidationRegistry(t *testing.T) {
 	if registry == nil {
 		t.Fatal("NewValidationRegistry() returned nil")
 	}
-	if validators == nil {
+	if registry.validators == nil {
 		t.Error("NewValidationRegistry() validators map is nil")
 	}
-	if asyncValidators == nil {
+	if registry.asyncValidators == nil {
 		t.Error("NewValidationRegistry() asyncValidators map is nil")
 	}
 }
@@ -48,26 +48,26 @@ func TestValidationRegistry_Register(t *testing.T) {
 	registry := NewValidationRegistry()
 	ctx := context.Background()
 	// Test successful registration
-	err := Register("test", func(ctx context.Context, value any, params map[string]any) error {
+	err := registry.Register("test", func(ctx context.Context, value any, params map[string]any) error {
 		return nil
 	})
 	if err != nil {
 		t.Errorf("Register() unexpected error: %v", err)
 	}
 	// Test validation works
-	err = Validate(ctx, "test", "value", map[string]any{})
+	err = registry.Validate(ctx, "test", "value", map[string]any{})
 	if err != nil {
 		t.Errorf("Validate() unexpected error: %v", err)
 	}
 	// Test invalid registration - empty name
-	err = Register("", func(ctx context.Context, value any, params map[string]any) error {
+	err = registry.Register("", func(ctx context.Context, value any, params map[string]any) error {
 		return nil
 	})
 	if err == nil {
 		t.Error("Register() should return error for empty name")
 	}
 	// Test invalid registration - nil function
-	err = Register("test2", nil)
+	err = registry.Register("test2", nil)
 	if err == nil {
 		t.Error("Register() should return error for nil function")
 	}
@@ -76,14 +76,14 @@ func TestValidationRegistry_Validate(t *testing.T) {
 	registry := NewValidationRegistry()
 	ctx := context.Background()
 	// Register a test validator
-	Register("length_check", func(ctx context.Context, value any, params map[string]any) error {
+	registry.Register("length_check", func(ctx context.Context, value any, params map[string]any) error {
 		str, ok := value.(string)
 		if !ok {
-			return NewValidationError("invalid_type", "must be string", "VALIDATION_ERROR")
+			return NewValidationError("invalid_type", "must be string")
 		}
 		minLength, hasMin := params["min"].(int)
 		if hasMin && len(str) < minLength {
-			return NewValidationError("too_short", fmt.Sprintf("must be at least %d characters", minLength), "VALIDATION_ERROR")
+			return NewValidationError("too_short", fmt.Sprintf("must be at least %d characters", minLength))
 		}
 		return nil
 	})
@@ -125,7 +125,7 @@ func TestValidationRegistry_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Validate(ctx, tt.validator, tt.value, tt.params)
+			err := registry.Validate(ctx, tt.validator, tt.value, tt.params)
 			if tt.wantError && err == nil {
 				t.Error("Validate() expected error but got none")
 			}
@@ -190,7 +190,7 @@ func TestValidationRegistry_BuiltInValidators(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Validate(ctx, tt.validator, tt.value, tt.params)
+			err := registry.Validate(ctx, tt.validator, tt.value, tt.params)
 			if tt.wantError && err == nil {
 				t.Errorf("Validate(%s) expected error but got none", tt.validator)
 			}
@@ -212,31 +212,31 @@ func TestValidationRegistry_AsyncValidator(t *testing.T) {
 		Validate: func(ctx context.Context, value any, params map[string]any) error {
 			str, ok := value.(string)
 			if !ok {
-				return NewValidationError("invalid_type", "must be string", "VALIDATION_ERROR")
+				return NewValidationError("invalid_type", "must be string")
 			}
 			if str == "error" {
-				return NewValidationError("test_error", "test error", "VALIDATION_ERROR")
+				return NewValidationError("test_error", "test error")
 			}
 			return nil
 		},
 	}
-	err := RegisterAsync(asyncValidator)
+	err := registry.RegisterAsync(asyncValidator)
 	if err != nil {
 		t.Errorf("RegisterAsync() unexpected error: %v", err)
 	}
 	// Test async validation
-	err = ValidateAsync(ctx, "async_test", "valid", map[string]any{})
+	err = registry.ValidateAsync(ctx, "async_test", "valid", map[string]any{})
 	if err != nil {
 		t.Errorf("ValidateAsync() unexpected error: %v", err)
 	}
 	// Test async validation with error
-	err = ValidateAsync(ctx, "async_test", "error", map[string]any{})
+	err = registry.ValidateAsync(ctx, "async_test", "error", map[string]any{})
 	if err == nil {
 		t.Error("ValidateAsync() expected error but got none")
 	}
 	// Test caching (second call should be faster)
 	start := time.Now()
-	err = ValidateAsync(ctx, "async_test", "valid", map[string]any{})
+	err = registry.ValidateAsync(ctx, "async_test", "valid", map[string]any{})
 	duration := time.Since(start)
 	if err != nil {
 		t.Errorf("ValidateAsync() cached call unexpected error: %v", err)
@@ -245,17 +245,17 @@ func TestValidationRegistry_AsyncValidator(t *testing.T) {
 		t.Errorf("ValidateAsync() cached call took too long: %v", duration)
 	}
 	// Clean up
-	UnregisterAsync("async_test")
+	registry.UnregisterAsync("async_test")
 }
 func TestNewCrossFieldValidationRegistry(t *testing.T) {
 	registry := NewCrossFieldValidationRegistry()
 	if registry == nil {
 		t.Fatal("NewCrossFieldValidationRegistry() returned nil")
 	}
-	if validators == nil {
+	if registry.validators == nil {
 		t.Error("NewCrossFieldValidationRegistry() validators map is nil")
 	}
-	if evaluator == nil {
+	if registry.evaluator == nil {
 		t.Error("NewCrossFieldValidationRegistry() evaluator is nil")
 	}
 }
@@ -268,12 +268,12 @@ func TestCrossFieldValidationRegistry_Register(t *testing.T) {
 			return nil
 		},
 	}
-	err := Register(validator)
+	err := registry.Register(validator)
 	if err != nil {
 		t.Errorf("Register() unexpected error: %v", err)
 	}
 	// Test invalid registration - nil validator
-	err = Register(nil)
+	err = registry.Register(nil)
 	if err == nil {
 		t.Error("Register() should return error for nil validator")
 	}
@@ -285,7 +285,7 @@ func TestCrossFieldValidationRegistry_Register(t *testing.T) {
 			return nil
 		},
 	}
-	err = Register(invalidValidator)
+	err = registry.Register(invalidValidator)
 	if err == nil {
 		t.Error("Register() should return error for empty name")
 	}
@@ -297,7 +297,7 @@ func TestCrossFieldValidationRegistry_Register(t *testing.T) {
 			return nil
 		},
 	}
-	err = Register(invalidValidator2)
+	err = registry.Register(invalidValidator2)
 	if err == nil {
 		t.Error("Register() should return error for empty fields")
 	}
@@ -316,12 +316,12 @@ func TestCrossFieldValidationRegistry_Validate(t *testing.T) {
 				return nil // Skip if fields missing
 			}
 			if password != confirm {
-				return NewValidationError("password_mismatch", "passwords do not match", "VALIDATION_ERROR")
+				return NewValidationError("password_mismatch", "passwords do not match")
 			}
 			return nil
 		},
 	}
-	err := Register(validator)
+	err := registry.Register(validator)
 	if err != nil {
 		t.Errorf("Register() unexpected error: %v", err)
 	}
@@ -366,7 +366,7 @@ func TestCrossFieldValidationRegistry_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Validate(ctx, tt.validator, tt.values)
+			err := registry.Validate(ctx, tt.validator, tt.values)
 			if tt.wantError && err == nil {
 				t.Error("Validate() expected error but got none")
 			}
@@ -424,7 +424,7 @@ func TestCrossFieldValidationRegistry_BuiltInValidators(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Validate(ctx, tt.validator, tt.values)
+			err := registry.Validate(ctx, tt.validator, tt.values)
 			if tt.wantError && err == nil {
 				t.Errorf("Validate(%s) expected error but got none", tt.validator)
 			}
@@ -440,17 +440,17 @@ func TestValidatorChain(t *testing.T) {
 	// Add validators to chain
 	chain.Add(func(ctx context.Context, value any, params map[string]any) error {
 		if value == nil {
-			return NewValidationError("nil_value", "value cannot be nil", "VALIDATION_ERROR")
+			return NewValidationError("nil_value", "value cannot be nil")
 		}
 		return nil
 	})
 	chain.Add(func(ctx context.Context, value any, params map[string]any) error {
 		str, ok := value.(string)
 		if !ok {
-			return NewValidationError("invalid_type", "must be string", "VALIDATION_ERROR")
+			return NewValidationError("invalid_type", "must be string")
 		}
 		if len(str) < 3 {
-			return NewValidationError("too_short", "must be at least 3 characters", "VALIDATION_ERROR")
+			return NewValidationError("too_short", "must be at least 3 characters")
 		}
 		return nil
 	})
@@ -497,13 +497,13 @@ func TestValidator_ValidateWithRegistry(t *testing.T) {
 	registry := NewValidationRegistry()
 	ctx := context.Background()
 	// Register a custom validator
-	Register("custom_test", func(ctx context.Context, value any, params map[string]any) error {
+	registry.Register("custom_test", func(ctx context.Context, value any, params map[string]any) error {
 		str, ok := value.(string)
 		if !ok {
-			return NewValidationError("invalid_type", "must be string", "VALIDATION_ERROR")
+			return NewValidationError("invalid_type", "must be string")
 		}
 		if str == "forbidden" {
-			return NewValidationError("forbidden_value", "this value is not allowed", "VALIDATION_ERROR")
+			return NewValidationError("forbidden_value", "this value is not allowed")
 		}
 		return nil
 	})
@@ -554,7 +554,7 @@ func BenchmarkValidationRegistry_Validate(b *testing.B) {
 	ctx := context.Background()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Validate(ctx, "email", "test@example.com", map[string]any{})
+		registry.Validate(ctx, "email", "test@example.com", map[string]any{})
 	}
 }
 func BenchmarkValidationRegistry_ValidateAsync(b *testing.B) {
@@ -562,6 +562,6 @@ func BenchmarkValidationRegistry_ValidateAsync(b *testing.B) {
 	ctx := context.Background()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ValidateAsync(ctx, "unique", "test_value", map[string]any{})
+		registry.ValidateAsync(ctx, "unique", "test_value", map[string]any{})
 	}
 }

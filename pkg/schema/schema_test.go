@@ -20,7 +20,7 @@ func (s *SchemaTestSuite) SetupTest() {
 func (s *SchemaTestSuite) TestNewSchema() {
 	schema := NewSchema("user-form", TypeForm, "User Form")
 	require.Equal(s.T(), "user-form", schema.ID)
-	require.Equal(s.T(), TypeForm, Type)
+	require.Equal(s.T(), TypeForm, schema.Type)
 	require.Equal(s.T(), "User Form", schema.Title)
 	require.Empty(s.T(), schema.Fields)
 	require.Empty(s.T(), schema.Actions)
@@ -52,7 +52,7 @@ func (s *SchemaTestSuite) TestSchemaAddAction() {
 func (s *SchemaTestSuite) TestSchemaValidate() {
 	// Valid schema
 	s.schema.ID = "valid-id"
-	s.Type = TypeForm
+	s.schema.Type = TypeForm
 	s.schema.Title = "Valid Title"
 	err := s.schema.Validate(s.ctx)
 	require.NoError(s.T(), err)
@@ -79,7 +79,7 @@ func (s *SchemaTestSuite) TestSchemaTypes() {
 	types := []Type{TypeForm, TypeComponent, TypeLayout, TypeWorkflow, TypeTheme, TypePage}
 	for _, schemaType := range types {
 		schema := NewSchema("test", schemaType, "Test")
-		require.Equal(s.T(), schemaType, Type)
+		require.Equal(s.T(), schemaType, schema.Type)
 	}
 }
 func (s *SchemaTestSuite) TestSchemaFieldMethods() {
@@ -141,7 +141,7 @@ func (s *SchemaTestSuite) TestSchemaClone() {
 	// Manual cloning test
 	cloned := &Schema{
 		ID:      s.schema.ID,
-		Type:    s.Type,
+		Type:    s.schema.Type,
 		Title:   s.schema.Title,
 		Fields:  make([]Field, len(s.schema.Fields)),
 		Actions: make([]Action, len(s.schema.Actions)),
@@ -149,7 +149,7 @@ func (s *SchemaTestSuite) TestSchemaClone() {
 	copy(cloned.Fields, s.schema.Fields)
 	copy(cloned.Actions, s.schema.Actions)
 	require.Equal(s.T(), s.schema.ID, cloned.ID)
-	require.Equal(s.T(), s.Type, cloned.Type)
+	require.Equal(s.T(), s.schema.Type, cloned.Type)
 	require.Equal(s.T(), s.schema.Title, cloned.Title)
 	require.Len(s.T(), cloned.Fields, 2)
 	require.Len(s.T(), cloned.Actions, 1)
@@ -162,7 +162,7 @@ func (s *SchemaTestSuite) TestSchemaProperties() {
 	s.schema.AddField(field)
 	// Test schema properties
 	require.Equal(s.T(), "test-schema", s.schema.ID)
-	require.Equal(s.T(), TypeForm, s.Type)
+	require.Equal(s.T(), TypeForm, s.schema.Type)
 	require.Equal(s.T(), "Test Schema", s.schema.Title)
 	require.Len(s.T(), s.schema.Fields, 1)
 	require.Equal(s.T(), "username", s.schema.Fields[0].Name)

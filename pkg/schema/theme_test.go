@@ -51,7 +51,7 @@ func (suite *ThemeTestSuite) TestThemeRegistry() {
 	registry := NewThemeRegistry()
 	suite.Require().NotNil(registry)
 	// Test registry methods exist (they return placeholder values for now)
-	exists := Exists("test-theme")
+	exists := registry.Exists("test-theme")
 	suite.Require().False(exists) // Should be false for non-existent theme
 }
 func (suite *ThemeTestSuite) TestThemeManager() {
@@ -113,7 +113,7 @@ func (suite *ThemeTestSuite) TestThemeWithAllComponents() {
 // BenchmarkTokenResolution measures token resolution performance
 func BenchmarkTokenResolution(b *testing.B) {
 	registry := NewTokenRegistry()
-	err := SetTokens(GetDefaultTokens())
+	err := registry.SetTokens(GetDefaultTokens())
 	if err != nil {
 		b.Fatal("Failed to set tokens:", err)
 	}
@@ -121,7 +121,7 @@ func BenchmarkTokenResolution(b *testing.B) {
 	tokenRef := TokenReference("semantic.colors.background.default")
 	b.ReportAllocs()
 	for b.Loop() {
-		_, err := ResolveToken(ctx, tokenRef)
+		_, err := registry.ResolveToken(ctx, tokenRef)
 		if err != nil {
 			b.Fatal("Token resolution failed:", err)
 		}
@@ -130,7 +130,7 @@ func BenchmarkTokenResolution(b *testing.B) {
 // BenchmarkTokenResolutionConcurrent measures concurrent token resolution
 func BenchmarkTokenResolutionConcurrent(b *testing.B) {
 	registry := NewTokenRegistry()
-	err := SetTokens(GetDefaultTokens())
+	err := registry.SetTokens(GetDefaultTokens())
 	if err != nil {
 		b.Fatal("Failed to set tokens:", err)
 	}
@@ -147,7 +147,7 @@ func BenchmarkTokenResolutionConcurrent(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			for _, tokenRef := range tokenRefs {
-				_, err := ResolveToken(ctx, tokenRef)
+				_, err := registry.ResolveToken(ctx, tokenRef)
 				if err != nil {
 					b.Fatal("Token resolution failed:", err)
 				}
@@ -278,7 +278,7 @@ func BenchmarkTokenCompilation(b *testing.B) {
 	tokens := GetDefaultTokens()
 	b.ReportAllocs()
 	for b.Loop() {
-		err := SetTokens(tokens)
+		err := registry.SetTokens(tokens)
 		if err != nil {
 			b.Fatal("Token compilation failed:", err)
 		}
@@ -360,7 +360,7 @@ func BenchmarkConcurrentThemeAccess(b *testing.B) {
 // TestTokenResolutionPerformance verifies token resolution meets <1ms p95 target
 func TestTokenResolutionPerformance(t *testing.T) {
 	registry := NewTokenRegistry()
-	err := SetTokens(GetDefaultTokens())
+	err := registry.SetTokens(GetDefaultTokens())
 	if err != nil {
 		t.Fatal("Failed to set tokens:", err)
 	}
@@ -368,14 +368,14 @@ func TestTokenResolutionPerformance(t *testing.T) {
 	tokenRef := TokenReference("semantic.colors.background.default")
 	// Warm up
 	for range 100 {
-		_, _ = ResolveToken(ctx, tokenRef)
+		_, _ = registry.ResolveToken(ctx, tokenRef)
 	}
 	// Measure performance
 	iterations := 1000
 	durations := make([]time.Duration, iterations)
 	for i := range iterations {
 		start := time.Now()
-		_, err := ResolveToken(ctx, tokenRef)
+		_, err := registry.ResolveToken(ctx, tokenRef)
 		durations[i] = time.Since(start)
 		if err != nil {
 			t.Fatal("Token resolution failed:", err)

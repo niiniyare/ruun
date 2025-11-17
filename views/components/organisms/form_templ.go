@@ -5,14 +5,14 @@ package organisms
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import (
-	"strconv"
-	"strings"
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
 
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
+import (
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
+	"strconv"
+	"strings"
 )
 
 // FormLayout defines the layout style for the form
