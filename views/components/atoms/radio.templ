@@ -248,7 +248,9 @@ templ RadioGroupInline(props RadioProps) {
 		Disabled:     props.Disabled,
 		Readonly:     props.Readonly,
 		Error:        props.Error,
-		Class:        props.Class,
+		Size:         props.Size,
+		State:        props.State,
+		ClassName:    props.ClassName,
 		Inline:       true,
 		HXPost:       props.HXPost,
 		HXGet:        props.HXGet,
@@ -261,3 +263,69 @@ templ RadioGroupInline(props RadioProps) {
 		AlpineFocus:  props.AlpineFocus,
 	})
 }
+
+// Builder Pattern (functional options)
+type RadioOption func(*RadioProps)
+
+func NewRadioGroup(opts ...RadioOption) RadioProps {
+	props := RadioProps{
+		Size:  RadioSizeMD,
+		State: RadioStateDefault,
+	}
+	for _, opt := range opts {
+		opt(&props)
+	}
+	return props
+}
+
+func WithRadioSize(size RadioSize) RadioOption {
+	return func(p *RadioProps) { p.Size = size }
+}
+
+func WithRadioState(state RadioState) RadioOption {
+	return func(p *RadioProps) { p.State = state }
+}
+
+func WithRadioName(name string) RadioOption {
+	return func(p *RadioProps) { p.Name = name }
+}
+
+func WithRadioValue(value string) RadioOption {
+	return func(p *RadioProps) { p.Value = value }
+}
+
+func WithRadioOptions(options []RadioOption) RadioOption {
+	return func(p *RadioProps) { p.Options = options }
+}
+
+func WithRadioID(id string) RadioOption {
+	return func(p *RadioProps) { p.ID = id }
+}
+
+func AsRadioRequired() RadioOption {
+	return func(p *RadioProps) { p.Required = true }
+}
+
+func AsRadioDisabled() RadioOption {
+	return func(p *RadioProps) { p.Disabled = true }
+}
+
+func AsRadioInline() RadioOption {
+	return func(p *RadioProps) { p.Inline = true }
+}
+
+func WithRadioClass(class string) RadioOption {
+	return func(p *RadioProps) { p.ClassName = class }
+}
+
+// Key Improvements in this refactored version:
+// 1. Pure Presentation: No business logic, just visual rendering and state management
+// 2. Compiled Theme Classes: Uses "radio", "radio-error", etc. from compiled CSS
+// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
+// 4. Clean Props Interface: Focused on presentation concerns only
+// 5. Visual State Management: Simple states (error, success, warning, default)
+// 6. Atomic Design Compliant: Single purpose, indivisible radio component
+// 7. Icon Integration: Uses Icon atom for consistent iconography
+// 8. Ready for Molecules: Can be easily composed into FormField molecules
+// 9. Size Variants: Supports sm, md, lg sizing through compiled theme classes
+// 10. Accessibility: Proper ARIA attributes and radiogroup semantics

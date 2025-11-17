@@ -2,7 +2,6 @@ package atoms
 
 import (
 	"fmt"
-	"strconv"
 	"github.com/niiniyare/ruun/views/utils"
 )
 
@@ -112,7 +111,7 @@ func inputClasses(props InputProps) string {
 // This is the core atomic component - single purpose, no business logic
 templ Input(props InputProps) {
 	<input
-		type={ utils.IfElse(string(props.Type) != "", string(props.Type), "text") }
+		type={ string(props.Type) }
 		if props.ID != "" {
 			id={ props.ID }
 		}
@@ -138,10 +137,10 @@ templ Input(props InputProps) {
 			autofocus
 		}
 		if props.MinLength > 0 {
-			minlength={ strconv.Itoa(props.MinLength) }
+			minlength={ fmt.Sprint(props.MinLength) }
 		}
 		if props.MaxLength > 0 {
-			maxlength={ strconv.Itoa(props.MaxLength) }
+			maxlength={ fmt.Sprint(props.MaxLength) }
 		}
 		if props.Min != "" {
 			min={ props.Min }
@@ -188,9 +187,6 @@ templ Input(props InputProps) {
 		}
 		if props.AlpineInput != "" {
 			x-on:input={ props.AlpineInput }
-		}
-		if props.State == InputStateError {
-			aria-invalid="true"
 		}
 	/>
 }
@@ -340,147 +336,6 @@ templ SearchInput(props InputProps) {
 		AlpineFocus:  props.AlpineFocus,
 		AlpineInput:  props.AlpineInput,
 	})
-}
-
-// Textarea atom component
-
-// TextareaProps defines the properties for the Textarea atom component  
-type TextareaProps struct {
-	// Presentation
-	Size      InputSize
-	State     InputState
-	ClassName string
-	
-	// Basic HTML attributes
-	ID           string
-	Name         string
-	Value        string
-	Placeholder  string
-	Rows         int
-	Cols         int
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	AutoFocus    bool
-	MinLength    int
-	MaxLength    int
-	Resize       bool
-	AutoResize   bool
-	
-	// Interactive attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-}
-
-// textareaClasses generates CSS classes using compiled theme classes and utils
-func textareaClasses(props TextareaProps) string {
-	// Use compiled theme classes from JSON theme
-	return utils.TwMerge(
-		// Base textarea class from compiled theme (same as input)
-		"input",
-		"textarea",
-		
-		// Size classes from compiled theme
-		fmt.Sprintf("input-%s", props.Size),
-		
-		// State classes from compiled theme
-		utils.If(props.State == InputStateError, "input-error"),
-		utils.If(props.State == InputStateSuccess, "input-success"), 
-		utils.If(props.State == InputStateWarning, "input-warning"),
-		
-		// Interactive state classes
-		utils.If(props.Disabled, "input-disabled"),
-		utils.If(props.Readonly, "input-readonly"),
-		
-		// Resize behavior
-		utils.If(!props.Resize, "resize-none"),
-		utils.If(props.AutoResize, "auto-resize"),
-		
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// Textarea renders a pure presentation textarea atom
-templ Textarea(props TextareaProps) {
-	<textarea
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		if props.Name != "" {
-			name={ props.Name }
-		}
-		if props.Placeholder != "" {
-			placeholder={ props.Placeholder }
-		}
-		if props.Rows > 0 {
-			rows={ strconv.Itoa(props.Rows) }
-		}
-		if props.Cols > 0 {
-			cols={ strconv.Itoa(props.Cols) }
-		}
-		if props.Required {
-			required
-		}
-		if props.Disabled {
-			disabled
-		}
-		if props.Readonly {
-			readonly
-		}
-		if props.AutoFocus {
-			autofocus
-		}
-		if props.MinLength > 0 {
-			minlength={ strconv.Itoa(props.MinLength) }
-		}
-		if props.MaxLength > 0 {
-			maxlength={ strconv.Itoa(props.MaxLength) }
-		}
-		class={ textareaClasses(props) }
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-		if props.HXTrigger != "" {
-			hx-trigger={ props.HXTrigger }
-		}
-		if props.AlpineModel != "" {
-			x-model={ props.AlpineModel }
-		}
-		if props.AlpineChange != "" {
-			x-on:change={ props.AlpineChange }
-		}
-		if props.AlpineBlur != "" {
-			x-on:blur={ props.AlpineBlur }
-		}
-		if props.AlpineFocus != "" {
-			x-on:focus={ props.AlpineFocus }
-		}
-		if props.AutoResize {
-			x-data="{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }"
-			x-init="resize()"
-			x-on:input="resize()"
-		}
-		if props.State == InputStateError {
-			aria-invalid="true"
-		}
-	>{ props.Value }</textarea>
 }
 
 // Builder Pattern (functional options)

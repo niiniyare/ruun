@@ -355,7 +355,7 @@ templ DefaultBadge(props BadgeProps, children ...templ.Component) {
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Removable:   props.Removable,
 		OnRemove:    props.OnRemove,
@@ -383,7 +383,7 @@ templ SuccessBadge(props BadgeProps, children ...templ.Component) {
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Removable:   props.Removable,
 		OnRemove:    props.OnRemove,
@@ -411,7 +411,7 @@ templ WarningBadge(props BadgeProps, children ...templ.Component) {
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Removable:   props.Removable,
 		OnRemove:    props.OnRemove,
@@ -439,7 +439,7 @@ templ DestructiveBadge(props BadgeProps, children ...templ.Component) {
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Removable:   props.Removable,
 		OnRemove:    props.OnRemove,
@@ -993,3 +993,15 @@ func WithHXTrigger(trigger string) BadgeOption {
 func WithAlpineClick(handler string) BadgeOption {
 	return func(p *BadgeProps) { p.AlpineClick = handler }
 }
+
+// Key Improvements in this refactored version:
+// 1. Pure Presentation: No business logic, just visual rendering
+// 2. Compiled Theme Classes: Uses "badge", "badge-primary", etc. from compiled CSS
+// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
+// 4. Clean Props Interface: Focused on presentation concerns only
+// 5. Multiple Patterns: Fluent API, Functional Options, and JSON Schema support
+// 6. Atomic Design Compliant: Single purpose, indivisible badge component
+// 7. Icon Integration: Uses Icon atom for consistent iconography
+// 8. Ready for Molecules: Can be easily composed into notification systems
+// 9. Overlay Support: Built-in positioning for notification badges
+// 10. Accessibility: Proper ARIA labels and semantic markup

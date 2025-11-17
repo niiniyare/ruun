@@ -234,14 +234,17 @@ templ Checkbox(props CheckboxProps) {
 				x-on:focus={ props.AlpineFocus }
 			}
 		/>
-		<div class="flex-1 min-w-0">
+		<div class="checkbox-content">
+			if props.Icon != "" {
+				@Icon(IconProps{Name: props.Icon, Size: "sm", ClassName: "checkbox-icon"})
+			}
 			if props.Label != "" {
-				<div class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+				<div class="checkbox-label">
 					{ props.Label }
 				</div>
 			}
 			if props.Description != "" {
-				<p class="text-xs text-muted-foreground mt-1">
+				<p class="checkbox-description">
 					{ props.Description }
 				</p>
 			}
@@ -355,6 +358,9 @@ templ CheckboxGroupInline(props CheckboxGroupProps) {
 		Readonly:     props.Readonly,
 		Error:        props.Error,
 		Class:        props.Class,
+		Size:         props.Size,
+		State:        props.State,
+		ClassName:    props.ClassName,
 		Inline:       true,
 		HXPost:       props.HXPost,
 		HXGet:        props.HXGet,
@@ -367,3 +373,69 @@ templ CheckboxGroupInline(props CheckboxGroupProps) {
 		AlpineFocus:  props.AlpineFocus,
 	})
 }
+
+// Builder Pattern (functional options)
+type CheckboxOption func(*CheckboxProps)
+
+func NewCheckbox(opts ...CheckboxOption) CheckboxProps {
+	props := CheckboxProps{
+		Size:  CheckboxSizeMD,
+		State: CheckboxStateDefault,
+	}
+	for _, opt := range opts {
+		opt(&props)
+	}
+	return props
+}
+
+func WithCheckboxSize(size CheckboxSize) CheckboxOption {
+	return func(p *CheckboxProps) { p.Size = size }
+}
+
+func WithCheckboxState(state CheckboxState) CheckboxOption {
+	return func(p *CheckboxProps) { p.State = state }
+}
+
+func WithCheckboxLabel(label string) CheckboxOption {
+	return func(p *CheckboxProps) { p.Label = label }
+}
+
+func WithCheckboxValue(value string) CheckboxOption {
+	return func(p *CheckboxProps) { p.Value = value }
+}
+
+func WithCheckboxName(name string) CheckboxOption {
+	return func(p *CheckboxProps) { p.Name = name }
+}
+
+func WithCheckboxID(id string) CheckboxOption {
+	return func(p *CheckboxProps) { p.ID = id }
+}
+
+func AsCheckboxChecked() CheckboxOption {
+	return func(p *CheckboxProps) { p.Checked = true }
+}
+
+func AsCheckboxRequired() CheckboxOption {
+	return func(p *CheckboxProps) { p.Required = true }
+}
+
+func AsCheckboxDisabled() CheckboxOption {
+	return func(p *CheckboxProps) { p.Disabled = true }
+}
+
+func WithCheckboxClass(class string) CheckboxOption {
+	return func(p *CheckboxProps) { p.ClassName = class }
+}
+
+// Key Improvements in this refactored version:
+// 1. Pure Presentation: No business logic, just visual rendering and state management
+// 2. Compiled Theme Classes: Uses "checkbox", "checkbox-error", etc. from compiled CSS
+// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
+// 4. Clean Props Interface: Focused on presentation concerns only
+// 5. Visual State Management: Simple states (error, success, warning, default)
+// 6. Atomic Design Compliant: Single purpose, indivisible checkbox component
+// 7. Icon Integration: Uses Icon atom for consistent iconography
+// 8. Ready for Molecules: Can be easily composed into FormField molecules
+// 9. Size Variants: Supports sm, md, lg sizing through compiled theme classes
+// 10. Accessibility: Proper ARIA attributes for screen readers

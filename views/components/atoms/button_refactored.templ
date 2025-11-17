@@ -2,6 +2,7 @@ package atoms
 
 import (
 	"fmt"
+	"strings"
 	"github.com/niiniyare/ruun/views/utils"
 )
 
@@ -11,8 +12,8 @@ type ButtonVariant string
 const (
 	ButtonPrimary     ButtonVariant = "primary"
 	ButtonSecondary   ButtonVariant = "secondary"
-	ButtonDestructive ButtonVariant = "destructive"
 	ButtonOutline     ButtonVariant = "outline"
+	ButtonDestructive ButtonVariant = "destructive"
 	ButtonGhost       ButtonVariant = "ghost"
 	ButtonLink        ButtonVariant = "link"
 )
@@ -35,22 +36,22 @@ type ButtonProps struct {
 	Variant   ButtonVariant
 	Size      ButtonSize
 	ClassName string
+	ID        string
 	
-	// Content
+	// Content (simple presentation only)
 	Text      string
 	Icon      string
 	IconLeft  string
 	IconRight string
 	
 	// Basic HTML attributes
-	ID       string
-	Type     string
+	Type     string // "button", "submit", "reset"
 	Name     string
 	Value    string
 	Disabled bool
 	Loading  bool
 	
-	// Interactive attributes
+	// Interactive attributes (HTMX/Alpine)
 	HXPost      string
 	HXGet       string
 	HXTarget    string
@@ -69,7 +70,7 @@ func buttonClasses(props ButtonProps) string {
 		// Variant classes from compiled theme
 		fmt.Sprintf("button-%s", props.Variant),
 		
-		// Size classes from compiled theme
+		// Size classes from compiled theme  
 		fmt.Sprintf("button-%s", props.Size),
 		
 		// State classes
@@ -85,7 +86,11 @@ func buttonClasses(props ButtonProps) string {
 // This is the core atomic component - single purpose, no business logic
 templ Button(props ButtonProps, children ...templ.Component) {
 	<button
-		type={ utils.IfElse(props.Type != "", props.Type, "button") }
+		if props.Type != "" {
+			type={ props.Type }
+		} else {
+			type="button"
+		}
 		if props.ID != "" {
 			id={ props.ID }
 		}
@@ -129,17 +134,20 @@ templ Button(props ButtonProps, children ...templ.Component) {
 templ buttonContent(props ButtonProps, children ...templ.Component) {
 	// Loading state
 	if props.Loading {
-		@LoadingSpinner()
+		<svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+			<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+		</svg>
 	}
 	
 	// Left icon
 	if !props.Loading && props.IconLeft != "" {
-		@Icon(IconProps{Name: props.IconLeft, ClassName: "button-icon-left"})
+		@Icon(IconProps{Name: props.IconLeft, Size: "sm", ClassName: "mr-2"})
 	}
 	
 	// Single icon (for icon-only buttons)
 	if !props.Loading && props.Icon != "" && len(children) == 0 && props.Text == "" {
-		@Icon(IconProps{Name: props.Icon, ClassName: "button-icon"})
+		@Icon(IconProps{Name: props.Icon, Size: "md"})
 	}
 	
 	// Simple text content
@@ -147,59 +155,34 @@ templ buttonContent(props ButtonProps, children ...templ.Component) {
 		{ props.Text }
 	}
 	
-	// Button content (children take precedence)
+	// Children components (takes precedence over text)
 	for _, child := range children {
 		@child
 	}
 	
 	// Right icon
 	if !props.Loading && props.IconRight != "" {
-		@Icon(IconProps{Name: props.IconRight, ClassName: "button-icon-right"})
+		@Icon(IconProps{Name: props.IconRight, Size: "sm", ClassName: "ml-2"})
 	}
 }
 
-// LoadingSpinner renders a loading indicator
-templ LoadingSpinner() {
-	<svg
-		class="button-spinner"
-		xmlns="http://www.w3.org/2000/svg"
-		fill="none"
-		viewBox="0 0 24 24"
-		aria-hidden="true"
-	>
-		<circle
-			class="opacity-25"
-			cx="12"
-			cy="12"
-			r="10"
-			stroke="currentColor"
-			stroke-width="4"
-		></circle>
-		<path
-			class="opacity-75"
-			fill="currentColor"
-			d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-		></path>
-	</svg>
-}
-
-// Convenience components for common button variants
+// Convenience variant components (still atomic, just different defaults)
 
 templ PrimaryButton(props ButtonProps, children ...templ.Component) {
 	@Button(ButtonProps{
 		Variant:     ButtonPrimary,
 		Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-		ClassName:   props.ClassName,
+		Type:        utils.IfElse(props.Type != "", props.Type, "button"),
+		Disabled:    props.Disabled,
+		Loading:     props.Loading,
 		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
-		Type:        props.Type,
 		Name:        props.Name,
 		Value:       props.Value,
-		Disabled:    props.Disabled,
-		Loading:     props.Loading,
 		HXPost:      props.HXPost,
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
@@ -213,17 +196,17 @@ templ SecondaryButton(props ButtonProps, children ...templ.Component) {
 	@Button(ButtonProps{
 		Variant:     ButtonSecondary,
 		Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-		ClassName:   props.ClassName,
+		Type:        utils.IfElse(props.Type != "", props.Type, "button"),
+		Disabled:    props.Disabled,
+		Loading:     props.Loading,
 		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
-		Type:        props.Type,
 		Name:        props.Name,
 		Value:       props.Value,
-		Disabled:    props.Disabled,
-		Loading:     props.Loading,
 		HXPost:      props.HXPost,
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
@@ -237,17 +220,17 @@ templ OutlineButton(props ButtonProps, children ...templ.Component) {
 	@Button(ButtonProps{
 		Variant:     ButtonOutline,
 		Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-		ClassName:   props.ClassName,
+		Type:        utils.IfElse(props.Type != "", props.Type, "button"),
+		Disabled:    props.Disabled,
+		Loading:     props.Loading,
 		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
-		Type:        props.Type,
 		Name:        props.Name,
 		Value:       props.Value,
-		Disabled:    props.Disabled,
-		Loading:     props.Loading,
 		HXPost:      props.HXPost,
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
@@ -261,17 +244,17 @@ templ DestructiveButton(props ButtonProps, children ...templ.Component) {
 	@Button(ButtonProps{
 		Variant:     ButtonDestructive,
 		Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-		ClassName:   props.ClassName,
+		Type:        utils.IfElse(props.Type != "", props.Type, "button"),
+		Disabled:    props.Disabled,
+		Loading:     props.Loading,
 		Text:        props.Text,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		IconRight:   props.IconRight,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
-		Type:        props.Type,
 		Name:        props.Name,
 		Value:       props.Value,
-		Disabled:    props.Disabled,
-		Loading:     props.Loading,
 		HXPost:      props.HXPost,
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
@@ -321,12 +304,12 @@ func WithIconRight(icon string) ButtonOption {
 	return func(p *ButtonProps) { p.IconRight = icon }
 }
 
-func WithID(id string) ButtonOption {
-	return func(p *ButtonProps) { p.ID = id }
+func WithClass(class string) ButtonOption {
+	return func(p *ButtonProps) { p.ClassName = class }
 }
 
-func WithType(buttonType string) ButtonOption {
-	return func(p *ButtonProps) { p.Type = buttonType }
+func AsSubmit() ButtonOption {
+	return func(p *ButtonProps) { p.Type = "submit" }
 }
 
 func AsDisabled() ButtonOption {
@@ -345,15 +328,14 @@ func WithHXGet(url string) ButtonOption {
 	return func(p *ButtonProps) { p.HXGet = url }
 }
 
-func WithClass(class string) ButtonOption {
-	return func(p *ButtonProps) { p.ClassName = class }
+func WithAlpineClick(handler string) ButtonOption {
+	return func(p *ButtonProps) { p.AlpineClick = handler }
 }
 
 // Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, validation, or form context
-// 2. Compiled Theme Classes: Uses "button", "button-primary", etc. from compiled CSS
+// 1. Pure Presentation: No business logic, user context, or tenant logic
+// 2. Compiled Theme Classes: Uses "button", "button-primary", etc. from compiled CSS  
 // 3. Utils Integration: TwMerge for class conflicts, If/IfElse for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. State Management: Simple visual states (loading, disabled)
-// 6. Atomic Design Compliant: Single purpose, indivisible button component
-// 7. Ready for Molecules: Can be easily composed into FormField molecules
+// 4. Clean Props Interface: Focused, minimal props - single purpose
+// 5. Schema Ready: Ready for molecular composition and schema integration
+// 6. Atomic Design Compliant: Truly indivisible UI component

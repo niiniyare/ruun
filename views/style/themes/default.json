@@ -1,0 +1,128 @@
+{
+  "name": "Default",
+  "extends": null,
+  "tokens": {
+    "colors": {
+      "primary": "hsl(217, 91%, 60%)",
+      "primary-foreground": "hsl(0, 0%, 100%)",
+      "secondary": "hsl(0, 0%, 96%)",
+      "secondary-foreground": "hsl(0, 0%, 9%)",
+      "background": "hsl(0, 0%, 100%)",
+      "foreground": "hsl(0, 0%, 9%)",
+      "muted": "hsl(0, 0%, 98%)",
+      "muted-foreground": "hsl(0, 0%, 50%)",
+      "border": "hsl(0, 0%, 90%)",
+      "input": "hsl(0, 0%, 100%)",
+      "ring": "hsl(217, 91%, 60%)",
+      "success": "hsl(142, 71%, 45%)",
+      "success-foreground": "hsl(0, 0%, 100%)",
+      "warning": "hsl(45, 93%, 47%)",
+      "warning-foreground": "hsl(0, 0%, 100%)",
+      "error": "hsl(0, 84%, 60%)",
+      "error-foreground": "hsl(0, 0%, 100%)"
+    },
+    "spacing": {
+      "xs": "0.5rem",
+      "sm": "0.75rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem"
+    },
+    "radius": {
+      "sm": "0.25rem",
+      "md": "0.5rem",
+      "lg": "0.75rem"
+    },
+    "typography": {
+      "font-size-sm": "0.875rem",
+      "font-size-base": "1rem",
+      "font-size-lg": "1.125rem"
+    }
+  },
+  "components": {
+    "button": {
+      "primary": {
+        "background-color": "hsl(217, 91%, 60%)",
+        "color": "hsl(0, 0%, 100%)",
+        "border": "1px solid hsl(217, 91%, 60%)",
+        "border-radius": "0.5rem",
+        "padding": "0.5rem 1rem",
+        "font-weight": "500"
+      },
+      "secondary": {
+        "background-color": "hsl(0, 0%, 96%)",
+        "color": "hsl(0, 0%, 9%)",
+        "border": "1px solid hsl(0, 0%, 90%)",
+        "border-radius": "0.5rem",
+        "padding": "0.5rem 1rem"
+      },
+      "outline": {
+        "background-color": "transparent",
+        "color": "hsl(217, 91%, 60%)",
+        "border": "1px solid hsl(217, 91%, 60%)",
+        "border-radius": "0.5rem",
+        "padding": "0.5rem 1rem"
+      }
+    },
+    "input": {
+      "base": {
+        "background-color": "hsl(0, 0%, 100%)",
+        "border": "1px solid hsl(0, 0%, 90%)",
+        "border-radius": "0.5rem",
+        "padding": "0.5rem 0.75rem",
+        "color": "hsl(0, 0%, 9%)"
+      },
+      "focus": {
+        "border-color": "hsl(217, 91%, 60%)",
+        "outline": "2px solid hsl(217, 91%, 60%)",
+        "outline-offset": "2px"
+      },
+      "error": {
+        "border-color": "hsl(0, 84%, 60%)"
+      }
+    },
+    "badge": {
+      "default": {
+        "background-color": "hsl(0, 0%, 96%)",
+        "color": "hsl(0, 0%, 50%)",
+        "padding": "0.125rem 0.5rem",
+        "border-radius": "0.25rem",
+        "font-size": "0.75rem"
+      },
+      "success": {
+        "background-color": "hsl(142, 71%, 45%)",
+        "color": "hsl(0, 0%, 100%)"
+      },
+      "warning": {
+        "background-color": "hsl(45, 93%, 47%)",
+        "color": "hsl(0, 0%, 100%)"
+      },
+      "error": {
+        "background-color": "hsl(0, 84%, 60%)",
+        "color": "hsl(0, 0%, 100%)"
+      }
+    },
+    "alert": {
+      "base": {
+        "padding": "1rem",
+        "border-radius": "0.5rem",
+        "border": "1px solid hsl(0, 0%, 90%)"
+      },
+      "success": {
+        "background-color": "hsl(142, 71%, 97%)",
+        "border-color": "hsl(142, 71%, 85%)",
+        "color": "hsl(142, 71%, 25%)"
+      },
+      "warning": {
+        "background-color": "hsl(45, 93%, 97%)",
+        "border-color": "hsl(45, 93%, 85%)",
+        "color": "hsl(45, 93%, 25%)"
+      },
+      "error": {
+        "background-color": "hsl(0, 84%, 97%)",
+        "border-color": "hsl(0, 84%, 85%)",
+        "color": "hsl(0, 84%, 25%)"
+      }
+    }
+  }
+}

@@ -179,7 +179,7 @@ func (l *Layout) GetGap() string {
 	if l.Gap != "" {
 		return l.Gap
 	}
-	return GetSpacing("md") // Use design token
+	return "1rem" // Default spacing
 }
 // GetDirection returns the direction with fallback
 func (l *Layout) GetDirection() string {
