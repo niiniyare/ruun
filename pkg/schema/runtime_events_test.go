@@ -197,8 +197,8 @@ func (s *EventHandlerTestSuite) TestValidationTiming() {
 			// Reset state
 			s.runtime.state.Reset()
 			s.runtime.state.ClearErrors("email")
-			// Set validation timing
-			s.handler.SetValidationTiming(tt.timing)
+			// Set validation timing on runtime
+			s.runtime.SetValidationTiming(tt.timing)
 			// Create event with invalid email
 			// Handle event based on type through runtime
 			var err error
@@ -266,10 +266,9 @@ func (s *EventHandlerTestSuite) TestHandleBatchUpdate() {
 		"email": "john@example.com",
 	})
 	require.NoError(s.T(), err, "Initialize should not fail")
-	s.handler.SetValidationTiming(ValidateOnChange)
 	// Track callback calls
 	changeEvents := 0
-	s.handler.Register(EventChange, func(ctx context.Context, event *Event) error {
+	s.runtime.RegisterEventHandler(EventChange, func(ctx context.Context, event *Event) error {
 		changeEvents++
 		return nil
 	})
@@ -284,7 +283,6 @@ func (s *EventHandlerTestSuite) TestHandleBatchUpdate() {
 		err := s.runtime.HandleFieldChange(s.ctx, field, value)
 		require.NoError(s.T(), err, "HandleFieldChange() should not return error for field %s", field)
 	}
-	require.NoError(s.T(), err, "HandleBatchUpdate() should not return error")
 	// Check all values were updated
 	for field, expectedValue := range updates {
 		value, exists := s.runtime.state.GetValue(field)

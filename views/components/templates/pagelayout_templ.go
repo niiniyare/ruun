@@ -5,13 +5,13 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
+	"strings"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/organisms"
-	"strings"
 )
 
 // PageLayoutType defines the layout type
@@ -245,7 +245,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 = []any{pageLayoutClasses(props)}
+		templ_7745c5c3_Var3 := []any{pageLayoutClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -368,7 +368,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		var templ_7745c5c3_Var9 = []any{pageContentClasses(props)}
+		templ_7745c5c3_Var9 := []any{pageContentClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var9...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -406,7 +406,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		var templ_7745c5c3_Var11 = []any{pageMainClasses(props)}
+		templ_7745c5c3_Var11 := []any{pageMainClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var11...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -453,7 +453,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 = []any{getContentContainerClasses(props)}
+			templ_7745c5c3_Var13 := []any{getContentContainerClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var13...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -705,7 +705,7 @@ func pageHeader(header PageHeader) templ.Component {
 			templ_7745c5c3_Var23 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var24 = []any{"border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 " + header.Class}
+		templ_7745c5c3_Var24 := []any{"border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 " + header.Class}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var24...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -929,7 +929,7 @@ func pageFooter(footer PageFooter) templ.Component {
 			templ_7745c5c3_Var32 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var33 = []any{"border-t border-border bg-background " + footer.Class}
+		templ_7745c5c3_Var33 := []any{"border-t border-border bg-background " + footer.Class}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var33...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -236,6 +236,7 @@ func (v *DataValidator) ValidateWithFieldState(ctx context.Context, field Enrich
 		}
 	}
 	// For editable fields or fields without runtime state, run full validation
+	// Need to call with exists parameter based on the actual ValidateField signature
 	return v.ValidateField(ctx, field, value, exists)
 }
 // ValidateConditionalFields validates fields based on their visibility/editability state

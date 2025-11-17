@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/validation"
 )
 
 // FormFieldType defines the input type for the form field
@@ -144,12 +143,12 @@ type FormFieldProps struct {
 	DebounceMs      int // Debounce validation
 
 	// NEW: Validation state integration
-	ValidationState    validation.ValidationState `json:"validationState,omitempty"`    // idle, validating, valid, invalid, warning
-	ValidationLoading  bool                       `json:"validationLoading,omitempty"`  // Async validation in progress
-	ClientRules        *ClientValidationRules     `json:"clientRules,omitempty"`        // For immediate client-side validation
-	OnValidate         string                     `json:"onValidate,omitempty"`         // HTMX validation endpoint
-	ValidationDebounce int                        `json:"validationDebounce,omitempty"` // Debounce timing in ms
-	Errors             []string                   `json:"errors,omitempty"`             // Current validation errors
+	ValidationState    ValidationState        `json:"validationState,omitempty"`    // idle, validating, valid, invalid, warning
+	ValidationLoading  bool                   `json:"validationLoading,omitempty"`  // Async validation in progress
+	ClientRules        *ClientValidationRules `json:"clientRules,omitempty"`        // For immediate client-side validation
+	OnValidate         string                 `json:"onValidate,omitempty"`         // HTMX validation endpoint
+	ValidationDebounce int                    `json:"validationDebounce,omitempty"` // Debounce timing in ms
+	Errors             []string               `json:"errors,omitempty"`             // Current validation errors
 
 	// Input constraints
 	MinLength    int
@@ -296,6 +295,23 @@ type FormFieldProps struct {
 	// Conditional rendering
 	Condition    string   // Condition.Condition expression for conditional display
 	Dependencies []string // Field IDs this field depends on
+}
+
+// ValidationState represents the state of validation.
+type ValidationState string
+
+// Define the possible validation states.
+const (
+	Idle       ValidationState = "idle"
+	Validating ValidationState = "validating"
+	Valid      ValidationState = "valid"
+	Invalid    ValidationState = "invalid"
+	Warning    ValidationState = "warning"
+)
+
+// String returns the string representation of ValidationState
+func (v ValidationState) String() string {
+	return string(v)
 }
 
 // ClientValidationRules represents validation rules that can be executed client-side

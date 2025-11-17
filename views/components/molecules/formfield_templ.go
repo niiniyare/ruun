@@ -11,7 +11,6 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/validation"
 	"strconv"
 	"strings"
 )
@@ -232,7 +231,7 @@ func FormField(props FormFieldProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Loading && props.ValidationState != validation.ValidationStateValidating {
+		if props.Loading && props.ValidationState != Validating {
 			templ_7745c5c3_Err = renderLoadingIndicator(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -519,7 +518,7 @@ func renderValidationStatus(props FormFieldProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(props.ValidationState == validation.ValidationStateIdle)
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(props.ValidationState == Idle)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/formfield.templ`, Line: 138, Col: 71}
 		}
@@ -544,7 +543,7 @@ func renderValidationStatus(props FormFieldProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.ValidationState == validation.ValidationStateValidating || props.ValidationLoading {
+		if props.ValidationState == Validating || props.ValidationLoading {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, " <div class=\"validation-loading\" style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -575,7 +574,7 @@ func renderValidationStatus(props FormFieldProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if props.ValidationState == validation.ValidationStateValid {
+		} else if props.ValidationState == Valid {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, " <div class=\"validation-success\" style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -619,7 +618,7 @@ func renderValidationStatus(props FormFieldProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if props.ValidationState == validation.ValidationStateInvalid {
+		} else if props.ValidationState == Invalid {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " <div class=\"validation-error\" style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -663,7 +662,7 @@ func renderValidationStatus(props FormFieldProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if props.ValidationState == validation.ValidationStateWarning {
+		} else if props.ValidationState == Warning {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, " <div class=\"validation-warning\" style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -738,7 +737,7 @@ func renderValidationMessages(props FormFieldProps) templ.Component {
 			templ_7745c5c3_Var40 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(props.Errors) > 0 && (props.ValidationState == validation.ValidationStateInvalid || props.ErrorText != "") {
+		if len(props.Errors) > 0 && (props.ValidationState == Invalid || props.ErrorText != "") {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "<div class=\"field-errors\" style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1056,7 +1055,7 @@ func renderTextInput(props FormFieldProps, inputType atoms.InputType) templ.Comp
 			Required:     props.Required,
 			Disabled:     props.Disabled,
 			Readonly:     props.Readonly,
-			Error:        props.ValidationState == validation.ValidationStateInvalid,
+			Error:        props.ValidationState == Invalid,
 			MinLength:    props.MinLength,
 			MaxLength:    props.MaxLength,
 			Pattern:      props.Pattern,
@@ -1354,22 +1353,22 @@ func getInputFieldStyles(props FormFieldProps) string {
 // getValidationStateBorderColor returns border color based on validation state and tokens
 func getValidationStateBorderColor(props FormFieldProps) string {
 	switch props.ValidationState {
-	case validation.ValidationStateValidating:
+	case Validating:
 		if color := props.Tokens[TokenValidationLoading+".color"]; color != "" {
 			return color
 		}
 		return "#f59e0b" // fallback amber
-	case validation.ValidationStateValid:
+	case Valid:
 		if color := props.Tokens[TokenValidationSuccess+".color"]; color != "" {
 			return color
 		}
 		return "#16a34a" // fallback green
-	case validation.ValidationStateInvalid:
+	case Invalid:
 		if color := props.Tokens[TokenValidationError+".color"]; color != "" {
 			return color
 		}
 		return "#dc2626" // fallback red
-	case validation.ValidationStateWarning:
+	case Warning:
 		if color := props.Tokens[TokenValidationWarning+".color"]; color != "" {
 			return color
 		}
@@ -1449,13 +1448,13 @@ func getInputValidationClasses(props FormFieldProps) string {
 
 	// Add validation state class
 	switch props.ValidationState {
-	case validation.ValidationStateValidating:
+	case Validating:
 		classes = append(classes, "field-validating")
-	case validation.ValidationStateValid:
+	case Valid:
 		classes = append(classes, "field-valid")
-	case validation.ValidationStateInvalid:
+	case Invalid:
 		classes = append(classes, "field-invalid")
-	case validation.ValidationStateWarning:
+	case Warning:
 		classes = append(classes, "field-warning")
 	}
 
@@ -1468,15 +1467,15 @@ func getInputValidationClasses(props FormFieldProps) string {
 }
 
 // getValidationStateClass returns CSS class for validation state (legacy fallback)
-func getValidationStateClass(state validation.ValidationState) string {
+func getValidationStateClass(state ValidationState) string {
 	switch state {
-	case validation.ValidationStateValidating:
+	case Validating:
 		return "validating"
-	case validation.ValidationStateValid:
+	case Valid:
 		return "valid"
-	case validation.ValidationStateInvalid:
+	case Invalid:
 		return "invalid"
-	case validation.ValidationStateWarning:
+	case Warning:
 		return "warning"
 	default:
 		return "idle"

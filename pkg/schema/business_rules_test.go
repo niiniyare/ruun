@@ -353,7 +353,7 @@ func (suite *BusinessRulesTestSuite) TestFieldOptionsActions() {
 	require.NoError(suite.T(), err)
 	_, err = suite.engine.ApplyRules(suite.ctx, schema, map[string]any{})
 	require.Error(suite.T(), err)
-	require.Contains(suite.T(), err.Error(), "options must be []Option type")
+	require.Contains(suite.T(), err.Error(), "options must be []FieldOption type")
 }
 // Test action visibility
 func (suite *BusinessRulesTestSuite) TestActionVisibility() {

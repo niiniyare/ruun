@@ -684,7 +684,7 @@ func TestNewValidationError(t *testing.T) {
 	if !strings.Contains(err.Error(), "Invalid email format") {
 		t.Errorf("NewValidationError() Error = %s, want to contain 'Invalid email format'", err.Error())
 	}
-	expectedError := "email: Invalid email format"
+	expectedError := "[email_format] Invalid email format"
 	if err.Error() != expectedError {
 		t.Errorf("ValidationError.Error() = %s, want %s", err.Error(), expectedError)
 	}
@@ -970,11 +970,15 @@ type MockEnrichedField struct {
 	*MockField
 	runtime *MockFieldRuntime
 }
-func (f *MockEnrichedField) GetRuntime() FieldRuntime {
+func (f *MockEnrichedField) GetRuntime() *FieldRuntime {
 	if f.runtime == nil {
-		return FieldRuntime{}
+		return nil
 	}
-	return *f.runtime
+	return &FieldRuntime{
+		Visible:  f.runtime.IsVisible(),
+		Editable: f.runtime.IsEditable(),
+		Reason:   f.runtime.GetReason(),
+	}
 }
 // MockEnrichedSchema implements EnrichedSchemaInterface for testing
 type MockEnrichedSchema struct {
@@ -1474,7 +1478,7 @@ func convertMockToRealSchema(mockSchema *MockSchema) *Schema {
 	for _, mockField := range mockSchema.GetFields() {
 		field := Field{
 			Name:     mockField.GetName(),
-			Type:     schema.FieldType(mockField.GetType()),
+			Type:     FieldType(mockField.GetType()),
 			Required: mockField.GetRequired(),
 		}
 		// Convert validation if present or create based on field type
@@ -1507,9 +1511,9 @@ func convertMockToRealSchema(mockSchema *MockSchema) *Schema {
 		// Convert options if present
 		mockOptions := mockField.GetOptions()
 		if len(mockOptions) > 0 {
-			field.Options = make([]Option, len(mockOptions))
+			field.Options = make([]FieldOption, len(mockOptions))
 			for i, opt := range mockOptions {
-				field.Options[i] = Option{
+				field.Options[i] = FieldOption{
 					Value: opt.Value,
 					Label: opt.Label,
 				}

@@ -9,6 +9,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"runtime"
 	"sync"
 	"time"
 
@@ -155,7 +156,7 @@ func (ek *EncryptionKey) Zeroize() {
 	for i := range ek.key {
 		ek.key[i] = 0
 	}
-	GC() // Force GC to clear any copies
+	runtime.GC() // Force GC to clear any copies
 }
 
 type EncryptedPayload struct {
