@@ -226,7 +226,7 @@ func (p *PrometheusProvider) Counter(name, help string, labelKeys ...string) Cou
 		labelKeys,
 	)
 
-	if err := p.registry.Register(counter); err != nil {
+	if err := p.Register(counter); err != nil {
 		if are, ok := err.(prometheus.AlreadyRegisteredError); ok {
 			if existing, ok := are.ExistingCollector.(*prometheus.CounterVec); ok {
 				p.counters[key] = existing
@@ -265,7 +265,7 @@ func (p *PrometheusProvider) Gauge(name, help string, labelKeys ...string) Gauge
 		labelKeys,
 	)
 
-	if err := p.registry.Register(gauge); err != nil {
+	if err := p.Register(gauge); err != nil {
 		if are, ok := err.(prometheus.AlreadyRegisteredError); ok {
 			if existing, ok := are.ExistingCollector.(*prometheus.GaugeVec); ok {
 				p.gauges[key] = existing
@@ -309,7 +309,7 @@ func (p *PrometheusProvider) Histogram(name, help string, buckets []float64, lab
 		labelKeys,
 	)
 
-	if err := p.registry.Register(histogram); err != nil {
+	if err := p.Register(histogram); err != nil {
 		if are, ok := err.(prometheus.AlreadyRegisteredError); ok {
 			if existing, ok := are.ExistingCollector.(*prometheus.HistogramVec); ok {
 				p.histograms[key] = existing

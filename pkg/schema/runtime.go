@@ -1,331 +1,909 @@
 package schema
-
 import (
 	"context"
+	"fmt"
+	"strings"
+	"sync"
 	"time"
 )
-
-// Runtime Types - Shared across packages to avoid import cycles
-// These types are used by the runtime package and other packages that integrate with it
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Event Types and Structures
-// ═══════════════════════════════════════════════════════════════════════════
-
-// EventType represents runtime event types
-type EventType string
-
-const (
-	EventChange EventType = "change" // Field value changed
-	EventBlur   EventType = "blur"   // Field lost focus
-	EventFocus  EventType = "focus"  // Field gained focus
-	EventSubmit EventType = "submit" // Form submitted
-	EventReset  EventType = "reset"  // Form reset
-	EventInit   EventType = "init"   // Form initialized
-)
-
-// Event represents a runtime event
-type Event struct {
-	Type      EventType `json:"type"`
-	Field     string    `json:"field,omitempty"`
-	Value     any       `json:"value,omitempty"`
-	OldValue  any       `json:"old_value,omitempty"`
-	Timestamp time.Time `json:"timestamp"`
-	Context   any       `json:"context,omitempty"`
+// Runtime is the main runtime implementation that orchestrates state and events
+// It's UI-agnostic and uses interfaces for maximum flexibility
+// Uses types from schema package to avoid import cycles
+type Runtime struct {
+	// Core components
+	schema *Schema
+	state  *RuntimeState
+	events *EventHandler
+	// Injected dependencies (optional - gracefully degrade if not provided)
+	renderer    RuntimeRenderer          // UI rendering implementation
+	validator   RuntimeValidator         // Validation implementation
+	conditional RuntimeConditionalEngine // Conditional logic implementation
+	// Internationalization
+	currentLocale string // Current locale for the runtime instance
+	// Configuration
+	config *RuntimeConfig
+	// Statistics and tracking
+	initializedAt time.Time
+	lastActivity  time.Time
+	// Concurrency control
+	mu sync.RWMutex
 }
-
-// EventCallback is a function that handles events
-type EventCallback func(ctx context.Context, event *Event) error
-
 // ═══════════════════════════════════════════════════════════════════════════
-// Validation Types
+// Builder Pattern for Runtime Creation
 // ═══════════════════════════════════════════════════════════════════════════
-
-// ValidationTiming defines when validation occurs
-type ValidationTiming string
-
-const (
-	ValidateOnChange ValidationTiming = "change" // Validate immediately on change
-	ValidateOnBlur   ValidationTiming = "blur"   // Validate when field loses focus
-	ValidateOnSubmit ValidationTiming = "submit" // Validate only on form submission
-	ValidateNever    ValidationTiming = "never"  // Never validate automatically
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-// State Types and Structures
-// ═══════════════════════════════════════════════════════════════════════════
-
-// StateSnapshot represents a point-in-time snapshot of state
-// Used for undo/redo functionality and state history
-type StateSnapshot struct {
-	Values      map[string]any      `json:"values"`
-	Initial     map[string]any      `json:"initial"`
-	Touched     map[string]bool     `json:"touched"`
-	Dirty       map[string]bool     `json:"dirty"`
-	Errors      map[string][]string `json:"errors"`
-	Timestamp   time.Time           `json:"timestamp"`
-	Initialized time.Time           `json:"initialized"`
+// RuntimeBuilder provides a fluent builder pattern for runtime creation
+type RuntimeBuilder struct {
+	schema        *Schema
+	config        *RuntimeConfig
+	renderer      RuntimeRenderer
+	validator     RuntimeValidator
+	conditional   RuntimeConditionalEngine
+	locale        string // Default locale for this runtime
+	initialData   map[string]any
+	eventHandlers map[EventType][]EventCallback
 }
-
-// StateStats provides statistics about the current state
-type StateStats struct {
-	FieldCount        int       `json:"field_count"`
-	TouchedCount      int       `json:"touched_count"`
-	DirtyCount        int       `json:"dirty_count"`
-	ErrorCount        int       `json:"error_count"`
-	IsValid           bool      `json:"is_valid"`
-	InitializedAt     time.Time `json:"initialized_at"`
-	LastUpdated       time.Time `json:"last_updated"`
-	HasUnsavedChanges bool      `json:"has_unsaved_changes"`
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Runtime Configuration
-// ═══════════════════════════════════════════════════════════════════════════
-
-// RuntimeConfig holds runtime configuration options
-type RuntimeConfig struct {
-	EnableConditionals  bool             `json:"enableConditionals"`
-	EnableValidation    bool             `json:"enableValidation"`
-	ValidationTiming    ValidationTiming `json:"validationTiming"`
-	EnableDebounce      bool             `json:"enableDebounce"`
-	DebounceDelay       time.Duration    `json:"debounceDelay"`
-	EnableEventTracking bool             `json:"enableEventTracking"`
-	MaxStateSnapshots   int              `json:"maxStateSnapshots"`
-}
-
-// DefaultRuntimeConfig returns sensible defaults
-func DefaultRuntimeConfig() *RuntimeConfig {
-	return &RuntimeConfig{
-		EnableConditionals:  true,
-		EnableValidation:    true,
-		ValidationTiming:    ValidateOnBlur,
-		EnableDebounce:      true,
-		DebounceDelay:       300 * time.Millisecond,
-		EnableEventTracking: false,
-		MaxStateSnapshots:   10,
+// NewRuntimeBuilder creates a new builder for runtime
+func NewRuntimeBuilder(enrichedSchema *Schema) *RuntimeBuilder {
+	return &RuntimeBuilder{
+		schema:        enrichedSchema,
+		config:        DefaultRuntimeConfig(),
+		initialData:   make(map[string]any),
+		eventHandlers: make(map[EventType][]EventCallback),
 	}
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Runtime Statistics
-// ═══════════════════════════════════════════════════════════════════════════
-
-// RuntimeStats provides runtime statistics
-type RuntimeStats struct {
-	FieldCount    int           `json:"field_count"`
-	VisibleFields int           `json:"visible_fields"`
-	TouchedFields int           `json:"touched_fields"`
-	DirtyFields   int           `json:"dirty_fields"`
-	ErrorCount    int           `json:"error_count"`
-	IsValid       bool          `json:"is_valid"`
-	InitializedAt time.Time     `json:"initialized_at"`
-	LastActivity  time.Time     `json:"last_activity"`
-	Uptime        time.Duration `json:"uptime"`
-	EventStats    *EventStats   `json:"event_stats,omitempty"`
+// WithRenderer sets the UI renderer implementation
+func (b *RuntimeBuilder) WithRenderer(renderer RuntimeRenderer) *RuntimeBuilder {
+	b.renderer = renderer
+	return b
 }
-
-// EventStats provides statistics about events
-type EventStats struct {
-	TotalEvents    int               `json:"total_events"`
-	EventsByType   map[EventType]int `json:"events_by_type"`
-	EventsByField  map[string]int    `json:"events_by_field"`
-	LastEventTime  time.Time         `json:"last_event_time"`
-	LastEventType  EventType         `json:"last_event_type"`
-	LastEventField string            `json:"last_event_field"`
-	FirstEventTime time.Time         `json:"first_event_time"`
-	StartTime      time.Time         `json:"start_time"`
+// WithValidator sets the validation implementation
+func (b *RuntimeBuilder) WithValidator(validator RuntimeValidator) *RuntimeBuilder {
+	b.validator = validator
+	return b
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Event Handler Configuration
-// ═══════════════════════════════════════════════════════════════════════════
-
-// EventHandlerConfig holds configuration for event handler
-type EventHandlerConfig struct {
-	ValidationTiming ValidationTiming `json:"validationTiming"`
-	EnableTracking   bool             `json:"enableTracking"`
-	Enabled          bool             `json:"enabled"`
+// WithConditionalEngine sets the conditional logic implementation
+func (b *RuntimeBuilder) WithConditionalEngine(conditional RuntimeConditionalEngine) *RuntimeBuilder {
+	b.conditional = conditional
+	return b
 }
-
-// DefaultEventHandlerConfig returns sensible defaults
-func DefaultEventHandlerConfig() *EventHandlerConfig {
-	return &EventHandlerConfig{
-		ValidationTiming: ValidateOnBlur,
-		EnableTracking:   false,
-		Enabled:          true,
+// WithLocale sets the default locale for the runtime
+func (b *RuntimeBuilder) WithLocale(locale string) *RuntimeBuilder {
+	b.locale = locale
+	return b
+}
+// WithConfig sets custom configuration
+func (b *RuntimeBuilder) WithConfig(config *RuntimeConfig) *RuntimeBuilder {
+	b.config = config
+	return b
+}
+// WithInitialData sets initial form data
+func (b *RuntimeBuilder) WithInitialData(data map[string]any) *RuntimeBuilder {
+	for k, v := range data {
+		b.initialData[k] = v
 	}
+	return b
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Debouncing Configuration
-// ═══════════════════════════════════════════════════════════════════════════
-
-// DebouncedConfig holds debouncing configuration
-type DebouncedConfig struct {
-	ChangeDelay time.Duration `json:"changeDelay"`
-	BlurDelay   time.Duration `json:"blurDelay"`
-	FocusDelay  time.Duration `json:"focusDelay"`
+// WithEventHandler registers an event handler
+func (b *RuntimeBuilder) WithEventHandler(eventType EventType, handler EventCallback) *RuntimeBuilder {
+	b.eventHandlers[eventType] = append(b.eventHandlers[eventType], handler)
+	return b
 }
-
-// DefaultDebouncedConfig returns sensible debouncing defaults
-func DefaultDebouncedConfig() *DebouncedConfig {
-	return &DebouncedConfig{
-		ChangeDelay: 300 * time.Millisecond,
-		BlurDelay:   100 * time.Millisecond,
-		FocusDelay:  0, // No debounce for focus
+// WithValidationTiming sets validation timing strategy
+func (b *RuntimeBuilder) WithValidationTiming(timing ValidationTiming) *RuntimeBuilder {
+	b.config.ValidationTiming = timing
+	return b
+}
+// WithDebounce configures debouncing
+func (b *RuntimeBuilder) WithDebounce(enabled bool, delay time.Duration) *RuntimeBuilder {
+	b.config.EnableDebounce = enabled
+	b.config.DebounceDelay = delay
+	return b
+}
+// Build creates the runtime instance
+func (b *RuntimeBuilder) Build(ctx context.Context) (*Runtime, error) {
+	if b.schema == nil {
+		return nil, fmt.Errorf("schema is required")
 	}
+	// Create core components
+	state := NewState()
+	// Create event handler with config
+	eventConfig := &EventHandlerConfig{
+		ValidationTiming: b.config.ValidationTiming,
+		EnableTracking:   b.config.EnableEventTracking,
+	}
+	events := NewEventHandlerWithConfig(eventConfig)
+	// Create runtime instance
+	runtime := &Runtime{
+		schema:        b.schema,
+		state:         state,
+		events:        events,
+		renderer:      b.renderer,
+		validator:     b.validator,
+		conditional:   b.conditional,
+		currentLocale: b.locale,
+		config:        b.config,
+		initializedAt: time.Now(),
+		lastActivity:  time.Now(),
+	}
+	// Register custom event handlers
+	for eventType, handlers := range b.eventHandlers {
+		for _, handler := range handlers {
+			events.Register(eventType, handler)
+		}
+	}
+	// Initialize state
+	if err := state.Initialize(b.schema, b.initialData); err != nil {
+		return nil, fmt.Errorf("failed to initialize runtime: %w", err)
+	}
+	return runtime, nil
 }
-
-// Runtime interfaces - provide abstraction layer for UI implementations
-// These interfaces allow runtime to be UI-agnostic while still providing rich functionality
-
-// RuntimeRenderer interface for UI implementations (Templ, Go templates, React SSR, etc.)
-// Uses existing Field, Action, Layout, Schema types from schema package
-type RuntimeRenderer interface {
-	// RenderField renders a single field with schema context and current state values
-	RenderField(ctx context.Context, field *Field, value any, errors []string, touched, dirty bool) (string, error)
-
-	// RenderForm renders the complete form using schema and runtime state
-	// State contains all values, errors, touched/dirty tracking
-	RenderForm(ctx context.Context, schema *Schema, state map[string]any, errors map[string][]string) (string, error)
-
-	// RenderAction renders an action button/element
-	RenderAction(ctx context.Context, action *Action, enabled bool) (string, error)
-
-	// RenderLayout renders layout components using existing schema types
-	RenderLayout(ctx context.Context, layout *Layout, fields []*Field, state map[string]any) (string, error)
-	RenderSection(ctx context.Context, section *Section, fields []*Field, state map[string]any) (string, error)
-	RenderTab(ctx context.Context, tab *Tab, fields []*Field, state map[string]any) (string, error)
-	RenderStep(ctx context.Context, step *Step, fields []*Field, state map[string]any) (string, error)
-	RenderGroup(ctx context.Context, group *Group, fields []*Field, state map[string]any) (string, error)
-
-	// RenderErrors renders validation errors for display
-	RenderErrors(ctx context.Context, errors map[string][]string) (string, error)
+// MustBuild builds the runtime and panics on error (for testing/simple cases)
+func (b *RuntimeBuilder) MustBuild(ctx context.Context) *Runtime {
+	runtime, err := b.Build(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("failed to build runtime: %v", err))
+	}
+	return runtime
 }
-
-// RuntimeStateManager interface - implemented by runtime.State
-// This interface allows runtime package to be used without import cycles
-type RuntimeStateManager interface {
-	// Core state operations - matches runtime.State methods
-	GetValue(fieldName string) (any, bool)
-	SetValue(fieldName string, value any) error
-	GetAll() map[string]any
-
-	// State tracking - matches runtime.State methods
-	IsTouched(fieldName string) bool
-	Touch(fieldName string)
-	IsDirty(fieldName string) bool
-	IsAnyDirty() bool
-
-	// Error management - matches runtime.State methods
-	GetErrors(fieldName string) []string
-	SetErrors(fieldName string, errors []string)
-	GetAllErrors() map[string][]string
-	IsValid() bool
-
-	// State lifecycle - matches runtime.State methods
-	Initialize(schema *Schema, initialData map[string]any) error
-	Reset()
-	CreateSnapshot() any          // returns runtime.StateSnapshot
-	RestoreSnapshot(snapshot any) // takes runtime.StateSnapshot
-}
-
-// RuntimeEventHandler interface - implemented by runtime.EventHandler
-// Uses existing runtime.Event types and runtime.EventCallback
-type RuntimeEventHandler interface {
-	// Core events - uses existing runtime.Event struct
-	OnChange(ctx context.Context, event any) error // takes runtime.Event
-	OnBlur(ctx context.Context, event any) error   // takes runtime.Event
-	OnFocus(ctx context.Context, event any) error  // takes runtime.Event
-	OnSubmit(ctx context.Context) error
-
-	// Custom event registration - uses existing runtime types
-	Register(eventType string, handler any) // takes runtime.EventCallback
-	Unregister(eventType string)
-
-	// Validation timing - matches runtime.EventHandler
-	SetValidationTiming(timing string) // uses runtime.ValidationTiming
-	GetValidationTiming() string
-}
-
-// RuntimeValidator interface for validation implementations
-// Uses existing Field, Action, Workflow, Schema types from schema package
-type RuntimeValidator interface {
-	// Field validation
-	ValidateField(ctx context.Context, field *Field, value any, allData map[string]any) []string
-	ValidateAllFields(ctx context.Context, schema *Schema, data map[string]any) map[string][]string
-
-	// Action validation
-	ValidateAction(ctx context.Context, action *Action, formState map[string]any) error
-
-	// Workflow validation
-	ValidateWorkflow(ctx context.Context, workflow *Workflow, currentStage string, formState map[string]any) error
-
-	// Business rules validation using existing ValidationRule from enterprise.go
-	ValidateBusinessRules(ctx context.Context, rules []ValidationRule, allValues map[string]any) map[string][]string
-
-	// Async validation
-	ValidateFieldAsync(ctx context.Context, field *Field, value any, callback ValidationCallback) error
-}
-
-// RuntimeConditionalEngine interface for conditional logic
-// Uses existing Field, Action, Layout, Workflow, Schema types from schema package
-type RuntimeConditionalEngine interface {
-	// Evaluate field visibility and state
-	EvaluateFieldVisibility(ctx context.Context, field *Field, data map[string]any) (bool, error)
-	EvaluateFieldRequired(ctx context.Context, field *Field, data map[string]any) (bool, error)
-	EvaluateFieldEditable(ctx context.Context, field *Field, data map[string]any) (bool, error)
-
-	// Action conditional evaluation
-	EvaluateActionConditions(ctx context.Context, action *Action, allValues map[string]any) (bool, error)
-
-	// Layout conditional evaluation
-	EvaluateLayoutConditions(ctx context.Context, layout *Layout, allValues map[string]any) (*LayoutConditionalResult, error)
-
-	// Workflow conditional evaluation
-	EvaluateWorkflowConditions(ctx context.Context, workflow *Workflow, allValues map[string]any) ([]WorkflowAction, error)
-
-	// Batch evaluations
-	EvaluateAllConditions(ctx context.Context, schema *Schema, data map[string]any) (*ConditionalResults, error)
-
-	// Watch for changes
-	WatchConditions(ctx context.Context, schema *Schema, onChange ConditionalChangeCallback) error
-}
-
-// Runtime data structures - use existing types from runtime package where possible
-
-// ActionRuntimeState represents the runtime state of an action
-type ActionRuntimeState struct {
-	ID      string `json:"id"`
-	Visible bool   `json:"visible"`
-	Enabled bool   `json:"enabled"`
-	Loading bool   `json:"loading"`
-	Reason  string `json:"reason,omitempty"`
-}
-
-// ValidationCallback  rllback types for runtime interfaces
-type (
-	ValidationCallback        func(fieldName string, errors []string)
-	ConditionalChangeCallback func(ctx context.Context, updates []ConditionalUpdate)
-)
-
-// RuntimeValidationRule Custom validation rule interface
-type RuntimeValidationRule interface {
-	ID() string
-	Validate(ctx context.Context, value any, allData map[string]any) error
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
-// Runtime Interfaces (already defined in schema.go, kept here for reference)
+// Initialization and Lifecycle
 // ═══════════════════════════════════════════════════════════════════════════
-
-// Note: The following interfaces are already defined in schema.go:
-// - RuntimeRenderer
-// - RuntimeValidator
-// - RuntimeConditionalEngine
-// - RuntimeStateManager
-// - RuntimeEvent
-
-// These types can be used by any package that needs to integrate with the runtime
-// without creating import cycles, as they're all defined in the schema package.
+// Initialize initializes the runtime with data and performs initial validation
+func (r *Runtime) Initialize(ctx context.Context, initialData map[string]any) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	// Initialize state
+	if err := r.state.Initialize(r.schema, initialData); err != nil {
+		return fmt.Errorf("failed to initialize state: %w", err)
+	}
+	// Trigger init event
+	if err := r.events.OnInit(ctx); err != nil {
+		return fmt.Errorf("failed to trigger init event: %w", err)
+	}
+	// Run initial conditional logic if enabled
+	if r.config.EnableConditionals && r.conditional != nil {
+		if err := r.applyConditionalsUnsafe(ctx); err != nil {
+			// Log error but don't fail - graceful degradation
+		}
+	}
+	// Run initial validation if enabled and validator is available
+	if r.config.EnableValidation && r.validator != nil {
+		errors := r.validator.ValidateAllFields(ctx, r.schema, r.state.GetAll())
+		for field, fieldErrors := range errors {
+			r.state.SetErrors(field, fieldErrors)
+		}
+	}
+	r.initializedAt = time.Now()
+	r.lastActivity = time.Now()
+	return nil
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Event Handling Methods
+// ═══════════════════════════════════════════════════════════════════════════
+// HandleFieldChange processes a field value change
+func (r *Runtime) HandleFieldChange(ctx context.Context, fieldName string, newValue any) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.lastActivity = time.Now()
+	// Check if field exists and is editable
+	field := r.getField(fieldName)
+	if field == nil {
+		return fmt.Errorf("field %s not found", fieldName)
+	}
+	// Check if field is editable
+	if field.Runtime != nil && !field.Runtime.Editable {
+		return fmt.Errorf("field %s is read-only", fieldName)
+	}
+	// Get old value for event
+	oldValue, _ := r.state.GetValue(fieldName)
+	// Update state
+	if err := r.state.SetValue(fieldName, newValue); err != nil {
+		return fmt.Errorf("failed to update field value: %w", err)
+	}
+	// Create event
+	event := &Event{
+		Type:      EventChange,
+		FieldName: fieldName,
+		Value:     newValue,
+		OldValue:  oldValue,
+		Timestamp: time.Now(),
+	}
+	// Trigger event
+	if err := r.events.OnChange(ctx, event); err != nil {
+		return fmt.Errorf("failed to handle change event: %w", err)
+	}
+	// Run conditional logic if enabled
+	if r.config.EnableConditionals && r.conditional != nil {
+		if err := r.applyConditionalsUnsafe(ctx); err != nil {
+			// Log error but continue - graceful degradation
+		}
+	}
+	// Run validation if enabled and timing matches
+	if r.config.EnableValidation && r.validator != nil && r.events.ShouldValidateOn(EventChange) {
+		field := r.getField(fieldName)
+		if field != nil {
+			errors := r.validator.ValidateField(ctx, field, newValue, r.state.GetAll())
+			// Get current locale without locking (we already have lock)
+			locale := r.currentLocale
+			if locale == "" {
+				locale = "en" // Default fallback
+			}
+			// Localize validation messages using embedded translations
+			localizedErrors := r.localizeValidationErrorsWithLocale(errors, locale)
+			r.state.SetErrors(fieldName, localizedErrors)
+		}
+	}
+	return nil
+}
+// HandleFieldBlur processes a field blur event
+func (r *Runtime) HandleFieldBlur(ctx context.Context, fieldName string, value any) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.lastActivity = time.Now()
+	// Mark as touched
+	r.state.Touch(fieldName)
+	// Create event
+	event := &Event{
+		Type:      EventBlur,
+		FieldName: fieldName,
+		Value:     value,
+		Timestamp: time.Now(),
+	}
+	// Trigger event
+	if err := r.events.OnBlur(ctx, event); err != nil {
+		return fmt.Errorf("failed to handle blur event: %w", err)
+	}
+	// Run validation if enabled and timing matches
+	if r.config.EnableValidation && r.validator != nil && r.events.ShouldValidateOn(EventBlur) {
+		field := r.getField(fieldName)
+		if field != nil {
+			errors := r.validator.ValidateField(ctx, field, value, r.state.GetAll())
+			// Get current locale without locking (we already have lock)
+			locale := r.currentLocale
+			if locale == "" {
+				locale = "en" // Default fallback
+			}
+			// Localize validation messages using embedded translations
+			localizedErrors := r.localizeValidationErrorsWithLocale(errors, locale)
+			r.state.SetErrors(fieldName, localizedErrors)
+		}
+	}
+	return nil
+}
+// HandleFieldFocus processes a field focus event
+func (r *Runtime) HandleFieldFocus(ctx context.Context, fieldName string, value any) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.lastActivity = time.Now()
+	// Create event
+	event := &Event{
+		Type:      EventFocus,
+		FieldName: fieldName,
+		Value:     value,
+		Timestamp: time.Now(),
+	}
+	// Trigger event
+	return r.events.OnFocus(ctx, event)
+}
+// HandleSubmit processes form submission
+func (r *Runtime) HandleSubmit(ctx context.Context) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.lastActivity = time.Now()
+	// Run final validation if enabled and validator is available
+	if r.config.EnableValidation && r.validator != nil {
+		allErrors := r.validator.ValidateAllFields(ctx, r.schema, r.state.GetAll())
+		// Update state with validation errors
+		locale := r.currentLocale
+		if locale == "" {
+			locale = "en" // Default fallback
+		}
+		for field, errors := range allErrors {
+			// Localize validation messages using embedded translations
+			localizedErrors := r.localizeValidationErrorsWithLocale(errors, locale)
+			r.state.SetErrors(field, localizedErrors)
+		}
+		// Check if form is valid
+		if !r.state.IsValid() {
+			return fmt.Errorf("form validation failed")
+		}
+	}
+	// Trigger submit event
+	return r.events.OnSubmit(ctx)
+}
+// HandleReset processes form reset
+func (r *Runtime) HandleReset(ctx context.Context) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.lastActivity = time.Now()
+	// Reset state
+	r.state.Reset()
+	// Trigger reset event
+	return r.events.OnReset(ctx)
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Validation Methods
+// ═══════════════════════════════════════════════════════════════════════════
+// ValidateField validates a single field value
+func (r *Runtime) ValidateField(ctx context.Context, fieldName string, value any) []string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.validator == nil {
+		return nil // No validator configured - skip validation
+	}
+	field := r.getField(fieldName)
+	if field == nil {
+		return []string{"field not found"}
+	}
+	// Check if field is visible
+	if field.Runtime != nil && !field.Runtime.Visible {
+		return nil // Don't validate invisible fields
+	}
+	errors := r.validator.ValidateField(ctx, field, value, r.state.GetAll())
+	// Localize validation messages using embedded translations
+	return r.localizeValidationErrors(errors)
+}
+// ValidateCurrentState validates all fields using current state
+func (r *Runtime) ValidateCurrentState(ctx context.Context) map[string][]string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.validator == nil {
+		return make(map[string][]string) // No validator - return empty errors
+	}
+	return r.validator.ValidateAllFields(ctx, r.schema, r.state.GetAll())
+}
+// ValidateWithDebounce validates after a delay for better UX
+func (r *Runtime) ValidateWithDebounce(
+	ctx context.Context,
+	fieldName string,
+	value any,
+	delay time.Duration,
+) <-chan []string {
+	result := make(chan []string, 1)
+	go func() {
+		defer close(result)
+		timer := time.NewTimer(delay)
+		defer timer.Stop()
+		select {
+		case <-timer.C:
+			errors := r.ValidateField(ctx, fieldName, value)
+			result <- errors
+		case <-ctx.Done():
+			return
+		}
+	}()
+	return result
+}
+// ValidateAction validates an action before execution
+func (r *Runtime) ValidateAction(ctx context.Context, action *Action) error {
+	if r.validator == nil {
+		return nil
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.validator.ValidateAction(ctx, action, r.state.GetAll())
+}
+// ValidateWorkflow validates workflow state
+func (r *Runtime) ValidateWorkflow(ctx context.Context, workflow *Workflow) error {
+	if r.validator == nil {
+		return nil
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	currentStage := workflow.GetCurrentStage()
+	return r.validator.ValidateWorkflow(ctx, workflow, currentStage, r.state.GetAll())
+}
+// ValidateBusinessRules validates business rules
+func (r *Runtime) ValidateBusinessRules(ctx context.Context, rules []ValidationRule) map[string][]string {
+	if r.validator == nil {
+		return make(map[string][]string)
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.validator.ValidateBusinessRules(ctx, rules, r.state.GetAll())
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Conditional Logic Methods
+// ═══════════════════════════════════════════════════════════════════════════
+// ApplyConditionalLogic evaluates and applies conditional rules
+func (r *Runtime) ApplyConditionalLogic(ctx context.Context) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.applyConditionalsUnsafe(ctx)
+}
+// applyConditionalsUnsafe applies conditionals without locking (must be called with lock held)
+func (r *Runtime) applyConditionalsUnsafe(ctx context.Context) error {
+	if r.conditional == nil {
+		return r.applyBasicConditionals(ctx)
+	}
+	results, err := r.conditional.EvaluateAllConditions(ctx, r.schema, r.state.GetAll())
+	if err != nil {
+		return fmt.Errorf("failed to evaluate conditions: %w", err)
+	}
+	if results.Changed {
+		for _, update := range results.Updates {
+			field := r.getField(update.FieldName)
+			if field != nil && field.Runtime != nil {
+				field.Runtime.Visible = update.Visible
+				field.Runtime.Editable = update.Editable
+				if update.Required {
+					field.Required = update.Required
+				}
+				if update.Reason != "" {
+					field.Runtime.Reason = update.Reason
+				}
+			}
+		}
+		if r.schema.Layout != nil {
+			_, _ = r.conditional.EvaluateLayoutConditions(ctx, r.schema.Layout, r.state.GetAll())
+		}
+		if r.schema.Workflow != nil {
+			_, _ = r.conditional.EvaluateWorkflowConditions(ctx, r.schema.Workflow, r.state.GetAll())
+		}
+	}
+	return nil
+}
+// applyBasicConditionals applies basic field conditionals without full conditional engine
+func (r *Runtime) applyBasicConditionals(ctx context.Context) error {
+	data := r.state.GetAll()
+	for i := range r.schema.Fields {
+		field := &r.schema.Fields[i]
+		if field.Conditional != nil {
+			visible, err := field.IsVisible(ctx, data)
+			if err != nil {
+				continue
+			}
+			if field.Runtime != nil {
+				field.Runtime.Visible = visible
+			}
+		}
+	}
+	return nil
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Rendering Methods
+// ═══════════════════════════════════════════════════════════════════════════
+// Render renders the form using the injected renderer
+func (r *Runtime) Render(ctx context.Context) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured - use WithRenderer() in builder")
+	}
+	return r.renderer.RenderForm(ctx, r.schema, r.state.GetAll(), r.state.GetAllErrors())
+}
+// RenderField renders a single field using the injected renderer
+func (r *Runtime) RenderField(ctx context.Context, fieldName string) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	field := r.getField(fieldName)
+	if field == nil {
+		return "", fmt.Errorf("field %s not found", fieldName)
+	}
+	value, _ := r.state.GetValue(fieldName)
+	errors := r.state.GetErrors(fieldName)
+	touched := r.state.IsTouched(fieldName)
+	dirty := r.state.IsDirty(fieldName)
+	return r.renderer.RenderField(ctx, field, value, errors, touched, dirty)
+}
+// RenderAction renders an action
+func (r *Runtime) RenderAction(ctx context.Context, action *Action) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	enabled := !action.Disabled && !action.Loading
+	if r.conditional != nil {
+		visible, err := r.conditional.EvaluateActionConditions(ctx, action, r.state.GetAll())
+		if err == nil && !visible {
+			return "", nil
+		}
+	}
+	return r.renderer.RenderAction(ctx, action, enabled)
+}
+// RenderLayout renders layout
+func (r *Runtime) RenderLayout(ctx context.Context, layout *Layout) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	fieldNames := layout.GetAllFields()
+	fields := make([]*Field, 0, len(fieldNames))
+	for _, fieldName := range fieldNames {
+		field := r.getField(fieldName)
+		if field != nil {
+			fields = append(fields, field)
+		}
+	}
+	return r.renderer.RenderLayout(ctx, layout, fields, r.state.GetAll())
+}
+// RenderSection renders a section
+func (r *Runtime) RenderSection(ctx context.Context, section *Section) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	fields := make([]*Field, 0, len(section.Fields))
+	for _, fieldName := range section.Fields {
+		field := r.getField(fieldName)
+		if field != nil {
+			fields = append(fields, field)
+		}
+	}
+	return r.renderer.RenderSection(ctx, section, fields, r.state.GetAll())
+}
+// RenderTab renders a tab
+func (r *Runtime) RenderTab(ctx context.Context, tab *Tab) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	fields := make([]*Field, 0, len(tab.Fields))
+	for _, fieldName := range tab.Fields {
+		field := r.getField(fieldName)
+		if field != nil {
+			fields = append(fields, field)
+		}
+	}
+	return r.renderer.RenderTab(ctx, tab, fields, r.state.GetAll())
+}
+// RenderStep renders a step
+func (r *Runtime) RenderStep(ctx context.Context, step *Step) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	fields := make([]*Field, 0, len(step.Fields))
+	for _, fieldName := range step.Fields {
+		field := r.getField(fieldName)
+		if field != nil {
+			fields = append(fields, field)
+		}
+	}
+	return r.renderer.RenderStep(ctx, step, fields, r.state.GetAll())
+}
+// RenderGroup renders a group
+func (r *Runtime) RenderGroup(ctx context.Context, group *Group) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	fields := make([]*Field, 0, len(group.Fields))
+	for _, fieldName := range group.Fields {
+		field := r.getField(fieldName)
+		if field != nil {
+			fields = append(fields, field)
+		}
+	}
+	return r.renderer.RenderGroup(ctx, group, fields, r.state.GetAll())
+}
+// RenderErrors renders validation errors
+func (r *Runtime) RenderErrors(ctx context.Context) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.renderer == nil {
+		return "", fmt.Errorf("no renderer configured")
+	}
+	return r.renderer.RenderErrors(ctx, r.state.GetAllErrors())
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Event Registration
+// ═══════════════════════════════════════════════════════════════════════════
+// RegisterEventHandler registers a custom event handler
+func (r *Runtime) RegisterEventHandler(eventType EventType, callback EventCallback) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.events.Register(eventType, callback)
+}
+// SetValidationTiming configures when validation occurs
+func (r *Runtime) SetValidationTiming(timing ValidationTiming) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.config.ValidationTiming = timing
+	r.events.SetValidationTiming(timing)
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// State Accessors
+// ═══════════════════════════════════════════════════════════════════════════
+// GetState returns the state manager interface
+func (r *Runtime) GetState() RuntimeStateManager {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state
+}
+// GetRawState returns the concrete state implementation
+func (r *Runtime) GetRawState() *RuntimeState {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state
+}
+// GetSchema returns the schema
+func (r *Runtime) GetSchema() *Schema {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.schema
+}
+// GetConfig returns the configuration
+func (r *Runtime) GetConfig() *RuntimeConfig {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.config
+}
+// IsValid checks if the form is valid
+func (r *Runtime) IsValid() bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.IsValid()
+}
+// GetErrors returns all validation errors
+func (r *Runtime) GetErrors() map[string][]string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.GetAllErrors()
+}
+// Reset resets the form to initial state
+func (r *Runtime) Reset() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.state.Reset()
+	r.events.OnReset(context.Background())
+}
+// GetFieldValue gets a field value
+func (r *Runtime) GetFieldValue(fieldName string) (any, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.GetValue(fieldName)
+}
+// SetFieldValue sets a field value
+func (r *Runtime) SetFieldValue(fieldName string, value any) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.state.SetValue(fieldName, value)
+}
+// IsDirty checks if any field has been modified
+func (r *Runtime) IsDirty() bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.IsAnyDirty()
+}
+// IsFieldDirty checks if a specific field has been modified
+func (r *Runtime) IsFieldDirty(fieldName string) bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.IsDirty(fieldName)
+}
+// IsFieldTouched checks if a field has been touched
+func (r *Runtime) IsFieldTouched(fieldName string) bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.IsTouched(fieldName)
+}
+// GetAllData returns all form data
+func (r *Runtime) GetAllData() map[string]any {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.state.GetAll()
+}
+// UpdateSchema updates the schema
+func (r *Runtime) UpdateSchema(newSchema *Schema) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.schema = newSchema
+	return nil
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Statistics
+// ═══════════════════════════════════════════════════════════════════════════
+// GetStats returns runtime statistics
+func (r *Runtime) GetStats() *RuntimeStats {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	stats := &RuntimeStats{
+		FieldCount:    len(r.schema.Fields),
+		TouchedFields: r.state.GetTouchedCount(),
+		DirtyFields:   r.state.GetDirtyCount(),
+		ErrorCount:    r.state.GetErrorCount(),
+		IsValid:       r.state.IsValid(),
+		InitializedAt: r.initializedAt,
+		LastActivity:  r.lastActivity,
+		Uptime:        time.Since(r.initializedAt),
+	}
+	// Count visible fields
+	for i := range r.schema.Fields {
+		field := &r.schema.Fields[i]
+		if field.Runtime == nil || field.Runtime.Visible {
+			stats.VisibleFields++
+		}
+	}
+	// Add event stats if tracking enabled
+	if tracker := r.events.GetTracker(); tracker != nil {
+		stats.EventStats = tracker.GetStats()
+	}
+	return stats
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Private Helper Methods
+// ═══════════════════════════════════════════════════════════════════════════
+// getField finds a field in the schema by name
+func (r *Runtime) getField(fieldName string) *Field {
+	for i := range r.schema.Fields {
+		if r.schema.Fields[i].Name == fieldName {
+			return &r.schema.Fields[i]
+		}
+	}
+	return nil
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// Convenience Constructors
+// ═══════════════════════════════════════════════════════════════════════════
+// NewRuntime creates a runtime with default configuration
+func NewRuntime(enrichedSchema *Schema) *Runtime {
+	runtime, err := NewRuntimeBuilder(enrichedSchema).
+		Build(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("failed to create runtime: %v", err))
+	}
+	return runtime
+}
+// NewRuntimeWithValidator creates a runtime with a validator
+func NewRuntimeWithValidator(enrichedSchema *Schema, validator RuntimeValidator) *Runtime {
+	runtime, err := NewRuntimeBuilder(enrichedSchema).
+		WithValidator(validator).
+		Build(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("failed to create runtime: %v", err))
+	}
+	return runtime
+}
+// NewRuntimeWithRenderer creates a runtime with a renderer
+func NewRuntimeWithRenderer(enrichedSchema *Schema, renderer RuntimeRenderer) *Runtime {
+	runtime, err := NewRuntimeBuilder(enrichedSchema).
+		WithRenderer(renderer).
+		Build(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("failed to create runtime: %v", err))
+	}
+	return runtime
+}
+// NewRuntimeWithConfig creates a runtime with custom config
+func NewRuntimeWithConfig(enrichedSchema *Schema, config *RuntimeConfig) *Runtime {
+	runtime, err := NewRuntimeBuilder(enrichedSchema).
+		WithConfig(config).
+		Build(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("failed to create runtime: %v", err))
+	}
+	return runtime
+}
+// NewRuntimeFull creates a runtime with all dependencies
+func NewRuntimeFull(
+	enrichedSchema *Schema,
+	renderer RuntimeRenderer,
+	validator RuntimeValidator,
+	conditional RuntimeConditionalEngine,
+) *Runtime {
+	runtime, err := NewRuntimeBuilder(enrichedSchema).
+		WithRenderer(renderer).
+		WithValidator(validator).
+		WithConditionalEngine(conditional).
+		Build(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("failed to create runtime: %v", err))
+	}
+	return runtime
+}
+// NewRuntimeWithLocale creates a runtime with a specific locale
+func NewRuntimeWithLocale(enrichedSchema *Schema, locale string) *Runtime {
+	runtime, err := NewRuntimeBuilder(enrichedSchema).
+		WithLocale(locale).
+		Build(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("failed to create runtime: %v", err))
+	}
+	return runtime
+}
+// GetCurrentLocale returns the current locale for the runtime
+func (r *Runtime) GetCurrentLocale() string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.currentLocale == "" {
+		return "en" // Default fallback
+	}
+	return r.currentLocale
+}
+// SetLocale changes the current locale for the runtime
+func (r *Runtime) SetLocale(ctx context.Context, locale string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	// Validate locale is available
+	if !T_HasLocale(locale) {
+		return fmt.Errorf("locale '%s' is not available", locale)
+	}
+	r.currentLocale = locale
+	return nil
+}
+// DetectUserLocale automatically detects the best locale from user preferences
+func (r *Runtime) DetectUserLocale(userPreferences []string) string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	bestLocale := T_DetectLocale(userPreferences)
+	r.currentLocale = bestLocale
+	return bestLocale
+}
+// localizeValidationErrors translates validation error messages to current locale
+func (r *Runtime) localizeValidationErrors(errors []string) []string {
+	locale := r.GetCurrentLocale()
+	return r.localizeValidationErrorsWithLocale(errors, locale)
+}
+// localizeValidationErrorsWithLocale translates validation error messages with provided locale
+func (r *Runtime) localizeValidationErrorsWithLocale(errors []string, locale string) []string {
+	if len(errors) == 0 {
+		return errors
+	}
+	localizedErrors := make([]string, len(errors))
+	for i, errorMsg := range errors {
+		// Try to map common validation error patterns to translation keys
+		translationKey := r.mapErrorToTranslationKey(errorMsg)
+		if translationKey != "" {
+			localizedErrors[i] = T_Validation(locale, translationKey, nil)
+		} else {
+			// Fallback to original message if no mapping found
+			localizedErrors[i] = errorMsg
+		}
+	}
+	return localizedErrors
+}
+// mapErrorToTranslationKey maps validation error messages to translation keys
+func (r *Runtime) mapErrorToTranslationKey(errorMsg string) string {
+	// Map common English validation messages to translation keys
+	errorMap := map[string]string{
+		"This field is required":        "required",
+		"field is required":             "required",
+		"required":                      "required",
+		"Must be a valid email address": "invalidEmail",
+		"Must be a valid email":         "invalidEmail",
+		"invalid email":                 "invalidEmail",
+		"Passwords do not match":        "passwordMismatch",
+		"passwords must match":          "passwordMismatch",
+		"Must be a valid phone number":  "invalidPhone",
+		"invalid phone":                 "invalidPhone",
+		"Must be a valid URL":           "invalidUrl",
+		"invalid url":                   "invalidUrl",
+		"Must be a valid date":          "invalidDate",
+		"invalid date":                  "invalidDate",
+		"Must be a valid number":        "invalidNumber",
+		"invalid number":                "invalidNumber",
+		"Invalid format":                "patternMismatch",
+		"This value is already taken":   "uniqueViolation",
+		"value already exists":          "uniqueViolation",
+	}
+	// Check exact matches first
+	if key, exists := errorMap[errorMsg]; exists {
+		return key
+	}
+	// Check partial matches for parameterized messages
+	lowerMsg := strings.ToLower(errorMsg)
+	if strings.Contains(lowerMsg, "must be at least") && strings.Contains(lowerMsg, "character") {
+		return "minLength"
+	}
+	if strings.Contains(lowerMsg, "must be no more than") && strings.Contains(lowerMsg, "character") {
+		return "maxLength"
+	}
+	if strings.Contains(lowerMsg, "must be at least") && !strings.Contains(lowerMsg, "character") {
+		return "numberMin"
+	}
+	if strings.Contains(lowerMsg, "must be no more than") && !strings.Contains(lowerMsg, "character") {
+		return "numberMax"
+	}
+	// No mapping found
+	return ""
+}

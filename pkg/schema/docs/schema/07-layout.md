@@ -1043,4 +1043,470 @@ Breakpoints:
 - `wizard` - Multi-step form
 - `service` - Data loader wrapper
 
+## Advanced Implementation
+
+### Theme Management System
+
+The layout system includes a sophisticated theme management architecture:
+
+```go
+// Theme represents a complete theme configuration
+type Theme struct {
+    // Identity
+    ID          string `json:"id" validate:"required"`
+    Name        string `json:"name" validate:"required"`
+    Description string `json:"description,omitempty"`
+    Version     string `json:"version,omitempty" validate:"semver"`
+    Author      string `json:"author,omitempty"`
+    
+    // Design tokens - single source of truth for all styling
+    Tokens *DesignTokens `json:"tokens" validate:"required"`
+    
+    // Dark mode configuration
+    DarkMode *DarkModeConfig `json:"darkMode,omitempty"`
+    
+    // Accessibility configuration
+    Accessibility *AccessibilityConfig `json:"accessibility,omitempty"`
+    
+    // Metadata
+    Meta *ThemeMeta `json:"meta,omitempty"`
+    
+    // Custom extensions
+    CustomCSS string `json:"customCSS,omitempty"`
+    CustomJS  string `json:"customJS,omitempty"`
+}
+```
+
+### Design Token System
+
+```go
+// DesignTokens provides systematic design values
+type DesignTokens struct {
+    // Color system
+    Colors struct {
+        Primary   string `json:"primary"`     // #007bff
+        Secondary string `json:"secondary"`   // #6c757d
+        Success   string `json:"success"`     // #28a745
+        Danger    string `json:"danger"`      // #dc3545
+        Warning   string `json:"warning"`     // #ffc107
+        Info      string `json:"info"`        // #17a2b8
+        Light     string `json:"light"`       // #f8f9fa
+        Dark      string `json:"dark"`        // #343a40
+    } `json:"colors"`
+    
+    // Typography
+    Typography struct {
+        FontFamily   string `json:"fontFamily"`   // "Inter, -apple-system, sans-serif"
+        FontSizes    map[string]string `json:"fontSizes"`
+        FontWeights  map[string]int `json:"fontWeights"`
+        LineHeights  map[string]string `json:"lineHeights"`
+    } `json:"typography"`
+    
+    // Spacing system (based on 8px grid)
+    Spacing map[string]string `json:"spacing"` // "xs": "4px", "sm": "8px", etc.
+    
+    // Border radius
+    BorderRadius map[string]string `json:"borderRadius"`
+    
+    // Box shadows
+    Shadows map[string]string `json:"shadows"`
+    
+    // Breakpoints for responsive design
+    Breakpoints map[string]string `json:"breakpoints"`
+}
+```
+
+### Dark Mode & Accessibility
+
+```go
+// DarkModeConfig defines dark theme behavior
+type DarkModeConfig struct {
+    Enabled    bool     `json:"enabled"`
+    Default    bool     `json:"default,omitempty"`
+    Strategy   string   `json:"strategy,omitempty"` // "class", "media", "auto"
+    DarkTokens *DesignTokens `json:"darkTokens,omitempty"` // Override tokens for dark mode
+}
+
+// AccessibilityConfig for WCAG 2.1 Level AA compliance
+type AccessibilityConfig struct {
+    // ARIA support
+    AutoARIA         bool   `json:"autoAria,omitempty"`
+    AriaLive         string `json:"ariaLive,omitempty"`
+    AriaDescribedBy  bool   `json:"ariaDescribedBy,omitempty"`
+    
+    // Keyboard navigation
+    KeyboardNav         bool `json:"keyboardNav,omitempty"`
+    FocusIndicator      bool `json:"focusIndicator,omitempty"`
+    SkipLinks           bool `json:"skipLinks,omitempty"`
+    TabIndexManagement  bool `json:"tabIndexManagement,omitempty"`
+    
+    // Screen reader optimizations
+    ScreenReaderOnly    bool `json:"screenReaderOnly,omitempty"`
+    LiveAnnouncements   bool `json:"liveAnnouncements,omitempty"`
+    
+    // Contrast and visibility
+    HighContrast        bool    `json:"highContrast,omitempty"`
+    MinContrastRatio    float64 `json:"minContrastRatio,omitempty"`
+    FocusOutlineColor   string  `json:"focusOutlineColor,omitempty"`
+    FocusOutlineWidth   string  `json:"focusOutlineWidth,omitempty"`
+    
+    // Motion preferences
+    ReducedMotion       bool `json:"reducedMotion,omitempty"`
+}
+```
+
+### Theme Manager Architecture
+
+```go
+// ThemeManager handles theme application and customization
+type ThemeManager struct {
+    registry     *ThemeRegistry
+    tokenManager *TokenRegistry
+    cache        *ThemeCache
+    mu           sync.RWMutex
+}
+
+// ThemeRegistry manages available themes
+type ThemeRegistry struct {
+    themes    map[string]*Theme
+    overrides map[string]*ThemeOverrides // Per-tenant customizations
+    mu        sync.RWMutex
+}
+
+// TokenRegistry resolves design token values
+type TokenRegistry struct {
+    resolver *TokenResolver
+    cache    map[string]string // Flattened token cache
+    mu       sync.RWMutex
+}
+
+// ThemeCache provides fast theme lookup
+type ThemeCache struct {
+    cache     map[string]*CachedTheme
+    lru       *LRUEviction
+    maxSize   int
+    mu        sync.RWMutex
+}
+
+type CachedTheme struct {
+    theme     *Theme
+    css       string    // Compiled CSS
+    tokens    map[string]string
+    expiresAt time.Time
+}
+```
+
+### Theme Application
+
+```go
+// ApplyTheme applies a theme to a schema with tenant customizations
+func (tm *ThemeManager) ApplyTheme(
+    ctx context.Context,
+    schema *Schema,
+    themeID string,
+    tenantID string,
+) (*Schema, error) {
+    tm.mu.RLock()
+    defer tm.mu.RUnlock()
+    
+    // Get base theme
+    theme, err := tm.registry.GetTheme(themeID)
+    if err != nil {
+        return nil, fmt.Errorf("theme not found: %s", themeID)
+    }
+    
+    // Apply tenant overrides if they exist
+    if overrides := tm.registry.GetOverrides(tenantID, themeID); overrides != nil {
+        theme = tm.applyOverrides(theme, overrides)
+    }
+    
+    // Clone schema to avoid mutations
+    themedSchema := schema.Clone()
+    
+    // Apply theme tokens to schema
+    if err := tm.applyThemeToSchema(themedSchema, theme); err != nil {
+        return nil, fmt.Errorf("failed to apply theme: %w", err)
+    }
+    
+    return themedSchema, nil
+}
+
+// applyThemeToSchema injects theme values into schema components
+func (tm *ThemeManager) applyThemeToSchema(schema *Schema, theme *Theme) error {
+    // Apply to schema-level styling
+    if schema.Layout != nil {
+        tm.applyThemeToLayout(schema.Layout, theme)
+    }
+    
+    // Apply to fields
+    for i := range schema.Fields {
+        tm.applyThemeToField(&schema.Fields[i], theme)
+    }
+    
+    // Apply to actions
+    for i := range schema.Actions {
+        tm.applyThemeToAction(&schema.Actions[i], theme)
+    }
+    
+    return nil
+}
+
+func (tm *ThemeManager) applyThemeToField(field *Field, theme *Theme) {
+    if field.Style == nil {
+        field.Style = make(map[string]string)
+    }
+    
+    // Apply theme colors based on field type
+    switch field.Type {
+    case FieldText:
+        field.Style["borderColor"] = theme.Tokens.Colors.Primary
+        field.Style["focusColor"] = theme.Tokens.Colors.Primary
+    case FieldEmail:
+        field.Style["borderColor"] = theme.Tokens.Colors.Info
+    // ... more field type styling
+    }
+    
+    // Apply typography
+    field.Style["fontFamily"] = theme.Tokens.Typography.FontFamily
+    if fontSize, exists := theme.Tokens.Typography.FontSizes["base"]; exists {
+        field.Style["fontSize"] = fontSize
+    }
+}
+```
+
+### Runtime Theme Switching
+
+```go
+// Multi-tenant theme management with runtime switching
+type TenantThemeManager struct {
+    baseManager   *ThemeManager
+    tenantThemes  map[string]string    // tenantID -> themeID
+    tenantCache   map[string]*Theme    // Cached tenant-specific themes
+    mu           sync.RWMutex
+}
+
+// GetThemeForTenant retrieves the appropriate theme for a tenant
+func (ttm *TenantThemeManager) GetThemeForTenant(
+    ctx context.Context,
+    tenantID string,
+) (*Theme, error) {
+    ttm.mu.RLock()
+    
+    // Check cache first
+    if cached, exists := ttm.tenantCache[tenantID]; exists {
+        ttm.mu.RUnlock()
+        return cached, nil
+    }
+    
+    // Get tenant's theme ID
+    themeID := ttm.tenantThemes[tenantID]
+    if themeID == "" {
+        themeID = "default"
+    }
+    ttm.mu.RUnlock()
+    
+    // Load and cache theme
+    theme, err := ttm.baseManager.LoadTheme(ctx, themeID, tenantID)
+    if err != nil {
+        return nil, err
+    }
+    
+    ttm.mu.Lock()
+    ttm.tenantCache[tenantID] = theme
+    ttm.mu.Unlock()
+    
+    return theme, nil
+}
+
+// SetTenantTheme allows tenants to switch themes at runtime
+func (ttm *TenantThemeManager) SetTenantTheme(
+    tenantID, themeID string,
+) error {
+    ttm.mu.Lock()
+    defer ttm.mu.Unlock()
+    
+    // Validate theme exists
+    if !ttm.baseManager.ThemeExists(themeID) {
+        return fmt.Errorf("theme %s does not exist", themeID)
+    }
+    
+    // Update mapping
+    ttm.tenantThemes[tenantID] = themeID
+    
+    // Invalidate cache
+    delete(ttm.tenantCache, tenantID)
+    
+    return nil
+}
+```
+
+### Theme Overrides & Customization
+
+```go
+// ThemeOverrides allows runtime customization without modifying base themes
+type ThemeOverrides struct {
+    // Token overrides - specific token values to override
+    TokenOverrides map[string]string `json:"tokenOverrides,omitempty"`
+    
+    // Component customizations
+    ComponentOverrides map[string]any `json:"componentOverrides,omitempty"`
+    
+    // Custom CSS to inject
+    CustomCSS string `json:"customCSS,omitempty"`
+    
+    // Custom JavaScript
+    CustomJS string `json:"customJS,omitempty"`
+    
+    // Metadata
+    CreatedBy string    `json:"createdBy,omitempty"`
+    CreatedAt time.Time `json:"createdAt,omitempty"`
+}
+
+// Example tenant customization
+func CreateTenantOverrides() *ThemeOverrides {
+    return &ThemeOverrides{
+        TokenOverrides: map[string]string{
+            "colors.primary":   "#FF6B35", // Brand orange
+            "colors.secondary": "#2E4057", // Brand navy
+            "typography.fontFamily": "Montserrat, sans-serif",
+        },
+        ComponentOverrides: map[string]any{
+            "button.borderRadius": "8px",
+            "card.shadow": "0 4px 12px rgba(0,0,0,0.15)",
+        },
+        CustomCSS: `
+            .custom-brand-header {
+                background: linear-gradient(45deg, #FF6B35, #F7931E);
+                color: white;
+            }
+        `,
+    }
+}
+```
+
+### Design Token Resolution
+
+```go
+// TokenResolver handles deep path resolution and inheritance
+type TokenResolver struct {
+    baseTokens map[string]any
+    overrides  map[string]string
+}
+
+// Resolve resolves a token path with support for references
+func (tr *TokenResolver) Resolve(path string) (string, error) {
+    // Check overrides first
+    if override, exists := tr.overrides[path]; exists {
+        return override, nil
+    }
+    
+    // Resolve from base tokens with deep path support
+    value, err := tr.resolvePath(tr.baseTokens, path)
+    if err != nil {
+        return "", fmt.Errorf("token not found: %s", path)
+    }
+    
+    // Handle token references (e.g., "{colors.primary}")
+    if stringVal, ok := value.(string); ok {
+        return tr.resolveReferences(stringVal)
+    }
+    
+    return fmt.Sprintf("%v", value), nil
+}
+
+// resolvePath navigates deep object paths
+func (tr *TokenResolver) resolvePath(data map[string]any, path string) (any, error) {
+    parts := strings.Split(path, ".")
+    current := data
+    
+    for i, part := range parts {
+        if i == len(parts)-1 {
+            // Last part - return value
+            return current[part], nil
+        }
+        
+        // Navigate deeper
+        if next, ok := current[part].(map[string]any); ok {
+            current = next
+        } else {
+            return nil, fmt.Errorf("invalid path at: %s", part)
+        }
+    }
+    
+    return nil, fmt.Errorf("path not found")
+}
+
+// resolveReferences handles token references like "{colors.primary}"
+func (tr *TokenResolver) resolveReferences(value string) (string, error) {
+    re := regexp.MustCompile(`\{([^}]+)\}`)
+    
+    return re.ReplaceAllStringFunc(value, func(match string) string {
+        path := match[1 : len(match)-1] // Remove { }
+        resolved, err := tr.Resolve(path)
+        if err != nil {
+            return match // Return original if can't resolve
+        }
+        return resolved
+    }), nil
+}
+```
+
+### Performance Optimizations
+
+```go
+// Compiled theme caching for production performance
+type CompiledTheme struct {
+    CSS       string            // Pre-compiled CSS
+    Tokens    map[string]string // Flattened token map
+    Hash      string            // Content hash for cache invalidation
+    ExpiresAt time.Time         // TTL
+}
+
+// ThemeCompiler generates optimized theme assets
+type ThemeCompiler struct {
+    compiler *CSSCompiler
+    minifier *CSSMinifier
+    cache    map[string]*CompiledTheme
+    mu       sync.RWMutex
+}
+
+func (tc *ThemeCompiler) CompileTheme(theme *Theme) (*CompiledTheme, error) {
+    hash := tc.generateHash(theme)
+    
+    tc.mu.RLock()
+    if cached, exists := tc.cache[hash]; exists && time.Now().Before(cached.ExpiresAt) {
+        tc.mu.RUnlock()
+        return cached, nil
+    }
+    tc.mu.RUnlock()
+    
+    // Generate CSS from tokens
+    css, err := tc.compiler.CompileFromTokens(theme.Tokens)
+    if err != nil {
+        return nil, err
+    }
+    
+    // Minify for production
+    minifiedCSS := tc.minifier.Minify(css)
+    
+    // Flatten tokens for fast lookup
+    flatTokens := tc.flattenTokens(theme.Tokens)
+    
+    compiled := &CompiledTheme{
+        CSS:       minifiedCSS,
+        Tokens:    flatTokens,
+        Hash:      hash,
+        ExpiresAt: time.Now().Add(1 * time.Hour),
+    }
+    
+    tc.mu.Lock()
+    tc.cache[hash] = compiled
+    tc.mu.Unlock()
+    
+    return compiled, nil
+}
+```
+
+---
+
 [← Back](06-validation.md) | [Next: Conditional Logic →](08-conditional-logic.md)

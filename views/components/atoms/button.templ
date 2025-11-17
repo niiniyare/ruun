@@ -52,57 +52,57 @@ type ButtonProps struct {
 func buttonClasses(props ButtonProps) string {
 	var classes []string
 
-	// Base classes
+	// Base classes using schema tokens
 	classes = append(classes, 
 		"inline-flex",
 		"items-center",
 		"justify-center",
 		"whitespace-nowrap",
-		"rounded-md",
+		"rounded-[var(--radius-md)]",
 		"text-sm",
 		"font-medium",
-		"ring-offset-background",
+		"ring-offset-[var(--background)]",
 		"transition-colors",
 		"focus-visible:outline-none",
 		"focus-visible:ring-2",
-		"focus-visible:ring-ring",
+		"focus-visible:ring-[var(--ring)]",
 		"focus-visible:ring-offset-2",
 		"disabled:pointer-events-none",
 		"disabled:opacity-50",
 	)
 
-	// Variant classes
+	// Variant classes using schema tokens
 	switch props.Variant {
 	case ButtonPrimary:
-		classes = append(classes, "bg-primary", "text-primary-foreground", "hover:bg-primary/90")
+		classes = append(classes, "bg-[var(--primary)]", "text-[var(--primary-foreground)]", "hover:bg-[var(--primary)]/90")
 	case ButtonSecondary:
-		classes = append(classes, "bg-secondary", "text-secondary-foreground", "hover:bg-secondary/80")
+		classes = append(classes, "bg-[var(--secondary)]", "text-[var(--secondary-foreground)]", "hover:bg-[var(--secondary)]/80")
 	case ButtonDestructive:
-		classes = append(classes, "bg-destructive", "text-destructive-foreground", "hover:bg-destructive/90")
+		classes = append(classes, "bg-[var(--destructive)]", "text-[var(--destructive-foreground)]", "hover:bg-[var(--destructive)]/90")
 	case ButtonOutline:
-		classes = append(classes, "border", "border-input", "bg-background", "hover:bg-accent", "hover:text-accent-foreground")
+		classes = append(classes, "border", "border-[var(--input)]", "bg-[var(--background)]", "hover:bg-[var(--accent)]", "hover:text-[var(--accent-foreground)]")
 	case ButtonGhost:
-		classes = append(classes, "hover:bg-accent", "hover:text-accent-foreground")
+		classes = append(classes, "hover:bg-[var(--accent)]", "hover:text-[var(--accent-foreground)]")
 	case ButtonLink:
-		classes = append(classes, "text-primary", "underline-offset-4", "hover:underline")
+		classes = append(classes, "text-[var(--primary)]", "underline-offset-4", "hover:underline")
 	default:
-		classes = append(classes, "bg-primary", "text-primary-foreground", "hover:bg-primary/90")
+		classes = append(classes, "bg-[var(--primary)]", "text-[var(--primary-foreground)]", "hover:bg-[var(--primary)]/90")
 	}
 
-	// Size classes
+	// Size classes using schema spacing tokens
 	switch props.Size {
 	case ButtonSizeXS:
-		classes = append(classes, "h-6", "px-2", "text-xs")
+		classes = append(classes, "h-[var(--space-6)]", "px-[var(--space-2)]", "text-xs")
 	case ButtonSizeSM:
-		classes = append(classes, "h-8", "px-3", "text-xs")
+		classes = append(classes, "h-[var(--space-8)]", "px-[var(--space-3)]", "text-xs")
 	case ButtonSizeMD:
-		classes = append(classes, "h-10", "px-4", "py-2")
+		classes = append(classes, "h-[var(--space-10)]", "px-[var(--space-4)]", "py-[var(--space-2)]")
 	case ButtonSizeLG:
-		classes = append(classes, "h-11", "px-8")
+		classes = append(classes, "h-[var(--space-11)]", "px-[var(--space-8)]")
 	case ButtonSizeXL:
-		classes = append(classes, "h-14", "px-8", "text-lg")
+		classes = append(classes, "h-[var(--space-14)]", "px-[var(--space-8)]", "text-lg")
 	default:
-		classes = append(classes, "h-10", "px-4", "py-2")
+		classes = append(classes, "h-[var(--space-10)]", "px-[var(--space-4)]", "py-[var(--space-2)]")
 	}
 
 	// Loading state

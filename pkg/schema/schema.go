@@ -4,8 +4,8 @@
 // Example usage:
 //
 //	schema := schema.NewSchema("user-form", schema.TypeForm, "Create User")
-//	schema.AddField(schema.Field{Name: "email", Type: schema.FieldEmail, Label: "Email"})
-//	schema.AddAction(schema.Action{ID: "submit", Type: schema.ActionSubmit, Text: "Save"})
+//	schema.AddField(Field{Name: "email", Type: schema.FieldEmail, Label: "Email"})
+//	schema.AddAction(Action{ID: "submit", Type: schema.ActionSubmit, Text: "Save"})
 package schema
 
 import (
@@ -25,24 +25,20 @@ import (
 // This implementation is thread-safe and can be safely used concurrently.
 type Schema struct {
 	mu sync.RWMutex // Protects all mutable fields
-
 	// Identity
 	ID          string `json:"id" validate:"required,min=1,max=100" example:"user-create-form"`
 	Type        Type   `json:"type" validate:"required" example:"form"`
 	Version     string `json:"version,omitempty" validate:"semver" example:"1.2.0"`
 	Title       string `json:"title" validate:"required,min=1,max=200" example:"Create User"`
 	Description string `json:"description,omitempty" validate:"max=1000" example:"Add a new user to the system"`
-
 	// Core UI structure
 	Config   *Config  `json:"config,omitempty"`                  // HTTP/API configuration
 	Layout   *Layout  `json:"layout,omitempty"`                  // Visual layout (grid, tabs, sections)
 	Fields   []Field  `json:"fields,omitempty" validate:"dive"`  // Form fields and inputs
 	Actions  []Action `json:"actions,omitempty" validate:"dive"` // Buttons and actions
 	Children []Schema `json:"children,omitempty"`                // Nested components
-
 	// Performance optimization: field name -> index mapping
 	fieldMap map[string]int `json:"-"` // Not serialized
-
 	// Enterprise features
 	Security   *Security   `json:"security,omitempty"`   // CSRF, rate limiting, encryption
 	Tenant     *Tenant     `json:"tenant,omitempty"`     // Multi-tenancy isolation
@@ -51,7 +47,6 @@ type Schema struct {
 	Events     *Events     `json:"events,omitempty"`     // Lifecycle event handlers
 	I18n       *I18n       `json:"i18n,omitempty"`       // Internationalization
 	Mixin      *Mixin
-
 	// Frontend framework integration
 	HTMX   *HTMX   `json:"htmx,omitempty"`   // HTMX configuration
 	Alpine *Alpine `json:"alpine,omitempty"` // Alpine.js configuration
@@ -61,11 +56,9 @@ type Schema struct {
 	Tags     []string `json:"tags,omitempty" validate:"dive,alphanum"` // Search tags
 	Category string   `json:"category,omitempty" validate:"alphanum"`  // UI category
 	Module   string   `json:"module,omitempty" validate:"alphanum"`    // ERP module name
-
 	// Runtime state (managed by system, not in JSON)
-	State   *State   `json:"state,omitempty"`   // Form values, errors, dirty state
-	Context *Context `json:"context,omitempty"` // Request context, user info, permissions
-
+	State   *FormState `json:"state,omitempty"`   // Form values, errors, dirty state
+	Context *Context   `json:"context,omitempty"` // Request context, user info, permissions
 	// Internal fields (not serialized)
 	evaluator *condition.Evaluator `json:"-"` // Condition evaluator for dynamic behavior
 }
@@ -95,8 +88,8 @@ type Config struct {
 	CacheTTL int               `json:"cacheTTL,omitempty" validate:"min=0" example:"300"`             // seconds
 }
 
-// State represents runtime form state - managed by the frontend
-type State struct {
+// FormState represents runtime form state - managed by the frontend
+type FormState struct {
 	Values      map[string]any    `json:"values,omitempty"`      // Current field values
 	Errors      map[string]string `json:"errors,omitempty"`      // Validation errors by field
 	Touched     map[string]bool   `json:"touched,omitempty"`     // Fields user has interacted with
@@ -116,17 +109,14 @@ type Context struct {
 	TenantID  string `json:"tenantId,omitempty" validate:"uuid"`
 	SessionID string `json:"sessionId,omitempty" validate:"uuid"`
 	RequestID string `json:"requestId,omitempty" validate:"uuid"`
-
 	// Request metadata
 	IP        string `json:"ip,omitempty" validate:"ip"`
 	UserAgent string `json:"userAgent,omitempty"`
 	Locale    string `json:"locale,omitempty" validate:"locale"`
 	Timezone  string `json:"timezone,omitempty" validate:"timezone"`
-
 	// Authorization
 	Permissions []string `json:"permissions,omitempty"` // User permissions
 	Roles       []string `json:"roles,omitempty"`       // User roles
-
 	// Environment
 	Environment string         `json:"environment,omitempty" validate:"oneof=development staging production"`
 	Debug       bool           `json:"debug,omitempty"` // Enable debug mode
@@ -134,15 +124,14 @@ type Context struct {
 }
 
 // Core interfaces - implement these to extend the schema system
-
 // Validator validates schema structure and submitted data
 type Validator interface {
 	ValidateSchema(ctx context.Context, schema *Schema) error
 	ValidateData(ctx context.Context, schema *Schema, data map[string]any) error
 }
 
-// Enricher provides configurable schema enrichment with functional options
-type Enricher interface {
+// SchemaEnricher provides configurable schema enrichment with functional options
+type SchemaEnricher interface {
 	// Enrich enriches schema with provided options
 	Enrich(ctx context.Context, schema *Schema, opts ...EnrichOption) error
 }
@@ -167,8 +156,8 @@ type Renderer interface {
 	RenderField(ctx context.Context, field *Field, value any) (string, error)
 }
 
-// Registry manages schema storage and retrieval
-type Registry interface {
+// SchemaRegistry manages schema storage and retrieval
+type SchemaRegistry interface {
 	Register(ctx context.Context, schema *Schema) error
 	Get(ctx context.Context, id string) (*Schema, error)
 	List(ctx context.Context, filter map[string]any) ([]*Schema, error)
@@ -179,7 +168,7 @@ type Registry interface {
 
 // DataSourceResolver resolves dynamic options for select fields
 type DataSourceResolver interface {
-	Resolve(ctx context.Context, source *DataSource, params map[string]string) ([]Option, error)
+	Resolve(ctx context.Context, source *DataSource, params map[string]string) ([]FieldOption, error)
 	InvalidateCache(ctx context.Context, source *DataSource) error // Clear cached options
 }
 
@@ -204,7 +193,6 @@ type ConditionalUpdate struct {
 	Editable  bool   `json:"editable"`
 	Reason    string `json:"reason,omitempty"`
 }
-
 type ConditionalResults struct {
 	Updates   []ConditionalUpdate `json:"updates"`
 	Changed   bool                `json:"changed"`
@@ -234,7 +222,7 @@ func NewSchema(id string, schemaType Type, title string) *Schema {
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
-		State: &State{
+		State: &FormState{
 			Values:      make(map[string]any),
 			Errors:      make(map[string]string),
 			Touched:     make(map[string]bool),
@@ -259,9 +247,7 @@ func (s *Schema) buildFieldMap() {
 func (s *Schema) SetEvaluator(evaluator *condition.Evaluator) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	s.evaluator = evaluator
-
 	// Set evaluator on all fields
 	for i := range s.Fields {
 		s.Fields[i].SetEvaluator(evaluator)
@@ -279,21 +265,16 @@ func (s *Schema) GetEvaluator() *condition.Evaluator {
 func (s *Schema) AddField(field Field) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.Fields == nil {
 		s.Fields = []Field{}
 	}
-
 	// Set evaluator on new field if schema has one
 	if s.evaluator != nil {
 		field.SetEvaluator(s.evaluator)
 	}
-
 	s.Fields = append(s.Fields, field)
-
 	// Update field map
 	s.fieldMap[field.Name] = len(s.Fields) - 1
-
 	s.updateTimestampUnsafe()
 }
 
@@ -301,7 +282,6 @@ func (s *Schema) AddField(field Field) {
 func (s *Schema) AddFields(fields ...Field) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	for _, field := range fields {
 		if s.evaluator != nil {
 			field.SetEvaluator(s.evaluator)
@@ -309,7 +289,6 @@ func (s *Schema) AddFields(fields ...Field) {
 		s.Fields = append(s.Fields, field)
 		s.fieldMap[field.Name] = len(s.Fields) - 1
 	}
-
 	s.updateTimestampUnsafe()
 }
 
@@ -317,18 +296,14 @@ func (s *Schema) AddFields(fields ...Field) {
 func (s *Schema) RemoveField(name string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	idx, exists := s.fieldMap[name]
 	if !exists {
 		return false
 	}
-
 	// Remove from slice
 	s.Fields = append(s.Fields[:idx], s.Fields[idx+1:]...)
-
 	// Rebuild field map
 	s.buildFieldMap()
-
 	s.updateTimestampUnsafe()
 	return true
 }
@@ -337,25 +312,20 @@ func (s *Schema) RemoveField(name string) bool {
 func (s *Schema) UpdateField(name string, updatedField Field) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	idx, exists := s.fieldMap[name]
 	if !exists {
 		return false
 	}
-
 	// Preserve evaluator
 	if s.evaluator != nil {
 		updatedField.SetEvaluator(s.evaluator)
 	}
-
 	s.Fields[idx] = updatedField
-
 	// Update field map if name changed
 	if updatedField.Name != name {
 		delete(s.fieldMap, name)
 		s.fieldMap[updatedField.Name] = idx
 	}
-
 	s.updateTimestampUnsafe()
 	return true
 }
@@ -364,7 +334,6 @@ func (s *Schema) UpdateField(name string, updatedField Field) bool {
 func (s *Schema) AddAction(action Action) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.Actions == nil {
 		s.Actions = []Action{}
 	}
@@ -376,7 +345,6 @@ func (s *Schema) AddAction(action Action) {
 func (s *Schema) AddActions(actions ...Action) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	for _, action := range actions {
 		s.Actions = append(s.Actions, action)
 	}
@@ -387,7 +355,6 @@ func (s *Schema) AddActions(actions ...Action) {
 func (s *Schema) RemoveAction(id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	for i, action := range s.Actions {
 		if action.ID == id {
 			s.Actions = append(s.Actions[:i], s.Actions[i+1:]...)
@@ -402,7 +369,6 @@ func (s *Schema) RemoveAction(id string) bool {
 func (s *Schema) UpdateAction(id string, updatedAction Action) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	for i, action := range s.Actions {
 		if action.ID == id {
 			s.Actions[i] = updatedAction
@@ -417,12 +383,10 @@ func (s *Schema) UpdateAction(id string, updatedAction Action) bool {
 func (s *Schema) GetField(name string) (Field, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	idx, exists := s.fieldMap[name]
 	if !exists {
 		return Field{}, false
 	}
-
 	return s.Fields[idx], true
 }
 
@@ -431,12 +395,10 @@ func (s *Schema) GetField(name string) (Field, bool) {
 func (s *Schema) GetFieldPtr(name string) (*Field, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	idx, exists := s.fieldMap[name]
 	if !exists {
 		return nil, false
 	}
-
 	return &s.Fields[idx], true
 }
 
@@ -444,7 +406,6 @@ func (s *Schema) GetFieldPtr(name string) (*Field, bool) {
 func (s *Schema) GetFieldByIndex(index int) (Field, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	if index >= 0 && index < len(s.Fields) {
 		return s.Fields[index], true
 	}
@@ -455,7 +416,6 @@ func (s *Schema) GetFieldByIndex(index int) (Field, bool) {
 func (s *Schema) GetAction(id string) (Action, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	for _, action := range s.Actions {
 		if action.ID == id {
 			return action, true
@@ -476,7 +436,6 @@ func (s *Schema) HasField(name string) bool {
 func (s *Schema) HasFieldOfType(name string, fieldType FieldType) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	idx, exists := s.fieldMap[name]
 	return exists && s.Fields[idx].Type == fieldType
 }
@@ -485,7 +444,6 @@ func (s *Schema) HasFieldOfType(name string, fieldType FieldType) bool {
 func (s *Schema) HasAction(id string) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	for _, action := range s.Actions {
 		if action.ID == id {
 			return true
@@ -498,7 +456,6 @@ func (s *Schema) HasAction(id string) bool {
 func (s *Schema) GetFieldNames() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	names := make([]string, len(s.Fields))
 	for i, field := range s.Fields {
 		names[i] = field.Name
@@ -510,7 +467,6 @@ func (s *Schema) GetFieldNames() []string {
 func (s *Schema) GetActionIDs() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	ids := make([]string, len(s.Actions))
 	for i, action := range s.Actions {
 		ids[i] = action.ID
@@ -522,7 +478,6 @@ func (s *Schema) GetActionIDs() []string {
 func (s *Schema) GetVisibleFields(ctx context.Context, data map[string]any) []Field {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	visible := make([]Field, 0, len(s.Fields))
 	for i := range s.Fields {
 		if ok, _ := s.Fields[i].IsVisible(ctx, data); ok {
@@ -536,7 +491,6 @@ func (s *Schema) GetVisibleFields(ctx context.Context, data map[string]any) []Fi
 func (s *Schema) GetHiddenFields(ctx context.Context, data map[string]any) []Field {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	hidden := make([]Field, 0, len(s.Fields))
 	for i := range s.Fields {
 		if ok, _ := s.Fields[i].IsVisible(ctx, data); !ok {
@@ -550,17 +504,14 @@ func (s *Schema) GetHiddenFields(ctx context.Context, data map[string]any) []Fie
 func (s *Schema) GetRequiredFields(ctx context.Context, data map[string]any) []Field {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	required := make([]Field, 0, len(s.Fields))
 	for i := range s.Fields {
 		field := &s.Fields[i]
-
 		// Check if field is required (ignore errors, treat as not required)
 		isRequired, err := field.IsRequired(ctx, data)
 		if err != nil {
 			continue
 		}
-
 		if isRequired {
 			if ok, _ := field.IsVisible(ctx, data); ok {
 				required = append(required, *field) // Return copy
@@ -574,16 +525,13 @@ func (s *Schema) GetRequiredFields(ctx context.Context, data map[string]any) []F
 func (s *Schema) GetOptionalFields(ctx context.Context, data map[string]any) []Field {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	optional := make([]Field, 0, len(s.Fields))
 	for i := range s.Fields {
 		field := &s.Fields[i]
-
 		isRequired, err := field.IsRequired(ctx, data)
 		if err != nil || isRequired {
 			continue
 		}
-
 		if ok, _ := field.IsVisible(ctx, data); ok {
 			optional = append(optional, *field) // Return copy
 		}
@@ -595,7 +543,6 @@ func (s *Schema) GetOptionalFields(ctx context.Context, data map[string]any) []F
 func (s *Schema) GetFieldsByType(fieldType FieldType) []Field {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	fields := make([]Field, 0)
 	for i := range s.Fields {
 		if s.Fields[i].Type == fieldType {
@@ -609,7 +556,6 @@ func (s *Schema) GetFieldsByType(fieldType FieldType) []Field {
 func (s *Schema) GetEnabledActions(ctx context.Context, data map[string]any) []Action {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	enabled := make([]Action, 0, len(s.Actions))
 	for _, action := range s.Actions {
 		if !action.Disabled && !action.Hidden {
@@ -631,12 +577,9 @@ func (s *Schema) GetEnabledActions(ctx context.Context, data map[string]any) []A
 func (s *Schema) ValidateData(ctx context.Context, data map[string]any) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	collector := NewErrorCollector()
-
 	// Get visible required fields
 	requiredFields := s.getRequiredFieldsUnsafe(ctx, data)
-
 	// Check required fields
 	for _, field := range requiredFields {
 		value, exists := data[field.Name]
@@ -648,7 +591,6 @@ func (s *Schema) ValidateData(ctx context.Context, data map[string]any) error {
 			)
 		}
 	}
-
 	// Validate all provided field values
 	for i := range s.Fields {
 		field := &s.Fields[i]
@@ -664,11 +606,9 @@ func (s *Schema) ValidateData(ctx context.Context, data map[string]any) error {
 			}
 		}
 	}
-
 	if collector.HasErrors() {
 		return collector.Errors()
 	}
-
 	return nil
 }
 
@@ -677,12 +617,10 @@ func (s *Schema) getRequiredFieldsUnsafe(ctx context.Context, data map[string]an
 	required := make([]Field, 0, len(s.Fields))
 	for i := range s.Fields {
 		field := &s.Fields[i]
-
 		isRequired, err := field.IsRequired(ctx, data)
 		if err != nil {
 			continue
 		}
-
 		if isRequired {
 			if ok, _ := field.IsVisible(ctx, data); ok {
 				required = append(required, *field)
@@ -696,10 +634,8 @@ func (s *Schema) getRequiredFieldsUnsafe(ctx context.Context, data map[string]an
 func (s *Schema) DetectCircularDependencies() error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	visited := make(map[string]bool)
 	stack := make(map[string]bool)
-
 	for _, field := range s.Fields {
 		if err := s.checkCycleUnsafe(field.Name, visited, stack); err != nil {
 			return err
@@ -719,10 +655,8 @@ func (s *Schema) checkCycleUnsafe(fieldName string, visited, stack map[string]bo
 	if visited[fieldName] {
 		return nil
 	}
-
 	visited[fieldName] = true
 	stack[fieldName] = true
-
 	idx, exists := s.fieldMap[fieldName]
 	if exists {
 		for _, dep := range s.Fields[idx].Dependencies {
@@ -731,7 +665,6 @@ func (s *Schema) checkCycleUnsafe(fieldName string, visited, stack map[string]bo
 			}
 		}
 	}
-
 	stack[fieldName] = false
 	return nil
 }
@@ -740,7 +673,6 @@ func (s *Schema) checkCycleUnsafe(fieldName string, visited, stack map[string]bo
 func (s *Schema) Validate(ctx context.Context) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	// Check context cancellation (only if context is provided)
 	if ctx != nil {
 		select {
@@ -749,9 +681,7 @@ func (s *Schema) Validate(ctx context.Context) error {
 		default:
 		}
 	}
-
 	collector := NewErrorCollector()
-
 	// Basic field validation
 	if s.ID == "" {
 		collector.AddError(ErrInvalidSchemaID)
@@ -762,7 +692,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 	if s.Title == "" {
 		collector.AddError(ErrInvalidSchemaTitle)
 	}
-
 	// Validate all fields
 	for i, field := range s.Fields {
 		// Check cancellation periodically (only if context is provided)
@@ -773,7 +702,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 			default:
 			}
 		}
-
 		if err := field.Validate(ctx); err != nil {
 			var schemaErr SchemaError
 			if errors.As(err, &schemaErr) {
@@ -787,7 +715,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 			}
 		}
 	}
-
 	// Validate all actions
 	for i, action := range s.Actions {
 		if err := action.Validate(ctx); err != nil {
@@ -803,7 +730,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 			}
 		}
 	}
-
 	// Check for duplicate field names
 	seen := make(map[string]bool)
 	for _, field := range s.Fields {
@@ -815,7 +741,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 		}
 		seen[field.Name] = true
 	}
-
 	// Check for duplicate action IDs
 	seenActions := make(map[string]bool)
 	for _, action := range s.Actions {
@@ -828,7 +753,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 		}
 		seenActions[action.ID] = true
 	}
-
 	// Validate field dependencies exist
 	for _, field := range s.Fields {
 		for _, dep := range field.Dependencies {
@@ -841,7 +765,6 @@ func (s *Schema) Validate(ctx context.Context) error {
 			}
 		}
 	}
-
 	// Check for circular dependencies
 	visited := make(map[string]bool)
 	stack := make(map[string]bool)
@@ -856,11 +779,9 @@ func (s *Schema) Validate(ctx context.Context) error {
 			break
 		}
 	}
-
 	if collector.HasErrors() {
 		return collector.Errors()
 	}
-
 	return nil
 }
 
@@ -868,35 +789,28 @@ func (s *Schema) Validate(ctx context.Context) error {
 func (s *Schema) Clone() (*Schema, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	// Create a type alias to avoid calling custom MarshalJSON
 	type Alias Schema
 	alias := (*Alias)(s)
-
 	// Marshal to JSON for deep copy using the alias (bypassing custom MarshalJSON)
 	data, err := json.Marshal(alias)
 	if err != nil {
 		return nil, fmt.Errorf("clone marshal: %w", err)
 	}
-
 	var clone Schema
 	if err := json.Unmarshal(data, &clone); err != nil {
 		return nil, fmt.Errorf("clone unmarshal: %w", err)
 	}
-
 	// Preserve evaluator (doesn't serialize)
 	clone.evaluator = s.evaluator
-
 	// Rebuild field map
 	clone.buildFieldMap()
-
 	// Set evaluator on all fields
 	if clone.evaluator != nil {
 		for i := range clone.Fields {
 			clone.Fields[i].SetEvaluator(clone.evaluator)
 		}
 	}
-
 	return &clone, nil
 }
 
@@ -904,11 +818,9 @@ func (s *Schema) Clone() (*Schema, error) {
 func (s *Schema) Reset() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State == nil {
-		s.State = &State{}
+		s.State = &FormState{}
 	}
-
 	s.State.Values = make(map[string]any)
 	s.State.Errors = make(map[string]string)
 	s.State.Touched = make(map[string]bool)
@@ -923,9 +835,8 @@ func (s *Schema) Reset() {
 func (s *Schema) SetFieldValue(fieldName string, value any) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State == nil {
-		s.State = &State{
+		s.State = &FormState{
 			Values: make(map[string]any),
 		}
 	}
@@ -940,16 +851,14 @@ func (s *Schema) SetFieldValue(fieldName string, value any) {
 func (s *Schema) SetFieldValues(values map[string]any) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State == nil {
-		s.State = &State{
+		s.State = &FormState{
 			Values: make(map[string]any),
 		}
 	}
 	if s.State.Values == nil {
 		s.State.Values = make(map[string]any)
 	}
-
 	for k, v := range values {
 		s.State.Values[k] = v
 	}
@@ -960,7 +869,6 @@ func (s *Schema) SetFieldValues(values map[string]any) {
 func (s *Schema) GetFieldValue(fieldName string) (any, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	if s.State == nil || s.State.Values == nil {
 		return nil, false
 	}
@@ -972,9 +880,8 @@ func (s *Schema) GetFieldValue(fieldName string) (any, bool) {
 func (s *Schema) SetFieldError(fieldName string, errorMsg string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State == nil {
-		s.State = &State{
+		s.State = &FormState{
 			Errors: make(map[string]string),
 		}
 	}
@@ -989,7 +896,6 @@ func (s *Schema) SetFieldError(fieldName string, errorMsg string) {
 func (s *Schema) ClearFieldError(fieldName string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State != nil && s.State.Errors != nil {
 		delete(s.State.Errors, fieldName)
 		// Check if there are any remaining errors
@@ -1001,7 +907,6 @@ func (s *Schema) ClearFieldError(fieldName string) {
 func (s *Schema) ClearAllErrors() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State != nil {
 		s.State.Errors = make(map[string]string)
 		s.State.Valid = true
@@ -1019,11 +924,9 @@ func (s *Schema) HasErrors() bool {
 func (s *Schema) GetErrors() map[string]string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	if s.State == nil || s.State.Errors == nil {
 		return make(map[string]string)
 	}
-
 	// Return a copy to prevent external modification
 	errors := make(map[string]string, len(s.State.Errors))
 	for k, v := range s.State.Errors {
@@ -1036,9 +939,8 @@ func (s *Schema) GetErrors() map[string]string {
 func (s *Schema) MarkFieldTouched(fieldName string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State == nil {
-		s.State = &State{
+		s.State = &FormState{
 			Touched: make(map[string]bool),
 		}
 	}
@@ -1059,9 +961,8 @@ func (s *Schema) IsFieldTouched(fieldName string) bool {
 func (s *Schema) MarkFieldDirty(fieldName string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	if s.State == nil {
-		s.State = &State{
+		s.State = &FormState{
 			Dirty: make(map[string]bool),
 		}
 	}
@@ -1082,7 +983,6 @@ func (s *Schema) IsFieldDirty(fieldName string) bool {
 func (s *Schema) IsDirty() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	if s.State == nil || s.State.Dirty == nil {
 		return false
 	}
@@ -1134,7 +1034,6 @@ func (s *Schema) updateTimestamp() {
 func (s *Schema) MarshalJSON() ([]byte, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	type Alias Schema
 	s.updateTimestampUnsafe()
 	return json.Marshal((*Alias)(s))
@@ -1151,10 +1050,8 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-
 	// Build field map after unmarshaling
 	s.buildFieldMap()
-
 	// Don't validate here - let caller decide when to validate
 	return nil
 }
@@ -1172,7 +1069,6 @@ func (s *Schema) ToJSON() (string, error) {
 func (s *Schema) ToJSONPretty() (string, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
 	type Alias Schema
 	data, err := json.MarshalIndent((*Alias)(s), "", "  ")
 	if err != nil {
@@ -1191,11 +1087,9 @@ func FromJSON(jsonStr string) (*Schema, error) {
 }
 
 // Interface implementation checks
-
 func (s *Schema) GetID() string      { return s.ID }
 func (s *Schema) GetType() string    { return string(s.Type) }
 func (s *Schema) GetVersion() string { return s.Version }
-
 func (s *Schema) GetMetadata() *Meta {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -1203,14 +1097,12 @@ func (s *Schema) GetMetadata() *Meta {
 }
 
 // Utility functions
-
 // MergeSchemas merges multiple schemas into one (experimental)
 func MergeSchemas(base *Schema, others ...*Schema) (*Schema, error) {
 	merged, err := base.Clone()
 	if err != nil {
 		return nil, fmt.Errorf("failed to clone base schema: %w", err)
 	}
-
 	for _, other := range others {
 		// Merge fields (skip duplicates)
 		for _, field := range other.Fields {
@@ -1218,14 +1110,12 @@ func MergeSchemas(base *Schema, others ...*Schema) (*Schema, error) {
 				merged.AddField(field)
 			}
 		}
-
 		// Merge actions (skip duplicates)
 		for _, action := range other.Actions {
 			if !merged.HasAction(action.ID) {
 				merged.AddAction(action)
 			}
 		}
-
 		// Merge tags
 		if len(other.Tags) > 0 {
 			merged.mu.Lock()
@@ -1241,7 +1131,6 @@ func MergeSchemas(base *Schema, others ...*Schema) (*Schema, error) {
 			merged.mu.Unlock()
 		}
 	}
-
 	merged.updateTimestamp()
 	return merged, nil
 }
@@ -1252,23 +1141,19 @@ func (s *Schema) FilterFields(predicate func(field Field) bool) (*Schema, error)
 	if err != nil {
 		return nil, fmt.Errorf("failed to clone schema: %w", err)
 	}
-
 	filtered.mu.Lock()
 	filtered.Fields = []Field{}
 	filtered.buildFieldMap()
 	filtered.mu.Unlock()
-
 	s.mu.RLock()
 	fields := make([]Field, len(s.Fields))
 	copy(fields, s.Fields)
 	s.mu.RUnlock()
-
 	for _, field := range fields {
 		if predicate(field) {
 			filtered.AddField(field)
 		}
 	}
-
 	return filtered, nil
 }
 
@@ -1278,7 +1163,6 @@ func (s *Schema) MapFields(transform func(field Field) Field) (*Schema, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to clone schema: %w", err)
 	}
-
 	mapped.mu.Lock()
 	for i, field := range mapped.Fields {
 		mapped.Fields[i] = transform(field)
@@ -1286,7 +1170,6 @@ func (s *Schema) MapFields(transform func(field Field) Field) (*Schema, error) {
 	mapped.buildFieldMap()
 	mapped.updateTimestampUnsafe()
 	mapped.mu.Unlock()
-
 	return mapped, nil
 }
 
@@ -1298,35 +1181,29 @@ func (s *Schema) Equals(other *Schema) bool {
 	if s == nil || other == nil {
 		return false
 	}
-
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	other.mu.RLock()
 	defer other.mu.RUnlock()
-
 	// Compare basic fields
 	if s.ID != other.ID || s.Type != other.Type || s.Version != other.Version || s.Title != other.Title {
 		return false
 	}
-
 	// Compare field counts
 	if len(s.Fields) != len(other.Fields) || len(s.Actions) != len(other.Actions) {
 		return false
 	}
-
 	// Compare fields
 	for i := range s.Fields {
 		if s.Fields[i].Name != other.Fields[i].Name || s.Fields[i].Type != other.Fields[i].Type {
 			return false
 		}
 	}
-
 	// Compare actions
 	for i := range s.Actions {
 		if s.Actions[i].ID != other.Actions[i].ID {
 			return false
 		}
 	}
-
 	return true
 }

@@ -1,5 +1,4 @@
 package schema
-
 import (
 	"context"
 	"fmt"
@@ -8,12 +7,10 @@ import (
 	"strings"
 	"sync"
 )
-
 // TokenReference represents a reference to another token using the syntax "token.path".
 // References are resolved at runtime, allowing dynamic theme customization.
 // Example: "colors.primary.base" references the base primary color.
 type TokenReference string
-
 // IsReference checks if the value is a token reference (contains dots indicating a path).
 func (t TokenReference) IsReference() bool {
 	s := string(t)
@@ -23,38 +20,31 @@ func (t TokenReference) IsReference() bool {
 	if len(s) == 0 {
 		return false
 	}
-
 	// Not a reference if it starts with common CSS value patterns
 	if strings.HasPrefix(s, "#") || strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
 		return false
 	}
-
 	// Not a reference if it looks like a CSS unit (number + unit)
 	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") ||
 		strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
 		return false
 	}
-
 	// Not a reference if it's a pure number (with or without decimal)
 	if matched, _ := regexp.MatchString(`^\d+(\.\d+)?$`, s); matched {
 		return false
 	}
-
 	// Not a reference if it contains spaces (CSS values often have spaces)
 	if strings.Contains(s, " ") {
 		return false
 	}
-
 	// Must contain dots to be a valid token path
 	if !strings.Contains(s, ".") {
 		return false
 	}
-
 	// Should have at least 2 parts when split by dots (e.g., "colors.primary")
 	parts := strings.Split(s, ".")
 	return len(parts) >= 2
 }
-
 // Path extracts the token path from a reference.
 // For "colors.primary.base", it returns "colors.primary.base".
 func (t TokenReference) Path() string {
@@ -64,49 +54,40 @@ func (t TokenReference) Path() string {
 	// No need to trim braces since we don't use them anymore
 	return string(t)
 }
-
 // String returns the string representation of the token reference.
 func (t TokenReference) String() string {
 	return string(t)
 }
-
 // Validate checks if the token reference is well-formed.
 func (t TokenReference) Validate() error {
 	s := string(t)
-
 	// If it's clearly a CSS value (starts with # or contains spaces), it's valid
 	if strings.HasPrefix(s, "#") || strings.Contains(s, " ") ||
 		strings.HasPrefix(s, "hsl") || strings.HasPrefix(s, "rgb") {
 		return nil
 	}
-
 	// If it ends with CSS units, it's valid
 	if strings.HasSuffix(s, "rem") || strings.HasSuffix(s, "px") || strings.HasSuffix(s, "em") ||
 		strings.HasSuffix(s, "%") || strings.HasSuffix(s, "vh") || strings.HasSuffix(s, "vw") {
 		return nil
 	}
-
 	// If it's a pure number, it's valid
 	if matched, _ := regexp.MatchString(`^\d+(\.\d+)?$`, s); matched {
 		return nil
 	}
-
 	// If we get here, it's either a valid token reference or an invalid one
 	// Token references must contain at least one dot
 	if !strings.Contains(s, ".") {
 		return NewValidationError("invalid_token_path", "token path must contain at least one dot")
 	}
-
 	path := t.Path()
 	if path == "" {
 		return NewValidationError("empty_token_path", "empty token path in reference")
 	}
-
 	// Token paths must contain at least one dot
 	if !strings.Contains(path, ".") {
 		return NewValidationError("invalid_token_path", fmt.Sprintf("invalid token path format: %s (must contain at least one dot)", path))
 	}
-
 	// Check for valid characters (alphanumeric, dots, underscores, hyphens)
 	for _, char := range path {
 		if !((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') ||
@@ -114,10 +95,8 @@ func (t TokenReference) Validate() error {
 			return NewValidationError("invalid_token_char", fmt.Sprintf("invalid character '%c' in token path: %s", char, path))
 		}
 	}
-
 	return nil
 }
-
 // DesignTokens is the root container for all design tokens.
 // It follows a three-tier architecture for maximum flexibility and maintainability.
 //
@@ -131,14 +110,11 @@ func (t TokenReference) Validate() error {
 type DesignTokens struct {
 	// Primitives contains raw design values - the foundation of the system
 	Primitives *PrimitiveTokens `json:"primitives"`
-
 	// Semantic contains functional token assignments
 	Semantic *SemanticTokens `json:"semantic"`
-
 	// Components contains component-specific token assignments
 	Components *ComponentTokens `json:"components"`
 }
-
 // PrimitiveTokens contains the raw design values that form the foundation
 // of the design system. These values should rarely change and represent
 // the atomic design decisions.
@@ -152,29 +128,24 @@ type PrimitiveTokens struct {
 	Sizes      *SizeScale            `json:"sizes"`
 	ZIndex     *ZIndexScale          `json:"zIndex"`
 }
-
 // ColorPrimitives defines the raw color palette.
 // Uses HSL format for better manipulation and theming.
 type ColorPrimitives struct {
 	// Neutral colors - foundation for text, borders, and backgrounds
 	Gray *GrayScale `json:"gray"`
-
 	// Brand colors - full scales for primary, secondary, accent
 	Blue   *ColorScale `json:"blue"`   // Primary brand color
 	Purple *ColorScale `json:"purple"` // Secondary brand color
 	Cyan   *ColorScale `json:"cyan"`   // Accent color
-
 	// Semantic colors - full scales for feedback states
 	Green  *ColorScale `json:"green"`  // Success states
 	Red    *ColorScale `json:"red"`    // Error states
 	Yellow *ColorScale `json:"yellow"` // Warning states
 	Sky    *ColorScale `json:"sky"`    // Info states
-
 	// Pure colors
 	White string `json:"white"`
 	Black string `json:"black"`
 }
-
 // ColorScale represents a complete color scale from 50 (lightest) to 900 (darkest).
 // Follows industry standards for predictable color relationships.
 type ColorScale struct {
@@ -189,7 +160,6 @@ type ColorScale struct {
 	Scale800 string `json:"800"`
 	Scale900 string `json:"900"`
 }
-
 // GrayScale represents the neutral color scale used throughout the system.
 type GrayScale struct {
 	Scale50  string `json:"50"`
@@ -203,7 +173,6 @@ type GrayScale struct {
 	Scale800 string `json:"800"`
 	Scale900 string `json:"900"`
 }
-
 // SpacingScale defines the spacing scale used for margins, padding, and gaps.
 type SpacingScale struct {
 	None string `json:"0"`   // 0
@@ -216,7 +185,6 @@ type SpacingScale struct {
 	XXXL string `json:"3xl"` // 4rem
 	Huge string `json:"4xl"` // 6rem
 }
-
 // TypographyPrimitives defines the raw typography values.
 type TypographyPrimitives struct {
 	FontSizes     *FontSizeScale      `json:"fontSizes"`
@@ -225,7 +193,6 @@ type TypographyPrimitives struct {
 	FontFamilies  *FontFamilyScale    `json:"fontFamilies"`
 	LetterSpacing *LetterSpacingScale `json:"letterSpacing"`
 }
-
 // FontSizeScale defines the typography size scale.
 type FontSizeScale struct {
 	XS   string `json:"xs"`   // 0.75rem
@@ -237,7 +204,6 @@ type FontSizeScale struct {
 	XXXL string `json:"3xl"`  // 1.875rem
 	Huge string `json:"4xl"`  // 2.25rem
 }
-
 // FontWeightScale defines font weight values.
 type FontWeightScale struct {
 	Thin      string `json:"thin"`      // 100
@@ -249,7 +215,6 @@ type FontWeightScale struct {
 	Extrabold string `json:"extrabold"` // 800
 	Black     string `json:"black"`     // 900
 }
-
 // LineHeightScale defines line height values.
 type LineHeightScale struct {
 	Tight   string `json:"tight"`   // 1.25
@@ -257,28 +222,24 @@ type LineHeightScale struct {
 	Relaxed string `json:"relaxed"` // 1.75
 	Loose   string `json:"loose"`   // 2
 }
-
 // FontFamilyScale defines font family stacks.
 type FontFamilyScale struct {
 	Sans  string `json:"sans"`  // Sans-serif font stack
 	Serif string `json:"serif"` // Serif font stack
 	Mono  string `json:"mono"`  // Monospace font stack
 }
-
 // LetterSpacingScale defines letter spacing values.
 type LetterSpacingScale struct {
 	Tight  string `json:"tight"`  // -0.05em
 	Normal string `json:"normal"` // 0
 	Wide   string `json:"wide"`   // 0.05em
 }
-
 // BorderPrimitives defines border-related primitive values.
 type BorderPrimitives struct {
 	Width  *BorderWidthScale  `json:"width"`
 	Radius *BorderRadiusScale `json:"radius"`
 	Style  *BorderStyleScale  `json:"style"`
 }
-
 // BorderWidthScale defines border width values.
 type BorderWidthScale struct {
 	None   string `json:"none"`   // 0
@@ -286,7 +247,6 @@ type BorderWidthScale struct {
 	Medium string `json:"medium"` // 2px
 	Thick  string `json:"thick"`  // 4px
 }
-
 // BorderRadiusScale defines border radius values.
 type BorderRadiusScale struct {
 	None string `json:"none"` // 0
@@ -296,7 +256,6 @@ type BorderRadiusScale struct {
 	XL   string `json:"xl"`   // 1rem
 	Full string `json:"full"` // 9999px
 }
-
 // BorderStyleScale defines border style values.
 type BorderStyleScale struct {
 	Solid  string `json:"solid"`  // solid
@@ -304,7 +263,6 @@ type BorderStyleScale struct {
 	Dotted string `json:"dotted"` // dotted
 	None   string `json:"none"`   // none
 }
-
 // ShadowScale defines elevation shadow values.
 type ShadowScale struct {
 	None  string `json:"none"`  // none
@@ -315,20 +273,17 @@ type ShadowScale struct {
 	XXL   string `json:"2xl"`   // 0 25px 50px rgba(0, 0, 0, 0.15)
 	Inner string `json:"inner"` // inset 0 2px 4px rgba(0, 0, 0, 0.06)
 }
-
 // AnimationPrimitives defines animation-related primitive values.
 type AnimationPrimitives struct {
 	Duration *AnimationDurationScale `json:"duration"`
 	Easing   *AnimationEasingScale   `json:"easing"`
 }
-
 // AnimationDurationScale defines animation duration values.
 type AnimationDurationScale struct {
 	Fast   string `json:"fast"`   // 150ms
 	Normal string `json:"normal"` // 300ms
 	Slow   string `json:"slow"`   // 500ms
 }
-
 // AnimationEasingScale defines animation easing values.
 type AnimationEasingScale struct {
 	Linear    string `json:"linear"`    // linear
@@ -336,7 +291,6 @@ type AnimationEasingScale struct {
 	EaseOut   string `json:"easeOut"`   // cubic-bezier(0, 0, 0.2, 1)
 	EaseInOut string `json:"easeInOut"` // cubic-bezier(0.4, 0, 0.2, 1)
 }
-
 // SizeScale defines dimensional values for components.
 type SizeScale struct {
 	XS  string `json:"xs"`  // 1rem
@@ -346,7 +300,6 @@ type SizeScale struct {
 	XL  string `json:"xl"`  // 3rem
 	XXL string `json:"2xl"` // 4rem
 }
-
 // ZIndexScale defines layering values.
 type ZIndexScale struct {
 	Dropdown string `json:"dropdown"` // 1000
@@ -356,7 +309,6 @@ type ZIndexScale struct {
 	Popover  string `json:"popover"`  // 1400
 	Tooltip  string `json:"tooltip"`  // 1500
 }
-
 // SemanticTokens contains functional token assignments that map to primitive values.
 // These tokens provide semantic meaning to design decisions.
 type SemanticTokens struct {
@@ -365,25 +317,19 @@ type SemanticTokens struct {
 	Spacing     *SemanticSpacing     `json:"spacing"`
 	Interactive *SemanticInteractive `json:"interactive"`
 }
-
 // SemanticColors defines semantic color assignments.
 type SemanticColors struct {
 	// Background colors
 	Background *BackgroundColors `json:"background"`
-
 	// Text colors
 	Text *TextColors `json:"text"`
-
 	// Border colors
 	Border *BorderColors `json:"border"`
-
 	// Interactive colors
 	Interactive *InteractiveColors `json:"interactive"`
-
 	// Feedback colors
 	Feedback *FeedbackColors `json:"feedback"`
 }
-
 // BackgroundColors defines semantic background color assignments.
 type BackgroundColors struct {
 	Default  TokenReference `json:"default"`  // Primary background
@@ -391,7 +337,6 @@ type BackgroundColors struct {
 	Emphasis TokenReference `json:"emphasis"` // Emphasized background
 	Overlay  TokenReference `json:"overlay"`  // Overlay background
 }
-
 // TextColors defines semantic text color assignments.
 type TextColors struct {
 	Default   TokenReference `json:"default"`   // Primary text
@@ -401,7 +346,6 @@ type TextColors struct {
 	Link      TokenReference `json:"link"`      // Link text
 	LinkHover TokenReference `json:"linkHover"` // Link hover text
 }
-
 // BorderColors defines semantic border color assignments.
 type BorderColors struct {
 	Default TokenReference `json:"default"` // Default border
@@ -409,14 +353,12 @@ type BorderColors struct {
 	Strong  TokenReference `json:"strong"`  // Strong border
 	Subtle  TokenReference `json:"subtle"`  // Subtle border
 }
-
 // InteractiveColors defines semantic interactive color assignments.
 type InteractiveColors struct {
 	Primary   *InteractiveColorSet `json:"primary"`   // Primary interactive
 	Secondary *InteractiveColorSet `json:"secondary"` // Secondary interactive
 	Accent    *InteractiveColorSet `json:"accent"`    // Accent interactive
 }
-
 // InteractiveColorSet defines a complete set of interactive colors.
 type InteractiveColorSet struct {
 	Default TokenReference `json:"default"` // Default state
@@ -424,7 +366,6 @@ type InteractiveColorSet struct {
 	Active  TokenReference `json:"active"`  // Active state
 	Focus   TokenReference `json:"focus"`   // Focus state
 }
-
 // FeedbackColors defines semantic feedback color assignments.
 type FeedbackColors struct {
 	Success *FeedbackColorSet `json:"success"` // Success feedback
@@ -432,14 +373,12 @@ type FeedbackColors struct {
 	Warning *FeedbackColorSet `json:"warning"` // Warning feedback
 	Info    *FeedbackColorSet `json:"info"`    // Info feedback
 }
-
 // FeedbackColorSet defines a complete set of feedback colors.
 type FeedbackColorSet struct {
 	Default TokenReference `json:"default"` // Default feedback color
 	Subtle  TokenReference `json:"subtle"`  // Subtle feedback color
 	Strong  TokenReference `json:"strong"`  // Strong feedback color
 }
-
 // SemanticTypography defines semantic typography assignments.
 type SemanticTypography struct {
 	Headings *HeadingTokens `json:"headings"`
@@ -448,7 +387,6 @@ type SemanticTypography struct {
 	Captions *CaptionTokens `json:"captions"`
 	Code     *CodeTokens    `json:"code"`
 }
-
 // HeadingTokens defines semantic heading typography.
 type HeadingTokens struct {
 	H1 *TypographyToken `json:"h1"`
@@ -458,33 +396,28 @@ type HeadingTokens struct {
 	H5 *TypographyToken `json:"h5"`
 	H6 *TypographyToken `json:"h6"`
 }
-
 // BodyTokens defines semantic body typography.
 type BodyTokens struct {
 	Large   *TypographyToken `json:"large"`
 	Default *TypographyToken `json:"default"`
 	Small   *TypographyToken `json:"small"`
 }
-
 // LabelTokens defines semantic label typography.
 type LabelTokens struct {
 	Large   *TypographyToken `json:"large"`
 	Default *TypographyToken `json:"default"`
 	Small   *TypographyToken `json:"small"`
 }
-
 // CaptionTokens defines semantic caption typography.
 type CaptionTokens struct {
 	Default *TypographyToken `json:"default"`
 	Small   *TypographyToken `json:"small"`
 }
-
 // CodeTokens defines semantic code typography.
 type CodeTokens struct {
 	Inline *TypographyToken `json:"inline"`
 	Block  *TypographyToken `json:"block"`
 }
-
 // TypographyToken represents a complete typography definition.
 type TypographyToken struct {
 	FontFamily    TokenReference `json:"fontFamily"`
@@ -493,46 +426,39 @@ type TypographyToken struct {
 	LineHeight    TokenReference `json:"lineHeight"`
 	LetterSpacing TokenReference `json:"letterSpacing"`
 }
-
 // SemanticSpacing defines semantic spacing assignments.
 type SemanticSpacing struct {
 	Component *ComponentSpacing `json:"component"` // Component spacing
 	Layout    *LayoutSpacing    `json:"layout"`    // Layout spacing
 }
-
 // ComponentSpacing defines semantic component spacing.
 type ComponentSpacing struct {
 	Tight   TokenReference `json:"tight"`   // Tight component spacing
 	Default TokenReference `json:"default"` // Default component spacing
 	Loose   TokenReference `json:"loose"`   // Loose component spacing
 }
-
 // LayoutSpacing defines semantic layout spacing.
 type LayoutSpacing struct {
 	Section TokenReference `json:"section"` // Section spacing
 	Page    TokenReference `json:"page"`    // Page spacing
 }
-
 // SemanticInteractive defines semantic interactive assignments.
 type SemanticInteractive struct {
 	BorderRadius *InteractiveBorderRadius `json:"borderRadius"` // Interactive border radius
 	Shadow       *InteractiveShadow       `json:"shadow"`       // Interactive shadows
 }
-
 // InteractiveBorderRadius defines semantic interactive border radius.
 type InteractiveBorderRadius struct {
 	Small   TokenReference `json:"small"`   // Small interactive radius
 	Default TokenReference `json:"default"` // Default interactive radius
 	Large   TokenReference `json:"large"`   // Large interactive radius
 }
-
 // InteractiveShadow defines semantic interactive shadows.
 type InteractiveShadow struct {
 	Default TokenReference `json:"default"` // Default interactive shadow
 	Hover   TokenReference `json:"hover"`   // Hover interactive shadow
 	Focus   TokenReference `json:"focus"`   // Focus interactive shadow
 }
-
 // ComponentTokens contains component-specific token assignments.
 // These tokens are used directly by UI components.
 type ComponentTokens struct {
@@ -544,7 +470,6 @@ type ComponentTokens struct {
 	Table      *TableTokens      `json:"table"`
 	Navigation *NavigationTokens `json:"navigation"`
 }
-
 // ButtonTokens defines component tokens for buttons.
 type ButtonTokens struct {
 	Primary     *ButtonVariantTokens `json:"primary"`
@@ -553,7 +478,6 @@ type ButtonTokens struct {
 	Ghost       *ButtonVariantTokens `json:"ghost"`
 	Destructive *ButtonVariantTokens `json:"destructive"`
 }
-
 // ButtonVariantTokens defines tokens for a button variant.
 type ButtonVariantTokens struct {
 	Background       TokenReference `json:"background"`
@@ -569,7 +493,6 @@ type ButtonVariantTokens struct {
 	Shadow           TokenReference `json:"shadow"`
 	ShadowHover      TokenReference `json:"shadowHover"`
 }
-
 // InputTokens defines component tokens for inputs.
 type InputTokens struct {
 	Background      TokenReference `json:"background"`
@@ -582,7 +505,6 @@ type InputTokens struct {
 	Color           TokenReference `json:"color"`
 	Placeholder     TokenReference `json:"placeholder"`
 }
-
 // CardTokens defines component tokens for cards.
 type CardTokens struct {
 	Background   TokenReference `json:"background"`
@@ -591,7 +513,6 @@ type CardTokens struct {
 	Shadow       TokenReference `json:"shadow"`
 	Padding      TokenReference `json:"padding"`
 }
-
 // ModalTokens defines component tokens for modals.
 type ModalTokens struct {
 	Background   TokenReference `json:"background"`
@@ -601,7 +522,6 @@ type ModalTokens struct {
 	Shadow       TokenReference `json:"shadow"`
 	Padding      TokenReference `json:"padding"`
 }
-
 // FormTokens defines component tokens for forms.
 type FormTokens struct {
 	Background   TokenReference `json:"background"`
@@ -610,7 +530,6 @@ type FormTokens struct {
 	Shadow       TokenReference `json:"shadow"`
 	Spacing      TokenReference `json:"spacing"`
 }
-
 // TableTokens defines component tokens for tables.
 type TableTokens struct {
 	Background       TokenReference `json:"background"`
@@ -620,7 +539,6 @@ type TableTokens struct {
 	HeaderColor      TokenReference `json:"headerColor"`
 	Padding          TokenReference `json:"padding"`
 }
-
 // NavigationTokens defines component tokens for navigation.
 type NavigationTokens struct {
 	Background       TokenReference `json:"background"`
@@ -632,100 +550,80 @@ type NavigationTokens struct {
 	Border           TokenReference `json:"border"`
 	Padding          TokenReference `json:"padding"`
 }
-
 // TokenResolver provides methods for resolving token references to actual values.
 // Implementations should handle circular reference detection and caching.
 type TokenResolver interface {
 	// Resolve resolves a token reference to its actual value
 	Resolve(ctx context.Context, reference TokenReference, tokens *DesignTokens) (string, error)
-
 	// ResolveAll resolves all token references in a token set
 	ResolveAll(ctx context.Context, tokens *DesignTokens) (*DesignTokens, error)
-
 	// ValidateReferences checks for circular references and invalid paths
 	ValidateReferences(tokens *DesignTokens) error
 }
-
 // DefaultTokenResolver is the default implementation of TokenResolver with circular reference detection.
 type DefaultTokenResolver struct {
 	maxDepth int // Maximum resolution depth to prevent infinite loops
 }
-
 // NewDefaultTokenResolver creates a new default token resolver.
 func NewDefaultTokenResolver() *DefaultTokenResolver {
 	return &DefaultTokenResolver{
 		maxDepth: 20, // Reasonable depth limit
 	}
 }
-
 // Resolve resolves a token reference to its actual value with circular reference protection.
 func (r *DefaultTokenResolver) Resolve(ctx context.Context, reference TokenReference, tokens *DesignTokens) (string, error) {
 	if !reference.IsReference() {
 		return reference.String(), nil
 	}
-
 	// Track resolution path to detect circular references
 	visited := make(map[string]bool)
 	return r.resolveWithTracking(ctx, reference, tokens, visited, 0)
 }
-
 // resolveWithTracking performs recursive resolution with circular reference detection.
 func (r *DefaultTokenResolver) resolveWithTracking(ctx context.Context, reference TokenReference, tokens *DesignTokens, visited map[string]bool, depth int) (string, error) {
 	if depth > r.maxDepth {
 		return "", NewValidationError("max_depth_exceeded", fmt.Sprintf("maximum resolution depth exceeded for token: %s", reference.String()))
 	}
-
 	if !reference.IsReference() {
 		return reference.String(), nil
 	}
-
 	path := reference.Path()
-
 	// Check for circular reference
 	if visited[path] {
 		return "", NewValidationError("circular_reference", fmt.Sprintf("circular reference detected in token path: %s", path))
 	}
-
 	visited[path] = true
 	defer delete(visited, path) // Clean up for backtracking
-
 	// Get the value from the token structure
 	value, err := r.getTokenValue(path, tokens)
 	if err != nil {
 		return "", err
 	}
-
 	// If the resolved value is itself a reference, resolve it recursively
 	valueRef := TokenReference(value)
 	if valueRef.IsReference() {
 		return r.resolveWithTracking(ctx, valueRef, tokens, visited, depth+1)
 	}
-
 	return value, nil
 }
-
 // getTokenValue retrieves a token value by path from the token structure.
 func (r *DefaultTokenResolver) getTokenValue(path string, tokens *DesignTokens) (string, error) {
 	if tokens == nil {
 		return "", NewValidationError("tokens_nil", "tokens is nil")
 	}
-
 	parts := strings.Split(path, ".")
 	if len(parts) < 2 {
 		return "", NewValidationError("invalid_token_path", fmt.Sprintf("invalid token path: %s", path))
 	}
-
 	// Navigate through the token structure using reflection
 	current := reflect.ValueOf(tokens)
 	if current.Kind() == reflect.Ptr {
 		current = current.Elem()
 	}
-
 	for i, part := range parts {
 		if !current.IsValid() {
 			return "", NewValidationError("invalid_token_path", fmt.Sprintf("invalid token path at part %d: %s", i, path))
 		}
-
 		// Handle different types of navigation
 		switch current.Kind() {
 		case reflect.Struct:
@@ -735,7 +633,6 @@ func (r *DefaultTokenResolver) getTokenValue(path string, tokens *DesignTokens) 
 				return "", NewValidationError("token_field_not_found", fmt.Sprintf("token field not found: %s in path %s", part, path))
 			}
 			current = field
-
 		case reflect.Ptr:
 			if current.IsNil() {
 				return "", NewValidationError("nil_pointer_in_path", fmt.Sprintf("nil pointer encountered in token path: %s", path))
@@ -747,11 +644,9 @@ func (r *DefaultTokenResolver) getTokenValue(path string, tokens *DesignTokens) 
 				return "", NewValidationError("token_field_not_found", fmt.Sprintf("token field not found: %s in path %s", part, path))
 			}
 			current = field
-
 		default:
 			return "", NewValidationError("unsupported_token_type", fmt.Sprintf("cannot navigate token path %s at part %s: unsupported type %s", path, part, current.Kind()))
 		}
-
 		// If we reach a pointer, dereference it
 		if current.Kind() == reflect.Ptr {
 			if current.IsNil() {
@@ -760,7 +655,6 @@ func (r *DefaultTokenResolver) getTokenValue(path string, tokens *DesignTokens) 
 			current = current.Elem()
 		}
 	}
-
 	// Extract the final value
 	switch current.Kind() {
 	case reflect.String:
@@ -786,23 +680,19 @@ func (r *DefaultTokenResolver) getTokenValue(path string, tokens *DesignTokens) 
 		return "", NewValidationError("cannot_convert_to_string", fmt.Sprintf("cannot convert token value to string for path: %s", path))
 	}
 }
-
 // findStructField finds a struct field by name (case-insensitive).
 func (r *DefaultTokenResolver) findStructField(structValue reflect.Value, fieldName string) reflect.Value {
 	structType := structValue.Type()
-
 	// First try exact match
 	if field := structValue.FieldByName(fieldName); field.IsValid() {
 		return field
 	}
-
 	// Then try case-insensitive match
 	for i := 0; i < structValue.NumField(); i++ {
 		field := structType.Field(i)
 		if strings.EqualFold(field.Name, fieldName) {
 			return structValue.Field(i)
 		}
-
 		// Also check JSON tag
 		if jsonTag := field.Tag.Get("json"); jsonTag != "" {
 			tagParts := strings.Split(jsonTag, ",")
@@ -811,81 +701,66 @@ func (r *DefaultTokenResolver) findStructField(structValue reflect.Value, fieldN
 			}
 		}
 	}
-
 	return reflect.Value{} // Invalid value
 }
-
 // ResolveAll resolves all token references in a token set.
 func (r *DefaultTokenResolver) ResolveAll(ctx context.Context, tokens *DesignTokens) (*DesignTokens, error) {
 	// This is a complex operation that would need to traverse the entire token structure
 	// For now, return the original tokens (this can be implemented later if needed)
 	return tokens, nil
 }
-
 // ValidateReferences checks for circular references and invalid paths.
 func (r *DefaultTokenResolver) ValidateReferences(tokens *DesignTokens) error {
 	if tokens == nil {
 		return NewValidationError("tokens_nil", "tokens is nil")
 	}
-
 	// Collect all token references from the structure
 	references := r.collectTokenReferences(tokens)
-
 	// Validate each reference
 	for _, ref := range references {
 		if err := ref.Validate(); err != nil {
 			return WrapError(err, "invalid_token_reference", fmt.Sprintf("invalid token reference %s", ref.String()))
 		}
-
 		// Check if the reference can be resolved (this will catch circular references)
 		_, err := r.Resolve(context.Background(), ref, tokens)
 		if err != nil {
 			return WrapError(err, "token_resolution_failed", fmt.Sprintf("failed to resolve token reference %s", ref.String()))
 		}
 	}
-
 	return nil
 }
-
 // collectTokenReferences recursively collects all token references from the token structure.
 func (r *DefaultTokenResolver) collectTokenReferences(tokens *DesignTokens) []TokenReference {
 	var references []TokenReference
 	r.collectReferencesFromValue(reflect.ValueOf(tokens), &references)
 	return references
 }
-
 // collectReferencesFromValue recursively collects token references from a reflect.Value.
 func (r *DefaultTokenResolver) collectReferencesFromValue(v reflect.Value, references *[]TokenReference) {
 	if !v.IsValid() {
 		return
 	}
-
 	switch v.Kind() {
 	case reflect.Ptr:
 		if !v.IsNil() {
 			r.collectReferencesFromValue(v.Elem(), references)
 		}
-
 	case reflect.Struct:
 		for i := 0; i < v.NumField(); i++ {
 			r.collectReferencesFromValue(v.Field(i), references)
 		}
-
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < v.Len(); i++ {
 			r.collectReferencesFromValue(v.Index(i), references)
 		}
-
 	case reflect.Map:
 		for _, key := range v.MapKeys() {
 			r.collectReferencesFromValue(v.MapIndex(key), references)
 		}
-
 	case reflect.Interface:
 		if !v.IsNil() {
 			r.collectReferencesFromValue(v.Elem(), references)
 		}
-
 	case reflect.String:
 		// Check if this string is a TokenReference
 		if v.CanInterface() {
@@ -897,20 +772,17 @@ func (r *DefaultTokenResolver) collectReferencesFromValue(v reflect.Value, refer
 		}
 	}
 }
-
 // CompiledTokenMap provides O(1) token lookups for performance
 type CompiledTokenMap struct {
 	tokenMap map[string]string
 	mu       sync.RWMutex
 }
-
 // NewCompiledTokenMap creates a new compiled token map
 func NewCompiledTokenMap() *CompiledTokenMap {
 	return &CompiledTokenMap{
 		tokenMap: make(map[string]string),
 	}
 }
-
 // Get retrieves a token value by path
 func (ctm *CompiledTokenMap) Get(path string) (string, bool) {
 	ctm.mu.RLock()
@@ -918,28 +790,24 @@ func (ctm *CompiledTokenMap) Get(path string) (string, bool) {
 	value, exists := ctm.tokenMap[path]
 	return value, exists
 }
-
 // Set stores a token value at path
 func (ctm *CompiledTokenMap) Set(path, value string) {
 	ctm.mu.Lock()
 	defer ctm.mu.Unlock()
 	ctm.tokenMap[path] = value
 }
-
 // Clear removes all compiled tokens
 func (ctm *CompiledTokenMap) Clear() {
 	ctm.mu.Lock()
 	defer ctm.mu.Unlock()
 	ctm.tokenMap = make(map[string]string)
 }
-
 // Size returns the number of compiled tokens
 func (ctm *CompiledTokenMap) Size() int {
 	ctm.mu.RLock()
 	defer ctm.mu.RUnlock()
 	return len(ctm.tokenMap)
 }
-
 // TokenRegistry manages design tokens with thread safety and caching.
 type TokenRegistry struct {
 	tokens         *DesignTokens
@@ -949,7 +817,6 @@ type TokenRegistry struct {
 	needsRecompile bool              // Flag to trigger recompilation
 	mu             sync.RWMutex
 }
-
 // NewTokenRegistry creates a new token registry with default values.
 func NewTokenRegistry() *TokenRegistry {
 	registry := &TokenRegistry{
@@ -959,19 +826,15 @@ func NewTokenRegistry() *TokenRegistry {
 		cache:          make(map[string]string),
 		needsRecompile: true,
 	}
-
 	// Trigger initial compilation
 	registry.compileTokens()
-
 	return registry
 }
-
 // NewTokenRegistryWithResolver creates a new token registry with a custom resolver.
 func NewTokenRegistryWithResolver(resolver TokenResolver) *TokenRegistry {
 	if resolver == nil {
 		resolver = NewDefaultTokenResolver()
 	}
-
 	registry := &TokenRegistry{
 		tokens:         GetDefaultTokens(),
 		resolver:       resolver,
@@ -979,13 +842,10 @@ func NewTokenRegistryWithResolver(resolver TokenResolver) *TokenRegistry {
 		cache:          make(map[string]string),
 		needsRecompile: true,
 	}
-
 	// Trigger initial compilation
 	registry.compileTokens()
-
 	return registry
 }
-
 // SetTokens updates the entire token set (thread-safe).
 //
 // Example:
@@ -1028,14 +888,14 @@ func NewTokenRegistryWithResolver(resolver TokenResolver) *TokenRegistry {
 //	}
 //
 //	// Set the tokens (validates references and compiles for performance)
-//	err := registry.SetTokens(tokens)
+//	err := SetTokens(tokens)
 //	if err != nil {
 //	    return fmt.Errorf("failed to set tokens: %w", err)
 //	}
 //
 //	// Now resolve tokens
 //	ctx := context.Background()
-//	bgColor, err := registry.ResolveToken(ctx, schema.TokenReference("semantic.colors.background.default"))
+//	bgColor, err := ResolveToken(ctx, schema.TokenReference("semantic.colors.background.default"))
 //	if err != nil {
 //	    return err
 //	}
@@ -1044,42 +904,32 @@ func (tr *TokenRegistry) SetTokens(tokens *DesignTokens) error {
 	if tokens == nil {
 		return NewValidationError("tokens_nil", "tokens cannot be nil")
 	}
-
 	// Validate the tokens before setting them
 	if err := tr.resolver.ValidateReferences(tokens); err != nil {
 		return WrapError(err, "token_validation_failed", "token validation failed")
 	}
-
 	tr.mu.Lock()
 	defer tr.mu.Unlock()
-
 	tr.tokens = tokens
 	tr.needsRecompile = true
-
 	// Clear caches since tokens have changed
 	tr.cache = make(map[string]string)
 	tr.compiled.Clear()
-
 	// Trigger recompilation
 	tr.compileTokensUnsafe()
-
 	return nil
 }
-
 // GetTokens returns a copy of current tokens (thread-safe).
 func (tr *TokenRegistry) GetTokens() *DesignTokens {
 	tr.mu.RLock()
 	defer tr.mu.RUnlock()
-
 	if tr.tokens == nil {
 		return nil
 	}
-
 	// Return a deep copy to prevent external modification
 	// For now, return the original (deep copy can be implemented later if needed)
 	return tr.tokens
 }
-
 // ResolveToken resolves a single token reference to its actual value.
 //
 // Example:
@@ -1088,35 +938,35 @@ func (tr *TokenRegistry) GetTokens() *DesignTokens {
 //	ctx := context.Background()
 //
 //	// Resolve a primitive token
-//	blueColor, err := registry.ResolveToken(ctx, schema.TokenReference("primitives.colors.blue.500"))
+//	blueColor, err := ResolveToken(ctx, schema.TokenReference("primitives.colors.blue.500"))
 //	if err != nil {
 //	    return err
 //	}
 //	fmt.Printf("Blue 500: %s\n", blueColor) // Output: "#3b82f6"
 //
 //	// Resolve a semantic token (references primitive)
-//	primaryColor, err := registry.ResolveToken(ctx, schema.TokenReference("semantic.colors.interactive.primary"))
+//	primaryColor, err := ResolveToken(ctx, schema.TokenReference("semantic.colors.interactive.primary"))
 //	if err != nil {
 //	    return err
 //	}
 //	fmt.Printf("Primary color: %s\n", primaryColor) // Output: "#3b82f6"
 //
 //	// Resolve a component token (references semantic)
-//	buttonBg, err := registry.ResolveToken(ctx, schema.TokenReference("components.button.primary.background"))
+//	buttonBg, err := ResolveToken(ctx, schema.TokenReference("components.button.primary.background"))
 //	if err != nil {
 //	    return err
 //	}
 //	fmt.Printf("Button background: %s\n", buttonBg) // Output: "#3b82f6"
 //
 //	// Handle non-reference values (pass-through)
-//	literal, err := registry.ResolveToken(ctx, schema.TokenReference("#ff0000"))
+//	literal, err := ResolveToken(ctx, schema.TokenReference("#ff0000"))
 //	if err != nil {
 //	    return err
 //	}
 //	fmt.Printf("Literal color: %s\n", literal) // Output: "#ff0000"
 //
 //	// Error handling for invalid tokens
-//	_, err = registry.ResolveToken(ctx, schema.TokenReference("invalid.token.path"))
+//	_, err = ResolveToken(ctx, schema.TokenReference("invalid.token.path"))
 //	if err != nil {
 //	    if schema.IsValidationError(err) {
 //	        fmt.Printf("Token validation error: %s\n", err.Error())
@@ -1126,14 +976,11 @@ func (tr *TokenRegistry) ResolveToken(ctx context.Context, reference TokenRefere
 	if !reference.IsReference() {
 		return reference.String(), nil
 	}
-
 	path := reference.Path()
-
 	// Check compiled map first (O(1) lookup)
 	if compiled, exists := tr.compiled.Get(path); exists {
 		return compiled, nil
 	}
-
 	// Check resolution cache
 	tr.mu.RLock()
 	if cached, exists := tr.cache[path]; exists {
@@ -1143,7 +990,6 @@ func (tr *TokenRegistry) ResolveToken(ctx context.Context, reference TokenRefere
 	tokens := tr.tokens
 	needsRecompile := tr.needsRecompile
 	tr.mu.RUnlock()
-
 	// Recompile if needed
 	if needsRecompile {
 		tr.compileTokens()
@@ -1152,96 +998,75 @@ func (tr *TokenRegistry) ResolveToken(ctx context.Context, reference TokenRefere
 			return compiled, nil
 		}
 	}
-
 	if tokens == nil {
 		return "", NewValidationError("tokens_unavailable", "no tokens available")
 	}
-
 	// Fallback to resolver (should be rare after compilation)
 	resolved, err := tr.resolver.Resolve(ctx, reference, tokens)
 	if err != nil {
 		return "", err
 	}
-
 	// Cache the resolved value
 	tr.mu.Lock()
 	tr.cache[path] = resolved
 	tr.mu.Unlock()
-
 	// Add to compiled map for future O(1) access
 	tr.compiled.Set(path, resolved)
-
 	return resolved, nil
 }
-
-// ResolveAllTokens resolves all token references in the registry.
+// ResolveAllTokens resolves all token references in the
 func (tr *TokenRegistry) ResolveAllTokens(ctx context.Context) (*DesignTokens, error) {
 	tr.mu.RLock()
 	tokens := tr.tokens
 	tr.mu.RUnlock()
-
 	if tokens == nil {
 		return nil, NewValidationError("tokens_unavailable", "no tokens available")
 	}
-
 	return tr.resolver.ResolveAll(ctx, tokens)
 }
-
 // InvalidateCache clears the resolution cache.
 func (tr *TokenRegistry) InvalidateCache() {
 	tr.mu.Lock()
 	defer tr.mu.Unlock()
 	tr.cache = make(map[string]string)
 }
-
 // ValidateTokens validates the current token set for circular references and invalid paths.
 func (tr *TokenRegistry) ValidateTokens() error {
 	tr.mu.RLock()
 	tokens := tr.tokens
 	tr.mu.RUnlock()
-
 	if tokens == nil {
 		return NewValidationError("tokens_unavailable", "no tokens to validate")
 	}
-
 	return tr.resolver.ValidateReferences(tokens)
 }
-
 // compileTokens precompiles all token paths for O(1) lookups (thread-safe)
 func (tr *TokenRegistry) compileTokens() {
 	tr.mu.Lock()
 	defer tr.mu.Unlock()
 	tr.compileTokensUnsafe()
 }
-
 // compileTokensUnsafe precompiles all token paths (must hold lock)
 func (tr *TokenRegistry) compileTokensUnsafe() {
 	if tr.tokens == nil {
 		return
 	}
-
 	// Clear existing compiled tokens
 	tr.compiled.Clear()
-
 	// Compile all token paths using reflection
 	tr.compileTokenStruct(reflect.ValueOf(tr.tokens).Elem(), "")
-
 	tr.needsRecompile = false
 }
-
 // compileTokenStruct recursively compiles token paths from a struct
 func (tr *TokenRegistry) compileTokenStruct(structValue reflect.Value, basePath string) {
 	structType := structValue.Type()
-
 	for i := 0; i < structValue.NumField(); i++ {
 		field := structType.Field(i)
 		fieldValue := structValue.Field(i)
-
 		// Skip unexported fields
 		if !field.IsExported() {
 			continue
 		}
-
 		// Build field path
 		fieldPath := field.Name
 		if jsonTag := field.Tag.Get("json"); jsonTag != "" {
@@ -1250,28 +1075,23 @@ func (tr *TokenRegistry) compileTokenStruct(structValue reflect.Value, basePath 
 				fieldPath = tagParts[0]
 			}
 		}
-
 		fullPath := fieldPath
 		if basePath != "" {
 			fullPath = basePath + "." + fieldPath
 		}
-
 		// Handle different field types
 		switch fieldValue.Kind() {
 		case reflect.Ptr:
 			if !fieldValue.IsNil() {
 				tr.compileTokenStruct(fieldValue.Elem(), fullPath)
 			}
-
 		case reflect.Struct:
 			tr.compileTokenStruct(fieldValue, fullPath)
-
 		case reflect.String:
 			// Store string values directly
 			if fieldValue.String() != "" {
 				tr.compiled.Set(fullPath, fieldValue.String())
 			}
-
 		case reflect.Interface:
 			if fieldValue.CanInterface() {
 				if str, ok := fieldValue.Interface().(string); ok && str != "" {
@@ -1283,12 +1103,10 @@ func (tr *TokenRegistry) compileTokenStruct(structValue reflect.Value, basePath 
 		}
 	}
 }
-
 // GetCompiledSize returns the number of precompiled tokens
 func (tr *TokenRegistry) GetCompiledSize() int {
 	return tr.compiled.Size()
 }
-
 // GetDefaultTokens returns the default design token values.
 // Following the design system specification.
 func GetDefaultTokens() *DesignTokens {
@@ -1844,7 +1662,6 @@ func GetDefaultTokens() *DesignTokens {
 		},
 	}
 }
-
 // MergeTokens merges two token sets (second overrides first).
 func MergeTokens(base, override *DesignTokens) *DesignTokens {
 	if base == nil {
@@ -1853,43 +1670,35 @@ func MergeTokens(base, override *DesignTokens) *DesignTokens {
 	if override == nil {
 		return base
 	}
-
 	// For now, return override (deep merging can be implemented later if needed)
 	return override
 }
-
 // ValidateTokenPath checks if a token path is valid.
 func ValidateTokenPath(path string) error {
 	ref := TokenReference("" + path + "")
 	return ref.Validate()
 }
-
 // TokenPath creates a token path from components.
 func TokenPath(parts ...string) string {
 	return strings.Join(parts, ".")
 }
-
 // Global token registry instance
 var (
 	defaultTokenRegistry *TokenRegistry
 	registryOnce         sync.Once
 )
-
-// GetDefaultRegistry returns the global token registry.
+// GetDefaultRegistry returns the global token
 func GetDefaultRegistry() *TokenRegistry {
 	registryOnce.Do(func() {
 		defaultTokenRegistry = NewTokenRegistry()
 	})
 	return defaultTokenRegistry
 }
-
 // Convenience functions for common token access
-
 // GetSpacing returns a spacing token value.
 func GetSpacing(key string) string {
 	registry := GetDefaultRegistry()
 	tokenRef := TokenReference(fmt.Sprintf("primitives.spacing.%s", key))
-
 	resolved, err := registry.ResolveToken(context.Background(), tokenRef)
 	if err != nil {
 		// Fallback to semantic spacing
@@ -1899,14 +1708,11 @@ func GetSpacing(key string) string {
 		}
 		return "1rem" // Safe fallback
 	}
-
 	return resolved
 }
-
 // GetColor returns a color token value.
 func GetColor(path string) string {
 	registry := GetDefaultRegistry()
-
 	// Support both full paths and shorthand
 	var tokenRef TokenReference
 	if strings.Contains(path, ".") {
@@ -1915,7 +1721,6 @@ func GetColor(path string) string {
 		// Try common color paths
 		tokenRef = TokenReference(fmt.Sprintf("colors.%s", path))
 	}
-
 	resolved, err := registry.ResolveToken(context.Background(), tokenRef)
 	if err != nil {
 		// Try semantic colors as fallback
@@ -1925,15 +1730,12 @@ func GetColor(path string) string {
 		}
 		return "#000000" // Safe fallback
 	}
-
 	return resolved
 }
-
 // GetFontSize returns a font size token value.
 func GetFontSize(key string) string {
 	registry := GetDefaultRegistry()
 	tokenRef := TokenReference(fmt.Sprintf("primitives.typography.fontSizes.%s", key))
-
 	resolved, err := registry.ResolveToken(context.Background(), tokenRef)
 	if err != nil {
 		// Fallback to semantic typography
@@ -1943,15 +1745,12 @@ func GetFontSize(key string) string {
 		}
 		return "1rem" // Safe fallback
 	}
-
 	return resolved
 }
-
 // GetShadow returns a shadow token value.
 func GetShadow(key string) string {
 	registry := GetDefaultRegistry()
 	tokenRef := TokenReference(fmt.Sprintf("primitives.shadows.%s", key))
-
 	resolved, err := registry.ResolveToken(context.Background(), tokenRef)
 	if err != nil {
 		// Fallback to semantic shadows
@@ -1961,15 +1760,12 @@ func GetShadow(key string) string {
 		}
 		return "none" // Safe fallback
 	}
-
 	return resolved
 }
-
 // GetBorderRadius returns a border radius token value.
 func GetBorderRadius(key string) string {
 	registry := GetDefaultRegistry()
 	tokenRef := TokenReference(fmt.Sprintf("primitives.borders.radius.%s", key))
-
 	resolved, err := registry.ResolveToken(context.Background(), tokenRef)
 	if err != nil {
 		// Fallback to semantic border radius
@@ -1979,6 +1775,5 @@ func GetBorderRadius(key string) string {
 		}
 		return "4px" // Safe fallback
 	}
-
 	return resolved
 }
