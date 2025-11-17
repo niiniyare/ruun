@@ -3,6 +3,7 @@ module github.com/niiniyare/ruun
 go 1.25.3
 
 require (
+	github.com/Oudwins/tailwind-merge-go v0.2.1
 	github.com/a-h/templ v0.3.960
 	github.com/aws/aws-sdk-go-v2 v1.39.6
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.90.1
