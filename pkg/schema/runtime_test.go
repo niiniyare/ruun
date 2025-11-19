@@ -1,11 +1,14 @@
 package schema
+
 import (
 	"context"
 	"testing"
 	"time"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 // RuntimeTestSuite defines the test suite for Runtime
 type RuntimeTestSuite struct {
 	suite.Suite
@@ -13,17 +16,20 @@ type RuntimeTestSuite struct {
 	schema  *Schema
 	runtime *Runtime
 }
+
 // SetupTest runs before each test
 func (s *RuntimeTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.schema = createTestSchema()
 	s.runtime = createTestRuntimeWithValidator()
 }
+
 // TearDownTest runs after each test
 func (s *RuntimeTestSuite) TearDownTest() {
 	// Clean up if needed
 	s.runtime = nil
 }
+
 // TestNewRuntime tests runtime initialization
 func (s *RuntimeTestSuite) TestNewRuntime() {
 	schema := createTestSchema()
@@ -36,6 +42,7 @@ func (s *RuntimeTestSuite) TestNewRuntime() {
 	runtimeWithValidator := createTestRuntimeWithValidator()
 	require.NotNil(s.T(), runtimeWithValidator.validator, "Runtime with validator should have validator initialized")
 }
+
 // TestInitialize tests runtime initialization with data
 func (s *RuntimeTestSuite) TestInitialize() {
 	initialData := map[string]any{
@@ -53,6 +60,7 @@ func (s *RuntimeTestSuite) TestInitialize() {
 	require.True(s.T(), exists, "Email field should exist")
 	require.Equal(s.T(), "john@example.com", email, "Email should be set correctly")
 }
+
 // TestHandleFieldChange tests field value changes
 func (s *RuntimeTestSuite) TestHandleFieldChange() {
 	// Initialize first with valid data for required fields
@@ -71,6 +79,7 @@ func (s *RuntimeTestSuite) TestHandleFieldChange() {
 	// Check field is marked as dirty
 	require.True(s.T(), s.runtime.IsFieldDirty("name"), "Field should be marked as dirty after change")
 }
+
 // TestHandleFieldBlur tests field blur events
 func (s *RuntimeTestSuite) TestHandleFieldBlur() {
 	s.runtime.SetValidationTiming(ValidateOnBlur)
@@ -86,6 +95,7 @@ func (s *RuntimeTestSuite) TestHandleFieldBlur() {
 	// Check field is marked as touched
 	require.True(s.T(), s.runtime.IsFieldTouched("email"), "Field should be marked as touched after blur")
 }
+
 // TestValidateField tests field validation
 func (s *RuntimeTestSuite) TestValidateField() {
 	// Initialize first with valid data for required fields
@@ -137,6 +147,7 @@ func (s *RuntimeTestSuite) TestValidateField() {
 		})
 	}
 }
+
 // TestValidationTiming tests different validation timing modes
 func (s *RuntimeTestSuite) TestValidationTiming() {
 	// Initialize first with valid data for required fields
@@ -166,6 +177,7 @@ func (s *RuntimeTestSuite) TestValidationTiming() {
 		})
 	}
 }
+
 // TestGetStats tests runtime statistics
 func (s *RuntimeTestSuite) TestGetStats() {
 	// Initialize with data
@@ -188,6 +200,7 @@ func (s *RuntimeTestSuite) TestGetStats() {
 	require.Equal(s.T(), 1, stats.TouchedFields, "Expected 1 touched field (email)")
 	require.Equal(s.T(), 2, stats.DirtyFields, "Expected 2 dirty fields (name, email)")
 }
+
 // TestReset tests runtime reset functionality
 func (s *RuntimeTestSuite) TestReset() {
 	initialData := map[string]any{
@@ -213,6 +226,7 @@ func (s *RuntimeTestSuite) TestReset() {
 	require.True(s.T(), exists)
 	require.Equal(s.T(), "John Doe", name, "Name should be reset to initial value")
 }
+
 // TestConditionalLogic tests conditional field logic
 func (s *RuntimeTestSuite) TestConditionalLogic() {
 	// Create schema with conditional field
@@ -244,6 +258,7 @@ func (s *RuntimeTestSuite) TestConditionalLogic() {
 	err = runtime.ApplyConditionalLogic(s.ctx)
 	require.NoError(s.T(), err, "ApplyConditionalLogic() should not return error")
 }
+
 // TestEventHandling tests custom event handler registration
 func (s *RuntimeTestSuite) TestEventHandling() {
 	// Initialize
@@ -267,6 +282,7 @@ func (s *RuntimeTestSuite) TestEventHandling() {
 	require.NoError(s.T(), err, "HandleFieldChange should not return error")
 	require.True(s.T(), eventTriggered, "Custom event handler should be triggered")
 }
+
 // TestValidateWithDebounce tests debounced validation
 func (s *RuntimeTestSuite) TestValidateWithDebounce() {
 	// Initialize
@@ -285,6 +301,7 @@ func (s *RuntimeTestSuite) TestValidateWithDebounce() {
 		s.T().Error("Debounced validation timed out")
 	}
 }
+
 // TestEnrichedSchemaIntegration tests runtime with enriched schema context
 func (s *RuntimeTestSuite) TestEnrichedSchemaIntegration() {
 	// Create schema with runtime permissions set by enricher
@@ -345,6 +362,7 @@ func (s *RuntimeTestSuite) TestEnrichedSchemaIntegration() {
 	stats := runtime.GetStats()
 	require.Equal(s.T(), 2, stats.VisibleFields, "Expected 2 visible fields (public and readonly)")
 }
+
 // Helper method to create a test schema
 // TestRuntimeTestSuite runs the test suite
 func TestRuntimeTestSuite(t *testing.T) {

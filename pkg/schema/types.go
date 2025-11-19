@@ -1,10 +1,13 @@
 package schema
+
 import (
 	"context"
 	"slices"
 	"time"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // Security defines security and access control configuration
 type Security struct {
 	CSRF          *CSRF       `json:"csrf,omitempty"`                        // CSRF protection
@@ -18,6 +21,7 @@ type Security struct {
 	XSSProtection bool        `json:"xssProtection,omitempty"`               // XSS protection
 	SQLInjection  bool        `json:"sqlInjection,omitempty"`                // SQL injection protection
 }
+
 // CSRF defines CSRF protection configuration
 type CSRF struct {
 	Enabled     bool   `json:"enabled"`                                                     // Enable CSRF protection
@@ -27,6 +31,7 @@ type CSRF struct {
 	TokenLength int    `json:"tokenLength,omitempty" validate:"min=16,max=64" example:"32"` // Token length
 	Expiry      int    `json:"expiry,omitempty"`                                            // Token expiry in seconds
 }
+
 // RateLimit defines rate limiting configuration
 type RateLimit struct {
 	Enabled       bool          `json:"enabled"`                                    // Enable rate limiting
@@ -38,6 +43,7 @@ type RateLimit struct {
 	Burst         int           `json:"burst,omitempty"`                            // Burst capacity
 	BlockDuration time.Duration `json:"blockDuration,omitempty"`                    // Block duration after limit
 }
+
 // Encryption defines field encryption configuration
 type Encryption struct {
 	Enabled     bool     `json:"enabled"`                          // Enable encryption
@@ -46,6 +52,7 @@ type Encryption struct {
 	KeyRotation bool     `json:"keyRotation,omitempty"` // Enable key rotation
 	KeyVersion  int      `json:"keyVersion,omitempty"`  // Current key version
 }
+
 // Tenant defines multi-tenancy configuration
 type Tenant struct {
 	Enabled    bool     `json:"enabled"`                                                          // Enable tenant isolation
@@ -57,6 +64,7 @@ type Tenant struct {
 	Blacklist  []string `json:"blacklist,omitempty" validate:"dive,uuid"`                         // Blocked tenant IDs
 	Validation bool     `json:"validation,omitempty"`                                             // Validate tenant access
 }
+
 // Notification defines a workflow notification
 type Notification struct {
 	Event    string   `json:"event" validate:"required" example:"approval_required"` // Trigger event
@@ -67,6 +75,7 @@ type Notification struct {
 	Method   string   `json:"method" validate:"oneof=email sms push in-app webhook" example:"email"`
 	Priority string   `json:"priority,omitempty" validate:"oneof=low normal high urgent"`
 }
+
 // ApprovalConfig defines approval requirements
 type ApprovalConfig struct {
 	Required        bool             `json:"required"`                      // Approval required
@@ -79,6 +88,7 @@ type ApprovalConfig struct {
 	RemindAfter     *time.Duration   `json:"remindAfter,omitempty"`         // Send reminder after
 	AutoApprove     bool             `json:"autoApprove,omitempty"`         // Auto-approve on timeout
 }
+
 // ApproverConfig defines who can approve
 type ApproverConfig struct {
 	Type  string `json:"type" validate:"oneof=role user group dynamic manager" example:"role"`
@@ -86,6 +96,7 @@ type ApproverConfig struct {
 	Order int    `json:"order,omitempty"`           // Approval order
 	Level int    `json:"level,omitempty"`           // Approval level
 }
+
 // Validation defines cross-field validation rules
 type Validation struct {
 	Rules      []ValidationRule `json:"rules" validate:"dive"`                                                     // Validation rules
@@ -93,6 +104,7 @@ type Validation struct {
 	Async      bool             `json:"async,omitempty"`                                                           // Async validation
 	DebounceMS int              `json:"debounceMs,omitempty"`                                                      // Debounce delay
 }
+
 // ValidationRule defines a cross-field validation rule
 type ValidationRule struct {
 	ID        string                    `json:"id" validate:"required"`
@@ -104,6 +116,7 @@ type ValidationRule struct {
 	Severity  string                    `json:"severity,omitempty" validate:"oneof=error warning info" example:"error"`
 	Priority  int                       `json:"priority,omitempty"` // Validation priority
 }
+
 // Events defines lifecycle event handlers
 type Events struct {
 	// Form lifecycle
@@ -130,6 +143,7 @@ type Events struct {
 	OnFieldBlur     string `json:"onFieldBlur,omitempty" validate:"js_function"`     // Field blurred
 	OnFieldValidate string `json:"onFieldValidate,omitempty" validate:"js_function"` // Field validated
 }
+
 // HTMX defines HTMX integration for the entire form
 type HTMX struct {
 	Enabled   bool              `json:"enabled"` // Enable HTMX
@@ -153,6 +167,7 @@ type HTMX struct {
 	Timeout   int               `json:"timeout,omitempty"`                           // Request timeout in ms
 	Retry     int               `json:"retry,omitempty"`                             // Number of retries
 }
+
 // Alpine defines Alpine.js integration for the entire form
 type Alpine struct {
 	Enabled     bool   `json:"enabled"`                                     // Enable Alpine.js
@@ -172,6 +187,7 @@ type Alpine struct {
 	XFor        string `json:"xFor,omitempty" validate:"js_expression"`     // Loop directive
 	XEffect     string `json:"xEffect,omitempty" validate:"js_function"`    // Side effects
 }
+
 // Meta contains metadata and tracking information
 type Meta struct {
 	CreatedAt     time.Time        `json:"createdAt"`                                                  // Creation timestamp
@@ -189,6 +205,7 @@ type Meta struct {
 	Status        string           `json:"status,omitempty" validate:"oneof=draft published archived"` // Schema status
 	Theme         *ThemeConfig     `json:"theme,omitempty"`                                            // Theme configuration
 }
+
 // ChangelogEntry represents a version change
 type ChangelogEntry struct {
 	Version     string    `json:"version" validate:"semver"`
@@ -199,24 +216,29 @@ type ChangelogEntry struct {
 	Changes     []string  `json:"changes,omitempty"`   // List of changes
 	Migration   string    `json:"migration,omitempty"` // Migration guide
 }
+
 // ThemeConfig stores theme configuration for a schema
 type ThemeConfig struct {
 	ID        string          `json:"id,omitempty"`        // Theme ID to use
 	Overrides *ThemeOverrides `json:"overrides,omitempty"` // Theme overrides
 }
+
 // Helper methods for enterprise features
 // IsCSRFEnabled checks if CSRF protection is enabled
 func (s *Security) IsCSRFEnabled() bool {
 	return s.CSRF != nil && s.CSRF.Enabled
 }
+
 // IsRateLimitEnabled checks if rate limiting is enabled
 func (s *Security) IsRateLimitEnabled() bool {
 	return s.RateLimit != nil && s.RateLimit.Enabled
 }
+
 // IsEncryptionEnabled checks if encryption is enabled
 func (s *Security) IsEncryptionEnabled() bool {
 	return s.Encryption != nil && s.Encryption.Enabled
 }
+
 // ShouldEncryptField checks if a specific field should be encrypted
 func (s *Security) ShouldEncryptField(fieldName string) bool {
 	if !s.IsEncryptionEnabled() {
@@ -224,14 +246,17 @@ func (s *Security) ShouldEncryptField(fieldName string) bool {
 	}
 	return slices.Contains(s.Encryption.Fields, fieldName)
 }
+
 // IsTenantEnabled checks if multi-tenancy is enabled
 func (t *Tenant) IsTenantEnabled() bool {
 	return t != nil && t.Enabled
 }
+
 // IsWorkflowEnabled checks if workflow is enabled
 func (w *Workflow) IsWorkflowEnabled() bool {
 	return w != nil && w.Enabled
 }
+
 // GetCurrentStage returns the current workflow stage
 func (w *Workflow) GetCurrentStage() string {
 	if w == nil {
@@ -239,6 +264,7 @@ func (w *Workflow) GetCurrentStage() string {
 	}
 	return w.Stage
 }
+
 // GetCurrentStatus returns the current workflow status
 func (w *Workflow) GetCurrentStatus() string {
 	if w == nil {
@@ -246,6 +272,7 @@ func (w *Workflow) GetCurrentStatus() string {
 	}
 	return w.Status
 }
+
 // GetAvailableActions returns actions available in current stage
 func (w *Workflow) GetAvailableActions(ctx context.Context, data map[string]any, evaluator *condition.Evaluator) []WorkflowAction {
 	if w == nil || !w.Enabled {
@@ -265,10 +292,12 @@ func (w *Workflow) GetAvailableActions(ctx context.Context, data map[string]any,
 	}
 	return available
 }
+
 // IsI18nEnabled checks if internationalization is enabled
 func (i *I18n) IsI18nEnabled() bool {
 	return i != nil && i.Enabled
 }
+
 // GetLocale returns the default locale or fallback
 func (i *I18n) GetLocale() string {
 	if i == nil {
@@ -279,14 +308,17 @@ func (i *I18n) GetLocale() string {
 	}
 	return "en-US"
 }
+
 // IsHTMXEnabled checks if HTMX is enabled
 func (h *HTMX) IsHTMXEnabled() bool {
 	return h != nil && h.Enabled
 }
+
 // IsAlpineEnabled checks if Alpine.js is enabled
 func (a *Alpine) IsAlpineEnabled() bool {
 	return a != nil && a.Enabled
 }
+
 // GetHTTPMethod returns the appropriate HTTP method for HTMX
 func (h *HTMX) GetHTTPMethod() string {
 	if h == nil {
@@ -306,6 +338,7 @@ func (h *HTMX) GetHTTPMethod() string {
 	}
 	return "GET"
 }
+
 // GetURL returns the appropriate URL for HTMX based on method
 func (h *HTMX) GetURL() string {
 	if h == nil {
@@ -324,6 +357,7 @@ func (h *HTMX) GetURL() string {
 		return h.Get
 	}
 }
+
 // AddChangelog adds a new changelog entry
 func (m *Meta) AddChangelog(entry ChangelogEntry) {
 	if m.Changelog == nil {
@@ -331,6 +365,7 @@ func (m *Meta) AddChangelog(entry ChangelogEntry) {
 	}
 	m.Changelog = append(m.Changelog, entry)
 }
+
 // GetLatestVersion returns the latest version from changelog
 func (m *Meta) GetLatestVersion() string {
 	if m == nil || len(m.Changelog) == 0 {
@@ -338,10 +373,12 @@ func (m *Meta) GetLatestVersion() string {
 	}
 	return m.Changelog[len(m.Changelog)-1].Version
 }
+
 // IsDeprecated checks if the schema is deprecated
 func (m *Meta) IsDeprecated() bool {
 	return m != nil && m.Deprecated
 }
+
 // IsExperimental checks if the schema is experimental
 func (m *Meta) IsExperimental() bool {
 	return m != nil && m.Experimental

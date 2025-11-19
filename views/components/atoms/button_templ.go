@@ -9,7 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"strings"
+	"fmt"
+	"github.com/niiniyare/ruun/views/utils"
 )
 
 // ButtonVariant defines the visual style variants for buttons
@@ -35,98 +36,61 @@ const (
 	ButtonSizeXL ButtonSize = "xl"
 )
 
-// ButtonProps defines the properties for the Button component
+// ButtonProps defines the properties for the Button atom component
+// Following Atomic Design: pure presentation, no business logic
 type ButtonProps struct {
-	Variant     ButtonVariant
-	Size        ButtonSize
-	Type        string // "button", "submit", "reset"
-	Disabled    bool
-	Loading     bool
-	Icon        string
-	IconLeft    string
-	IconRight   string
-	Class       string
-	ID          string
-	Name        string
-	Value       string
-	HXPost      string // HTMX post URL
-	HXGet       string // HTMX get URL
-	HXTarget    string // HTMX target
-	HXSwap      string // HTMX swap strategy
-	AlpineClick string // Alpine.js click handler
+	// Presentation
+	Variant   ButtonVariant
+	Size      ButtonSize
+	ClassName string
+
+	// Content
+	Text      string
+	Icon      string
+	IconLeft  string
+	IconRight string
+
+	// Basic HTML attributes
+	ID       string
+	Type     string
+	Name     string
+	Value    string
+	Disabled bool
+	Loading  bool
+
+	// Interactive attributes
+	HXPost      string
+	HXGet       string
+	HXTarget    string
+	HXSwap      string
+	HXTrigger   string
+	AlpineClick string
 }
 
-// buttonClasses generates Tailwind CSS classes for the button based on props
+// buttonClasses generates CSS classes using compiled theme classes and utils
 func buttonClasses(props ButtonProps) string {
-	var classes []string
+	// Use compiled theme classes from JSON theme
+	return utils.TwMerge(
+		// Base button class from compiled theme
+		"button",
 
-	// Base classes using schema tokens
-	classes = append(classes,
-		"inline-flex",
-		"items-center",
-		"justify-center",
-		"whitespace-nowrap",
-		"rounded-[var(--radius-md)]",
-		"text-sm",
-		"font-medium",
-		"ring-offset-[var(--background)]",
-		"transition-colors",
-		"focus-visible:outline-none",
-		"focus-visible:ring-2",
-		"focus-visible:ring-[var(--ring)]",
-		"focus-visible:ring-offset-2",
-		"disabled:pointer-events-none",
-		"disabled:opacity-50",
+		// Variant classes from compiled theme
+		fmt.Sprintf("button-%s", props.Variant),
+
+		// Size classes from compiled theme
+		fmt.Sprintf("button-%s", props.Size),
+
+		// State classes
+		utils.If(props.Loading, "button-loading"),
+		utils.If(props.Disabled, "button-disabled"),
+
+		// Custom classes
+		props.ClassName,
 	)
-
-	// Variant classes using schema tokens
-	switch props.Variant {
-	case ButtonPrimary:
-		classes = append(classes, "bg-[var(--primary)]", "text-[var(--primary-foreground)]", "hover:bg-[var(--primary)]/90")
-	case ButtonSecondary:
-		classes = append(classes, "bg-[var(--secondary)]", "text-[var(--secondary-foreground)]", "hover:bg-[var(--secondary)]/80")
-	case ButtonDestructive:
-		classes = append(classes, "bg-[var(--destructive)]", "text-[var(--destructive-foreground)]", "hover:bg-[var(--destructive)]/90")
-	case ButtonOutline:
-		classes = append(classes, "border", "border-[var(--input)]", "bg-[var(--background)]", "hover:bg-[var(--accent)]", "hover:text-[var(--accent-foreground)]")
-	case ButtonGhost:
-		classes = append(classes, "hover:bg-[var(--accent)]", "hover:text-[var(--accent-foreground)]")
-	case ButtonLink:
-		classes = append(classes, "text-[var(--primary)]", "underline-offset-4", "hover:underline")
-	default:
-		classes = append(classes, "bg-[var(--primary)]", "text-[var(--primary-foreground)]", "hover:bg-[var(--primary)]/90")
-	}
-
-	// Size classes using schema spacing tokens
-	switch props.Size {
-	case ButtonSizeXS:
-		classes = append(classes, "h-[var(--space-6)]", "px-[var(--space-2)]", "text-xs")
-	case ButtonSizeSM:
-		classes = append(classes, "h-[var(--space-8)]", "px-[var(--space-3)]", "text-xs")
-	case ButtonSizeMD:
-		classes = append(classes, "h-[var(--space-10)]", "px-[var(--space-4)]", "py-[var(--space-2)]")
-	case ButtonSizeLG:
-		classes = append(classes, "h-[var(--space-11)]", "px-[var(--space-8)]")
-	case ButtonSizeXL:
-		classes = append(classes, "h-[var(--space-14)]", "px-[var(--space-8)]", "text-lg")
-	default:
-		classes = append(classes, "h-[var(--space-10)]", "px-[var(--space-4)]", "py-[var(--space-2)]")
-	}
-
-	// Loading state
-	if props.Loading {
-		classes = append(classes, "pointer-events-none")
-	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
 }
 
-// Button renders an accessible, styled button component
+// Button renders a pure presentation button atom
+// This is the core atomic component - single purpose, no business logic
 func Button(props ButtonProps, children ...templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -153,45 +117,53 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<button")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<button type=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.Type != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " type=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Type)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 125, Col: 20}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " type=\"button\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(props.Type != "", props.Type, "button"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 88, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		if props.ID != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 130, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 90, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Name != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " name=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 93, Col: 20}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -200,17 +172,17 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Name != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " name=\"")
+		if props.Value != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 133, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 96, Col: 22}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -219,32 +191,13 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Value != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 136, Col: 22}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
 		if props.Disabled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " disabled")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -257,21 +210,40 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if props.HXPost != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " hx-post=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 143, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 103, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.HXGet != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " hx-get=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 106, Col: 23}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -280,17 +252,17 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.HXGet != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " hx-get=\"")
+		if props.HXTarget != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " hx-target=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 146, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 109, Col: 29}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -299,17 +271,17 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.HXTarget != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " hx-target=\"")
+		if props.HXSwap != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " hx-swap=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 149, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 112, Col: 25}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -318,17 +290,17 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.HXSwap != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " hx-swap=\"")
+		if props.HXTrigger != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " hx-trigger=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 152, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 115, Col: 31}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -342,12 +314,12 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 155, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 118, Col: 33}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -366,20 +338,65 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = buttonContent(props, children...).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// buttonContent renders the internal content of the button
+func buttonContent(props ButtonProps, children ...templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
 		if props.Loading {
-			templ_7745c5c3_Err = LoadingIcon().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = LoadingSpinner().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if !props.Loading && props.IconLeft != "" {
-			templ_7745c5c3_Err = Icon(IconProps{Name: props.IconLeft, Size: IconSizeSM, Class: "mr-2"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconProps{Name: props.IconLeft, ClassName: "button-icon-left"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if !props.Loading && props.Icon != "" && len(children) == 0 {
-			templ_7745c5c3_Err = Icon(IconProps{Name: props.Icon, Size: IconSizeMD}).Render(ctx, templ_7745c5c3_Buffer)
+		if !props.Loading && props.Icon != "" && len(children) == 0 && props.Text == "" {
+			templ_7745c5c3_Err = Icon(IconProps{Name: props.Icon, ClassName: "button-icon"}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Text != "" && len(children) == 0 {
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 147, Col: 14}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -391,12 +408,38 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 			}
 		}
 		if !props.Loading && props.IconRight != "" {
-			templ_7745c5c3_Err = Icon(IconProps{Name: props.IconRight, Size: IconSizeSM, Class: "ml-2"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconProps{Name: props.IconRight, ClassName: "button-icon-right"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</button>")
+		return nil
+	})
+}
+
+// LoadingSpinner renders a loading indicator
+func LoadingSpinner() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var16 == nil {
+			templ_7745c5c3_Var16 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<svg class=\"button-spinner\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -421,28 +464,30 @@ func PrimaryButton(props ButtonProps, children ...templ.Component) templ.Compone
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var13 == nil {
-			templ_7745c5c3_Var13 = templ.NopComponent
+		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var17 == nil {
+			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = Button(ButtonProps{
 			Variant:     ButtonPrimary,
-			Size:        props.Size,
-			Type:        props.Type,
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
+			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
+			ClassName:   props.ClassName,
+			Text:        props.Text,
 			Icon:        props.Icon,
 			IconLeft:    props.IconLeft,
 			IconRight:   props.IconRight,
-			Class:       props.Class,
 			ID:          props.ID,
+			Type:        props.Type,
 			Name:        props.Name,
 			Value:       props.Value,
+			Disabled:    props.Disabled,
+			Loading:     props.Loading,
 			HXPost:      props.HXPost,
 			HXGet:       props.HXGet,
 			HXTarget:    props.HXTarget,
 			HXSwap:      props.HXSwap,
+			HXTrigger:   props.HXTrigger,
 			AlpineClick: props.AlpineClick,
 		}, children...).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -468,28 +513,79 @@ func SecondaryButton(props ButtonProps, children ...templ.Component) templ.Compo
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
+		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var18 == nil {
+			templ_7745c5c3_Var18 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = Button(ButtonProps{
 			Variant:     ButtonSecondary,
-			Size:        props.Size,
-			Type:        props.Type,
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
+			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
+			ClassName:   props.ClassName,
+			Text:        props.Text,
 			Icon:        props.Icon,
 			IconLeft:    props.IconLeft,
 			IconRight:   props.IconRight,
-			Class:       props.Class,
 			ID:          props.ID,
+			Type:        props.Type,
 			Name:        props.Name,
 			Value:       props.Value,
+			Disabled:    props.Disabled,
+			Loading:     props.Loading,
 			HXPost:      props.HXPost,
 			HXGet:       props.HXGet,
 			HXTarget:    props.HXTarget,
 			HXSwap:      props.HXSwap,
+			HXTrigger:   props.HXTrigger,
+			AlpineClick: props.AlpineClick,
+		}, children...).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func OutlineButton(props ButtonProps, children ...templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var19 == nil {
+			templ_7745c5c3_Var19 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = Button(ButtonProps{
+			Variant:     ButtonOutline,
+			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
+			ClassName:   props.ClassName,
+			Text:        props.Text,
+			Icon:        props.Icon,
+			IconLeft:    props.IconLeft,
+			IconRight:   props.IconRight,
+			ID:          props.ID,
+			Type:        props.Type,
+			Name:        props.Name,
+			Value:       props.Value,
+			Disabled:    props.Disabled,
+			Loading:     props.Loading,
+			HXPost:      props.HXPost,
+			HXGet:       props.HXGet,
+			HXTarget:    props.HXTarget,
+			HXSwap:      props.HXSwap,
+			HXTrigger:   props.HXTrigger,
 			AlpineClick: props.AlpineClick,
 		}, children...).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -515,28 +611,30 @@ func DestructiveButton(props ButtonProps, children ...templ.Component) templ.Com
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var20 == nil {
+			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = Button(ButtonProps{
 			Variant:     ButtonDestructive,
-			Size:        props.Size,
-			Type:        props.Type,
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
+			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
+			ClassName:   props.ClassName,
+			Text:        props.Text,
 			Icon:        props.Icon,
 			IconLeft:    props.IconLeft,
 			IconRight:   props.IconRight,
-			Class:       props.Class,
 			ID:          props.ID,
+			Type:        props.Type,
 			Name:        props.Name,
 			Value:       props.Value,
+			Disabled:    props.Disabled,
+			Loading:     props.Loading,
 			HXPost:      props.HXPost,
 			HXGet:       props.HXGet,
 			HXTarget:    props.HXTarget,
 			HXSwap:      props.HXSwap,
+			HXTrigger:   props.HXTrigger,
 			AlpineClick: props.AlpineClick,
 		}, children...).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -546,34 +644,80 @@ func DestructiveButton(props ButtonProps, children ...templ.Component) templ.Com
 	})
 }
 
-// LoadingIcon renders a spinning loading indicator
-func LoadingIcon() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var16 == nil {
-			templ_7745c5c3_Var16 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<svg class=\"mr-2 h-4 w-4 animate-spin\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
+// Builder Pattern (functional options)
+type ButtonOption func(*ButtonProps)
+
+func NewButton(opts ...ButtonOption) ButtonProps {
+	props := ButtonProps{
+		Variant: ButtonPrimary,
+		Size:    ButtonSizeMD,
+		Type:    "button",
+	}
+	for _, opt := range opts {
+		opt(&props)
+	}
+	return props
 }
 
+// Variant options
+func WithVariant(variant ButtonVariant) ButtonOption {
+	return func(p *ButtonProps) { p.Variant = variant }
+}
+
+func WithSize(size ButtonSize) ButtonOption {
+	return func(p *ButtonProps) { p.Size = size }
+}
+
+func WithText(text string) ButtonOption {
+	return func(p *ButtonProps) { p.Text = text }
+}
+
+func WithIcon(icon string) ButtonOption {
+	return func(p *ButtonProps) { p.Icon = icon }
+}
+
+func WithIconLeft(icon string) ButtonOption {
+	return func(p *ButtonProps) { p.IconLeft = icon }
+}
+
+func WithIconRight(icon string) ButtonOption {
+	return func(p *ButtonProps) { p.IconRight = icon }
+}
+
+func WithID(id string) ButtonOption {
+	return func(p *ButtonProps) { p.ID = id }
+}
+
+func WithType(buttonType string) ButtonOption {
+	return func(p *ButtonProps) { p.Type = buttonType }
+}
+
+func AsDisabled() ButtonOption {
+	return func(p *ButtonProps) { p.Disabled = true }
+}
+
+func AsLoading() ButtonOption {
+	return func(p *ButtonProps) { p.Loading = true }
+}
+
+func WithHXPost(url string) ButtonOption {
+	return func(p *ButtonProps) { p.HXPost = url }
+}
+
+func WithHXGet(url string) ButtonOption {
+	return func(p *ButtonProps) { p.HXGet = url }
+}
+
+func WithClass(class string) ButtonOption {
+	return func(p *ButtonProps) { p.ClassName = class }
+}
+
+// Key Improvements in this refactored version:
+// 1. Pure Presentation: No business logic, validation, or form context
+// 2. Compiled Theme Classes: Uses "button", "button-primary", etc. from compiled CSS
+// 3. Utils Integration: TwMerge for class conflicts, If/IfElse for conditionals
+// 4. Clean Props Interface: Focused on presentation concerns only
+// 5. State Management: Simple visual states (loading, disabled)
+// 6. Atomic Design Compliant: Single purpose, indivisible button component
+// 7. Ready for Molecules: Can be easily composed into FormField molecules
 var _ = templruntime.GeneratedTemplate

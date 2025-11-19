@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"bytes"
 	"context"
@@ -8,15 +9,18 @@ import (
 	"strings"
 	"testing"
 	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
+
 // MockS3Client implements a basic S3 client interface for testing
 type MockS3Client struct {
 	objects  map[string][]byte
 	metadata map[string]map[string]string
 }
+
 func NewMockS3Client() *MockS3Client {
 	return &MockS3Client{
 		objects:  make(map[string][]byte),
@@ -455,6 +459,7 @@ func BenchmarkS3Storage_Validation(b *testing.B) {
 		_ = validateSchemaID(id)
 	}
 }
+
 // Test JSON marshaling of S3Stats
 func TestS3Stats_JSON(t *testing.T) {
 	stats := &S3Stats{
@@ -480,6 +485,7 @@ func TestS3Stats_JSON(t *testing.T) {
 		t.Errorf("Unmarshaled SchemaCount = %v, want %v", unmarshaled.SchemaCount, stats.SchemaCount)
 	}
 }
+
 // Test JSON marshaling of S3ObjectInfo
 func TestS3ObjectInfo_JSON(t *testing.T) {
 	now := time.Now()

@@ -17,21 +17,19 @@ const (
 	EventInit   EventType = "init"   // Form initialized
 )
 
-
 // EventCallback represents a function that handles form events
 type EventCallback func(ctx context.Context, event *Event) error
 
 // Event represents a form event
 type Event struct {
-	Type      EventType              `json:"type"`                // Event type
-	FieldName string                 `json:"fieldName,omitempty"` // Field that triggered the event
-	Value     any                    `json:"value,omitempty"`     // Field value (for change events)
-	OldValue  any                    `json:"oldValue,omitempty"`  // Previous value (for change events)
-	Timestamp time.Time              `json:"timestamp"`           // When the event occurred
-	Data      map[string]any         `json:"data,omitempty"`      // Additional event data
-	Metadata  map[string]any         `json:"metadata,omitempty"`  // Event metadata
+	Type      EventType      `json:"type"`                // Event type
+	FieldName string         `json:"fieldName,omitempty"` // Field that triggered the event
+	Value     any            `json:"value,omitempty"`     // Field value (for change events)
+	OldValue  any            `json:"oldValue,omitempty"`  // Previous value (for change events)
+	Timestamp time.Time      `json:"timestamp"`           // When the event occurred
+	Data      map[string]any `json:"data,omitempty"`      // Additional event data
+	Metadata  map[string]any `json:"metadata,omitempty"`  // Event metadata
 }
-
 
 // EventHandlerConfig configures event handler behavior
 type EventHandlerConfig struct {
@@ -47,7 +45,6 @@ type DebouncedConfig struct {
 	BlurDelay   time.Duration `json:"blurDelay"`   // Delay for blur events
 	FocusDelay  time.Duration `json:"focusDelay"`  // Delay for focus events
 }
-
 
 // Default configurations
 
@@ -69,4 +66,3 @@ func DefaultDebouncedConfig() *DebouncedConfig {
 		FocusDelay:  50 * time.Millisecond,
 	}
 }
-

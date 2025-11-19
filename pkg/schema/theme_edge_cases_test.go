@@ -1,12 +1,15 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"sync"
 	"testing"
 	"time"
+
 	"github.com/stretchr/testify/suite"
 )
+
 // ThemeEdgeCasesTestSuite tests edge cases and error conditions
 type ThemeEdgeCasesTestSuite struct {
 	suite.Suite
@@ -14,6 +17,7 @@ type ThemeEdgeCasesTestSuite struct {
 	registry *TokenRegistry
 	ctx      context.Context
 }
+
 func (suite *ThemeEdgeCasesTestSuite) SetupTest() {
 	suite.registry = NewTokenRegistry()
 	suite.manager = NewThemeManager(NewThemeRegistry(), suite.registry)
@@ -22,6 +26,7 @@ func (suite *ThemeEdgeCasesTestSuite) SetupTest() {
 func TestThemeEdgeCasesTestSuite(t *testing.T) {
 	suite.Run(t, new(ThemeEdgeCasesTestSuite))
 }
+
 // ==================== Circular Reference Detection ====================
 func (suite *ThemeEdgeCasesTestSuite) TestCircularReferenceDetection() {
 	// Create tokens with circular reference
@@ -78,6 +83,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestDeepCircularReferenceDetection() {
 	suite.Error(err, "Should detect deep circular reference")
 	suite.Contains(err.Error(), "circular reference", "Error should mention circular reference")
 }
+
 // ==================== Token Path Error Handling ====================
 func (suite *ThemeEdgeCasesTestSuite) TestInvalidTokenPaths() {
 	err := suite.registry.SetTokens(GetDefaultTokens())
@@ -143,6 +149,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestTokenPathValidation() {
 		})
 	}
 }
+
 // ==================== Theme Registration Edge Cases ====================
 func (suite *ThemeEdgeCasesTestSuite) TestDuplicateThemeRegistration() {
 	// Register a theme
@@ -165,6 +172,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestDuplicateThemeRegistration() {
 	// This should either succeed (overwrite) or fail (conflict) depending on implementation
 	// We don't assert error/success since behavior may vary
 }
+
 // ==================== Theme Override Conflicts ====================
 func (suite *ThemeEdgeCasesTestSuite) TestThemeOverrideConflicts() {
 	// Register base theme
@@ -198,6 +206,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestBasicThemeOperations() {
 	suite.NotNil(retrieved)
 	suite.Equal("base-theme", retrieved.ID)
 }
+
 // ==================== Concurrent Access Edge Cases ====================
 func (suite *ThemeEdgeCasesTestSuite) TestConcurrentRegistrationRace() {
 	suite.T().Skip("Skipping concurrent test due to timeout issues")
@@ -279,6 +288,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestConcurrentCacheEviction() {
 	suite.True(found, "Cache should still work after concurrent eviction")
 	suite.Equal(testTheme.ID, retrieved.ID)
 }
+
 // ==================== Memory and Resource Edge Cases ====================
 func (suite *ThemeEdgeCasesTestSuite) TestLargeTokenStructures() {
 	// Create a theme with very large token structures
@@ -331,6 +341,7 @@ func (suite *ThemeEdgeCasesTestSuite) TestNilPointerHandling() {
 		suite.Run(tc.name, tc.testFn)
 	}
 }
+
 // ==================== Performance Edge Cases ====================
 func (suite *ThemeEdgeCasesTestSuite) TestTokenResolutionTimeout() {
 	// Create a context with timeout

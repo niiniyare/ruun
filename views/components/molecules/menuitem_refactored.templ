@@ -1,0 +1,454 @@
+package molecules
+
+import (
+	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
+	"github.com/niiniyare/ruun/views/components/atoms"
+)
+
+// MenuItemType defines the type of menu item
+type MenuItemType string
+
+const (
+	MenuItemTypeButton   MenuItemType = "button"
+	MenuItemTypeLink     MenuItemType = "link"
+	MenuItemTypeDivider  MenuItemType = "divider"
+	MenuItemTypeSubmenu  MenuItemType = "submenu"
+	MenuItemTypeCheckbox MenuItemType = "checkbox"
+	MenuItemTypeRadio    MenuItemType = "radio"
+)
+
+// MenuItemSize defines the size variants for menu items
+type MenuItemSize string
+
+const (
+	MenuItemSizeSM MenuItemSize = "sm"
+	MenuItemSizeMD MenuItemSize = "md"
+	MenuItemSizeLG MenuItemSize = "lg"
+)
+
+// MenuItemProps defines the properties for MenuItem components
+type MenuItemProps struct {
+	// Basic properties
+	Type        MenuItemType `json:"type"`
+	Size        MenuItemSize `json:"size,omitempty"`
+	Text        string       `json:"text,omitempty"`
+	Description string       `json:"description,omitempty"`
+	Value       string       `json:"value,omitempty"`
+	URL         string       `json:"url,omitempty"`
+	Target      string       `json:"target,omitempty"` // For links: _blank, _self, etc.
+	ID          string       `json:"id,omitempty"`
+	Name        string       `json:"name,omitempty"`
+	ClassName   string       `json:"className,omitempty"`
+
+	// Visual elements
+	Icon         string                `json:"icon,omitempty"`
+	IconLeft     string                `json:"iconLeft,omitempty"`
+	IconRight    string                `json:"iconRight,omitempty"`
+	Badge        string                `json:"badge,omitempty"`
+	BadgeVariant atoms.BadgeVariant    `json:"badgeVariant,omitempty"`
+
+	// States
+	Active      bool `json:"active,omitempty"`
+	Selected    bool `json:"selected,omitempty"`
+	Checked     bool `json:"checked,omitempty"`
+	Disabled    bool `json:"disabled,omitempty"`
+	Destructive bool `json:"destructive,omitempty"`
+
+	// Submenu items
+	SubItems []MenuItemProps `json:"subItems,omitempty"`
+
+	// HTMX attributes
+	HXPost    string `json:"hxPost,omitempty"`
+	HXGet     string `json:"hxGet,omitempty"`
+	HXTarget  string `json:"hxTarget,omitempty"`
+	HXSwap    string `json:"hxSwap,omitempty"`
+	HXTrigger string `json:"hxTrigger,omitempty"`
+
+	// Alpine.js attributes
+	AlpineClick string `json:"alpineClick,omitempty"`
+	AlpineShow  string `json:"alpineShow,omitempty"` // For submenu visibility
+	AlpineData  string `json:"alpineData,omitempty"` // Custom x-data
+
+	// Events
+	OnClick  string `json:"onClick,omitempty"`
+	OnSelect string `json:"onSelect,omitempty"`
+}
+
+// getMenuItemClasses returns compiled theme classes for menu items
+func getMenuItemClasses(props MenuItemProps) string {
+	if props.Type == MenuItemTypeDivider {
+		return utils.TwMerge(
+			"menu-item-divider",
+			props.ClassName,
+		)
+	}
+
+	return utils.TwMerge(
+		"menu-item",
+		fmt.Sprintf("menu-item-%s", string(props.Type)),
+		fmt.Sprintf("menu-item-%s", utils.If(string(props.Size) != "", string(props.Size), "md")),
+		utils.If(props.Active || props.Selected, "menu-item-active"),
+		utils.If(props.Disabled, "menu-item-disabled"),
+		utils.If(props.Destructive, "menu-item-destructive"),
+		props.ClassName,
+	)
+}
+
+// getCheckboxIndicatorClasses returns compiled theme classes for checkbox indicator
+func getCheckboxIndicatorClasses(checked bool) string {
+	return utils.TwMerge(
+		"menu-item-checkbox-indicator",
+		utils.If(checked, "menu-item-checkbox-checked"),
+	)
+}
+
+// getRadioIndicatorClasses returns compiled theme classes for radio indicator
+func getRadioIndicatorClasses(checked bool) string {
+	return utils.TwMerge(
+		"menu-item-radio-indicator",
+		utils.If(checked, "menu-item-radio-checked"),
+	)
+}
+
+// buildBadgeProps creates badge props from menu item props
+func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
+	variant := props.BadgeVariant
+	if variant == "" {
+		variant = atoms.BadgeVariantSecondary
+	}
+
+	return atoms.BadgeProps{
+		Variant:   variant,
+		Size:      atoms.BadgeSizeSM,
+		ClassName: "menu-item-badge",
+	}
+}
+
+// buildIconProps creates icon props for menu item icons
+func buildIconProps(name string, position string) atoms.IconProps {
+	className := "menu-item-icon"
+	if position != "" {
+		className = fmt.Sprintf("menu-item-icon menu-item-icon-%s", position)
+	}
+
+	size := atoms.IconSizeSM
+	if position == "submenu" {
+		size = atoms.IconSizeXS
+	}
+
+	return atoms.IconProps{
+		Name:      name,
+		Size:      size,
+		ClassName: className,
+	}
+}
+
+// MenuItem renders a menu item component with compiled theme classes
+templ MenuItem(props MenuItemProps) {
+	switch props.Type {
+	case MenuItemTypeDivider:
+		<div class={ getMenuItemClasses(props) }></div>
+	case MenuItemTypeLink:
+		<a
+			if props.URL != "" {
+				href={ props.URL }
+			}
+			if props.Target != "" {
+				target={ props.Target }
+			}
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			class={ getMenuItemClasses(props) }
+			if props.HXGet != "" {
+				hx-get={ props.HXGet }
+			}
+			if props.HXPost != "" {
+				hx-post={ props.HXPost }
+			}
+			if props.HXTarget != "" {
+				hx-target={ props.HXTarget }
+			}
+			if props.HXSwap != "" {
+				hx-swap={ props.HXSwap }
+			}
+			if props.HXTrigger != "" {
+				hx-trigger={ props.HXTrigger }
+			}
+			if props.AlpineClick != "" {
+				x-on:click={ props.AlpineClick }
+			}
+		>
+			@menuItemContent(props)
+		</a>
+	case MenuItemTypeCheckbox:
+		<label
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			class={ getMenuItemClasses(props) }
+			if props.AlpineClick != "" {
+				x-on:click={ props.AlpineClick }
+			}
+		>
+			<input
+				type="checkbox"
+				if props.Name != "" {
+					name={ props.Name }
+				}
+				if props.Value != "" {
+					value={ props.Value }
+				}
+				if props.Checked {
+					checked
+				}
+				if props.Disabled {
+					disabled
+				}
+				class="menu-item-checkbox-input"
+			/>
+			<div class={ getCheckboxIndicatorClasses(props.Checked) }></div>
+			@menuItemContent(props)
+		</label>
+	case MenuItemTypeRadio:
+		<label
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			class={ getMenuItemClasses(props) }
+			if props.AlpineClick != "" {
+				x-on:click={ props.AlpineClick }
+			}
+		>
+			<input
+				type="radio"
+				if props.Name != "" {
+					name={ props.Name }
+				}
+				if props.Value != "" {
+					value={ props.Value }
+				}
+				if props.Checked {
+					checked
+				}
+				if props.Disabled {
+					disabled
+				}
+				class="menu-item-radio-input"
+			/>
+			<div class={ getRadioIndicatorClasses(props.Checked) }></div>
+			@menuItemContent(props)
+		</label>
+	case MenuItemTypeSubmenu:
+		<div
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			class="menu-item-submenu-container"
+			if props.AlpineData != "" {
+				x-data={ props.AlpineData }
+			} else {
+				x-data="{ open: false }"
+			}
+		>
+			<div
+				class={ getMenuItemClasses(props) }
+				x-on:click="open = !open"
+				x-on:mouseenter="open = true"
+				x-on:mouseleave="open = false"
+			>
+				@menuItemContent(props)
+				@atoms.Icon(buildIconProps("chevron-right", "submenu"))
+			</div>
+			<div
+				class="menu-item-submenu-dropdown"
+				x-show="open"
+				x-transition:enter="menu-submenu-enter"
+				x-transition:enter-start="menu-submenu-enter-start"
+				x-transition:enter-end="menu-submenu-enter-end"
+				x-transition:leave="menu-submenu-leave"
+				x-transition:leave-start="menu-submenu-leave-start"
+				x-transition:leave-end="menu-submenu-leave-end"
+			>
+				for _, subItem := range props.SubItems {
+					@MenuItem(subItem)
+				}
+			</div>
+		</div>
+	default:
+		// MenuItemTypeButton or default
+		<div
+			if props.ID != "" {
+				id={ props.ID }
+			}
+			class={ getMenuItemClasses(props) }
+			if props.HXPost != "" {
+				hx-post={ props.HXPost }
+			}
+			if props.HXGet != "" {
+				hx-get={ props.HXGet }
+			}
+			if props.HXTarget != "" {
+				hx-target={ props.HXTarget }
+			}
+			if props.HXSwap != "" {
+				hx-swap={ props.HXSwap }
+			}
+			if props.HXTrigger != "" {
+				hx-trigger={ props.HXTrigger }
+			}
+			if props.AlpineClick != "" {
+				x-on:click={ props.AlpineClick }
+			}
+			role="button"
+			tabindex="0"
+		>
+			@menuItemContent(props)
+		</div>
+	}
+}
+
+// menuItemContent renders the content of a menu item using refactored atoms
+templ menuItemContent(props MenuItemProps) {
+	// Left icon
+	if props.IconLeft != "" {
+		@atoms.Icon(buildIconProps(props.IconLeft, "left"))
+	}
+	
+	// Single icon (for icon-only items)
+	if props.Icon != "" && props.Text == "" {
+		@atoms.Icon(buildIconProps(props.Icon, "single"))
+	}
+	
+	// Text content
+	if props.Text != "" {
+		<div class="menu-item-content">
+			<span class="menu-item-text">{ props.Text }</span>
+			if props.Description != "" {
+				<span class="menu-item-description">{ props.Description }</span>
+			}
+		</div>
+	}
+	
+	// Badge
+	if props.Badge != "" {
+		@atoms.Badge(buildBadgeProps(props)) {
+			{ props.Badge }
+		}
+	}
+	
+	// Right icon
+	if props.IconRight != "" {
+		@atoms.Icon(buildIconProps(props.IconRight, "right"))
+	}
+}
+
+// Helper components using the refactored MenuItem
+templ MenuDivider() {
+	@MenuItem(MenuItemProps{
+		Type: MenuItemTypeDivider,
+	})
+}
+
+templ MenuLink(props MenuItemProps) {
+	@MenuItem(MenuItemProps{
+		Type:         MenuItemTypeLink,
+		Size:         props.Size,
+		Text:         props.Text,
+		Description:  props.Description,
+		URL:          props.URL,
+		Target:       props.Target,
+		Icon:         props.Icon,
+		IconLeft:     props.IconLeft,
+		IconRight:    props.IconRight,
+		Badge:        props.Badge,
+		BadgeVariant: props.BadgeVariant,
+		Active:       props.Active,
+		Disabled:     props.Disabled,
+		ClassName:    props.ClassName,
+		ID:           props.ID,
+		HXGet:        props.HXGet,
+		HXPost:       props.HXPost,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineClick:  props.AlpineClick,
+	})
+}
+
+templ MenuButton(props MenuItemProps) {
+	@MenuItem(MenuItemProps{
+		Type:        MenuItemTypeButton,
+		Size:        props.Size,
+		Text:        props.Text,
+		Description: props.Description,
+		Value:       props.Value,
+		Icon:        props.Icon,
+		IconLeft:    props.IconLeft,
+		IconRight:   props.IconRight,
+		Badge:       props.Badge,
+		BadgeVariant: props.BadgeVariant,
+		Disabled:    props.Disabled,
+		Destructive: props.Destructive,
+		ClassName:   props.ClassName,
+		ID:          props.ID,
+		Name:        props.Name,
+		HXPost:      props.HXPost,
+		HXGet:       props.HXGet,
+		HXTarget:    props.HXTarget,
+		HXSwap:      props.HXSwap,
+		HXTrigger:   props.HXTrigger,
+		AlpineClick: props.AlpineClick,
+		OnClick:     props.OnClick,
+	})
+}
+
+templ MenuCheckbox(props MenuItemProps) {
+	@MenuItem(MenuItemProps{
+		Type:        MenuItemTypeCheckbox,
+		Size:        props.Size,
+		Text:        props.Text,
+		Description: props.Description,
+		Value:       props.Value,
+		Checked:     props.Checked,
+		Disabled:    props.Disabled,
+		ClassName:   props.ClassName,
+		ID:          props.ID,
+		Name:        props.Name,
+		AlpineClick: props.AlpineClick,
+		OnClick:     props.OnClick,
+	})
+}
+
+templ MenuRadio(props MenuItemProps) {
+	@MenuItem(MenuItemProps{
+		Type:        MenuItemTypeRadio,
+		Size:        props.Size,
+		Text:        props.Text,
+		Description: props.Description,
+		Value:       props.Value,
+		Checked:     props.Checked,
+		Disabled:    props.Disabled,
+		ClassName:   props.ClassName,
+		ID:          props.ID,
+		Name:        props.Name,
+		AlpineClick: props.AlpineClick,
+		OnClick:     props.OnClick,
+	})
+}
+
+templ MenuSubmenu(props MenuItemProps) {
+	@MenuItem(MenuItemProps{
+		Type:        MenuItemTypeSubmenu,
+		Size:        props.Size,
+		Text:        props.Text,
+		Description: props.Description,
+		Icon:        props.Icon,
+		IconLeft:    props.IconLeft,
+		SubItems:    props.SubItems,
+		ClassName:   props.ClassName,
+		ID:          props.ID,
+		AlpineData:  props.AlpineData,
+	})
+}

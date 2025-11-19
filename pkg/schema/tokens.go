@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"fmt"
@@ -294,13 +295,13 @@ type BorderStyleScale struct {
 
 // ShadowScale defines shadow values.
 type ShadowScale struct {
-	None string `json:"none"` // none
-	SM   string `json:"sm"`   // Small shadow
-	Base string `json:"base"` // Default shadow
-	MD   string `json:"md"`   // Medium shadow
-	LG   string `json:"lg"`   // Large shadow
-	XL   string `json:"xl"`   // Extra large shadow
-	XXL  string `json:"2xl"`  // 2x large shadow
+	None  string `json:"none"`  // none
+	SM    string `json:"sm"`    // Small shadow
+	Base  string `json:"base"`  // Default shadow
+	MD    string `json:"md"`    // Medium shadow
+	LG    string `json:"lg"`    // Large shadow
+	XL    string `json:"xl"`    // Extra large shadow
+	XXL   string `json:"2xl"`   // 2x large shadow
 	Inner string `json:"inner"` // Inner shadow
 }
 
@@ -369,15 +370,15 @@ type BackgroundColors struct {
 }
 
 type TextColors struct {
-	Default TokenReference `json:"default"`
-	Subtle  TokenReference `json:"subtle"`
+	Default  TokenReference `json:"default"`
+	Subtle   TokenReference `json:"subtle"`
 	Emphasis TokenReference `json:"emphasis"`
-	Accent  TokenReference `json:"accent"`
+	Accent   TokenReference `json:"accent"`
 }
 
 type BorderColors struct {
-	Default TokenReference `json:"default"`
-	Subtle  TokenReference `json:"subtle"`
+	Default  TokenReference `json:"default"`
+	Subtle   TokenReference `json:"subtle"`
 	Emphasis TokenReference `json:"emphasis"`
 }
 
@@ -478,13 +479,13 @@ type ComponentTokens struct {
 }
 
 type ButtonTokens struct {
-	Background     TokenReference `json:"background"`
-	Border         TokenReference `json:"border"`
-	Text           TokenReference `json:"text"`
-	BorderRadius   TokenReference `json:"borderRadius"`
-	Padding        TokenReference `json:"padding"`
-	FontSize       TokenReference `json:"fontSize"`
-	FontWeight     TokenReference `json:"fontWeight"`
+	Background   TokenReference `json:"background"`
+	Border       TokenReference `json:"border"`
+	Text         TokenReference `json:"text"`
+	BorderRadius TokenReference `json:"borderRadius"`
+	Padding      TokenReference `json:"padding"`
+	FontSize     TokenReference `json:"fontSize"`
+	FontWeight   TokenReference `json:"fontWeight"`
 }
 
 type InputTokens struct {
@@ -520,12 +521,12 @@ type FormTokens struct {
 }
 
 type TableTokens struct {
-	Background      TokenReference `json:"background"`
-	AlternateBg     TokenReference `json:"alternateBg"`
-	Border          TokenReference `json:"border"`
-	HeaderBg        TokenReference `json:"headerBg"`
-	HeaderText      TokenReference `json:"headerText"`
-	CellPadding     TokenReference `json:"cellPadding"`
+	Background  TokenReference `json:"background"`
+	AlternateBg TokenReference `json:"alternateBg"`
+	Border      TokenReference `json:"border"`
+	HeaderBg    TokenReference `json:"headerBg"`
+	HeaderText  TokenReference `json:"headerText"`
+	CellPadding TokenReference `json:"cellPadding"`
 }
 
 type NavigationTokens struct {

@@ -1,11 +1,14 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"regexp"
 	"time"
+
 	"github.com/niiniyare/ruun/pkg/shared"
 )
+
 // registerBuiltInValidators registers common validators using existing packages
 func (r *ValidationRegistry) registerBuiltInValidators() {
 	// Email validator
@@ -146,6 +149,7 @@ func (r *ValidationRegistry) registerBuiltInValidators() {
 		},
 	})
 }
+
 // registerBuiltInValidators for cross-field validation using condition engine
 func (r *CrossFieldValidationRegistry) registerBuiltInValidators() {
 	// Date range validator (start_date < end_date)
@@ -243,6 +247,7 @@ func (r *CrossFieldValidationRegistry) registerBuiltInValidators() {
 		},
 	})
 }
+
 // isValidLuhn implements the Luhn algorithm for credit card validation
 func isValidLuhn(number string) bool {
 	if len(number) == 0 {

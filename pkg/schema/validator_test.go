@@ -1,14 +1,17 @@
 package schema
+
 import (
 	"context"
 	"strings"
 	"testing"
 )
+
 // Mock implementations are shared from registry_test.go
 // MockDatabase for testing
 type MockDatabase struct {
 	existsFunc func(ctx context.Context, table, column string, value any) (bool, error)
 }
+
 func (m *MockDatabase) Exists(ctx context.Context, table, column string, value any) (bool, error) {
 	if m.existsFunc != nil {
 		return m.existsFunc(ctx, table, column, value)
@@ -443,42 +446,44 @@ func TestValidator_ValidateField_MultiSelect(t *testing.T) {
 		})
 	}
 }
+
 // TestValidator_ValidateField_Uniqueness tests uniqueness validation (ready when Unique field is added)
-// func TestValidator_ValidateField_Uniqueness(t *testing.T) {
-// 	// Test uniqueness validation
-// 	db := &MockDatabase{
-// 		existsFunc: func(ctx context.Context, table, column string, value any) (bool, error) {
-// 			// Simulate "admin" already exists
-// 			return value == "admin", nil
-// 		},
-// 	}
 //
-// 	validator := NewValidator(db)
-// 	ctx := context.Background()
+//	func TestValidator_ValidateField_Uniqueness(t *testing.T) {
+//		// Test uniqueness validation
+//		db := &MockDatabase{
+//			existsFunc: func(ctx context.Context, table, column string, value any) (bool, error) {
+//				// Simulate "admin" already exists
+//				return value == "admin", nil
+//			},
+//		}
 //
-// 	field := &MockField{
-// 		name: "username",
-// 		fieldType: FieldText,
-// 		validation: &FieldValidation{
-// 			Unique: true,
-// 		},
-// 		config: map[string]any{
-// 			"table": "users",
-// 		},
-// 	}
+//		validator := NewValidator(db)
+//		ctx := context.Background()
 //
-// 	// Test unique value
-// 	errors := validator.ValidateField(ctx, field, "newuser", true)
-// 	if len(errors) != 0 {
-// 		t.Errorf("ValidateField() unexpected errors for unique value: %v", errors)
-// 	}
+//		field := &MockField{
+//			name: "username",
+//			fieldType: FieldText,
+//			validation: &FieldValidation{
+//				Unique: true,
+//			},
+//			config: map[string]any{
+//				"table": "users",
+//			},
+//		}
 //
-// 	// Test non-unique value
-// 	errors = validator.ValidateField(ctx, field, "admin", true)
-// 	if len(errors) == 0 {
-// 		t.Error("ValidateField() should return error for non-unique value")
-// 	}
-// }
+//		// Test unique value
+//		errors := validator.ValidateField(ctx, field, "newuser", true)
+//		if len(errors) != 0 {
+//			t.Errorf("ValidateField() unexpected errors for unique value: %v", errors)
+//		}
+//
+//		// Test non-unique value
+//		errors = validator.ValidateField(ctx, field, "admin", true)
+//		if len(errors) == 0 {
+//			t.Error("ValidateField() should return error for non-unique value")
+//		}
+//	}
 func TestValidator_ValidateData(t *testing.T) {
 	validator := NewValidator(nil)
 	ctx := context.Background()
@@ -689,6 +694,7 @@ func TestNewValidationError(t *testing.T) {
 		t.Errorf("ValidationError.Error() = %s, want %s", err.Error(), expectedError)
 	}
 }
+
 // Benchmark tests
 func BenchmarkValidator_ValidateField_Text(b *testing.B) {
 	validator := NewValidator(nil)
@@ -953,6 +959,7 @@ func BenchmarkValidator_ValidateData(b *testing.B) {
 		validator.ValidateData(ctx, realSchema, data)
 	}
 }
+
 // =================================
 // Enricher-aware Mock Implementations
 // =================================
@@ -962,14 +969,17 @@ type MockFieldRuntime struct {
 	editable bool
 	reason   string
 }
+
 func (r *MockFieldRuntime) IsVisible() bool   { return r.visible }
 func (r *MockFieldRuntime) IsEditable() bool  { return r.editable }
 func (r *MockFieldRuntime) GetReason() string { return r.reason }
+
 // MockEnrichedField implements EnrichedFieldInterface for testing
 type MockEnrichedField struct {
 	*MockField
 	runtime *MockFieldRuntime
 }
+
 func (f *MockEnrichedField) GetRuntime() *FieldRuntime {
 	if f.runtime == nil {
 		return nil
@@ -980,14 +990,17 @@ func (f *MockEnrichedField) GetRuntime() *FieldRuntime {
 		Reason:   f.runtime.GetReason(),
 	}
 }
+
 // MockEnrichedSchema implements EnrichedSchemaInterface for testing
 type MockEnrichedSchema struct {
 	*MockSchema
 	enrichedFields []EnrichedFieldInterface
 }
+
 func (s *MockEnrichedSchema) GetEnrichedFields() []EnrichedFieldInterface {
 	return s.enrichedFields
 }
+
 // =================================
 // Enricher-aware Validation Tests
 // =================================
@@ -1466,6 +1479,7 @@ func TestValidator_validateReadOnlyField(t *testing.T) {
 		})
 	}
 }
+
 // Helper function to convert MockSchema to real schema for testing
 func convertMockToRealSchema(mockSchema *MockSchema) *Schema {
 	realSchema := &Schema{

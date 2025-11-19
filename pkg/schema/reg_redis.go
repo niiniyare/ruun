@@ -1,23 +1,28 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"strings"
 	"time"
+
 	"github.com/go-redis/redis/v8"
 )
+
 // RedisStorage implements Storage interface using Redis
 type RedisStorage struct {
 	client redis.Cmdable
 	prefix string
 	ttl    time.Duration
 }
+
 // RedisConfig configures Redis storage
 type RedisConfig struct {
 	Client redis.Cmdable // Redis client interface
 	Prefix string        // Key prefix for schemas (default: "schema:")
 	TTL    time.Duration // Optional TTL for cached schemas
 }
+
 // NewRedisStorage creates a new Redis storage backend
 func NewRedisStorage(config RedisConfig) (*RedisStorage, error) {
 	if config.Client == nil {
@@ -32,6 +37,7 @@ func NewRedisStorage(config RedisConfig) (*RedisStorage, error) {
 		ttl:    config.TTL,
 	}, nil
 }
+
 // Get retrieves a schema by ID from Redis
 func (rs *RedisStorage) Get(ctx context.Context, id string) ([]byte, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -47,6 +53,7 @@ func (rs *RedisStorage) Get(ctx context.Context, id string) ([]byte, error) {
 	}
 	return data, nil
 }
+
 // Set stores a schema by ID to Redis
 func (rs *RedisStorage) Set(ctx context.Context, id string, data []byte) error {
 	if err := validateSchemaID(id); err != nil {
@@ -67,6 +74,7 @@ func (rs *RedisStorage) Set(ctx context.Context, id string, data []byte) error {
 	}
 	return nil
 }
+
 // Delete removes a schema by ID from Redis
 func (rs *RedisStorage) Delete(ctx context.Context, id string) error {
 	if err := validateSchemaID(id); err != nil {
@@ -82,6 +90,7 @@ func (rs *RedisStorage) Delete(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
 // List returns all schema IDs from Redis
 func (rs *RedisStorage) List(ctx context.Context) ([]string, error) {
 	pattern := rs.prefix + "*"
@@ -103,6 +112,7 @@ func (rs *RedisStorage) List(ctx context.Context) ([]string, error) {
 	}
 	return schemaIDs, nil
 }
+
 // Exists checks if a schema exists in Redis
 func (rs *RedisStorage) Exists(ctx context.Context, id string) (bool, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -115,18 +125,22 @@ func (rs *RedisStorage) Exists(ctx context.Context, id string) (bool, error) {
 	}
 	return exists > 0, nil
 }
+
 // getKey converts schema ID to Redis key
 func (rs *RedisStorage) getKey(id string) string {
 	return rs.prefix + id
 }
+
 // GetPrefix returns the key prefix used by this storage
 func (rs *RedisStorage) GetPrefix() string {
 	return rs.prefix
 }
+
 // GetTTL returns the TTL used by this storage
 func (rs *RedisStorage) GetTTL() time.Duration {
 	return rs.ttl
 }
+
 // Stats returns Redis storage statistics
 func (rs *RedisStorage) Stats(ctx context.Context) (*RedisStats, error) {
 	stats := &RedisStats{
@@ -162,6 +176,7 @@ func (rs *RedisStorage) Stats(ctx context.Context) (*RedisStats, error) {
 	stats.TTL = rs.ttl
 	return stats, nil
 }
+
 // RedisStats represents Redis storage statistics
 type RedisStats struct {
 	Type        string        `json:"type"`
@@ -169,10 +184,12 @@ type RedisStats struct {
 	UsedMemory  int64         `json:"used_memory_bytes"`
 	TTL         time.Duration `json:"ttl_seconds"`
 }
+
 // Ping checks Redis connectivity
 func (rs *RedisStorage) Ping(ctx context.Context) error {
 	return rs.client.Ping(ctx).Err()
 }
+
 // FlushAll removes all schemas from Redis (use with caution)
 func (rs *RedisStorage) FlushAll(ctx context.Context) error {
 	pattern := rs.prefix + "*"
@@ -191,6 +208,7 @@ func (rs *RedisStorage) FlushAll(ctx context.Context) error {
 	}
 	return nil
 }
+
 // GetWithTTL retrieves a schema and its remaining TTL
 func (rs *RedisStorage) GetWithTTL(ctx context.Context, id string) ([]byte, time.Duration, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -219,6 +237,7 @@ func (rs *RedisStorage) GetWithTTL(ctx context.Context, id string) ([]byte, time
 	}
 	return data, ttl, nil
 }
+
 // SetWithCustomTTL stores a schema with a custom TTL
 func (rs *RedisStorage) SetWithCustomTTL(ctx context.Context, id string, data []byte, ttl time.Duration) error {
 	if err := validateSchemaID(id); err != nil {
@@ -234,6 +253,7 @@ func (rs *RedisStorage) SetWithCustomTTL(ctx context.Context, id string, data []
 	}
 	return nil
 }
+
 // BatchGet retrieves multiple schemas in a single operation
 func (rs *RedisStorage) BatchGet(ctx context.Context, ids []string) (map[string][]byte, error) {
 	if len(ids) == 0 {
@@ -266,6 +286,7 @@ func (rs *RedisStorage) BatchGet(ctx context.Context, ids []string) (map[string]
 	}
 	return result, nil
 }
+
 // BatchSet stores multiple schemas in a single operation
 func (rs *RedisStorage) BatchSet(ctx context.Context, schemas map[string][]byte) error {
 	if len(schemas) == 0 {

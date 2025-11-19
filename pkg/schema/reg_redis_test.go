@@ -1,13 +1,16 @@
 package schema
+
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redis/redismock/v8"
 )
+
 func TestNewRedisStorage(t *testing.T) {
 	client := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",

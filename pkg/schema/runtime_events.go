@@ -1,11 +1,13 @@
 // pkg/schema/runtime/events.go
 package schema
+
 import (
 	"context"
 	"fmt"
 	"sync"
 	"time"
 )
+
 // EventHandler manages runtime events with dependency injection
 // No direct dependency on Runtime to avoid circular references
 // Uses types from schema package to avoid import cycles
@@ -20,10 +22,12 @@ type EventHandler struct {
 	// Concurrency control
 	mu sync.RWMutex
 }
+
 // NewEventHandler creates a new event handler
 func NewEventHandler() *EventHandler {
 	return NewEventHandlerWithConfig(DefaultEventHandlerConfig())
 }
+
 // NewEventHandlerWithConfig creates a new event handler with custom config
 func NewEventHandlerWithConfig(config *EventHandlerConfig) *EventHandler {
 	handler := &EventHandler{
@@ -36,6 +40,7 @@ func NewEventHandlerWithConfig(config *EventHandlerConfig) *EventHandler {
 	}
 	return handler
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Event Handling Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -54,6 +59,7 @@ func (h *EventHandler) OnChange(ctx context.Context, event *Event) error {
 	// Trigger registered callbacks
 	return h.triggerCallbacks(ctx, EventChange, event)
 }
+
 // OnBlur handles field blur (focus lost)
 func (h *EventHandler) OnBlur(ctx context.Context, event *Event) error {
 	if !h.enabled {
@@ -69,6 +75,7 @@ func (h *EventHandler) OnBlur(ctx context.Context, event *Event) error {
 	// Trigger registered callbacks
 	return h.triggerCallbacks(ctx, EventBlur, event)
 }
+
 // OnFocus handles field focus (focus gained)
 func (h *EventHandler) OnFocus(ctx context.Context, event *Event) error {
 	if !h.enabled {
@@ -84,6 +91,7 @@ func (h *EventHandler) OnFocus(ctx context.Context, event *Event) error {
 	// Trigger registered callbacks
 	return h.triggerCallbacks(ctx, EventFocus, event)
 }
+
 // OnSubmit handles form submission
 func (h *EventHandler) OnSubmit(ctx context.Context) error {
 	if !h.enabled {
@@ -100,6 +108,7 @@ func (h *EventHandler) OnSubmit(ctx context.Context) error {
 	// Trigger registered callbacks
 	return h.triggerCallbacks(ctx, EventSubmit, event)
 }
+
 // OnReset handles form reset
 func (h *EventHandler) OnReset(ctx context.Context) error {
 	if !h.enabled {
@@ -116,6 +125,7 @@ func (h *EventHandler) OnReset(ctx context.Context) error {
 	// Trigger registered callbacks
 	return h.triggerCallbacks(ctx, EventReset, event)
 }
+
 // OnInit handles form initialization
 func (h *EventHandler) OnInit(ctx context.Context) error {
 	if !h.enabled {
@@ -132,6 +142,7 @@ func (h *EventHandler) OnInit(ctx context.Context) error {
 	// Trigger registered callbacks
 	return h.triggerCallbacks(ctx, EventInit, event)
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Event Registration and Configuration
 // ═══════════════════════════════════════════════════════════════════════════
@@ -141,6 +152,7 @@ func (h *EventHandler) Register(eventType EventType, callback EventCallback) {
 	defer h.mu.Unlock()
 	h.handlers[eventType] = append(h.handlers[eventType], callback)
 }
+
 // RegisterMultiple registers a callback for multiple event types
 func (h *EventHandler) RegisterMultiple(eventTypes []EventType, callback EventCallback) {
 	h.mu.Lock()
@@ -149,30 +161,35 @@ func (h *EventHandler) RegisterMultiple(eventTypes []EventType, callback EventCa
 		h.handlers[eventType] = append(h.handlers[eventType], callback)
 	}
 }
+
 // Unregister removes all event handlers for a specific event type
 func (h *EventHandler) Unregister(eventType EventType) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	delete(h.handlers, eventType)
 }
+
 // UnregisterAll removes all event handlers
 func (h *EventHandler) UnregisterAll() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.handlers = make(map[EventType][]EventCallback)
 }
+
 // SetValidationTiming configures when validation occurs
 func (h *EventHandler) SetValidationTiming(timing ValidationTiming) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.validationTiming = timing
 }
+
 // GetValidationTiming returns current validation timing strategy
 func (h *EventHandler) GetValidationTiming() ValidationTiming {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return h.validationTiming
 }
+
 // ShouldValidateOn checks if validation should occur for given event type
 func (h *EventHandler) ShouldValidateOn(eventType EventType) bool {
 	h.mu.RLock()
@@ -190,30 +207,35 @@ func (h *EventHandler) ShouldValidateOn(eventType EventType) bool {
 		return false
 	}
 }
+
 // Enable enables event handling
 func (h *EventHandler) Enable() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.enabled = true
 }
+
 // Disable disables event handling
 func (h *EventHandler) Disable() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.enabled = false
 }
+
 // IsEnabled checks if event handling is enabled
 func (h *EventHandler) IsEnabled() bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return h.enabled
 }
+
 // GetTracker returns the event tracker (if enabled)
 func (h *EventHandler) GetTracker() *EventTracker {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return h.tracker
 }
+
 // EnableTracking enables event tracking
 func (h *EventHandler) EnableTracking() {
 	h.mu.Lock()
@@ -222,24 +244,28 @@ func (h *EventHandler) EnableTracking() {
 		h.tracker = NewEventTracker()
 	}
 }
+
 // DisableTracking disables event tracking
 func (h *EventHandler) DisableTracking() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.tracker = nil
 }
+
 // HasHandlers checks if there are any handlers registered for an event type
 func (h *EventHandler) HasHandlers(eventType EventType) bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.handlers[eventType]) > 0
 }
+
 // GetHandlerCount returns the number of handlers for an event type
 func (h *EventHandler) GetHandlerCount(eventType EventType) int {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.handlers[eventType])
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Private Helper Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -257,6 +283,7 @@ func (h *EventHandler) triggerCallbacks(ctx context.Context, eventType EventType
 	}
 	return nil
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Event Tracker
 // ═══════════════════════════════════════════════════════════════════════════
@@ -265,6 +292,7 @@ type EventTracker struct {
 	stats *EventStats
 	mu    sync.RWMutex
 }
+
 // NewEventTracker creates a new event tracker
 func NewEventTracker() *EventTracker {
 	return &EventTracker{
@@ -274,6 +302,7 @@ func NewEventTracker() *EventTracker {
 		},
 	}
 }
+
 // TrackEvent records an event for statistics
 func (t *EventTracker) TrackEvent(event *Event) {
 	t.mu.Lock()
@@ -292,6 +321,7 @@ func (t *EventTracker) TrackEvent(event *Event) {
 	t.stats.LastEventType = string(event.Type)
 	t.stats.LastEventField = event.FieldName
 }
+
 // GetStats returns current event statistics
 func (t *EventTracker) GetStats() *EventStats {
 	t.mu.RLock()
@@ -313,6 +343,7 @@ func (t *EventTracker) GetStats() *EventStats {
 	}
 	return statsCopy
 }
+
 // Reset clears all statistics
 func (t *EventTracker) Reset() {
 	t.mu.Lock()
@@ -322,6 +353,7 @@ func (t *EventTracker) Reset() {
 		EventsByField: make(map[string]int),
 	}
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Debounced Event Handler
 // ═══════════════════════════════════════════════════════════════════════════
@@ -332,6 +364,7 @@ type DebouncedEventHandler struct {
 	delays  map[EventType]time.Duration
 	mu      sync.Mutex
 }
+
 // NewDebouncedEventHandler creates a debounced event handler
 func NewDebouncedEventHandler(handler *EventHandler, config *DebouncedConfig) *DebouncedEventHandler {
 	if config == nil {
@@ -347,14 +380,17 @@ func NewDebouncedEventHandler(handler *EventHandler, config *DebouncedConfig) *D
 		},
 	}
 }
+
 // OnChange handles change events with debouncing
 func (d *DebouncedEventHandler) OnChange(ctx context.Context, event *Event) error {
 	return d.debounce(ctx, EventChange, event)
 }
+
 // OnBlur handles blur events with debouncing
 func (d *DebouncedEventHandler) OnBlur(ctx context.Context, event *Event) error {
 	return d.debounce(ctx, EventBlur, event)
 }
+
 // OnFocus handles focus events (may not be debounced)
 func (d *DebouncedEventHandler) OnFocus(ctx context.Context, event *Event) error {
 	delay := d.delays[EventFocus]
@@ -364,10 +400,12 @@ func (d *DebouncedEventHandler) OnFocus(ctx context.Context, event *Event) error
 	}
 	return d.debounce(ctx, EventFocus, event)
 }
+
 // OnSubmit handles submit events (not debounced)
 func (d *DebouncedEventHandler) OnSubmit(ctx context.Context) error {
 	return d.handler.OnSubmit(ctx)
 }
+
 // debounce applies debouncing to an event
 func (d *DebouncedEventHandler) debounce(ctx context.Context, eventType EventType, event *Event) error {
 	d.mu.Lock()
@@ -398,6 +436,7 @@ func (d *DebouncedEventHandler) debounce(ctx context.Context, eventType EventTyp
 	})
 	return nil
 }
+
 // triggerEvent triggers the appropriate event handler
 func (d *DebouncedEventHandler) triggerEvent(ctx context.Context, eventType EventType, event *Event) error {
 	switch eventType {
@@ -411,6 +450,7 @@ func (d *DebouncedEventHandler) triggerEvent(ctx context.Context, eventType Even
 		return fmt.Errorf("unsupported event type: %s", eventType)
 	}
 }
+
 // CancelAll cancels all pending debounced events
 func (d *DebouncedEventHandler) CancelAll() {
 	d.mu.Lock()
@@ -420,6 +460,7 @@ func (d *DebouncedEventHandler) CancelAll() {
 	}
 	d.timers = make(map[string]*time.Timer)
 }
+
 // CancelField cancels all pending debounced events for a specific field
 func (d *DebouncedEventHandler) CancelField(fieldName string) {
 	d.mu.Lock()
@@ -431,12 +472,14 @@ func (d *DebouncedEventHandler) CancelField(fieldName string) {
 		}
 	}
 }
+
 // GetPendingCount returns the number of pending debounced events
 func (d *DebouncedEventHandler) GetPendingCount() int {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	return len(d.timers)
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Batch Event Handler
 // ═══════════════════════════════════════════════════════════════════════════
@@ -450,6 +493,7 @@ type BatchEventHandler struct {
 	timer        *time.Timer
 	onFlush      func(context.Context, []*Event) error
 }
+
 // NewBatchEventHandler creates a batch event handler
 func NewBatchEventHandler(handler *EventHandler, batchSize int, batchTimeout time.Duration) *BatchEventHandler {
 	return &BatchEventHandler{
@@ -459,6 +503,7 @@ func NewBatchEventHandler(handler *EventHandler, batchSize int, batchTimeout tim
 		queue:        make([]*Event, 0, batchSize),
 	}
 }
+
 // Add adds an event to the batch queue
 func (b *BatchEventHandler) Add(event *Event) {
 	b.mu.Lock()
@@ -476,12 +521,14 @@ func (b *BatchEventHandler) Add(event *Event) {
 		b.flushUnsafe(context.Background())
 	}
 }
+
 // Flush processes all queued events
 func (b *BatchEventHandler) Flush(ctx context.Context) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.flushUnsafe(ctx)
 }
+
 // flushUnsafe flushes without acquiring lock (must be called with lock held)
 func (b *BatchEventHandler) flushUnsafe(ctx context.Context) error {
 	if len(b.queue) == 0 {
@@ -519,12 +566,14 @@ func (b *BatchEventHandler) flushUnsafe(ctx context.Context) error {
 	}
 	return nil
 }
+
 // SetFlushCallback sets a custom callback for batch processing
 func (b *BatchEventHandler) SetFlushCallback(callback func(context.Context, []*Event) error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	b.onFlush = callback
 }
+
 // GetQueueSize returns the current queue size
 func (b *BatchEventHandler) GetQueueSize() int {
 	b.mu.Lock()

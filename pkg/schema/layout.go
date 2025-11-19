@@ -1,10 +1,13 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"sort"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // Layout defines the visual structure and arrangement of form elements
 type Layout struct {
 	Type LayoutType `json:"type" validate:"required" example:"grid"` // Layout algorithm
@@ -26,8 +29,10 @@ type Layout struct {
 	// Internal (not serialized)
 	evaluator *condition.Evaluator `json:"-"` // Condition evaluator
 }
+
 // LayoutType defines the layout algorithm
 type LayoutType string
+
 const (
 	LayoutGrid     LayoutType = "grid"     // CSS Grid layout
 	LayoutFlex     LayoutType = "flex"     // Flexbox layout
@@ -36,6 +41,7 @@ const (
 	LayoutSections LayoutType = "sections" // Divided into sections
 	LayoutGroups   LayoutType = "groups"   // Field grouping
 )
+
 // Section represents a logical grouping of fields with a title
 type Section struct {
 	ID          string                    `json:"id" validate:"required"`
@@ -52,6 +58,7 @@ type Section struct {
 	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
 	Theme       *SectionTheme             `json:"theme,omitempty"`                           // Section-specific theme
 }
+
 // Group represents a visual grouping of fields (like a fieldset)
 type Group struct {
 	ID          string                    `json:"id" validate:"required"`
@@ -66,6 +73,7 @@ type Group struct {
 	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
 	Theme       *GroupTheme               `json:"theme,omitempty"`                           // Group-specific theme
 }
+
 // Tab represents a tab in a tabbed interface
 type Tab struct {
 	ID          string                    `json:"id" validate:"required"`
@@ -81,6 +89,7 @@ type Tab struct {
 	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
 	Theme       *TabTheme                 `json:"theme,omitempty"`                           // Tab-specific theme
 }
+
 // Step represents a step in a multi-step wizard
 type Step struct {
 	ID          string                    `json:"id" validate:"required"`
@@ -96,6 +105,7 @@ type Step struct {
 	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
 	Theme       *StepTheme                `json:"theme,omitempty"`                           // Step-specific theme
 }
+
 // Breakpoints defines responsive behavior at different screen sizes
 type Breakpoints struct {
 	Mobile  *BreakpointConfig            `json:"mobile,omitempty"`  // < 640px
@@ -103,6 +113,7 @@ type Breakpoints struct {
 	Desktop *BreakpointConfig            `json:"desktop,omitempty"` // > 1024px
 	Custom  map[string]*BreakpointConfig `json:"custom,omitempty"`  // Custom breakpoints
 }
+
 // BreakpointConfig defines layout at specific breakpoint
 type BreakpointConfig struct {
 	Columns    int      `json:"columns,omitempty" validate:"min=1,max=24"` // Columns at this size
@@ -111,6 +122,7 @@ type BreakpointConfig struct {
 	HideFields []string `json:"hideFields,omitempty"` // Fields to hide at this size
 	ShowFields []string `json:"showFields,omitempty"` // Fields to show only at this size
 }
+
 // Theme types for layout components
 type LayoutTheme struct {
 	Colors       map[string]string `json:"colors,omitempty"`
@@ -151,14 +163,17 @@ type StepTheme struct {
 	Colors         map[string]string `json:"colors,omitempty"`
 	CustomCSS      string            `json:"customCSS,omitempty"`
 }
+
 // SetEvaluator sets the condition evaluator for the layout
 func (l *Layout) SetEvaluator(evaluator *condition.Evaluator) {
 	l.evaluator = evaluator
 }
+
 // GetEvaluator returns the layout's condition evaluator
 func (l *Layout) GetEvaluator() *condition.Evaluator {
 	return l.evaluator
 }
+
 // GetColumns returns the appropriate column count for the layout
 func (l *Layout) GetColumns() int {
 	if l.Columns > 0 {
@@ -174,6 +189,7 @@ func (l *Layout) GetColumns() int {
 		return 1
 	}
 }
+
 // GetGap returns the gap value with fallback
 func (l *Layout) GetGap() string {
 	if l.Gap != "" {
@@ -181,6 +197,7 @@ func (l *Layout) GetGap() string {
 	}
 	return "1rem" // Default spacing
 }
+
 // GetDirection returns the direction with fallback
 func (l *Layout) GetDirection() string {
 	if l.Direction != "" {
@@ -188,22 +205,27 @@ func (l *Layout) GetDirection() string {
 	}
 	return "column" // Default direction
 }
+
 // HasTabs checks if layout uses tabs
 func (l *Layout) HasTabs() bool {
 	return l.Type == LayoutTabs && len(l.Tabs) > 0
 }
+
 // HasSteps checks if layout is a multi-step wizard
 func (l *Layout) HasSteps() bool {
 	return l.Type == LayoutSteps && len(l.Steps) > 0
 }
+
 // HasSections checks if layout has sections
 func (l *Layout) HasSections() bool {
 	return (l.Type == LayoutSections && len(l.Sections) > 0) || len(l.Sections) > 0
 }
+
 // HasGroups checks if layout has groups
 func (l *Layout) HasGroups() bool {
 	return (l.Type == LayoutGroups && len(l.Groups) > 0) || len(l.Groups) > 0
 }
+
 // GetFieldsForSection returns field names for a specific section
 func (l *Layout) GetFieldsForSection(sectionID string) []string {
 	for _, section := range l.Sections {
@@ -213,6 +235,7 @@ func (l *Layout) GetFieldsForSection(sectionID string) []string {
 	}
 	return []string{}
 }
+
 // GetFieldsForTab returns field names for a specific tab
 func (l *Layout) GetFieldsForTab(tabID string) []string {
 	for _, tab := range l.Tabs {
@@ -222,6 +245,7 @@ func (l *Layout) GetFieldsForTab(tabID string) []string {
 	}
 	return []string{}
 }
+
 // GetFieldsForStep returns field names for a specific step
 func (l *Layout) GetFieldsForStep(stepID string) []string {
 	for _, step := range l.Steps {
@@ -231,6 +255,7 @@ func (l *Layout) GetFieldsForStep(stepID string) []string {
 	}
 	return []string{}
 }
+
 // GetFieldsForGroup returns field names for a specific group
 func (l *Layout) GetFieldsForGroup(groupID string) []string {
 	for _, group := range l.Groups {
@@ -240,6 +265,7 @@ func (l *Layout) GetFieldsForGroup(groupID string) []string {
 	}
 	return []string{}
 }
+
 // GetSection returns a section by ID
 func (l *Layout) GetSection(sectionID string) (*Section, bool) {
 	for i := range l.Sections {
@@ -249,6 +275,7 @@ func (l *Layout) GetSection(sectionID string) (*Section, bool) {
 	}
 	return nil, false
 }
+
 // GetTab returns a tab by ID
 func (l *Layout) GetTab(tabID string) (*Tab, bool) {
 	for i := range l.Tabs {
@@ -258,6 +285,7 @@ func (l *Layout) GetTab(tabID string) (*Tab, bool) {
 	}
 	return nil, false
 }
+
 // GetStep returns a step by ID
 func (l *Layout) GetStep(stepID string) (*Step, bool) {
 	for i := range l.Steps {
@@ -267,6 +295,7 @@ func (l *Layout) GetStep(stepID string) (*Step, bool) {
 	}
 	return nil, false
 }
+
 // GetGroup returns a group by ID
 func (l *Layout) GetGroup(groupID string) (*Group, bool) {
 	for i := range l.Groups {
@@ -276,6 +305,7 @@ func (l *Layout) GetGroup(groupID string) (*Group, bool) {
 	}
 	return nil, false
 }
+
 // GetOrderedSteps returns steps sorted by order
 func (l *Layout) GetOrderedSteps() []Step {
 	steps := make([]Step, len(l.Steps))
@@ -285,6 +315,7 @@ func (l *Layout) GetOrderedSteps() []Step {
 	})
 	return steps
 }
+
 // GetOrderedSections returns sections sorted by order
 func (l *Layout) GetOrderedSections() []Section {
 	sections := make([]Section, len(l.Sections))
@@ -294,6 +325,7 @@ func (l *Layout) GetOrderedSections() []Section {
 	})
 	return sections
 }
+
 // GetOrderedGroups returns groups sorted by order
 func (l *Layout) GetOrderedGroups() []Group {
 	groups := make([]Group, len(l.Groups))
@@ -303,6 +335,7 @@ func (l *Layout) GetOrderedGroups() []Group {
 	})
 	return groups
 }
+
 // GetOrderedTabs returns tabs sorted by order
 func (l *Layout) GetOrderedTabs() []Tab {
 	tabs := make([]Tab, len(l.Tabs))
@@ -312,6 +345,7 @@ func (l *Layout) GetOrderedTabs() []Tab {
 	})
 	return tabs
 }
+
 // GetVisibleSections returns sections visible for given data context
 func (l *Layout) GetVisibleSections(ctx context.Context, data map[string]any) []Section {
 	visible := make([]Section, 0)
@@ -322,6 +356,7 @@ func (l *Layout) GetVisibleSections(ctx context.Context, data map[string]any) []
 	}
 	return visible
 }
+
 // GetVisibleTabs returns tabs visible for given data context
 func (l *Layout) GetVisibleTabs(ctx context.Context, data map[string]any) []Tab {
 	visible := make([]Tab, 0)
@@ -332,6 +367,7 @@ func (l *Layout) GetVisibleTabs(ctx context.Context, data map[string]any) []Tab 
 	}
 	return visible
 }
+
 // GetVisibleSteps returns steps visible for given data context
 func (l *Layout) GetVisibleSteps(ctx context.Context, data map[string]any) []Step {
 	visible := make([]Step, 0)
@@ -342,6 +378,7 @@ func (l *Layout) GetVisibleSteps(ctx context.Context, data map[string]any) []Ste
 	}
 	return visible
 }
+
 // isSectionVisible checks if section is visible
 func (l *Layout) isSectionVisible(ctx context.Context, section *Section, data map[string]any) (bool, error) {
 	if section.Condition != nil && l.evaluator != nil {
@@ -350,6 +387,7 @@ func (l *Layout) isSectionVisible(ctx context.Context, section *Section, data ma
 	}
 	return true, nil
 }
+
 // isTabVisible checks if tab is visible
 func (l *Layout) isTabVisible(ctx context.Context, tab *Tab, data map[string]any) (bool, error) {
 	if tab.Condition != nil && l.evaluator != nil {
@@ -358,6 +396,7 @@ func (l *Layout) isTabVisible(ctx context.Context, tab *Tab, data map[string]any
 	}
 	return true, nil
 }
+
 // isStepVisible checks if step is visible
 func (l *Layout) isStepVisible(ctx context.Context, step *Step, data map[string]any) (bool, error) {
 	if step.Condition != nil && l.evaluator != nil {
@@ -366,6 +405,7 @@ func (l *Layout) isStepVisible(ctx context.Context, step *Step, data map[string]
 	}
 	return true, nil
 }
+
 // isGroupVisible checks if group is visible
 func (l *Layout) isGroupVisible(ctx context.Context, group *Group, data map[string]any) (bool, error) {
 	if group.Condition != nil && l.evaluator != nil {
@@ -374,6 +414,7 @@ func (l *Layout) isGroupVisible(ctx context.Context, group *Group, data map[stri
 	}
 	return true, nil
 }
+
 // ValidateLayout checks if layout configuration is valid
 func (l *Layout) ValidateLayout(schema *Schema) error {
 	collector := NewErrorCollector()
@@ -480,6 +521,7 @@ func (l *Layout) ValidateLayout(schema *Schema) error {
 	}
 	return nil
 }
+
 // checkDuplicateIDs validates that all IDs are unique
 func (l *Layout) checkDuplicateIDs(collector *ErrorCollector) {
 	ids := make(map[string]bool)
@@ -524,6 +566,7 @@ func (l *Layout) checkDuplicateIDs(collector *ErrorCollector) {
 		ids[group.ID] = true
 	}
 }
+
 // GetAllFields returns all field names referenced in the layout
 func (l *Layout) GetAllFields() []string {
 	fieldMap := make(map[string]bool)
@@ -553,12 +596,14 @@ func (l *Layout) GetAllFields() []string {
 	}
 	return fields
 }
+
 // Clone creates a copy of the layout with evaluator preservation
 func (l *Layout) Clone() *Layout {
 	clone := *l
 	clone.evaluator = l.evaluator
 	return &clone
 }
+
 // ApplyTheme applies theme settings to the layout
 func (l *Layout) ApplyTheme(theme *Theme) {
 	if theme == nil {
@@ -570,6 +615,7 @@ func (l *Layout) ApplyTheme(theme *Theme) {
 	}
 	// Theme will be applied by renderer
 }
+
 // GetBreakpointColumns returns columns for a specific breakpoint
 func (l *Layout) GetBreakpointColumns(breakpoint string) int {
 	if l.Breakpoints == nil {
@@ -593,6 +639,7 @@ func (l *Layout) GetBreakpointColumns(breakpoint string) int {
 	}
 	return l.GetColumns()
 }
+
 // GetBreakpointGap returns gap for a specific breakpoint
 func (l *Layout) GetBreakpointGap(breakpoint string) string {
 	if l.Breakpoints == nil {

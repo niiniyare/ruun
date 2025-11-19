@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"bytes"
 	"context"
@@ -6,21 +7,25 @@ import (
 	"io"
 	"strings"
 	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
+
 // S3Storage implements Storage interface using AWS S3
 type S3Storage struct {
 	client    *s3.Client
 	bucket    string
 	keyPrefix string
 }
+
 // S3Config configures S3 storage
 type S3Config struct {
 	Client    *s3.Client // AWS S3 client
 	Bucket    string     // S3 bucket name
 	KeyPrefix string     // Optional key prefix for schemas (default: "schemas/")
 }
+
 // NewS3Storage creates a new S3 storage backend
 func NewS3Storage(config S3Config) (*S3Storage, error) {
 	if config.Client == nil {
@@ -42,6 +47,7 @@ func NewS3Storage(config S3Config) (*S3Storage, error) {
 		keyPrefix: config.KeyPrefix,
 	}, nil
 }
+
 // Get retrieves a schema by ID from S3
 func (s3s *S3Storage) Get(ctx context.Context, id string) ([]byte, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -65,6 +71,7 @@ func (s3s *S3Storage) Get(ctx context.Context, id string) ([]byte, error) {
 	}
 	return data, nil
 }
+
 // Set stores a schema by ID to S3
 func (s3s *S3Storage) Set(ctx context.Context, id string, data []byte) error {
 	if err := validateSchemaID(id); err != nil {
@@ -89,6 +96,7 @@ func (s3s *S3Storage) Set(ctx context.Context, id string, data []byte) error {
 	}
 	return nil
 }
+
 // Delete removes a schema by ID from S3
 func (s3s *S3Storage) Delete(ctx context.Context, id string) error {
 	if err := validateSchemaID(id); err != nil {
@@ -116,6 +124,7 @@ func (s3s *S3Storage) Delete(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
 // List returns all schema IDs from S3
 func (s3s *S3Storage) List(ctx context.Context) ([]string, error) {
 	var schemaIDs []string
@@ -150,6 +159,7 @@ func (s3s *S3Storage) List(ctx context.Context) ([]string, error) {
 	}
 	return schemaIDs, nil
 }
+
 // Exists checks if a schema exists in S3
 func (s3s *S3Storage) Exists(ctx context.Context, id string) (bool, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -168,6 +178,7 @@ func (s3s *S3Storage) Exists(ctx context.Context, id string) (bool, error) {
 	}
 	return true, nil
 }
+
 // getKey converts schema ID to S3 key
 // Schema IDs like "user.profile" become "schemas/user/profile.json"
 func (s3s *S3Storage) getKey(id string) string {
@@ -176,14 +187,17 @@ func (s3s *S3Storage) getKey(id string) string {
 	path := strings.Join(pathParts, "/")
 	return s3s.keyPrefix + path + ".json"
 }
+
 // GetBucket returns the S3 bucket name used by this storage
 func (s3s *S3Storage) GetBucket() string {
 	return s3s.bucket
 }
+
 // GetKeyPrefix returns the key prefix used by this storage
 func (s3s *S3Storage) GetKeyPrefix() string {
 	return s3s.keyPrefix
 }
+
 // Stats returns S3 storage statistics
 func (s3s *S3Storage) Stats(ctx context.Context) (*S3Stats, error) {
 	stats := &S3Stats{
@@ -217,6 +231,7 @@ func (s3s *S3Storage) Stats(ctx context.Context) (*S3Stats, error) {
 	}
 	return stats, nil
 }
+
 // S3Stats represents S3 storage statistics
 type S3Stats struct {
 	Type        string `json:"type"`
@@ -225,6 +240,7 @@ type S3Stats struct {
 	SchemaCount int    `json:"schema_count"`
 	TotalSize   int64  `json:"total_size_bytes"`
 }
+
 // BatchGet retrieves multiple schemas in a single operation using parallel requests
 func (s3s *S3Storage) BatchGet(ctx context.Context, ids []string) (map[string][]byte, error) {
 	if len(ids) == 0 {
@@ -269,6 +285,7 @@ func (s3s *S3Storage) BatchGet(ctx context.Context, ids []string) (map[string][]
 	}
 	return result, nil
 }
+
 // BatchSet stores multiple schemas using parallel requests
 func (s3s *S3Storage) BatchSet(ctx context.Context, schemas map[string][]byte) error {
 	if len(schemas) == 0 {
@@ -308,6 +325,7 @@ func (s3s *S3Storage) BatchSet(ctx context.Context, schemas map[string][]byte) e
 	}
 	return nil
 }
+
 // BatchDelete removes multiple schemas using parallel requests
 func (s3s *S3Storage) BatchDelete(ctx context.Context, ids []string) error {
 	if len(ids) == 0 {
@@ -344,6 +362,7 @@ func (s3s *S3Storage) BatchDelete(ctx context.Context, ids []string) error {
 	}
 	return nil
 }
+
 // GetObjectInfo returns metadata about a schema object in S3
 func (s3s *S3Storage) GetObjectInfo(ctx context.Context, id string) (*S3ObjectInfo, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -371,6 +390,7 @@ func (s3s *S3Storage) GetObjectInfo(ctx context.Context, id string) (*S3ObjectIn
 	}
 	return info, nil
 }
+
 // S3ObjectInfo represents metadata about an S3 object
 type S3ObjectInfo struct {
 	SchemaID     string            `json:"schema_id"`
@@ -381,6 +401,7 @@ type S3ObjectInfo struct {
 	ETag         string            `json:"etag"`
 	Metadata     map[string]string `json:"metadata"`
 }
+
 // SetWithMetadata stores a schema with custom metadata
 func (s3s *S3Storage) SetWithMetadata(ctx context.Context, id string, data []byte, metadata map[string]string) error {
 	if err := validateSchemaID(id); err != nil {

@@ -1,21 +1,26 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 type ErrorsTestSuite struct {
 	suite.Suite
 	ctx context.Context
 }
+
 func (suite *ErrorsTestSuite) SetupTest() {
 	suite.ctx = context.Background()
 }
 func TestErrorsTestSuite(t *testing.T) {
 	suite.Run(t, new(ErrorsTestSuite))
 }
+
 // Test SchemaError interface methods
 func (suite *ErrorsTestSuite) TestSchemaErrorMethods() {
 	err := NewValidationError("test_field", "test error message")
@@ -28,18 +33,21 @@ func (suite *ErrorsTestSuite) TestSchemaErrorMethods() {
 	// Test Details method
 	require.NotNil(suite.T(), err.Details())
 }
+
 // Test error creation with field
 func (suite *ErrorsTestSuite) TestErrorWithField() {
 	err := NewValidationError("test_code", "test message").WithField("field_name")
 	require.Equal(suite.T(), "field_name", err.Field())
 	require.Contains(suite.T(), err.Error(), "field_name")
 }
+
 // Test error creation with details
 func (suite *ErrorsTestSuite) TestErrorWithDetail() {
 	err := NewValidationError("test_code", "test message").WithDetail("custom_key", "custom_value")
 	require.NotNil(suite.T(), err.Details())
 	require.Equal(suite.T(), "custom_value", err.Details()["custom_key"])
 }
+
 // Test ValidationErrorCollection methods
 func (suite *ErrorsTestSuite) TestValidationErrorCollection() {
 	collection := NewValidationErrorCollection()
@@ -64,6 +72,7 @@ func (suite *ErrorsTestSuite) TestValidationErrorCollection() {
 	require.Contains(suite.T(), fieldErrors, "general") // err1 has no field
 	require.Contains(suite.T(), fieldErrors, "field2")  // err2 was added with field2
 }
+
 // Test error type checking functions
 func (suite *ErrorsTestSuite) TestErrorTypeChecking() {
 	validationErr := NewValidationError("test", "message")
@@ -80,6 +89,7 @@ func (suite *ErrorsTestSuite) TestErrorTypeChecking() {
 	require.True(suite.T(), IsPermissionError(permissionErr))
 	require.False(suite.T(), IsPermissionError(validationErr))
 }
+
 // Test error code and details extraction
 func (suite *ErrorsTestSuite) TestErrorExtraction() {
 	err := NewValidationError("test_code", "message").WithDetail("key", "value")
@@ -96,6 +106,7 @@ func (suite *ErrorsTestSuite) TestErrorExtraction() {
 	details = GetErrorDetails(regularErr)
 	require.Contains(suite.T(), details, "error")
 }
+
 // Test HTTP status code mapping
 func (suite *ErrorsTestSuite) TestHTTPStatusCode() {
 	testCases := []struct {
@@ -117,6 +128,7 @@ func (suite *ErrorsTestSuite) TestHTTPStatusCode() {
 	code := GetHTTPStatusCode(regularErr)
 	require.Equal(suite.T(), 500, code)
 }
+
 // Test error response conversion
 func (suite *ErrorsTestSuite) TestErrorResponse() {
 	err := NewValidationError("test_code", "test message").WithField("test_field")
@@ -131,6 +143,7 @@ func (suite *ErrorsTestSuite) TestErrorResponse() {
 	require.Equal(suite.T(), "unknown_error", response.Code)
 	require.Contains(suite.T(), response.Error, "regular error")
 }
+
 // Test multi-error response conversion
 func (suite *ErrorsTestSuite) TestMultiErrorResponse() {
 	collection := NewValidationErrorCollection()
@@ -142,6 +155,7 @@ func (suite *ErrorsTestSuite) TestMultiErrorResponse() {
 	require.Equal(suite.T(), "code2", response.Errors[1].Code)
 	require.Equal(suite.T(), "field1", response.Errors[1].Field)
 }
+
 // Test WrapError function
 func (suite *ErrorsTestSuite) TestWrapErrorFunction() {
 	// Test with schema error
@@ -154,6 +168,7 @@ func (suite *ErrorsTestSuite) TestWrapErrorFunction() {
 	require.IsType(suite.T(), &BaseError{}, wrapped)
 	require.Contains(suite.T(), wrapped.Error(), "regular error")
 }
+
 // Test error handler
 func (suite *ErrorsTestSuite) TestErrorHandler() {
 	handler := NewErrorHandler(nil)
@@ -167,6 +182,7 @@ func (suite *ErrorsTestSuite) TestErrorHandler() {
 	result = handler.HandleError(regularErr)
 	require.IsType(suite.T(), &BaseError{}, result)
 }
+
 // Test WrapError function
 func (suite *ErrorsTestSuite) TestWrapError() {
 	originalErr := fmt.Errorf("original error")

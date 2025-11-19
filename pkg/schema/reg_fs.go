@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"fmt"
@@ -6,10 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 )
+
 // FilesystemStorage implements Storage interface using local filesystem
 type FilesystemStorage struct {
 	basePath string
 }
+
 // NewFilesystemStorage creates a new filesystem storage backend
 func NewFilesystemStorage(basePath string) (*FilesystemStorage, error) {
 	// Ensure the base directory exists
@@ -26,6 +29,7 @@ func NewFilesystemStorage(basePath string) (*FilesystemStorage, error) {
 		basePath: basePath,
 	}, nil
 }
+
 // Get retrieves a schema by ID from the filesystem
 func (fs *FilesystemStorage) Get(ctx context.Context, id string) ([]byte, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -47,6 +51,7 @@ func (fs *FilesystemStorage) Get(ctx context.Context, id string) ([]byte, error)
 	}
 	return data, nil
 }
+
 // Set stores a schema by ID to the filesystem
 func (fs *FilesystemStorage) Set(ctx context.Context, id string, data []byte) error {
 	if err := validateSchemaID(id); err != nil {
@@ -79,6 +84,7 @@ func (fs *FilesystemStorage) Set(ctx context.Context, id string, data []byte) er
 	}
 	return nil
 }
+
 // Delete removes a schema by ID from the filesystem
 func (fs *FilesystemStorage) Delete(ctx context.Context, id string) error {
 	if err := validateSchemaID(id); err != nil {
@@ -100,6 +106,7 @@ func (fs *FilesystemStorage) Delete(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
 // List returns all schema IDs from the filesystem
 func (fs *FilesystemStorage) List(ctx context.Context) ([]string, error) {
 	// Check if context is cancelled
@@ -139,6 +146,7 @@ func (fs *FilesystemStorage) List(ctx context.Context) ([]string, error) {
 	}
 	return schemaIDs, nil
 }
+
 // Exists checks if a schema exists in the filesystem
 func (fs *FilesystemStorage) Exists(ctx context.Context, id string) (bool, error) {
 	if err := validateSchemaID(id); err != nil {
@@ -160,6 +168,7 @@ func (fs *FilesystemStorage) Exists(ctx context.Context, id string) (bool, error
 	}
 	return true, nil
 }
+
 // getFilePath converts schema ID to file path
 // Schema IDs like "user.profile" become "user/profile.json"
 func (fs *FilesystemStorage) getFilePath(id string) string {
@@ -168,6 +177,7 @@ func (fs *FilesystemStorage) getFilePath(id string) string {
 	pathParts = append(pathParts[:len(pathParts)-1], pathParts[len(pathParts)-1]+".json")
 	return filepath.Join(append([]string{fs.basePath}, pathParts...)...)
 }
+
 // validateSchemaID validates that the schema ID is safe for filesystem use
 func validateSchemaID(id string) error {
 	if id == "" {
@@ -193,10 +203,12 @@ func validateSchemaID(id string) error {
 	}
 	return nil
 }
+
 // GetBasePath returns the base path used by this storage
 func (fs *FilesystemStorage) GetBasePath() string {
 	return fs.basePath
 }
+
 // Stats returns storage statistics
 func (fs *FilesystemStorage) Stats(ctx context.Context) (*StorageStats, error) {
 	select {
@@ -230,6 +242,7 @@ func (fs *FilesystemStorage) Stats(ctx context.Context) (*StorageStats, error) {
 	}
 	return stats, nil
 }
+
 // StorageStats represents filesystem storage statistics
 type StorageStats struct {
 	Type        string `json:"type"`

@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"embed"
 	"encoding/json"
@@ -6,14 +7,17 @@ import (
 	"strings"
 	"sync"
 )
+
 //go:embed locale/*.json
 var translationFiles embed.FS
+
 // TranslationCatalog holds all locale translations with embedded files
 type TranslationCatalog struct {
 	locales       map[string]*LocaleTranslations
 	defaultLocale string
 	mu            sync.RWMutex
 }
+
 // LocaleTranslations contains all translation categories for a specific locale
 type LocaleTranslations struct {
 	Fields     map[string]string `json:"fields"`
@@ -21,8 +25,10 @@ type LocaleTranslations struct {
 	Actions    map[string]string `json:"actions"`
 	Status     map[string]string `json:"status"`
 }
+
 // Global translation catalog instance
 var Translator *TranslationCatalog
+
 func init() {
 	Translator = NewTranslationCatalog("en")
 	if err := Translator.LoadEmbeddedTranslations(); err != nil {
@@ -35,6 +41,7 @@ func init() {
 		}
 	}
 }
+
 // NewTranslationCatalog creates a new translation catalog with the specified default locale
 func NewTranslationCatalog(defaultLocale string) *TranslationCatalog {
 	return &TranslationCatalog{
@@ -42,6 +49,7 @@ func NewTranslationCatalog(defaultLocale string) *TranslationCatalog {
 		defaultLocale: defaultLocale,
 	}
 }
+
 // LoadEmbeddedTranslations loads all translation files from embedded filesystem
 func (tc *TranslationCatalog) LoadEmbeddedTranslations() error {
 	tc.mu.Lock()
@@ -67,6 +75,7 @@ func (tc *TranslationCatalog) LoadEmbeddedTranslations() error {
 	}
 	return nil
 }
+
 // HasLocale checks if a specific locale is available
 func (tc *TranslationCatalog) HasLocale(locale string) bool {
 	tc.mu.RLock()
@@ -74,6 +83,7 @@ func (tc *TranslationCatalog) HasLocale(locale string) bool {
 	_, exists := tc.locales[locale]
 	return exists
 }
+
 // GetAvailableLocales returns a list of all available locales
 func (tc *TranslationCatalog) GetAvailableLocales() []string {
 	tc.mu.RLock()
@@ -84,6 +94,7 @@ func (tc *TranslationCatalog) GetAvailableLocales() []string {
 	}
 	return locales
 }
+
 // DetectBestLocale finds the best available locale from a list of preferences
 func (tc *TranslationCatalog) DetectBestLocale(preferences []string) string {
 	tc.mu.RLock()
@@ -104,6 +115,7 @@ func (tc *TranslationCatalog) DetectBestLocale(preferences []string) string {
 	// Fallback to default locale
 	return tc.defaultLocale
 }
+
 // FieldLabel returns the translated field label for the given locale and field ID
 func (tc *TranslationCatalog) FieldLabel(locale, fieldID string) string {
 	tc.mu.RLock()
@@ -125,11 +137,13 @@ func (tc *TranslationCatalog) FieldLabel(locale, fieldID string) string {
 	// Return humanized field ID as last resort
 	return humanizeFieldID(fieldID)
 }
+
 // ValidationMessage returns the translated validation message with parameter substitution
 func (tc *TranslationCatalog) ValidationMessage(locale, messageKey string, params map[string]any) string {
 	template := tc.getValidationTemplate(locale, messageKey)
 	return tc.interpolateMessage(template, params)
 }
+
 // ActionText returns the translated action text
 func (tc *TranslationCatalog) ActionText(locale, actionKey string) string {
 	tc.mu.RLock()
@@ -151,6 +165,7 @@ func (tc *TranslationCatalog) ActionText(locale, actionKey string) string {
 	// Return humanized action key as last resort
 	return humanizeFieldID(actionKey)
 }
+
 // StatusText returns the translated status text
 func (tc *TranslationCatalog) StatusText(locale, statusKey string) string {
 	tc.mu.RLock()
@@ -172,6 +187,7 @@ func (tc *TranslationCatalog) StatusText(locale, statusKey string) string {
 	// Return humanized status key as last resort
 	return humanizeFieldID(statusKey)
 }
+
 // getValidationTemplate retrieves validation message template with fallback
 func (tc *TranslationCatalog) getValidationTemplate(locale, messageKey string) string {
 	// Try requested locale first
@@ -191,6 +207,7 @@ func (tc *TranslationCatalog) getValidationTemplate(locale, messageKey string) s
 	// Return key as fallback
 	return messageKey
 }
+
 // interpolateMessage performs parameter substitution in message templates
 func (tc *TranslationCatalog) interpolateMessage(template string, params map[string]any) string {
 	if params == nil {
@@ -203,6 +220,7 @@ func (tc *TranslationCatalog) interpolateMessage(template string, params map[str
 	}
 	return result
 }
+
 // humanizeFieldID converts camelCase field IDs to readable labels
 func humanizeFieldID(fieldID string) string {
 	if fieldID == "" {
@@ -224,6 +242,7 @@ func humanizeFieldID(fieldID string) string {
 	}
 	return result.String()
 }
+
 // IsRTL checks if the given locale uses right-to-left text direction
 func (tc *TranslationCatalog) IsRTL(locale string) bool {
 	rtlLocales := map[string]bool{
@@ -239,6 +258,7 @@ func (tc *TranslationCatalog) IsRTL(locale string) bool {
 	lang := strings.Split(locale, "-")[0]
 	return rtlLocales[lang]
 }
+
 // GetTextDirection returns the text direction for the locale ("ltr" or "rtl")
 func (tc *TranslationCatalog) GetTextDirection(locale string) string {
 	if tc.IsRTL(locale) {
@@ -246,35 +266,43 @@ func (tc *TranslationCatalog) GetTextDirection(locale string) string {
 	}
 	return "ltr"
 }
+
 // Convenience functions for direct access to global translator
 // T_Field returns translated field label using global translator
 func T_Field(locale, fieldID string) string {
 	return Translator.FieldLabel(locale, fieldID)
 }
+
 // T_Validation returns translated validation message using global translator
 func T_Validation(locale, messageKey string, params map[string]any) string {
 	return Translator.ValidationMessage(locale, messageKey, params)
 }
+
 // T_Action returns translated action text using global translator
 func T_Action(locale, actionKey string) string {
 	return Translator.ActionText(locale, actionKey)
 }
+
 // T_Status returns translated status text using global translator
 func T_Status(locale, statusKey string) string {
 	return Translator.StatusText(locale, statusKey)
 }
+
 // T_HasLocale checks if locale is available using global translator
 func T_HasLocale(locale string) bool {
 	return Translator.HasLocale(locale)
 }
+
 // T_DetectLocale finds best locale from preferences using global translator
 func T_DetectLocale(preferences []string) string {
 	return Translator.DetectBestLocale(preferences)
 }
+
 // T_IsRTL checks if locale is right-to-left using global translator
 func T_IsRTL(locale string) bool {
 	return Translator.IsRTL(locale)
 }
+
 // T_Direction returns text direction using global translator
 func T_Direction(locale string) string {
 	return Translator.GetTextDirection(locale)

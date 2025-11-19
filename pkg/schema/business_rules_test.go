@@ -1,17 +1,21 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"testing"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 type BusinessRulesTestSuite struct {
 	suite.Suite
 	engine *BusinessRuleEngine
 	ctx    context.Context
 }
+
 func (suite *BusinessRulesTestSuite) SetupTest() {
 	suite.engine = NewBusinessRuleEngine()
 	suite.ctx = context.Background()
@@ -19,6 +23,7 @@ func (suite *BusinessRulesTestSuite) SetupTest() {
 func TestBusinessRulesTestSuite(t *testing.T) {
 	suite.Run(t, new(BusinessRulesTestSuite))
 }
+
 // Test BusinessRuleEngine creation
 func (suite *BusinessRulesTestSuite) TestNewBusinessRuleEngine() {
 	require.NotNil(suite.T(), suite.engine)
@@ -26,6 +31,7 @@ func (suite *BusinessRulesTestSuite) TestNewBusinessRuleEngine() {
 	require.NotNil(suite.T(), suite.engine.evaluator)
 	require.Equal(suite.T(), 0, len(suite.engine.rules))
 }
+
 // Test business rule creation and validation
 func (suite *BusinessRulesTestSuite) TestBusinessRuleValidation() {
 	// Valid rule
@@ -89,6 +95,7 @@ func (suite *BusinessRulesTestSuite) TestBusinessRuleValidation() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "business rule is required")
 }
+
 // Test action validation
 func (suite *BusinessRulesTestSuite) TestActionValidation() {
 	// Invalid action - missing target for field action
@@ -124,6 +131,7 @@ func (suite *BusinessRulesTestSuite) TestActionValidation() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "action type is required")
 }
+
 // Test rule CRUD operations
 func (suite *BusinessRulesTestSuite) TestRuleCRUD() {
 	rule := &BusinessRule{
@@ -165,6 +173,7 @@ func (suite *BusinessRulesTestSuite) TestRuleCRUD() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "business rule non_existent not found")
 }
+
 // Test rule priority sorting
 func (suite *BusinessRulesTestSuite) TestRulePriority() {
 	rules := []*BusinessRule{
@@ -210,6 +219,7 @@ func (suite *BusinessRulesTestSuite) TestRulePriority() {
 	require.Equal(suite.T(), "medium_priority", sortedRules[1].ID)
 	require.Equal(suite.T(), "low_priority", sortedRules[2].ID)
 }
+
 // Test field visibility actions
 func (suite *BusinessRulesTestSuite) TestFieldVisibilityActions() {
 	// Create a test schema
@@ -256,6 +266,7 @@ func (suite *BusinessRulesTestSuite) TestFieldVisibilityActions() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "field non_existent_field not found")
 }
+
 // Test field required actions
 func (suite *BusinessRulesTestSuite) TestFieldRequiredActions() {
 	schema := &Schema{
@@ -283,6 +294,7 @@ func (suite *BusinessRulesTestSuite) TestFieldRequiredActions() {
 	require.True(suite.T(), modifiedSchema.Fields[0].Required)  // field1 should be required
 	require.False(suite.T(), modifiedSchema.Fields[1].Required) // field2 should be optional
 }
+
 // Test field default value actions
 func (suite *BusinessRulesTestSuite) TestFieldDefaultActions() {
 	schema := &Schema{
@@ -310,6 +322,7 @@ func (suite *BusinessRulesTestSuite) TestFieldDefaultActions() {
 	require.Equal(suite.T(), "default_text", modifiedSchema.Fields[0].Default)
 	require.Equal(suite.T(), 42, modifiedSchema.Fields[1].Default)
 }
+
 // Test field options actions
 func (suite *BusinessRulesTestSuite) TestFieldOptionsActions() {
 	schema := &Schema{
@@ -355,6 +368,7 @@ func (suite *BusinessRulesTestSuite) TestFieldOptionsActions() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "options must be []FieldOption type")
 }
+
 // Test action visibility
 func (suite *BusinessRulesTestSuite) TestActionVisibility() {
 	schema := &Schema{
@@ -397,6 +411,7 @@ func (suite *BusinessRulesTestSuite) TestActionVisibility() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "action non_existent_action not found")
 }
+
 // Test action enabled/disabled
 func (suite *BusinessRulesTestSuite) TestActionEnabled() {
 	schema := &Schema{
@@ -424,6 +439,7 @@ func (suite *BusinessRulesTestSuite) TestActionEnabled() {
 	require.True(suite.T(), modifiedSchema.Actions[0].Disabled)  // action1 should be disabled
 	require.False(suite.T(), modifiedSchema.Actions[1].Disabled) // action2 should be enabled
 }
+
 // Test calculation actions
 func (suite *BusinessRulesTestSuite) TestCalculationActions() {
 	schema := &Schema{
@@ -457,6 +473,7 @@ func (suite *BusinessRulesTestSuite) TestCalculationActions() {
 	require.NoError(suite.T(), err)
 	require.True(suite.T(), modifiedSchema.Fields[2].Readonly) // Calculated fields should be readonly
 }
+
 // Test disabled rules
 func (suite *BusinessRulesTestSuite) TestDisabledRules() {
 	schema := &Schema{
@@ -482,6 +499,7 @@ func (suite *BusinessRulesTestSuite) TestDisabledRules() {
 	// Field should not be affected since rule is disabled
 	require.False(suite.T(), modifiedSchema.Fields[0].Hidden)
 }
+
 // Test unsupported action types
 func (suite *BusinessRulesTestSuite) TestUnsupportedActionTypes() {
 	schema := &Schema{
@@ -506,6 +524,7 @@ func (suite *BusinessRulesTestSuite) TestUnsupportedActionTypes() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "action type unsupported_action not supported")
 }
+
 // Test BusinessRuleBuilder
 func (suite *BusinessRulesTestSuite) TestBusinessRuleBuilder() {
 	conditionRule := &condition.ConditionRule{
@@ -555,6 +574,7 @@ func (suite *BusinessRulesTestSuite) TestBusinessRuleBuilder() {
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "rule ID is required")
 }
+
 // Test helper functions
 func (suite *BusinessRulesTestSuite) TestHelperFunctions() {
 	conditionRule := &condition.ConditionRule{
@@ -597,6 +617,7 @@ func (suite *BusinessRulesTestSuite) TestHelperFunctions() {
 	require.Equal(suite.T(), ActionCalculate, calcRule.Actions[0].Type)
 	require.Equal(suite.T(), "quantity * price", calcRule.Actions[0].Params["formula"])
 }
+
 // Test rule condition evaluation
 func (suite *BusinessRulesTestSuite) TestRuleConditionEvaluation() {
 	// Create a condition that checks if status equals "active"
@@ -661,6 +682,7 @@ func (suite *BusinessRulesTestSuite) TestRuleConditionEvaluation() {
 	require.NoError(suite.T(), err)
 	require.False(suite.T(), modifiedSchema.Fields[0].Hidden) // Field should be shown
 }
+
 // Test schema modification doesn't affect original
 func (suite *BusinessRulesTestSuite) TestSchemaImmutability() {
 	originalSchema := &Schema{
@@ -688,6 +710,7 @@ func (suite *BusinessRulesTestSuite) TestSchemaImmutability() {
 	// Modified schema should have the changes
 	require.True(suite.T(), modifiedSchema.Fields[0].Hidden)
 }
+
 // Test concurrent access to rules
 func (suite *BusinessRulesTestSuite) TestConcurrentAccess() {
 	rule := &BusinessRule{
@@ -742,6 +765,7 @@ func (suite *BusinessRulesTestSuite) TestConcurrentAccess() {
 	rules := suite.engine.ListRules()
 	require.GreaterOrEqual(suite.T(), len(rules), 1)
 }
+
 // Test TestRule method
 func (suite *BusinessRulesTestSuite) TestTestRule() {
 	// Create a rule that checks if user role is admin
@@ -816,6 +840,7 @@ func (suite *BusinessRulesTestSuite) TestTestRule() {
 	require.NoError(suite.T(), err)
 	require.Len(suite.T(), emptyResults, 0)
 }
+
 // Test ExplainRule method
 func (suite *BusinessRulesTestSuite) TestExplainRule() {
 	// Create a rule with condition
@@ -895,6 +920,7 @@ func (suite *BusinessRulesTestSuite) TestExplainRule() {
 	require.NoError(suite.T(), err)
 	require.Contains(suite.T(), explanation, "Actions: 0")
 }
+
 // Test UpdateRule method
 func (suite *BusinessRulesTestSuite) TestUpdateRule() {
 	// First add a rule to update

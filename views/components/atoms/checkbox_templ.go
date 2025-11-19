@@ -507,19 +507,25 @@ func Checkbox(props CheckboxProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "><div class=\"flex-1 min-w-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "><div class=\"checkbox-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		if props.Icon != "" {
+			templ_7745c5c3_Err = Icon(IconProps{Name: props.Icon, Size: "sm", ClassName: "checkbox-icon"}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
 		if props.Label != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div class=\"checkbox-label\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 240, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 243, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -531,14 +537,14 @@ func Checkbox(props CheckboxProps) templ.Component {
 			}
 		}
 		if props.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<p class=\"text-xs text-muted-foreground mt-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<p class=\"checkbox-description\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 245, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 248, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -609,7 +615,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-group")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 257, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 260, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -669,7 +675,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-" + option.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 273, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 276, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -693,7 +699,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-" + option.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 277, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 280, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -706,7 +712,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 278, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 281, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
@@ -719,7 +725,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 279, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 282, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -778,7 +784,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 296, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 299, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -797,7 +803,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 299, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 302, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 				if templ_7745c5c3_Err != nil {
@@ -816,7 +822,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 302, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 305, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 				if templ_7745c5c3_Err != nil {
@@ -835,7 +841,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var36 string
 				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 305, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 308, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 				if templ_7745c5c3_Err != nil {
@@ -854,7 +860,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var37 string
 				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 308, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 311, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 				if templ_7745c5c3_Err != nil {
@@ -873,7 +879,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var38 string
 				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineModel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 311, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 314, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 				if templ_7745c5c3_Err != nil {
@@ -892,7 +898,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineChange)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 314, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 317, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
@@ -911,7 +917,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var40 string
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineBlur)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 317, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 320, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -930,7 +936,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var41 string
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineFocus)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 320, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 323, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
@@ -953,7 +959,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var42 string
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(option.Icon)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 328, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 331, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
@@ -971,7 +977,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 			var templ_7745c5c3_Var43 string
 			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 332, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 335, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 			if templ_7745c5c3_Err != nil {
@@ -989,7 +995,7 @@ func CheckboxGroup(props CheckboxGroupProps) templ.Component {
 				var templ_7745c5c3_Var44 string
 				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(option.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 337, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 340, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 				if templ_7745c5c3_Err != nil {
@@ -1045,6 +1051,9 @@ func CheckboxGroupInline(props CheckboxGroupProps) templ.Component {
 			Readonly:     props.Readonly,
 			Error:        props.Error,
 			Class:        props.Class,
+			Size:         props.Size,
+			State:        props.State,
+			ClassName:    props.ClassName,
 			Inline:       true,
 			HXPost:       props.HXPost,
 			HXGet:        props.HXGet,
@@ -1063,4 +1072,69 @@ func CheckboxGroupInline(props CheckboxGroupProps) templ.Component {
 	})
 }
 
+// Builder Pattern (functional options)
+type CheckboxOption func(*CheckboxProps)
+
+func NewCheckbox(opts ...CheckboxOption) CheckboxProps {
+	props := CheckboxProps{
+		Size:  CheckboxSizeMD,
+		State: CheckboxStateDefault,
+	}
+	for _, opt := range opts {
+		opt(&props)
+	}
+	return props
+}
+
+func WithCheckboxSize(size CheckboxSize) CheckboxOption {
+	return func(p *CheckboxProps) { p.Size = size }
+}
+
+func WithCheckboxState(state CheckboxState) CheckboxOption {
+	return func(p *CheckboxProps) { p.State = state }
+}
+
+func WithCheckboxLabel(label string) CheckboxOption {
+	return func(p *CheckboxProps) { p.Label = label }
+}
+
+func WithCheckboxValue(value string) CheckboxOption {
+	return func(p *CheckboxProps) { p.Value = value }
+}
+
+func WithCheckboxName(name string) CheckboxOption {
+	return func(p *CheckboxProps) { p.Name = name }
+}
+
+func WithCheckboxID(id string) CheckboxOption {
+	return func(p *CheckboxProps) { p.ID = id }
+}
+
+func AsCheckboxChecked() CheckboxOption {
+	return func(p *CheckboxProps) { p.Checked = true }
+}
+
+func AsCheckboxRequired() CheckboxOption {
+	return func(p *CheckboxProps) { p.Required = true }
+}
+
+func AsCheckboxDisabled() CheckboxOption {
+	return func(p *CheckboxProps) { p.Disabled = true }
+}
+
+func WithCheckboxClass(class string) CheckboxOption {
+	return func(p *CheckboxProps) { p.ClassName = class }
+}
+
+// Key Improvements in this refactored version:
+// 1. Pure Presentation: No business logic, just visual rendering and state management
+// 2. Compiled Theme Classes: Uses "checkbox", "checkbox-error", etc. from compiled CSS
+// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
+// 4. Clean Props Interface: Focused on presentation concerns only
+// 5. Visual State Management: Simple states (error, success, warning, default)
+// 6. Atomic Design Compliant: Single purpose, indivisible checkbox component
+// 7. Icon Integration: Uses Icon atom for consistent iconography
+// 8. Ready for Molecules: Can be easily composed into FormField molecules
+// 9. Size Variants: Supports sm, md, lg sizing through compiled theme classes
+// 10. Accessibility: Proper ARIA attributes for screen readers
 var _ = templruntime.GeneratedTemplate

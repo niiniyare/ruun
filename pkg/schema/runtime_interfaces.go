@@ -58,13 +58,13 @@ type FieldConditionalResult struct {
 
 // RuntimeLayoutConditionalResult contains the result of conditional evaluation for layouts
 type RuntimeLayoutConditionalResult struct {
-	Changed bool                       // Whether any conditions changed
+	Changed bool                      // Whether any conditions changed
 	Updates []*FieldConditionalResult // Field updates to apply
 }
 
 // ConditionalEvaluationResult contains the result of evaluating all conditions
 type ConditionalEvaluationResult struct {
-	Changed bool                       // Whether any conditions changed state
+	Changed bool                      // Whether any conditions changed state
 	Updates []*FieldConditionalResult // List of field updates to apply
 }
 
@@ -162,10 +162,10 @@ type RuntimeStats struct {
 	ErrorCount    int `json:"errorCount"`    // Total number of validation errors
 
 	// State information
-	IsValid       bool      `json:"isValid"`       // Whether form is currently valid
-	InitializedAt time.Time `json:"initializedAt"` // When runtime was initialized
-	LastActivity  time.Time `json:"lastActivity"`  // Time of last user activity
-	Uptime        time.Duration `json:"uptime"`    // How long runtime has been active
+	IsValid       bool          `json:"isValid"`       // Whether form is currently valid
+	InitializedAt time.Time     `json:"initializedAt"` // When runtime was initialized
+	LastActivity  time.Time     `json:"lastActivity"`  // Time of last user activity
+	Uptime        time.Duration `json:"uptime"`        // How long runtime has been active
 
 	// Performance metrics
 	EventStats *EventStats `json:"eventStats,omitempty"` // Event processing statistics

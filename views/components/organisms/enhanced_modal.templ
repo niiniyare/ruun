@@ -1,0 +1,1168 @@
+package organisms
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"github.com/niiniyare/ruun/pkg/schema"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+	"github.com/niiniyare/ruun/views/components/utils"
+)
+
+// EnhancedModalType defines the different types of modals available
+type EnhancedModalType string
+
+const (
+	EnhancedModalDialog      EnhancedModalType = "dialog"      // Standard centered dialog
+	EnhancedModalDrawer      EnhancedModalType = "drawer"      // Side slide-out panel
+	EnhancedModalPopover     EnhancedModalType = "popover"     // Small contextual popup
+	EnhancedModalFullscreen  EnhancedModalType = "fullscreen"  // Full-screen overlay
+	EnhancedModalBottomSheet EnhancedModalType = "bottomsheet" // Mobile bottom sheet
+)
+
+// EnhancedModalSize defines size variants specific to enhanced modals
+type EnhancedModalSize string
+
+const (
+	EnhancedModalSizeXS   EnhancedModalSize = "xs"   // 320px
+	EnhancedModalSizeSM   EnhancedModalSize = "sm"   // 448px
+	EnhancedModalSizeMD   EnhancedModalSize = "md"   // 576px
+	EnhancedModalSizeLG   EnhancedModalSize = "lg"   // 768px
+	EnhancedModalSizeXL   EnhancedModalSize = "xl"   // 1024px
+	EnhancedModalSize2XL  EnhancedModalSize = "2xl"  // 1280px
+	EnhancedModalSize3XL  EnhancedModalSize = "3xl"  // 1536px
+	EnhancedModalSizeFull EnhancedModalSize = "full" // Full screen
+	EnhancedModalSizeAuto EnhancedModalSize = "auto" // Content-based sizing
+)
+
+// EnhancedModalVariant defines the visual style variants
+type EnhancedModalVariant string
+
+const (
+	EnhancedModalDefault     EnhancedModalVariant = "default"
+	EnhancedModalDestructive EnhancedModalVariant = "destructive"
+	EnhancedModalSuccess     EnhancedModalVariant = "success"
+	EnhancedModalWarning     EnhancedModalVariant = "warning"
+	EnhancedModalInfo        EnhancedModalVariant = "info"
+)
+
+// EnhancedModalPosition defines where drawers/popovers appear
+type EnhancedModalPosition string
+
+const (
+	EnhancedModalPositionCenter EnhancedModalPosition = "center"
+	EnhancedModalPositionTop    EnhancedModalPosition = "top"
+	EnhancedModalPositionRight  EnhancedModalPosition = "right"
+	EnhancedModalPositionBottom EnhancedModalPosition = "bottom"
+	EnhancedModalPositionLeft   EnhancedModalPosition = "left"
+)
+
+// EnhancedModalAction represents modal action buttons with enhanced functionality
+type EnhancedModalAction struct {
+	// Basic properties
+	ID          string            `json:"id"`
+	Text        string            `json:"text"`
+	Type        string            `json:"type"` // "primary", "secondary", "destructive", "save", "cancel", "submit"
+	Variant     atoms.ButtonVariant `json:"variant"`
+	Size        atoms.ButtonSize  `json:"size"`
+	Icon        string            `json:"icon,omitempty"`
+	IconLeft    string            `json:"iconLeft,omitempty"`
+	IconRight   string            `json:"iconRight,omitempty"`
+	
+	// State
+	Loading     bool              `json:"loading"`
+	Disabled    bool              `json:"disabled"`
+	Hidden      bool              `json:"hidden"`
+	
+	// Behavior
+	AutoClose   bool              `json:"autoClose"`   // Whether clicking this action closes the modal
+	ConfirmText string            `json:"confirmText,omitempty"` // Confirmation prompt text
+	Position    string            `json:"position"`    // "left", "right", "center"
+	Priority    int               `json:"priority"`    // For sorting actions
+	
+	// Styling
+	Class       string            `json:"class,omitempty"`
+	FullWidth   bool              `json:"fullWidth"`   // For mobile layouts
+	
+	// Validation & Dependencies
+	RequiredFields []string        `json:"requiredFields,omitempty"` // Fields that must be valid
+	DisabledIf     string          `json:"disabledIf,omitempty"`     // Condition for disabling
+	VisibleIf      string          `json:"visibleIf,omitempty"`      // Condition for visibility
+	
+	// HTMX Integration
+	HXPost      string            `json:"hxPost,omitempty"`
+	HXGet       string            `json:"hxGet,omitempty"`
+	HXPut       string            `json:"hxPut,omitempty"`
+	HXDelete    string            `json:"hxDelete,omitempty"`
+	HXTarget    string            `json:"hxTarget,omitempty"`
+	HXSwap      string            `json:"hxSwap,omitempty"`
+	HXTrigger   string            `json:"hxTrigger,omitempty"`
+	HXConfirm   string            `json:"hxConfirm,omitempty"`
+	HXIndicator string            `json:"hxIndicator,omitempty"`
+	
+	// Alpine.js Integration
+	AlpineClick string            `json:"alpineClick,omitempty"`
+	AlpineDisabled string         `json:"alpineDisabled,omitempty"`
+	AlpineVisible string          `json:"alpineVisible,omitempty"`
+	
+	// Events
+	OnClick     string            `json:"onClick,omitempty"`
+	OnSuccess   string            `json:"onSuccess,omitempty"`
+	OnError     string            `json:"onError,omitempty"`
+}
+
+// EnhancedModalStep represents a step in multi-step workflows
+type EnhancedModalStep struct {
+	ID          string               `json:"id"`
+	Title       string               `json:"title"`
+	Description string               `json:"description,omitempty"`
+	Icon        string               `json:"icon,omitempty"`
+	Required    bool                 `json:"required"`
+	Completed   bool                 `json:"completed"`
+	Active      bool                 `json:"active"`
+	Skippable   bool                 `json:"skippable"`
+	Content     *schema.FormSchema   `json:"content,omitempty"`
+	Actions     []EnhancedModalAction `json:"actions,omitempty"`
+	
+	// Validation
+	ValidateOn  string               `json:"validateOn,omitempty"` // "next", "always", "manual"
+	Validator   string               `json:"validator,omitempty"`  // Custom validation function
+	
+	// Navigation
+	NextStep    string               `json:"nextStep,omitempty"`   // Override default next step
+	PrevStep    string               `json:"prevStep,omitempty"`   // Override default prev step
+	
+	// Conditional logic
+	ShowIf      string               `json:"showIf,omitempty"`     // Condition to show this step
+}
+
+// EnhancedModalProps defines comprehensive properties for enhanced modals
+type EnhancedModalProps struct {
+	// Core Identity & Display
+	ID          string               `json:"id"`
+	Name        string               `json:"name,omitempty"`       // For referencing in Alpine.js
+	Title       string               `json:"title,omitempty"`
+	Subtitle    string               `json:"subtitle,omitempty"`
+	Description string               `json:"description,omitempty"`
+	Icon        string               `json:"icon,omitempty"`
+	
+	// Type & Layout
+	Type        EnhancedModalType    `json:"type"`
+	Size        EnhancedModalSize    `json:"size"`
+	Position    EnhancedModalPosition `json:"position"`
+	Variant     EnhancedModalVariant `json:"variant"`
+	
+	// Behavior Configuration
+	Dismissible     bool             `json:"dismissible"`      // Can be closed
+	CloseOnOverlay  bool             `json:"closeOnOverlay"`   // Click backdrop to close
+	CloseOnEscape   bool             `json:"closeOnEscape"`    // Press ESC to close
+	PersistOnClose  bool             `json:"persistOnClose"`   // Keep in DOM when closed
+	AutoFocus       bool             `json:"autoFocus"`        // Focus first input on open
+	TrapFocus       bool             `json:"trapFocus"`        // Keep focus within modal
+	RestoreFocus    bool             `json:"restoreFocus"`     // Restore focus on close
+	
+	// Visual Configuration
+	Backdrop        bool             `json:"backdrop"`         // Show backdrop/overlay
+	BlurBackdrop    bool             `json:"blurBackdrop"`     // Blur background content
+	Centered        bool             `json:"centered"`         // Center vertically
+	Scrollable      bool             `json:"scrollable"`       // Allow content scrolling
+	Resizable       bool             `json:"resizable"`        // Allow resizing
+	Draggable       bool             `json:"draggable"`        // Allow dragging
+	
+	// Content Structure
+	Header          bool             `json:"header"`           // Show header section
+	Footer          bool             `json:"footer"`           // Show footer section
+	ShowProgress    bool             `json:"showProgress"`     // Show progress indicator
+	ShowStepNav     bool             `json:"showStepNav"`      // Show step navigation
+	
+	// Multi-step Workflow
+	Steps           []EnhancedModalStep `json:"steps,omitempty"`
+	CurrentStep     int              `json:"currentStep"`
+	StepNavigation  bool             `json:"stepNavigation"`   // Allow step navigation
+	LinearProgress  bool             `json:"linearProgress"`   // Force linear step progression
+	
+	// Actions
+	Actions         []EnhancedModalAction `json:"actions,omitempty"`
+	PrimaryAction   *EnhancedModalAction  `json:"primaryAction,omitempty"`
+	SecondaryAction *EnhancedModalAction  `json:"secondaryAction,omitempty"`
+	DestructiveAction *EnhancedModalAction `json:"destructiveAction,omitempty"`
+	
+	// Form Integration
+	FormID          string           `json:"formId,omitempty"`
+	FormSchema      *schema.FormSchema `json:"formSchema,omitempty"`
+	FormData        map[string]any   `json:"formData,omitempty"`
+	FormValidation  bool             `json:"formValidation"`
+	SubmitOnEnter   bool             `json:"submitOnEnter"`
+	
+	// File Upload Integration
+	FileUpload      bool             `json:"fileUpload"`
+	UploadURL       string           `json:"uploadUrl,omitempty"`
+	UploadMultiple  bool             `json:"uploadMultiple"`
+	UploadMaxFiles  int              `json:"uploadMaxFiles"`
+	UploadMaxSize   int              `json:"uploadMaxSize"`   // MB
+	UploadAccept    string           `json:"uploadAccept,omitempty"` // File types
+	ShowProgress    bool             `json:"showUploadProgress"`
+	
+	// Search & Selection
+	Searchable      bool             `json:"searchable"`
+	SearchURL       string           `json:"searchUrl,omitempty"`
+	SearchResults   []map[string]any `json:"searchResults,omitempty"`
+	Selectable      bool             `json:"selectable"`
+	MultiSelect     bool             `json:"multiSelect"`
+	SelectedItems   []string         `json:"selectedItems,omitempty"`
+	
+	// Data Loading
+	LoadDataURL     string           `json:"loadDataUrl,omitempty"`
+	LoadOnOpen      bool             `json:"loadOnOpen"`
+	ReloadOnOpen    bool             `json:"reloadOnOpen"`
+	LoadingText     string           `json:"loadingText,omitempty"`
+	
+	// State Management
+	Open            bool             `json:"open"`             // Initial open state
+	Loading         bool             `json:"loading"`          // Loading state
+	Saving          bool             `json:"saving"`           // Saving state
+	Dirty           bool             `json:"dirty"`            // Has unsaved changes
+	
+	// Performance & UX
+	LazyLoad        bool             `json:"lazyLoad"`         // Lazy load content
+	DebounceMs      int              `json:"debounceMs"`       // Debounce for search/validation
+	AnimationDuration int            `json:"animationDuration"` // Animation duration in ms
+	
+	// Responsive Design
+	MobileFullscreen bool            `json:"mobileFullscreen"` // Full screen on mobile
+	MobilePosition   string          `json:"mobilePosition"`   // "bottom", "center"
+	TabletBehavior   string          `json:"tabletBehavior"`   // "desktop", "mobile"
+	
+	// Accessibility
+	AriaLabel       string           `json:"ariaLabel,omitempty"`
+	AriaDescription string           `json:"ariaDescription,omitempty"`
+	Role            string           `json:"role,omitempty"`
+	
+	// Styling & Themes
+	Class           string           `json:"class,omitempty"`
+	ContentClass    string           `json:"contentClass,omitempty"`
+	HeaderClass     string           `json:"headerClass,omitempty"`
+	BodyClass       string           `json:"bodyClass,omitempty"`
+	FooterClass     string           `json:"footerClass,omitempty"`
+	OverlayClass    string           `json:"overlayClass,omitempty"`
+	
+	// Theme Integration
+	ThemeID         string           `json:"themeId,omitempty"`
+	TokenOverrides  map[string]string `json:"tokenOverrides,omitempty"`
+	DarkMode        bool             `json:"darkMode"`
+	
+	// HTMX Integration
+	HXGet           string           `json:"hxGet,omitempty"`
+	HXPost          string           `json:"hxPost,omitempty"`
+	HXTarget        string           `json:"hxTarget,omitempty"`
+	HXSwap          string           `json:"hxSwap,omitempty"`
+	HXTrigger       string           `json:"hxTrigger,omitempty"`
+	HXPushURL       string           `json:"hxPushUrl,omitempty"`
+	HXIndicator     string           `json:"hxIndicator,omitempty"`
+	
+	// Alpine.js Integration
+	AlpineData      string           `json:"alpineData,omitempty"`
+	AlpineShow      string           `json:"alpineShow,omitempty"`
+	AlpineInit      string           `json:"alpineInit,omitempty"`
+	
+	// Event Handlers
+	OnOpen          string           `json:"onOpen,omitempty"`
+	OnClose         string           `json:"onClose,omitempty"`
+	OnBeforeOpen    string           `json:"onBeforeOpen,omitempty"`
+	OnBeforeClose   string           `json:"onBeforeClose,omitempty"`
+	OnAfterOpen     string           `json:"onAfterOpen,omitempty"`
+	OnAfterClose    string           `json:"onAfterClose,omitempty"`
+	OnStepChange    string           `json:"onStepChange,omitempty"`
+	OnDataChange    string           `json:"onDataChange,omitempty"`
+	OnValidation    string           `json:"onValidation,omitempty"`
+	OnUploadProgress string          `json:"onUploadProgress,omitempty"`
+	OnUploadComplete string          `json:"onUploadComplete,omitempty"`
+	OnSearch        string           `json:"onSearch,omitempty"`
+	OnSelection     string           `json:"onSelection,omitempty"`
+	
+	// Business Logic Integration
+	Service         *ModalService    `json:"-"` // Server-side service
+	Context         context.Context  `json:"-"` // Request context
+	
+	// Advanced Features
+	ModalStack      bool             `json:"modalStack"`       // Support modal stacking
+	MaxStackDepth   int              `json:"maxStackDepth"`
+	ConfirmOnClose  bool             `json:"confirmOnClose"`   // Confirm before closing if dirty
+	AutoSave        bool             `json:"autoSave"`         // Auto-save form data
+	AutoSaveInterval int             `json:"autoSaveInterval"` // Auto-save interval in seconds
+	VersionControl  bool             `json:"versionControl"`   // Track data versions
+	UndoRedo        bool             `json:"undoRedo"`         // Support undo/redo
+	
+	// Workflow & Business Logic
+	WorkflowID      string           `json:"workflowId,omitempty"`
+	ProcessID       string           `json:"processId,omitempty"`
+	TaskID          string           `json:"taskId,omitempty"`
+	EntityID        string           `json:"entityId,omitempty"`
+	EntityType      string           `json:"entityType,omitempty"`
+	
+	// Permissions & Security
+	RequiredPermissions []string     `json:"requiredPermissions,omitempty"`
+	ReadOnly        bool             `json:"readOnly"`
+	SecureMode      bool             `json:"secureMode"`       // Enhanced security features
+}
+
+// EnhancedModal renders a comprehensive modal with business logic integration
+templ EnhancedModal(props EnhancedModalProps, children ...templ.Component) {
+	@enhancedModalOverlay(props) {
+		@enhancedModalContent(props) {
+			// Modal Header
+			if props.Header || props.Title != "" || props.Dismissible || props.ShowProgress {
+				@enhancedModalHeader(props)
+			}
+			
+			// Step Navigation (for multi-step modals)
+			if len(props.Steps) > 0 && props.ShowStepNav {
+				@enhancedModalStepNavigation(props)
+			}
+			
+			// Modal Body
+			@enhancedModalBody(props) {
+				// Multi-step content
+				if len(props.Steps) > 0 {
+					@enhancedModalSteps(props)
+				} else if props.FormSchema != nil {
+					// Form-based content
+					@enhancedModalForm(props)
+				} else if props.FileUpload {
+					// File upload content
+					@enhancedModalFileUpload(props)
+				} else if props.Searchable {
+					// Search and selection content
+					@enhancedModalSearch(props)
+				} else if props.HXGet != "" || props.LoadDataURL != "" {
+					// Dynamic HTMX content
+					@enhancedModalDynamicContent(props)
+				} else {
+					// Static content from children
+					for _, child := range children {
+						@child
+					}
+				}
+			}
+			
+			// Modal Footer
+			if props.Footer || len(props.Actions) > 0 || props.PrimaryAction != nil {
+				@enhancedModalFooter(props)
+			}
+		}
+	}
+}
+
+// Enhanced modal overlay with type-specific positioning
+templ enhancedModalOverlay(props EnhancedModalProps) {
+	<div
+		if props.ID != "" {
+			id={ props.ID }
+		}
+		class={ getEnhancedModalOverlayClasses(props) }
+		if props.AlpineData != "" {
+			x-data={ props.AlpineData }
+		} else {
+			x-data={ getEnhancedModalAlpineData(props) }
+		}
+		if props.AlpineShow != "" {
+			x-show={ props.AlpineShow }
+		} else {
+			x-show={ getModalShowExpression(props) }
+		}
+		if props.AlpineInit != "" {
+			x-init={ props.AlpineInit }
+		} else {
+			x-init="initEnhancedModal()"
+		}
+		x-transition:enter={ getModalEnterTransition(props) }
+		x-transition:enter-start={ getModalEnterStartTransition(props) }
+		x-transition:enter-end={ getModalEnterEndTransition(props) }
+		x-transition:leave={ getModalLeaveTransition(props) }
+		x-transition:leave-start={ getModalLeaveStartTransition(props) }
+		x-transition:leave-end={ getModalLeaveEndTransition(props) }
+		if props.CloseOnEscape {
+			x-on:keydown.escape.window="closeModal()"
+		}
+		if props.CloseOnOverlay {
+			x-on:click="closeModalOnOverlay($event)"
+		}
+		if props.TrapFocus {
+			x-trap="open"
+		}
+		style="display: none;"
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		if props.AriaDescription != "" {
+			aria-describedby={ props.AriaDescription }
+		}
+		if props.Role != "" {
+			role={ props.Role }
+		} else {
+			role="dialog"
+		}
+		aria-modal="true"
+	>
+		{ children... }
+	</div>
+}
+
+// Enhanced modal content container with type-specific styles
+templ enhancedModalContent(props EnhancedModalProps) {
+	<div
+		class={ getEnhancedModalContentClasses(props) }
+		if props.Draggable {
+			x-data="{ isDragging: false, startX: 0, startY: 0, currentX: 0, currentY: 0 }"
+			x-on:mousedown="startDrag($event)"
+			x-bind:style="isDragging ? `transform: translate(${currentX}px, ${currentY}px)` : ''"
+		}
+		x-on:click.stop
+		if props.HXGet != "" || props.LoadDataURL != "" {
+			hx-get={ utils.IfElse(props.HXGet != "", props.HXGet, props.LoadDataURL) }
+			if props.HXTarget != "" {
+				hx-target={ props.HXTarget }
+			} else {
+				hx-target="this"
+			}
+			if props.HXSwap != "" {
+				hx-swap={ props.HXSwap }
+			} else {
+				hx-swap="innerHTML"
+			}
+			if props.LoadOnOpen {
+				hx-trigger="modalOpen"
+			}
+			if props.HXIndicator != "" {
+				hx-indicator={ props.HXIndicator }
+			}
+		}
+		if props.Resizable {
+			resize="both"
+			style="overflow: auto; min-width: 300px; min-height: 200px;"
+		}
+	>
+		{ children... }
+	</div>
+}
+
+// Enhanced modal header with progress and step indicators
+templ enhancedModalHeader(props EnhancedModalProps) {
+	<div class={ getEnhancedModalHeaderClasses(props) }>
+		<div class="flex items-start justify-between w-full">
+			<div class="flex items-start gap-3 flex-1 min-w-0">
+				// Header icon
+				if props.Icon != "" {
+					<div class="shrink-0 mt-0.5">
+						@atoms.Icon(atoms.IconProps{
+							Name:  props.Icon,
+							Size:  atoms.IconSizeLG,
+							Class: getHeaderIconClasses(props.Variant),
+						})
+					</div>
+				}
+				
+				// Header content
+				<div class="space-y-1 flex-1 min-w-0">
+					if props.Title != "" {
+						<h2 class={ getHeaderTitleClasses(props.Variant) }>
+							{ props.Title }
+						</h2>
+					}
+					if props.Subtitle != "" {
+						<h3 class="text-sm font-medium text-muted-foreground">
+							{ props.Subtitle }
+						</h3>
+					}
+					if props.Description != "" {
+						<p class="text-sm text-muted-foreground">
+							{ props.Description }
+						</p>
+					}
+				</div>
+			</div>
+			
+			// Header actions area
+			<div class="flex items-center gap-2 shrink-0">
+				// Progress indicator for multi-step modals
+				if props.ShowProgress && len(props.Steps) > 1 {
+					@enhancedModalProgressIndicator(props)
+				}
+				
+				// Close button
+				if props.Dismissible {
+					<button
+						type="button"
+						class="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+						x-on:click="closeModal()"
+						aria-label="Close"
+					>
+						@atoms.Icon(atoms.IconProps{
+							Name:  "x",
+							Size:  atoms.IconSizeMD,
+							Class: "h-4 w-4",
+						})
+					</button>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// Progress indicator for multi-step workflows
+templ enhancedModalProgressIndicator(props EnhancedModalProps) {
+	<div class="flex items-center gap-2 text-sm text-muted-foreground">
+		<span x-text="`Step ${currentStep} of ${totalSteps}`"></span>
+		<div class="w-16 h-1 bg-muted rounded-full overflow-hidden">
+			<div
+				class="h-full bg-primary transition-all duration-300 ease-out"
+				x-bind:style="`width: ${(currentStep / totalSteps) * 100}%`"
+			></div>
+		</div>
+	</div>
+}
+
+// Step navigation for multi-step modals
+templ enhancedModalStepNavigation(props EnhancedModalProps) {
+	<div class="px-6 py-4 border-b bg-muted/50">
+		<nav aria-label="Progress">
+			<ol class="flex items-center justify-between space-x-2 sm:space-x-4">
+				for i, step := range props.Steps {
+					<li class={ getStepNavItemClasses(step, i, props) }>
+						if props.StepNavigation && !props.LinearProgress {
+							<button
+								type="button"
+								class={ getStepNavButtonClasses(step, i, props) }
+								x-on:click={ fmt.Sprintf("goToStep(%d)", i+1) }
+								if step.Icon != "" {
+									aria-label={ step.Title }
+								}
+							>
+								@stepNavContent(step, i, props)
+							</button>
+						} else {
+							<div class={ getStepNavButtonClasses(step, i, props) }>
+								@stepNavContent(step, i, props)
+							</div>
+						}
+						
+						// Step connector (except for last step)
+						if i < len(props.Steps)-1 {
+							<div class="flex-1 h-px bg-border mx-2"></div>
+						}
+					</li>
+				}
+			</ol>
+		</nav>
+	</div>
+}
+
+// Step navigation content
+templ stepNavContent(step EnhancedModalStep, index int, props EnhancedModalProps) {
+	<div class="flex items-center">
+		// Step icon or number
+		<div class={ getStepIconContainerClasses(step, index, props) }>
+			if step.Completed {
+				@atoms.Icon(atoms.IconProps{
+					Name: "check",
+					Size: atoms.IconSizeSM,
+				})
+			} else if step.Icon != "" {
+				@atoms.Icon(atoms.IconProps{
+					Name: step.Icon,
+					Size: atoms.IconSizeSM,
+				})
+			} else {
+				<span class="text-xs font-medium">{ fmt.Sprint(index + 1) }</span>
+			}
+		</div>
+		
+		// Step title (hidden on mobile for space)
+		<div class="ml-3 hidden sm:block">
+			<p class="text-sm font-medium">
+				{ step.Title }
+			</p>
+			if step.Description != "" {
+				<p class="text-xs text-muted-foreground">
+					{ step.Description }
+				</p>
+			}
+		</div>
+	</div>
+}
+
+// Enhanced modal body with content routing
+templ enhancedModalBody(props EnhancedModalProps) {
+	<div class={ getEnhancedModalBodyClasses(props) }>
+		{ children... }
+	</div>
+}
+
+// Multi-step content rendering
+templ enhancedModalSteps(props EnhancedModalProps) {
+	<div class="space-y-6" x-show="!loading">
+		for i, step := range props.Steps {
+			<div
+				x-show={ fmt.Sprintf("currentStep === %d", i+1) }
+				x-transition:enter="transition ease-out duration-300"
+				x-transition:enter-start="opacity-0 transform translate-x-6"
+				x-transition:enter-end="opacity-100 transform translate-x-0"
+				x-transition:leave="transition ease-in duration-200"
+				x-transition:leave-start="opacity-100 transform translate-x-0"
+				x-transition:leave-end="opacity-0 transform -translate-x-6"
+			>
+				@enhancedModalStepContent(step, i, props)
+			</div>
+		}
+	</div>
+}
+
+// Individual step content
+templ enhancedModalStepContent(step EnhancedModalStep, index int, props EnhancedModalProps) {
+	<div class="space-y-4">
+		// Step header
+		<div class="pb-4 border-b">
+			<h3 class="text-lg font-semibold">{ step.Title }</h3>
+			if step.Description != "" {
+				<p class="text-sm text-muted-foreground mt-1">{ step.Description }</p>
+			}
+		</div>
+		
+		// Step content
+		<div class="space-y-4">
+			if step.Content != nil {
+				// Render form schema content
+				@molecules.SchemaFormRenderer(molecules.SchemaFormRendererProps{
+					Schema: step.Content,
+					Data:   props.FormData,
+					Prefix: fmt.Sprintf("step_%d_", index),
+				})
+			}
+		</div>
+	</div>
+}
+
+// Form-based modal content
+templ enhancedModalForm(props EnhancedModalProps) {
+	if props.FormSchema != nil {
+		<form
+			if props.FormID != "" {
+				id={ props.FormID }
+			}
+			class="space-y-6"
+			if props.HXPost != "" {
+				hx-post={ props.HXPost }
+			}
+			if props.HXTarget != "" {
+				hx-target={ props.HXTarget }
+			}
+			if props.SubmitOnEnter {
+				x-on:keydown.enter="if($event.target.form === $event.currentTarget) { $event.preventDefault(); submitForm(); }"
+			}
+		>
+			@molecules.SchemaFormRenderer(molecules.SchemaFormRendererProps{
+				Schema: props.FormSchema,
+				Data:   props.FormData,
+				Prefix: "modal_form_",
+			})
+		</form>
+	}
+}
+
+// File upload modal content
+templ enhancedModalFileUpload(props EnhancedModalProps) {
+	<div class="space-y-6" x-data="modalFileUpload()">
+		// Upload area
+		<div 
+			class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center transition-colors hover:border-muted-foreground/50"
+			x-bind:class="{ 'border-primary bg-primary/5': isDragOver }"
+			x-on:drop.prevent="handleDrop($event)"
+			x-on:dragover.prevent="isDragOver = true"
+			x-on:dragleave.prevent="isDragOver = false"
+		>
+			// Upload icon and text
+			<div class="space-y-4">
+				@atoms.Icon(atoms.IconProps{
+					Name: "upload",
+					Size: atoms.IconSize2XL,
+					Class: "mx-auto text-muted-foreground",
+				})
+				
+				<div>
+					<h4 class="text-lg font-semibold">Drop files here</h4>
+					<p class="text-sm text-muted-foreground">
+						or
+						<button
+							type="button"
+							class="text-primary underline"
+							x-on:click="$refs.fileInput.click()"
+						>
+							browse to upload
+						</button>
+					</p>
+					if props.UploadAccept != "" {
+						<p class="text-xs text-muted-foreground mt-2">
+							Accepted formats: { props.UploadAccept }
+						</p>
+					}
+					if props.UploadMaxSize > 0 {
+						<p class="text-xs text-muted-foreground">
+							Max size: { fmt.Sprintf("%d MB", props.UploadMaxSize) }
+						</p>
+					}
+				</div>
+			</div>
+			
+			// Hidden file input
+			<input
+				type="file"
+				x-ref="fileInput"
+				x-on:change="handleFileSelect($event)"
+				class="hidden"
+				if props.UploadMultiple {
+					multiple
+				}
+				if props.UploadAccept != "" {
+					accept={ props.UploadAccept }
+				}
+			/>
+		</div>
+		
+		// File list
+		<div x-show="files.length > 0" class="space-y-3">
+			<h5 class="font-medium">Selected Files</h5>
+			<div class="space-y-2">
+				<template x-for="(file, index) in files" :key="index">
+					<div class="flex items-center justify-between p-3 bg-muted/50 rounded">
+						<div class="flex items-center gap-3">
+							@atoms.Icon(atoms.IconProps{
+								Name: "file",
+								Size: atoms.IconSizeSM,
+							})
+							<div>
+								<p class="text-sm font-medium" x-text="file.name"></p>
+								<p class="text-xs text-muted-foreground" x-text="formatFileSize(file.size)"></p>
+							</div>
+						</div>
+						
+						// Upload progress
+						<div class="flex items-center gap-2">
+							<div class="w-16 h-1 bg-muted rounded-full overflow-hidden" x-show="file.uploading">
+								<div 
+									class="h-full bg-primary transition-all duration-300"
+									x-bind:style="`width: ${file.progress}%`"
+								></div>
+							</div>
+							
+							// Remove button
+							<button
+								type="button"
+								class="text-muted-foreground hover:text-destructive"
+								x-on:click="removeFile(index)"
+								x-show="!file.uploading"
+							>
+								@atoms.Icon(atoms.IconProps{
+									Name: "x",
+									Size: atoms.IconSizeSM,
+								})
+							</button>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
+		
+		// Upload summary
+		<div x-show="files.length > 0" class="text-sm text-muted-foreground">
+			<span x-text="`${files.length} file${files.length !== 1 ? 's' : ''} selected`"></span>
+			<span x-show="totalSize > 0" x-text="`• ${formatFileSize(totalSize)} total`"></span>
+		</div>
+	</div>
+}
+
+// Search and selection modal content
+templ enhancedModalSearch(props EnhancedModalProps) {
+	<div class="space-y-6" x-data="modalSearch()">
+		// Search input
+		<div class="relative">
+			<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+				@atoms.Icon(atoms.IconProps{
+					Name: "search",
+					Size: atoms.IconSizeSM,
+					Class: "text-muted-foreground",
+				})
+			</div>
+			<input
+				type="search"
+				class="block w-full pl-10 pr-3 py-2 border border-input bg-background rounded-md text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+				placeholder="Search..."
+				x-model="searchQuery"
+				x-on:input="debounceSearch()"
+				autofocus
+			/>
+			<div class="absolute inset-y-0 right-0 pr-3 flex items-center" x-show="searching">
+				@atoms.LoadingIcon()
+			</div>
+		</div>
+		
+		// Search results
+		<div class="space-y-2 max-h-96 overflow-y-auto" x-show="searchResults.length > 0">
+			<template x-for="(result, index) in searchResults" :key="result.id || index">
+				<div 
+					class="p-3 border rounded cursor-pointer transition-colors hover:bg-muted/50"
+					x-bind:class="{ 'bg-primary/10 border-primary': isSelected(result) }"
+					x-on:click="toggleSelection(result)"
+				>
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<div class="w-4 h-4 border rounded border-input" x-show="selectable">
+								@atoms.Icon(attrs.IconProps{
+									Name: "check",
+									Size: atoms.IconSizeSM,
+									Class: "text-primary",
+								}) if="isSelected(result)"
+							</div>
+							
+							<div>
+								<p class="text-sm font-medium" x-text="result.title || result.name"></p>
+								<p class="text-xs text-muted-foreground" x-text="result.description" x-show="result.description"></p>
+							</div>
+						</div>
+						
+						if props.MultiSelect {
+							<div class="text-xs text-muted-foreground" x-text="result.type" x-show="result.type"></div>
+						}
+					</div>
+				</div>
+			</template>
+		</div>
+		
+		// No results message
+		<div class="text-center py-8 text-muted-foreground" x-show="searchQuery && !searching && searchResults.length === 0">
+			<p>No results found for "{{ searchQuery }}"</p>
+		</div>
+		
+		// Selection summary
+		<div class="pt-4 border-t" x-show="selectedItems.length > 0">
+			<p class="text-sm text-muted-foreground">
+				<span x-text="selectedItems.length"></span>
+				<span x-text="selectedItems.length === 1 ? 'item' : 'items'"></span>
+				selected
+			</p>
+		</div>
+	</div>
+}
+
+// Dynamic HTMX content with loading state
+templ enhancedModalDynamicContent(props EnhancedModalProps) {
+	<div x-show="loading" class="flex items-center justify-center py-12">
+		@atoms.LoadingIcon()
+		<span class="ml-2 text-muted-foreground">
+			{ utils.IfElse(props.LoadingText != "", props.LoadingText, "Loading...") }
+		</span>
+	</div>
+	
+	<div x-show="!loading">
+		// Content will be loaded via HTMX
+		// Placeholder for dynamic content
+	</div>
+}
+
+// Enhanced modal footer with flexible action layout
+templ enhancedModalFooter(props EnhancedModalProps) {
+	<div class={ getEnhancedModalFooterClasses(props) }>
+		// Left side actions
+		<div class="flex items-center gap-2">
+			for _, action := range getActionsByPosition(props.Actions, "left") {
+				@enhancedModalAction(action, props)
+			}
+			
+			// Step navigation for multi-step modals
+			if len(props.Steps) > 1 {
+				// Previous step button
+				<button
+					type="button"
+					class="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground border border-input bg-background rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+					x-on:click="prevStep()"
+					x-bind:disabled="currentStep <= 1"
+				>
+					@atoms.Icon(atoms.IconProps{
+						Name: "chevron-left",
+						Size: atoms.IconSizeSM,
+						Class: "mr-2",
+					})
+					Previous
+				</button>
+			}
+		</div>
+		
+		// Right side actions
+		<div class="flex items-center gap-2">
+			if len(props.Steps) > 1 {
+				// Next step button
+				<button
+					type="button"
+					class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary border border-transparent rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+					x-on:click="nextStep()"
+					x-bind:disabled="currentStep >= totalSteps"
+					x-show="currentStep < totalSteps"
+				>
+					Next
+					@atoms.Icon(atoms.IconProps{
+						Name: "chevron-right", 
+						Size: atoms.IconSizeSM,
+						Class: "ml-2",
+					})
+				</button>
+			}
+			
+			// Center actions
+			for _, action := range getActionsByPosition(props.Actions, "center") {
+				@enhancedModalAction(action, props)
+			}
+			
+			// Right actions
+			for _, action := range getActionsByPosition(props.Actions, "right") {
+				@enhancedModalAction(action, props)
+			}
+			
+			// Default primary action if none specified
+			if props.PrimaryAction != nil {
+				@enhancedModalAction(*props.PrimaryAction, props)
+			}
+			
+			// Secondary action
+			if props.SecondaryAction != nil {
+				@enhancedModalAction(*props.SecondaryAction, props)
+			}
+			
+			// Destructive action
+			if props.DestructiveAction != nil {
+				@enhancedModalAction(*props.DestructiveAction, props)
+			}
+		</div>
+	</div>
+}
+
+// Enhanced modal action button with comprehensive integration
+templ enhancedModalAction(action EnhancedModalAction, modalProps EnhancedModalProps) {
+	if !action.Hidden {
+		<div
+			if action.VisibleIf != "" {
+				x-show={ action.VisibleIf }
+			}
+		>
+			@atoms.Button(atoms.ButtonProps{
+				Variant:     getEnhancedModalActionVariant(action),
+				Size:        getEnhancedModalActionSize(action),
+				Icon:        action.Icon,
+				IconLeft:    action.IconLeft,
+				IconRight:   action.IconRight,
+				Text:        action.Text,
+				Type:        getEnhancedModalActionType(action),
+				Loading:     action.Loading,
+				Disabled:    action.Disabled,
+				ClassName:   utils.TwMerge(getEnhancedModalActionClasses(action), action.Class),
+				ID:          action.ID,
+				
+				// HTMX integration
+				HXPost:      action.HXPost,
+				HXGet:       action.HXGet,
+				HXTarget:    getEnhancedModalActionTarget(action, modalProps),
+				HXSwap:      getEnhancedModalActionSwap(action, modalProps),
+				HXTrigger:   action.HXTrigger,
+				
+				// Alpine.js integration
+				AlpineClick: getEnhancedModalActionClick(action, modalProps),
+			})
+		</div>
+	}
+}
+
+// Convenience modal types for common use cases
+
+// ConfirmationModal renders a confirmation dialog
+templ ConfirmationModal(props EnhancedModalProps, children ...templ.Component) {
+	@EnhancedModal(EnhancedModalProps{
+		Type:           EnhancedModalDialog,
+		Size:           utils.IfElse(props.Size != "", props.Size, EnhancedModalSizeSM),
+		Variant:        utils.IfElse(props.Variant != "", props.Variant, EnhancedModalWarning),
+		Title:          utils.IfElse(props.Title != "", props.Title, "Confirm Action"),
+		Icon:           utils.IfElse(props.Icon != "", props.Icon, "alert-triangle"),
+		Dismissible:    utils.IfElse(props.Dismissible, props.Dismissible, true),
+		CloseOnOverlay: props.CloseOnOverlay,
+		CloseOnEscape:  utils.IfElse(props.CloseOnEscape, props.CloseOnEscape, true),
+		Header:         true,
+		Footer:         true,
+		
+		Actions: utils.IfElse(len(props.Actions) > 0, props.Actions, []EnhancedModalAction{
+			{
+				Text:      "Cancel",
+				Type:      "cancel",
+				Variant:   atoms.ButtonOutline,
+				AutoClose: true,
+				Position:  "right",
+			},
+			{
+				Text:      "Confirm",
+				Type:      "confirm",
+				Variant:   atoms.ButtonDestructive,
+				AutoClose: true,
+				Position:  "right",
+			},
+		}),
+		
+		// Copy other relevant props
+		Class:         props.Class,
+		ID:            props.ID,
+		Name:          props.Name,
+		Open:          props.Open,
+		AlpineData:    props.AlpineData,
+		OnOpen:        props.OnOpen,
+		OnClose:       props.OnClose,
+		OnBeforeClose: props.OnBeforeClose,
+	}, children...)
+}
+
+// DrawerModal renders a side slide-out panel
+templ DrawerModal(props EnhancedModalProps, children ...templ.Component) {
+	@EnhancedModal(EnhancedModalProps{
+		Type:           EnhancedModalDrawer,
+		Size:           utils.IfElse(props.Size != "", props.Size, EnhancedModalSizeMD),
+		Position:      utils.IfElse(props.Position != "", props.Position, EnhancedModalPositionRight),
+		Variant:       props.Variant,
+		Title:         props.Title,
+		Subtitle:      props.Subtitle,
+		Description:   props.Description,
+		Icon:          props.Icon,
+		Dismissible:   utils.IfElse(props.Dismissible, props.Dismissible, true),
+		CloseOnOverlay: utils.IfElse(props.CloseOnOverlay, props.CloseOnOverlay, true),
+		CloseOnEscape: utils.IfElse(props.CloseOnEscape, props.CloseOnEscape, true),
+		Scrollable:    true,
+		Header:        props.Header || props.Title != "",
+		Footer:        props.Footer || len(props.Actions) > 0,
+		
+		// Copy all other props
+		Actions:       props.Actions,
+		FormSchema:    props.FormSchema,
+		FormData:      props.FormData,
+		Class:         props.Class,
+		ID:            props.ID,
+		Name:          props.Name,
+		Open:          props.Open,
+		HXGet:         props.HXGet,
+		HXPost:        props.HXPost,
+		HXTarget:      props.HXTarget,
+		HXSwap:        props.HXSwap,
+		AlpineData:    props.AlpineData,
+		OnOpen:        props.OnOpen,
+		OnClose:       props.OnClose,
+		OnBeforeClose: props.OnBeforeClose,
+	}, children...)
+}
+
+// BottomSheetModal renders a mobile-optimized bottom sheet
+templ BottomSheetModal(props EnhancedModalProps, children ...templ.Component) {
+	@EnhancedModal(EnhancedModalProps{
+		Type:            EnhancedModalBottomSheet,
+		Size:            EnhancedModalSizeFull,
+		Variant:        props.Variant,
+		Title:          props.Title,
+		Subtitle:       props.Subtitle,
+		Description:    props.Description,
+		Icon:           props.Icon,
+		Dismissible:    utils.IfElse(props.Dismissible, props.Dismissible, true),
+		CloseOnOverlay: utils.IfElse(props.CloseOnOverlay, props.CloseOnOverlay, true),
+		CloseOnEscape:  utils.IfElse(props.CloseOnEscape, props.CloseOnEscape, true),
+		Scrollable:     true,
+		Header:         props.Header || props.Title != "",
+		Footer:         props.Footer || len(props.Actions) > 0,
+		MobileFullscreen: true,
+		
+		// Copy all other props
+		Actions:        props.Actions,
+		FormSchema:     props.FormSchema,
+		FormData:       props.FormData,
+		Class:          props.Class,
+		ID:             props.ID,
+		Name:           props.Name,
+		Open:           props.Open,
+		HXGet:          props.HXGet,
+		HXPost:         props.HXPost,
+		HXTarget:       props.HXTarget,
+		HXSwap:         props.HXSwap,
+		AlpineData:     props.AlpineData,
+		OnOpen:         props.OnOpen,
+		OnClose:        props.OnClose,
+		OnBeforeClose:  props.OnBeforeClose,
+	}, children...)
+}
+
+// PopoverModal renders a small contextual popup
+templ PopoverModal(props EnhancedModalProps, children ...templ.Component) {
+	@EnhancedModal(EnhancedModalProps{
+		Type:           EnhancedModalPopover,
+		Size:           utils.IfElse(props.Size != "", props.Size, EnhancedModalSizeAuto),
+		Position:       utils.IfElse(props.Position != "", props.Position, EnhancedModalPositionTop),
+		Variant:        props.Variant,
+		Title:          props.Title,
+		Description:    props.Description,
+		Dismissible:    utils.IfElse(props.Dismissible, props.Dismissible, true),
+		CloseOnOverlay: utils.IfElse(props.CloseOnOverlay, props.CloseOnOverlay, true),
+		CloseOnEscape:  utils.IfElse(props.CloseOnEscape, props.CloseOnEscape, true),
+		Backdrop:       false,
+		Header:         props.Header || props.Title != "",
+		Footer:         props.Footer || len(props.Actions) > 0,
+		
+		// Copy all other props
+		Actions:       props.Actions,
+		Class:         props.Class,
+		ID:            props.ID,
+		Name:          props.Name,
+		Open:          props.Open,
+		AlpineData:    props.AlpineData,
+		OnOpen:        props.OnOpen,
+		OnClose:       props.OnClose,
+		OnBeforeClose: props.OnBeforeClose,
+	}, children...)
+}
+
+// FullscreenModal renders a full-screen modal
+templ FullscreenModal(props EnhancedModalProps, children ...templ.Component) {
+	@EnhancedModal(EnhancedModalProps{
+		Type:           EnhancedModalFullscreen,
+		Size:           EnhancedModalSizeFull,
+		Variant:        props.Variant,
+		Title:          props.Title,
+		Subtitle:       props.Subtitle,
+		Description:    props.Description,
+		Icon:           props.Icon,
+		Dismissible:    utils.IfElse(props.Dismissible, props.Dismissible, true),
+		CloseOnOverlay: false, // No overlay in fullscreen
+		CloseOnEscape:  utils.IfElse(props.CloseOnEscape, props.CloseOnEscape, true),
+		Scrollable:     true,
+		Header:         props.Header || props.Title != "",
+		Footer:         props.Footer || len(props.Actions) > 0,
+		
+		// Copy all other props
+		Actions:        props.Actions,
+		Steps:          props.Steps,
+		CurrentStep:    props.CurrentStep,
+		ShowStepNav:    props.ShowStepNav,
+		FormSchema:     props.FormSchema,
+		FormData:       props.FormData,
+		Class:          props.Class,
+		ID:             props.ID,
+		Name:           props.Name,
+		Open:           props.Open,
+		HXGet:          props.HXGet,
+		HXPost:         props.HXPost,
+		HXTarget:       props.HXTarget,
+		HXSwap:         props.HXSwap,
+		AlpineData:     props.AlpineData,
+		OnOpen:         props.OnOpen,
+		OnClose:        props.OnClose,
+		OnBeforeClose:  props.OnBeforeClose,
+	}, children...)
+}

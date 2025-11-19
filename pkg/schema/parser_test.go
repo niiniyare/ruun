@@ -1,14 +1,18 @@
 package schema
+
 import (
 	"context"
 	"encoding/json"
 	"testing"
+
 	"github.com/stretchr/testify/suite"
 )
+
 type ParserTestSuite struct {
 	suite.Suite
 	ctx context.Context
 }
+
 func TestParserSuite(t *testing.T) {
 	suite.Run(t, new(ParserTestSuite))
 }
@@ -423,6 +427,7 @@ func (s *ParserTestSuite) TestParser_Options() {
 		s.Require().Equal(200, parser.maxFieldCount)
 	})
 }
+
 // Benchmark tests - these remain as regular test functions
 func BenchmarkParser_Parse(b *testing.B) {
 	jsonData := []byte(`{

@@ -480,4 +480,3 @@ func minifyCSS(css string) string {
 	css = strings.ReplaceAll(css, "; ", ";")
 	return css
 }
-

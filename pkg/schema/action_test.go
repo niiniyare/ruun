@@ -1,21 +1,26 @@
 package schema
+
 import (
 	"context"
 	"testing"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 type ActionTestSuite struct {
 	suite.Suite
 	ctx context.Context
 }
+
 func (suite *ActionTestSuite) SetupTest() {
 	suite.ctx = context.Background()
 }
 func TestActionTestSuite(t *testing.T) {
 	suite.Run(t, new(ActionTestSuite))
 }
+
 // ==================== Additional Coverage Tests ====================
 func (suite *ActionTestSuite) TestActionSetGetEvaluator() {
 	action := &Action{
@@ -208,10 +213,12 @@ func (suite *ActionTestSuite) TestActionGetAlpineConfig() {
 	cfg = action.GetAlpineConfig()
 	suite.Require().Equal("click: handleClick()", cfg.XOn)
 }
+
 // Helper method to create a mock condition evaluator
 func (suite *ActionTestSuite) createMockConditionEvaluator() *condition.Evaluator {
 	return condition.NewEvaluator(nil, condition.DefaultEvalOptions())
 }
+
 // Test action visibility methods
 func (suite *ActionTestSuite) TestActionVisibility() {
 	// Test visible action
@@ -235,6 +242,7 @@ func (suite *ActionTestSuite) TestActionVisibility() {
 	require.NoError(suite.T(), err)
 	require.False(suite.T(), visible)
 }
+
 // Test action enabled methods
 func (suite *ActionTestSuite) TestActionEnabled() {
 	// Test enabled action
@@ -254,6 +262,7 @@ func (suite *ActionTestSuite) TestActionEnabled() {
 	}
 	require.False(suite.T(), disabledAction.IsEnabled())
 }
+
 // Test action variant classes
 func (suite *ActionTestSuite) TestActionVariantClass() {
 	testCases := []struct {
@@ -278,6 +287,7 @@ func (suite *ActionTestSuite) TestActionVariantClass() {
 		require.Equal(suite.T(), tc.expected, action.GetVariantClass())
 	}
 }
+
 // Test action size classes
 func (suite *ActionTestSuite) TestActionSizeClass() {
 	testCases := []struct {
@@ -301,6 +311,7 @@ func (suite *ActionTestSuite) TestActionSizeClass() {
 		require.Equal(suite.T(), tc.expected, action.GetSizeClass())
 	}
 }
+
 // Test action validation edge cases
 func (suite *ActionTestSuite) TestActionValidationEdgeCases() {
 	// Test action with empty ID
@@ -353,6 +364,7 @@ func (suite *ActionTestSuite) TestActionValidationEdgeCases() {
 	err = action5.Validate(suite.ctx)
 	require.NoError(suite.T(), err)
 }
+
 // Test action methods
 func (suite *ActionTestSuite) TestActionMethods() {
 	action := Action{
@@ -379,6 +391,7 @@ func (suite *ActionTestSuite) TestActionMethods() {
 	canExecute := action.CanExecute([]string{"read", "write"})
 	suite.Require().True(canExecute) // Should return true when no permissions required
 }
+
 // Test action validation methods
 func (suite *ActionTestSuite) TestActionValidation() {
 	// Test valid action
@@ -415,10 +428,12 @@ func (suite *ActionTestSuite) TestActionValidation() {
 	suite.Require().NoError(err)
 	suite.Require().Equal(ActionButton, actionWithEmptyType.Type) // Should default to button
 }
+
 // Test action serialization
 func (suite *ActionTestSuite) TestActionSerialization() {
 	// Skip - Action struct doesn't have ToJSON/FromJSON methods
 }
+
 // Test action copying
 func (suite *ActionTestSuite) TestActionCopy() {
 	original := Action{
@@ -435,6 +450,7 @@ func (suite *ActionTestSuite) TestActionCopy() {
 	suite.Require().NotNil(cloned)
 	suite.Require().Equal(original.ID, cloned.ID)
 }
+
 // Test action with conditions
 func (suite *ActionTestSuite) TestActionWithConditions() {
 	action := Action{
@@ -464,6 +480,7 @@ func (suite *ActionTestSuite) TestActionWithConditions() {
 	canExecute = action.CanExecute([]string{"admin"})
 	suite.Require().True(canExecute) // Should return true since no permissions are set
 }
+
 // Test action theme application
 func (suite *ActionTestSuite) TestActionTheme() {
 	action := Action{
@@ -490,6 +507,7 @@ func (suite *ActionTestSuite) TestActionTheme() {
 		suite.Require().Equal("#28a745", action.Theme.Colors["primary"])
 	}
 }
+
 // Test action accessibility
 func (suite *ActionTestSuite) TestActionAccessibility() {
 	// Test accessibility features when implemented
@@ -502,6 +520,7 @@ func (suite *ActionTestSuite) TestActionAccessibility() {
 	suite.Require().Equal("accessible-action", action.ID)
 	suite.Require().Equal(ActionSubmit, action.Type)
 }
+
 // Test action states
 func (suite *ActionTestSuite) TestActionStates() {
 	action := Action{
@@ -530,6 +549,7 @@ func (suite *ActionTestSuite) TestActionStates() {
 	suite.Require().False(action.Loading)
 	suite.Require().False(action.Hidden)
 }
+
 // Test action execution context
 func (suite *ActionTestSuite) TestActionExecutionContext() {
 	// Test execution context when implemented
@@ -542,6 +562,7 @@ func (suite *ActionTestSuite) TestActionExecutionContext() {
 	suite.Require().Equal("context-action", action.ID)
 	suite.Require().Equal(ActionSubmit, action.Type)
 }
+
 // Test action type checking methods
 func (suite *ActionTestSuite) TestActionTypeChecking() {
 	// Test IsSubmitAction
@@ -569,6 +590,7 @@ func (suite *ActionTestSuite) TestActionTypeChecking() {
 	suite.Require().False(customAction.IsLinkAction())
 	suite.Require().True(customAction.IsCustomAction())
 }
+
 // Test action URL methods
 func (suite *ActionTestSuite) TestActionURLMethods() {
 	// Test GetURL with link action and config
@@ -595,6 +617,7 @@ func (suite *ActionTestSuite) TestActionURLMethods() {
 	buttonAction := &Action{ID: "button", Type: ActionButton, Text: "Button"}
 	suite.Require().Equal("", buttonAction.GetURL())
 }
+
 // Test action HTTP method
 func (suite *ActionTestSuite) TestActionHTTPMethod() {
 	// Test GetHTTPMethod with HTMX config
@@ -624,6 +647,7 @@ func (suite *ActionTestSuite) TestActionHTTPMethod() {
 	submitAction := &Action{ID: "submit", Type: ActionSubmit, Text: "Submit"}
 	suite.Require().Equal("POST", submitAction.GetHTTPMethod()) // Submit actions default to POST
 }
+
 // Test action debounce and throttle methods
 func (suite *ActionTestSuite) TestActionDebounceThrottle() {
 	// Test ShouldDebounce with config
@@ -658,6 +682,7 @@ func (suite *ActionTestSuite) TestActionDebounceThrottle() {
 	suite.Require().Equal(1000, throttleAction.GetThrottleDelay())
 	suite.Require().Equal(0, noThrottleAction.GetThrottleDelay())
 }
+
 // Test action builder methods
 func (suite *ActionTestSuite) TestActionBuilder() {
 	// Test NewAction
@@ -699,6 +724,7 @@ func (suite *ActionTestSuite) TestActionBuilder() {
 	suite.Require().Equal("lg", action.Size)
 	suite.Require().Equal("save", action.Icon)
 }
+
 // Test action factory methods
 func (suite *ActionTestSuite) TestActionFactoryMethods() {
 	// Test NewSubmitAction
@@ -731,6 +757,7 @@ func (suite *ActionTestSuite) TestActionFactoryMethods() {
 	suite.Require().Equal("destructive", builtDelete.Variant)
 	suite.Require().NotNil(builtDelete.Confirm) // Should have confirmation
 }
+
 // Test action builder state methods
 func (suite *ActionTestSuite) TestActionBuilderStates() {
 	builder := NewAction("test", ActionButton, "Test")

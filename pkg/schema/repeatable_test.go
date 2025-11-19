@@ -1,10 +1,13 @@
 package schema
+
 import (
 	"context"
 	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 // RepeatableSimpleTestSuite tests the RepeatableField functionality with actual API
 type RepeatableSimpleTestSuite struct {
 	suite.Suite
@@ -12,6 +15,7 @@ type RepeatableSimpleTestSuite struct {
 	manager         *RepeatableManager
 	template        []Field
 }
+
 func (s *RepeatableSimpleTestSuite) SetupTest() {
 	s.template = []Field{
 		{
@@ -318,6 +322,7 @@ func (s *RepeatableSimpleTestSuite) TestBuilderEdgeCases() {
 	require.False(s.T(), field.Sortable)
 	require.True(s.T(), field.Collapsible)
 }
+
 // Run the test suite
 func TestRepeatableSimpleTestSuite(t *testing.T) {
 	suite.Run(t, new(RepeatableSimpleTestSuite))

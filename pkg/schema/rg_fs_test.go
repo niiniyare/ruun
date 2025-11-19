@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestNewFilesystemStorage(t *testing.T) {
 	tempDir := t.TempDir()
 	tests := []struct {
@@ -491,6 +493,7 @@ func TestFilesystemStorage_ConcurrentAccess(t *testing.T) {
 		t.Errorf("Expected %d schemas after concurrent operations, got %d", expectedCount, len(schemaIDs))
 	}
 }
+
 // Helper functions
 func setupFilesystemTest(t *testing.T) (*FilesystemStorage, string) {
 	tempDir := t.TempDir()

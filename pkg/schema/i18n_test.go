@@ -1,17 +1,21 @@
 package schema
+
 import (
 	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
+
 	"github.com/stretchr/testify/suite"
 )
+
 type I18nTestSuite struct {
 	suite.Suite
 	ctx     context.Context
 	tempDir string
 }
+
 func (suite *I18nTestSuite) SetupTest() {
 	suite.ctx = context.Background()
 	// Create temporary directory for translation files
@@ -27,6 +31,7 @@ func (suite *I18nTestSuite) TearDownTest() {
 func TestI18nTestSuite(t *testing.T) {
 	suite.Run(t, new(I18nTestSuite))
 }
+
 // Test I18nManager creation and basic functionality
 func (suite *I18nTestSuite) TestI18nManagerCreation() {
 	manager := NewI18nManager("en", "en")
@@ -36,6 +41,7 @@ func (suite *I18nTestSuite) TestI18nManagerCreation() {
 	manager.SetLocale("es")
 	suite.Require().Equal("es", manager.GetLocale())
 }
+
 // Test loading default translations
 func (suite *I18nTestSuite) TestLoadDefaultTranslations() {
 	manager := NewI18nManager("en", "en")
@@ -53,6 +59,7 @@ func (suite *I18nTestSuite) TestLoadDefaultTranslations() {
 	})
 	suite.Require().Equal("Email es requerido", message)
 }
+
 // Test field localization methods
 func (suite *I18nTestSuite) TestFieldLocalization() {
 	field := &Field{
@@ -103,6 +110,7 @@ func (suite *I18nTestSuite) TestFieldLocalization() {
 	// Test fallback for unsupported locale
 	suite.Require().Equal("First Name", field.GetLocalizedLabel("de"))
 }
+
 // Test schema localization
 func (suite *I18nTestSuite) TestSchemaLocalization() {
 	schema := &Schema{
@@ -168,6 +176,7 @@ func (suite *I18nTestSuite) TestSchemaLocalization() {
 	suite.Require().Equal("Email", localizedSchema.Fields[0].Label)
 	suite.Require().Equal("Enter email", localizedSchema.Fields[0].Placeholder)
 }
+
 // Test RTL language detection
 func (suite *I18nTestSuite) TestRTLDetection() {
 	schemaI18n := &SchemaI18n{
@@ -205,6 +214,7 @@ func (suite *I18nTestSuite) TestRTLDetection() {
 	}
 	suite.Require().False(schemaLTR.IsRTL("en"))
 }
+
 // Test I18nLoader file loading
 func (suite *I18nTestSuite) TestI18nLoader() {
 	// Create test translation files
@@ -258,6 +268,7 @@ func (suite *I18nTestSuite) TestI18nLoader() {
 	suite.Require().NoError(err)
 	suite.Require().Equal(enMessages, cachedMessages)
 }
+
 // Test message interpolation
 func (suite *I18nTestSuite) TestMessageInterpolation() {
 	manager := NewI18nManager("en", "en")
@@ -280,6 +291,7 @@ func (suite *I18nTestSuite) TestMessageInterpolation() {
 	message = manager.GetValidationMessage("invalid_email", nil)
 	suite.Require().Equal("Please enter a valid email address", message)
 }
+
 // Test fallback behavior
 func (suite *I18nTestSuite) TestFallbackBehavior() {
 	manager := NewI18nManager("de", "en") // German with English fallback
@@ -294,6 +306,7 @@ func (suite *I18nTestSuite) TestFallbackBehavior() {
 	message = manager.GetValidationMessage("unknown_key", nil)
 	suite.Require().Equal("unknown_key", message)
 }
+
 // Test action message retrieval
 func (suite *I18nTestSuite) TestActionMessages() {
 	manager := NewI18nManager("en", "en")
@@ -311,6 +324,7 @@ func (suite *I18nTestSuite) TestActionMessages() {
 	suite.Require().Equal("Enviar", manager.GetMessage("actions.submit", nil))
 	suite.Require().Equal("Eliminar", manager.GetMessage("actions.delete", nil))
 }
+
 // Test status messages
 func (suite *I18nTestSuite) TestStatusMessages() {
 	manager := NewI18nManager("en", "en")
@@ -326,6 +340,7 @@ func (suite *I18nTestSuite) TestStatusMessages() {
 	suite.Require().Equal("Error al guardar cambios", manager.GetMessage("messages.save_error", nil))
 	suite.Require().Equal("Cargando...", manager.GetMessage("messages.loading", nil))
 }
+
 // Test pluralization
 func (suite *I18nTestSuite) TestPluralization() {
 	manager := NewI18nManager("en", "en")
@@ -347,6 +362,7 @@ func (suite *I18nTestSuite) TestPluralization() {
 	message = manager.GetPluralMessage("items", 0, "en")
 	suite.Require().Equal("0 items", message)
 }
+
 // Test JSON flattening
 func (suite *I18nTestSuite) TestJSONFlattening() {
 	nested := map[string]any{
@@ -371,6 +387,7 @@ func (suite *I18nTestSuite) TestJSONFlattening() {
 	suite.Require().Equal("Cancel", flattened["actions.cancel"])
 	suite.Require().Equal("Simple value", flattened["simple"])
 }
+
 // Test edge cases
 func (suite *I18nTestSuite) TestEdgeCases() {
 	manager := NewI18nManager("", "en") // Empty locale
@@ -403,6 +420,7 @@ func (suite *I18nTestSuite) TestEdgeCases() {
 	suite.Require().NoError(err)
 	suite.Require().Equal("Test Schema", localizedSchema.Title)
 }
+
 // Test concurrent access
 func (suite *I18nTestSuite) TestConcurrentAccess() {
 	manager := NewI18nManager("en", "en")
@@ -445,6 +463,7 @@ func (suite *I18nTestSuite) TestConcurrentAccess() {
 	locale := manager.GetLocale()
 	suite.Require().True(locale == "en" || locale == "es")
 }
+
 // Test complete localization workflow
 func (suite *I18nTestSuite) TestCompleteWorkflow() {
 	// Create a complete schema with I18n

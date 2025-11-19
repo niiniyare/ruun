@@ -129,9 +129,10 @@ type ConditionalOverride struct {
 //   - Validation and error handling
 //
 // Usage:
-//   manager := NewThemeManager()
-//   manager.RegisterTheme(myTheme)
-//   customized := manager.ApplyOverrides("base-theme", overrides)
+//
+//	manager := NewThemeManager()
+//	manager.RegisterTheme(myTheme)
+//	customized := manager.ApplyOverrides("base-theme", overrides)
 type ThemeManager struct {
 	// Core storage
 	themes map[string]*Theme
@@ -425,7 +426,7 @@ func (tm *ThemeManager) mergeThemes(parent, child *Theme) *Theme {
 
 func (tm *ThemeManager) applyOverridesToTheme(theme *Theme, overrides *ThemeOverrides) *Theme {
 	customized := tm.cloneTheme(theme)
-	
+
 	// Apply token overrides
 	if len(overrides.TokenOverrides) > 0 {
 		// TODO: Deep apply token overrides

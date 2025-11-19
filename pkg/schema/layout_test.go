@@ -1,15 +1,20 @@
 package schema
+
 import (
 	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 type LayoutTestSuite struct {
 	suite.Suite
 }
+
 func TestLayoutTestSuite(t *testing.T) {
 	suite.Run(t, new(LayoutTestSuite))
 }
+
 // ==================== Additional Layout Coverage ====================
 func (suite *LayoutTestSuite) TestLayoutConditionEvaluation() {
 	// Skip condition evaluation tests as methods don't exist
@@ -31,6 +36,7 @@ func (suite *LayoutTestSuite) TestLayoutUtilityMethods() {
 	layout.Type = LayoutSections
 	suite.Require().Equal(LayoutSections, layout.Type)
 }
+
 // Test grid layout functionality
 func (suite *LayoutTestSuite) TestGridLayout() {
 	layout := &Layout{
@@ -47,6 +53,7 @@ func (suite *LayoutTestSuite) TestGridLayout() {
 	layout.Gap = "lg"
 	require.Equal(suite.T(), "lg", layout.Gap)
 }
+
 // Test flex layout direction
 func (suite *LayoutTestSuite) TestFlexDirection() {
 	layout := &Layout{
@@ -60,6 +67,7 @@ func (suite *LayoutTestSuite) TestFlexDirection() {
 	layout.Direction = "row-reverse"
 	require.Equal(suite.T(), "row-reverse", layout.Direction)
 }
+
 // Test layout type checking
 func (suite *LayoutTestSuite) TestLayoutTypeChecking() {
 	// Test HasTabs
@@ -85,6 +93,7 @@ func (suite *LayoutTestSuite) TestLayoutTypeChecking() {
 	require.True(suite.T(), sectionLayout.HasSections())
 	require.False(suite.T(), gridLayout.HasSections())
 }
+
 // Test field organization by sections
 func (suite *LayoutTestSuite) TestFieldsForSection() {
 	layout := &Layout{
@@ -110,6 +119,7 @@ func (suite *LayoutTestSuite) TestFieldsForSection() {
 	// Test that we have the expected number of sections
 	require.Len(suite.T(), layout.Sections, 2)
 }
+
 // Test field organization by tabs
 func (suite *LayoutTestSuite) TestFieldsForTab() {
 	layout := &Layout{
@@ -135,6 +145,7 @@ func (suite *LayoutTestSuite) TestFieldsForTab() {
 	// Test that we have the expected number of tabs
 	require.Len(suite.T(), layout.Tabs, 2)
 }
+
 // Test field organization by steps
 func (suite *LayoutTestSuite) TestFieldsForStep() {
 	layout := &Layout{
@@ -162,6 +173,7 @@ func (suite *LayoutTestSuite) TestFieldsForStep() {
 	// Test that we have the expected number of steps
 	require.Len(suite.T(), layout.Steps, 2)
 }
+
 // Test ordered steps
 func (suite *LayoutTestSuite) TestOrderedSteps() {
 	layout := &Layout{
@@ -208,6 +220,7 @@ func (suite *LayoutTestSuite) TestOrderedSteps() {
 	require.Equal(suite.T(), "step2", step2.ID)
 	require.Equal(suite.T(), "step3", step3.ID)
 }
+
 // Test layout validation
 func (suite *LayoutTestSuite) TestLayoutValidation() {
 	// Create a mock schema for validation

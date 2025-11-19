@@ -1,13 +1,16 @@
 package schema
+
 import (
 	"context"
 	"testing"
 	"time"
 )
+
 // MockStorage for testing
 type MockStorage struct {
 	data map[string][]byte
 }
+
 func NewMockStorage() *MockStorage {
 	return &MockStorage{
 		data: make(map[string][]byte),
@@ -41,12 +44,14 @@ func (m *MockStorage) Exists(ctx context.Context, id string) (bool, error) {
 	_, exists := m.data[id]
 	return exists, nil
 }
+
 // StorageError for testing
 type StorageError struct {
 	Operation string
 	ID        string
 	Message   string
 }
+
 func (e *StorageError) Error() string {
 	return e.Operation + " " + e.ID + ": " + e.Message
 }
@@ -405,6 +410,7 @@ func TestRegistry_WithCache(t *testing.T) {
 		t.Error("Get() from cache returned wrong schema")
 	}
 }
+
 // Benchmark tests
 func BenchmarkRegistry_Get(b *testing.B) {
 	storage := NewMockStorage()

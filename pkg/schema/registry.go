@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"encoding/json"
@@ -6,6 +7,7 @@ import (
 	"sync"
 	"time"
 )
+
 // Storage defines the interface for schema storage backends
 type Storage interface {
 	// Get retrieves a schema by ID
@@ -19,6 +21,7 @@ type Storage interface {
 	// Exists checks if schema exists
 	Exists(ctx context.Context, id string) (bool, error)
 }
+
 // Registry manages schema storage and caching
 type Registry struct {
 	storage     Storage
@@ -31,6 +34,7 @@ type cacheEntry struct {
 	schema    *Schema
 	expiresAt time.Time
 }
+
 // RegistryConfig configures the registry
 type RegistryConfig struct {
 	Storage     Storage
@@ -39,6 +43,7 @@ type RegistryConfig struct {
 	CacheTTL    time.Duration
 	EnableCache bool
 }
+
 // NewRegistry creates a new schema registry
 func NewRegistry(config RegistryConfig) *Registry {
 	if config.MemoryTTL == 0 {
@@ -54,6 +59,7 @@ func NewRegistry(config RegistryConfig) *Registry {
 		parser:      NewParser(),
 	}
 }
+
 // Get retrieves a schema by ID with caching
 func (r *Registry) Get(ctx context.Context, id string) (*Schema, error) {
 	// 1. Check memory cache (1ms)
@@ -95,10 +101,12 @@ func (r *Registry) Get(ctx context.Context, id string) (*Schema, error) {
 	r.cacheInMemory(id, schema)
 	return schema, nil
 }
+
 // Register stores a schema (implements Registry interface)
 func (r *Registry) Register(ctx context.Context, schema *Schema) error {
 	return r.Set(ctx, schema.ID, schema)
 }
+
 // Set stores a schema (internal method)
 func (r *Registry) Set(ctx context.Context, id string, schema *Schema) error {
 	// Validate schema first
@@ -123,6 +131,7 @@ func (r *Registry) Set(ctx context.Context, id string, schema *Schema) error {
 	}
 	return nil
 }
+
 // Delete removes a schema
 func (r *Registry) Delete(ctx context.Context, id string) error {
 	// Delete from primary storage
@@ -140,6 +149,7 @@ func (r *Registry) Delete(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
 // Update updates an existing schema (implements Registry interface)
 func (r *Registry) Update(ctx context.Context, schema *Schema) error {
 	// Check if schema exists first
@@ -153,6 +163,7 @@ func (r *Registry) Update(ctx context.Context, schema *Schema) error {
 	// Update is same as Set for this implementation
 	return r.Set(ctx, schema.ID, schema)
 }
+
 // List returns all schemas (implements Registry interface)
 func (r *Registry) List(ctx context.Context, filter map[string]any) ([]*Schema, error) {
 	// Get all schema IDs from storage
@@ -175,20 +186,24 @@ func (r *Registry) List(ctx context.Context, filter map[string]any) ([]*Schema, 
 	}
 	return schemas, nil
 }
+
 // ListIDs returns all schema IDs (helper method)
 func (r *Registry) ListIDs(ctx context.Context) ([]string, error) {
 	return r.storage.List(ctx)
 }
+
 // GetVersion retrieves a specific version of a schema (implements Registry interface)
 func (r *Registry) GetVersion(ctx context.Context, id, version string) (*Schema, error) {
 	// For this implementation, we'll use version as part of the key
 	versionedID := fmt.Sprintf("%s@%s", id, version)
 	return r.Get(ctx, versionedID)
 }
+
 // Exists checks if a schema exists
 func (r *Registry) Exists(ctx context.Context, id string) (bool, error) {
 	return r.storage.Exists(ctx, id)
 }
+
 // matchesFilter checks if a schema matches the given filter criteria
 func (r *Registry) matchesFilter(s *Schema, filter map[string]any) bool {
 	for key, value := range filter {
@@ -230,6 +245,7 @@ func (r *Registry) matchesFilter(s *Schema, filter map[string]any) bool {
 	}
 	return true
 }
+
 // cacheInMemory stores schema in memory cache
 func (r *Registry) cacheInMemory(id string, schema *Schema) {
 	r.mu.Lock()
@@ -239,6 +255,7 @@ func (r *Registry) cacheInMemory(id string, schema *Schema) {
 		expiresAt: time.Now().Add(5 * time.Minute),
 	}
 }
+
 // CleanupExpired removes expired entries from memory cache
 func (r *Registry) CleanupExpired() {
 	r.mu.Lock()
@@ -250,6 +267,7 @@ func (r *Registry) CleanupExpired() {
 		}
 	}
 }
+
 // StartCleanupTask starts a background task to clean expired entries
 func (r *Registry) StartCleanupTask() {
 	ticker := time.NewTicker(1 * time.Minute)

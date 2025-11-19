@@ -449,7 +449,7 @@ func tagContent(props TagProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if props.Removable && !props.Disabled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<button type=\"button\" class=\"ml-1 h-3 w-3 rounded-full outline-none ring-offset-background transition-colors hover:bg-foreground/20 focus:bg-foreground/20 focus:ring-1 focus:ring-ring\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<button type=\"button\" class=\"tag-remove-btn\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -489,7 +489,7 @@ func tagContent(props TagProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Icon(IconProps{Name: "x", Size: IconSizeXS}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconProps{Name: "x", Size: IconSizeXS, ClassName: "tag-remove-icon"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -685,11 +685,11 @@ func Tags(props TagsProps) templ.Component {
 			}
 		}
 		if props.Editable {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<template x-for=\"(tag, index) in tags\" x-key=\"index\"><span class=\"inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1 text-xs font-medium text-foreground\"><span x-text=\"tag\"></span> <button type=\"button\" class=\"ml-1 h-3 w-3 rounded-full outline-none ring-offset-background transition-colors hover:bg-foreground/20 focus:bg-foreground/20 focus:ring-1 focus:ring-ring\" x-on:click=\"removeTag(index)\" aria-label=\"Remove tag\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<template x-for=\"(tag, index) in tags\" x-key=\"index\"><span class=\"inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1 text-xs font-medium text-foreground\"><span x-text=\"tag\"></span> <button type=\"button\" class=\"tag-remove-btn\" x-on:click=\"removeTag(index)\" aria-label=\"Remove tag\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Icon(IconProps{Name: "x", Size: IconSizeXS}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconProps{Name: "x", Size: IconSizeXS, ClassName: "tag-remove-icon"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1045,4 +1045,68 @@ func SelectableTags(props TagsProps) templ.Component {
 	})
 }
 
+// Builder Pattern (functional options)
+type TagOption func(*TagProps)
+
+func NewTag(opts ...TagOption) TagProps {
+	props := TagProps{
+		Variant: TagDefault,
+		Size:    TagSizeMD,
+	}
+	for _, opt := range opts {
+		opt(&props)
+	}
+	return props
+}
+
+func WithTagVariant(variant TagVariant) TagOption {
+	return func(p *TagProps) { p.Variant = variant }
+}
+
+func WithTagSize(size TagSize) TagOption {
+	return func(p *TagProps) { p.Size = size }
+}
+
+func WithTagText(text string) TagOption {
+	return func(p *TagProps) { p.Text = text }
+}
+
+func WithTagValue(value string) TagOption {
+	return func(p *TagProps) { p.Value = value }
+}
+
+func WithTagIcon(icon string) TagOption {
+	return func(p *TagProps) { p.Icon = icon }
+}
+
+func AsTagSelected() TagOption {
+	return func(p *TagProps) { p.Selected = true }
+}
+
+func AsTagRemovable(onRemove string) TagOption {
+	return func(p *TagProps) {
+		p.Removable = true
+		p.OnRemove = onRemove
+	}
+}
+
+func AsTagDisabled() TagOption {
+	return func(p *TagProps) { p.Disabled = true }
+}
+
+func WithTagClass(class string) TagOption {
+	return func(p *TagProps) { p.ClassName = class }
+}
+
+// Key Improvements in this refactored version:
+// 1. Pure Presentation: No business logic, just visual rendering and state management
+// 2. Compiled Theme Classes: Uses "tag", "tag-primary", etc. from compiled CSS
+// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
+// 4. Clean Props Interface: Focused on presentation concerns only
+// 5. Variant System: Multiple tag styles (default, success, warning, etc.)
+// 6. Size System: Multiple tag sizes (sm, md, lg)
+// 7. Icon Integration: Uses Icon atom for consistent iconography
+// 8. Editable Support: Built-in Alpine.js integration for dynamic tags
+// 9. Selectable Support: Tag selection and multi-selection patterns
+// 10. Accessibility: Proper ARIA labels and semantic markup
 var _ = templruntime.GeneratedTemplate

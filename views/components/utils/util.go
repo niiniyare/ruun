@@ -56,3 +56,18 @@ func RandomID() string {
 // ScriptVersion is a timestamp generated at app start for cache busting.
 // Used in Script() templates to append ?v=<timestamp> to script URLs.
 var ScriptVersion = fmt.Sprintf("%d", time.Now().Unix())
+
+// GetStringValue safely converts any value to string
+func GetStringValue(value any) string {
+	if value == nil {
+		return ""
+	}
+	switch v := value.(type) {
+	case string:
+		return v
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}

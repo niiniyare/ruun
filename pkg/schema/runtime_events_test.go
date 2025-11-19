@@ -1,12 +1,15 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"testing"
 	"time"
+
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 // EventHandlerTestSuite defines the test suite for EventHandler
 type EventHandlerTestSuite struct {
 	suite.Suite
@@ -15,6 +18,7 @@ type EventHandlerTestSuite struct {
 	runtime *Runtime
 	handler *EventHandler
 }
+
 // SetupTest runs before each test
 func (s *EventHandlerTestSuite) SetupTest() {
 	s.ctx = context.Background()
@@ -22,12 +26,14 @@ func (s *EventHandlerTestSuite) SetupTest() {
 	s.runtime = createTestRuntimeWithValidator()
 	s.handler = NewEventHandler()
 }
+
 // TearDownTest runs after each test
 func (s *EventHandlerTestSuite) TearDownTest() {
 	// Clean up if needed
 	s.handler = nil
 	s.runtime = nil
 }
+
 // TestNewEventHandler tests event handler initialization
 func (s *EventHandlerTestSuite) TestNewEventHandler() {
 	handler := NewEventHandler()
@@ -35,6 +41,7 @@ func (s *EventHandlerTestSuite) TestNewEventHandler() {
 	require.NotNil(s.T(), handler.handlers, "Event handlers map should be initialized")
 	require.Equal(s.T(), ValidateOnBlur, handler.validationTiming, "Default validation timing should be ValidateOnBlur")
 }
+
 // TestOnChange tests field change event handling
 func (s *EventHandlerTestSuite) TestOnChange() {
 	// Initialize runtime
@@ -54,6 +61,7 @@ func (s *EventHandlerTestSuite) TestOnChange() {
 	// Check field is marked as dirty
 	require.True(s.T(), s.runtime.state.IsDirty("name"), "Field should be marked as dirty after change")
 }
+
 // TestOnChange_ReadOnlyField tests change event on read-only field
 func (s *EventHandlerTestSuite) TestOnChange_ReadOnlyField() {
 	// Create schema with read-only field
@@ -90,6 +98,7 @@ func (s *EventHandlerTestSuite) TestOnChange_ReadOnlyField() {
 		require.NotEqual(s.T(), "new value", value, "Read-only field value should not be updated")
 	}
 }
+
 // TestOnBlur tests field blur event handling
 func (s *EventHandlerTestSuite) TestOnBlur() {
 	// Initialize runtime
@@ -108,6 +117,7 @@ func (s *EventHandlerTestSuite) TestOnBlur() {
 	errors := s.runtime.state.GetErrors("email")
 	require.NotEmpty(s.T(), errors, "Expected validation errors for invalid email on blur")
 }
+
 // TestOnSubmit tests submit event with valid data
 func (s *EventHandlerTestSuite) TestOnSubmit() {
 	// Initialize runtime with valid data
@@ -123,6 +133,7 @@ func (s *EventHandlerTestSuite) TestOnSubmit() {
 	// Check state is valid
 	require.True(s.T(), s.runtime.state.IsValid(), "State should be valid after successful submit")
 }
+
 // TestOnSubmit_WithErrors tests submit event with validation errors
 func (s *EventHandlerTestSuite) TestOnSubmit_WithErrors() {
 	// Initialize runtime with valid data first
@@ -147,6 +158,7 @@ func (s *EventHandlerTestSuite) TestOnSubmit_WithErrors() {
 	emailErrors := s.runtime.state.GetErrors("email")
 	require.NotEmpty(s.T(), emailErrors, "Expected validation errors for invalid email")
 }
+
 // TestValidationTiming tests different validation timing modes
 func (s *EventHandlerTestSuite) TestValidationTiming() {
 	// Initialize runtime
@@ -220,6 +232,7 @@ func (s *EventHandlerTestSuite) TestValidationTiming() {
 		})
 	}
 }
+
 // TestRegister tests event handler registration
 func (s *EventHandlerTestSuite) TestRegister() {
 	handler := NewEventHandler()
@@ -243,7 +256,7 @@ func (s *EventHandlerTestSuite) TestRegister() {
 	// Create event
 	event := &Event{
 		Type:      EventChange,
-		FieldName:     "name",
+		FieldName: "name",
 		Value:     "Test Value",
 		Timestamp: time.Now(),
 	}
@@ -258,6 +271,7 @@ func (s *EventHandlerTestSuite) TestRegister() {
 		require.Equal(s.T(), "Test Value", receivedEvent.Value, "Event value should match")
 	}
 }
+
 // TestHandleBatchUpdate tests batch field updates
 func (s *EventHandlerTestSuite) TestHandleBatchUpdate() {
 	// Initialize runtime
@@ -292,11 +306,13 @@ func (s *EventHandlerTestSuite) TestHandleBatchUpdate() {
 	// Check change events were triggered for each field
 	require.Equal(s.T(), len(updates), changeEvents, "Expected change event for each field")
 }
+
 // TestDebouncedEventHandler tests debounced event handling
 func (s *EventHandlerTestSuite) TestDebouncedEventHandler() {
 	// Debounced handler functionality was intentionally removed
 	s.T().Skip("DebouncedEventHandler functionality was removed from design")
 }
+
 // TestEventTracker tests event tracking functionality
 func (s *EventHandlerTestSuite) TestEventTracker() {
 	tracker := NewEventTracker()
@@ -325,6 +341,7 @@ func (s *EventHandlerTestSuite) TestEventTracker() {
 	stats = tracker.GetStats()
 	require.Equal(s.T(), 0, stats.TotalEvents, "Should have 0 events after reset")
 }
+
 // TestGetValidationTiming tests getting validation timing
 func (s *EventHandlerTestSuite) TestGetValidationTiming() {
 	handler := NewEventHandler()
@@ -342,6 +359,7 @@ func (s *EventHandlerTestSuite) TestGetValidationTiming() {
 		require.Equal(s.T(), timing, handler.GetValidationTiming(), "Timing should match set value")
 	}
 }
+
 // TestUnregister tests event handler unregistration
 func (s *EventHandlerTestSuite) TestUnregister() {
 	handler := NewEventHandler()
@@ -365,6 +383,7 @@ func (s *EventHandlerTestSuite) TestUnregister() {
 	handler.mu.RUnlock()
 	require.Equal(s.T(), 0, changeHandlers, "Should have 0 change handlers after unregister")
 }
+
 // TestErrorHandling tests error propagation from callbacks
 func (s *EventHandlerTestSuite) TestErrorHandling() {
 	err := s.runtime.Initialize(s.ctx, map[string]any{
@@ -379,7 +398,7 @@ func (s *EventHandlerTestSuite) TestErrorHandling() {
 	// Create event
 	event := &Event{
 		Type:      EventChange,
-		FieldName:     "name",
+		FieldName: "name",
 		Value:     "Test Value",
 		Timestamp: time.Now(),
 	}
@@ -387,6 +406,7 @@ func (s *EventHandlerTestSuite) TestErrorHandling() {
 	err = s.handler.OnChange(s.ctx, event)
 	require.Error(s.T(), err, "OnChange() should return error from callback")
 }
+
 // TestNonExistentField tests handling of non-existent field
 func (s *EventHandlerTestSuite) TestNonExistentField() {
 	err := s.runtime.Initialize(s.ctx, map[string]any{
@@ -398,6 +418,7 @@ func (s *EventHandlerTestSuite) TestNonExistentField() {
 	err = s.runtime.HandleFieldChange(s.ctx, "non_existent_field", "test value")
 	require.Error(s.T(), err, "HandleFieldChange() should fail for non-existent field")
 }
+
 // Helper method to create a test schema
 // TestEventHandlerTestSuite runs the test suite
 func TestEventHandlerTestSuite(t *testing.T) {

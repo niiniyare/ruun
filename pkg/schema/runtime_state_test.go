@@ -1,8 +1,10 @@
 package schema
+
 import (
 	"reflect"
 	"testing"
 )
+
 func TestNewState(t *testing.T) {
 	state := NewState()
 	if state == nil {

@@ -3,8 +3,10 @@ package organisms
 import (
 	"strings"
 	"strconv"
+	"fmt"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
+	"github.com/niiniyare/ruun/views/components/utils"
 )
 
 // NavigationType defines the type of navigation
@@ -56,74 +58,204 @@ type NavigationItem struct {
 	OnClick     string
 }
 
-// NavigationProps defines the properties for Navigation components
+// NavigationProps defines the properties for enhanced Navigation components
 type NavigationProps struct {
+	// Core properties
 	Type        NavigationType
 	Size        NavigationSize
 	Items       []NavigationItem
 	Title       string
+	Description string
 	Logo        string
 	LogoURL     string
 	Collapsible bool
 	Collapsed   bool
 	Class       string
 	ID          string
-	// Sidebar specific
+	
+	// Enhanced layout options
 	Width       string // CSS width value
 	Position    string // "left", "right"
-	// Topbar specific
+	Variant     string // "default", "minimal", "card"
+	
+	// User interface
 	UserMenu    []NavigationItem
 	UserName    string
 	UserAvatar  string
-	// Breadcrumb specific
+	UserOnline  bool
+	UserRole    string
+	
+	// Search configuration
+	Search      NavigationSearch
+	
+	// Breadcrumb configuration
+	Breadcrumbs []BreadcrumbItem
 	Separator   string // Custom separator
+	
 	// Tabs specific
-	Variant     string // "default", "pills", "underline"
+	TabVariant  string // "default", "pills", "underline"
+	
 	// Steps specific
 	CurrentStep int
+	TotalSteps  int
+	
+	// Mobile menu
+	MobileMenu  NavigationMobileMenu
+	
+	// Notifications
+	Notifications []Notification
+	
 	// HTMX attributes
 	HXGet       string
 	HXTarget    string
 	HXSwap      string
+	HXTrigger   string
+	
 	// Alpine.js attributes
 	AlpineData  string
+	AlpineInit  string
+	
 	// Events
 	OnItemClick string
 	OnToggle    string
+	OnSearch    string
+	OnUserMenuToggle string
+	
+	// Auth and permissions
+	AuthContext *AuthContext
+	
+	// Performance
+	LazyLoad    bool
+	CacheData   bool
+	
+	// Theme integration
+	ThemeID     string
+	DarkMode    bool
+	
+	// Accessibility
+	AriaLabel   string
+	AriaLabels  map[string]string
 }
 
-// navigationClasses generates classes for navigation containers
+// NavigationSearch defines search configuration
+type NavigationSearch struct {
+	Enabled     bool
+	Placeholder string
+	MinLength   int
+	Debounce    int
+	Results     []NavigationSearchResult
+	Loading     bool
+	Visible     bool
+}
+
+// NavigationSearchResult represents a search result
+type NavigationSearchResult struct {
+	ID          string
+	Text        string
+	Description string
+	URL         string
+	Icon        string
+	Score       int
+	Highlighted string
+}
+
+// NavigationMobileMenu defines mobile menu configuration
+type NavigationMobileMenu struct {
+	Enabled     bool
+	Position    string // "left", "right", "top", "bottom"
+	Overlay     bool
+	CloseButton bool
+	Swipeable   bool
+}
+
+// navigationClasses generates classes for enhanced navigation containers
 func navigationClasses(props NavigationProps) string {
 	var classes []string
 
+	// Base navigation classes
+	classes = append(classes, "navigation")
+
 	switch props.Type {
 	case NavigationSidebar:
-		classes = append(classes, "flex", "flex-col", "bg-background", "border-r", "border-border")
+		classes = append(classes, "navigation-sidebar", "flex", "flex-col", "bg-background", "border-r", "border-border")
+		
+		// Variant classes
+		switch props.Variant {
+		case "minimal":
+			classes = append(classes, "navigation-sidebar--minimal")
+		case "card":
+			classes = append(classes, "navigation-sidebar--card", "m-4", "rounded-lg", "shadow-sm")
+		default:
+			classes = append(classes, "navigation-sidebar--default")
+		}
+		
+		// Width handling
 		if props.Width != "" {
 			// Width handled via inline style
 		} else {
-			classes = append(classes, "w-64")
+			if props.Collapsed {
+				classes = append(classes, "w-16")
+			} else {
+				classes = append(classes, "w-64")
+			}
 		}
+		
+		// Collapsed state
+		if props.Collapsed {
+			classes = append(classes, "navigation-sidebar--collapsed")
+		}
+		
 	case NavigationTopbar:
-		classes = append(classes, "flex", "items-center", "justify-between", "bg-background", "border-b", "border-border", "px-4", "h-16")
+		classes = append(classes, "navigation-topbar", "flex", "items-center", "justify-between", "bg-background", "border-b", "border-border", "px-4")
+		
+		// Height based on size
+		switch props.Size {
+		case NavigationSizeSM:
+			classes = append(classes, "h-12", "px-3")
+		case NavigationSizeLG:
+			classes = append(classes, "h-20", "px-6")
+		default:
+			classes = append(classes, "h-16")
+		}
+		
 	case NavigationBreadcrumb:
-		classes = append(classes, "flex", "items-center", "space-x-1", "text-sm", "text-muted-foreground")
+		classes = append(classes, "navigation-breadcrumb", "flex", "items-center", "space-x-1", "text-sm", "text-muted-foreground")
+		
 	case NavigationTabs:
-		classes = append(classes, "flex", "border-b", "border-border")
+		classes = append(classes, "navigation-tabs", "flex", "border-b", "border-border")
+		
+		// Tab variant classes
+		switch props.TabVariant {
+		case "pills":
+			classes = append(classes, "navigation-tabs--pills", "border-0", "space-x-1")
+		case "underline":
+			classes = append(classes, "navigation-tabs--underline")
+		default:
+			classes = append(classes, "navigation-tabs--default")
+		}
+		
 	case NavigationSteps:
-		classes = append(classes, "flex", "items-center", "justify-between")
+		classes = append(classes, "navigation-steps", "flex", "items-center", "justify-between")
 	}
 
-	// Size classes
-	switch props.Size {
-	case NavigationSizeSM:
-		if props.Type == NavigationTopbar {
-			classes = append(classes, "h-12", "px-3")
-		}
-	case NavigationSizeLG:
-		if props.Type == NavigationTopbar {
-			classes = append(classes, "h-20", "px-6")
-		}
+	// Search enabled class
+	if props.Search.Enabled {
+		classes = append(classes, "navigation--searchable")
+	}
+
+	// Mobile menu enabled class
+	if props.MobileMenu.Enabled {
+		classes = append(classes, "navigation--mobile")
+	}
+
+	// Theme classes
+	if props.DarkMode {
+		classes = append(classes, "navigation--dark")
+	}
+
+	// Performance classes
+	if props.LazyLoad {
+		classes = append(classes, "navigation--lazy")
 	}
 
 	// Custom classes
@@ -131,25 +263,332 @@ func navigationClasses(props NavigationProps) string {
 		classes = append(classes, props.Class)
 	}
 
-	return strings.Join(classes, " ")
+	return utils.TwMerge(classes...)
 }
 
-// Navigation renders different types of navigation components
+// Navigation renders enhanced navigation components with auth integration
 templ Navigation(props NavigationProps) {
-	switch props.Type {
-	case NavigationSidebar:
-		@sidebarNavigation(props)
-	case NavigationTopbar:
-		@topbarNavigation(props)
-	case NavigationBreadcrumb:
-		@breadcrumbNavigation(props)
-	case NavigationTabs:
-		@tabsNavigation(props)
-	case NavigationSteps:
-		@stepsNavigation(props)
-	default:
-		@sidebarNavigation(props)
-	}
+	// Navigation container with Alpine.js state
+	<div
+		if props.ID != "" {
+			id={ props.ID }
+		} else {
+			id={ utils.RandomID() }
+		}
+		class={ navigationClasses(props) }
+		if props.AlpineData != "" {
+			x-data={ props.AlpineData }
+		} else {
+			x-data={ getDefaultNavigationAlpineData(props) }
+		}
+		if props.AlpineInit != "" {
+			x-init={ props.AlpineInit }
+		} else {
+			x-init="initNavigation()"
+		}
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		role="navigation"
+	>
+		// Render navigation content based on type
+		switch props.Type {
+		case NavigationSidebar:
+			@enhancedSidebarNavigation(props)
+		case NavigationTopbar:
+			@enhancedTopbarNavigation(props)
+		case NavigationBreadcrumb:
+			@enhancedBreadcrumbNavigation(props)
+		case NavigationTabs:
+			@enhancedTabsNavigation(props)
+		case NavigationSteps:
+			@enhancedStepsNavigation(props)
+		default:
+			@enhancedSidebarNavigation(props)
+		}
+		
+		// Search overlay
+		if props.Search.Enabled {
+			@navigationSearchOverlay(props)
+		}
+		
+		// Mobile menu overlay
+		if props.MobileMenu.Enabled {
+			@navigationMobileOverlay(props)
+		}
+		
+		// Notification toast container
+		if len(props.Notifications) > 0 {
+			@navigationNotifications(props)
+		}
+	</div>
+}
+
+// enhancedSidebarNavigation renders enhanced sidebar navigation with auth integration
+templ enhancedSidebarNavigation(props NavigationProps) {
+	<aside
+		class="navigation-sidebar-content flex flex-col h-full"
+		if props.Width != "" {
+			style={ "width: " + props.Width }
+		}
+	>
+		// Sidebar header with logo and controls
+		<div class="navigation-header flex items-center justify-between p-4 border-b border-border">
+			<div class="flex items-center gap-3" x-show="!sidebarCollapsed || !$root.isMobile">
+				if props.Logo != "" {
+					<img 
+						src={ props.Logo } 
+						alt="Logo" 
+						class="h-8 w-8 rounded"
+						if props.LogoURL != "" {
+							x-on:click={ "window.location.href='" + props.LogoURL + "'" }
+							style="cursor: pointer;"
+						}
+					/>
+				}
+				if props.Title != "" {
+					<div x-show="!sidebarCollapsed">
+						<h1 class="text-lg font-semibold text-foreground">{ props.Title }</h1>
+						if props.Description != "" {
+							<p class="text-xs text-muted-foreground">{ props.Description }</p>
+						}
+					</div>
+				}
+			</div>
+			
+			// Sidebar controls
+			<div class="flex items-center gap-2">
+				// Search toggle button
+				if props.Search.Enabled {
+					<button
+						class="p-2 hover:bg-accent rounded-sm transition-colors"
+						x-on:click="toggleSearch()"
+						x-bind:class="{'bg-accent': searchOpen}"
+						aria-label="Toggle search"
+					>
+						@atoms.Icon(atoms.IconProps{
+							Name: "search",
+							Size: atoms.IconSizeSM,
+							Class: "text-muted-foreground",
+						})
+					</button>
+				}
+				
+				// Collapse toggle button
+				if props.Collapsible {
+					<button
+						class="p-2 hover:bg-accent rounded-sm transition-colors"
+						x-on:click="toggleSidebar()"
+						x-bind:aria-expanded="!sidebarCollapsed"
+						aria-label="Toggle sidebar"
+					>
+						@atoms.Icon(atoms.IconProps{
+							Name: "menu",
+							Size: atoms.IconSizeSM,
+							Class: "text-muted-foreground transition-transform duration-200",
+							XBind: "{'rotate-90': sidebarCollapsed}",
+						})
+					</button>
+				}
+			</div>
+		</div>
+
+		// Search bar (when enabled and visible)
+		if props.Search.Enabled {
+			<div 
+				class="navigation-search p-4 border-b border-border"
+				x-show="searchOpen && !sidebarCollapsed"
+				x-transition:enter="transition ease-out duration-200"
+				x-transition:enter-start="opacity-0 transform -translate-y-2"
+				x-transition:enter-end="opacity-100 transform translate-y-0"
+			>
+				@enhancedNavigationSearch(props)
+			</div>
+		}
+
+		// Navigation content
+		<nav class="navigation-content flex-1 overflow-auto p-2">
+			@enhancedNavigationMenu(props)
+		</nav>
+
+		// User section at bottom
+		if props.AuthContext != nil && props.AuthContext.User != nil {
+			<div class="navigation-user border-t border-border p-4">
+				@navigationUserSection(props)
+			</div>
+		}
+	</aside>
+}
+
+// enhancedTopbarNavigation renders enhanced topbar navigation
+templ enhancedTopbarNavigation(props NavigationProps) {
+	<header class="navigation-topbar-content">
+		// Left section with logo and main nav
+		<div class="flex items-center gap-6">
+			if props.Logo != "" || props.Title != "" {
+				<div class="flex items-center gap-3">
+					if props.Logo != "" {
+						<img 
+							src={ props.Logo } 
+							alt="Logo" 
+							class="h-8 w-8"
+							if props.LogoURL != "" {
+								x-on:click={ "window.location.href='" + props.LogoURL + "'" }
+								style="cursor: pointer;"
+							}
+						/>
+					}
+					if props.Title != "" {
+						<h1 class="text-lg font-semibold">{ props.Title }</h1>
+					}
+				</div>
+			}
+			
+			// Main navigation items (desktop)
+			<nav class="hidden md:flex items-center space-x-1">
+				@enhancedTopbarMenu(props)
+			</nav>
+		</div>
+
+		// Right section with search, notifications, and user menu
+		<div class="flex items-center gap-3">
+			// Search button/field
+			if props.Search.Enabled {
+				<div class="relative">
+					<button
+						class="p-2 hover:bg-accent rounded-md transition-colors"
+						x-on:click="toggleSearch()"
+						x-bind:class="{'bg-accent': searchOpen}"
+					>
+						@atoms.Icon(atoms.IconProps{Name: "search", Size: atoms.IconSizeSM})
+					</button>
+				</div>
+			}
+			
+			// Notifications
+			if len(props.Notifications) > 0 {
+				@navigationNotificationButton(props)
+			}
+			
+			// User menu
+			if props.AuthContext != nil && props.AuthContext.User != nil {
+				@navigationUserMenu(props)
+			}
+
+			// Mobile menu toggle
+			if props.MobileMenu.Enabled {
+				<button
+					class="md:hidden p-2 hover:bg-accent rounded-md transition-colors"
+					x-on:click="toggleMobileMenu()"
+					aria-label="Toggle mobile menu"
+				>
+					@atoms.Icon(atoms.IconProps{
+						Name: "menu",
+						Size: atoms.IconSizeSM,
+						Class: "transition-transform duration-200",
+						XBind: "{'rotate-90': mobileMenuOpen}",
+					})
+				</button>
+			}
+		</div>
+	</header>
+}
+
+// enhancedBreadcrumbNavigation renders enhanced breadcrumb navigation
+templ enhancedBreadcrumbNavigation(props NavigationProps) {
+	<nav
+		class="navigation-breadcrumb-content"
+		aria-label="Breadcrumb"
+	>
+		<ol class="flex items-center space-x-1">
+			if len(props.Breadcrumbs) > 0 {
+				for i, item := range props.Breadcrumbs {
+					<li class="flex items-center">
+						if i > 0 {
+							<span class="mx-2 text-muted-foreground">
+								if props.Separator != "" {
+									{ props.Separator }
+								} else {
+									@atoms.Icon(atoms.IconProps{Name: "chevron-right", Size: atoms.IconSizeXS})
+								}
+							</span>
+						}
+						
+						if item.Active {
+							// Current page
+							<span class="font-medium text-foreground" aria-current="page">
+								if item.Icon != "" {
+									@atoms.Icon(atoms.IconProps{Name: item.Icon, Size: atoms.IconSizeXS, Class: "mr-1"})
+								}
+								{ item.Text }
+							</span>
+						} else if item.Clickable && item.URL != "" {
+							// Linked item
+							<a
+								href={ item.URL }
+								class="text-muted-foreground hover:text-foreground transition-colors"
+							>
+								if item.Icon != "" {
+									@atoms.Icon(atoms.IconProps{Name: item.Icon, Size: atoms.IconSizeXS, Class: "mr-1"})
+								}
+								{ item.Text }
+							</a>
+						} else {
+							// Non-linked item
+							<span class="text-muted-foreground">
+								if item.Icon != "" {
+									@atoms.Icon(atoms.IconProps{Name: item.Icon, Size: atoms.IconSizeXS, Class: "mr-1"})
+								}
+								{ item.Text }
+							</span>
+						}
+					</li>
+				}
+			}
+		</ol>
+	</nav>
+}
+
+// enhancedTabsNavigation renders enhanced tabs navigation
+templ enhancedTabsNavigation(props NavigationProps) {
+	<nav
+		class="navigation-tabs-content"
+		role="tablist"
+	>
+		for _, item := range props.Items {
+			@enhancedTabNavItem(item, props)
+		}
+	</nav>
+}
+
+// enhancedStepsNavigation renders enhanced steps navigation
+templ enhancedStepsNavigation(props NavigationProps) {
+	<nav
+		class="navigation-steps-content"
+		aria-label="Steps"
+	>
+		<div class="flex items-center justify-between">
+			for i, item := range props.Items {
+				@enhancedStepNavItem(item, i+1, props.CurrentStep, i < len(props.Items)-1, props.TotalSteps)
+			}
+		</div>
+		
+		// Progress indicator
+		if props.TotalSteps > 0 {
+			<div class="mt-4">
+				<div class="flex justify-between text-sm text-muted-foreground mb-2">
+					<span>Step { strconv.Itoa(props.CurrentStep) } of { strconv.Itoa(props.TotalSteps) }</span>
+					<span>{ strconv.Itoa((props.CurrentStep * 100) / props.TotalSteps) }% complete</span>
+				</div>
+				<div class="w-full bg-secondary rounded-full h-2">
+					<div 
+						class="bg-primary h-2 rounded-full transition-all duration-300"
+						style={ fmt.Sprintf("width: %d%%", (props.CurrentStep * 100) / props.TotalSteps) }
+					></div>
+				</div>
+			</div>
+		}
+	</nav>
 }
 
 // sidebarNavigation renders a sidebar navigation
@@ -835,4 +1274,315 @@ func getStepConnectorClasses(stepNumber int, currentStep int) string {
 	}
 	
 	return strings.Join(classes, " ")
+}
+
+// Enhanced helper functions for new navigation features
+
+func getDefaultNavigationAlpineData(props NavigationProps) string {
+	baseData := `{
+		sidebarCollapsed: false,
+		mobileMenuOpen: false,
+		userMenuOpen: false,
+		searchOpen: false,
+		searchQuery: '',
+		searchResults: [],
+		searchLoading: false,
+		collapsedItems: {},
+		activePath: window.location.pathname,
+		preferences: {
+			sidebarCollapsed: false,
+			theme: 'auto',
+			recentMenuItems: []
+		},
+		notifications: [],
+		unreadCount: 0
+	}`
+	
+	if props.AuthContext != nil {
+		return fmt.Sprintf("navigationWithAuth(%s)", baseData)
+	}
+	
+	return fmt.Sprintf("navigationBase(%s)", baseData)
+}
+
+func getEnhancedSidebarItemClasses(item NavigationItem, depth int, collapsible bool) string {
+	classes := []string{
+		"flex", "items-center", "w-full", "px-3", "py-2", "text-left", "rounded-md",
+		"text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", 
+		"focus:ring-ring", "focus:ring-offset-2", "group",
+	}
+	
+	// State classes
+	if item.Active {
+		classes = append(classes, "bg-accent", "text-accent-foreground", "font-medium")
+	} else if item.Disabled {
+		classes = append(classes, "text-muted-foreground", "cursor-not-allowed", "opacity-50")
+	} else {
+		classes = append(classes, "hover:bg-accent", "hover:text-accent-foreground")
+	}
+	
+	// Depth classes
+	if depth > 0 {
+		classes = append(classes, fmt.Sprintf("ml-%d", depth*4), "text-xs")
+	}
+	
+	// Custom classes
+	if item.Class != "" {
+		classes = append(classes, item.Class)
+	}
+	
+	return utils.TwMerge(classes...)
+}
+
+func getEnhancedSubItemClasses(depth int) string {
+	classes := []string{"mt-1", "space-y-1"}
+	
+	if depth == 0 {
+		classes = append(classes, "ml-6")
+	} else {
+		classes = append(classes, "ml-4")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getEnhancedTopbarItemClasses(item NavigationItem) string {
+	classes := []string{
+		"px-3", "py-2", "rounded-md", "text-sm", "font-medium", "transition-colors",
+		"focus:outline-none", "focus:ring-2", "focus:ring-ring", "focus:ring-offset-2",
+	}
+	
+	if item.Active {
+		classes = append(classes, "bg-accent", "text-accent-foreground")
+	} else if item.Disabled {
+		classes = append(classes, "text-muted-foreground", "cursor-not-allowed", "opacity-50")
+	} else {
+		classes = append(classes, "text-muted-foreground", "hover:text-foreground", "hover:bg-accent")
+	}
+	
+	return utils.TwMerge(classes...)
+}
+
+func getEnhancedTabItemClasses(item NavigationItem, variant string) string {
+	classes := []string{
+		"px-4", "py-2", "text-sm", "font-medium", "transition-all", "duration-200",
+		"focus:outline-none", "focus:ring-2", "focus:ring-ring", "focus:ring-offset-2",
+	}
+	
+	switch variant {
+	case "pills":
+		classes = append(classes, "rounded-md")
+		if item.Active {
+			classes = append(classes, "bg-accent", "text-accent-foreground")
+		} else {
+			classes = append(classes, "text-muted-foreground", "hover:text-foreground", "hover:bg-accent")
+		}
+	case "underline":
+		classes = append(classes, "border-b-2", "border-transparent", "pb-3")
+		if item.Active {
+			classes = append(classes, "border-primary", "text-foreground")
+		} else {
+			classes = append(classes, "text-muted-foreground", "hover:text-foreground", "hover:border-muted-foreground")
+		}
+	default:
+		classes = append(classes, "border-b-2", "border-transparent")
+		if item.Active {
+			classes = append(classes, "border-primary", "text-foreground")
+		} else {
+			classes = append(classes, "text-muted-foreground", "hover:text-foreground")
+		}
+	}
+	
+	if item.Disabled {
+		classes = append(classes, "opacity-50", "cursor-not-allowed", "hover:text-muted-foreground", "hover:border-transparent", "hover:bg-transparent")
+	}
+	
+	return utils.TwMerge(classes...)
+}
+
+func getEnhancedStepCircleClasses(stepNumber int, currentStep int) string {
+	classes := []string{
+		"flex", "items-center", "justify-center", "w-10", "h-10", "rounded-full",
+		"text-sm", "font-medium", "transition-all", "duration-200", "border-2",
+	}
+	
+	if stepNumber < currentStep {
+		classes = append(classes, "bg-primary", "border-primary", "text-primary-foreground")
+	} else if stepNumber == currentStep {
+		classes = append(classes, "bg-primary", "border-primary", "text-primary-foreground", "ring-4", "ring-primary/20")
+	} else {
+		classes = append(classes, "bg-muted", "border-muted", "text-muted-foreground")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getEnhancedStepTextClasses(stepNumber int, currentStep int) string {
+	classes := []string{"text-sm", "font-medium", "transition-colors"}
+	
+	if stepNumber <= currentStep {
+		classes = append(classes, "text-foreground")
+	} else {
+		classes = append(classes, "text-muted-foreground")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getEnhancedStepConnectorClasses(stepNumber int, currentStep int) string {
+	classes := []string{"flex-1", "h-0.5", "mx-4", "transition-colors", "duration-200"}
+	
+	if stepNumber < currentStep {
+		classes = append(classes, "bg-primary")
+	} else {
+		classes = append(classes, "bg-muted")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getEnhancedNavItemBadgeVariant(variant atoms.BadgeVariant) atoms.BadgeVariant {
+	if variant != "" {
+		return variant
+	}
+	return atoms.BadgeSecondary
+}
+
+func getNavItemAlpineData(item NavigationItem) string {
+	collapsed := "false"
+	if item.Collapsed {
+		collapsed = "true"
+	}
+	
+	return fmt.Sprintf("{ collapsed: %s, toggleMenuItem() { this.collapsed = !this.collapsed; } }", collapsed)
+}
+
+func getSearchPlaceholder(placeholder string) string {
+	if placeholder != "" {
+		return placeholder
+	}
+	return "Search navigation..."
+}
+
+func getUserDisplayName(props NavigationProps) string {
+	if props.UserName != "" {
+		return props.UserName
+	}
+	if props.AuthContext != nil && props.AuthContext.User != nil {
+		if props.AuthContext.User.DisplayName != "" {
+			return props.AuthContext.User.DisplayName
+		}
+		if props.AuthContext.User.Username != "" {
+			return props.AuthContext.User.Username
+		}
+		if props.AuthContext.User.Email != "" {
+			return props.AuthContext.User.Email
+		}
+	}
+	return "User"
+}
+
+func hasUnreadNotifications(notifications []Notification) bool {
+	for _, n := range notifications {
+		if !n.Read {
+			return true
+		}
+	}
+	return false
+}
+
+func getUnreadNotificationCount(notifications []Notification) int {
+	count := 0
+	for _, n := range notifications {
+		if !n.Read {
+			count++
+		}
+	}
+	return count
+}
+
+func getNotificationClasses(notification Notification) string {
+	classes := []string{
+		"flex", "items-start", "gap-3", "p-4", "hover:bg-accent", "transition-colors",
+		"cursor-pointer", "border-b", "border-border", "last:border-0",
+	}
+	
+	if !notification.Read {
+		classes = append(classes, "bg-accent/50")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getNotificationIconClasses(notificationType string) string {
+	classes := []string{"shrink-0", "w-8", "h-8", "rounded-full", "flex", "items-center", "justify-center"}
+	
+	switch notificationType {
+	case "success":
+		classes = append(classes, "bg-success/20", "text-success")
+	case "warning":
+		classes = append(classes, "bg-warning/20", "text-warning")
+	case "error":
+		classes = append(classes, "bg-destructive/20", "text-destructive")
+	default:
+		classes = append(classes, "bg-primary/20", "text-primary")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getNotificationIcon(notification Notification) string {
+	if notification.Icon != "" {
+		return notification.Icon
+	}
+	
+	switch notification.Type {
+	case "success":
+		return "check-circle"
+	case "warning":
+		return "alert-triangle"
+	case "error":
+		return "alert-circle"
+	default:
+		return "bell"
+	}
+}
+
+func formatNotificationTime(createdAt interface{}) string {
+	// This would format the time appropriately
+	// For now, return a placeholder
+	return "2 minutes ago"
+}
+
+func getMobileMenuClasses(position string) string {
+	classes := []string{
+		"fixed", "bg-background", "border", "border-border", "z-40", "flex", "flex-col",
+		"shadow-lg", "max-w-sm", "w-full", "h-full",
+	}
+	
+	switch position {
+	case "right":
+		classes = append(classes, "right-0", "top-0")
+	case "top":
+		classes = append(classes, "top-0", "left-0", "right-0", "h-auto", "max-h-screen")
+	case "bottom":
+		classes = append(classes, "bottom-0", "left-0", "right-0", "h-auto", "max-h-screen")
+	default: // left
+		classes = append(classes, "left-0", "top-0")
+	}
+	
+	return strings.Join(classes, " ")
+}
+
+func getMobileMenuEnterStart(position string) string {
+	switch position {
+	case "right":
+		return "opacity-0 transform translate-x-full"
+	case "top":
+		return "opacity-0 transform -translate-y-full"
+	case "bottom":
+		return "opacity-0 transform translate-y-full"
+	default: // left
+		return "opacity-0 transform -translate-x-full"
+	}
 }

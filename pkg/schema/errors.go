@@ -1,11 +1,14 @@
 package schema
+
 import (
 	"context"
 	"errors"
 	"fmt"
 	"strings"
+
 	"github.com/niiniyare/ruun/pkg/logger"
 )
+
 // Core error types for schema validation and processing
 var (
 	// Schema validation errors
@@ -47,6 +50,7 @@ var (
 	ErrInternalError  = NewInternalError("internal_error", "internal server error")
 	ErrInvalidRequest = NewValidationError("invalid_request", "invalid request")
 )
+
 // SchemaError is the base interface for all schema-related errors
 type SchemaError interface {
 	error
@@ -57,8 +61,10 @@ type SchemaError interface {
 	WithField(field string) SchemaError
 	WithDetail(key string, value any) SchemaError
 }
+
 // ErrorType categorizes errors for better handling
 type ErrorType string
+
 const (
 	ErrorTypeValidation ErrorType = "validation"
 	ErrorTypeNotFound   ErrorType = "not_found"
@@ -70,6 +76,7 @@ const (
 	ErrorTypeTenant     ErrorType = "tenant"
 	ErrorTypeInternal   ErrorType = "internal"
 )
+
 // BaseError implements the SchemaError interface
 type BaseError struct {
 	code    string
@@ -78,6 +85,7 @@ type BaseError struct {
 	field   string
 	details map[string]any
 }
+
 func (e *BaseError) Error() string {
 	if e.field != "" {
 		return fmt.Sprintf("[%s] %s: %s", e.code, e.field, e.message)
@@ -112,6 +120,7 @@ func (e *BaseError) WithDetail(key string, value any) SchemaError {
 	newErr.details[key] = value
 	return &newErr
 }
+
 // Specific error constructors
 func NewValidationError(code, message string) SchemaError {
 	return &BaseError{
@@ -189,10 +198,12 @@ func NewInternalError(code, message string) SchemaError {
 		details: make(map[string]any),
 	}
 }
+
 // ValidationErrorCollection holds multiple validation errors
 type ValidationErrorCollection struct {
 	errors []SchemaError
 }
+
 func NewValidationErrorCollection() *ValidationErrorCollection {
 	return &ValidationErrorCollection{
 		errors: make([]SchemaError, 0),
@@ -239,10 +250,12 @@ func (vec *ValidationErrorCollection) ErrorsByField() map[string][]string {
 	}
 	return fieldErrors
 }
+
 // ErrorCollector helps collect errors during validation
 type ErrorCollector struct {
 	errors *ValidationErrorCollection
 }
+
 func NewErrorCollector() *ErrorCollector {
 	return &ErrorCollector{
 		errors: NewValidationErrorCollection(),
@@ -263,6 +276,7 @@ func (ec *ErrorCollector) HasErrors() bool {
 func (ec *ErrorCollector) Errors() *ValidationErrorCollection {
 	return ec.errors
 }
+
 // Helper functions for common error patterns
 func WrapError(err error, code, message string) SchemaError {
 	if schemaErr, ok := err.(SchemaError); ok {
@@ -306,6 +320,7 @@ func GetErrorDetails(err error) map[string]any {
 		"error": err.Error(),
 	}
 }
+
 // HTTP status code mapping for errors
 func GetHTTPStatusCode(err error) int {
 	if schemaErr, ok := err.(SchemaError); ok {
@@ -332,6 +347,7 @@ func GetHTTPStatusCode(err error) int {
 	}
 	return 500 // Default to Internal Server Error
 }
+
 // Error response structure for API responses
 type ErrorResponse struct {
 	Error   string         `json:"error"`
@@ -340,6 +356,7 @@ type ErrorResponse struct {
 	Field   string         `json:"field,omitempty"`
 	Details map[string]any `json:"details,omitempty"`
 }
+
 func ToErrorResponse(err error) *ErrorResponse {
 	if schemaErr, ok := err.(SchemaError); ok {
 		return &ErrorResponse{
@@ -356,6 +373,7 @@ func ToErrorResponse(err error) *ErrorResponse {
 		Type:  string(ErrorTypeInternal),
 	}
 }
+
 // Multiple error response for validation collections
 type MultiErrorResponse struct {
 	Errors      []ErrorResponse     `json:"errors"`
@@ -363,6 +381,7 @@ type MultiErrorResponse struct {
 	FieldErrors map[string][]string `json:"fieldErrors"`
 	Summary     string              `json:"summary"`
 }
+
 func ToMultiErrorResponse(err *ValidationErrorCollection) *MultiErrorResponse {
 	if err == nil || !err.HasErrors() {
 		return &MultiErrorResponse{
@@ -383,6 +402,7 @@ func ToMultiErrorResponse(err *ValidationErrorCollection) *MultiErrorResponse {
 		Summary:     fmt.Sprintf("validation failed with %d errors", err.Count()),
 	}
 }
+
 // Panic recovery for schema operations
 func RecoverSchemaError() SchemaError {
 	if r := recover(); r != nil {
@@ -393,10 +413,12 @@ func RecoverSchemaError() SchemaError {
 	}
 	return nil
 }
+
 // Error middleware for consistent error handling
 type ErrorHandler struct {
 	logger logger.Logger
 }
+
 func NewErrorHandler(logger logger.Logger) *ErrorHandler {
 	return &ErrorHandler{logger: logger}
 }
@@ -425,10 +447,12 @@ func (eh *ErrorHandler) HandleError(err error) SchemaError {
 		return WrapError(err, "unknown_error", "unexpected error occurred")
 	}
 }
+
 // ErrRendererNotFound represents a renderer not found error
 type ErrRendererNotFound struct {
 	Type string
 }
+
 func (e ErrRendererNotFound) Error() string {
 	return fmt.Sprintf("renderer not found for type: %s", e.Type)
 }

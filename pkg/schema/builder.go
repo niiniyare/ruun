@@ -1,8 +1,11 @@
 package schema
+
 import (
 	"context"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // Builder provides a fluent interface for building schemas programmatically
 type Builder struct {
 	schema       *Schema
@@ -11,6 +14,7 @@ type Builder struct {
 	ruleEngine   *BusinessRuleEngine
 	evaluator    *condition.Evaluator
 }
+
 // NewBuilder creates a new schema builder
 func NewBuilder(id string, schemaType Type, title string) *Builder {
 	return &Builder{
@@ -20,46 +24,55 @@ func NewBuilder(id string, schemaType Type, title string) *Builder {
 		ruleEngine:   NewBusinessRuleEngine(),
 	}
 }
+
 // WithEvaluator sets the condition evaluator for all fields
 func (b *Builder) WithEvaluator(evaluator *condition.Evaluator) *Builder {
 	b.evaluator = evaluator
 	return b
 }
+
 // WithDescription adds a description
 func (b *Builder) WithDescription(desc string) *Builder {
 	b.schema.Description = desc
 	return b
 }
+
 // WithVersion sets the version
 func (b *Builder) WithVersion(version string) *Builder {
 	b.schema.Version = version
 	return b
 }
+
 // WithCategory sets the category
 func (b *Builder) WithCategory(category string) *Builder {
 	b.schema.Category = category
 	return b
 }
+
 // WithModule sets the module
 func (b *Builder) WithModule(module string) *Builder {
 	b.schema.Module = module
 	return b
 }
+
 // WithTags adds tags
 func (b *Builder) WithTags(tags ...string) *Builder {
 	b.schema.Tags = append(b.schema.Tags, tags...)
 	return b
 }
+
 // WithConfig sets the config
 func (b *Builder) WithConfig(config *Config) *Builder {
 	b.schema.Config = config
 	return b
 }
+
 // WithLayout sets the layout
 func (b *Builder) WithLayout(layout *Layout) *Builder {
 	b.schema.Layout = layout
 	return b
 }
+
 // WithTenant enables tenant isolation
 func (b *Builder) WithTenant(field, isolation string) *Builder {
 	b.schema.Tenant = &Tenant{
@@ -69,11 +82,13 @@ func (b *Builder) WithTenant(field, isolation string) *Builder {
 	}
 	return b
 }
+
 // WithSecurity adds security configuration
 func (b *Builder) WithSecurity(security *Security) *Builder {
 	b.schema.Security = security
 	return b
 }
+
 // WithCSRF enables CSRF protection
 func (b *Builder) WithCSRF() *Builder {
 	if b.schema.Security == nil {
@@ -86,6 +101,7 @@ func (b *Builder) WithCSRF() *Builder {
 	}
 	return b
 }
+
 // WithRateLimit adds rate limiting
 func (b *Builder) WithRateLimit(maxRequests int, windowSeconds int64) *Builder {
 	if b.schema.Security == nil {
@@ -98,6 +114,7 @@ func (b *Builder) WithRateLimit(maxRequests int, windowSeconds int64) *Builder {
 	}
 	return b
 }
+
 // WithHTMX configures HTMX
 func (b *Builder) WithHTMX(post, target string) *Builder {
 	b.schema.HTMX = &HTMX{
@@ -108,6 +125,7 @@ func (b *Builder) WithHTMX(post, target string) *Builder {
 	}
 	return b
 }
+
 // WithAlpine enables Alpine.js with initial data
 func (b *Builder) WithAlpine(xData string) *Builder {
 	b.schema.Alpine = &Alpine{
@@ -116,6 +134,7 @@ func (b *Builder) WithAlpine(xData string) *Builder {
 	}
 	return b
 }
+
 // WithI18n enables internationalization
 func (b *Builder) WithI18n(defaultLocale string, supported ...string) *Builder {
 	b.schema.I18n = &I18n{
@@ -125,6 +144,7 @@ func (b *Builder) WithI18n(defaultLocale string, supported ...string) *Builder {
 	}
 	return b
 }
+
 // AddTextField adds a text field
 func (b *Builder) AddTextField(name, label string, required bool) *Builder {
 	field := Field{
@@ -139,6 +159,7 @@ func (b *Builder) AddTextField(name, label string, required bool) *Builder {
 	b.schema.AddField(field)
 	return b
 }
+
 // AddEmailField adds an email field
 func (b *Builder) AddEmailField(name, label string, required bool) *Builder {
 	field := Field{
@@ -153,6 +174,7 @@ func (b *Builder) AddEmailField(name, label string, required bool) *Builder {
 	b.schema.AddField(field)
 	return b
 }
+
 // AddPasswordField adds a password field
 func (b *Builder) AddPasswordField(name, label string, required bool) *Builder {
 	field := Field{
@@ -167,6 +189,7 @@ func (b *Builder) AddPasswordField(name, label string, required bool) *Builder {
 	b.schema.AddField(field)
 	return b
 }
+
 // AddNumberField adds a number field
 func (b *Builder) AddNumberField(name, label string, required bool, min, max *float64) *Builder {
 	field := Field{
@@ -187,6 +210,7 @@ func (b *Builder) AddNumberField(name, label string, required bool, min, max *fl
 	b.schema.AddField(field)
 	return b
 }
+
 // AddSelectField adds a select field with options
 func (b *Builder) AddSelectField(name, label string, required bool, options []FieldOption) *Builder {
 	field := Field{
@@ -202,6 +226,7 @@ func (b *Builder) AddSelectField(name, label string, required bool, options []Fi
 	b.schema.AddField(field)
 	return b
 }
+
 // AddTextareaField adds a textarea field
 func (b *Builder) AddTextareaField(name, label string, required bool, rows int) *Builder {
 	field := Field{
@@ -219,6 +244,7 @@ func (b *Builder) AddTextareaField(name, label string, required bool, rows int) 
 	b.schema.AddField(field)
 	return b
 }
+
 // AddCheckboxField adds a checkbox field
 func (b *Builder) AddCheckboxField(name, label string, defaultValue bool) *Builder {
 	field := Field{
@@ -233,6 +259,7 @@ func (b *Builder) AddCheckboxField(name, label string, defaultValue bool) *Build
 	b.schema.AddField(field)
 	return b
 }
+
 // AddDateField adds a date field
 func (b *Builder) AddDateField(name, label string, required bool) *Builder {
 	field := Field{
@@ -247,6 +274,7 @@ func (b *Builder) AddDateField(name, label string, required bool) *Builder {
 	b.schema.AddField(field)
 	return b
 }
+
 // AddFieldWithConfig adds a fully configured field
 func (b *Builder) AddFieldWithConfig(field Field) *Builder {
 	if b.evaluator != nil {
@@ -255,6 +283,7 @@ func (b *Builder) AddFieldWithConfig(field Field) *Builder {
 	b.schema.AddField(field)
 	return b
 }
+
 // AddSubmitButton adds a submit button
 func (b *Builder) AddSubmitButton(text string) *Builder {
 	b.schema.AddAction(Action{
@@ -266,6 +295,7 @@ func (b *Builder) AddSubmitButton(text string) *Builder {
 	})
 	return b
 }
+
 // AddResetButton adds a reset button
 func (b *Builder) AddResetButton(text string) *Builder {
 	b.schema.AddAction(Action{
@@ -277,6 +307,7 @@ func (b *Builder) AddResetButton(text string) *Builder {
 	})
 	return b
 }
+
 // AddButton adds a generic button
 func (b *Builder) AddButton(id, text, variant string) *Builder {
 	b.schema.AddAction(Action{
@@ -288,11 +319,13 @@ func (b *Builder) AddButton(id, text, variant string) *Builder {
 	})
 	return b
 }
+
 // AddActionWithConfig adds a fully configured action
 func (b *Builder) AddActionWithConfig(action Action) *Builder {
 	b.schema.AddAction(action)
 	return b
 }
+
 // Build returns the constructed schema with evaluator set on all fields
 func (b *Builder) Build(ctx context.Context) (*Schema, error) {
 	// Set evaluator on all fields
@@ -307,6 +340,7 @@ func (b *Builder) Build(ctx context.Context) (*Schema, error) {
 	}
 	return b.schema, nil
 }
+
 // MustBuild returns the schema or panics on error (useful for static definitions)
 func (b *Builder) MustBuild(ctx context.Context) *Schema {
 	schema, err := b.Build(ctx)
@@ -315,6 +349,7 @@ func (b *Builder) MustBuild(ctx context.Context) *Schema {
 	}
 	return schema
 }
+
 // WithMixin applies a mixin to the schema with evaluator support
 func (b *Builder) WithMixin(mixinID string) *Builder {
 	if err := b.mixinSupport.ApplyMixinWithEvaluator(b.schema, mixinID, "", b.evaluator); err == nil {
@@ -334,6 +369,7 @@ func (b *Builder) WithMixin(mixinID string) *Builder {
 	}
 	return b
 }
+
 // WithCustomMixin applies a custom mixin
 func (b *Builder) WithCustomMixin(mixin *Mixin) *Builder {
 	if err := b.mixinSupport.Register(mixin); err == nil {
@@ -341,6 +377,7 @@ func (b *Builder) WithCustomMixin(mixin *Mixin) *Builder {
 	}
 	return b
 }
+
 // WithRepeatable adds a repeatable field with evaluator support
 func (b *Builder) WithRepeatable(field *RepeatableField) *Builder {
 	if b.evaluator != nil {
@@ -349,29 +386,35 @@ func (b *Builder) WithRepeatable(field *RepeatableField) *Builder {
 	b.schema.AddField(field.Field)
 	return b
 }
+
 // WithValidator sets a custom validator
 func (b *Builder) WithValidator(validator Validator) *Builder {
 	b.validator = validator
 	return b
 }
+
 // WithCustomValidator adds a custom validator (placeholder - implement with concrete validator)
 func (b *Builder) WithCustomValidator(name string, validatorFunc func(context.Context, any, map[string]any) error) *Builder {
 	// Implementation depends on concrete validator type
 	return b
 }
+
 // GetMixinRegistry returns the mixin registry for advanced operations
 func (b *Builder) GetMixinRegistry() *MixinRegistry {
 	return b.mixinSupport
 }
+
 // GetValidator returns the validator for advanced operations
 func (b *Builder) GetValidator() Validator {
 	return b.validator
 }
+
 // WithBusinessRule adds a business rule to the schema
 func (b *Builder) WithBusinessRule(rule *BusinessRule) *Builder {
 	b.ruleEngine.AddRule(rule)
 	return b
 }
+
 // WithBusinessRuleBuilder adds a business rule using the builder pattern
 func (b *Builder) WithBusinessRuleBuilder(ruleBuilder *BusinessRuleBuilder) *Builder {
 	if rule, err := ruleBuilder.Build(); err == nil {
@@ -379,14 +422,17 @@ func (b *Builder) WithBusinessRuleBuilder(ruleBuilder *BusinessRuleBuilder) *Bui
 	}
 	return b
 }
+
 // GetBusinessRuleEngine returns the business rule engine for advanced operations
 func (b *Builder) GetBusinessRuleEngine() *BusinessRuleEngine {
 	return b.ruleEngine
 }
+
 // ApplyBusinessRules applies business rules to the schema based on data
 func (b *Builder) ApplyBusinessRules(ctx context.Context, data map[string]any) (*Schema, error) {
 	return b.ruleEngine.ApplyRules(ctx, b.schema, data)
 }
+
 // BuildWithRules builds the schema and applies business rules based on provided data
 func (b *Builder) BuildWithRules(ctx context.Context, data map[string]any) (*Schema, error) {
 	// First build the base schema
@@ -397,6 +443,7 @@ func (b *Builder) BuildWithRules(ctx context.Context, data map[string]any) (*Sch
 	// Then apply business rules
 	return b.ruleEngine.ApplyRules(ctx, schema, data)
 }
+
 // Helper functions for creating common configurations
 // NewGridLayout creates a grid layout with specified columns
 func NewGridLayout(columns int) *Layout {
@@ -407,6 +454,7 @@ func NewGridLayout(columns int) *Layout {
 		Responsive: true,
 	}
 }
+
 // NewTabLayout creates a tabbed layout
 func NewTabLayout(tabs []Tab) *Layout {
 	return &Layout{
@@ -414,6 +462,7 @@ func NewTabLayout(tabs []Tab) *Layout {
 		Tabs: tabs,
 	}
 }
+
 // NewStepLayout creates a multi-step wizard layout
 func NewStepLayout(steps []Step) *Layout {
 	return &Layout{
@@ -421,6 +470,7 @@ func NewStepLayout(steps []Step) *Layout {
 		Steps: steps,
 	}
 }
+
 // NewSimpleConfig creates a basic POST configuration
 func NewSimpleConfig(action, method string) *Config {
 	return &Config{
@@ -430,6 +480,7 @@ func NewSimpleConfig(action, method string) *Config {
 		Timeout:  30000,
 	}
 }
+
 // CreateOption is a helper to create FieldOption structs
 func CreateOption(value, label string) FieldOption {
 	return FieldOption{
@@ -437,6 +488,7 @@ func CreateOption(value, label string) FieldOption {
 		Label: label,
 	}
 }
+
 // CreateOptionWithIcon creates an option with an icon
 func CreateOptionWithIcon(value, label, icon string) FieldOption {
 	return FieldOption{
@@ -445,6 +497,7 @@ func CreateOptionWithIcon(value, label, icon string) FieldOption {
 		Icon:  icon,
 	}
 }
+
 // CreateGroupedOption creates an option with a group
 func CreateGroupedOption(value, label, group string) FieldOption {
 	return FieldOption{
@@ -453,12 +506,14 @@ func CreateGroupedOption(value, label, group string) FieldOption {
 		Group: group,
 	}
 }
+
 // Field builder helpers
 // FieldBuilder provides fluent interface for building fields
 type FieldBuilder struct {
 	field     Field
 	evaluator *condition.Evaluator
 }
+
 // NewField starts building a field
 func NewField(name string, fieldType FieldType) *FieldBuilder {
 	return &FieldBuilder{
@@ -468,61 +523,73 @@ func NewField(name string, fieldType FieldType) *FieldBuilder {
 		},
 	}
 }
+
 // WithLabel sets the label
 func (fb *FieldBuilder) WithLabel(label string) *FieldBuilder {
 	fb.field.Label = label
 	return fb
 }
+
 // WithDescription sets the description
 func (fb *FieldBuilder) WithDescription(desc string) *FieldBuilder {
 	fb.field.Description = desc
 	return fb
 }
+
 // WithPlaceholder sets the placeholder
 func (fb *FieldBuilder) WithPlaceholder(placeholder string) *FieldBuilder {
 	fb.field.Placeholder = placeholder
 	return fb
 }
+
 // WithHelp sets help text
 func (fb *FieldBuilder) WithHelp(help string) *FieldBuilder {
 	fb.field.Help = help
 	return fb
 }
+
 // Required marks field as required
 func (fb *FieldBuilder) Required() *FieldBuilder {
 	fb.field.Required = true
 	return fb
 }
+
 // Disabled marks field as disabled
 func (fb *FieldBuilder) Disabled() *FieldBuilder {
 	fb.field.Disabled = true
 	return fb
 }
+
 // Readonly marks field as readonly
 func (fb *FieldBuilder) Readonly() *FieldBuilder {
 	fb.field.Readonly = true
 	return fb
 }
+
 // WithDefault sets default value
 func (fb *FieldBuilder) WithDefault(value any) *FieldBuilder {
 	fb.field.Default = value
 	return fb
 }
+
 // WithOptions sets options (for select fields)
 func (fb *FieldBuilder) WithOptions(options []FieldOption) *FieldBuilder {
 	fb.field.Options = options
 	return fb
 }
+
 // WithValidation sets validation rules
 func (fb *FieldBuilder) WithValidation(validation *FieldValidation) *FieldBuilder {
 	fb.field.Validation = validation
 	return fb
 }
+
 // WithEvaluator sets the condition evaluator
 func (fb *FieldBuilder) WithEvaluator(evaluator *condition.Evaluator) *FieldBuilder {
 	fb.evaluator = evaluator
 	return fb
 }
+
 // Build returns the constructed field
 func (fb *FieldBuilder) Build() Field {
 	if fb.evaluator != nil {
@@ -530,6 +597,7 @@ func (fb *FieldBuilder) Build() Field {
 	}
 	return fb.field
 }
+
 // Foundation helper methods for common schema patterns
 // NewInvoiceFormBuilder creates a builder for invoice forms with line items
 func NewInvoiceFormBuilder() *Builder {
@@ -571,6 +639,7 @@ func NewInvoiceFormBuilder() *Builder {
 	builder.AddButton("send", "Send", "primary")
 	return builder
 }
+
 // NewContactFormBuilder creates a builder for contact forms
 func NewContactFormBuilder() *Builder {
 	builder := NewBuilder("contact_form", TypeForm, "Contact Form")
@@ -593,6 +662,7 @@ func NewContactFormBuilder() *Builder {
 	builder.AddSubmitButton("Save Contact")
 	return builder
 }
+
 // NewAddressFormBuilder creates a builder for address forms
 func NewAddressFormBuilder() *Builder {
 	builder := NewBuilder("address_form", TypeForm, "Address Form")
@@ -608,6 +678,7 @@ func NewAddressFormBuilder() *Builder {
 	builder.AddSubmitButton("Save Address")
 	return builder
 }
+
 // NewUserRegistrationBuilder creates a builder for user registration with validation
 func NewUserRegistrationBuilder() *Builder {
 	builder := NewBuilder("user_registration", TypeForm, "User Registration")
@@ -633,6 +704,7 @@ func NewUserRegistrationBuilder() *Builder {
 	builder.AddSubmitButton("Create Account")
 	return builder
 }
+
 // NewTaskFormBuilder creates a builder for task management forms
 func NewTaskFormBuilder() *Builder {
 	builder := NewBuilder("task_form", TypeForm, "Task Form")

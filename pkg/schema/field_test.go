@@ -1,19 +1,23 @@
 package schema
+
 import (
 	"context"
 	"testing"
 	"time"
+
 	"github.com/google/uuid"
 	"github.com/niiniyare/ruun/pkg/condition"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 // FieldTestSuite tests the Field functionality
 type FieldTestSuite struct {
 	suite.Suite
 	field     Field
 	evaluator *condition.Evaluator
 }
+
 func (s *FieldTestSuite) SetupTest() {
 	s.field = Field{
 		Name:     "test_field",
@@ -24,6 +28,7 @@ func (s *FieldTestSuite) SetupTest() {
 	// Create evaluator for conditional tests
 	s.evaluator = condition.NewEvaluator(nil, condition.DefaultEvalOptions())
 }
+
 // ==================== Field Types ====================
 func (s *FieldTestSuite) TestFieldTypes() {
 	types := []FieldType{
@@ -55,6 +60,7 @@ func (s *FieldTestSuite) TestFieldTypes() {
 		s.Require().Equal(fieldType, field.Type, "Field type %s should be set correctly", fieldType)
 	}
 }
+
 // ==================== Basic Validation ====================
 func (s *FieldTestSuite) TestFieldRequiredValidation() {
 	s.field.Required = true
@@ -76,6 +82,7 @@ func (s *FieldTestSuite) TestFieldNotRequired() {
 	err = s.field.ValidateValue(context.Background(), "")
 	s.Require().NoError(err)
 }
+
 // ==================== String Validation ====================
 func (s *FieldTestSuite) TestStringMinLength() {
 	minLen := 3
@@ -134,6 +141,7 @@ func (s *FieldTestSuite) TestPatternValidationCustomMessage() {
 	s.Require().Error(err)
 	s.Require().Equal("Only letters, numbers, underscore and hyphen allowed", err.Error())
 }
+
 // ==================== Format Validation ====================
 func (s *FieldTestSuite) TestEmailFormatValidation() {
 	s.field.Type = FieldEmail
@@ -237,6 +245,7 @@ func (s *FieldTestSuite) TestTimeFormatValidation() {
 	err = s.field.ValidateValue(context.Background(), "25:00:00")
 	s.Require().Error(err)
 }
+
 // ==================== Number Validation ====================
 func (s *FieldTestSuite) TestNumberMinMax() {
 	min := 5.0
@@ -336,6 +345,7 @@ func (s *FieldTestSuite) TestStepValidation() {
 	s.Require().Error(err)
 	s.Require().Contains(err.Error(), "steps of 0.5")
 }
+
 // ==================== Array Validation ====================
 func (s *FieldTestSuite) TestArrayMinMaxItems() {
 	minItems := 2
@@ -367,6 +377,7 @@ func (s *FieldTestSuite) TestArrayUniqueItems() {
 	s.Require().Error(err)
 	s.Require().Contains(err.Error(), "unique items")
 }
+
 // ==================== Transform Tests ====================
 func (s *FieldTestSuite) TestUppercaseTransform() {
 	s.field.Transform = &Transform{Type: "uppercase"}
@@ -404,6 +415,7 @@ func (s *FieldTestSuite) TestTransformNonString() {
 	s.Require().NoError(err)
 	s.Require().Equal(123, result)
 }
+
 // ==================== Default Value Tests ====================
 func (s *FieldTestSuite) TestStaticDefaultValue() {
 	s.field.Default = "static value"
@@ -481,6 +493,7 @@ func (s *FieldTestSuite) TestTypeDefaultValues() {
 		})
 	}
 }
+
 // ==================== Conditional Logic Tests ====================
 func (s *FieldTestSuite) TestIsVisibleSimpleFormat() {
 	s.field.SetEvaluator(s.evaluator)
@@ -586,6 +599,7 @@ func (s *FieldTestSuite) TestIsVisibleWithoutEvaluator() {
 	s.Require().NoError(err)   // Now gracefully handles missing evaluator
 	s.Require().False(visible) // Should default to visible (false = not hidden)
 }
+
 // ==================== Helper Methods Tests ====================
 func (s *FieldTestSuite) TestIsSelectionType() {
 	selectionTypes := []FieldType{
@@ -660,6 +674,7 @@ func (s *FieldTestSuite) TestGetOptionLabel() {
 	label = s.field.GetOptionLabel("unknown")
 	s.Require().Equal("unknown", label)
 }
+
 // ==================== I18n Tests ====================
 func (s *FieldTestSuite) TestGetLabelLocalized() {
 	s.field.Label = "Default Label"
@@ -700,6 +715,7 @@ func (s *FieldTestSuite) TestGetHelpLocalized() {
 	help := s.field.GetHelp("fr")
 	s.Require().Equal("Aide française", help)
 }
+
 // ==================== Typed Config Tests ====================
 func (s *FieldTestSuite) TestGetTextConfig() {
 	s.field.Type = FieldText
@@ -759,6 +775,7 @@ func (s *FieldTestSuite) TestGetRelationConfig() {
 	s.Require().Equal("id", cfg.ValueField)
 	s.Require().True(cfg.CreateNew)
 }
+
 // ==================== Field Validation Tests ====================
 func (s *FieldTestSuite) TestFieldValidate() {
 	field := Field{
@@ -820,6 +837,7 @@ func (s *FieldTestSuite) TestFieldValidateRequiresOptions() {
 	s.Require().Error(err)
 	s.Require().Contains(err.Error(), "requires options or dataSource")
 }
+
 // ==================== Basic Field Properties ====================
 func (s *FieldTestSuite) TestFieldOptions() {
 	s.field.Type = FieldSelect
@@ -874,6 +892,7 @@ func (s *FieldTestSuite) TestFieldCustomMessages() {
 	s.Require().Error(err)
 	s.Require().Equal("Custom min length message", err.Error())
 }
+
 // ==================== Condition Conversion Tests ====================
 func (s *FieldTestSuite) TestConditionGroupConversion() {
 	cg := &ConditionGroup{
@@ -901,10 +920,12 @@ func (s *FieldTestSuite) TestConditionGroupConversionOR() {
 	s.Require().Equal(condition.ConjunctionOr, converted.Conjunction)
 	// Don't check internal structure, just verify it can be used
 }
+
 // Run the test suite
 func TestFieldTestSuite(t *testing.T) {
 	suite.Run(t, new(FieldTestSuite))
 }
+
 // ==================== Additional Coverage Tests ====================
 func (s *FieldTestSuite) TestFieldSetGetEvaluator() {
 	// Test that SetEvaluator and evaluator field work

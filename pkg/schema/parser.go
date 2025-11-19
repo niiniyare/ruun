@@ -1,9 +1,11 @@
 package schema
+
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 )
+
 // Parser converts JSON to Go structs with configurable behavior
 type Parser struct {
 	applyDefaults    bool
@@ -12,8 +14,10 @@ type Parser struct {
 	maxFieldCount    int
 	maxDepth         int
 }
+
 // ParserOption configures parser behavior
 type ParserOption func(*Parser)
+
 // NewParser creates a new parser with options
 func NewParser(opts ...ParserOption) *Parser {
 	p := &Parser{
@@ -28,36 +32,42 @@ func NewParser(opts ...ParserOption) *Parser {
 	}
 	return p
 }
+
 // WithDefaults applies sensible defaults to parsed schema
 func WithDefaults() ParserOption {
 	return func(p *Parser) {
 		p.applyDefaults = true
 	}
 }
+
 // WithStrictValidation enables/disables strict validation
 func WithStrictValidation(strict bool) ParserOption {
 	return func(p *Parser) {
 		p.strictValidation = strict
 	}
 }
+
 // WithPreserveUnknown preserves unknown JSON fields
 func WithPreserveUnknown() ParserOption {
 	return func(p *Parser) {
 		p.preserveUnknown = true
 	}
 }
+
 // WithMaxFields sets maximum allowed fields (prevents abuse)
 func WithMaxFields(max int) ParserOption {
 	return func(p *Parser) {
 		p.maxFieldCount = max
 	}
 }
+
 // WithMaxDepth sets maximum nesting depth
 func WithMaxDepth(max int) ParserOption {
 	return func(p *Parser) {
 		p.maxDepth = max
 	}
 }
+
 // Parse converts JSON bytes to Schema struct
 func (p *Parser) Parse(ctx context.Context, data []byte) (*Schema, error) {
 	if len(data) == 0 {
@@ -81,10 +91,12 @@ func (p *Parser) Parse(ctx context.Context, data []byte) (*Schema, error) {
 	}
 	return &s, nil
 }
+
 // ParseString converts JSON string to Schema struct
 func (p *Parser) ParseString(ctx context.Context, jsonStr string) (*Schema, error) {
 	return p.Parse(ctx, []byte(jsonStr))
 }
+
 // ParseFile reads and parses a JSON file
 func (p *Parser) ParseFile(filename string) (*Schema, error) {
 	// Note: Import os package to use this
@@ -95,6 +107,7 @@ func (p *Parser) ParseFile(filename string) (*Schema, error) {
 	// return p.Parse(data)
 	return nil, fmt.Errorf("ParseFile not implemented - add os import")
 }
+
 // ParseMap converts map to Schema (useful for dynamic schemas)
 func (p *Parser) ParseMap(ctx context.Context, data map[string]any) (*Schema, error) {
 	jsonBytes, err := json.Marshal(data)
@@ -103,6 +116,7 @@ func (p *Parser) ParseMap(ctx context.Context, data map[string]any) (*Schema, er
 	}
 	return p.Parse(ctx, jsonBytes)
 }
+
 // validateJSON performs quick validation before full parse
 func (p *Parser) validateJSON(data []byte) error {
 	var raw map[string]any
@@ -129,6 +143,7 @@ func (p *Parser) validateJSON(data []byte) error {
 	}
 	return nil
 }
+
 // validate performs deep validation
 func (p *Parser) validate(ctx context.Context, s *Schema) error {
 	// Check field count limits
@@ -147,6 +162,7 @@ func (p *Parser) validate(ctx context.Context, s *Schema) error {
 	}
 	return nil
 }
+
 // strictValidate performs additional validation checks
 func (p *Parser) strictValidate(s *Schema) error {
 	// Validate field names are unique
@@ -169,6 +185,7 @@ func (p *Parser) strictValidate(s *Schema) error {
 	}
 	return nil
 }
+
 // setDefaults applies sensible defaults to schema
 // Note: Does NOT set State or Meta timestamps - those are runtime concerns
 func (p *Parser) setDefaults(s *Schema) {
@@ -191,6 +208,7 @@ func (p *Parser) setDefaults(s *Schema) {
 	// Set defaults for other components like tables, forms, etc.
 	p.setPageComponentDefaults(s)
 }
+
 // setFieldDefaults applies defaults to a field
 func (p *Parser) setFieldDefaults(f *Field) {
 	// Set field-specific defaults based on type
@@ -278,6 +296,7 @@ func (p *Parser) setFieldDefaults(f *Field) {
 		f.Placeholder = "Enter " + f.Label
 	}
 }
+
 // setActionDefaults applies defaults to an action
 func (p *Parser) setActionDefaults(a *Action) {
 	// Set default variant based on action type
@@ -307,6 +326,7 @@ func (p *Parser) setActionDefaults(a *Action) {
 		}
 	}
 }
+
 // setLayoutDefaults applies defaults to layout
 func (p *Parser) setLayoutDefaults(l *Layout) {
 	if l.Type == "grid" && l.Columns == 0 {
@@ -316,6 +336,7 @@ func (p *Parser) setLayoutDefaults(l *Layout) {
 		l.Gap = "1rem"
 	}
 }
+
 // setComponentDefaults is now implemented above in the file
 // Sets defaults for CRUD tables, charts, and other page components
 // Serialize converts a Schema struct to JSON bytes
@@ -326,6 +347,7 @@ func (p *Parser) Serialize(s *Schema) ([]byte, error) {
 	}
 	return data, nil
 }
+
 // SerializeString converts a Schema struct to JSON string
 func (p *Parser) SerializeString(s *Schema) (string, error) {
 	data, err := p.Serialize(s)
@@ -334,6 +356,7 @@ func (p *Parser) SerializeString(s *Schema) (string, error) {
 	}
 	return string(data), nil
 }
+
 // SerializeCompact converts to minified JSON
 func (p *Parser) SerializeCompact(s *Schema) ([]byte, error) {
 	data, err := json.Marshal(s)
@@ -342,6 +365,7 @@ func (p *Parser) SerializeCompact(s *Schema) ([]byte, error) {
 	}
 	return data, nil
 }
+
 // Clone creates a deep copy of a schema
 func (p *Parser) Clone(ctx context.Context, s *Schema) (*Schema, error) {
 	// Serialize and re-parse to get a deep copy
@@ -351,6 +375,7 @@ func (p *Parser) Clone(ctx context.Context, s *Schema) (*Schema, error) {
 	}
 	return p.Parse(ctx, data)
 }
+
 // Merge combines two schemas (useful for inheritance/composition)
 func (p *Parser) Merge(ctx context.Context, base, overlay *Schema) (*Schema, error) {
 	// Clone base to avoid mutation
@@ -375,10 +400,12 @@ func (p *Parser) Merge(ctx context.Context, base, overlay *Schema) (*Schema, err
 	}
 	return result, nil
 }
+
 // ValidateQuick performs fast validation without full parsing
 func (p *Parser) ValidateQuick(data []byte) error {
 	return p.validateJSON(data)
 }
+
 // GetSchemaInfo extracts basic info without full parsing
 func (p *Parser) GetSchemaInfo(data []byte) (*SchemaInfo, error) {
 	var raw map[string]any
@@ -397,6 +424,7 @@ func (p *Parser) GetSchemaInfo(data []byte) (*SchemaInfo, error) {
 	}
 	return info, nil
 }
+
 // SchemaInfo contains basic schema metadata
 type SchemaInfo struct {
 	ID         string
@@ -405,6 +433,7 @@ type SchemaInfo struct {
 	Version    string
 	FieldCount int
 }
+
 // Helper to safely get string from map
 func getString(m map[string]any, key string) string {
 	if val, ok := m[key].(string); ok {
@@ -412,11 +441,13 @@ func getString(m map[string]any, key string) string {
 	}
 	return ""
 }
+
 // ParseError provides detailed error information
 type ParseError struct {
 	SchemaID string
 	Message  string
 }
+
 func (e *ParseError) Error() string {
 	if e.SchemaID != "" {
 		return fmt.Sprintf("parse error in schema '%s': %s", e.SchemaID, e.Message)
@@ -429,11 +460,13 @@ func NewParseError(schemaID, message string) *ParseError {
 		Message:  message,
 	}
 }
+
 // IsParseError checks if error is a ParseError
 func IsParseError(err error) bool {
 	_, ok := err.(*ParseError)
 	return ok
 }
+
 // validateConditionFieldReferences validates field references in business rule conditions
 func validateConditionFieldReferences(condition *ConditionGroup, fieldNames map[string]bool) error {
 	// This is a simplified validation - would need to parse condition expressions
@@ -442,12 +475,14 @@ func validateConditionFieldReferences(condition *ConditionGroup, fieldNames map[
 	// and validate field references in condition expressions.
 	return nil
 }
+
 // setComponentDefaults sets defaults for page body components
 func (p *Parser) setComponentDefaults(body any) {
 	// Set defaults for various component types when Body field is properly typed
 	// For now this is a placeholder since Body is any
 	// This would set defaults for things like tables, forms, grids, etc.
 }
+
 // setPageComponentDefaults sets defaults for page-level components
 func (p *Parser) setPageComponentDefaults(s *Schema) {
 	// Set defaults for page-level components like navigation, toolbars, etc.

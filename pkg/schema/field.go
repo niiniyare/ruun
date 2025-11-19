@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"fmt"
@@ -7,10 +8,12 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // Field represents a form input or UI component
 type Field struct {
 	// Identity
@@ -30,8 +33,8 @@ type Field struct {
 	Readonly bool `json:"readonly,omitempty"` // Value visible but not editable
 	Hidden   bool `json:"hidden,omitempty"`   // Field not displayed
 	// Values
-	Value   any      `json:"value,omitempty"`                   // Current value
-	Default any      `json:"default,omitempty"`                 // Default value (supports ${expressions})
+	Value   any           `json:"value,omitempty"`                   // Current value
+	Default any           `json:"default,omitempty"`                 // Default value (supports ${expressions})
 	Options []FieldOption `json:"options,omitempty" validate:"dive"` // For select/radio/checkbox
 	// Behavior configuration
 	Validation   *FieldValidation  `json:"validation,omitempty"`                             // Validation rules
@@ -60,6 +63,7 @@ type Field struct {
 	// Internal state (not in JSON)
 	evaluator *condition.Evaluator `json:"-"` // Condition evaluator (injected)
 }
+
 // GetLocalizedLabel returns the field label in the specified locale
 // Uses embedded translations based on field ID, with I18n as fallback
 func (f *Field) GetLocalizedLabel(locale string) string {
@@ -77,6 +81,7 @@ func (f *Field) GetLocalizedLabel(locale string) string {
 	}
 	return embeddedTranslation
 }
+
 // GetLocalizedPlaceholder returns the placeholder text in the specified locale
 func (f *Field) GetLocalizedPlaceholder(locale string) string {
 	// Check if explicit I18n translations exist
@@ -94,6 +99,7 @@ func (f *Field) GetLocalizedPlaceholder(locale string) string {
 	}
 	return placeholder
 }
+
 // GetLocalizedHelp returns the help text in the specified locale
 func (f *Field) GetLocalizedHelp(locale string) string {
 	// Check if explicit I18n translations exist
@@ -111,6 +117,7 @@ func (f *Field) GetLocalizedHelp(locale string) string {
 	}
 	return help
 }
+
 // GetLocalizedDescription returns the description in the specified locale
 func (f *Field) GetLocalizedDescription(locale string) string {
 	// Check if explicit I18n translations exist
@@ -128,8 +135,10 @@ func (f *Field) GetLocalizedDescription(locale string) string {
 	}
 	return desc
 }
+
 // FieldType defines all supported input types
 type FieldType string
+
 const (
 	// Basic text inputs
 	FieldText     FieldType = "text"
@@ -195,6 +204,7 @@ const (
 	FieldRepeatable    FieldType = "repeatable"     // Repeatable field groups
 	FieldTableRepeater FieldType = "table_repeater" // Table-style repeatable fields
 )
+
 // FieldValidation defines validation rules for a field
 type FieldValidation struct {
 	// String validation
@@ -226,6 +236,7 @@ type FieldValidation struct {
 	Custom   string    `json:"custom,omitempty"` // Custom validation formula
 	Messages *Messages `json:"messages"`         // Custom error messages
 }
+
 // FileValidation for file upload fields
 type FileValidation struct {
 	MaxSize  int64    `json:"maxSize,omitempty"`  // Max file size in bytes
@@ -233,6 +244,7 @@ type FileValidation struct {
 	Accept   []string `json:"accept,omitempty"`   // Allowed MIME types
 	MaxFiles int      `json:"maxFiles,omitempty"` // Max number of files (for multiple)
 }
+
 // ImageValidation extends file validation with image-specific rules
 type ImageValidation struct {
 	FileValidation
@@ -241,6 +253,7 @@ type ImageValidation struct {
 	MinHeight int `json:"minHeight,omitempty"` // Minimum image height
 	MaxHeight int `json:"maxHeight,omitempty"` // Maximum image height
 }
+
 // Messages holds custom validation error messages
 type Messages struct {
 	Required  string `json:"required,omitempty"`
@@ -251,11 +264,13 @@ type Messages struct {
 	Max       string `json:"max,omitempty"`
 	Custom    string `json:"custom,omitempty"`
 }
+
 // Transform defines value transformation rules
 type Transform struct {
 	Type   string         `json:"type" validate:"oneof=uppercase lowercase trim capitalize slugify"` // Transform type
 	Params map[string]any `json:"params,omitempty"`                                                  // Transform parameters
 }
+
 // Mask defines input masking
 type Mask struct {
 	Pattern     string `json:"pattern" example:"(999) 999-9999"`  // Mask pattern
@@ -263,6 +278,7 @@ type Mask struct {
 	ShowMask    bool   `json:"showMask,omitempty"`                // Show mask when empty
 	Guide       bool   `json:"guide,omitempty"`                   // Show guide while typing
 }
+
 // FieldLayout controls field positioning in grid
 type FieldLayout struct {
 	Row     int    `json:"row,omitempty"`     // Grid row
@@ -274,6 +290,7 @@ type FieldLayout struct {
 	Offset  int    `json:"offset,omitempty"`  // Column offset
 	Class   string `json:"class,omitempty"`   // CSS classes
 }
+
 // Style defines custom styling
 type Style struct {
 	Classes        string            `json:"classes,omitempty"`        // CSS classes
@@ -283,6 +300,7 @@ type Style struct {
 	ErrorClass     string            `json:"errorClass,omitempty"`     // Error CSS classes
 	ContainerClass string            `json:"containerClass,omitempty"` // Container CSS
 }
+
 // FieldEvents defines field-level event handlers
 type FieldEvents struct {
 	// Form lifecycle
@@ -309,6 +327,7 @@ type FieldEvents struct {
 	OnFieldBlur     string `json:"onFieldBlur,omitempty" validate:"js_function"`     // Field blurred
 	OnFieldValidate string `json:"onFieldValidate,omitempty" validate:"js_function"` // Field validated
 }
+
 // Conditional defines when field is shown/required using condition engine
 // Supports both simple format (for ease of use) and full condition package format (for advanced use)
 type Conditional struct {
@@ -323,18 +342,21 @@ type Conditional struct {
 	RequiredAdvanced *condition.ConditionGroup `json:"requiredAdvanced,omitempty"` // Advanced required conditions
 	DisabledAdvanced *condition.ConditionGroup `json:"disabledAdvanced,omitempty"` // Advanced disabled conditions
 }
+
 // ConditionGroup wraps simple condition logic (backward compatible)
 // For more complex conditions, use ShowAdvanced/HideAdvanced with condition.ConditionGroup
 type ConditionGroup struct {
 	Logic      string      `json:"logic" validate:"oneof=AND OR"` // AND or OR
 	Conditions []Condition `json:"conditions" validate:"dive"`    // List of conditions
 }
+
 // Condition represents a single condition check (backward compatible)
 type Condition struct {
 	Field    string `json:"field" validate:"required"`    // Field to check
 	Operator string `json:"operator" validate:"required"` // Comparison operator (equal, not_equal, greater, less, etc.)
 	Value    any    `json:"value"`                        // Value to compare against
 }
+
 // ToConditionGroup converts simple ConditionGroup to condition package format
 func (cg *ConditionGroup) ToConditionGroup() *condition.ConditionGroup {
 	if cg == nil {
@@ -356,6 +378,7 @@ func (cg *ConditionGroup) ToConditionGroup() *condition.ConditionGroup {
 	}
 	return builder.Build()
 }
+
 // mapOperatorType maps string operators to condition.OperatorType
 func mapOperatorType(op string) condition.OperatorType {
 	switch strings.ToLower(op) {
@@ -397,6 +420,7 @@ func mapOperatorType(op string) condition.OperatorType {
 		return condition.OpEqual // Default to equal
 	}
 }
+
 // DataSource defines where to fetch dynamic options
 type DataSource struct {
 	Type      string            `json:"type" validate:"oneof=api static computed"` // Source type
@@ -405,16 +429,18 @@ type DataSource struct {
 	Headers   map[string]string `json:"headers,omitempty"`   // Request headers
 	Params    map[string]string `json:"params,omitempty"`    // Query parameters
 	CacheTTL  int               `json:"cacheTTL,omitempty"`  // Cache duration in seconds
-	Static    []FieldOption          `json:"static,omitempty"`    // Static options
+	Static    []FieldOption     `json:"static,omitempty"`    // Static options
 	Computed  string            `json:"computed,omitempty"`  // JS function for computed options
 	Transform string            `json:"transform,omitempty"` // Transform response data
 }
+
 // FieldPermissions controls field access
 type FieldPermissions struct {
 	View     []string `json:"view,omitempty"`     // Roles that can view
 	Edit     []string `json:"edit,omitempty"`     // Roles that can edit
 	Required []string `json:"required,omitempty"` // Permissions needed
 }
+
 // FieldRuntime holds runtime state set by the enricher
 type FieldRuntime struct {
 	Visible  bool   `json:"visible"`  // Whether field should be visible to user
@@ -436,6 +462,7 @@ func (fr *FieldRuntime) IsEditable() bool {
 func (fr *FieldRuntime) GetReason() string {
 	return fr.Reason
 }
+
 // FieldI18n holds field translations for multiple locales
 type FieldI18n struct {
 	Label       map[string]string `json:"label,omitempty"`       // Localized labels
@@ -458,6 +485,7 @@ type FieldI18n struct {
 	FallbackLocale   string            `json:"fallbackLocale,omitempty" validate:"locale"`
 	LoadPath         string            `json:"loadPath,omitempty"` // Path to translation files
 }
+
 // FieldHTMX defines HTMX behavior for this field
 type FieldHTMX struct {
 	Enabled     bool   `json:"enabled"`                                     // Enable Alpine.js
@@ -477,6 +505,7 @@ type FieldHTMX struct {
 	XFor        string `json:"xFor,omitempty" validate:"js_expression"`     // Loop directive
 	XEffect     string `json:"xEffect,omitempty" validate:"js_function"`    // Side effects
 }
+
 // FieldAlpine defines Alpine.js bindings
 type FieldAlpine struct {
 	XModel string `json:"xModel,omitempty" validate:"js_variable"`  // Two-way binding
@@ -485,6 +514,7 @@ type FieldAlpine struct {
 	XShow  string `json:"xShow,omitempty" validate:"js_expression"` // Show/hide
 	XIf    string `json:"xIf,omitempty" validate:"js_expression"`   // Conditional render
 }
+
 // FieldSecurity defines security settings
 type FieldSecurity struct {
 	Sanitize     bool     `json:"sanitize,omitempty"`     // XSS protection
@@ -492,19 +522,21 @@ type FieldSecurity struct {
 	MaxFileSize  int64    `json:"maxFileSize,omitempty"`  // File security limit
 	AllowedMimes []string `json:"allowedMimes,omitempty"` // Allowed MIME types for files
 }
+
 // FieldOption represents a selectable option for select/radio/checkbox fields
 type FieldOption struct {
-	Value       string   `json:"value" validate:"required"`                // Option value
-	Label       string   `json:"label" validate:"required"`                // Display label
-	Description string   `json:"description,omitempty" validate:"max=200"` // Extra description
-	Icon        string   `json:"icon,omitempty" validate:"icon_name"`      // Icon to show
-	Color       string   `json:"color,omitempty" validate:"css_color"`     // Color indicator
-	Group       string   `json:"group,omitempty"`                          // Option group
-	Disabled    bool     `json:"disabled,omitempty"`                       // Cannot be selected
-	Selected    bool     `json:"selected,omitempty"`                       // Pre-selected
+	Value       string        `json:"value" validate:"required"`                // Option value
+	Label       string        `json:"label" validate:"required"`                // Display label
+	Description string        `json:"description,omitempty" validate:"max=200"` // Extra description
+	Icon        string        `json:"icon,omitempty" validate:"icon_name"`      // Icon to show
+	Color       string        `json:"color,omitempty" validate:"css_color"`     // Color indicator
+	Group       string        `json:"group,omitempty"`                          // Option group
+	Disabled    bool          `json:"disabled,omitempty"`                       // Cannot be selected
+	Selected    bool          `json:"selected,omitempty"`                       // Pre-selected
 	Children    []FieldOption `json:"children,omitempty" validate:"dive"`       // Nested options (tree)
-	Meta        any      `json:"meta,omitempty"`                           // Custom metadata
+	Meta        any           `json:"meta,omitempty"`                           // Custom metadata
 }
+
 // Typed Field Configurations
 // TextFieldConfig for text input fields
 type TextFieldConfig struct {
@@ -513,6 +545,7 @@ type TextFieldConfig struct {
 	Prefix       string `json:"prefix,omitempty"`
 	Suffix       string `json:"suffix,omitempty"`
 }
+
 // SelectFieldConfig for selection fields
 type SelectFieldConfig struct {
 	Searchable    bool   `json:"searchable,omitempty"`
@@ -523,6 +556,7 @@ type SelectFieldConfig struct {
 	OptionsSource string `json:"optionsSource,omitempty"` // API endpoint for dynamic options
 	Createable    bool   `json:"createable,omitempty"`    // Allow creating new options
 }
+
 // FileFieldConfig for file upload fields
 type FileFieldConfig struct {
 	MaxSize     int64    `json:"maxSize,omitempty"`
@@ -533,6 +567,7 @@ type FileFieldConfig struct {
 	AutoUpload  bool     `json:"autoUpload,omitempty"`
 	Drag        bool     `json:"drag,omitempty"` // Enable drag-and-drop
 }
+
 // ImageFieldConfig for image upload fields
 type ImageFieldConfig struct {
 	FileFieldConfig
@@ -545,6 +580,7 @@ type ImageFieldConfig struct {
 	} `json:"resize,omitempty"`
 	Preview bool `json:"preview,omitempty"` // Show image preview
 }
+
 // RelationConfig for foreign key fields
 type RelationConfig struct {
 	TargetSchema string         `json:"targetSchema"`        // Related table/schema
@@ -558,6 +594,7 @@ type RelationConfig struct {
 	CreateURL    string         `json:"createUrl,omitempty"` // URL for creating new records
 	Template     string         `json:"template,omitempty"`  // Display template e.g., "${code} - ${name}"
 }
+
 // RepeatableConfig for repeatable field groups
 type RepeatableConfig struct {
 	MinItems         int     `json:"minItems,omitempty"`
@@ -569,6 +606,7 @@ type RepeatableConfig struct {
 	ItemTitle        string  `json:"itemTitle,omitempty"` // Template for item title, e.g., "Item ${index + 1}"
 	Fields           []Field `json:"fields"`
 }
+
 // FormulaConfig for computed fields
 type FormulaConfig struct {
 	Expression   string   `json:"expression" validate:"required,max=10000"`              // Formula expression using condition engine syntax
@@ -577,6 +615,7 @@ type FormulaConfig struct {
 	Recalculate  string   `json:"recalculate" validate:"oneof=onChange onSubmit onLoad"` // When to recalculate
 	Dependencies []string `json:"dependencies,omitempty"`                                // Fields this formula depends on
 }
+
 // TextareaConfig for textarea fields
 type TextareaConfig struct {
 	Rows      int    `json:"rows,omitempty"`
@@ -585,6 +624,7 @@ type TextareaConfig struct {
 	AutoSize  bool   `json:"autoSize,omitempty"`  // Auto-grow height
 	Resize    string `json:"resize,omitempty"`    // "none", "vertical", "horizontal", "both"
 }
+
 // RichTextConfig for WYSIWYG editor
 type RichTextConfig struct {
 	Toolbar      []string `json:"toolbar,omitempty"` // Available formatting tools
@@ -595,6 +635,7 @@ type RichTextConfig struct {
 	Sanitize     bool     `json:"sanitize,omitempty"`     // XSS protection
 	OutputFormat string   `json:"outputFormat,omitempty"` // "html", "markdown", "json"
 }
+
 // CodeConfig for code editor
 type CodeConfig struct {
 	Language    string `json:"language,omitempty"` // "sql", "javascript", "python", "json", etc.
@@ -605,6 +646,7 @@ type CodeConfig struct {
 	WordWrap    bool   `json:"wordWrap,omitempty"`
 	ReadOnly    bool   `json:"readOnly,omitempty"`
 }
+
 // CurrencyConfig for currency fields
 type CurrencyConfig struct {
 	Currency       string `json:"currency,omitempty"`       // ISO currency code (USD, EUR, KES, etc.)
@@ -613,6 +655,7 @@ type CurrencyConfig struct {
 	ShowSymbol     bool   `json:"showSymbol,omitempty"`     // Display currency symbol
 	SymbolPosition string `json:"symbolPosition,omitempty"` // "before" or "after"
 }
+
 // AutocompleteConfig for autocomplete fields
 type AutocompleteConfig struct {
 	Source       string `json:"source"`                 // API endpoint for search
@@ -623,6 +666,7 @@ type AutocompleteConfig struct {
 	ValueField   string `json:"valueField,omitempty"`   // Field to use as value
 	Template     string `json:"template,omitempty"`     // Display template with placeholders
 }
+
 // RatingConfig for rating fields
 type RatingConfig struct {
 	Max          int      `json:"max,omitempty"`          // Maximum rating value (typically 5)
@@ -632,6 +676,7 @@ type RatingConfig struct {
 	ShowTooltips bool     `json:"showTooltips,omitempty"` // Show tooltips for each rating
 	Tooltips     []string `json:"tooltips,omitempty"`     // Tooltip text for each rating level
 }
+
 // SliderConfig for slider fields
 type SliderConfig struct {
 	Min       float64           `json:"min,omitempty"`
@@ -641,6 +686,7 @@ type SliderConfig struct {
 	ShowValue bool              `json:"showValue,omitempty"` // Display current value
 	Range     bool              `json:"range,omitempty"`     // Enable range selection (two handles)
 }
+
 // DateConfig for date fields
 type DateConfig struct {
 	Format         string `json:"format,omitempty"`         // Internal date format (YYYY-MM-DD)
@@ -650,12 +696,14 @@ type DateConfig struct {
 	FirstDayOfWeek int    `json:"firstDayOfWeek,omitempty"` // 0=Sunday, 1=Monday
 	Shortcuts      bool   `json:"shortcuts,omitempty"`      // Show "Today", "Yesterday" buttons
 }
+
 // TimeConfig for time fields
 type TimeConfig struct {
 	Format     string `json:"format,omitempty"`     // Time format (HH:mm or HH:mm:ss)
 	Use24Hour  bool   `json:"use24Hour,omitempty"`  // 24-hour vs 12-hour format
 	MinuteStep int    `json:"minuteStep,omitempty"` // Minute increment (e.g., 15, 30)
 }
+
 // DateTimeConfig for datetime fields
 type DateTimeConfig struct {
 	Format        string `json:"format,omitempty"`        // Internal format
@@ -663,6 +711,7 @@ type DateTimeConfig struct {
 	Timezone      string `json:"timezone,omitempty"`      // Timezone (UTC, America/New_York, etc.)
 	UTC           bool   `json:"utc,omitempty"`           // Store in UTC
 }
+
 // DateRangeConfig for daterange fields
 type DateRangeConfig struct {
 	StartField     string `json:"startField,omitempty"`     // Field name for start date
@@ -671,6 +720,7 @@ type DateRangeConfig struct {
 	MaxDays        int    `json:"maxDays,omitempty"`        // Maximum range in days
 	SingleCalendar bool   `json:"singleCalendar,omitempty"` // Show both dates in one calendar
 }
+
 // TagsConfig for tags fields
 type TagsConfig struct {
 	Delimiter         string   `json:"delimiter,omitempty"`         // Tag separator (typically ",")
@@ -679,22 +729,26 @@ type TagsConfig struct {
 	Suggestions       []string `json:"suggestions,omitempty"`       // Pre-defined tag suggestions
 	SuggestionsSource string   `json:"suggestionsSource,omitempty"` // API for tag suggestions
 }
+
 // ColorConfig for color picker
 type ColorConfig struct {
 	Format  string   `json:"format,omitempty"`  // "hex", "rgb", "rgba", "hsl"
 	Alpha   bool     `json:"alpha,omitempty"`   // Support transparency
 	Presets []string `json:"presets,omitempty"` // Quick-select colors
 }
+
 // GroupConfig for field groups
 type GroupConfig struct {
 	Collapsible bool `json:"collapsible,omitempty"` // Can collapse/expand
 	Collapsed   bool `json:"collapsed,omitempty"`   // Initial collapsed state
 	Border      bool `json:"border,omitempty"`      // Show border around group
 }
+
 // SetEvaluator injects the condition evaluator for conditional logic
 func (f *Field) SetEvaluator(evaluator *condition.Evaluator) {
 	f.evaluator = evaluator
 }
+
 // IsVisible checks if field should be displayed given current form data
 // Supports both simple and advanced condition formats
 func (f *Field) IsVisible(ctx context.Context, data map[string]any) (bool, error) {
@@ -748,6 +802,7 @@ func (f *Field) IsVisible(ctx context.Context, data map[string]any) (bool, error
 	}
 	return true, nil
 }
+
 // IsRequired checks if field is required given current form data
 // Supports both simple and advanced condition formats
 func (f *Field) IsRequired(ctx context.Context, data map[string]any) (bool, error) {
@@ -778,6 +833,7 @@ func (f *Field) IsRequired(ctx context.Context, data map[string]any) (bool, erro
 	}
 	return false, nil
 }
+
 // IsDisabled checks if field is disabled given current form data
 // Supports both simple and advanced condition formats
 func (f *Field) IsDisabled(ctx context.Context, data map[string]any) (bool, error) {
@@ -808,6 +864,7 @@ func (f *Field) IsDisabled(ctx context.Context, data map[string]any) (bool, erro
 	}
 	return false, nil
 }
+
 // Validate checks if field configuration is valid
 func (f *Field) Validate(ctx context.Context) error {
 	if f.Name == "" {
@@ -877,6 +934,7 @@ func (f *Field) Validate(ctx context.Context) error {
 	}
 	return nil
 }
+
 // requiresOptions checks if field type requires options
 func (f *Field) requiresOptions() bool {
 	switch f.Type {
@@ -885,6 +943,7 @@ func (f *Field) requiresOptions() bool {
 	}
 	return false
 }
+
 // validateValueExcludingCustom validates a value against field rules, excluding custom condition engine validation
 func (f *Field) validateValueExcludingCustom(ctx context.Context, value any) error {
 	// Check for context cancellation before starting validation
@@ -932,6 +991,7 @@ func (f *Field) validateValueExcludingCustom(ctx context.Context, value any) err
 	// Skip custom validation - will be handled by registry
 	return nil
 }
+
 // isValueTypeCompatible checks if the value type is compatible with field expectations
 func (f *Field) isValueTypeCompatible(value any) bool {
 	// Implement type compatibility logic based on field configuration
@@ -947,6 +1007,7 @@ func (f *Field) isValueTypeCompatible(value any) bool {
 		return f.isOtherTypeCompatible()
 	}
 }
+
 // Helper methods for type compatibility (to be implemented based on your field configuration)
 func (f *Field) isStringTypeCompatible() bool {
 	// Check if field expects string type
@@ -964,6 +1025,7 @@ func (f *Field) isOtherTypeCompatible() bool {
 	// Check if field expects other specific types
 	return true // default implementation
 }
+
 // ValidateValue validates a value against field rules
 func (f *Field) ValidateValue(ctx context.Context, value any) error {
 	// Required check
@@ -1005,6 +1067,7 @@ func (f *Field) ValidateValue(ctx context.Context, value any) error {
 	}
 	return nil
 }
+
 // validateString performs string-specific validation
 func (f *Field) validateString(value string) error {
 	v := f.Validation
@@ -1049,6 +1112,7 @@ func (f *Field) validateString(value string) error {
 	}
 	return nil
 }
+
 // validateFormat validates specific string formats
 func (f *Field) validateFormat(value string) error {
 	switch f.Validation.Format {
@@ -1090,6 +1154,7 @@ func (f *Field) validateFormat(value string) error {
 	}
 	return nil
 }
+
 // validateNumber performs number-specific validation
 func (f *Field) validateNumber(value any) error {
 	numVal, ok := toFloat64(value)
@@ -1147,6 +1212,7 @@ func (f *Field) validateNumber(value any) error {
 	}
 	return nil
 }
+
 // validateArray performs array-specific validation
 func (f *Field) validateArray(arr []any) error {
 	v := f.Validation
@@ -1164,6 +1230,7 @@ func (f *Field) validateArray(arr []any) error {
 	}
 	return nil
 }
+
 // validateCustom performs custom validation using condition engine formulas
 func (f *Field) validateCustom(ctx context.Context, value any) error {
 	if f.evaluator == nil {
@@ -1190,6 +1257,7 @@ func (f *Field) validateCustom(ctx context.Context, value any) error {
 	}
 	return nil
 }
+
 // validationError returns custom error message if available, otherwise default
 func (f *Field) validationError(customMsg, defaultFmt string, args ...any) SchemaError {
 	var message string
@@ -1211,11 +1279,13 @@ func (f *Field) validationError(customMsg, defaultFmt string, args ...any) Schem
 	}
 	return NewValidationError(code, message).WithField(f.Name)
 }
+
 // customValidationError provides backward compatibility for custom messages
 type customValidationError struct {
 	baseError SchemaError
 	message   string
 }
+
 func (e *customValidationError) Error() string {
 	return e.message // Return just the custom message for backward compatibility
 }
@@ -1243,6 +1313,7 @@ func (e *customValidationError) WithDetail(key string, value any) SchemaError {
 		message:   e.message,
 	}
 }
+
 // GetDefaultValue returns the field's default value, resolving dynamic expressions
 func (f *Field) GetDefaultValue(ctx context.Context) (any, error) {
 	if f.Default == nil {
@@ -1257,6 +1328,7 @@ func (f *Field) GetDefaultValue(ctx context.Context) (any, error) {
 	}
 	return f.Default, nil
 }
+
 // resolveDynamicDefault resolves dynamic default value expressions
 func (f *Field) resolveDynamicDefault(ctx context.Context, expr string) (any, error) {
 	// Remove ${ and }
@@ -1289,6 +1361,7 @@ func (f *Field) resolveDynamicDefault(ctx context.Context, expr string) (any, er
 		return f.evaluateDynamicFormula(ctx, expr)
 	}
 }
+
 // evaluateDynamicFormula evaluates a formula expression for default value
 func (f *Field) evaluateDynamicFormula(ctx context.Context, formula string) (any, error) {
 	if f.evaluator == nil {
@@ -1312,6 +1385,7 @@ func (f *Field) evaluateDynamicFormula(ctx context.Context, formula string) (any
 	}
 	return result, nil
 }
+
 // getTypeDefaultValue returns type-specific default values
 func (f *Field) getTypeDefaultValue() any {
 	switch f.Type {
@@ -1331,6 +1405,7 @@ func (f *Field) getTypeDefaultValue() any {
 		return ""
 	}
 }
+
 // ApplyTransform transforms the field value according to transform rules
 func (f *Field) ApplyTransform(value any) (any, error) {
 	if f.Transform == nil {
@@ -1358,6 +1433,7 @@ func (f *Field) ApplyTransform(value any) (any, error) {
 		return value, fmt.Errorf("unknown transform type: %s", f.Transform.Type)
 	}
 }
+
 // slugify converts a string to a URL-friendly slug
 func (f *Field) slugify(s string) string {
 	// Convert to lowercase
@@ -1374,6 +1450,7 @@ func (f *Field) slugify(s string) string {
 	s = strings.Trim(s, "-")
 	return s
 }
+
 // EvaluateFormula evaluates a formula field's expression
 func (f *Field) EvaluateFormula(ctx context.Context, data map[string]any) (any, error) {
 	if f.Type != FieldFormula {
@@ -1403,6 +1480,7 @@ func (f *Field) EvaluateFormula(ctx context.Context, data map[string]any) (any, 
 	// Format result based on config
 	return f.formatFormulaResult(result, formulaCfg)
 }
+
 // formatFormulaResult formats the formula result based on configuration
 func (f *Field) formatFormulaResult(value any, cfg FormulaConfig) (any, error) {
 	switch cfg.Format {
@@ -1431,22 +1509,26 @@ func (f *Field) formatFormulaResult(value any, cfg FormulaConfig) (any, error) {
 	}
 	return value, nil
 }
+
 // Helper Methods
 // IsSelectionType checks if field is a selection type
 func (f *Field) IsSelectionType() bool {
 	return f.requiresOptions()
 }
+
 // IsFileType checks if field handles files
 func (f *Field) IsFileType() bool {
 	return f.Type == FieldFile || f.Type == FieldImage ||
 		f.Type == FieldSignature || f.Type == FieldVideo ||
 		f.Type == FieldAudio
 }
+
 // IsNumericType checks if field is numeric
 func (f *Field) IsNumericType() bool {
 	return f.Type == FieldNumber || f.Type == FieldCurrency ||
 		f.Type == FieldSlider || f.Type == FieldRating
 }
+
 // IsDateTimeType checks if field is date/time related
 func (f *Field) IsDateTimeType() bool {
 	return f.Type == FieldDate || f.Type == FieldTime ||
@@ -1454,16 +1536,19 @@ func (f *Field) IsDateTimeType() bool {
 		f.Type == FieldMonth || f.Type == FieldYear ||
 		f.Type == FieldQuarter
 }
+
 // IsLayoutType checks if field is a layout container
 func (f *Field) IsLayoutType() bool {
 	return f.Type == FieldGroup || f.Type == FieldFieldset ||
 		f.Type == FieldTabs || f.Type == FieldPanel ||
 		f.Type == FieldCollapse
 }
+
 // GetOptionLabel returns label for option value
 func (f *Field) GetOptionLabel(value string) string {
 	return f.getOptionLabelRecursive(f.Options, value)
 }
+
 // getOptionLabelRecursive recursively searches for option label
 func (f *Field) getOptionLabelRecursive(options []FieldOption, value string) string {
 	for _, opt := range options {
@@ -1479,6 +1564,7 @@ func (f *Field) getOptionLabelRecursive(options []FieldOption, value string) str
 	}
 	return value
 }
+
 // GetLabel returns localized label if available, otherwise default label
 func (f *Field) GetLabel(locale string) string {
 	if f.I18n != nil && f.I18n.Label != nil {
@@ -1488,6 +1574,7 @@ func (f *Field) GetLabel(locale string) string {
 	}
 	return f.Label
 }
+
 // GetPlaceholder returns localized placeholder if available
 func (f *Field) GetPlaceholder(locale string) string {
 	if f.I18n != nil && f.I18n.Placeholder != nil {
@@ -1497,6 +1584,7 @@ func (f *Field) GetPlaceholder(locale string) string {
 	}
 	return f.Placeholder
 }
+
 // GetHelp returns localized help text if available
 func (f *Field) GetHelp(locale string) string {
 	if f.I18n != nil && f.I18n.Help != nil {
@@ -1506,6 +1594,7 @@ func (f *Field) GetHelp(locale string) string {
 	}
 	return f.Help
 }
+
 // GetTextConfig returns typed text field configuration
 func (f *Field) GetTextConfig() (*TextFieldConfig, error) {
 	var cfg TextFieldConfig
@@ -1514,6 +1603,7 @@ func (f *Field) GetTextConfig() (*TextFieldConfig, error) {
 	}
 	return &cfg, nil
 }
+
 // GetSelectConfig returns typed select field configuration
 func (f *Field) GetSelectConfig() (*SelectFieldConfig, error) {
 	var cfg SelectFieldConfig
@@ -1522,6 +1612,7 @@ func (f *Field) GetSelectConfig() (*SelectFieldConfig, error) {
 	}
 	return &cfg, nil
 }
+
 // GetFileConfig returns typed file field configuration
 func (f *Field) GetFileConfig() (*FileFieldConfig, error) {
 	var cfg FileFieldConfig
@@ -1530,6 +1621,7 @@ func (f *Field) GetFileConfig() (*FileFieldConfig, error) {
 	}
 	return &cfg, nil
 }
+
 // GetRelationConfig returns typed relation field configuration
 func (f *Field) GetRelationConfig() (*RelationConfig, error) {
 	var cfg RelationConfig
@@ -1538,6 +1630,7 @@ func (f *Field) GetRelationConfig() (*RelationConfig, error) {
 	}
 	return &cfg, nil
 }
+
 // GetRepeatableConfig returns typed repeatable field configuration
 func (f *Field) GetRepeatableConfig() (*RepeatableConfig, error) {
 	var cfg RepeatableConfig
@@ -1546,6 +1639,7 @@ func (f *Field) GetRepeatableConfig() (*RepeatableConfig, error) {
 	}
 	return &cfg, nil
 }
+
 // GetFormulaConfig returns typed formula field configuration
 func (f *Field) GetFormulaConfig() (*FormulaConfig, error) {
 	var cfg FormulaConfig
@@ -1554,6 +1648,7 @@ func (f *Field) GetFormulaConfig() (*FormulaConfig, error) {
 	}
 	return &cfg, nil
 }
+
 // Utility Functions
 // isEmpty checks if a value is empty/nil
 func isEmpty(value any) bool {
@@ -1571,6 +1666,7 @@ func isEmpty(value any) bool {
 		return false
 	}
 }
+
 // hasUniqueItems checks if array items are unique
 func hasUniqueItems(arr []any) bool {
 	seen := make(map[string]bool)
@@ -1583,6 +1679,7 @@ func hasUniqueItems(arr []any) bool {
 	}
 	return true
 }
+
 // toFloat64 converts various numeric types to float64
 func toFloat64(value any) (float64, bool) {
 	switch v := value.(type) {
@@ -1614,11 +1711,13 @@ func toFloat64(value any) (float64, bool) {
 		return 0, false
 	}
 }
+
 // roundToPrecision rounds a float to specified decimal places
 func roundToPrecision(value float64, precision int) float64 {
 	multiplier := math.Pow(10, float64(precision))
 	return math.Round(value*multiplier) / multiplier
 }
+
 // isValidEmail validates email format using RFC 5322 basic validation
 func isValidEmail(email string) bool {
 	// Basic RFC 5322 validation

@@ -1,12 +1,15 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"maps"
 	"sync"
 	"time"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // Mixin represents a reusable collection of fields and validation rules
 // that can be included in multiple schemas to avoid duplication
 type Mixin struct {
@@ -27,11 +30,13 @@ type Mixin struct {
 	// Tracking
 	Meta *Meta `json:"meta,omitempty"` // Creation/update metadata
 }
+
 // MixinRegistry manages available mixins with thread-safe operations
 type MixinRegistry struct {
 	mixins map[string]*Mixin
 	mu     sync.RWMutex
 }
+
 // NewMixinRegistry creates a new mixin registry with built-in mixins
 func NewMixinRegistry() *MixinRegistry {
 	registry := &MixinRegistry{
@@ -41,14 +46,17 @@ func NewMixinRegistry() *MixinRegistry {
 	registry.registerBuiltInMixins()
 	return registry
 }
+
 // Register adds a mixin to the registry
 func (r *MixinRegistry) Register(mixin *Mixin) error {
 	return r.register(mixin, true)
 }
+
 // registerBuiltIn adds a mixin without validation (for built-in mixins)
 func (r *MixinRegistry) registerBuiltIn(mixin *Mixin) error {
 	return r.register(mixin, false)
 }
+
 // register is the internal registration method with thread safety
 func (r *MixinRegistry) register(mixin *Mixin, validate bool) error {
 	if mixin.ID == "" {
@@ -69,6 +77,7 @@ func (r *MixinRegistry) register(mixin *Mixin, validate bool) error {
 	r.mixins[mixin.ID] = mixin
 	return nil
 }
+
 // Get retrieves a mixin by ID with thread safety
 func (r *MixinRegistry) Get(id string) (*Mixin, error) {
 	r.mu.RLock()
@@ -79,6 +88,7 @@ func (r *MixinRegistry) Get(id string) (*Mixin, error) {
 	}
 	return mixin, nil
 }
+
 // List returns all registered mixins with thread safety
 func (r *MixinRegistry) List() map[string]*Mixin {
 	r.mu.RLock()
@@ -87,10 +97,12 @@ func (r *MixinRegistry) List() map[string]*Mixin {
 	maps.Copy(result, r.mixins)
 	return result
 }
+
 // ApplyMixin applies a mixin to a schema (backward compatible)
 func (r *MixinRegistry) ApplyMixin(schema *Schema, mixinID string, prefix string) error {
 	return r.ApplyMixinWithEvaluator(schema, mixinID, prefix, nil)
 }
+
 // ApplyMixinWithEvaluator applies a mixin to a schema with evaluator injection
 func (r *MixinRegistry) ApplyMixinWithEvaluator(schema *Schema, mixinID string, prefix string, evaluator *condition.Evaluator) error {
 	mixin, err := r.Get(mixinID)
@@ -152,6 +164,7 @@ func (r *MixinRegistry) ApplyMixinWithEvaluator(schema *Schema, mixinID string, 
 	schema.Meta.CustomData["applied_mixins"] = append(mixinList, mixinRef)
 	return nil
 }
+
 // Unregister removes a mixin from the registry
 func (r *MixinRegistry) Unregister(mixinID string) error {
 	r.mu.Lock()
@@ -162,6 +175,7 @@ func (r *MixinRegistry) Unregister(mixinID string) error {
 	delete(r.mixins, mixinID)
 	return nil
 }
+
 // Update updates an existing mixin
 func (r *MixinRegistry) Update(mixin *Mixin) error {
 	if mixin == nil || mixin.ID == "" {
@@ -178,6 +192,7 @@ func (r *MixinRegistry) Update(mixin *Mixin) error {
 	r.mixins[mixin.ID] = mixin
 	return nil
 }
+
 // Validate checks if mixin configuration is valid
 func (m *Mixin) Validate() error {
 	collector := NewErrorCollector()
@@ -214,6 +229,7 @@ func (m *Mixin) Validate() error {
 	}
 	return nil
 }
+
 // Clone creates a deep copy of the mixin
 func (m *Mixin) Clone() *Mixin {
 	return &Mixin{
@@ -228,6 +244,7 @@ func (m *Mixin) Clone() *Mixin {
 		Metadata:    copyMap(m.Metadata),
 	}
 }
+
 // registerBuiltInMixins registers common mixins
 func (r *MixinRegistry) registerBuiltInMixins() {
 	// Audit Fields Mixin
@@ -445,6 +462,7 @@ func (r *MixinRegistry) registerBuiltInMixins() {
 	}
 	r.registerBuiltIn(statusMixin)
 }
+
 // Helper functions
 func copyMap(original map[string]any) map[string]any {
 	if original == nil {

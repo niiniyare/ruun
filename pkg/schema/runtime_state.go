@@ -1,10 +1,12 @@
 package schema
+
 import (
 	"fmt"
 	"reflect"
 	"sync"
 	"time"
 )
+
 // RuntimeState holds runtime form state and tracks user interactions
 // Implements schema.RuntimeStateManager interface for clean integration
 type RuntimeState struct {
@@ -20,6 +22,7 @@ type RuntimeState struct {
 	// Concurrency control
 	mu sync.RWMutex // Concurrent access protection
 }
+
 // NewState creates a new state manager
 func NewState() *RuntimeState {
 	now := time.Now()
@@ -33,6 +36,7 @@ func NewState() *RuntimeState {
 		lastUpdated: now,
 	}
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // RuntimeStateManager Interface Implementation
 // ═══════════════════════════════════════════════════════════════════════════
@@ -74,6 +78,7 @@ func (s *RuntimeState) Initialize(sch *Schema, data map[string]any) error {
 	s.lastUpdated = time.Now()
 	return nil
 }
+
 // GetValue retrieves a field value
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) GetValue(fieldName string) (any, bool) {
@@ -85,6 +90,7 @@ func (s *RuntimeState) GetValue(fieldName string) (any, bool) {
 	value, exists := s.values[fieldName]
 	return value, exists
 }
+
 // SetValue updates a field value and tracks dirty state
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) SetValue(fieldName string, value any) error {
@@ -105,6 +111,7 @@ func (s *RuntimeState) SetValue(fieldName string, value any) error {
 	s.lastUpdated = time.Now()
 	return nil
 }
+
 // GetAll returns all current values
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) GetAll() map[string]any {
@@ -117,6 +124,7 @@ func (s *RuntimeState) GetAll() map[string]any {
 	}
 	return result
 }
+
 // IsTouched checks if field has been touched
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) IsTouched(fieldName string) bool {
@@ -124,6 +132,7 @@ func (s *RuntimeState) IsTouched(fieldName string) bool {
 	defer s.mu.RUnlock()
 	return s.touched[fieldName]
 }
+
 // Touch marks a field as touched (user interacted with it)
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) Touch(fieldName string) {
@@ -135,6 +144,7 @@ func (s *RuntimeState) Touch(fieldName string) {
 	s.touched[fieldName] = true
 	s.lastUpdated = time.Now()
 }
+
 // IsDirty checks if field changed from initial value
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) IsDirty(fieldName string) bool {
@@ -142,6 +152,7 @@ func (s *RuntimeState) IsDirty(fieldName string) bool {
 	defer s.mu.RUnlock()
 	return s.dirty[fieldName]
 }
+
 // IsAnyDirty checks if any field has been modified
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) IsAnyDirty() bool {
@@ -154,6 +165,7 @@ func (s *RuntimeState) IsAnyDirty() bool {
 	}
 	return false
 }
+
 // GetErrors returns validation errors for a field
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) GetErrors(fieldName string) []string {
@@ -168,6 +180,7 @@ func (s *RuntimeState) GetErrors(fieldName string) []string {
 	copy(result, errors)
 	return result
 }
+
 // SetErrors sets validation errors for a field
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) SetErrors(fieldName string, errors []string) {
@@ -186,6 +199,7 @@ func (s *RuntimeState) SetErrors(fieldName string, errors []string) {
 	}
 	s.lastUpdated = time.Now()
 }
+
 // GetAllErrors returns all current validation errors
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) GetAllErrors() map[string][]string {
@@ -200,6 +214,7 @@ func (s *RuntimeState) GetAllErrors() map[string][]string {
 	}
 	return result
 }
+
 // IsValid checks if entire form is valid (no errors)
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) IsValid() bool {
@@ -207,6 +222,7 @@ func (s *RuntimeState) IsValid() bool {
 	defer s.mu.RUnlock()
 	return len(s.errors) == 0
 }
+
 // Reset clears all state back to initial
 // Implements schema.RuntimeStateManager interface
 func (s *RuntimeState) Reset() {
@@ -223,6 +239,7 @@ func (s *RuntimeState) Reset() {
 	}
 	s.lastUpdated = time.Now()
 }
+
 // CreateSnapshot creates a snapshot of current state
 // Implements schema.RuntimeStateManager interface
 // Returns StateSnapshot type to avoid import cycles
@@ -258,6 +275,7 @@ func (s *RuntimeState) CreateSnapshot() any {
 	}
 	return snapshot
 }
+
 // RestoreSnapshot restores state from a snapshot
 // Implements schema.RuntimeStateManager interface
 // Accepts StateSnapshot type to avoid import cycles
@@ -295,6 +313,7 @@ func (s *RuntimeState) RestoreSnapshot(snapshot any) {
 	s.initialized = stateSnapshot.Initialized
 	s.lastUpdated = time.Now()
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Additional Methods Beyond RuntimeStateManager Interface
 // ═══════════════════════════════════════════════════════════════════════════
@@ -308,6 +327,7 @@ func (s *RuntimeState) GetInitialValues() map[string]any {
 	}
 	return result
 }
+
 // GetChangedValues returns only the values that have changed from initial
 func (s *RuntimeState) GetChangedValues() map[string]any {
 	s.mu.RLock()
@@ -322,6 +342,7 @@ func (s *RuntimeState) GetChangedValues() map[string]any {
 	}
 	return result
 }
+
 // UpdateValues updates multiple field values at once (batch operation)
 func (s *RuntimeState) UpdateValues(updates map[string]any) error {
 	s.mu.Lock()
@@ -342,6 +363,7 @@ func (s *RuntimeState) UpdateValues(updates map[string]any) error {
 	s.lastUpdated = time.Now()
 	return nil
 }
+
 // ClearErrors removes all errors for a field
 func (s *RuntimeState) ClearErrors(fieldName string) {
 	s.mu.Lock()
@@ -349,6 +371,7 @@ func (s *RuntimeState) ClearErrors(fieldName string) {
 	delete(s.errors, fieldName)
 	s.lastUpdated = time.Now()
 }
+
 // ClearAllErrors removes all validation errors
 func (s *RuntimeState) ClearAllErrors() {
 	s.mu.Lock()
@@ -356,6 +379,7 @@ func (s *RuntimeState) ClearAllErrors() {
 	s.errors = make(map[string][]string)
 	s.lastUpdated = time.Now()
 }
+
 // ResetField resets a single field to its initial value
 func (s *RuntimeState) ResetField(fieldName string) {
 	s.mu.Lock()
@@ -375,6 +399,7 @@ func (s *RuntimeState) ResetField(fieldName string) {
 	delete(s.errors, fieldName)
 	s.lastUpdated = time.Now()
 }
+
 // SetInitialValue updates the initial value for a field (useful for dynamic forms)
 func (s *RuntimeState) SetInitialValue(fieldName string, value any) {
 	s.mu.Lock()
@@ -389,6 +414,7 @@ func (s *RuntimeState) SetInitialValue(fieldName string, value any) {
 	}
 	s.lastUpdated = time.Now()
 }
+
 // HasField checks if a field exists in the state
 func (s *RuntimeState) HasField(fieldName string) bool {
 	s.mu.RLock()
@@ -396,6 +422,7 @@ func (s *RuntimeState) HasField(fieldName string) bool {
 	_, exists := s.values[fieldName]
 	return exists
 }
+
 // RemoveField removes a field completely from state
 func (s *RuntimeState) RemoveField(fieldName string) {
 	s.mu.Lock()
@@ -410,6 +437,7 @@ func (s *RuntimeState) RemoveField(fieldName string) {
 	delete(s.errors, fieldName)
 	s.lastUpdated = time.Now()
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Statistics and Query Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -425,6 +453,7 @@ func (s *RuntimeState) GetTouchedFields() []string {
 	}
 	return touched
 }
+
 // GetDirtyFields returns list of dirty field names
 func (s *RuntimeState) GetDirtyFields() []string {
 	s.mu.RLock()
@@ -437,6 +466,7 @@ func (s *RuntimeState) GetDirtyFields() []string {
 	}
 	return dirty
 }
+
 // GetFieldsWithErrors returns list of field names that have errors
 func (s *RuntimeState) GetFieldsWithErrors() []string {
 	s.mu.RLock()
@@ -447,6 +477,7 @@ func (s *RuntimeState) GetFieldsWithErrors() []string {
 	}
 	return fields
 }
+
 // GetTouchedCount returns number of touched fields
 func (s *RuntimeState) GetTouchedCount() int {
 	s.mu.RLock()
@@ -459,6 +490,7 @@ func (s *RuntimeState) GetTouchedCount() int {
 	}
 	return count
 }
+
 // GetDirtyCount returns number of dirty fields
 func (s *RuntimeState) GetDirtyCount() int {
 	s.mu.RLock()
@@ -471,6 +503,7 @@ func (s *RuntimeState) GetDirtyCount() int {
 	}
 	return count
 }
+
 // GetErrorCount returns total number of validation errors
 func (s *RuntimeState) GetErrorCount() int {
 	s.mu.RLock()
@@ -481,6 +514,7 @@ func (s *RuntimeState) GetErrorCount() int {
 	}
 	return count
 }
+
 // GetStats returns comprehensive state statistics
 // Returns StateStats to avoid import cycles
 func (s *RuntimeState) GetStats() *StateStats {
@@ -497,6 +531,7 @@ func (s *RuntimeState) GetStats() *StateStats {
 		HasUnsavedChanges: s.hasUnsavedChangesUnsafe(),
 	}
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Private Helper Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -510,6 +545,7 @@ func (s *RuntimeState) valuesEqual(a, b any) bool {
 	}
 	return reflect.DeepEqual(a, b)
 }
+
 // deepCopyValue creates a deep copy of a value
 func (s *RuntimeState) deepCopyValue(value any) any {
 	if value == nil {
@@ -534,6 +570,7 @@ func (s *RuntimeState) deepCopyValue(value any) any {
 		return value
 	}
 }
+
 // Unsafe methods (must be called with lock held)
 func (s *RuntimeState) getTouchedCountUnsafe() int {
 	count := 0

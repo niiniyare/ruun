@@ -1,10 +1,12 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"testing"
 	"time"
 )
+
 // Mock implementations for testing
 type MockField struct {
 	name       string
@@ -14,12 +16,14 @@ type MockField struct {
 	options    []FieldOption
 	config     map[string]any
 }
+
 func (f *MockField) GetName() string                 { return f.name }
 func (f *MockField) GetType() FieldType              { return f.fieldType }
 func (f *MockField) GetRequired() bool               { return f.required }
 func (f *MockField) GetValidation() *FieldValidation { return f.validation }
 func (f *MockField) GetOptions() []FieldOption       { return f.options }
 func (f *MockField) GetConfig() map[string]any       { return f.config }
+
 type MockSchema struct {
 	id         string
 	schemaType string
@@ -27,6 +31,7 @@ type MockSchema struct {
 	fields     []FieldInterface
 	validation any
 }
+
 func (s *MockSchema) GetID() string               { return s.id }
 func (s *MockSchema) GetType() string             { return s.schemaType }
 func (s *MockSchema) GetTitle() string            { return s.title }
@@ -548,6 +553,7 @@ func TestValidator_ValidateWithRegistry(t *testing.T) {
 		})
 	}
 }
+
 // Benchmark tests
 func BenchmarkValidationRegistry_Validate(b *testing.B) {
 	registry := NewValidationRegistry()

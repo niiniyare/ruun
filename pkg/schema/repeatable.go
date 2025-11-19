@@ -1,12 +1,15 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"maps"
 	"strings"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 	"github.com/niiniyare/ruun/pkg/logger"
 )
+
 // RepeatableField extends the existing Field type to support repeatable/array fields
 // This is used for invoice line items, task lists, etc.
 type RepeatableField struct {
@@ -22,6 +25,7 @@ type RepeatableField struct {
 	AddText     string         `json:"addText,omitempty"`        // Text for add button
 	RemoveText  string         `json:"removeText,omitempty"`     // Text for remove button
 }
+
 // SetEvaluator sets the condition evaluator on the repeatable field and all template fields
 func (rf *RepeatableField) SetEvaluator(evaluator *condition.Evaluator) {
 	// Set on base field
@@ -31,6 +35,7 @@ func (rf *RepeatableField) SetEvaluator(evaluator *condition.Evaluator) {
 		rf.Template[i].SetEvaluator(evaluator)
 	}
 }
+
 // TableRepeaterField provides a table layout for repeatable fields
 type TableRepeaterField struct {
 	RepeatableField
@@ -41,6 +46,7 @@ type TableRepeaterField struct {
 	Aggregates  map[string]Aggregate `json:"aggregates,omitempty"`  // Column aggregations
 	Selectable  bool                 `json:"selectable,omitempty"`  // Allow row selection
 }
+
 // Aggregate defines how to aggregate column values
 type Aggregate struct {
 	Type   AggregateType `json:"type"`             // sum, avg, count, min, max
@@ -48,8 +54,10 @@ type Aggregate struct {
 	Label  string        `json:"label,omitempty"`  // Label for aggregate
 	Format string        `json:"format,omitempty"` // Display format
 }
+
 // AggregateType defines aggregation functions
 type AggregateType string
+
 const (
 	AggregateSum   AggregateType = "sum"
 	AggregateAvg   AggregateType = "avg"
@@ -57,6 +65,7 @@ const (
 	AggregateMin   AggregateType = "min"
 	AggregateMax   AggregateType = "max"
 )
+
 // RepeatableOperations defines operations that can be performed on repeatable fields
 type RepeatableOperations interface {
 	Add(ctx context.Context, item map[string]any) error
@@ -68,14 +77,17 @@ type RepeatableOperations interface {
 	Export(ctx context.Context, format string) ([]byte, error)
 	Validate(ctx context.Context, items []map[string]any) error
 }
+
 // RepeatableManager handles operations on repeatable fields
 type RepeatableManager struct {
 	field *RepeatableField
 }
+
 // NewRepeatableManager creates a new repeatable field manager
 func NewRepeatableManager(field *RepeatableField) *RepeatableManager {
 	return &RepeatableManager{field: field}
 }
+
 // ValidateItems validates all items in a repeatable field
 func (rm *RepeatableManager) ValidateItems(ctx context.Context, items []map[string]any) error {
 	collector := NewErrorCollector()
@@ -124,6 +136,7 @@ func (rm *RepeatableManager) ValidateItems(ctx context.Context, items []map[stri
 	}
 	return nil
 }
+
 // GetItemLabel generates a label for an item based on the template
 func (rm *RepeatableManager) GetItemLabel(item map[string]any, index int) string {
 	if rm.field.ItemLabel == "" {
@@ -168,6 +181,7 @@ func (rm *RepeatableManager) CreateDefaultItem(ctx context.Context) map[string]a
 	maps.Copy(item, rm.field.DefaultItem)
 	return item
 }
+
 // ValidateRepeatable validates a repeatable field configuration
 func (rf *RepeatableField) ValidateRepeatable() error {
 	collector := NewErrorCollector()
@@ -218,11 +232,13 @@ func (rf *RepeatableField) ValidateRepeatable() error {
 	}
 	return nil
 }
+
 // RepeatableFieldBuilder provides a fluent interface for building repeatable fields
 type RepeatableFieldBuilder struct {
 	field     *RepeatableField
 	evaluator *condition.Evaluator
 }
+
 // NewRepeatableField starts building a repeatable field
 func NewRepeatableField(name, label string) *RepeatableFieldBuilder {
 	return &RepeatableFieldBuilder{
@@ -243,52 +259,62 @@ func NewRepeatableField(name, label string) *RepeatableFieldBuilder {
 		},
 	}
 }
+
 // WithTemplate sets the field template
 func (rfb *RepeatableFieldBuilder) WithTemplate(fields []Field) *RepeatableFieldBuilder {
 	rfb.field.Template = fields
 	return rfb
 }
+
 // WithMinItems sets minimum items
 func (rfb *RepeatableFieldBuilder) WithMinItems(min int) *RepeatableFieldBuilder {
 	rfb.field.MinItems = min
 	return rfb
 }
+
 // WithMaxItems sets maximum items
 func (rfb *RepeatableFieldBuilder) WithMaxItems(max int) *RepeatableFieldBuilder {
 	rfb.field.MaxItems = max
 	return rfb
 }
+
 // WithSortable enables/disables sorting
 func (rfb *RepeatableFieldBuilder) WithSortable(sortable bool) *RepeatableFieldBuilder {
 	rfb.field.Sortable = sortable
 	return rfb
 }
+
 // WithCollapsible enables/disables collapsing
 func (rfb *RepeatableFieldBuilder) WithCollapsible(collapsible bool) *RepeatableFieldBuilder {
 	rfb.field.Collapsible = collapsible
 	return rfb
 }
+
 // WithItemLabel sets the item label template
 func (rfb *RepeatableFieldBuilder) WithItemLabel(label string) *RepeatableFieldBuilder {
 	rfb.field.ItemLabel = label
 	return rfb
 }
+
 // WithDefaultItem sets default values for new items
 func (rfb *RepeatableFieldBuilder) WithDefaultItem(defaults map[string]any) *RepeatableFieldBuilder {
 	rfb.field.DefaultItem = defaults
 	return rfb
 }
+
 // WithTexts sets button texts
 func (rfb *RepeatableFieldBuilder) WithTexts(addText, removeText string) *RepeatableFieldBuilder {
 	rfb.field.AddText = addText
 	rfb.field.RemoveText = removeText
 	return rfb
 }
+
 // WithEvaluator sets the condition evaluator
 func (rfb *RepeatableFieldBuilder) WithEvaluator(evaluator *condition.Evaluator) *RepeatableFieldBuilder {
 	rfb.evaluator = evaluator
 	return rfb
 }
+
 // Build returns the constructed repeatable field
 func (rfb *RepeatableFieldBuilder) Build() (*RepeatableField, error) {
 	if err := rfb.field.ValidateRepeatable(); err != nil {
@@ -300,6 +326,7 @@ func (rfb *RepeatableFieldBuilder) Build() (*RepeatableField, error) {
 	}
 	return rfb.field, nil
 }
+
 // CreateInvoiceLineItemsField helper function to create invoice line items schema
 func CreateInvoiceLineItemsField() *RepeatableField {
 	lineItemsField, err := NewRepeatableField("line_items", "Line Items").
@@ -403,6 +430,7 @@ func CreateInvoiceLineItemsField() *RepeatableField {
 	}
 	return lineItemsField
 }
+
 // SwapItems swaps two items in the array
 func (rm *RepeatableManager) SwapItems(items []map[string]any, i, j int) ([]map[string]any, error) {
 	if i < 0 || i >= len(items) || j < 0 || j >= len(items) {
@@ -411,6 +439,7 @@ func (rm *RepeatableManager) SwapItems(items []map[string]any, i, j int) ([]map[
 	items[i], items[j] = items[j], items[i]
 	return items, nil
 }
+
 // DuplicateItem duplicates an item at the given index
 func (rm *RepeatableManager) DuplicateItem(items []map[string]any, index int) ([]map[string]any, error) {
 	if index < 0 || index >= len(items) {
@@ -423,6 +452,7 @@ func (rm *RepeatableManager) DuplicateItem(items []map[string]any, index int) ([
 	items = append(items[:index+1], append([]map[string]any{newItem}, items[index+1:]...)...)
 	return items, nil
 }
+
 // CalculateAggregates calculates aggregate values for items
 func (rm *RepeatableManager) CalculateAggregates(items []map[string]any, aggregates map[string]Aggregate) (map[string]any, error) {
 	results := make(map[string]any)
@@ -480,6 +510,7 @@ func (rm *RepeatableManager) CalculateAggregates(items []map[string]any, aggrega
 	}
 	return results, nil
 }
+
 // AddItem adds a new item to the items array
 func (rm *RepeatableManager) AddItem(ctx context.Context, items []map[string]any, item map[string]any) ([]map[string]any, error) {
 	// Check max items constraint
@@ -492,6 +523,7 @@ func (rm *RepeatableManager) AddItem(ctx context.Context, items []map[string]any
 	}
 	return append(items, item), nil
 }
+
 // RemoveItem removes an item at the given index
 func (rm *RepeatableManager) RemoveItem(ctx context.Context, items []map[string]any, index int) ([]map[string]any, error) {
 	if index < 0 || index >= len(items) {
@@ -503,6 +535,7 @@ func (rm *RepeatableManager) RemoveItem(ctx context.Context, items []map[string]
 	}
 	return append(items[:index], items[index+1:]...), nil
 }
+
 // UpdateItem updates an item at the given index
 func (rm *RepeatableManager) UpdateItem(ctx context.Context, items []map[string]any, index int, item map[string]any) ([]map[string]any, error) {
 	if index < 0 || index >= len(items) {
@@ -515,6 +548,7 @@ func (rm *RepeatableManager) UpdateItem(ctx context.Context, items []map[string]
 	items[index] = item
 	return items, nil
 }
+
 // validateSingleItem validates a single item against the template
 func (rm *RepeatableManager) validateSingleItem(ctx context.Context, item map[string]any) error {
 	collector := NewErrorCollector()
@@ -545,6 +579,7 @@ func (rm *RepeatableManager) validateSingleItem(ctx context.Context, item map[st
 	}
 	return nil
 }
+
 // Helper function
 func floatPtr(f float64) *float64 {
 	return &f

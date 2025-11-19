@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"fmt"
@@ -6,6 +7,7 @@ import (
 	"sync"
 	"time"
 )
+
 // Runtime is the main runtime implementation that orchestrates state and events
 // It's UI-agnostic and uses interfaces for maximum flexibility
 // Uses types from schema package to avoid import cycles
@@ -28,6 +30,7 @@ type Runtime struct {
 	// Concurrency control
 	mu sync.RWMutex
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Builder Pattern for Runtime Creation
 // ═══════════════════════════════════════════════════════════════════════════
@@ -42,6 +45,7 @@ type RuntimeBuilder struct {
 	initialData   map[string]any
 	eventHandlers map[EventType][]EventCallback
 }
+
 // NewRuntimeBuilder creates a new builder for runtime
 func NewRuntimeBuilder(enrichedSchema *Schema) *RuntimeBuilder {
 	return &RuntimeBuilder{
@@ -51,31 +55,37 @@ func NewRuntimeBuilder(enrichedSchema *Schema) *RuntimeBuilder {
 		eventHandlers: make(map[EventType][]EventCallback),
 	}
 }
+
 // WithRenderer sets the UI renderer implementation
 func (b *RuntimeBuilder) WithRenderer(renderer RuntimeRenderer) *RuntimeBuilder {
 	b.renderer = renderer
 	return b
 }
+
 // WithValidator sets the validation implementation
 func (b *RuntimeBuilder) WithValidator(validator RuntimeValidator) *RuntimeBuilder {
 	b.validator = validator
 	return b
 }
+
 // WithConditionalEngine sets the conditional logic implementation
 func (b *RuntimeBuilder) WithConditionalEngine(conditional RuntimeConditionalEngine) *RuntimeBuilder {
 	b.conditional = conditional
 	return b
 }
+
 // WithLocale sets the default locale for the runtime
 func (b *RuntimeBuilder) WithLocale(locale string) *RuntimeBuilder {
 	b.locale = locale
 	return b
 }
+
 // WithConfig sets custom configuration
 func (b *RuntimeBuilder) WithConfig(config *RuntimeConfig) *RuntimeBuilder {
 	b.config = config
 	return b
 }
+
 // WithInitialData sets initial form data
 func (b *RuntimeBuilder) WithInitialData(data map[string]any) *RuntimeBuilder {
 	for k, v := range data {
@@ -83,22 +93,26 @@ func (b *RuntimeBuilder) WithInitialData(data map[string]any) *RuntimeBuilder {
 	}
 	return b
 }
+
 // WithEventHandler registers an event handler
 func (b *RuntimeBuilder) WithEventHandler(eventType EventType, handler EventCallback) *RuntimeBuilder {
 	b.eventHandlers[eventType] = append(b.eventHandlers[eventType], handler)
 	return b
 }
+
 // WithValidationTiming sets validation timing strategy
 func (b *RuntimeBuilder) WithValidationTiming(timing ValidationTiming) *RuntimeBuilder {
 	b.config.ValidationTiming = timing
 	return b
 }
+
 // WithDebounce configures debouncing
 func (b *RuntimeBuilder) WithDebounce(enabled bool, delay time.Duration) *RuntimeBuilder {
 	b.config.EnableDebounce = enabled
 	b.config.DebounceDelay = delay
 	return b
 }
+
 // Build creates the runtime instance
 func (b *RuntimeBuilder) Build(ctx context.Context) (*Runtime, error) {
 	if b.schema == nil {
@@ -137,6 +151,7 @@ func (b *RuntimeBuilder) Build(ctx context.Context) (*Runtime, error) {
 	}
 	return runtime, nil
 }
+
 // MustBuild builds the runtime and panics on error (for testing/simple cases)
 func (b *RuntimeBuilder) MustBuild(ctx context.Context) *Runtime {
 	runtime, err := b.Build(ctx)
@@ -145,6 +160,7 @@ func (b *RuntimeBuilder) MustBuild(ctx context.Context) *Runtime {
 	}
 	return runtime
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Initialization and Lifecycle
 // ═══════════════════════════════════════════════════════════════════════════
@@ -177,6 +193,7 @@ func (r *Runtime) Initialize(ctx context.Context, initialData map[string]any) er
 	r.lastActivity = time.Now()
 	return nil
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Event Handling Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -235,6 +252,7 @@ func (r *Runtime) HandleFieldChange(ctx context.Context, fieldName string, newVa
 	}
 	return nil
 }
+
 // HandleFieldBlur processes a field blur event
 func (r *Runtime) HandleFieldBlur(ctx context.Context, fieldName string, value any) error {
 	r.mu.Lock()
@@ -270,6 +288,7 @@ func (r *Runtime) HandleFieldBlur(ctx context.Context, fieldName string, value a
 	}
 	return nil
 }
+
 // HandleFieldFocus processes a field focus event
 func (r *Runtime) HandleFieldFocus(ctx context.Context, fieldName string, value any) error {
 	r.mu.Lock()
@@ -285,6 +304,7 @@ func (r *Runtime) HandleFieldFocus(ctx context.Context, fieldName string, value 
 	// Trigger event
 	return r.events.OnFocus(ctx, event)
 }
+
 // HandleSubmit processes form submission
 func (r *Runtime) HandleSubmit(ctx context.Context) error {
 	r.mu.Lock()
@@ -311,6 +331,7 @@ func (r *Runtime) HandleSubmit(ctx context.Context) error {
 	// Trigger submit event
 	return r.events.OnSubmit(ctx)
 }
+
 // HandleReset processes form reset
 func (r *Runtime) HandleReset(ctx context.Context) error {
 	r.mu.Lock()
@@ -321,6 +342,7 @@ func (r *Runtime) HandleReset(ctx context.Context) error {
 	// Trigger reset event
 	return r.events.OnReset(ctx)
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Validation Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -343,6 +365,7 @@ func (r *Runtime) ValidateField(ctx context.Context, fieldName string, value any
 	// Localize validation messages using embedded translations
 	return r.localizeValidationErrors(errors)
 }
+
 // ValidateCurrentState validates all fields using current state
 func (r *Runtime) ValidateCurrentState(ctx context.Context) map[string][]string {
 	r.mu.RLock()
@@ -352,6 +375,7 @@ func (r *Runtime) ValidateCurrentState(ctx context.Context) map[string][]string 
 	}
 	return r.validator.ValidateAllFields(ctx, r.schema, r.state.GetAll())
 }
+
 // ValidateWithDebounce validates after a delay for better UX
 func (r *Runtime) ValidateWithDebounce(
 	ctx context.Context,
@@ -374,6 +398,7 @@ func (r *Runtime) ValidateWithDebounce(
 	}()
 	return result
 }
+
 // ValidateAction validates an action before execution
 func (r *Runtime) ValidateAction(ctx context.Context, action *Action) error {
 	if r.validator == nil {
@@ -383,6 +408,7 @@ func (r *Runtime) ValidateAction(ctx context.Context, action *Action) error {
 	defer r.mu.RUnlock()
 	return r.validator.ValidateAction(ctx, action, r.state.GetAll())
 }
+
 // ValidateWorkflow validates workflow state
 func (r *Runtime) ValidateWorkflow(ctx context.Context, workflow *Workflow) error {
 	if r.validator == nil {
@@ -393,6 +419,7 @@ func (r *Runtime) ValidateWorkflow(ctx context.Context, workflow *Workflow) erro
 	currentStage := workflow.GetCurrentStage()
 	return r.validator.ValidateWorkflow(ctx, workflow, currentStage, r.state.GetAll())
 }
+
 // ValidateBusinessRules validates business rules
 func (r *Runtime) ValidateBusinessRules(ctx context.Context, rules []ValidationRule) map[string][]string {
 	if r.validator == nil {
@@ -402,6 +429,7 @@ func (r *Runtime) ValidateBusinessRules(ctx context.Context, rules []ValidationR
 	defer r.mu.RUnlock()
 	return r.validator.ValidateBusinessRules(ctx, rules, r.state.GetAll())
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Conditional Logic Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -411,6 +439,7 @@ func (r *Runtime) ApplyConditionalLogic(ctx context.Context) error {
 	defer r.mu.Unlock()
 	return r.applyConditionalsUnsafe(ctx)
 }
+
 // applyConditionalsUnsafe applies conditionals without locking (must be called with lock held)
 func (r *Runtime) applyConditionalsUnsafe(ctx context.Context) error {
 	if r.conditional == nil {
@@ -443,6 +472,7 @@ func (r *Runtime) applyConditionalsUnsafe(ctx context.Context) error {
 	}
 	return nil
 }
+
 // applyBasicConditionals applies basic field conditionals without full conditional engine
 func (r *Runtime) applyBasicConditionals(ctx context.Context) error {
 	data := r.state.GetAll()
@@ -460,6 +490,7 @@ func (r *Runtime) applyBasicConditionals(ctx context.Context) error {
 	}
 	return nil
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Rendering Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -472,6 +503,7 @@ func (r *Runtime) Render(ctx context.Context) (string, error) {
 	}
 	return r.renderer.RenderForm(ctx, r.schema, r.state.GetAll(), r.state.GetAllErrors())
 }
+
 // RenderField renders a single field using the injected renderer
 func (r *Runtime) RenderField(ctx context.Context, fieldName string) (string, error) {
 	r.mu.RLock()
@@ -489,6 +521,7 @@ func (r *Runtime) RenderField(ctx context.Context, fieldName string) (string, er
 	dirty := r.state.IsDirty(fieldName)
 	return r.renderer.RenderField(ctx, field, value, errors, touched, dirty)
 }
+
 // RenderAction renders an action
 func (r *Runtime) RenderAction(ctx context.Context, action *Action) (string, error) {
 	r.mu.RLock()
@@ -505,6 +538,7 @@ func (r *Runtime) RenderAction(ctx context.Context, action *Action) (string, err
 	}
 	return r.renderer.RenderAction(ctx, action, enabled)
 }
+
 // RenderLayout renders layout
 func (r *Runtime) RenderLayout(ctx context.Context, layout *Layout) (string, error) {
 	r.mu.RLock()
@@ -522,6 +556,7 @@ func (r *Runtime) RenderLayout(ctx context.Context, layout *Layout) (string, err
 	}
 	return r.renderer.RenderLayout(ctx, layout, fields, r.state.GetAll())
 }
+
 // RenderSection renders a section
 func (r *Runtime) RenderSection(ctx context.Context, section *Section) (string, error) {
 	r.mu.RLock()
@@ -538,6 +573,7 @@ func (r *Runtime) RenderSection(ctx context.Context, section *Section) (string, 
 	}
 	return r.renderer.RenderSection(ctx, section, fields, r.state.GetAll())
 }
+
 // RenderTab renders a tab
 func (r *Runtime) RenderTab(ctx context.Context, tab *Tab) (string, error) {
 	r.mu.RLock()
@@ -554,6 +590,7 @@ func (r *Runtime) RenderTab(ctx context.Context, tab *Tab) (string, error) {
 	}
 	return r.renderer.RenderTab(ctx, tab, fields, r.state.GetAll())
 }
+
 // RenderStep renders a step
 func (r *Runtime) RenderStep(ctx context.Context, step *Step) (string, error) {
 	r.mu.RLock()
@@ -570,6 +607,7 @@ func (r *Runtime) RenderStep(ctx context.Context, step *Step) (string, error) {
 	}
 	return r.renderer.RenderStep(ctx, step, fields, r.state.GetAll())
 }
+
 // RenderGroup renders a group
 func (r *Runtime) RenderGroup(ctx context.Context, group *Group) (string, error) {
 	r.mu.RLock()
@@ -586,6 +624,7 @@ func (r *Runtime) RenderGroup(ctx context.Context, group *Group) (string, error)
 	}
 	return r.renderer.RenderGroup(ctx, group, fields, r.state.GetAll())
 }
+
 // RenderErrors renders validation errors
 func (r *Runtime) RenderErrors(ctx context.Context) (string, error) {
 	r.mu.RLock()
@@ -595,6 +634,7 @@ func (r *Runtime) RenderErrors(ctx context.Context) (string, error) {
 	}
 	return r.renderer.RenderErrors(ctx, r.state.GetAllErrors())
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Event Registration
 // ═══════════════════════════════════════════════════════════════════════════
@@ -604,6 +644,7 @@ func (r *Runtime) RegisterEventHandler(eventType EventType, callback EventCallba
 	defer r.mu.Unlock()
 	r.events.Register(eventType, callback)
 }
+
 // SetValidationTiming configures when validation occurs
 func (r *Runtime) SetValidationTiming(timing ValidationTiming) {
 	r.mu.Lock()
@@ -611,6 +652,7 @@ func (r *Runtime) SetValidationTiming(timing ValidationTiming) {
 	r.config.ValidationTiming = timing
 	r.events.SetValidationTiming(timing)
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // State Accessors
 // ═══════════════════════════════════════════════════════════════════════════
@@ -620,36 +662,42 @@ func (r *Runtime) GetState() RuntimeStateManager {
 	defer r.mu.RUnlock()
 	return r.state
 }
+
 // GetRawState returns the concrete state implementation
 func (r *Runtime) GetRawState() *RuntimeState {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state
 }
+
 // GetSchema returns the schema
 func (r *Runtime) GetSchema() *Schema {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.schema
 }
+
 // GetConfig returns the configuration
 func (r *Runtime) GetConfig() *RuntimeConfig {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.config
 }
+
 // IsValid checks if the form is valid
 func (r *Runtime) IsValid() bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.IsValid()
 }
+
 // GetErrors returns all validation errors
 func (r *Runtime) GetErrors() map[string][]string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.GetAllErrors()
 }
+
 // Reset resets the form to initial state
 func (r *Runtime) Reset() {
 	r.mu.Lock()
@@ -657,42 +705,49 @@ func (r *Runtime) Reset() {
 	r.state.Reset()
 	r.events.OnReset(context.Background())
 }
+
 // GetFieldValue gets a field value
 func (r *Runtime) GetFieldValue(fieldName string) (any, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.GetValue(fieldName)
 }
+
 // SetFieldValue sets a field value
 func (r *Runtime) SetFieldValue(fieldName string, value any) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.state.SetValue(fieldName, value)
 }
+
 // IsDirty checks if any field has been modified
 func (r *Runtime) IsDirty() bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.IsAnyDirty()
 }
+
 // IsFieldDirty checks if a specific field has been modified
 func (r *Runtime) IsFieldDirty(fieldName string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.IsDirty(fieldName)
 }
+
 // IsFieldTouched checks if a field has been touched
 func (r *Runtime) IsFieldTouched(fieldName string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.IsTouched(fieldName)
 }
+
 // GetAllData returns all form data
 func (r *Runtime) GetAllData() map[string]any {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.state.GetAll()
 }
+
 // UpdateSchema updates the schema
 func (r *Runtime) UpdateSchema(newSchema *Schema) error {
 	r.mu.Lock()
@@ -700,6 +755,7 @@ func (r *Runtime) UpdateSchema(newSchema *Schema) error {
 	r.schema = newSchema
 	return nil
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Statistics
 // ═══════════════════════════════════════════════════════════════════════════
@@ -730,6 +786,7 @@ func (r *Runtime) GetStats() *RuntimeStats {
 	}
 	return stats
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Private Helper Methods
 // ═══════════════════════════════════════════════════════════════════════════
@@ -742,6 +799,7 @@ func (r *Runtime) getField(fieldName string) *Field {
 	}
 	return nil
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Convenience Constructors
 // ═══════════════════════════════════════════════════════════════════════════
@@ -754,6 +812,7 @@ func NewRuntime(enrichedSchema *Schema) *Runtime {
 	}
 	return runtime
 }
+
 // NewRuntimeWithValidator creates a runtime with a validator
 func NewRuntimeWithValidator(enrichedSchema *Schema, validator RuntimeValidator) *Runtime {
 	runtime, err := NewRuntimeBuilder(enrichedSchema).
@@ -764,6 +823,7 @@ func NewRuntimeWithValidator(enrichedSchema *Schema, validator RuntimeValidator)
 	}
 	return runtime
 }
+
 // NewRuntimeWithRenderer creates a runtime with a renderer
 func NewRuntimeWithRenderer(enrichedSchema *Schema, renderer RuntimeRenderer) *Runtime {
 	runtime, err := NewRuntimeBuilder(enrichedSchema).
@@ -774,6 +834,7 @@ func NewRuntimeWithRenderer(enrichedSchema *Schema, renderer RuntimeRenderer) *R
 	}
 	return runtime
 }
+
 // NewRuntimeWithConfig creates a runtime with custom config
 func NewRuntimeWithConfig(enrichedSchema *Schema, config *RuntimeConfig) *Runtime {
 	runtime, err := NewRuntimeBuilder(enrichedSchema).
@@ -784,6 +845,7 @@ func NewRuntimeWithConfig(enrichedSchema *Schema, config *RuntimeConfig) *Runtim
 	}
 	return runtime
 }
+
 // NewRuntimeFull creates a runtime with all dependencies
 func NewRuntimeFull(
 	enrichedSchema *Schema,
@@ -801,6 +863,7 @@ func NewRuntimeFull(
 	}
 	return runtime
 }
+
 // NewRuntimeWithLocale creates a runtime with a specific locale
 func NewRuntimeWithLocale(enrichedSchema *Schema, locale string) *Runtime {
 	runtime, err := NewRuntimeBuilder(enrichedSchema).
@@ -811,6 +874,7 @@ func NewRuntimeWithLocale(enrichedSchema *Schema, locale string) *Runtime {
 	}
 	return runtime
 }
+
 // GetCurrentLocale returns the current locale for the runtime
 func (r *Runtime) GetCurrentLocale() string {
 	r.mu.RLock()
@@ -820,6 +884,7 @@ func (r *Runtime) GetCurrentLocale() string {
 	}
 	return r.currentLocale
 }
+
 // SetLocale changes the current locale for the runtime
 func (r *Runtime) SetLocale(ctx context.Context, locale string) error {
 	r.mu.Lock()
@@ -831,6 +896,7 @@ func (r *Runtime) SetLocale(ctx context.Context, locale string) error {
 	r.currentLocale = locale
 	return nil
 }
+
 // DetectUserLocale automatically detects the best locale from user preferences
 func (r *Runtime) DetectUserLocale(userPreferences []string) string {
 	r.mu.Lock()
@@ -839,11 +905,13 @@ func (r *Runtime) DetectUserLocale(userPreferences []string) string {
 	r.currentLocale = bestLocale
 	return bestLocale
 }
+
 // localizeValidationErrors translates validation error messages to current locale
 func (r *Runtime) localizeValidationErrors(errors []string) []string {
 	locale := r.GetCurrentLocale()
 	return r.localizeValidationErrorsWithLocale(errors, locale)
 }
+
 // localizeValidationErrorsWithLocale translates validation error messages with provided locale
 func (r *Runtime) localizeValidationErrorsWithLocale(errors []string, locale string) []string {
 	if len(errors) == 0 {
@@ -862,6 +930,7 @@ func (r *Runtime) localizeValidationErrorsWithLocale(errors []string, locale str
 	}
 	return localizedErrors
 }
+
 // mapErrorToTranslationKey maps validation error messages to translation keys
 func (r *Runtime) mapErrorToTranslationKey(errorMsg string) string {
 	// Map common English validation messages to translation keys

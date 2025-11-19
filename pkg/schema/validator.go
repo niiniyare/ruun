@@ -1,4 +1,5 @@
 package schema
+
 import (
 	"context"
 	"fmt"
@@ -7,20 +8,24 @@ import (
 	"strings"
 	"time"
 )
+
 // Database interface for uniqueness checks
 type Database interface {
 	// Exists checks if a value exists in the specified table/column
 	Exists(ctx context.Context, table, column string, value any) (bool, error)
 }
+
 // BusinessRulesEngine interface for business rules validation
 type BusinessRulesEngine interface {
 	ApplyRules(ctx context.Context, schema *Schema, data map[string]any) (*Schema, error)
 }
+
 // ValidatorOption for select fields
 type ValidatorOption struct {
 	Value string `json:"value"`
 	Label string `json:"label"`
 }
+
 // Field represents a form field (interface to avoid circular import)
 type FieldInterface interface {
 	GetName() string
@@ -30,11 +35,13 @@ type FieldInterface interface {
 	GetOptions() []FieldOption
 	GetConfig() map[string]any
 }
+
 // EnrichedFieldInterface extends FieldInterface with runtime state
 type EnrichedFieldInterface interface {
 	FieldInterface
 	GetRuntime() *FieldRuntime // Returns nil if not enriched
 }
+
 // Schema represents a form schema (interface to avoid circular import)
 type SchemaInterface interface {
 	GetID() string
@@ -43,37 +50,44 @@ type SchemaInterface interface {
 	GetFields() []FieldInterface
 	GetValidation() any
 }
+
 // EnrichedSchemaInterface extends SchemaInterface with enriched field support
 type EnrichedSchemaInterface interface {
 	SchemaInterface
 	GetEnrichedFields() []EnrichedFieldInterface
 }
+
 // DataValidator provides server-side validation for schema data
 type DataValidator struct {
 	db                  Database            // Optional database for uniqueness checks
 	businessRulesEngine BusinessRulesEngine // Optional business rules engine
 }
+
 // ValidationResult contains the results of validation
 type ValidationResult struct {
 	Valid  bool                `json:"valid"`
 	Errors map[string][]string `json:"errors"` // field -> error messages
 	Data   map[string]any      `json:"data"`   // validated/cleaned data
 }
+
 // ValidationError represents a field validation error
 type ValidationError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
 	Code    string `json:"code"`
 }
+
 func (e ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Field, e.Message)
 }
+
 // NewValidator creates a new validator
 func NewValidator(db Database) *DataValidator {
 	return &DataValidator{
 		db: db,
 	}
 }
+
 // NewValidatorWithBusinessRules creates a new validator with business rules engine
 func NewValidatorWithBusinessRules(db Database, bre BusinessRulesEngine) *DataValidator {
 	return &DataValidator{
@@ -81,6 +95,7 @@ func NewValidatorWithBusinessRules(db Database, bre BusinessRulesEngine) *DataVa
 		businessRulesEngine: bre,
 	}
 }
+
 // ValidateSchema validates schema structure (implements schema.Validator interface)
 func (v *DataValidator) ValidateSchema(ctx context.Context, schema *Schema) error {
 	if schema == nil {
@@ -89,6 +104,7 @@ func (v *DataValidator) ValidateSchema(ctx context.Context, schema *Schema) erro
 	// Use the existing schema validation method
 	return schema.Validate(ctx)
 }
+
 // ValidateData validates form data against a schema (implements schema.Validator interface)
 func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data map[string]any) error {
 	if schema == nil {
@@ -97,6 +113,7 @@ func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data m
 	// Use the existing schema data validation method
 	return schema.ValidateData(ctx, data)
 }
+
 // ValidateDataDetailed validates form data against a schema and returns detailed results
 func (v *DataValidator) ValidateDataDetailed(ctx context.Context, schema SchemaInterface, data map[string]any) (*ValidationResult, error) {
 	result := &ValidationResult{
@@ -121,6 +138,7 @@ func (v *DataValidator) ValidateDataDetailed(ctx context.Context, schema SchemaI
 	// Note: Business rules integration requires proper interface implementation
 	return result, nil
 }
+
 // ValidateField validates a single field value
 func (v *DataValidator) ValidateField(ctx context.Context, field FieldInterface, value any, exists bool) []string {
 	var errors []string
@@ -170,6 +188,7 @@ func (v *DataValidator) ValidateField(ctx context.Context, field FieldInterface,
 	}
 	return errors
 }
+
 // ValidateBusinessRules runs business rules validation
 func (v *DataValidator) ValidateBusinessRules(ctx context.Context, schema SchemaInterface, data map[string]any) map[string][]string {
 	errors := make(map[string][]string)
@@ -178,6 +197,7 @@ func (v *DataValidator) ValidateBusinessRules(ctx context.Context, schema Schema
 	// For now, return empty errors as business rules engine would handle this
 	return errors
 }
+
 // ValidateEnrichedSchema validates form data against an enriched schema
 // This method respects field visibility and editability from the enricher
 func (v *DataValidator) ValidateEnrichedSchema(ctx context.Context, schema EnrichedSchemaInterface, data map[string]any) (*ValidationResult, error) {
@@ -218,6 +238,7 @@ func (v *DataValidator) ValidateEnrichedSchema(ctx context.Context, schema Enric
 	}
 	return result, nil
 }
+
 // ValidateWithFieldState validates a field considering its runtime state
 // This method integrates with enricher's permission system
 func (v *DataValidator) ValidateWithFieldState(ctx context.Context, field EnrichedFieldInterface, value any, exists bool) []string {
@@ -239,6 +260,7 @@ func (v *DataValidator) ValidateWithFieldState(ctx context.Context, field Enrich
 	// Need to call with exists parameter based on the actual ValidateField signature
 	return v.ValidateField(ctx, field, value, exists)
 }
+
 // ValidateConditionalFields validates fields based on their visibility/editability state
 // This method supports conditional validation based on enriched permissions
 func (v *DataValidator) ValidateConditionalFields(ctx context.Context, schema EnrichedSchemaInterface, data map[string]any) map[string][]string {
@@ -271,6 +293,7 @@ func (v *DataValidator) ValidateConditionalFields(ctx context.Context, schema En
 	}
 	return errors
 }
+
 // validateReadOnlyField validates readonly fields with limited rules
 func (v *DataValidator) validateReadOnlyField(field FieldInterface, value any, exists bool) []string {
 	var errors []string
@@ -332,6 +355,7 @@ func (v *DataValidator) validateReadOnlyField(field FieldInterface, value any, e
 	}
 	return errors
 }
+
 // String validation
 func (v *DataValidator) validateString(field FieldInterface, value any) []string {
 	var errors []string
@@ -366,6 +390,7 @@ func (v *DataValidator) validateString(field FieldInterface, value any) []string
 	}
 	return errors
 }
+
 // Email validation
 func (v *DataValidator) validateEmail(field FieldInterface, value any) []string {
 	var errors []string
@@ -384,6 +409,7 @@ func (v *DataValidator) validateEmail(field FieldInterface, value any) []string 
 	errors = append(errors, v.validateString(field, value)...)
 	return errors
 }
+
 // Password validation
 func (v *DataValidator) validatePassword(field FieldInterface, value any) []string {
 	var errors []string
@@ -412,6 +438,7 @@ func (v *DataValidator) validatePassword(field FieldInterface, value any) []stri
 	}
 	return errors
 }
+
 // Number validation
 func (v *DataValidator) validateNumber(field FieldInterface, value any) []string {
 	var errors []string
@@ -461,6 +488,7 @@ func (v *DataValidator) validateNumber(field FieldInterface, value any) []string
 	}
 	return errors
 }
+
 // Phone validation
 func (v *DataValidator) validatePhone(_ FieldInterface, value any) []string {
 	var errors []string
@@ -494,6 +522,7 @@ func (v *DataValidator) validatePhone(_ FieldInterface, value any) []string {
 	}
 	return errors
 }
+
 // URL validation
 func (v *DataValidator) validateURL(_ FieldInterface, value any) []string {
 	var errors []string
@@ -510,6 +539,7 @@ func (v *DataValidator) validateURL(_ FieldInterface, value any) []string {
 	}
 	return errors
 }
+
 // Date validation
 func (v *DataValidator) validateDate(field FieldInterface, value any) []string {
 	var errors []string
@@ -565,6 +595,7 @@ func (v *DataValidator) validateDate(field FieldInterface, value any) []string {
 	}
 	return errors
 }
+
 // Select validation
 func (v *DataValidator) validateSelect(field FieldInterface, value any) []string {
 	var errors []string
@@ -589,6 +620,7 @@ func (v *DataValidator) validateSelect(field FieldInterface, value any) []string
 	}
 	return errors
 }
+
 // Multi-select validation
 func (v *DataValidator) validateMultiSelect(field FieldInterface, value any) []string {
 	var errors []string
@@ -633,6 +665,7 @@ func (v *DataValidator) validateMultiSelect(field FieldInterface, value any) []s
 	}
 	return errors
 }
+
 // File validation
 func (v *DataValidator) validateFile(field FieldInterface, value any) []string {
 	var errors []string
@@ -647,6 +680,7 @@ func (v *DataValidator) validateFile(field FieldInterface, value any) []string {
 	// Required validation is handled separately
 	return errors
 }
+
 // Custom validation
 func (v *DataValidator) validateCustom(field FieldInterface, value any) []string {
 	var errors []string
@@ -660,6 +694,7 @@ func (v *DataValidator) validateCustom(field FieldInterface, value any) []string
 	// The actual implementation would use the condition package's evaluator
 	return errors
 }
+
 // Check if value is empty
 func (v *DataValidator) isEmpty(value any) bool {
 	if value == nil {
@@ -678,6 +713,7 @@ func (v *DataValidator) isEmpty(value any) bool {
 		return false
 	}
 }
+
 // Clean and normalize value
 func (v *DataValidator) cleanValue(field FieldInterface, value any) any {
 	if value == nil {
@@ -701,6 +737,7 @@ func (v *DataValidator) cleanValue(field FieldInterface, value any) any {
 	}
 	return value
 }
+
 // ValidateWithRegistry validates a field using the validation registry
 func (v *DataValidator) ValidateWithRegistry(ctx context.Context, field FieldInterface, value any, registry *ValidationRegistry) []string {
 	// First run standard validation
@@ -738,6 +775,7 @@ func (v *DataValidator) ValidateWithRegistry(ctx context.Context, field FieldInt
 	}
 	return errors
 }
+
 // ValidateSchemaWithRegistries validates a schema using both validation registries
 func ValidateSchemaWithRegistries(ctx context.Context, schema SchemaInterface, data map[string]any,
 	fieldRegistry *ValidationRegistry, crossFieldRegistry *CrossFieldValidationRegistry,
@@ -786,6 +824,7 @@ func ValidateSchemaWithRegistries(ctx context.Context, schema SchemaInterface, d
 	}
 	return nil
 }
+
 // checkUniqueness checks if a field value is unique in the database
 func (v *DataValidator) checkUniqueness(field FieldInterface, value any) error {
 	if v.db == nil {
@@ -805,6 +844,7 @@ func (v *DataValidator) checkUniqueness(field FieldInterface, value any) error {
 	}
 	return nil
 }
+
 // Utility function to create a validation error
 func NewFieldValidationError(field, message, code string) ValidationError {
 	return ValidationError{

@@ -1,18 +1,22 @@
 package schema
+
 import (
 	"context"
 	"testing"
 	"time"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
 // SchemaTestSuite tests the core Schema functionality
 type SchemaTestSuite struct {
 	suite.Suite
 	schema *Schema
 	ctx    context.Context
 }
+
 func (s *SchemaTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.schema = NewSchema("test-schema", TypeForm, "Test Schema")
@@ -218,10 +222,12 @@ func (s *SchemaTestSuite) TestSchemaFrontendIntegration() {
 	require.True(s.T(), s.schema.Alpine.Enabled)
 	require.Equal(s.T(), "{ open: false }", s.schema.Alpine.XData)
 }
+
 // Run the test suite
 func TestSchemaTestSuite(t *testing.T) {
 	suite.Run(t, new(SchemaTestSuite))
 }
+
 // ==================== Additional Coverage Tests ====================
 func (s *SchemaTestSuite) TestSchemaStateManagement() {
 	// Test field value management
@@ -428,6 +434,7 @@ func (s *SchemaTestSuite) TestMapFields() {
 	s.Require().Equal("Field 1", s.schema.Fields[0].Label)
 	s.Require().Equal("Field 2", s.schema.Fields[1].Label)
 }
+
 // ==================== Additional Enterprise Coverage ====================
 func (s *SchemaTestSuite) TestSchemaValidationEdgeCases() {
 	// Test schema with circular dependencies
@@ -511,6 +518,7 @@ func (s *SchemaTestSuite) TestSchemaConditionalFieldsAdvanced() {
 	hiddenFields = schema.GetHiddenFields(ctx, basicData)
 	s.Require().Len(hiddenFields, 2) // conditional_field and hidden_field
 }
+
 // Test schema utility methods for better coverage
 func (s *SchemaTestSuite) TestSchemaUtilityMethodsExtended() {
 	schema := NewSchema("test", TypeForm, "Test Schema")
@@ -583,6 +591,7 @@ func (s *SchemaTestSuite) TestSchemaUtilityMethodsExtended() {
 	err = schema.ValidateData(ctx, invalidData)
 	s.Require().Error(err) // Should fail due to missing required fields
 }
+
 // Test enterprise security features
 func (s *SchemaTestSuite) TestSecurityEnterpriseFeatures() {
 	security := &Security{
@@ -642,6 +651,7 @@ func (s *SchemaTestSuite) TestSecurityEnterpriseFeatures() {
 	s.Require().False(nilSecurity.IsEncryptionEnabled())
 	s.Require().False(nilSecurity.ShouldEncryptField("password"))
 }
+
 // Test tenant enterprise features
 func (s *SchemaTestSuite) TestTenantEnterpriseFeatures() {
 	tenant := &Tenant{
@@ -658,6 +668,7 @@ func (s *SchemaTestSuite) TestTenantEnterpriseFeatures() {
 	var nilTenant *Tenant
 	s.Require().False(nilTenant.IsTenantEnabled())
 }
+
 // Test workflow enterprise features
 func (s *SchemaTestSuite) TestWorkflowEnterpriseFeatures() {
 	ctx := context.Background()
@@ -722,6 +733,7 @@ func (s *SchemaTestSuite) TestWorkflowEnterpriseFeatures() {
 	s.Require().Equal("", nilWorkflow.GetCurrentStatus())
 	s.Require().Empty(nilWorkflow.GetAvailableActions(ctx, map[string]any{}, evaluator))
 }
+
 // Test i18n enterprise features
 func (s *SchemaTestSuite) TestI18nEnterpriseFeatures() {
 	i18n := &I18n{
@@ -747,6 +759,7 @@ func (s *SchemaTestSuite) TestI18nEnterpriseFeatures() {
 	s.Require().False(nilI18n.IsI18nEnabled())
 	s.Require().Equal("en-US", nilI18n.GetLocale()) // Should return default
 }
+
 // Test HTMX enterprise features
 func (s *SchemaTestSuite) TestHTMXEnterpriseFeatures() {
 	htmx := &HTMX{
@@ -788,6 +801,7 @@ func (s *SchemaTestSuite) TestHTMXEnterpriseFeatures() {
 	s.Require().Equal("GET", nilHTMX.GetHTTPMethod()) // Should return default
 	s.Require().Equal("", nilHTMX.GetURL())
 }
+
 // Test Alpine.js enterprise features
 func (s *SchemaTestSuite) TestAlpineEnterpriseFeatures() {
 	alpine := &Alpine{
@@ -805,6 +819,7 @@ func (s *SchemaTestSuite) TestAlpineEnterpriseFeatures() {
 	var nilAlpine *Alpine
 	s.Require().False(nilAlpine.IsAlpineEnabled())
 }
+
 // Test meta enterprise features
 func (s *SchemaTestSuite) TestMetaEnterpriseFeatures() {
 	now := time.Now()

@@ -1,21 +1,27 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"sync"
 	"time"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // ValidatorFunc represents a custom validation function
 type ValidatorFunc func(ctx context.Context, value any, params map[string]any) error
+
 // AsyncValidatorFunc represents an async validation function with debouncing
 type AsyncValidatorFunc func(ctx context.Context, value any, params map[string]any) error
+
 // ValidationRegistry manages custom validators and provides extensible validation
 type ValidationRegistry struct {
 	validators      map[string]ValidatorFunc
 	asyncValidators map[string]*AsyncValidator
 	mu              sync.RWMutex
 }
+
 // AsyncValidator wraps async validation with caching and debouncing
 type AsyncValidator struct {
 	Name     string
@@ -27,11 +33,13 @@ type AsyncValidator struct {
 	mu       sync.RWMutex
 	cleanup  context.CancelFunc
 }
+
 // CacheEntry represents a cached validation result
 type CacheEntry struct {
 	Result    error
 	ExpiresAt time.Time
 }
+
 // CrossFieldValidator validates multiple fields together using condition engine
 type CrossFieldValidator struct {
 	Name      string
@@ -39,16 +47,19 @@ type CrossFieldValidator struct {
 	Condition *condition.ConditionGroup
 	Validate  func(ctx context.Context, values map[string]any) error
 }
+
 // CrossFieldValidationRegistry manages cross-field validators
 type CrossFieldValidationRegistry struct {
 	validators map[string]*CrossFieldValidator
 	evaluator  *condition.Evaluator
 	mu         sync.RWMutex
 }
+
 // ValidatorChain allows chaining multiple validators
 type ValidatorChain struct {
 	validators []ValidatorFunc
 }
+
 // NewValidationRegistry creates a new validation registry with built-in validators
 func NewValidationRegistry() *ValidationRegistry {
 	registry := &ValidationRegistry{
@@ -59,6 +70,7 @@ func NewValidationRegistry() *ValidationRegistry {
 	registry.registerBuiltInValidators()
 	return registry
 }
+
 // NewCrossFieldValidationRegistry creates a new cross-field validation registry
 func NewCrossFieldValidationRegistry() *CrossFieldValidationRegistry {
 	// Initialize condition evaluator with reasonable defaults
@@ -100,12 +112,14 @@ func NewCrossFieldValidationRegistry() *CrossFieldValidationRegistry {
 	registry.registerBuiltInValidators()
 	return registry
 }
+
 // NewValidatorChain creates a new validator chain
 func NewValidatorChain() *ValidatorChain {
 	return &ValidatorChain{
 		validators: []ValidatorFunc{},
 	}
 }
+
 // Register adds a custom validator
 func (r *ValidationRegistry) Register(name string, validator ValidatorFunc) error {
 	if name == "" {
@@ -119,6 +133,7 @@ func (r *ValidationRegistry) Register(name string, validator ValidatorFunc) erro
 	r.validators[name] = validator
 	return nil
 }
+
 // RegisterAsync adds an async validator with cache cleanup
 func (r *ValidationRegistry) RegisterAsync(validator *AsyncValidator) error {
 	if validator == nil {
@@ -144,6 +159,7 @@ func (r *ValidationRegistry) RegisterAsync(validator *AsyncValidator) error {
 	r.asyncValidators[validator.Name] = validator
 	return nil
 }
+
 // Validate executes a validator by name
 func (r *ValidationRegistry) Validate(ctx context.Context, name string, value any, params map[string]any) error {
 	r.mu.RLock()
@@ -154,6 +170,7 @@ func (r *ValidationRegistry) Validate(ctx context.Context, name string, value an
 	}
 	return validator(ctx, value, params)
 }
+
 // ValidateAsync executes an async validator with caching and debouncing
 func (r *ValidationRegistry) ValidateAsync(ctx context.Context, name string, value any, params map[string]any) error {
 	r.mu.RLock()
@@ -194,6 +211,7 @@ func (r *ValidationRegistry) ValidateAsync(ctx context.Context, name string, val
 	}
 	return result
 }
+
 // UnregisterAsync removes an async validator and stops its cleanup goroutine
 func (r *ValidationRegistry) UnregisterAsync(name string) error {
 	r.mu.Lock()
@@ -207,6 +225,7 @@ func (r *ValidationRegistry) UnregisterAsync(name string) error {
 	delete(r.asyncValidators, name)
 	return nil
 }
+
 // Register adds a cross-field validator
 func (r *CrossFieldValidationRegistry) Register(validator *CrossFieldValidator) error {
 	if validator == nil {
@@ -223,6 +242,7 @@ func (r *CrossFieldValidationRegistry) Register(validator *CrossFieldValidator) 
 	r.validators[validator.Name] = validator
 	return nil
 }
+
 // Validate executes a cross-field validator
 func (r *CrossFieldValidationRegistry) Validate(ctx context.Context, name string, values map[string]any) error {
 	r.mu.RLock()
@@ -252,11 +272,13 @@ func (r *CrossFieldValidationRegistry) Validate(ctx context.Context, name string
 	}
 	return validator.Validate(ctx, fieldValues)
 }
+
 // Add adds a validator to the chain
 func (vc *ValidatorChain) Add(validator ValidatorFunc) *ValidatorChain {
 	vc.validators = append(vc.validators, validator)
 	return vc
 }
+
 // Validate executes all validators in the chain
 func (vc *ValidatorChain) Validate(ctx context.Context, value any, params map[string]any) error {
 	for _, validator := range vc.validators {
@@ -266,12 +288,14 @@ func (vc *ValidatorChain) Validate(ctx context.Context, value any, params map[st
 	}
 	return nil
 }
+
 // Stop stops the cache cleanup goroutine
 func (av *AsyncValidator) Stop() {
 	if av.cleanup != nil {
 		av.cleanup()
 	}
 }
+
 // startCacheCleanup starts a goroutine to clean up expired cache entries
 func (av *AsyncValidator) startCacheCleanup(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Minute)
@@ -287,6 +311,7 @@ func (av *AsyncValidator) startCacheCleanup(ctx context.Context) {
 		}
 	}()
 }
+
 // cleanupExpiredCache removes expired entries from the cache
 func (av *AsyncValidator) cleanupExpiredCache() {
 	av.mu.Lock()
@@ -298,6 +323,7 @@ func (av *AsyncValidator) cleanupExpiredCache() {
 		}
 	}
 }
+
 // WrapValidationError wraps an error with additional context
 func WrapValidationError(err error, code, message string) error {
 	return fmt.Errorf("%s (%s): %w", message, code, err)

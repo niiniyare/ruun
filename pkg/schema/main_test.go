@@ -1,8 +1,10 @@
 package schema
+
 import (
 	"context"
 	"strings"
 )
+
 // Helper function to create a test schema
 func createTestSchema() *Schema {
 	return &Schema{
@@ -45,8 +47,10 @@ func createTestSchema() *Schema {
 		},
 	}
 }
+
 // MockValidator implements RuntimeValidator for testing
 type MockValidator struct{}
+
 func (mv *MockValidator) ValidateField(ctx context.Context, field *Field, value any, allData map[string]any) []string {
 	var errors []string
 	// Required field validation
@@ -87,6 +91,7 @@ func (mv *MockValidator) ValidateFieldAsync(ctx context.Context, field *Field, v
 	callback(field.Name, errors)
 	return nil
 }
+
 // createTestRuntimeWithValidator creates a runtime with a mock validator for testing
 func createTestRuntimeWithValidator() *Runtime {
 	return NewRuntimeWithValidator(createTestSchema(), &MockValidator{})

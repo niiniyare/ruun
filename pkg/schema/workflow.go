@@ -1,8 +1,11 @@
 package schema
+
 import (
 	"time"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
+
 // Workflow defines workflow and approval configuration
 type Workflow struct {
 	Enabled       bool                 `json:"enabled"`                                 // Enable workflow
@@ -18,6 +21,7 @@ type Workflow struct {
 	Audit         bool                 `json:"audit,omitempty"`                         // Enable audit logging
 	Versioning    bool                 `json:"versioning,omitempty"`                    // Enable versioning
 }
+
 // WorkflowAction defines an action that can be taken in the workflow
 type WorkflowAction struct {
 	ID          string                    `json:"id" validate:"required"`
@@ -31,6 +35,7 @@ type WorkflowAction struct {
 	Variant     string                    `json:"variant,omitempty" validate:"oneof=primary secondary outline destructive"`
 	Condition   *condition.ConditionGroup `json:"condition,omitempty"` // Action visibility conditions
 }
+
 // WorkflowTransition defines a stage transition
 type WorkflowTransition struct {
 	From       string                    `json:"from" validate:"required"`   // From stage
@@ -41,6 +46,7 @@ type WorkflowTransition struct {
 	Auto       bool                      `json:"auto,omitempty"`             // Automatic transition
 	Delay      time.Duration             `json:"delay,omitempty"`            // Transition delay
 }
+
 // WorkflowTimeout defines timeout for workflow stages
 type WorkflowTimeout struct {
 	Duration time.Duration `json:"duration" validate:"min=1"` // Timeout duration

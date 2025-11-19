@@ -1,19 +1,24 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"sync"
 	"testing"
 	"time"
+
 	"github.com/stretchr/testify/suite"
 )
+
 // ThemeTestSuite tests the theme functionality
 type ThemeTestSuite struct {
 	suite.Suite
 }
+
 func TestThemeTestSuite(t *testing.T) {
 	suite.Run(t, new(ThemeTestSuite))
 }
+
 // ==================== Basic Theme Tests ====================
 func (suite *ThemeTestSuite) TestThemeStructure() {
 	theme := &Theme{
@@ -109,6 +114,7 @@ func (suite *ThemeTestSuite) TestThemeWithAllComponents() {
 	suite.Require().NotNil(theme.Accessibility)
 	suite.Require().Contains(theme.CustomCSS, "Custom theme styles")
 }
+
 // ==================== Performance Benchmarks ====================
 // BenchmarkTokenResolution measures token resolution performance
 func BenchmarkTokenResolution(b *testing.B) {
@@ -127,6 +133,7 @@ func BenchmarkTokenResolution(b *testing.B) {
 		}
 	}
 }
+
 // BenchmarkTokenResolutionConcurrent measures concurrent token resolution
 func BenchmarkTokenResolutionConcurrent(b *testing.B) {
 	registry := NewTokenRegistry()
@@ -155,6 +162,7 @@ func BenchmarkTokenResolutionConcurrent(b *testing.B) {
 		}
 	})
 }
+
 // BenchmarkThemeRegistration measures theme registration performance
 func BenchmarkThemeRegistration(b *testing.B) {
 	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
@@ -172,6 +180,7 @@ func BenchmarkThemeRegistration(b *testing.B) {
 		}
 	}
 }
+
 // BenchmarkThemeRetrieval measures theme retrieval performance
 func BenchmarkThemeRetrieval(b *testing.B) {
 	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
@@ -195,6 +204,7 @@ func BenchmarkThemeRetrieval(b *testing.B) {
 		}
 	}
 }
+
 // BenchmarkThemeCloning measures deep copy performance
 func BenchmarkThemeCloning(b *testing.B) {
 	theme := &Theme{
@@ -220,6 +230,7 @@ func BenchmarkThemeCloning(b *testing.B) {
 		}
 	}
 }
+
 // BenchmarkCacheOperations measures cache performance
 func BenchmarkCacheOperations(b *testing.B) {
 	cache := NewThemeCache(1000, 5*time.Minute)
@@ -272,6 +283,7 @@ func BenchmarkCacheOperations(b *testing.B) {
 		})
 	})
 }
+
 // BenchmarkTokenCompilation measures token compilation performance
 func BenchmarkTokenCompilation(b *testing.B) {
 	registry := NewTokenRegistry()
@@ -284,6 +296,7 @@ func BenchmarkTokenCompilation(b *testing.B) {
 		}
 	}
 }
+
 // BenchmarkThemeOverrides measures theme override application performance
 func BenchmarkThemeOverrides(b *testing.B) {
 	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
@@ -316,6 +329,7 @@ func BenchmarkThemeOverrides(b *testing.B) {
 		}
 	}
 }
+
 // BenchmarkConcurrentThemeAccess measures concurrent theme operations
 func BenchmarkConcurrentThemeAccess(b *testing.B) {
 	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
@@ -356,6 +370,7 @@ func BenchmarkConcurrentThemeAccess(b *testing.B) {
 		}
 	})
 }
+
 // ==================== Performance Tests ====================
 // TestTokenResolutionPerformance verifies token resolution meets <1ms p95 target
 func TestTokenResolutionPerformance(t *testing.T) {
@@ -394,6 +409,7 @@ func TestTokenResolutionPerformance(t *testing.T) {
 		t.Errorf("Token resolution P95 (%v) exceeds 1ms target", p95)
 	}
 }
+
 // TestConcurrentSafety verifies thread safety under concurrent access
 func TestConcurrentSafety(t *testing.T) {
 	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
@@ -438,6 +454,7 @@ func TestConcurrentSafety(t *testing.T) {
 		t.Errorf("Expected at least 50 themes, got %d", len(themes))
 	}
 }
+
 // Helper functions for performance calculations
 func calculatePercentile(durations []time.Duration, percentile int) time.Duration {
 	if len(durations) == 0 {

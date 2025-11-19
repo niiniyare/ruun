@@ -1,10 +1,13 @@
 package schema
+
 import (
 	"context"
 	"fmt"
 	"time"
+
 	"github.com/google/uuid"
 )
+
 // User represents a user in the system for enrichment purposes
 type User interface {
 	GetID() string
@@ -16,6 +19,7 @@ type User interface {
 	// I18n support
 	GetPreferredLocale() string
 }
+
 // TenantOverride represents tenant-specific customizations
 type TenantOverride struct {
 	FieldName    string `json:"field_name"`
@@ -26,6 +30,7 @@ type TenantOverride struct {
 	Placeholder  string `json:"placeholder,omitempty"`
 	Help         string `json:"help,omitempty"`
 }
+
 // TenantCustomization holds all tenant-specific overrides for a schema
 type TenantCustomization struct {
 	SchemaID  string                    `json:"schema_id"`
@@ -34,10 +39,12 @@ type TenantCustomization struct {
 	CreatedAt time.Time                 `json:"created_at"`
 	UpdatedAt time.Time                 `json:"updated_at"`
 }
+
 // TenantProvider interface for retrieving tenant customizations
 type TenantProvider interface {
 	GetCustomization(ctx context.Context, schemaID, tenantID string) (*TenantCustomization, error)
 }
+
 // Enricher interface defines the contract for schema enrichment
 type Enricher interface {
 	// Enrich enriches a schema with runtime data based on user context
@@ -49,18 +56,22 @@ type Enricher interface {
 	// SetTenantProvider sets the tenant customization provider
 	SetTenantProvider(provider TenantProvider)
 }
+
 // DefaultEnricher is the default implementation of the Enricher interface
 type DefaultEnricher struct {
 	tenantProvider TenantProvider
 }
+
 // NewEnricher creates a new DefaultEnricher instance
 func NewEnricher() *DefaultEnricher {
 	return &DefaultEnricher{}
 }
+
 // SetTenantProvider sets the tenant customization provider
 func (e *DefaultEnricher) SetTenantProvider(provider TenantProvider) {
 	e.tenantProvider = provider
 }
+
 // Enrich enriches a schema with functional options (implements Enricher interface)
 func (e *DefaultEnricher) Enrich(ctx context.Context, s *Schema, opts ...EnrichOption) error {
 	if s == nil {
@@ -169,6 +180,7 @@ func (e *DefaultEnricher) Enrich(ctx context.Context, s *Schema, opts ...EnrichO
 	}
 	return nil
 }
+
 // EnrichWithUser enriches a schema with runtime data based on user context (legacy method)
 func (e *DefaultEnricher) EnrichWithUser(ctx context.Context, schemaObj *Schema, user User) (*Schema, error) {
 	if schemaObj == nil {
@@ -218,6 +230,7 @@ func (e *DefaultEnricher) EnrichWithUser(ctx context.Context, schemaObj *Schema,
 	}
 	return enriched, nil
 }
+
 // EnrichWithLocale enriches a schema with localization support using embedded translations
 func (e *DefaultEnricher) EnrichWithLocale(ctx context.Context, schemaObj *Schema, user User, locale string) (*Schema, error) {
 	if schemaObj == nil {
@@ -275,6 +288,7 @@ func (e *DefaultEnricher) EnrichWithLocale(ctx context.Context, schemaObj *Schem
 	}
 	return enrichedSchema, nil
 }
+
 // EnrichField enriches a single field with runtime data
 func (e *DefaultEnricher) EnrichField(ctx context.Context, field *Field, user User, data map[string]any) error {
 	if field == nil {
@@ -292,6 +306,7 @@ func (e *DefaultEnricher) EnrichField(ctx context.Context, field *Field, user Us
 	e.applyTenantIsolation(field, user)
 	return nil
 }
+
 // applyPermissions applies permission-based field restrictions
 func (e *DefaultEnricher) applyPermissions(field *Field, user User) {
 	// Check if field requires specific permission
@@ -323,6 +338,7 @@ func (e *DefaultEnricher) applyPermissions(field *Field, user User) {
 		}
 	}
 }
+
 // applyDynamicDefaults applies dynamic default values based on context
 func (e *DefaultEnricher) applyDynamicDefaults(field *Field, data map[string]any) {
 	// Only apply defaults if field has no current value
@@ -352,6 +368,7 @@ func (e *DefaultEnricher) applyDynamicDefaults(field *Field, data map[string]any
 		field.Value = time.Now().Format(time.RFC3339)
 	}
 }
+
 // applyTenantIsolation applies tenant isolation for multi-tenant fields
 func (e *DefaultEnricher) applyTenantIsolation(field *Field, user User) {
 	// Automatically set tenant_id field for tenant isolation
@@ -361,6 +378,7 @@ func (e *DefaultEnricher) applyTenantIsolation(field *Field, user User) {
 		field.Readonly = true
 	}
 }
+
 // applyTenantCustomization applies tenant-specific customizations
 func (e *DefaultEnricher) applyTenantCustomization(field *Field, customization *TenantCustomization) {
 	override, exists := customization.Overrides[field.Name]
@@ -392,6 +410,7 @@ func (e *DefaultEnricher) applyTenantCustomization(field *Field, customization *
 		field.Help = override.Help
 	}
 }
+
 // enrichAction enriches actions with user permissions
 func (e *DefaultEnricher) enrichAction(ctx context.Context, action *Action, user User) {
 	// Check action permissions
@@ -432,6 +451,7 @@ func (e *DefaultEnricher) enrichAction(ctx context.Context, action *Action, user
 		}
 	}
 }
+
 // BasicUser is a simple implementation of the User interface for enrichment
 type BasicUser struct {
 	ID          string   `json:"id"`
@@ -439,6 +459,7 @@ type BasicUser struct {
 	Permissions []string `json:"permissions"`
 	Roles       []string `json:"roles"`
 }
+
 // DefaultUser is a simple implementation of the User interface for testing
 type DefaultUser struct {
 	ID          string   `json:"id"`
@@ -446,26 +467,32 @@ type DefaultUser struct {
 	Permissions []string `json:"permissions"`
 	Roles       []string `json:"roles"`
 }
+
 // GetID returns the user ID
 func (u *DefaultUser) GetID() string {
 	return u.ID
 }
+
 // GetTenantID returns the tenant ID
 func (u *DefaultUser) GetTenantID() string {
 	return u.TenantID
 }
+
 // GetPermissions returns user permissions
 func (u *DefaultUser) GetPermissions() []string {
 	return u.Permissions
 }
+
 // GetRoles returns user roles
 func (u *DefaultUser) GetRoles() []string {
 	return u.Roles
 }
+
 // GetPreferredLocale returns user's preferred locale
 func (u *DefaultUser) GetPreferredLocale() string {
 	return "en" // Default implementation
 }
+
 // HasPermission checks if user has specific permission
 func (u *DefaultUser) HasPermission(permission string) bool {
 	for _, perm := range u.Permissions {
@@ -475,6 +502,7 @@ func (u *DefaultUser) HasPermission(permission string) bool {
 	}
 	return false
 }
+
 // HasRole checks if user has specific role
 func (u *DefaultUser) HasRole(role string) bool {
 	for _, r := range u.Roles {
@@ -484,27 +512,33 @@ func (u *DefaultUser) HasRole(role string) bool {
 	}
 	return false
 }
+
 // BasicUser interface implementation
 // GetID returns the user ID
 func (u *BasicUser) GetID() string {
 	return u.ID
 }
+
 // GetTenantID returns the tenant ID
 func (u *BasicUser) GetTenantID() string {
 	return u.TenantID
 }
+
 // GetPermissions returns user permissions
 func (u *BasicUser) GetPermissions() []string {
 	return u.Permissions
 }
+
 // GetRoles returns user roles
 func (u *BasicUser) GetRoles() []string {
 	return u.Roles
 }
+
 // GetPreferredLocale returns user's preferred locale
 func (u *BasicUser) GetPreferredLocale() string {
 	return "en" // Default implementation
 }
+
 // HasPermission checks if user has specific permission
 func (u *BasicUser) HasPermission(permission string) bool {
 	for _, perm := range u.Permissions {
@@ -514,6 +548,7 @@ func (u *BasicUser) HasPermission(permission string) bool {
 	}
 	return false
 }
+
 // HasRole checks if user has specific role
 func (u *BasicUser) HasRole(role string) bool {
 	for _, r := range u.Roles {
@@ -523,6 +558,7 @@ func (u *BasicUser) HasRole(role string) bool {
 	}
 	return false
 }
+
 // Helper functions for extracting data from EnrichOption configurations
 // extractTenantFromConfig extracts tenant ID from enrichment config
 func extractTenantFromConfig(config *EnrichConfig) string {
@@ -538,6 +574,7 @@ func extractTenantFromConfig(config *EnrichConfig) string {
 	}
 	return "default"
 }
+
 // extractPermissionsFromConfig extracts permissions from enrichment config
 func extractPermissionsFromConfig(config *EnrichConfig) []string {
 	if permInterface, exists := config.Extensions["permissions"]; exists {
@@ -556,6 +593,7 @@ func extractPermissionsFromConfig(config *EnrichConfig) []string {
 	}
 	return []string{}
 }
+
 // extractRolesFromConfig extracts roles from enrichment config
 func extractRolesFromConfig(config *EnrichConfig) []string {
 	if roleInterface, exists := config.Extensions["roles"]; exists {
@@ -574,6 +612,7 @@ func extractRolesFromConfig(config *EnrichConfig) []string {
 	}
 	return []string{}
 }
+
 // filterFields filters fields based on the provided filter function
 func filterFields(fields []Field, filter func(*Field) bool) []Field {
 	var filtered []Field
@@ -584,6 +623,7 @@ func filterFields(fields []Field, filter func(*Field) bool) []Field {
 	}
 	return filtered
 }
+
 // Helper functions to create EnrichOptions
 // WithUser creates an EnrichOption that sets the user in extensions
 func WithUser(user User) EnrichOption {
@@ -591,30 +631,35 @@ func WithUser(user User) EnrichOption {
 		config.Extensions["user"] = user
 	}
 }
+
 // WithTenant creates an EnrichOption that sets the tenant ID
 func WithTenant(tenantID string) EnrichOption {
 	return func(config *EnrichConfig) {
 		config.Extensions["tenant_id"] = tenantID
 	}
 }
+
 // WithPermissions creates an EnrichOption that sets permissions
 func WithPermissions(permissions []string) EnrichOption {
 	return func(config *EnrichConfig) {
 		config.Extensions["permissions"] = permissions
 	}
 }
+
 // WithRoles creates an EnrichOption that sets roles
 func WithRoles(roles []string) EnrichOption {
 	return func(config *EnrichConfig) {
 		config.Extensions["roles"] = roles
 	}
 }
+
 // WithFieldFilter creates an EnrichOption that sets a field filter
 func WithFieldFilter(filter func(*Field) bool) EnrichOption {
 	return func(config *EnrichConfig) {
 		config.FieldFilter = filter
 	}
 }
+
 // WithEnvironment creates an EnrichOption that sets the environment
 func WithEnvironment(env string) EnrichOption {
 	return func(config *EnrichConfig) {
