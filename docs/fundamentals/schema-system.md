@@ -191,7 +191,7 @@ rules := ValidationRules{
     Patterns: map[string]string{
         "variant": "^(primary|secondary|success|danger)$",
     },
-    Custom: map[string]func(interface{}) error{
+    Custom: map[string]func(any) error{
         "size": validateSizeValue,
     },
 }
@@ -220,7 +220,7 @@ cssString, err := factory.cssFactory.GenerateCSS(*cssProps)
 ### Theme System
 ```go
 // Theme configuration through schemas
-themeProps := map[string]interface{}{
+themeProps := map[string]any{
     "primary": "#3b82f6",
     "secondary": "#6b7280", 
     "success": "#10b981",
@@ -245,12 +245,12 @@ func (r *CustomRenderer) GetSchemaType() string {
     return "CustomComponentSchema"
 }
 
-func (r *CustomRenderer) ValidateProps(props map[string]interface{}, schema *JsonSchema) error {
+func (r *CustomRenderer) ValidateProps(props map[string]any, schema *JsonSchema) error {
     // Custom validation logic
     return nil
 }
 
-func (r *CustomRenderer) Render(ctx context.Context, props map[string]interface{}, schema *JsonSchema) (TemplComponent, error) {
+func (r *CustomRenderer) Render(ctx context.Context, props map[string]any, schema *JsonSchema) (TemplComponent, error) {
     // Custom rendering logic
     return TemplComponent{
         Type:  "CustomComponent",
@@ -290,7 +290,7 @@ func TestSchemaIntegration(t *testing.T) {
     factory, err := engine.NewSchemaFactory("docs/ui/Schema")
     require.NoError(t, err)
     
-    props := map[string]interface{}{
+    props := map[string]any{
         "text": "Test Button",
         "variant": "primary",
     }

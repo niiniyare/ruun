@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/niiniyare/ruun/views/components/utils"
+	"github.com/niiniyare/ruun/views/utils"
 )
 
 // IconSize defines the size variants for icons

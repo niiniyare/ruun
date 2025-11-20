@@ -122,15 +122,15 @@ const (
 )
 
 type ThemeRuleValidator interface {
-	ValidateTheme(theme interface{}, context *ThemeValidationContext) *ThemeRuleResult
+	ValidateTheme(theme any, context *ThemeValidationContext) *ThemeRuleResult
 	GetCategory() ThemeValidationCategory
 }
 
 type ThemeValidationContext struct {
-	Theme       interface{}            `json:"theme"`
+	Theme       any            `json:"theme"`
 	Registry    *TokenRegistry         `json:"registry"`
 	Config      ThemeValidationConfig  `json:"config"`
-	Context     map[string]interface{} `json:"context"`
+	Context     map[string]any `json:"context"`
 }
 
 type ThemeRuleResult struct {
@@ -140,7 +140,7 @@ type ThemeRuleResult struct {
 	Violations  []ThemeViolation       `json:"violations,omitempty"`
 	Warnings    []ThemeWarning         `json:"warnings,omitempty"`
 	Suggestions []ThemeSuggestion      `json:"suggestions,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata"`
+	Metadata    map[string]any `json:"metadata"`
 }
 
 type ThemeViolation struct {
@@ -154,7 +154,7 @@ type ThemeViolation struct {
 	Location    *SourceLocation        `json:"location,omitempty"`
 	Fix         string                 `json:"fix,omitempty"`
 	AutoFix     bool                   `json:"autoFix"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 }
 
 type ThemeWarning struct {
@@ -165,7 +165,7 @@ type ThemeWarning struct {
 	Value     string                 `json:"value,omitempty"`
 	Location  *SourceLocation        `json:"location,omitempty"`
 	Fix       string                 `json:"fix,omitempty"`
-	Context   map[string]interface{} `json:"context,omitempty"`
+	Context   map[string]any `json:"context,omitempty"`
 }
 
 type ThemeSuggestion struct {
@@ -178,7 +178,7 @@ type ThemeSuggestion struct {
 	Examples    []string               `json:"examples,omitempty"`
 	Benefits    []string               `json:"benefits,omitempty"`
 	AutoFix     bool                   `json:"autoFix"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 }
 
 // Consistency types
@@ -212,7 +212,7 @@ type ConsistencyIssue struct {
 	Tokens      []string               `json:"tokens"`
 	Suggestion  string                 `json:"suggestion"`
 	Severity    ValidationLevel        `json:"severity"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 }
 
 // Token usage types
@@ -275,7 +275,7 @@ type A11yThemeIssue struct {
 	Severity    ValidationLevel        `json:"severity"`
 	Tokens      []string               `json:"tokens,omitempty"`
 	Fix         string                 `json:"fix,omitempty"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 }
 
 // Performance types
@@ -438,7 +438,7 @@ func NewTokenRegistry() *TokenRegistry {
 }
 
 // ValidateTheme validates a complete theme
-func (tv *ThemeValidator) ValidateTheme(ctx *ValidationContext, theme interface{}) *ThemeValidationResult {
+func (tv *ThemeValidator) ValidateTheme(ctx *ValidationContext, theme any) *ThemeValidationResult {
 	start := time.Now()
 	
 	result := &ThemeValidationResult{
@@ -451,7 +451,7 @@ func (tv *ThemeValidator) ValidateTheme(ctx *ValidationContext, theme interface{
 		Theme:    theme,
 		Registry: tv.tokenRegistry,
 		Config:   tv.config,
-		Context:  make(map[string]interface{}),
+		Context:  make(map[string]any),
 	}
 
 	// Run validation rules
@@ -563,7 +563,7 @@ func (tv *ThemeValidator) AddRule(rule ThemeValidationRule) {
 }
 
 // validateConsistency validates theme consistency
-func (tv *ThemeValidator) validateConsistency(theme interface{}, context *ThemeValidationContext) ThemeConsistencyResult {
+func (tv *ThemeValidator) validateConsistency(theme any, context *ThemeValidationContext) ThemeConsistencyResult {
 	result := ThemeConsistencyResult{
 		Consistent: true,
 		Score:      100.0,
@@ -600,7 +600,7 @@ func (tv *ThemeValidator) validateConsistency(theme interface{}, context *ThemeV
 }
 
 // validateTokenUsage validates token usage patterns
-func (tv *ThemeValidator) validateTokenUsage(theme interface{}, context *ThemeValidationContext) TokenUsageResult {
+func (tv *ThemeValidator) validateTokenUsage(theme any, context *ThemeValidationContext) TokenUsageResult {
 	result := TokenUsageResult{
 		UnusedTokens:      make([]string, 0),
 		MissingTokens:     make([]string, 0),
@@ -658,7 +658,7 @@ func (tv *ThemeValidator) validateTokenUsage(theme interface{}, context *ThemeVa
 }
 
 // validateCompleteness validates theme completeness
-func (tv *ThemeValidator) validateCompleteness(theme interface{}, context *ThemeValidationContext) CompletenessResult {
+func (tv *ThemeValidator) validateCompleteness(theme any, context *ThemeValidationContext) CompletenessResult {
 	result := CompletenessResult{
 		Complete:             true,
 		Score:               100.0,
@@ -714,7 +714,7 @@ func (tv *ThemeValidator) validateCompleteness(theme interface{}, context *Theme
 }
 
 // validateAccessibility validates theme accessibility
-func (tv *ThemeValidator) validateAccessibility(theme interface{}, context *ThemeValidationContext) A11yThemeResult {
+func (tv *ThemeValidator) validateAccessibility(theme any, context *ThemeValidationContext) A11yThemeResult {
 	result := A11yThemeResult{
 		Accessible:     true,
 		Score:          100.0,
@@ -770,7 +770,7 @@ func (tv *ThemeValidator) validateAccessibility(theme interface{}, context *Them
 }
 
 // validatePerformance validates theme performance characteristics
-func (tv *ThemeValidator) validatePerformance(theme interface{}, context *ThemeValidationContext) ThemePerformanceResult {
+func (tv *ThemeValidator) validatePerformance(theme any, context *ThemeValidationContext) ThemePerformanceResult {
 	result := ThemePerformanceResult{
 		Optimized:     true,
 		Score:         100.0,
@@ -817,12 +817,12 @@ func (tv *ThemeValidator) validatePerformance(theme interface{}, context *ThemeV
 
 // Helper methods for theme validation
 
-func (tv *ThemeValidator) extractTokens(theme interface{}) map[string]interface{} {
-	tokens := make(map[string]interface{})
+func (tv *ThemeValidator) extractTokens(theme any) map[string]any {
+	tokens := make(map[string]any)
 	
-	if themeMap, ok := theme.(map[string]interface{}); ok {
+	if themeMap, ok := theme.(map[string]any); ok {
 		if tokensData, exists := themeMap["tokens"]; exists {
-			if tokensMap, ok := tokensData.(map[string]interface{}); ok {
+			if tokensMap, ok := tokensData.(map[string]any); ok {
 				tv.flattenTokens(tokensMap, "", tokens)
 			}
 		}
@@ -831,14 +831,14 @@ func (tv *ThemeValidator) extractTokens(theme interface{}) map[string]interface{
 	return tokens
 }
 
-func (tv *ThemeValidator) flattenTokens(data map[string]interface{}, prefix string, result map[string]interface{}) {
+func (tv *ThemeValidator) flattenTokens(data map[string]any, prefix string, result map[string]any) {
 	for key, value := range data {
 		fullKey := key
 		if prefix != "" {
 			fullKey = prefix + "." + key
 		}
 
-		if valueMap, ok := value.(map[string]interface{}); ok {
+		if valueMap, ok := value.(map[string]any); ok {
 			// Check if this is a token object with a value
 			if tokenValue, hasValue := valueMap["value"]; hasValue {
 				result[fullKey] = tokenValue
@@ -853,7 +853,7 @@ func (tv *ThemeValidator) flattenTokens(data map[string]interface{}, prefix stri
 	}
 }
 
-func (tv *ThemeValidator) extractColorTokens(theme interface{}) map[string]string {
+func (tv *ThemeValidator) extractColorTokens(theme any) map[string]string {
 	tokens := tv.extractTokens(theme)
 	colors := make(map[string]string)
 
@@ -960,7 +960,7 @@ func (tv *ThemeValidator) validateColorBlindness(colors map[string]string) Color
 
 // Additional validation methods would be implemented similarly...
 
-func (tv *ThemeValidator) validateColorConsistency(theme interface{}) ColorConsistencyResult {
+func (tv *ThemeValidator) validateColorConsistency(theme any) ColorConsistencyResult {
 	result := ColorConsistencyResult{
 		Consistent: true,
 		Score:      100.0,
@@ -983,7 +983,7 @@ func (tv *ThemeValidator) validateColorConsistency(theme interface{}) ColorConsi
 	return result
 }
 
-func (tv *ThemeValidator) validateSpacingConsistency(theme interface{}) SpacingConsistencyResult {
+func (tv *ThemeValidator) validateSpacingConsistency(theme any) SpacingConsistencyResult {
 	result := SpacingConsistencyResult{
 		Consistent: true,
 		Score:      100.0,
@@ -1018,7 +1018,7 @@ func (tv *ThemeValidator) validateSpacingConsistency(theme interface{}) SpacingC
 	return result
 }
 
-func (tv *ThemeValidator) validateTypographyConsistency(theme interface{}) TypographyConsistencyResult {
+func (tv *ThemeValidator) validateTypographyConsistency(theme any) TypographyConsistencyResult {
 	result := TypographyConsistencyResult{
 		Consistent: true,
 		Score:      100.0,
@@ -1102,19 +1102,19 @@ func (tv *ThemeValidator) analyzeTypographyHierarchy(typography map[string]strin
 	}
 }
 
-func (tv *ThemeValidator) estimateThemeSize(theme interface{}) int64 {
+func (tv *ThemeValidator) estimateThemeSize(theme any) int64 {
 	// Simplified size estimation
 	tokens := tv.extractTokens(theme)
 	size := int64(len(tokens) * 50) // Estimate 50 bytes per token
 	return size
 }
 
-func (tv *ThemeValidator) estimateComputedSize(theme interface{}) int64 {
+func (tv *ThemeValidator) estimateComputedSize(theme any) int64 {
 	// Estimate CSS output size
 	return tv.estimateThemeSize(theme) * 3 // Roughly 3x expansion
 }
 
-func (tv *ThemeValidator) calculateThemeComplexity(theme interface{}) ThemeComplexityMetrics {
+func (tv *ThemeValidator) calculateThemeComplexity(theme any) ThemeComplexityMetrics {
 	tokens := tv.extractTokens(theme)
 	
 	return ThemeComplexityMetrics{
@@ -1125,8 +1125,8 @@ func (tv *ThemeValidator) calculateThemeComplexity(theme interface{}) ThemeCompl
 	}
 }
 
-func (tv *ThemeValidator) calculateNestingDepth(data interface{}) int {
-	if dataMap, ok := data.(map[string]interface{}); ok {
+func (tv *ThemeValidator) calculateNestingDepth(data any) int {
+	if dataMap, ok := data.(map[string]any); ok {
 		maxDepth := 0
 		for _, value := range dataMap {
 			depth := 1 + tv.calculateNestingDepth(value)
@@ -1139,7 +1139,7 @@ func (tv *ThemeValidator) calculateNestingDepth(data interface{}) int {
 	return 0
 }
 
-func (tv *ThemeValidator) findDuplicateValues(tokens map[string]interface{}) []TokenDuplicate {
+func (tv *ThemeValidator) findDuplicateValues(tokens map[string]any) []TokenDuplicate {
 	valueToTokens := make(map[string][]string)
 	duplicates := make([]TokenDuplicate, 0)
 
@@ -1180,12 +1180,12 @@ type TokenFormatValidator struct {
 	registry *TokenRegistry
 }
 
-func (v *TokenFormatValidator) ValidateTheme(theme interface{}, context *ThemeValidationContext) *ThemeRuleResult {
+func (v *TokenFormatValidator) ValidateTheme(theme any, context *ThemeValidationContext) *ThemeRuleResult {
 	result := &ThemeRuleResult{
 		Passed:      true,
 		Score:       100.0,
 		Rule:        "theme.tokens.format",
-		Metadata:    make(map[string]interface{}),
+		Metadata:    make(map[string]any),
 		Violations:  make([]ThemeViolation, 0),
 		Warnings:    make([]ThemeWarning, 0),
 		Suggestions: make([]ThemeSuggestion, 0),
@@ -1231,9 +1231,9 @@ func (v *TokenFormatValidator) GetCategory() ThemeValidationCategory {
 	return ThemeValidationCategoryTokens
 }
 
-func (v *TokenFormatValidator) extractTokens(theme interface{}) map[string]interface{} {
+func (v *TokenFormatValidator) extractTokens(theme any) map[string]any {
 	// Implementation similar to ThemeValidator.extractTokens
-	tokens := make(map[string]interface{})
+	tokens := make(map[string]any)
 	// ... token extraction logic
 	return tokens
 }
@@ -1244,7 +1244,7 @@ func (v *TokenFormatValidator) isValidTokenName(name string) bool {
 	return validName.MatchString(name)
 }
 
-func (v *TokenFormatValidator) isValidTokenValue(token string, value interface{}) bool {
+func (v *TokenFormatValidator) isValidTokenValue(token string, value any) bool {
 	valueStr := fmt.Sprintf("%v", value)
 	
 	// Determine token type and validate accordingly
@@ -1266,9 +1266,9 @@ func (v *TokenFormatValidator) isValidTokenValue(token string, value interface{}
 // ColorConsistencyValidator validates color consistency
 type ColorConsistencyValidator struct{}
 
-func (v *ColorConsistencyValidator) ValidateTheme(theme interface{}, context *ThemeValidationContext) *ThemeRuleResult {
+func (v *ColorConsistencyValidator) ValidateTheme(theme any, context *ThemeValidationContext) *ThemeRuleResult {
 	// Implementation for color consistency validation
-	return &ThemeRuleResult{Passed: true, Score: 100.0, Rule: "theme.colors.consistency", Metadata: make(map[string]interface{})}
+	return &ThemeRuleResult{Passed: true, Score: 100.0, Rule: "theme.colors.consistency", Metadata: make(map[string]any)}
 }
 
 func (v *ColorConsistencyValidator) GetCategory() ThemeValidationCategory {
@@ -1280,9 +1280,9 @@ type ThemeContrastValidator struct {
 	minRatio float64
 }
 
-func (v *ThemeContrastValidator) ValidateTheme(theme interface{}, context *ThemeValidationContext) *ThemeRuleResult {
+func (v *ThemeContrastValidator) ValidateTheme(theme any, context *ThemeValidationContext) *ThemeRuleResult {
 	// Implementation for contrast validation
-	return &ThemeRuleResult{Passed: true, Score: 100.0, Rule: "theme.accessibility.contrast", Metadata: make(map[string]interface{})}
+	return &ThemeRuleResult{Passed: true, Score: 100.0, Rule: "theme.accessibility.contrast", Metadata: make(map[string]any)}
 }
 
 func (v *ThemeContrastValidator) GetCategory() ThemeValidationCategory {
@@ -1294,9 +1294,9 @@ type ThemePerformanceValidator struct {
 	maxTokens int
 }
 
-func (v *ThemePerformanceValidator) ValidateTheme(theme interface{}, context *ThemeValidationContext) *ThemeRuleResult {
+func (v *ThemePerformanceValidator) ValidateTheme(theme any, context *ThemeValidationContext) *ThemeRuleResult {
 	// Implementation for performance validation
-	return &ThemeRuleResult{Passed: true, Score: 100.0, Rule: "theme.performance.size", Metadata: make(map[string]interface{})}
+	return &ThemeRuleResult{Passed: true, Score: 100.0, Rule: "theme.performance.size", Metadata: make(map[string]any)}
 }
 
 func (v *ThemePerformanceValidator) GetCategory() ThemeValidationCategory {

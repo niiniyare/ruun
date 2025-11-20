@@ -3905,7 +3905,7 @@ func getNotificationIcon(notification Notification) string {
 	}
 }
 
-func formatNotificationTime(createdAt interface{}) string {
+func formatNotificationTime(createdAt any) string {
 	// This would format the time appropriately
 	// For now, return a placeholder
 	return "2 minutes ago"

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/niiniyare/ruun/pkg/schema"
 )
@@ -323,7 +324,7 @@ func (compiler *ThemeCompiler) writeComponentClasses(css *strings.Builder, token
 
 // Helper functions for token conversion
 
-func (api *ThemeAPI) convertTokens(tokens map[string]interface{}, components map[string]interface{}) *schema.DesignTokens {
+func (api *ThemeAPI) convertTokens(tokens map[string]any, components map[string]any) *schema.DesignTokens {
 	designTokens := &schema.DesignTokens{
 		Semantic: &schema.SemanticTokens{
 			Colors:      convertColors(tokens),
@@ -337,8 +338,8 @@ func (api *ThemeAPI) convertTokens(tokens map[string]interface{}, components map
 	return designTokens
 }
 
-func convertColors(tokens map[string]interface{}) *schema.SemanticColors {
-	colors, ok := tokens["colors"].(map[string]interface{})
+func convertColors(tokens map[string]any) *schema.SemanticColors {
+	colors, ok := tokens["colors"].(map[string]any)
 	if !ok {
 		return &schema.SemanticColors{}
 	}
@@ -372,21 +373,21 @@ func convertColors(tokens map[string]interface{}) *schema.SemanticColors {
 	return semanticColors
 }
 
-func convertSpacing(tokens map[string]interface{}) *schema.SemanticSpacing {
+func convertSpacing(tokens map[string]any) *schema.SemanticSpacing {
 	return &schema.SemanticSpacing{
 		Component: &schema.ComponentSpacing{},
 		Layout:    &schema.LayoutSpacing{},
 	}
 }
 
-func convertInteractive(tokens map[string]interface{}) *schema.SemanticInteractive {
+func convertInteractive(tokens map[string]any) *schema.SemanticInteractive {
 	return &schema.SemanticInteractive{
 		BorderRadius: &schema.InteractiveBorderRadius{},
 		Shadow:       &schema.InteractiveShadow{},
 	}
 }
 
-func convertTypography(tokens map[string]interface{}) *schema.SemanticTypography {
+func convertTypography(tokens map[string]any) *schema.SemanticTypography {
 	return &schema.SemanticTypography{
 		Headings: &schema.HeadingTokens{},
 		Body:     &schema.BodyTokens{},
@@ -396,7 +397,7 @@ func convertTypography(tokens map[string]interface{}) *schema.SemanticTypography
 	}
 }
 
-func convertComponents(components map[string]interface{}) *schema.ComponentTokens {
+func convertComponents(components map[string]any) *schema.ComponentTokens {
 	return &schema.ComponentTokens{
 		Button:     &schema.ButtonTokens{},
 		Input:      &schema.InputTokens{},
@@ -480,3 +481,172 @@ func minifyCSS(css string) string {
 	css = strings.ReplaceAll(css, "; ", ";")
 	return css
 }
+
+type CSSBeautifier struct {
+	indentChar string
+	indentSize int
+}
+
+func NewCSSBeautifier() *CSSBeautifier {
+	return &CSSBeautifier{
+		indentChar: "\t",
+		indentSize: 1,
+	}
+}
+
+func (b *CSSBeautifier) Beautify(css string) string {
+	var result strings.Builder
+	var buffer strings.Builder
+
+	indentLevel := 0
+	inComment := false
+	inString := false
+	stringChar := rune(0)
+	prevChar := rune(0)
+
+	runes := []rune(strings.TrimSpace(css))
+
+	for i := 0; i < len(runes); i++ {
+		char := runes[i]
+
+		// Handle string literals
+		if (char == '"' || char == '\'') && prevChar != '\\' {
+			if !inString {
+				inString = true
+				stringChar = char
+			} else if char == stringChar {
+				inString = false
+			}
+		}
+
+		if inString {
+			buffer.WriteRune(char)
+			prevChar = char
+			continue
+		}
+
+		// Handle comments
+		if !inComment && char == '/' && i+1 < len(runes) && runes[i+1] == '*' {
+			inComment = true
+			buffer.WriteRune(char)
+			prevChar = char
+			continue
+		}
+
+		if inComment {
+			buffer.WriteRune(char)
+			if char == '/' && prevChar == '*' {
+				inComment = false
+				content := buffer.String()
+				result.WriteString(content)
+				result.WriteString("\n")
+				buffer.Reset()
+			}
+			prevChar = char
+			continue
+		}
+
+		switch char {
+		case '{':
+			// Write selector and opening brace
+			selector := strings.TrimSpace(buffer.String())
+			if selector != "" {
+				result.WriteString(selector)
+				result.WriteString(" ")
+			}
+			result.WriteString("{\n")
+			buffer.Reset()
+			indentLevel++
+			inSelector = false
+
+		case '}':
+			// Write any remaining property
+			prop := strings.TrimSpace(buffer.String())
+			if prop != "" && !strings.HasSuffix(prop, ";") {
+				result.WriteString(b.indent(indentLevel))
+				result.WriteString(prop)
+				result.WriteString(";\n")
+			} else if prop != "" {
+				result.WriteString(b.indent(indentLevel))
+				result.WriteString(prop)
+				result.WriteString("\n")
+			}
+			buffer.Reset()
+
+			indentLevel--
+			result.WriteString(b.indent(indentLevel))
+			result.WriteString("}\n")
+
+			// Add blank line after closing brace (except for last one)
+			if i+1 < len(runes) {
+				next := b.skipWhitespace(runes, i+1)
+				if next < len(runes) && runes[next] != '}' {
+					result.WriteString("\n")
+				}
+			}
+
+		case ';':
+			// Write property and semicolon
+			prop := strings.TrimSpace(buffer.String())
+			if prop != "" {
+				result.WriteString(b.indent(indentLevel))
+				result.WriteString(b.formatProperty(prop))
+				result.WriteString(";\n")
+			}
+			buffer.Reset()
+
+		case ':':
+			buffer.WriteRune(char)
+
+		default:
+			// Skip redundant whitespace but preserve in buffer
+			if unicode.IsSpace(char) {
+				if buffer.Len() > 0 && !unicode.IsSpace(prevChar) {
+					buffer.WriteRune(' ')
+				}
+			} else {
+				buffer.WriteRune(char)
+			}
+		}
+
+		prevChar = char
+	}
+
+	return strings.TrimRight(result.String(), "\n") + "\n"
+}
+
+func (b *CSSBeautifier) formatProperty(prop string) string {
+	// Split property name and value
+	parts := strings.SplitN(prop, ":", 2)
+	if len(parts) != 2 {
+		return prop
+	}
+
+	name := strings.TrimSpace(parts[0])
+	value := strings.TrimSpace(parts[1])
+
+	return name + ": " + value
+}
+
+func (b *CSSBeautifier) indent(level int) string {
+	return strings.Repeat(b.indentChar, level*b.indentSize)
+}
+
+func (b *CSSBeautifier) skipWhitespace(runes []rune, start int) int {
+	for i := start; i < len(runes); i++ {
+		if !unicode.IsSpace(runes[i]) {
+			return i
+		}
+	}
+	return len(runes)
+}
+
+// func main() {
+// 	// Example minified CSS
+// 	css := `/* Generated theme:Default */:root { /* Colors */ --color-background:hsl(0, 0%, 100%);--color-background-subtle:hsl(0, 0%, 96%);--color-background-emphasis:;--color-foreground:hsl(0, 0%, 9%);--color-foreground-subtle:hsl(0, 0%, 50%);--color-border:hsl(0, 0%, 90%);/* Spacing */ --spacing-component-tight:;--spacing-component-default:;--spacing-component-loose:;--spacing-layout-section:;--spacing-layout-page:;/* Typography */ --font-size-sm:0.875rem;--font-size-base:1rem;--font-size-lg:1.125rem;}/* Button Components */.button { display:inline-flex;align-items:center;justify-content:center;font-weight:500;transition:all 0.2s ease;cursor:pointer;border:1px solid transparent;}.button-primary { background-color:var(--color-primary);color:var(--color-primary-foreground);border-color:var(--color-primary);}.button-secondary { background-color:var(--color-secondary);color:var(--color-secondary-foreground);border-color:var(--color-border);}.button-outline { background-color:transparent;color:var(--color-primary);border-color:var(--color-primary);}/* Input Components */.input { width:100%;background-color:var(--color-input);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:0.5rem 0.75rem;color:var(--color-foreground);transition:border-color 0.2s ease;}.input:focus { outline:none;border-color:var(--color-ring);box-shadow:0 0 0 2px var(--color-ring);}.input-error { border-color:var(--color-error);}/* Alert Components */.alert { padding:1rem;border-radius:var(--radius-md);border:1px solid var(--color-border);}.alert-success { background-color:hsl(142, 71%, 97%);border-color:var(--color-success);color:hsl(142, 71%, 25%);}.alert-warning { background-color:hsl(45, 93%, 97%);border-color:var(--color-warning);color:hsl(45, 93%, 25%);}.alert-error { background-color:hsl(0, 84%, 97%);border-color:var(--color-error);color:hsl(0, 84%, 25%);}`
+//
+// 	beautifier := NewCSSBeautifier()
+// 	beautified := beautifier.Beautify(css)
+//
+// 	fmt.Println(beautified)
+// }

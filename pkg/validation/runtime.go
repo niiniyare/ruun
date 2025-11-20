@@ -46,9 +46,9 @@ type ValidationMiddleware interface {
 
 // ValidationInterceptor interface for intercepting validation calls
 type ValidationInterceptor interface {
-	BeforeValidation(ctx context.Context, data interface{}) (interface{}, error)
-	AfterValidation(ctx context.Context, data interface{}, result *ValidationResult) *ValidationResult
-	OnValidationError(ctx context.Context, data interface{}, err error) error
+	BeforeValidation(ctx context.Context, data any) (any, error)
+	AfterValidation(ctx context.Context, data any, result *ValidationResult) *ValidationResult
+	OnValidationError(ctx context.Context, data any, err error) error
 }
 
 // RuntimeMetrics contains runtime validation metrics
@@ -102,9 +102,9 @@ type RequestCounter struct {
 type RuntimeValidationRequest struct {
 	ID          string                 `json:"id"`
 	Type        string                 `json:"type"` // input, api, form, etc.
-	Data        interface{}            `json:"data"`
-	Schema      interface{}            `json:"schema,omitempty"`
-	Context     map[string]interface{} `json:"context"`
+	Data        any            `json:"data"`
+	Schema      any            `json:"schema,omitempty"`
+	Context     map[string]any `json:"context"`
 	ClientID    string                 `json:"clientId,omitempty"`
 	Async       bool                   `json:"async"`
 	Timeout     time.Duration          `json:"timeout,omitempty"`
@@ -117,7 +117,7 @@ type RuntimeValidationResponse struct {
 	ID          string            `json:"id"`
 	Valid       bool              `json:"valid"`
 	Result      *ValidationResult `json:"result"`
-	Sanitized   interface{}       `json:"sanitized,omitempty"`
+	Sanitized   any       `json:"sanitized,omitempty"`
 	Cached      bool              `json:"cached"`
 	Duration    time.Duration     `json:"duration"`
 	Timestamp   time.Time         `json:"timestamp"`
@@ -132,7 +132,7 @@ type InputValidationMiddleware struct {
 
 // APIValidationMiddleware validates API requests and responses
 type APIValidationMiddleware struct {
-	schemas   map[string]interface{}
+	schemas   map[string]any
 	validator *APIValidator
 	config    APIValidationConfig
 }
@@ -237,13 +237,13 @@ func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
 }
 
 // ValidateInput validates user input data
-func (rv *RuntimeValidator) ValidateInput(ctx context.Context, data interface{}, schema interface{}) *RuntimeValidationResponse {
+func (rv *RuntimeValidator) ValidateInput(ctx context.Context, data any, schema any) *RuntimeValidationResponse {
 	request := &RuntimeValidationRequest{
 		ID:        generateRequestID(),
 		Type:      "input",
 		Data:      data,
 		Schema:    schema,
-		Context:   make(map[string]interface{}),
+		Context:   make(map[string]any),
 		Async:     rv.config.ValidateAsync,
 		Timeout:   rv.config.ValidationTimeout,
 		Priority:  1,
@@ -259,7 +259,7 @@ func (rv *RuntimeValidator) ValidateAPI(ctx context.Context, req *http.Request) 
 		ID:        generateRequestID(),
 		Type:      "api",
 		Data:      req,
-		Context:   map[string]interface{}{"method": req.Method, "url": req.URL.String()},
+		Context:   map[string]any{"method": req.Method, "url": req.URL.String()},
 		ClientID:  rv.getClientID(req),
 		Async:     false, // API validation should be synchronous
 		Timeout:   rv.config.ValidationTimeout,
@@ -271,13 +271,13 @@ func (rv *RuntimeValidator) ValidateAPI(ctx context.Context, req *http.Request) 
 }
 
 // ValidateForm validates form submissions
-func (rv *RuntimeValidator) ValidateForm(ctx context.Context, formData map[string]interface{}, formSchema interface{}) *RuntimeValidationResponse {
+func (rv *RuntimeValidator) ValidateForm(ctx context.Context, formData map[string]any, formSchema any) *RuntimeValidationResponse {
 	request := &RuntimeValidationRequest{
 		ID:        generateRequestID(),
 		Type:      "form",
 		Data:      formData,
 		Schema:    formSchema,
-		Context:   make(map[string]interface{}),
+		Context:   make(map[string]any),
 		Async:     rv.config.ValidateAsync,
 		Timeout:   rv.config.ValidationTimeout,
 		Priority:  1,
@@ -307,7 +307,7 @@ func (rv *RuntimeValidator) processValidationRequest(ctx context.Context, reques
 					NewValidationError("rate_limit_exceeded", "Too many validation requests", "", ValidationLevelError),
 				},
 				Timestamp: time.Now(),
-				Metadata:  map[string]interface{}{"rateLimited": true},
+				Metadata:  map[string]any{"rateLimited": true},
 			}
 			rv.metrics.RecordRateLimitHit()
 			return response
@@ -348,7 +348,7 @@ func (rv *RuntimeValidator) processValidationRequest(ctx context.Context, reques
 
 	// Perform validation based on type
 	var result *ValidationResult
-	var sanitized interface{}
+	var sanitized any
 	
 	switch request.Type {
 	case "input":
@@ -356,7 +356,7 @@ func (rv *RuntimeValidator) processValidationRequest(ctx context.Context, reques
 	case "api":
 		result = rv.validateAPIRequest(ctx, processedData.(*http.Request))
 	case "form":
-		result, sanitized = rv.validateFormData(ctx, processedData.(map[string]interface{}), request.Schema)
+		result, sanitized = rv.validateFormData(ctx, processedData.(map[string]any), request.Schema)
 	default:
 		result = &ValidationResult{
 			Valid: false,
@@ -390,16 +390,16 @@ func (rv *RuntimeValidator) processValidationRequest(ctx context.Context, reques
 }
 
 // validateInputData validates input data with sanitization
-func (rv *RuntimeValidator) validateInputData(ctx context.Context, data interface{}, schema interface{}) (*ValidationResult, interface{}) {
+func (rv *RuntimeValidator) validateInputData(ctx context.Context, data any, schema any) (*ValidationResult, any) {
 	result := &ValidationResult{
 		Valid:     true,
 		Level:     ValidationLevelError,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Sanitize input if enabled
-	var sanitized interface{} = data
+	var sanitized any = data
 	if rv.config.EnableSanitization {
 		sanitized = rv.sanitizeInput(data)
 	}
@@ -420,7 +420,7 @@ func (rv *RuntimeValidator) validateInputData(ctx context.Context, data interfac
 	}
 
 	// Additional input validation rules
-	if dataMap, ok := sanitized.(map[string]interface{}); ok {
+	if dataMap, ok := sanitized.(map[string]any); ok {
 		for field, value := range dataMap {
 			if err := rv.validateFieldInput(field, value); err != nil {
 				result.Valid = false
@@ -438,7 +438,7 @@ func (rv *RuntimeValidator) validateAPIRequest(ctx context.Context, req *http.Re
 		Valid:     true,
 		Level:     ValidationLevelError,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Validate request size
@@ -495,12 +495,12 @@ func (rv *RuntimeValidator) validateAPIRequest(ctx context.Context, req *http.Re
 }
 
 // validateFormData validates form submission data
-func (rv *RuntimeValidator) validateFormData(ctx context.Context, data map[string]interface{}, schema interface{}) (*ValidationResult, interface{}) {
+func (rv *RuntimeValidator) validateFormData(ctx context.Context, data map[string]any, schema any) (*ValidationResult, any) {
 	result := &ValidationResult{
 		Valid:     true,
 		Level:     ValidationLevelError,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Sanitize form data
@@ -533,15 +533,15 @@ func (rv *RuntimeValidator) validateFormData(ctx context.Context, data map[strin
 
 // Input sanitization methods
 
-func (rv *RuntimeValidator) sanitizeInput(data interface{}) interface{} {
-	if dataMap, ok := data.(map[string]interface{}); ok {
-		sanitized := make(map[string]interface{})
+func (rv *RuntimeValidator) sanitizeInput(data any) any {
+	if dataMap, ok := data.(map[string]any); ok {
+		sanitized := make(map[string]any)
 		for key, value := range dataMap {
 			sanitized[key] = rv.sanitizeValue(value)
 		}
 		return sanitized
-	} else if dataSlice, ok := data.([]interface{}); ok {
-		sanitized := make([]interface{}, len(dataSlice))
+	} else if dataSlice, ok := data.([]any); ok {
+		sanitized := make([]any, len(dataSlice))
 		for i, value := range dataSlice {
 			sanitized[i] = rv.sanitizeValue(value)
 		}
@@ -551,7 +551,7 @@ func (rv *RuntimeValidator) sanitizeInput(data interface{}) interface{} {
 	return rv.sanitizeValue(data)
 }
 
-func (rv *RuntimeValidator) sanitizeValue(value interface{}) interface{} {
+func (rv *RuntimeValidator) sanitizeValue(value any) any {
 	if str, ok := value.(string); ok {
 		// Basic XSS prevention
 		str = rv.removeHTMLTags(str)
@@ -603,8 +603,8 @@ func (rv *RuntimeValidator) removeSQLPatterns(input string) string {
 	return result
 }
 
-func (rv *RuntimeValidator) sanitizeFormData(data map[string]interface{}) map[string]interface{} {
-	sanitized := make(map[string]interface{})
+func (rv *RuntimeValidator) sanitizeFormData(data map[string]any) map[string]any {
+	sanitized := make(map[string]any)
 	
 	for key, value := range data {
 		// Skip sensitive fields from logging
@@ -634,7 +634,7 @@ func (rv *RuntimeValidator) isSensitiveField(field string) bool {
 
 // Field validation methods
 
-func (rv *RuntimeValidator) validateFieldInput(field string, value interface{}) *ValidationError {
+func (rv *RuntimeValidator) validateFieldInput(field string, value any) *ValidationError {
 	// Implement field-specific validation logic
 	if field == "email" {
 		if str, ok := value.(string); ok {
@@ -665,7 +665,7 @@ func (rv *RuntimeValidator) validateFieldInput(field string, value interface{}) 
 	return nil
 }
 
-func (rv *RuntimeValidator) validateFormField(field string, value interface{}) *ValidationError {
+func (rv *RuntimeValidator) validateFormField(field string, value any) *ValidationError {
 	// Additional form-specific validation
 	if field == "csrf_token" {
 		if str, ok := value.(string); ok {
@@ -873,7 +873,7 @@ func (rm *RuntimeMetrics) RecordRateLimitHit() {
 	rm.RateLimitHits++
 }
 
-func (rm *RuntimeMetrics) GetStats() map[string]interface{} {
+func (rm *RuntimeMetrics) GetStats() map[string]any {
 	rm.mutex.RLock()
 	defer rm.mutex.RUnlock()
 	
@@ -882,7 +882,7 @@ func (rm *RuntimeMetrics) GetStats() map[string]interface{} {
 		successRate = float64(rm.SuccessfulValidations) / float64(rm.TotalValidations)
 	}
 	
-	return map[string]interface{}{
+	return map[string]any{
 		"totalValidations":     rm.TotalValidations,
 		"successfulValidations": rm.SuccessfulValidations,
 		"failedValidations":    rm.FailedValidations,
@@ -898,7 +898,7 @@ func (rm *RuntimeMetrics) GetStats() map[string]interface{} {
 // Utility methods
 
 func (rv *RuntimeValidator) generateCacheKey(request *RuntimeValidationRequest) string {
-	data, _ := json.Marshal(map[string]interface{}{
+	data, _ := json.Marshal(map[string]any{
 		"type":   request.Type,
 		"data":   request.Data,
 		"schema": request.Schema,
@@ -945,7 +945,7 @@ func (rv *RuntimeValidator) HTTPMiddleware() func(http.Handler) http.Handler {
 				// Return validation error
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(map[string]interface{}{
+				json.NewEncoder(w).Encode(map[string]any{
 					"error":  "Validation failed",
 					"result": response.Result,
 				})

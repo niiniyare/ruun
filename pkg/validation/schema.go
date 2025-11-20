@@ -41,17 +41,17 @@ const (
 
 // SchemaRuleValidator interface for schema validation rules
 type SchemaRuleValidator interface {
-	ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult
+	ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult
 	GetCategory() SchemaCategory
 }
 
 // SchemaValidationContext provides context for schema validation
 type SchemaValidationContext struct {
 	Path     []string               `json:"path"`
-	Schema   interface{}            `json:"schema"`
-	Parent   interface{}            `json:"parent,omitempty"`
-	Root     interface{}            `json:"root"`
-	Metadata map[string]interface{} `json:"metadata"`
+	Schema   any            `json:"schema"`
+	Parent   any            `json:"parent,omitempty"`
+	Root     any            `json:"root"`
+	Metadata map[string]any `json:"metadata"`
 	Level    ValidationLevel        `json:"level"`
 }
 
@@ -61,7 +61,7 @@ type SchemaValidationResult struct {
 	Errors      []SchemaError          `json:"errors,omitempty"`
 	Warnings    []SchemaWarning        `json:"warnings,omitempty"`
 	Suggestions []SchemaSuggestion     `json:"suggestions,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata"`
+	Metadata    map[string]any `json:"metadata"`
 	Performance *ValidationMetrics     `json:"performance,omitempty"`
 	Timestamp   time.Time             `json:"timestamp"`
 }
@@ -71,14 +71,14 @@ type SchemaError struct {
 	Code        string         `json:"code"`
 	Message     string         `json:"message"`
 	Path        string         `json:"path"`
-	Value       interface{}    `json:"value,omitempty"`
-	Expected    interface{}    `json:"expected,omitempty"`
-	Actual      interface{}    `json:"actual,omitempty"`
+	Value       any    `json:"value,omitempty"`
+	Expected    any    `json:"expected,omitempty"`
+	Actual      any    `json:"actual,omitempty"`
 	Level       ValidationLevel `json:"level"`
 	Category    SchemaCategory `json:"category"`
 	Rule        string         `json:"rule"`
 	Location    *SourceLocation `json:"location,omitempty"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 	Suggestion  string         `json:"suggestion,omitempty"`
 }
 
@@ -87,11 +87,11 @@ type SchemaWarning struct {
 	Code       string                 `json:"code"`
 	Message    string                 `json:"message"`
 	Path       string                 `json:"path"`
-	Value      interface{}            `json:"value,omitempty"`
+	Value      any            `json:"value,omitempty"`
 	Category   SchemaCategory         `json:"category"`
 	Rule       string                 `json:"rule"`
 	Location   *SourceLocation        `json:"location,omitempty"`
-	Context    map[string]interface{} `json:"context,omitempty"`
+	Context    map[string]any `json:"context,omitempty"`
 	Suggestion string                 `json:"suggestion,omitempty"`
 }
 
@@ -104,7 +104,7 @@ type SchemaSuggestion struct {
 	AutoFix     bool                  `json:"autoFix"`
 	Category    SchemaCategory         `json:"category"`
 	Rule        string                 `json:"rule"`
-	Details     map[string]interface{} `json:"details,omitempty"`
+	Details     map[string]any `json:"details,omitempty"`
 }
 
 // ValidationMetrics contains performance metrics for validation
@@ -156,20 +156,20 @@ func NewErrorReporter(format ReportFormat, suggestions, context bool) *ErrorRepo
 }
 
 // ValidateSchema validates a schema with detailed error reporting
-func (sv *SchemaValidator) ValidateSchema(schemaData interface{}) *SchemaValidationResult {
+func (sv *SchemaValidator) ValidateSchema(schemaData any) *SchemaValidationResult {
 	start := time.Now()
 	
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: start,
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	context := &SchemaValidationContext{
 		Path:     []string{},
 		Schema:   schemaData,
 		Root:     schemaData,
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 		Level:    ValidationLevelError,
 	}
 
@@ -344,17 +344,17 @@ func (sv *SchemaValidator) mergeResults(base, addition *SchemaValidationResult) 
 // FormStructureValidator validates basic form schema structure
 type FormStructureValidator struct{}
 
-func (v *FormStructureValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *FormStructureValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	formSchema, ok := schema.(*schema.Schema)
 	if !ok {
 		// Try to convert from interface
-		if schemaMap, ok := schema.(map[string]interface{}); ok {
+		if schemaMap, ok := schema.(map[string]any); ok {
 			// Basic structure validation for map representation
 			requiredFields := []string{"id", "type", "title"}
 			for _, field := range requiredFields {
@@ -376,7 +376,7 @@ func (v *FormStructureValidator) ValidateSchema(schema interface{}, context *Sch
 				Code:     "form.structure.invalid_type",
 				Message:  "Schema must be a valid form schema object",
 				Path:     strings.Join(context.Path, "."),
-				Expected: "*schema.Schema or map[string]interface{}",
+				Expected: "*schema.Schema or map[string]any",
 				Actual:   reflect.TypeOf(schema).String(),
 				Level:    ValidationLevelError,
 				Category: SchemaCategoryForm,
@@ -435,11 +435,11 @@ func (v *FormStructureValidator) GetCategory() SchemaCategory {
 // FormFieldsValidator validates form fields
 type FormFieldsValidator struct{}
 
-func (v *FormFieldsValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *FormFieldsValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	formSchema, ok := schema.(*schema.Schema)
@@ -481,7 +481,7 @@ func (v *FormFieldsValidator) validateField(field *schema.Field, context *Schema
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Validate required field properties
@@ -531,11 +531,11 @@ func (v *FormFieldsValidator) GetCategory() SchemaCategory {
 // RequiredFieldsValidator validates required field configuration
 type RequiredFieldsValidator struct{}
 
-func (v *RequiredFieldsValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *RequiredFieldsValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	formSchema, ok := schema.(*schema.Schema)
@@ -584,11 +584,11 @@ func (v *RequiredFieldsValidator) GetCategory() SchemaCategory {
 // FieldTypeValidator validates field types
 type FieldTypeValidator struct{}
 
-func (v *FieldTypeValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *FieldTypeValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	field, ok := schema.(*schema.Field)
@@ -636,11 +636,11 @@ func (v *FieldTypeValidator) GetCategory() SchemaCategory {
 // FieldValidationValidator validates field validation rules
 type FieldValidationValidator struct{}
 
-func (v *FieldValidationValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *FieldValidationValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	field, ok := schema.(*schema.Field)
@@ -700,11 +700,11 @@ func (v *FieldValidationValidator) GetCategory() SchemaCategory {
 // ThemeTokenValidator validates theme design tokens
 type ThemeTokenValidator struct{}
 
-func (v *ThemeTokenValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *ThemeTokenValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	theme, ok := schema.(*schema.Theme)
@@ -748,11 +748,11 @@ func (v *ThemeTokenValidator) GetCategory() SchemaCategory {
 // ThemeConsistencyValidator validates theme consistency
 type ThemeConsistencyValidator struct{}
 
-func (v *ThemeConsistencyValidator) ValidateSchema(schema interface{}, context *SchemaValidationContext) *SchemaValidationResult {
+func (v *ThemeConsistencyValidator) ValidateSchema(schema any, context *SchemaValidationContext) *SchemaValidationResult {
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	theme, ok := schema.(*schema.Theme)
@@ -928,11 +928,11 @@ func (er *ErrorReporter) generateJUnitReport(result *SchemaValidationResult) (st
 // SchemaStructureValidator validates basic schema structure
 type SchemaStructureValidator struct{}
 
-func (v *SchemaStructureValidator) Validate(ctx *ValidationContext, value interface{}) *ValidationResult {
+func (v *SchemaStructureValidator) Validate(ctx *ValidationContext, value any) *ValidationResult {
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// This is a simplified implementation that would delegate to SchemaValidator

@@ -188,8 +188,8 @@ type Runtime struct {
 }
 
 func NewRuntime(enrichedSchema *schema.Schema) *Runtime
-func (r *Runtime) Initialize(ctx context.Context, data map[string]interface{}) error
-func (r *Runtime) HandleFieldChange(ctx context.Context, field string, value interface{}) error
+func (r *Runtime) Initialize(ctx context.Context, data map[string]any) error
+func (r *Runtime) HandleFieldChange(ctx context.Context, field string, value any) error
 func (r *Runtime) ValidateCurrentState(ctx context.Context) map[string][]string
 ```
 

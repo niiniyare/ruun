@@ -613,7 +613,7 @@ type Plugin interface {
 }
 
 type PluginHook interface {
-    Execute(ctx context.Context, data interface{}) error
+    Execute(ctx context.Context, data any) error
 }
 
 func (r *PluginRegistry) LoadPlugin(plugin Plugin) error {
@@ -693,7 +693,7 @@ func NewComponentPool(factory ComponentFactory) *ComponentPool {
     return &ComponentPool{
         factory: factory,
         pool: sync.Pool{
-            New: func() interface{} {
+            New: func() any {
                 component, _ := factory.CreateComponent(&Schema{})
                 return component
             },

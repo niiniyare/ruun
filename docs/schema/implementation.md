@@ -152,7 +152,7 @@ func (v *Validator) loadSchemaFile(filepath string) error {
         return err
     }
     
-    var schemaData map[string]interface{}
+    var schemaData map[string]any
     if err := json.Unmarshal(data, &schemaData); err != nil {
         return fmt.Errorf("invalid JSON: %w", err)
     }
@@ -176,7 +176,7 @@ func (v *Validator) loadSchemaFile(filepath string) error {
     return nil
 }
 
-func (v *Validator) ValidateSchema(schemaData interface{}, schemaType string) error {
+func (v *Validator) ValidateSchema(schemaData any, schemaType string) error {
     // First validate against meta schema
     result, err := v.metaSchema.Validate(gojsonschema.NewGoLoader(schemaData))
     if err != nil {
@@ -444,14 +444,14 @@ func (f *ButtonFactory) schemaToProps(schema *Schema) (ButtonProps, error) {
     }
     
     // Handle actions
-    if action, ok := schema.Properties["action"].(map[string]interface{}); ok {
+    if action, ok := schema.Properties["action"].(map[string]any); ok {
         props.Action = f.parseAction(action)
     }
     
     return props, nil
 }
 
-func (f *ButtonFactory) parseAction(action map[string]interface{}) *ActionConfig {
+func (f *ButtonFactory) parseAction(action map[string]any) *ActionConfig {
     actionType := getString(action, "actionType", "")
     
     switch actionType {
@@ -624,9 +624,9 @@ func (f *FormFactory) Create(ctx context.Context, schema *Schema) (templ.Compone
     
     // Create field components
     fields := make([]templ.Component, 0)
-    if bodyArray, ok := schema.Properties["body"].([]interface{}); ok {
+    if bodyArray, ok := schema.Properties["body"].([]any); ok {
         for _, bodyItem := range bodyArray {
-            if fieldMap, ok := bodyItem.(map[string]interface{}); ok {
+            if fieldMap, ok := bodyItem.(map[string]any); ok {
                 fieldSchema := &Schema{
                     Type:       getString(fieldMap, "type", ""),
                     Properties: fieldMap,
@@ -644,9 +644,9 @@ func (f *FormFactory) Create(ctx context.Context, schema *Schema) (templ.Compone
     
     // Create action components
     actions := make([]templ.Component, 0)
-    if actionsArray, ok := schema.Properties["actions"].([]interface{}); ok {
+    if actionsArray, ok := schema.Properties["actions"].([]any); ok {
         for _, actionItem := range actionsArray {
-            if actionMap, ok := actionItem.(map[string]interface{}); ok {
+            if actionMap, ok := actionItem.(map[string]any); ok {
                 actionSchema := &Schema{
                     Type:       "button",
                     Properties: actionMap,
@@ -677,7 +677,7 @@ type FormProps struct {
     PreventEnterSubmit bool             `json:"preventEnterSubmit"`
     Debug             bool              `json:"debug"`
     Target            string            `json:"target"`
-    Validation        map[string]interface{} `json:"validation"`
+    Validation        map[string]any `json:"validation"`
 }
 
 func (f *FormFactory) schemaToProps(schema *Schema) (FormProps, error) {
@@ -828,7 +828,7 @@ type TextInputProps struct {
     Suffix        string            `json:"suffix"`
     Clearable     bool              `json:"clearable"`
     ShowCount     bool              `json:"showCount"`
-    Validation    map[string]interface{} `json:"validation"`
+    Validation    map[string]any `json:"validation"`
 }
 
 func (f *TextInputFactory) schemaToProps(schema *Schema) (TextInputProps, error) {
@@ -939,7 +939,7 @@ templ TextInputComponent(props TextInputProps) {
     </div>
 }
 
-templ renderInputValidation(validation map[string]interface{}) {
+templ renderInputValidation(validation map[string]any) {
     if validation != nil {
         if required, ok := validation["required"].(bool); ok && required {
             required
@@ -1026,7 +1026,7 @@ func NewSchemaHandler(
 
 func (h *SchemaHandler) RenderSchema(c *fiber.Ctx) error {
     // Get schema from request body
-    var schemaData map[string]interface{}
+    var schemaData map[string]any
     if err := c.BodyParser(&schemaData); err != nil {
         return c.Status(400).JSON(fiber.Map{
             "error": "invalid JSON",
@@ -1102,7 +1102,7 @@ func (h *SchemaHandler) renderComponentToHTML(
 ```go
 func (h *SchemaHandler) HandleFormSubmission(c *fiber.Ctx) error {
     // Parse form data
-    formData := make(map[string]interface{})
+    formData := make(map[string]any)
     
     // Handle multipart form data
     if form, err := c.MultipartForm(); err == nil {
@@ -1201,13 +1201,13 @@ func TestSchemaValidator(t *testing.T) {
     tests := []struct {
         name        string
         schemaType  string
-        data        interface{}
+        data        any
         shouldError bool
     }{
         {
             name:       "valid button schema",
             schemaType: "button",
-            data: map[string]interface{}{
+            data: map[string]any{
                 "type":    "button",
                 "label":   "Click me",
                 "variant": "primary",
@@ -1217,7 +1217,7 @@ func TestSchemaValidator(t *testing.T) {
         {
             name:       "invalid button schema - missing type",
             schemaType: "button",
-            data: map[string]interface{}{
+            data: map[string]any{
                 "label":   "Click me",
                 "variant": "primary",
             },
@@ -1246,7 +1246,7 @@ func TestButtonComponent(t *testing.T) {
     
     schema := &schema.Schema{
         Type: "button",
-        Properties: map[string]interface{}{
+        Properties: map[string]any{
             "label":   "Test Button",
             "variant": "primary",
             "size":    "medium",
@@ -1288,7 +1288,7 @@ func TestSchemaRenderingEndpoint(t *testing.T) {
     app.Post("/render", handler.RenderSchema)
     
     // Test data
-    schemaData := map[string]interface{}{
+    schemaData := map[string]any{
         "type":    "button",
         "label":   "Test Button",
         "variant": "primary",
@@ -1304,7 +1304,7 @@ func TestSchemaRenderingEndpoint(t *testing.T) {
     require.NoError(t, err)
     assert.Equal(t, 200, resp.StatusCode)
     
-    var result map[string]interface{}
+    var result map[string]any
     require.NoError(t, json.NewDecoder(resp.Body).Decode(&result))
     
     assert.Contains(t, result, "html")

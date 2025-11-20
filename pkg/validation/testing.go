@@ -66,9 +66,9 @@ type TestCase struct {
 	Name            string                 `json:"name"`
 	Description     string                 `json:"description"`
 	Category        TestCategory           `json:"category"`
-	Input           interface{}            `json:"input"`
+	Input           any            `json:"input"`
 	Expected        ExpectedResult         `json:"expected"`
-	Context         map[string]interface{} `json:"context"`
+	Context         map[string]any `json:"context"`
 	Setup           func() error           `json:"-"`
 	Teardown        func() error           `json:"-"`
 	Skip            bool                   `json:"skip"`
@@ -90,7 +90,7 @@ type ExpectedResult struct {
 	Score          *float64               `json:"score,omitempty"`
 	MinScore       *float64               `json:"minScore,omitempty"`
 	MaxScore       *float64               `json:"maxScore,omitempty"`
-	Properties     map[string]interface{} `json:"properties,omitempty"`
+	Properties     map[string]any `json:"properties,omitempty"`
 	ContainsText   []string               `json:"containsText,omitempty"`
 	ExcludesText   []string               `json:"excludesText,omitempty"`
 	MatchesRegex   []string               `json:"matchesRegex,omitempty"`
@@ -127,7 +127,7 @@ type TestContext struct {
 	TestSuite   *TestSuite             `json:"testSuite"`
 	Framework   *TestFramework         `json:"framework"`
 	StartTime   time.Time              `json:"startTime"`
-	Metadata    map[string]interface{} `json:"metadata"`
+	Metadata    map[string]any `json:"metadata"`
 	Logger      TestLogger             `json:"-"`
 }
 
@@ -148,13 +148,13 @@ type TestReporter struct {
 
 // TestFixtures provides test data and utilities
 type TestFixtures struct {
-	ComponentFixtures     map[string]interface{} `json:"componentFixtures"`
-	SchemaFixtures       map[string]interface{} `json:"schemaFixtures"`
-	ThemeFixtures        map[string]interface{} `json:"themeFixtures"`
-	AccessibilityFixtures map[string]interface{} `json:"accessibilityFixtures"`
-	PerformanceFixtures  map[string]interface{} `json:"performanceFixtures"`
-	MockData             map[string]interface{} `json:"mockData"`
-	TestData             map[string]interface{} `json:"testData"`
+	ComponentFixtures     map[string]any `json:"componentFixtures"`
+	SchemaFixtures       map[string]any `json:"schemaFixtures"`
+	ThemeFixtures        map[string]any `json:"themeFixtures"`
+	AccessibilityFixtures map[string]any `json:"accessibilityFixtures"`
+	PerformanceFixtures  map[string]any `json:"performanceFixtures"`
+	MockData             map[string]any `json:"mockData"`
+	TestData             map[string]any `json:"testData"`
 }
 
 // MockServices provides mocked services for testing
@@ -177,7 +177,7 @@ type TestResult struct {
 	Assertions   []AssertionResult      `json:"assertions"`
 	Benchmark    *BenchmarkResult       `json:"benchmark,omitempty"`
 	Coverage     *CoverageResult        `json:"coverage,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata"`
+	Metadata     map[string]any `json:"metadata"`
 	StartTime    time.Time              `json:"startTime"`
 	EndTime      time.Time              `json:"endTime"`
 }
@@ -197,8 +197,8 @@ const (
 type AssertionResult struct {
 	Name     string      `json:"name"`
 	Passed   bool        `json:"passed"`
-	Expected interface{} `json:"expected"`
-	Actual   interface{} `json:"actual"`
+	Expected any `json:"expected"`
+	Actual   any `json:"actual"`
 	Message  string      `json:"message"`
 }
 
@@ -256,28 +256,28 @@ type TestSummary struct {
 	Coverage      *CoverageResult        `json:"coverage,omitempty"`
 	Categories    map[TestCategory]int   `json:"categories"`
 	Tags          map[string]int         `json:"tags"`
-	Metadata      map[string]interface{} `json:"metadata"`
+	Metadata      map[string]any `json:"metadata"`
 }
 
 // TestLogger provides logging for tests
 type TestLogger interface {
-	Debug(msg string, args ...interface{})
-	Info(msg string, args ...interface{})
-	Warn(msg string, args ...interface{})
-	Error(msg string, args ...interface{})
+	Debug(msg string, args ...any)
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
 }
 
 // Mock interfaces
 type MockDatabase interface {
-	SetupData(data map[string]interface{}) error
+	SetupData(data map[string]any) error
 	ClearData() error
-	Query(query string, args ...interface{}) (interface{}, error)
+	Query(query string, args ...any) (any, error)
 }
 
 type MockHTTPClient interface {
-	SetResponse(url string, response interface{}) error
-	GET(url string) (interface{}, error)
-	POST(url string, data interface{}) (interface{}, error)
+	SetResponse(url string, response any) error
+	GET(url string) (any, error)
+	POST(url string, data any) (any, error)
 }
 
 type MockFileSystem interface {
@@ -287,8 +287,8 @@ type MockFileSystem interface {
 }
 
 type MockThemeManager interface {
-	SetTheme(id string, theme interface{}) error
-	GetTheme(id string) (interface{}, error)
+	SetTheme(id string, theme any) error
+	GetTheme(id string) (any, error)
 }
 
 type MockLogger interface {
@@ -299,7 +299,7 @@ type MockLogger interface {
 type LogEntry struct {
 	Level   string      `json:"level"`
 	Message string      `json:"message"`
-	Args    []interface{} `json:"args"`
+	Args    []any `json:"args"`
 	Time    time.Time   `json:"time"`
 }
 
@@ -349,13 +349,13 @@ func NewTestReporter(config TestFrameworkConfig) *TestReporter {
 // NewTestFixtures creates new test fixtures
 func NewTestFixtures() *TestFixtures {
 	return &TestFixtures{
-		ComponentFixtures:     make(map[string]interface{}),
-		SchemaFixtures:       make(map[string]interface{}),
-		ThemeFixtures:        make(map[string]interface{}),
-		AccessibilityFixtures: make(map[string]interface{}),
-		PerformanceFixtures:  make(map[string]interface{}),
-		MockData:             make(map[string]interface{}),
-		TestData:             make(map[string]interface{}),
+		ComponentFixtures:     make(map[string]any),
+		SchemaFixtures:       make(map[string]any),
+		ThemeFixtures:        make(map[string]any),
+		AccessibilityFixtures: make(map[string]any),
+		PerformanceFixtures:  make(map[string]any),
+		MockData:             make(map[string]any),
+		TestData:             make(map[string]any),
 	}
 }
 
@@ -488,7 +488,7 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 		TestSuite:  suite.Name,
 		Status:     TestStatusPassed,
 		Assertions: make([]AssertionResult, 0),
-		Metadata:   make(map[string]interface{}),
+		Metadata:   make(map[string]any),
 		StartTime:  start,
 	}
 	
@@ -529,7 +529,7 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 		TestSuite: suite,
 		Framework: tf,
 		StartTime: start,
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 	
 	assertions := tf.runAssertions(validationResult, testCase.Expected, testContext)
@@ -624,7 +624,7 @@ func (tf *TestFramework) validateTheme(ctx context.Context, testCase *TestCase) 
 
 func (tf *TestFramework) validateRuntime(ctx context.Context, testCase *TestCase) (*ValidationResult, error) {
 	validator := NewRuntimeValidator()
-	if inputData, ok := testCase.Input.(map[string]interface{}); ok {
+	if inputData, ok := testCase.Input.(map[string]any); ok {
 		response := validator.ValidateInput(ctx, inputData["data"], inputData["schema"])
 		return response.Result, nil
 	}
@@ -660,7 +660,7 @@ func (tf *TestFramework) convertA11yResult(result *AccessibilityResult) *Validat
 	validationResult := &ValidationResult{
 		Valid:     result.Compliant,
 		Timestamp: result.Timestamp,
-		Metadata:  map[string]interface{}{"score": result.Score},
+		Metadata:  map[string]any{"score": result.Score},
 	}
 	
 	for _, violation := range result.Violations {
@@ -679,7 +679,7 @@ func (tf *TestFramework) convertPerformanceResult(result *PerformanceMetrics) *V
 	return &ValidationResult{
 		Valid:     result.MeetsThresholds,
 		Timestamp: result.Timestamp,
-		Metadata:  map[string]interface{}{"score": result.Score},
+		Metadata:  map[string]any{"score": result.Score},
 	}
 }
 
@@ -687,7 +687,7 @@ func (tf *TestFramework) convertThemeResult(result *ThemeValidationResult) *Vali
 	validationResult := &ValidationResult{
 		Valid:     result.Valid,
 		Timestamp: result.Timestamp,
-		Metadata:  map[string]interface{}{"score": result.Score},
+		Metadata:  map[string]any{"score": result.Score},
 	}
 	
 	for _, violation := range result.Violations {
@@ -874,7 +874,7 @@ func (tf *TestFramework) generateTestSummary(duration time.Duration) TestSummary
 		TotalDuration: duration,
 		Categories:    make(map[TestCategory]int),
 		Tags:          make(map[string]int),
-		Metadata:      make(map[string]interface{}),
+		Metadata:      make(map[string]any),
 	}
 	
 	for _, result := range tf.reporter.results {
@@ -929,7 +929,7 @@ func (tr *TestReporter) GenerateReport() (string, error) {
 }
 
 func (tr *TestReporter) generateJSONReport() (string, error) {
-	report := map[string]interface{}{
+	report := map[string]any{
 		"summary": tr.summary,
 		"results": tr.results,
 	}
@@ -1017,33 +1017,33 @@ func (tf *TestFramework) CreateComponentTest(name string, component *ComponentIn
 		Category:    TestCategoryComponent,
 		Input:       component,
 		Expected:    expected,
-		Context:     make(map[string]interface{}),
+		Context:     make(map[string]any),
 		Tags:        []string{"component"},
 		Timeout:     time.Second * 30,
 	}
 }
 
-func (tf *TestFramework) CreateSchemaTest(name string, schema interface{}, expected ExpectedResult) TestCase {
+func (tf *TestFramework) CreateSchemaTest(name string, schema any, expected ExpectedResult) TestCase {
 	return TestCase{
 		Name:        name,
 		Description: fmt.Sprintf("Schema validation test for %s", name),
 		Category:    TestCategorySchema,
 		Input:       schema,
 		Expected:    expected,
-		Context:     make(map[string]interface{}),
+		Context:     make(map[string]any),
 		Tags:        []string{"schema"},
 		Timeout:     time.Second * 30,
 	}
 }
 
-func (tf *TestFramework) CreateA11yTest(name string, element interface{}, expected ExpectedResult) TestCase {
+func (tf *TestFramework) CreateA11yTest(name string, element any, expected ExpectedResult) TestCase {
 	return TestCase{
 		Name:        name,
 		Description: fmt.Sprintf("Accessibility validation test for %s", name),
 		Category:    TestCategoryAccessibility,
 		Input:       element,
 		Expected:    expected,
-		Context:     make(map[string]interface{}),
+		Context:     make(map[string]any),
 		Tags:        []string{"accessibility", "a11y"},
 		Timeout:     time.Second * 30,
 	}

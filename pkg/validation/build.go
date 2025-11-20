@@ -178,11 +178,11 @@ type BuildCache struct {
 // BuildCacheEntry represents a cached build artifact
 type BuildCacheEntry struct {
 	Key       string                 `json:"key"`
-	Data      interface{}            `json:"data"`
+	Data      any            `json:"data"`
 	Hash      string                 `json:"hash"`
 	Timestamp time.Time              `json:"timestamp"`
 	TTL       time.Duration          `json:"ttl"`
-	Metadata  map[string]interface{} `json:"metadata"`
+	Metadata  map[string]any `json:"metadata"`
 }
 
 // BuildReporter generates build reports
@@ -206,7 +206,7 @@ type BuildResult struct {
 	Output       string                 `json:"output"`
 	Error        string                 `json:"error,omitempty"`
 	Validation   *ValidationResult      `json:"validation,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata"`
+	Metadata     map[string]any `json:"metadata"`
 	Artifacts    []BuildArtifact        `json:"artifacts,omitempty"`
 }
 
@@ -230,7 +230,7 @@ type BuildArtifact struct {
 	Size     int64     `json:"size"`
 	Hash     string    `json:"hash"`
 	Created  time.Time `json:"created"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
 // BuildSummary contains overall build summary
@@ -246,7 +246,7 @@ type BuildSummary struct {
 	Validations     ValidationSummary          `json:"validations"`
 	StartTime       time.Time                  `json:"startTime"`
 	EndTime         time.Time                  `json:"endTime"`
-	Metadata        map[string]interface{}     `json:"metadata"`
+	Metadata        map[string]any     `json:"metadata"`
 }
 
 // ValidationSummary contains validation-specific summary
@@ -449,7 +449,7 @@ func (bi *BuildIntegration) RunPipeline(ctx context.Context, pipelineName string
 	summary := &BuildSummary{
 		TotalPipelines: 1,
 		StartTime:     start,
-		Metadata:      make(map[string]interface{}),
+		Metadata:      make(map[string]any),
 		Validations: ValidationSummary{
 			ValidationsByType: make(map[string]int),
 		},
@@ -598,7 +598,7 @@ func (bi *BuildIntegration) runCommand(ctx context.Context, pipeline *BuildPipel
 		Command:   command.Name,
 		Status:    BuildStatusRunning,
 		StartTime: start,
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Check cache first
@@ -757,8 +757,8 @@ func (bi *BuildIntegration) loadComponentsFromDirectory(dir string) ([]*Componen
 	return components, err
 }
 
-func (bi *BuildIntegration) loadSchemasFromDirectory(dir string) ([]interface{}, error) {
-	schemas := make([]interface{}, 0)
+func (bi *BuildIntegration) loadSchemasFromDirectory(dir string) ([]any, error) {
+	schemas := make([]any, 0)
 	
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -806,13 +806,13 @@ func (bi *BuildIntegration) loadComponentFromFile(path string) (*ComponentInstan
 	return nil, nil
 }
 
-func (bi *BuildIntegration) loadSchemaFromFile(path string) (interface{}, error) {
+func (bi *BuildIntegration) loadSchemaFromFile(path string) (any, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	var schema interface{}
+	var schema any
 	if err := json.Unmarshal(data, &schema); err != nil {
 		return nil, err
 	}
@@ -1006,7 +1006,7 @@ func (bi *BuildIntegration) combineValidationResults(results []*ValidationResult
 	combined := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	for _, result := range results {
@@ -1245,7 +1245,7 @@ func (bc *BuildCache) Get(key string) *BuildCacheEntry {
 	return entry
 }
 
-func (bc *BuildCache) Set(key string, data interface{}) {
+func (bc *BuildCache) Set(key string, data any) {
 	bc.mutex.Lock()
 	defer bc.mutex.Unlock()
 
@@ -1259,7 +1259,7 @@ func (bc *BuildCache) Set(key string, data interface{}) {
 		Data:      data,
 		Timestamp: time.Now(),
 		TTL:       bc.ttl,
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 }
 
@@ -1297,7 +1297,7 @@ func (br *BuildReporter) GenerateReport() error {
 	}
 
 	// Generate JSON report
-	reportData := map[string]interface{}{
+	reportData := map[string]any{
 		"summary": br.summary,
 		"results": br.results,
 		"timestamp": time.Now(),

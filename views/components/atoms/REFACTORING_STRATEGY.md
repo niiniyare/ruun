@@ -543,12 +543,12 @@ package atoms
 
 // Factory for creating typed components
 type ComponentFactory struct {
-    defaults map[string]interface{}
+    defaults map[string]any
 }
 
 func NewComponentFactory() *ComponentFactory {
     return &ComponentFactory{
-        defaults: make(map[string]interface{}),
+        defaults: make(map[string]any),
     }
 }
 

@@ -180,7 +180,7 @@ BadgePositionBottomLeft
     BadgeProps{
         Text: "NEW",
         Position: BadgePositionTopRight,
-        Offset: []interface{}{10, -5}, // [x, y] in pixels
+        Offset: []any{10, -5}, // [x, y] in pixels
         Variant: BadgeSuccess,
     },
 )
@@ -661,13 +661,13 @@ templ NotificationBell(count int) {
 | `Size` | `BadgeSize` | `BadgeSizeMD` | Badge size |
 | `Class` | `string` | `""` | Additional CSS classes |
 | `ID` | `string` | `""` | HTML id attribute |
-| `Text` | `interface{}` | `nil` | Text content (string or number) |
+| `Text` | `any` | `nil` | Text content (string or number) |
 | `Icon` | `string` | `""` | Single icon (icon-only) |
 | `IconLeft` | `string` | `""` | Left icon |
 | `IconRight` | `string` | `""` | Right icon |
 | `Mode` | `BadgeMode` | `BadgeModeText` | Display mode |
 | `Position` | `BadgePosition` | `BadgePositionTopRight` | Corner position (overlay) |
-| `Offset` | `[]interface{}` | `nil` | Position offset [x, y] |
+| `Offset` | `[]any` | `nil` | Position offset [x, y] |
 | `OverflowCount` | `int` | `0` | Max count before "+" |
 | `Removable` | `bool` | `false` | Show remove button |
 | `OnRemove` | `string` | `""` | Alpine.js remove handler |

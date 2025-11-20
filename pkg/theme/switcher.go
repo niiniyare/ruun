@@ -63,7 +63,7 @@ type ThemeChangeEvent struct {
 	UserID        string                 `json:"userId,omitempty"`
 	TenantID      string                 `json:"tenantId,omitempty"`
 	Timestamp     time.Time              `json:"timestamp"`
-	Metadata      map[string]interface{} `json:"metadata,omitempty"`
+	Metadata      map[string]any `json:"metadata,omitempty"`
 }
 
 // ThemeSwitchResult represents the result of a theme switch operation
@@ -75,7 +75,7 @@ type ThemeSwitchResult struct {
 	Classes        []string          `json:"classes"`
 	Error          string            `json:"error,omitempty"`
 	TransitionCSS  string            `json:"transitionCss,omitempty"`
-	Metadata       map[string]interface{} `json:"metadata,omitempty"`
+	Metadata       map[string]any `json:"metadata,omitempty"`
 }
 
 // AlpineJSData provides data structure for Alpine.js integration
@@ -86,7 +86,7 @@ type AlpineJSData struct {
 	IsLoading       bool                   `json:"isLoading"`
 	Error           string                 `json:"error,omitempty"`
 	Preferences     *UserPreferences       `json:"preferences"`
-	Config          map[string]interface{} `json:"config"`
+	Config          map[string]any `json:"config"`
 	Methods         map[string]string      `json:"methods"`
 }
 
@@ -197,7 +197,7 @@ func (ts *ThemeSwitcher) SwitchTheme(themeID string, userID string) (*ThemeSwitc
 		Variables:     ts.extractVariables(css),
 		Classes:       ts.extractClasses(css),
 		TransitionCSS: transitionCSS,
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"previousTheme": previousTheme,
 			"timestamp":     event.Timestamp,
 		},
@@ -255,7 +255,7 @@ func (ts *ThemeSwitcher) ToggleDarkMode(userID string) (*ThemeSwitchResult, erro
 		DarkMode:      newMode,
 		UserID:        userID,
 		Timestamp:     time.Now(),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"darkModeToggle": true,
 			"previousMode":   previousMode,
 		},
@@ -270,7 +270,7 @@ func (ts *ThemeSwitcher) ToggleDarkMode(userID string) (*ThemeSwitchResult, erro
 		CSS:       css,
 		Variables: ts.extractVariables(css),
 		Classes:   ts.extractClasses(css),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"darkModeChanged": true,
 			"previousMode":    previousMode,
 			"newMode":         newMode,
@@ -320,7 +320,7 @@ func (ts *ThemeSwitcher) GetAlpineJSData() *AlpineJSData {
 		DarkMode:        ts.preferences.DarkMode,
 		IsLoading:       false,
 		Preferences:     ts.preferences,
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"enableTransitions":  ts.config.EnableTransitions,
 			"transitionDuration": ts.config.TransitionDuration.Milliseconds(),
 			"enableAutoDetect":   ts.config.EnableAutoDetect,

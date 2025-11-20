@@ -201,7 +201,7 @@ type ComponentTypeDefinition struct {
     Version         string                 `json:"version"`
     Description     string                 `json:"description"`
     Schema          *JSONSchema            `json:"schema"`
-    ExampleUsage    []map[string]interface{} `json:"example_usage"`
+    ExampleUsage    []map[string]any `json:"example_usage"`
     DeprecationInfo *DeprecationInfo       `json:"deprecation_info,omitempty"`
     Dependencies    []string               `json:"dependencies"`
     Category        string                 `json:"category"`
@@ -278,7 +278,7 @@ func (ip *InheritanceProcessor) resolveInheritanceChain(schema *Schema) (*Schema
     resolved := &Schema{
         Type:       schema.Type,
         Version:    schema.Version,
-        Properties: make(map[string]interface{}),
+        Properties: make(map[string]any),
     }
     
     // Build inheritance chain
@@ -317,7 +317,7 @@ type ValidationConfig struct {
     ValidationMode        string        `json:"validation_mode"` // "strict", "lenient", "custom"
 }
 
-func (v *ThreeLayerValidator) ValidateSchema(data interface{}, schema *Schema) *ValidationResult {
+func (v *ThreeLayerValidator) ValidateSchema(data any, schema *Schema) *ValidationResult {
     ctx, cancel := context.WithTimeout(context.Background(), v.config.MaxValidationTime)
     defer cancel()
     
@@ -685,7 +685,7 @@ type Theme struct {
     Name         string                 `json:"name"`
     Version      string                 `json:"version"`
     ParentTheme  string                 `json:"parent_theme,omitempty"`
-    Variables    map[string]interface{} `json:"variables"`
+    Variables    map[string]any `json:"variables"`
     Components   map[string]*ComponentTheme `json:"components"`
     MediaQueries map[string]*MediaQuery `json:"media_queries"`
     Tenant       string                 `json:"tenant,omitempty"`
@@ -957,20 +957,20 @@ func (r *XSSPreventionRule) Validate(ctx context.Context, schema *Schema, user *
     return r.scanSchemaRecursively(schema.Properties, dangerous)
 }
 
-func (r *XSSPreventionRule) scanSchemaRecursively(props map[string]interface{}, dangerous []string) error {
+func (r *XSSPreventionRule) scanSchemaRecursively(props map[string]any, dangerous []string) error {
     for key, value := range props {
         switch v := value.(type) {
         case string:
             if r.containsDangerousContent(v, dangerous) {
                 return fmt.Errorf("dangerous content detected in property %s", key)
             }
-        case map[string]interface{}:
+        case map[string]any:
             if err := r.scanSchemaRecursively(v, dangerous); err != nil {
                 return err
             }
-        case []interface{}:
+        case []any:
             for _, item := range v {
-                if itemMap, ok := item.(map[string]interface{}); ok {
+                if itemMap, ok := item.(map[string]any); ok {
                     if err := r.scanSchemaRecursively(itemMap, dangerous); err != nil {
                         return err
                     }

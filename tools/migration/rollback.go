@@ -77,7 +77,7 @@ func (r *MigrationRollback) LoadMigrationSession(sessionFile string) error {
 		return fmt.Errorf("error reading migration session: %w", err)
 	}
 	
-	var migrationSession map[string]interface{}
+	var migrationSession map[string]any
 	if err := json.Unmarshal(data, &migrationSession); err != nil {
 		return fmt.Errorf("error parsing migration session: %w", err)
 	}

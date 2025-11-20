@@ -174,8 +174,8 @@ type MultiTenantThemeBundle struct {
 }
 
 // GetSystemStats returns comprehensive statistics about the theme system
-func (tsb *ThemeSystemBundle) GetSystemStats() map[string]interface{} {
-	stats := make(map[string]interface{})
+func (tsb *ThemeSystemBundle) GetSystemStats() map[string]any {
+	stats := make(map[string]any)
 	
 	// Runtime stats
 	if tsb.Runtime != nil {
@@ -199,12 +199,12 @@ func (tsb *ThemeSystemBundle) GetSystemStats() map[string]interface{} {
 }
 
 // GetTenantStats returns statistics about multi-tenant usage
-func (mtb *MultiTenantThemeBundle) GetTenantStats() map[string]interface{} {
+func (mtb *MultiTenantThemeBundle) GetTenantStats() map[string]any {
 	stats := mtb.GetSystemStats()
 	
 	if mtb.TenantManager != nil {
 		tenants, _ := mtb.TenantManager.ListTenants()
-		stats["tenants"] = map[string]interface{}{
+		stats["tenants"] = map[string]any{
 			"total":  len(tenants),
 			"active": countActiveTenants(tenants),
 		}
@@ -270,7 +270,7 @@ type ThemeBundle struct {
 	CSS              string               `json:"css"`
 	ValidationResult *ValidationResult    `json:"validation"`
 	CompilationResult *CompilationResult  `json:"compilation"`
-	Metadata         map[string]interface{} `json:"metadata"`
+	Metadata         map[string]any `json:"metadata"`
 }
 
 // GenerateCompleteThemeBundle creates a comprehensive theme bundle
@@ -286,7 +286,7 @@ func GenerateCompleteThemeBundle(bundle *ThemeSystemBundle, theme *schema.Theme)
 		CSS:               compilation.CSS,
 		ValidationResult:  validation,
 		CompilationResult: compilation,
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"packageVersion": Version,
 			"generated":      time.Now(),
 			"bundleSize":     len(compilation.CSS),

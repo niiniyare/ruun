@@ -135,8 +135,8 @@ import (
 type Theme struct {
     Name       string                 `json:"name"`
     Extends    string                 `json:"extends,omitempty"`
-    Tokens     map[string]interface{} `json:"tokens"`
-    Components map[string]interface{} `json:"components,omitempty"`
+    Tokens     map[string]any `json:"tokens"`
+    Components map[string]any `json:"components,omitempty"`
 }
 
 func main() {
@@ -204,8 +204,8 @@ func (tc *ThemeCompiler) CompileTheme(name string, theme *Theme) string {
 
 func (tc *ThemeCompiler) ResolveTheme(theme *Theme) *Theme {
     result := &Theme{
-        Tokens:     make(map[string]interface{}),
-        Components: make(map[string]interface{}),
+        Tokens:     make(map[string]any),
+        Components: make(map[string]any),
     }
     
     // Inherit from parent
@@ -228,7 +228,7 @@ func (tc *ThemeCompiler) ResolveTheme(theme *Theme) *Theme {
     return result
 }
 
-func (tc *ThemeCompiler) WriteTokens(css *strings.Builder, prefix string, tokens map[string]interface{}) {
+func (tc *ThemeCompiler) WriteTokens(css *strings.Builder, prefix string, tokens map[string]any) {
     for key, value := range tokens {
         tokenName := key
         if prefix != "" {
@@ -238,15 +238,15 @@ func (tc *ThemeCompiler) WriteTokens(css *strings.Builder, prefix string, tokens
         switch v := value.(type) {
         case string:
             css.WriteString(fmt.Sprintf("  --%s: %s;\n", tokenName, v))
-        case map[string]interface{}:
+        case map[string]any:
             tc.WriteTokens(css, tokenName, v)
         }
     }
 }
 
-func (tc *ThemeCompiler) WriteComponents(css *strings.Builder, components map[string]interface{}) {
+func (tc *ThemeCompiler) WriteComponents(css *strings.Builder, components map[string]any) {
     for comp, variants := range components {
-        if variantMap, ok := variants.(map[string]interface{}); ok {
+        if variantMap, ok := variants.(map[string]any); ok {
             for variant, props := range variantMap {
                 css.WriteString(fmt.Sprintf(".%s-%s {\n", comp, variant))
                 tc.WriteProperties(css, props)
@@ -256,8 +256,8 @@ func (tc *ThemeCompiler) WriteComponents(css *strings.Builder, components map[st
     }
 }
 
-func (tc *ThemeCompiler) WriteProperties(css *strings.Builder, props interface{}) {
-    if propMap, ok := props.(map[string]interface{}); ok {
+func (tc *ThemeCompiler) WriteProperties(css *strings.Builder, props any) {
+    if propMap, ok := props.(map[string]any); ok {
         for prop, value := range propMap {
             cssProp := strings.ReplaceAll(prop, "_", "-")
             css.WriteString(fmt.Sprintf("  %s: %s;\n", cssProp, value))
@@ -265,21 +265,21 @@ func (tc *ThemeCompiler) WriteProperties(css *strings.Builder, props interface{}
     }
 }
 
-func (tc *ThemeCompiler) ResolveReferences(data interface{}, tokens map[string]interface{}) {
+func (tc *ThemeCompiler) ResolveReferences(data any, tokens map[string]any) {
     // Resolve {token.path} references - simplified implementation
     // Full implementation would handle nested token resolution
 }
 
-func (tc *ThemeCompiler) DeepCopy(src map[string]interface{}) map[string]interface{} {
+func (tc *ThemeCompiler) DeepCopy(src map[string]any) map[string]any {
     // Simple deep copy implementation
-    result := make(map[string]interface{})
+    result := make(map[string]any)
     for k, v := range src {
         result[k] = v
     }
     return result
 }
 
-func (tc *ThemeCompiler) DeepMerge(dst, src map[string]interface{}) {
+func (tc *ThemeCompiler) DeepMerge(dst, src map[string]any) {
     for k, v := range src {
         dst[k] = v
     }
@@ -540,7 +540,7 @@ type FormProps struct {
     
     // Schema integration
     Schema schema.FormSchema
-    Values map[string]interface{}
+    Values map[string]any
     Errors map[string][]string
     
     // User context

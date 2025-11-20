@@ -90,7 +90,7 @@ func NewRuntime(enrichedSchema *schema.Schema) *Runtime {
 }
 
 // Initialize prepares the runtime with initial data and validates the schema
-func (r *Runtime) Initialize(ctx context.Context, initialData map[string]interface{}) error {
+func (r *Runtime) Initialize(ctx context.Context, initialData map[string]any) error {
     r.mu.Lock()
     defer r.mu.Unlock()
     
@@ -141,27 +141,27 @@ func HandleFormRender(c *fiber.Ctx) error {
 ```go
 // State holds runtime form state and tracks user interactions
 type State struct {
-    values   map[string]interface{} // Current field values
+    values   map[string]any // Current field values
     touched  map[string]bool        // Fields user has interacted with
     dirty    map[string]bool        // Fields that changed from initial
     errors   map[string][]string    // Validation errors per field
-    initial  map[string]interface{} // Initial values for dirty checking
+    initial  map[string]any // Initial values for dirty checking
     mu       sync.RWMutex          // Concurrent access protection
 }
 
 // NewState creates a new state manager
 func NewState() *State {
     return &State{
-        values:  make(map[string]interface{}),
+        values:  make(map[string]any),
         touched: make(map[string]bool),
         dirty:   make(map[string]bool),
         errors:  make(map[string][]string),
-        initial: make(map[string]interface{}),
+        initial: make(map[string]any),
     }
 }
 
 // Initialize sets initial state from schema and provided data
-func (s *State) Initialize(schema *schema.Schema, data map[string]interface{}) error {
+func (s *State) Initialize(schema *schema.Schema, data map[string]any) error {
     s.mu.Lock()
     defer s.mu.Unlock()
     
@@ -186,7 +186,7 @@ func (s *State) Initialize(schema *schema.Schema, data map[string]interface{}) e
 }
 
 // SetValue updates a field value
-func (s *State) SetValue(path string, value interface{}) error {
+func (s *State) SetValue(path string, value any) error {
     s.mu.Lock()
     defer s.mu.Unlock()
     
@@ -203,7 +203,7 @@ func (s *State) SetValue(path string, value interface{}) error {
 }
 
 // GetValue retrieves a field value
-func (s *State) GetValue(path string) (interface{}, bool) {
+func (s *State) GetValue(path string) (any, bool) {
     s.mu.RLock()
     defer s.mu.RUnlock()
     
@@ -252,12 +252,12 @@ func (s *State) IsValid() bool {
 }
 
 // GetAll returns all current values
-func (s *State) GetAll() map[string]interface{} {
+func (s *State) GetAll() map[string]any {
     s.mu.RLock()
     defer s.mu.RUnlock()
     
     // Return a copy to prevent external modification
-    result := make(map[string]interface{}, len(s.values))
+    result := make(map[string]any, len(s.values))
     for k, v := range s.values {
         result[k] = v
     }
@@ -270,7 +270,7 @@ func (s *State) Reset() {
     s.mu.Lock()
     defer s.mu.Unlock()
     
-    s.values = make(map[string]interface{})
+    s.values = make(map[string]any)
     s.touched = make(map[string]bool)
     s.dirty = make(map[string]bool)
     s.errors = make(map[string][]string)
@@ -286,7 +286,7 @@ func (s *State) Reset() {
 
 ```go
 // StateObserver gets notified of state changes
-type StateObserver func(path string, oldValue, newValue interface{})
+type StateObserver func(path string, oldValue, newValue any)
 
 // Subscribe to state changes
 func (s *State) Subscribe(observer StateObserver) func() {
@@ -309,7 +309,7 @@ func (s *State) Subscribe(observer StateObserver) func() {
 import "github.com/niiniyare/ruun/pkg/schema/validate"
 
 // Runtime validation leverages the schema's built-in validator
-func (r *Runtime) ValidateField(ctx context.Context, fieldName string, value interface{}) []string {
+func (r *Runtime) ValidateField(ctx context.Context, fieldName string, value any) []string {
     r.mu.RLock()
     defer r.mu.RUnlock()
     
@@ -376,7 +376,7 @@ func (r *Runtime) SetValidationTiming(timing ValidationTiming) {
 func (r *Runtime) ValidateWithDebounce(
     ctx context.Context,
     fieldName string,
-    value interface{},
+    value any,
     delay time.Duration,
 ) <-chan []string {
     result := make(chan []string, 1)
@@ -422,8 +422,8 @@ const (
 type Event struct {
     Type      EventType
     Field     string
-    Value     interface{}
-    OldValue  interface{}
+    Value     any
+    OldValue  any
     Timestamp time.Time
 }
 
@@ -571,7 +571,7 @@ func (c *ConditionalRenderer) ApplyConditionalRules(ctx context.Context) error {
 // evaluateCondition parses and evaluates a condition expression
 func (c *ConditionalRenderer) evaluateCondition(
     condition string,
-    data map[string]interface{},
+    data map[string]any,
 ) (bool, error) {
     // Simple expression parser (use a library like govaluate in production)
     // Supports: field == "value", field != "value", field > 10, etc.
@@ -607,7 +607,7 @@ func HandleFieldUpdate(c *fiber.Ctx) error {
     
     // 2. Parse new value
     var payload struct {
-        Value interface{} `json:"value"`
+        Value any `json:"value"`
     }
     if err := c.BodyParser(&payload); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "Invalid payload"})
@@ -644,7 +644,7 @@ func HandleFormSubmit(c *fiber.Ctx) error {
     rt := getOrCreateRuntime(c, schema)
     
     // Parse form data
-    var formData map[string]interface{}
+    var formData map[string]any
     if err := c.BodyParser(&formData); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "Invalid form data"})
     }
@@ -719,7 +719,7 @@ type DebouncedValidator struct {
 func (d *DebouncedValidator) ValidateField(
     ctx context.Context,
     fieldName string,
-    value interface{},
+    value any,
     callback func(errors []string),
 ) {
     d.mu.Lock()
@@ -749,14 +749,14 @@ type CachedValidator struct {
 }
 
 type cachedResult struct {
-    value  interface{}
+    value  any
     errors []string
 }
 
 func (c *CachedValidator) ValidateField(
     ctx context.Context,
     fieldName string,
-    value interface{},
+    value any,
 ) []string {
     // Check cache
     c.mu.RLock()
@@ -808,10 +808,10 @@ const (
 )
 
 // HandleError provides user-friendly error messages
-func (r *Runtime) HandleError(err error) map[string]interface{} {
+func (r *Runtime) HandleError(err error) map[string]any {
     if runtimeErr, ok := err.(*RuntimeError); ok {
-        return map[string]interface{}{
-            "error": map[string]interface{}{
+        return map[string]any{
+            "error": map[string]any{
                 "type":    runtimeErr.Type,
                 "field":   runtimeErr.Field,
                 "message": runtimeErr.Message,
@@ -819,8 +819,8 @@ func (r *Runtime) HandleError(err error) map[string]interface{} {
         }
     }
     
-    return map[string]interface{}{
-        "error": map[string]interface{}{
+    return map[string]any{
+        "error": map[string]any{
             "type":    "unknown",
             "message": "An unexpected error occurred",
         },

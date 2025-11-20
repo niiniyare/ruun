@@ -316,15 +316,15 @@ type ThemeConfig struct {
     Name        string                 `json:"name"`
     Description string                 `json:"description"`
     Extends     *string                `json:"extends"`
-    Tokens      map[string]interface{} `json:"tokens"`
-    Components  map[string]interface{} `json:"components"`
+    Tokens      map[string]any `json:"tokens"`
+    Components  map[string]any `json:"components"`
 }
 
 type ThemeCompiler struct {
     themesDir   string
     outputDir   string
     themes      map[string]*ThemeConfig
-    compiled    map[string]map[string]interface{}
+    compiled    map[string]map[string]any
 }
 
 func NewThemeCompiler(themesDir, outputDir string) *ThemeCompiler {
@@ -332,7 +332,7 @@ func NewThemeCompiler(themesDir, outputDir string) *ThemeCompiler {
         themesDir: themesDir,
         outputDir: outputDir,
         themes:    make(map[string]*ThemeConfig),
-        compiled:  make(map[string]map[string]interface{}),
+        compiled:  make(map[string]map[string]any),
     }
 }
 
@@ -361,7 +361,7 @@ func (tc *ThemeCompiler) LoadThemes() error {
     return nil
 }
 
-func (tc *ThemeCompiler) CompileTheme(name string) (map[string]interface{}, error) {
+func (tc *ThemeCompiler) CompileTheme(name string) (map[string]any, error) {
     if compiled, exists := tc.compiled[name]; exists {
         return compiled, nil
     }
@@ -371,7 +371,7 @@ func (tc *ThemeCompiler) CompileTheme(name string) (map[string]interface{}, erro
         return nil, fmt.Errorf("theme %s not found", name)
     }
 
-    result := make(map[string]interface{})
+    result := make(map[string]any)
 
     // If theme extends another, compile parent first
     if theme.Extends != nil {
@@ -404,18 +404,18 @@ func (tc *ThemeCompiler) CompileTheme(name string) (map[string]interface{}, erro
     return result, nil
 }
 
-func (tc *ThemeCompiler) resolveReferences(data interface{}) interface{} {
+func (tc *ThemeCompiler) resolveReferences(data any) any {
     switch v := data.(type) {
     case string:
         return tc.resolveTokenReference(v, tc.compiled)
-    case map[string]interface{}:
-        result := make(map[string]interface{})
+    case map[string]any:
+        result := make(map[string]any)
         for key, value := range v {
             result[key] = tc.resolveReferences(value)
         }
         return result
-    case []interface{}:
-        result := make([]interface{}, len(v))
+    case []any:
+        result := make([]any, len(v))
         for i, value := range v {
             result[i] = tc.resolveReferences(value)
         }
@@ -425,7 +425,7 @@ func (tc *ThemeCompiler) resolveReferences(data interface{}) interface{} {
     }
 }
 
-func (tc *ThemeCompiler) resolveTokenReference(value string, compiled map[string]map[string]interface{}) string {
+func (tc *ThemeCompiler) resolveTokenReference(value string, compiled map[string]map[string]any) string {
     // Match {path.to.token} pattern
     re := regexp.MustCompile(`\{([^}]+)\}`)
     
@@ -459,21 +459,21 @@ func (tc *ThemeCompiler) GenerateCSS(themeName string) (string, error) {
     css.WriteString(fmt.Sprintf(":root[data-theme=\"%s\"] {\n", themeName))
     
     // Generate token variables
-    if tokens, ok := compiled["tokens"].(map[string]interface{}); ok {
+    if tokens, ok := compiled["tokens"].(map[string]any); ok {
         tc.generateTokenCSS(&css, "", tokens)
     }
     
     css.WriteString("}\n\n")
     
     // Generate component classes
-    if components, ok := compiled["components"].(map[string]interface{}); ok {
+    if components, ok := compiled["components"].(map[string]any); ok {
         tc.generateComponentCSS(&css, components)
     }
     
     return css.String(), nil
 }
 
-func (tc *ThemeCompiler) generateTokenCSS(css *strings.Builder, prefix string, tokens map[string]interface{}) {
+func (tc *ThemeCompiler) generateTokenCSS(css *strings.Builder, prefix string, tokens map[string]any) {
     for key, value := range tokens {
         currentPrefix := key
         if prefix != "" {
@@ -483,37 +483,37 @@ func (tc *ThemeCompiler) generateTokenCSS(css *strings.Builder, prefix string, t
         switch v := value.(type) {
         case string:
             css.WriteString(fmt.Sprintf("  --%s: %s;\n", currentPrefix, v))
-        case map[string]interface{}:
+        case map[string]any:
             tc.generateTokenCSS(css, currentPrefix, v)
         }
     }
 }
 
-func (tc *ThemeCompiler) generateComponentCSS(css *strings.Builder, components map[string]interface{}) {
+func (tc *ThemeCompiler) generateComponentCSS(css *strings.Builder, components map[string]any) {
     for componentName, componentConfig := range components {
-        if config, ok := componentConfig.(map[string]interface{}); ok {
+        if config, ok := componentConfig.(map[string]any); ok {
             tc.generateComponentClasses(css, componentName, config)
         }
     }
 }
 
-func (tc *ThemeCompiler) generateComponentClasses(css *strings.Builder, component string, config map[string]interface{}) {
+func (tc *ThemeCompiler) generateComponentClasses(css *strings.Builder, component string, config map[string]any) {
     // Base class
-    if base, ok := config["base"].(map[string]interface{}); ok {
+    if base, ok := config["base"].(map[string]any); ok {
         css.WriteString(fmt.Sprintf(".%s {\n", component))
         tc.generateCSSProperties(css, base)
         css.WriteString("}\n\n")
     }
     
     // Variant classes
-    if variants, ok := config["variants"].(map[string]interface{}); ok {
+    if variants, ok := config["variants"].(map[string]any); ok {
         for variant, props := range variants {
             css.WriteString(fmt.Sprintf(".%s-%s {\n", component, variant))
-            if propMap, ok := props.(map[string]interface{}); ok {
+            if propMap, ok := props.(map[string]any); ok {
                 tc.generateCSSProperties(css, propMap)
                 
                 // Handle hover states
-                if hover, ok := propMap["hover"].(map[string]interface{}); ok {
+                if hover, ok := propMap["hover"].(map[string]any); ok {
                     css.WriteString("}\n\n")
                     css.WriteString(fmt.Sprintf(".%s-%s:hover {\n", component, variant))
                     tc.generateCSSProperties(css, hover)
@@ -524,10 +524,10 @@ func (tc *ThemeCompiler) generateComponentClasses(css *strings.Builder, componen
     }
     
     // Size classes
-    if sizes, ok := config["sizes"].(map[string]interface{}); ok {
+    if sizes, ok := config["sizes"].(map[string]any); ok {
         for size, props := range sizes {
             css.WriteString(fmt.Sprintf(".%s-%s {\n", component, size))
-            if propMap, ok := props.(map[string]interface{}); ok {
+            if propMap, ok := props.(map[string]any); ok {
                 tc.generateCSSProperties(css, propMap)
             }
             css.WriteString("}\n\n")
@@ -535,7 +535,7 @@ func (tc *ThemeCompiler) generateComponentClasses(css *strings.Builder, componen
     }
 }
 
-func (tc *ThemeCompiler) generateCSSProperties(css *strings.Builder, props map[string]interface{}) {
+func (tc *ThemeCompiler) generateCSSProperties(css *strings.Builder, props map[string]any) {
     for prop, value := range props {
         if prop == "hover" || prop == "focus" || prop == "disabled" {
             continue // Skip state properties
@@ -552,15 +552,15 @@ func (tc *ThemeCompiler) camelToKebab(s string) string {
 }
 
 // Utility functions
-func (tc *ThemeCompiler) deepMerge(dst, src map[string]interface{}) map[string]interface{} {
+func (tc *ThemeCompiler) deepMerge(dst, src map[string]any) map[string]any {
     if dst == nil {
-        dst = make(map[string]interface{})
+        dst = make(map[string]any)
     }
     
     for key, srcVal := range src {
         if dstVal, ok := dst[key]; ok {
-            if srcMap, ok := srcVal.(map[string]interface{}); ok {
-                if dstMap, ok := dstVal.(map[string]interface{}); ok {
+            if srcMap, ok := srcVal.(map[string]any); ok {
+                if dstMap, ok := dstVal.(map[string]any); ok {
                     dst[key] = tc.deepMerge(dstMap, srcMap)
                     continue
                 }
@@ -572,20 +572,20 @@ func (tc *ThemeCompiler) deepMerge(dst, src map[string]interface{}) map[string]i
     return dst
 }
 
-func (tc *ThemeCompiler) getMapValue(m map[string]interface{}, key string) map[string]interface{} {
+func (tc *ThemeCompiler) getMapValue(m map[string]any, key string) map[string]any {
     if val, ok := m[key]; ok {
-        if mapVal, ok := val.(map[string]interface{}); ok {
+        if mapVal, ok := val.(map[string]any); ok {
             return mapVal
         }
     }
-    return make(map[string]interface{})
+    return make(map[string]any)
 }
 
-func (tc *ThemeCompiler) getNestedValue(data map[string]interface{}, path []string) interface{} {
+func (tc *ThemeCompiler) getNestedValue(data map[string]any, path []string) any {
     current := data
     for _, key := range path {
         if val, ok := current[key]; ok {
-            if mapVal, ok := val.(map[string]interface{}); ok {
+            if mapVal, ok := val.(map[string]any); ok {
                 current = mapVal
             } else if len(path) == 1 {
                 return val

@@ -19,9 +19,9 @@ type TokenResolver struct {
 
 // ResolverRegistry provides token resolution with caching
 type ResolverRegistry struct {
-	primitives map[string]interface{}
-	semantic   map[string]interface{}
-	components map[string]interface{}
+	primitives map[string]any
+	semantic   map[string]any
+	components map[string]any
 	mu         sync.RWMutex
 }
 
@@ -33,7 +33,7 @@ type ResolvedToken struct {
 	Type        TokenType              `json:"type"`
 	Fallback    string                 `json:"fallback,omitempty"`
 	DarkValue   string                 `json:"darkValue,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	Metadata    map[string]any `json:"metadata,omitempty"`
 	Resolved    bool                   `json:"resolved"`
 	Error       string                 `json:"error,omitempty"`
 }
@@ -70,9 +70,9 @@ func NewTokenResolver(api ThemeAPIInterface, cache *RuntimeCache) *TokenResolver
 		api:   api,
 		cache: cache,
 		registry: &ResolverRegistry{
-			primitives: make(map[string]interface{}),
-			semantic:   make(map[string]interface{}),
-			components: make(map[string]interface{}),
+			primitives: make(map[string]any),
+			semantic:   make(map[string]any),
+			components: make(map[string]any),
 		},
 	}
 }
@@ -247,7 +247,7 @@ const (
 )
 
 // RegisterTokens registers tokens for resolution
-func (tr *TokenResolver) RegisterTokens(category string, tokens interface{}) {
+func (tr *TokenResolver) RegisterTokens(category string, tokens any) {
 	tr.registry.mu.Lock()
 	defer tr.registry.mu.Unlock()
 

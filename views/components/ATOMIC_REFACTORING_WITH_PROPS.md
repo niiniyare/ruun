@@ -213,7 +213,7 @@ func getSearchAlpineData(props SearchBarProps) string {
 type FormProps struct {
     ID, Name string
     Schema   schema.FormSchema
-    Values   map[string]interface{}
+    Values   map[string]any
     Errors   map[string][]string
     
     // Context
@@ -295,7 +295,7 @@ func getFormAlpineData(props FormProps) string {
 type DataTableProps struct {
     ID       string
     Columns  []TableColumn
-    Data     []map[string]interface{}
+    Data     []map[string]any
     
     // Features
     Sortable, Filterable, Selectable bool

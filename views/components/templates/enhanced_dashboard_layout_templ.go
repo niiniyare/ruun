@@ -1792,7 +1792,7 @@ func getChartAlpineData(chart DashboardChart) string {
 	return fmt.Sprintf("chartWidget(%s)", string(jsonData))
 }
 
-func toJSON(data interface{}) string {
+func toJSON(data any) string {
 	jsonData, _ := json.Marshal(data)
 	return string(jsonData)
 }

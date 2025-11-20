@@ -51,7 +51,7 @@ type CompiledTheme struct {
 	CSS         string                 `json:"css"`
 	Variables   map[string]string      `json:"variables"`
 	Classes     map[string]string      `json:"classes"`
-	Components  map[string]interface{} `json:"components"`
+	Components  map[string]any `json:"components"`
 	Timestamp   time.Time              `json:"timestamp"`
 	Hash        string                 `json:"hash"`
 	DarkMode    *CompiledTheme         `json:"darkMode,omitempty"`

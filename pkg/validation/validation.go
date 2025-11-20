@@ -23,7 +23,7 @@
 //	// Validate a component
 //	component := &validation.ComponentInstance{
 //		Type: "Button",
-//		Props: map[string]interface{}{
+//		Props: map[string]any{
 //			"variant": "primary",
 //			"size": "md",
 //			"children": "Click me",
@@ -280,12 +280,12 @@ func DefaultValidationSuiteConfig() ValidationSuiteConfig {
 }
 
 // ValidateAll performs comprehensive validation across all enabled validators
-func (suite *ValidationSuite) ValidateAll(ctx context.Context, data interface{}) (*ComprehensiveValidationResult, error) {
+func (suite *ValidationSuite) ValidateAll(ctx context.Context, data any) (*ComprehensiveValidationResult, error) {
 	result := &ComprehensiveValidationResult{
 		Overall:   true,
 		StartTime: time.Now(),
 		Results:   make(map[string]*ValidationResult),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Component validation
@@ -351,7 +351,7 @@ type ComprehensiveValidationResult struct {
 	StartTime time.Time                      `json:"startTime"`
 	EndTime   time.Time                      `json:"endTime"`
 	Duration  time.Duration                  `json:"duration"`
-	Metadata  map[string]interface{}         `json:"metadata"`
+	Metadata  map[string]any         `json:"metadata"`
 }
 
 // ValidateComponent validates a component using the component validator
@@ -365,7 +365,7 @@ func (suite *ValidationSuite) ValidateComponent(component *ComponentInstance) (*
 }
 
 // ValidateSchema validates a schema using the schema validator
-func (suite *ValidationSuite) ValidateSchema(schema interface{}) (*SchemaValidationResult, error) {
+func (suite *ValidationSuite) ValidateSchema(schema any) (*SchemaValidationResult, error) {
 	if !suite.config.EnableSchemaValidation || suite.schemaValidator == nil {
 		return nil, fmt.Errorf("schema validation is not enabled")
 	}
@@ -374,7 +374,7 @@ func (suite *ValidationSuite) ValidateSchema(schema interface{}) (*SchemaValidat
 }
 
 // ValidateAccessibility validates accessibility using the a11y validator
-func (suite *ValidationSuite) ValidateAccessibility(ctx context.Context, element interface{}) (*AccessibilityResult, error) {
+func (suite *ValidationSuite) ValidateAccessibility(ctx context.Context, element any) (*AccessibilityResult, error) {
 	if !suite.config.EnableA11yValidation || suite.a11yValidator == nil {
 		return nil, fmt.Errorf("accessibility validation is not enabled")
 	}
@@ -384,7 +384,7 @@ func (suite *ValidationSuite) ValidateAccessibility(ctx context.Context, element
 }
 
 // ValidatePerformance validates performance characteristics
-func (suite *ValidationSuite) ValidatePerformance(ctx context.Context, data interface{}) (*PerformanceMetrics, error) {
+func (suite *ValidationSuite) ValidatePerformance(ctx context.Context, data any) (*PerformanceMetrics, error) {
 	if !suite.config.EnablePerformanceValidation || suite.performanceValidator == nil {
 		return nil, fmt.Errorf("performance validation is not enabled")
 	}
@@ -394,7 +394,7 @@ func (suite *ValidationSuite) ValidatePerformance(ctx context.Context, data inte
 }
 
 // ValidateTheme validates theme definitions
-func (suite *ValidationSuite) ValidateTheme(ctx context.Context, theme interface{}) (*ThemeValidationResult, error) {
+func (suite *ValidationSuite) ValidateTheme(ctx context.Context, theme any) (*ThemeValidationResult, error) {
 	if !suite.config.EnableThemeValidation || suite.themeValidator == nil {
 		return nil, fmt.Errorf("theme validation is not enabled")
 	}
@@ -404,7 +404,7 @@ func (suite *ValidationSuite) ValidateTheme(ctx context.Context, theme interface
 }
 
 // ValidateRuntime validates runtime data
-func (suite *ValidationSuite) ValidateRuntime(ctx context.Context, data interface{}, schema interface{}) (*RuntimeValidationResponse, error) {
+func (suite *ValidationSuite) ValidateRuntime(ctx context.Context, data any, schema any) (*RuntimeValidationResponse, error) {
 	if !suite.config.EnableRuntimeValidation || suite.runtimeValidator == nil {
 		return nil, fmt.Errorf("runtime validation is not enabled")
 	}
@@ -474,7 +474,7 @@ func (suite *ValidationSuite) AddTestSuite(testSuite TestSuite) error {
 // GenerateReport generates a comprehensive validation report
 func (suite *ValidationSuite) GenerateReport() (string, error) {
 	// Implementation would combine reports from all validators
-	report := map[string]interface{}{
+	report := map[string]any{
 		"version":   Version,
 		"timestamp": time.Now(),
 		"config":    suite.config,
@@ -529,7 +529,7 @@ func (suite *ValidationSuite) convertA11yValidationResult(result *AccessibilityR
 		Valid:     result.Compliant,
 		Level:     ValidationLevel(result.Level),
 		Timestamp: result.Timestamp,
-		Metadata:  map[string]interface{}{"score": result.Score},
+		Metadata:  map[string]any{"score": result.Score},
 	}
 
 	for _, violation := range result.Violations {
@@ -551,7 +551,7 @@ func (suite *ValidationSuite) convertPerformanceValidationResult(result *Perform
 		Valid:     result.MeetsThresholds,
 		Level:     ValidationLevelError,
 		Timestamp: result.Timestamp,
-		Metadata:  map[string]interface{}{"score": result.Score, "grade": result.Grade},
+		Metadata:  map[string]any{"score": result.Score, "grade": result.Grade},
 	}
 }
 
@@ -560,7 +560,7 @@ func (suite *ValidationSuite) convertThemeValidationResult(result *ThemeValidati
 		Valid:     result.Valid,
 		Level:     ValidationLevelError,
 		Timestamp: result.Timestamp,
-		Metadata:  map[string]interface{}{"score": result.Score},
+		Metadata:  map[string]any{"score": result.Score},
 	}
 
 	for _, violation := range result.Violations {
@@ -586,25 +586,25 @@ func ValidateComponent(component *ComponentInstance) (*ValidationResult, error) 
 }
 
 // ValidateSchema is a package-level convenience function
-func ValidateSchema(schema interface{}) (*SchemaValidationResult, error) {
+func ValidateSchema(schema any) (*SchemaValidationResult, error) {
 	suite := NewValidationSuite()
 	return suite.ValidateSchema(schema)
 }
 
 // ValidateAccessibility is a package-level convenience function
-func ValidateAccessibility(ctx context.Context, element interface{}) (*AccessibilityResult, error) {
+func ValidateAccessibility(ctx context.Context, element any) (*AccessibilityResult, error) {
 	suite := NewValidationSuite()
 	return suite.ValidateAccessibility(ctx, element)
 }
 
 // ValidateTheme is a package-level convenience function
-func ValidateTheme(ctx context.Context, theme interface{}) (*ThemeValidationResult, error) {
+func ValidateTheme(ctx context.Context, theme any) (*ThemeValidationResult, error) {
 	suite := NewValidationSuite()
 	return suite.ValidateTheme(ctx, theme)
 }
 
 // QuickValidate performs a quick validation with default settings
-func QuickValidate(ctx context.Context, data interface{}) (*ComprehensiveValidationResult, error) {
+func QuickValidate(ctx context.Context, data any) (*ComprehensiveValidationResult, error) {
 	config := DefaultValidationSuiteConfig()
 	config.EnableBuildIntegration = false // Disable for quick validation
 	

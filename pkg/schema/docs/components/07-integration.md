@@ -44,7 +44,7 @@ type FieldRenderer struct {
 }
 
 type ComponentRenderer interface {
-    Render(field schema.Field, value interface{}, ctx RenderContext) templ.Component
+    Render(field schema.Field, value any, ctx RenderContext) templ.Component
     SupportedTypes() []schema.FieldType
     RequiredTokens() []string
 }
@@ -70,7 +70,7 @@ func NewFieldRenderer() *FieldRenderer {
 }
 
 // Automatic component rendering based on schema
-func (r *FieldRenderer) RenderField(field schema.Field, value interface{}, ctx RenderContext) templ.Component {
+func (r *FieldRenderer) RenderField(field schema.Field, value any, ctx RenderContext) templ.Component {
     renderer, exists := r.registry[field.Type]
     if !exists {
         return r.renderFallbackField(field, value, ctx)
@@ -88,7 +88,7 @@ Schema fields are automatically mapped to component props:
 // Text input renderer with schema integration
 type TextInputRenderer struct{}
 
-func (r *TextInputRenderer) Render(field schema.Field, value interface{}, ctx RenderContext) templ.Component {
+func (r *TextInputRenderer) Render(field schema.Field, value any, ctx RenderContext) templ.Component {
     // Map schema field to component props
     props := FormFieldProps{
         // Basic field properties
@@ -131,7 +131,7 @@ func (r *TextInputRenderer) Render(field schema.Field, value interface{}, ctx Re
 // Complex field renderer for business objects
 type CustomerSelectRenderer struct{}
 
-func (r *CustomerSelectRenderer) Render(field schema.Field, value interface{}, ctx RenderContext) templ.Component {
+func (r *CustomerSelectRenderer) Render(field schema.Field, value any, ctx RenderContext) templ.Component {
     // Extract business context from schema
     businessConfig := field.BusinessConfig.(*schema.CustomerSelectConfig)
     
@@ -179,7 +179,7 @@ type SchemaFormGenerator struct {
     validator     *SchemaValidator
 }
 
-func (g *SchemaFormGenerator) GenerateForm(schema *schema.Schema, data map[string]interface{}, ctx RenderContext) templ.Component {
+func (g *SchemaFormGenerator) GenerateForm(schema *schema.Schema, data map[string]any, ctx RenderContext) templ.Component {
     return SchemaForm(SchemaFormProps{
         Schema:     schema,
         Data:       data,
@@ -274,7 +274,7 @@ type BusinessRuleEngine struct {
     ctx   *RenderContext
 }
 
-func (e *BusinessRuleEngine) EvaluateRules(fieldName string, value interface{}) (*RuleEvaluation, error) {
+func (e *BusinessRuleEngine) EvaluateRules(fieldName string, value any) (*RuleEvaluation, error) {
     evaluation := &RuleEvaluation{
         FieldName: fieldName,
         Value:     value,
@@ -295,7 +295,7 @@ func (e *BusinessRuleEngine) EvaluateRules(fieldName string, value interface{}) 
 }
 
 // Component with business rules integration
-templ BusinessRuleField(field schema.Field, value interface{}, ctx RenderContext) {
+templ BusinessRuleField(field schema.Field, value any, ctx RenderContext) {
     <div 
         x-data={ fmt.Sprintf(`{
             value: %s,
@@ -347,7 +347,7 @@ templ BusinessRuleField(field schema.Field, value interface{}, ctx RenderContext
 }
 
 // Dynamic field visibility based on business rules
-templ ConditionalField(field schema.Field, value interface{}, ctx RenderContext) {
+templ ConditionalField(field schema.Field, value any, ctx RenderContext) {
     <div 
         x-show={ buildConditionalExpression(field.ConditionalLogic) }
         x-transition:enter="transition ease-out duration-200"
@@ -389,7 +389,7 @@ Schema validation rules are applied in real-time:
 
 ```go
 // Real-time validation with schema rules
-templ ValidatedFormField(field schema.Field, value interface{}, ctx RenderContext) {
+templ ValidatedFormField(field schema.Field, value any, ctx RenderContext) {
     <div 
         x-data={ fmt.Sprintf(`{
             value: %s,
@@ -509,7 +509,7 @@ type TenantSchemaRenderer struct {
     customizations  map[string]*TenantCustomization
 }
 
-func (r *TenantSchemaRenderer) RenderTenantForm(tenantID string, schema *schema.Schema, data map[string]interface{}) templ.Component {
+func (r *TenantSchemaRenderer) RenderTenantForm(tenantID string, schema *schema.Schema, data map[string]any) templ.Component {
     // Apply tenant customizations
     tenantSchema := r.applyTenantCustomizations(tenantID, schema)
     
@@ -569,7 +569,7 @@ Schema workflows are integrated with component state management:
 
 ```go
 // Workflow-aware form rendering
-templ WorkflowForm(schema *schema.Schema, workflow *schema.Workflow, currentState string, data map[string]interface{}) {
+templ WorkflowForm(schema *schema.Schema, workflow *schema.Workflow, currentState string, data map[string]any) {
     <div 
         x-data={ fmt.Sprintf(`{
             currentState: '%s',
@@ -679,7 +679,7 @@ type CachedSchemaRenderer struct {
     renderer    *SchemaFormGenerator
 }
 
-func (r *CachedSchemaRenderer) RenderForm(schemaID string, data map[string]interface{}) (templ.Component, error) {
+func (r *CachedSchemaRenderer) RenderForm(schemaID string, data map[string]any) (templ.Component, error) {
     // Check cache first
     cacheKey := fmt.Sprintf("schema:%s:hash:%s", schemaID, hashData(data))
     if cached, ok := r.cache.Get(cacheKey); ok {
@@ -751,7 +751,7 @@ func TestSchemaFormGeneration(t *testing.T) {
         },
     }
     
-    data := map[string]interface{}{
+    data := map[string]any{
         "firstName": "John",
         "email":     "john@example.com",
     }

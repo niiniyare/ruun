@@ -44,7 +44,7 @@ type TenantConfig struct {
 	CustomTokens        map[string]string      `json:"customTokens,omitempty"`
 	BrandingOverrides   *BrandingOverrides     `json:"brandingOverrides,omitempty"`
 	FeatureFlags        map[string]bool        `json:"featureFlags,omitempty"`
-	Metadata            map[string]interface{} `json:"metadata,omitempty"`
+	Metadata            map[string]any `json:"metadata,omitempty"`
 	CreatedAt           time.Time              `json:"createdAt"`
 	UpdatedAt           time.Time              `json:"updatedAt"`
 	Active              bool                   `json:"active"`
@@ -70,7 +70,7 @@ type TenantStorage interface {
 	LoadTenantConfig(tenantID string) (*TenantConfig, error)
 	DeleteTenantConfig(tenantID string) error
 	ListTenantConfigs() ([]TenantConfig, error)
-	UpdateTenantConfig(tenantID string, updates map[string]interface{}) error
+	UpdateTenantConfig(tenantID string, updates map[string]any) error
 }
 
 // TenantThemeContext provides context for tenant-specific theme operations
@@ -81,7 +81,7 @@ type TenantThemeContext struct {
 	DarkMode     bool                   `json:"darkMode"`
 	CustomTokens map[string]string      `json:"customTokens,omitempty"`
 	Permissions  *TenantPermissions     `json:"permissions,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	Metadata     map[string]any `json:"metadata,omitempty"`
 }
 
 // TenantPermissions defines what theme operations a tenant can perform
@@ -106,7 +106,7 @@ type TenantThemeResult struct {
 	BrandingCSS    string            `json:"brandingCss,omitempty"`
 	CustomCSS      string            `json:"customCss,omitempty"`
 	Error          string            `json:"error,omitempty"`
-	Metadata       map[string]interface{} `json:"metadata,omitempty"`
+	Metadata       map[string]any `json:"metadata,omitempty"`
 }
 
 // NewTenantThemeManager creates a new multi-tenant theme manager
@@ -217,7 +217,7 @@ func (ttm *TenantThemeManager) SwitchTenantTheme(ctx *TenantThemeContext) (*Tena
 		CustomCSS:   customCSS,
 		Variables:   ttm.extractVariables(css),
 		Classes:     ttm.extractClasses(css),
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"timestamp":   time.Now(),
 			"darkMode":    ctx.DarkMode,
 			"customized":  len(ctx.CustomTokens) > 0,
@@ -667,7 +667,7 @@ func (s *SimpleTenantStorage) ListTenantConfigs() ([]TenantConfig, error) {
 }
 
 // UpdateTenantConfig updates tenant configuration
-func (s *SimpleTenantStorage) UpdateTenantConfig(tenantID string, updates map[string]interface{}) error {
+func (s *SimpleTenantStorage) UpdateTenantConfig(tenantID string, updates map[string]any) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

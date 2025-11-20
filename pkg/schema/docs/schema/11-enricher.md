@@ -134,7 +134,7 @@ func HandleAdminForm(c *fiber.Ctx) error {
         User:             user,
         TenantID:         c.Query("tenant_id"),
         SkipPermissions:  user.IsAdmin(), // Admins bypass permission checks
-        DefaultOverrides: map[string]interface{}{
+        DefaultOverrides: map[string]any{
             "status": "active",
             "role":   "user",
         },
@@ -252,7 +252,7 @@ type TenantOverride struct {
     Label        *string
     Placeholder  *string
     Required     *bool
-    DefaultValue interface{}
+    DefaultValue any
     Validation   *ValidationRule
     HelpText     *string
 }
@@ -391,16 +391,16 @@ func (e *DefaultEnricher) applyTenantIsolation(field *schema.Field, user User) {
 
 ```go
 // ComputedDefault calculates a default value
-type ComputedDefault func(ctx context.Context, schema *Schema, user *User) (interface{}, error)
+type ComputedDefault func(ctx context.Context, schema *Schema, user *User) (any, error)
 
 // Register computed defaults
 var computedDefaults = map[string]ComputedDefault{
-    "invoice_number": func(ctx context.Context, schema *Schema, user *User) (interface{}, error) {
+    "invoice_number": func(ctx context.Context, schema *Schema, user *User) (any, error) {
         // Generate next invoice number
         return generateInvoiceNumber(ctx, user.TenantID)
     },
     
-    "order_total": func(ctx context.Context, schema *Schema, user *User) (interface{}, error) {
+    "order_total": func(ctx context.Context, schema *Schema, user *User) (any, error) {
         // Calculate from line items
         items := schema.FindField("line_items")
         if items == nil || items.Value == nil {
@@ -409,7 +409,7 @@ var computedDefaults = map[string]ComputedDefault{
         return calculateTotal(items.Value), nil
     },
     
-    "full_name": func(ctx context.Context, schema *Schema, user *User) (interface{}, error) {
+    "full_name": func(ctx context.Context, schema *Schema, user *User) (any, error) {
         // Combine first and last name
         firstName := schema.FindField("first_name")
         lastName := schema.FindField("last_name")
@@ -766,7 +766,7 @@ func HandleSubmitGOOD(c *fiber.Ctx) error {
     user := GetUserFromContext(c)
     
     // Get submitted data
-    var formData map[string]interface{}
+    var formData map[string]any
     if err := c.BodyParser(&formData); err != nil {
         return err
     }
@@ -822,7 +822,7 @@ func (e *Enricher) SanitizeForClient(schema *Schema) *Schema {
 // Never trust client state - always re-validate
 func HandleFieldUpdate(c *fiber.Ctx) error {
     fieldName := c.Params("field")
-    var newValue interface{}
+    var newValue any
     c.BodyParser(&newValue)
     
     user := GetUserFromContext(c)

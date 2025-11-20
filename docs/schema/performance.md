@@ -267,7 +267,7 @@ func (o *SchemaOptimizer) FlattenInheritance(schema *Schema) (*Schema, error) {
     flattened := &Schema{
         Type:       schema.Type,
         Version:    schema.Version,
-        Properties: make(map[string]interface{}),
+        Properties: make(map[string]any),
     }
     
     // Recursively flatten inheritance chain
@@ -286,9 +286,9 @@ func (o *SchemaOptimizer) flattenInheritanceRecursive(source, target *Schema) er
     for key, value := range source.Properties {
         // Handle allOf composition
         if key == "allOf" {
-            if allOfArray, ok := value.([]interface{}); ok {
+            if allOfArray, ok := value.([]any); ok {
                 for _, item := range allOfArray {
-                    if refMap, ok := item.(map[string]interface{}); ok {
+                    if refMap, ok := item.(map[string]any); ok {
                         if ref, hasRef := refMap["$ref"]; hasRef {
                             referenced, err := o.resolveReference(ref.(string))
                             if err != nil {
@@ -321,7 +321,7 @@ func (o *SchemaOptimizer) EliminateDeadCode(schema *Schema) *Schema {
     optimized := &Schema{
         Type:       schema.Type,
         Version:    schema.Version,
-        Properties: make(map[string]interface{}),
+        Properties: make(map[string]any),
     }
     
     // Track which properties are actually used
@@ -345,10 +345,10 @@ func (o *SchemaOptimizer) FoldConstants(schema *Schema) *Schema {
     return optimized
 }
 
-func (o *SchemaOptimizer) foldConstantsRecursive(properties map[string]interface{}) {
+func (o *SchemaOptimizer) foldConstantsRecursive(properties map[string]any) {
     for key, value := range properties {
         switch v := value.(type) {
-        case map[string]interface{}:
+        case map[string]any:
             // Check for expression that can be folded
             if exprType, ok := v["type"].(string); ok && exprType == "expression" {
                 if expr, ok := v["expression"].(string); ok {
@@ -359,9 +359,9 @@ func (o *SchemaOptimizer) foldConstantsRecursive(properties map[string]interface
             } else {
                 o.foldConstantsRecursive(v)
             }
-        case []interface{}:
+        case []any:
             for _, item := range v {
-                if itemMap, ok := item.(map[string]interface{}); ok {
+                if itemMap, ok := item.(map[string]any); ok {
                     o.foldConstantsRecursive(itemMap)
                 }
             }
@@ -401,7 +401,7 @@ type L1Cache struct {
 
 type CacheItem struct {
     Key        string      `json:"key"`
-    Value      interface{} `json:"value"`
+    Value      any `json:"value"`
     Size       int64       `json:"size"`
     CreatedAt  time.Time   `json:"created_at"`
     AccessedAt time.Time   `json:"accessed_at"`
@@ -418,7 +418,7 @@ func NewCacheManager(config *CacheConfig) *CacheManager {
     }
 }
 
-func (c *CacheManager) Get(ctx context.Context, key string) (interface{}, bool) {
+func (c *CacheManager) Get(ctx context.Context, key string) (any, bool) {
     start := time.Now()
     defer func() {
         c.metrics.RecordGetLatency(time.Since(start))
@@ -451,7 +451,7 @@ func (c *CacheManager) Get(ctx context.Context, key string) (interface{}, bool) 
     return nil, false
 }
 
-func (c *CacheManager) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
+func (c *CacheManager) Set(ctx context.Context, key string, value any, ttl time.Duration) error {
     // Set in all cache levels
     if err := c.l1Cache.Set(key, value, ttl); err != nil {
         return fmt.Errorf("L1 cache set failed: %w", err)
@@ -470,7 +470,7 @@ func (c *CacheManager) Set(ctx context.Context, key string, value interface{}, t
     return nil
 }
 
-func (l1 *L1Cache) Get(key string) (interface{}, bool) {
+func (l1 *L1Cache) Get(key string) (any, bool) {
     if item, found := l1.items.Load(key); found {
         cacheItem := item.(*CacheItem)
         
@@ -491,7 +491,7 @@ func (l1 *L1Cache) Get(key string) (interface{}, bool) {
     return nil, false
 }
 
-func (l1 *L1Cache) Set(key string, value interface{}, ttl time.Duration) error {
+func (l1 *L1Cache) Set(key string, value any, ttl time.Duration) error {
     size := estimateSize(value)
     
     // Check if we need to evict items
@@ -561,7 +561,7 @@ func (cp *ComponentPool) RegisterType(componentType string, factory ComponentFac
         factory: factory,
         metrics: &PoolMetrics{},
         pool: sync.Pool{
-            New: func() interface{} {
+            New: func() any {
                 component, _ := factory.CreateComponent(&Schema{Type: componentType})
                 return component
             },
@@ -649,12 +649,12 @@ func NewStreamingRenderer(registry *components.Registry) *StreamingRenderer {
         registry:  registry,
         chunkSize: 8192, // 8KB chunks
         bufferPool: &sync.Pool{
-            New: func() interface{} {
+            New: func() any {
                 return make([]byte, 8192)
             },
         },
         writerPool: &sync.Pool{
-            New: func() interface{} {
+            New: func() any {
                 return &bytes.Buffer{}
             },
         },
@@ -964,7 +964,7 @@ func (mm *MemoryManager) CreatePool(name string, maxSize int64) *MemoryPool {
         name:    name,
         maxSize: maxSize,
         pool: sync.Pool{
-            New: func() interface{} {
+            New: func() any {
                 return make([]byte, 1024) // Default 1KB chunks
             },
         },

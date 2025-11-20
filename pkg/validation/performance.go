@@ -205,7 +205,7 @@ func NewMetricsCollector(config PerformanceConfig) *MetricsCollector {
 }
 
 // ValidatePerformance validates performance characteristics
-func (pv *PerformanceValidator) ValidatePerformance(ctx *ValidationContext, value interface{}) *PerformanceMetrics {
+func (pv *PerformanceValidator) ValidatePerformance(ctx *ValidationContext, value any) *PerformanceMetrics {
 	start := time.Now()
 	
 	metrics := &PerformanceMetrics{
@@ -270,7 +270,7 @@ func (pv *PerformanceValidator) ValidatePerformance(ctx *ValidationContext, valu
 }
 
 // collectBundleSizeMetrics collects bundle size metrics
-func (pv *PerformanceValidator) collectBundleSizeMetrics(value interface{}) *BundleSizeMetrics {
+func (pv *PerformanceValidator) collectBundleSizeMetrics(value any) *BundleSizeMetrics {
 	metrics := &BundleSizeMetrics{
 		ComponentSizes:  make(map[string]int64),
 		DependencySizes: make(map[string]int64),
@@ -293,13 +293,13 @@ func (pv *PerformanceValidator) collectBundleSizeMetrics(value interface{}) *Bun
 	}
 
 	// Analyze component sizes
-	if componentMap, ok := value.(map[string]interface{}); ok {
+	if componentMap, ok := value.(map[string]any); ok {
 		if components, exists := componentMap["components"]; exists {
-			if compArray, ok := components.([]interface{}); ok {
+			if compArray, ok := components.([]any); ok {
 				for i, comp := range compArray {
 					compSize := pv.estimateComponentSize(comp)
 					compName := fmt.Sprintf("component_%d", i)
-					if compMap, ok := comp.(map[string]interface{}); ok {
+					if compMap, ok := comp.(map[string]any); ok {
 						if name, exists := compMap["type"]; exists {
 							compName = fmt.Sprintf("%v", name)
 						}
@@ -314,7 +314,7 @@ func (pv *PerformanceValidator) collectBundleSizeMetrics(value interface{}) *Bun
 }
 
 // collectRenderTimeMetrics collects render performance metrics
-func (pv *PerformanceValidator) collectRenderTimeMetrics(value interface{}) *RenderTimeMetrics {
+func (pv *PerformanceValidator) collectRenderTimeMetrics(value any) *RenderTimeMetrics {
 	metrics := &RenderTimeMetrics{
 		ComponentTimes: make(map[string]time.Duration),
 		Bottlenecks:    make([]string, 0),
@@ -359,7 +359,7 @@ func (pv *PerformanceValidator) collectRenderTimeMetrics(value interface{}) *Ren
 }
 
 // collectMemoryMetrics collects memory usage metrics
-func (pv *PerformanceValidator) collectMemoryMetrics(value interface{}) *MemoryMetrics {
+func (pv *PerformanceValidator) collectMemoryMetrics(value any) *MemoryMetrics {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
@@ -398,7 +398,7 @@ func (pv *PerformanceValidator) collectMemoryMetrics(value interface{}) *MemoryM
 }
 
 // collectComplexityMetrics collects complexity metrics
-func (pv *PerformanceValidator) collectComplexityMetrics(value interface{}) *ComplexityMetrics {
+func (pv *PerformanceValidator) collectComplexityMetrics(value any) *ComplexityMetrics {
 	metrics := &ComplexityMetrics{
 		ComponentComplexity: make(map[string]int),
 		Suggestions:         make([]ComplexitySuggestion, 0),
@@ -455,7 +455,7 @@ func (pv *PerformanceValidator) collectComplexityMetrics(value interface{}) *Com
 }
 
 // collectNetworkMetrics collects network performance metrics
-func (pv *PerformanceValidator) collectNetworkMetrics(value interface{}) *NetworkMetrics {
+func (pv *PerformanceValidator) collectNetworkMetrics(value any) *NetworkMetrics {
 	metrics := &NetworkMetrics{
 		RequestDetails: make(map[string]RequestMetrics),
 		Optimizations:  make([]string, 0),
@@ -490,7 +490,7 @@ func (pv *PerformanceValidator) collectNetworkMetrics(value interface{}) *Networ
 }
 
 // collectRuntimeMetrics collects runtime performance metrics
-func (pv *PerformanceValidator) collectRuntimeMetrics(value interface{}) *RuntimeMetrics {
+func (pv *PerformanceValidator) collectRuntimeMetrics(value any) *RuntimeMetrics {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
@@ -539,7 +539,7 @@ type complexityScores struct {
 	depth      int
 }
 
-func (pv *PerformanceValidator) estimateComponentSize(value interface{}) int64 {
+func (pv *PerformanceValidator) estimateComponentSize(value any) int64 {
 	// Simplified size estimation based on structure
 	if value == nil {
 		return 0
@@ -547,12 +547,12 @@ func (pv *PerformanceValidator) estimateComponentSize(value interface{}) int64 {
 
 	size := int64(100) // Base size
 
-	if valueMap, ok := value.(map[string]interface{}); ok {
+	if valueMap, ok := value.(map[string]any); ok {
 		for key, val := range valueMap {
 			size += int64(len(key)) * 2 // Key size
 			size += pv.estimateValueSize(val)
 		}
-	} else if valueSlice, ok := value.([]interface{}); ok {
+	} else if valueSlice, ok := value.([]any); ok {
 		for _, val := range valueSlice {
 			size += pv.estimateValueSize(val)
 		}
@@ -563,7 +563,7 @@ func (pv *PerformanceValidator) estimateComponentSize(value interface{}) int64 {
 	return size
 }
 
-func (pv *PerformanceValidator) estimateValueSize(value interface{}) int64 {
+func (pv *PerformanceValidator) estimateValueSize(value any) int64 {
 	if value == nil {
 		return 4
 	}
@@ -571,9 +571,9 @@ func (pv *PerformanceValidator) estimateValueSize(value interface{}) int64 {
 	switch v := value.(type) {
 	case string:
 		return int64(len(v) * 2) // Unicode overhead
-	case map[string]interface{}:
+	case map[string]any:
 		return pv.estimateComponentSize(v)
-	case []interface{}:
+	case []any:
 		size := int64(0)
 		for _, item := range v {
 			size += pv.estimateValueSize(item)
@@ -584,27 +584,27 @@ func (pv *PerformanceValidator) estimateValueSize(value interface{}) int64 {
 	}
 }
 
-func (pv *PerformanceValidator) simulateRender(value interface{}) {
+func (pv *PerformanceValidator) simulateRender(value any) {
 	// Simulate render work based on component complexity
 	complexity := pv.calculateComplexity(value)
 	workDuration := time.Microsecond * time.Duration(complexity.cyclomatic*10)
 	time.Sleep(workDuration)
 }
 
-func (pv *PerformanceValidator) calculateComplexity(value interface{}) complexityScores {
+func (pv *PerformanceValidator) calculateComplexity(value any) complexityScores {
 	scores := complexityScores{}
 
-	if valueMap, ok := value.(map[string]interface{}); ok {
+	if valueMap, ok := value.(map[string]any); ok {
 		// Count props
 		if props, exists := valueMap["props"]; exists {
-			if propsMap, ok := props.(map[string]interface{}); ok {
+			if propsMap, ok := props.(map[string]any); ok {
 				scores.props = len(propsMap)
 			}
 		}
 
 		// Count state complexity
 		if state, exists := valueMap["state"]; exists {
-			if stateMap, ok := state.(map[string]interface{}); ok {
+			if stateMap, ok := state.(map[string]any); ok {
 				scores.state = len(stateMap)
 			}
 		}
@@ -622,18 +622,18 @@ func (pv *PerformanceValidator) calculateComplexity(value interface{}) complexit
 	return scores
 }
 
-func (pv *PerformanceValidator) calculateDepth(value map[string]interface{}, currentDepth int) int {
+func (pv *PerformanceValidator) calculateDepth(value map[string]any, currentDepth int) int {
 	maxDepth := currentDepth
 
 	for _, val := range value {
-		if childMap, ok := val.(map[string]interface{}); ok {
+		if childMap, ok := val.(map[string]any); ok {
 			depth := pv.calculateDepth(childMap, currentDepth+1)
 			if depth > maxDepth {
 				maxDepth = depth
 			}
-		} else if childSlice, ok := val.([]interface{}); ok {
+		} else if childSlice, ok := val.([]any); ok {
 			for _, child := range childSlice {
-				if childMap, ok := child.(map[string]interface{}); ok {
+				if childMap, ok := child.(map[string]any); ok {
 					depth := pv.calculateDepth(childMap, currentDepth+1)
 					if depth > maxDepth {
 						maxDepth = depth
@@ -646,10 +646,10 @@ func (pv *PerformanceValidator) calculateDepth(value map[string]interface{}, cur
 	return maxDepth
 }
 
-func (pv *PerformanceValidator) estimateNetworkRequests(value interface{}) int {
+func (pv *PerformanceValidator) estimateNetworkRequests(value any) int {
 	requests := 0
 
-	if valueMap, ok := value.(map[string]interface{}); ok {
+	if valueMap, ok := value.(map[string]any); ok {
 		// Check for API endpoints
 		for key, val := range valueMap {
 			if strings.Contains(strings.ToLower(key), "api") ||
@@ -667,7 +667,7 @@ func (pv *PerformanceValidator) estimateNetworkRequests(value interface{}) int {
 
 		// Recursively check nested structures
 		if components, exists := valueMap["components"]; exists {
-			if compSlice, ok := components.([]interface{}); ok {
+			if compSlice, ok := components.([]any); ok {
 				for _, comp := range compSlice {
 					requests += pv.estimateNetworkRequests(comp)
 				}

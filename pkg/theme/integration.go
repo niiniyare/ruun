@@ -54,7 +54,7 @@ type ComponentStyle struct {
 	Classes   []string               `json:"classes"`
 	Styles    map[string]string      `json:"styles"`
 	Variables map[string]string      `json:"variables"`
-	Tokens    map[string]interface{} `json:"tokens"`
+	Tokens    map[string]any `json:"tokens"`
 }
 
 // StyleResult represents the result of style generation
@@ -75,7 +75,7 @@ type ComponentStyleConfig struct {
 	State        string                 `json:"state,omitempty"`
 	CustomTokens map[string]string      `json:"customTokens,omitempty"`
 	Modifiers    []string               `json:"modifiers,omitempty"`
-	Context      map[string]interface{} `json:"context,omitempty"`
+	Context      map[string]any `json:"context,omitempty"`
 }
 
 // NewComponentIntegrator creates a new component integrator
@@ -633,11 +633,11 @@ func (ci *ComponentIntegrator) GetSupportedComponents() []string {
 }
 
 // GetIntegrationStats returns integration statistics
-func (ci *ComponentIntegrator) GetIntegrationStats() map[string]interface{} {
+func (ci *ComponentIntegrator) GetIntegrationStats() map[string]any {
 	ci.cache.mu.RLock()
 	defer ci.cache.mu.RUnlock()
 
-	return map[string]interface{}{
+	return map[string]any{
 		"componentClasses":    len(ci.cache.componentClasses),
 		"utilityClasses":      len(ci.cache.utilityClasses),
 		"variantClasses":      len(ci.cache.variantClasses),

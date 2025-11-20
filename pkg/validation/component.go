@@ -31,11 +31,11 @@ type PropSchema struct {
 	Name         string                 `json:"name"`
 	Type         PropType              `json:"type"`
 	Required     bool                  `json:"required"`
-	Default      interface{}           `json:"default,omitempty"`
+	Default      any           `json:"default,omitempty"`
 	Description  string                `json:"description"`
 	Deprecated   bool                  `json:"deprecated"`
 	Validation   *PropValidation       `json:"validation,omitempty"`
-	Examples     []interface{}         `json:"examples,omitempty"`
+	Examples     []any         `json:"examples,omitempty"`
 	Dependencies []string              `json:"dependencies,omitempty"` // Props that must be present if this prop is used
 	Conflicts    []string              `json:"conflicts,omitempty"`    // Props that cannot be used with this prop
 }
@@ -46,7 +46,7 @@ type PropType struct {
 	ElementType *PropType             `json:"elementType,omitempty"` // For arrays
 	Properties  map[string]*PropType  `json:"properties,omitempty"`  // For objects
 	Union       []*PropType           `json:"union,omitempty"`       // For union types
-	Enum        []interface{}         `json:"enum,omitempty"`        // For enum types
+	Enum        []any         `json:"enum,omitempty"`        // For enum types
 }
 
 // PropKind represents the kind of prop type
@@ -128,11 +128,11 @@ type StateSchema struct {
 // ComponentInstance represents an instance of a component being validated
 type ComponentInstance struct {
 	Type      string                 `json:"type"`
-	Props     map[string]interface{} `json:"props"`
+	Props     map[string]any `json:"props"`
 	Children  []ComponentInstance    `json:"children,omitempty"`
-	Slots     map[string]interface{} `json:"slots,omitempty"`
+	Slots     map[string]any `json:"slots,omitempty"`
 	Location  *SourceLocation        `json:"location,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	Metadata  map[string]any `json:"metadata,omitempty"`
 }
 
 // NewComponentValidator creates a new component validator
@@ -153,7 +153,7 @@ func (cv *ComponentValidator) ValidateComponent(instance *ComponentInstance) *Va
 		Valid:     true,
 		Level:     ValidationLevelError,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Find component schema
@@ -195,11 +195,11 @@ func (cv *ComponentValidator) ValidateComponent(instance *ComponentInstance) *Va
 }
 
 // validateProps validates component props
-func (cv *ComponentValidator) validateProps(props map[string]interface{}, schemas map[string]*PropSchema, componentType string) *ValidationResult {
+func (cv *ComponentValidator) validateProps(props map[string]any, schemas map[string]*PropSchema, componentType string) *ValidationResult {
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Check for required props
@@ -285,11 +285,11 @@ func (cv *ComponentValidator) validateProps(props map[string]interface{}, schema
 }
 
 // validatePropType validates the type of a prop value
-func (cv *ComponentValidator) validatePropType(value interface{}, propType PropType, propName string) *ValidationResult {
+func (cv *ComponentValidator) validatePropType(value any, propType PropType, propName string) *ValidationResult {
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	if value == nil {
@@ -377,7 +377,7 @@ func (cv *ComponentValidator) validatePropType(value interface{}, propType PropT
 			result.Valid = false
 		} else if len(propType.Properties) > 0 {
 			// Validate object properties
-			objMap, ok := value.(map[string]interface{})
+			objMap, ok := value.(map[string]any)
 			if ok {
 				for propKey, propVal := range objMap {
 					if propSchema, exists := propType.Properties[propKey]; exists {
@@ -458,11 +458,11 @@ func (cv *ComponentValidator) validatePropType(value interface{}, propType PropT
 }
 
 // validatePropConstraints validates prop constraints
-func (cv *ComponentValidator) validatePropConstraints(value interface{}, validation *PropValidation, propName string) *ValidationResult {
+func (cv *ComponentValidator) validatePropConstraints(value any, validation *PropValidation, propName string) *ValidationResult {
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// String length validation
@@ -556,7 +556,7 @@ func (cv *ComponentValidator) validateChildren(children []ComponentInstance, sch
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Check required children
@@ -614,7 +614,7 @@ func (cv *ComponentValidator) validateComposition(instance *ComponentInstance, s
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Validate slots
@@ -649,7 +649,7 @@ func (cv *ComponentValidator) validateVariants(instance *ComponentInstance, vari
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Determine which variant is being used (simplified logic)
@@ -708,11 +708,11 @@ func (cv *ComponentValidator) mergeResults(base, addition *ValidationResult) *Va
 // RequiredPropsValidator validates required props
 type RequiredPropsValidator struct{}
 
-func (v *RequiredPropsValidator) Validate(ctx *ValidationContext, value interface{}) *ValidationResult {
+func (v *RequiredPropsValidator) Validate(ctx *ValidationContext, value any) *ValidationResult {
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	if instance, ok := value.(*ComponentInstance); ok {
@@ -737,11 +737,11 @@ func (v *RequiredPropsValidator) GetRule() ValidationRule {
 // PropTypesValidator validates prop types
 type PropTypesValidator struct{}
 
-func (v *PropTypesValidator) Validate(ctx *ValidationContext, value interface{}) *ValidationResult {
+func (v *PropTypesValidator) Validate(ctx *ValidationContext, value any) *ValidationResult {
 	result := &ValidationResult{
 		Valid:     true,
 		Timestamp: time.Now(),
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Implementation would be similar to RequiredPropsValidator

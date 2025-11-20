@@ -64,15 +64,15 @@ type BadgeProps struct {
 	ID      string
 
 	// Content
-	Text      interface{} // Text content (string or number) - for overlay badges
-	Icon      string      // Single icon (for icon-only badges)
+	Text      any    // Text content (string or number) - for overlay badges
+	Icon      string // Single icon (for icon-only badges)
 	IconLeft  string
 	IconRight string
 
 	// Overlay/Position features (from badge.new.templ)
 	Mode          BadgeMode     // Badge mode: text, dot, ribbon (for overlays)
 	Position      BadgePosition // Corner position (for overlays)
-	Offset        []interface{} // Position offset [x, y]
+	Offset        []any         // Position offset [x, y]
 	OverflowCount int           // Max count before showing "+"
 
 	// Interactivity
@@ -148,7 +148,7 @@ func (p BadgeProps) GetOffsetStyle() string {
 	return fmt.Sprintf("transform: translate(%s, %s);", x, y)
 }
 
-func (p BadgeProps) formatOffsetValue(val interface{}) string {
+func (p BadgeProps) formatOffsetValue(val any) string {
 	switch v := val.(type) {
 	case int:
 		return fmt.Sprintf("%dpx", v)
@@ -996,21 +996,21 @@ func DestructiveBadge(props BadgeProps, children ...templ.Component) templ.Compo
 
 // BadgeSchema represents the JSON schema for Badge component
 type BadgeSchema struct {
-	Variant       string        `json:"variant,omitempty"`
-	Size          string        `json:"size,omitempty"`
-	Class         string        `json:"class,omitempty"`
-	Text          interface{}   `json:"text,omitempty"`
-	Icon          string        `json:"icon,omitempty"`
-	IconLeft      string        `json:"iconLeft,omitempty"`
-	IconRight     string        `json:"iconRight,omitempty"`
-	Mode          string        `json:"mode,omitempty"`
-	Position      string        `json:"position,omitempty"`
-	Offset        []interface{} `json:"offset,omitempty"`
-	OverflowCount int           `json:"overflowCount,omitempty"`
-	VisibleOn     string        `json:"visibleOn,omitempty"`
-	Animation     bool          `json:"animation,omitempty"`
-	Style         string        `json:"style,omitempty"`
-	Removable     bool          `json:"removable,omitempty"`
+	Variant       string `json:"variant,omitempty"`
+	Size          string `json:"size,omitempty"`
+	Class         string `json:"class,omitempty"`
+	Text          any    `json:"text,omitempty"`
+	Icon          string `json:"icon,omitempty"`
+	IconLeft      string `json:"iconLeft,omitempty"`
+	IconRight     string `json:"iconRight,omitempty"`
+	Mode          string `json:"mode,omitempty"`
+	Position      string `json:"position,omitempty"`
+	Offset        []any  `json:"offset,omitempty"`
+	OverflowCount int    `json:"overflowCount,omitempty"`
+	VisibleOn     string `json:"visibleOn,omitempty"`
+	Animation     bool   `json:"animation,omitempty"`
+	Style         string `json:"style,omitempty"`
+	Removable     bool   `json:"removable,omitempty"`
 }
 
 // ToProps converts BadgeSchema to BadgeProps
@@ -1252,7 +1252,7 @@ func (b *BadgeBuilder) Large() *BadgeBuilder {
 }
 
 // Content methods
-func (b *BadgeBuilder) WithText(text interface{}) *BadgeBuilder {
+func (b *BadgeBuilder) WithText(text any) *BadgeBuilder {
 	b.props.Text = text
 	return b
 }
@@ -1323,8 +1323,8 @@ func (b *BadgeBuilder) BottomLeft() *BadgeBuilder {
 	return b
 }
 
-func (b *BadgeBuilder) WithOffset(x, y interface{}) *BadgeBuilder {
-	b.props.Offset = []interface{}{x, y}
+func (b *BadgeBuilder) WithOffset(x, y any) *BadgeBuilder {
+	b.props.Offset = []any{x, y}
 	return b
 }
 
@@ -1451,7 +1451,7 @@ func WithLarge() BadgeOption {
 }
 
 // Content options
-func WithText(text interface{}) BadgeOption {
+func WithText(text any) BadgeOption {
 	return func(p *BadgeProps) { p.Text = text }
 }
 
@@ -1517,8 +1517,8 @@ func AtBottomLeft() BadgeOption {
 	return func(p *BadgeProps) { p.Position = BadgePositionBottomLeft }
 }
 
-func WithOffset(x, y interface{}) BadgeOption {
-	return func(p *BadgeProps) { p.Offset = []interface{}{x, y} }
+func WithOffset(x, y any) BadgeOption {
+	return func(p *BadgeProps) { p.Offset = []any{x, y} }
 }
 
 func WithOverflowCount(count int) BadgeOption {

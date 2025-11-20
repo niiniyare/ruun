@@ -373,7 +373,7 @@ func (mp *MigrationPipeline) shouldRunTests() bool {
 }
 
 // printPhaseResult prints a formatted phase result
-func (mp *MigrationPipeline) printPhaseResult(phase string, count interface{}, description string) {
+func (mp *MigrationPipeline) printPhaseResult(phase string, count any, description string) {
 	fmt.Printf("  ✅ %s: %v %s\n", phase, count, description)
 }
 

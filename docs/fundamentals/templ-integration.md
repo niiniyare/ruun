@@ -188,7 +188,7 @@ templ DashboardPage(data DashboardData) {
 ### Component Factory Pattern
 ```go
 // Dynamic component rendering
-templ RenderComponent(componentType string, props map[string]interface{}) {
+templ RenderComponent(componentType string, props map[string]any) {
     switch componentType {
         case "button":
             @Button(props["text"].(string), props["variant"].(string))

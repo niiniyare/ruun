@@ -56,13 +56,13 @@ type ExecutiveDashboardPageProps struct {
 type DashboardMetric struct {
     ID          string
     Title       string
-    Value       interface{}
-    PrevValue   interface{}
+    Value       any
+    PrevValue   any
     Trend       TrendDirection
     TrendValue  string
     Format      MetricFormat
     Unit        string
-    Target      interface{}
+    Target      any
     Permission  string
     DrillDown   *DrillDownConfig
 }
@@ -71,8 +71,8 @@ type ChartConfig struct {
     ID       string
     Type     ChartType
     Title    string
-    Data     interface{}
-    Options  map[string]interface{}
+    Data     any
+    Options  map[string]any
     Height   int
     Width    int
     Position GridPosition

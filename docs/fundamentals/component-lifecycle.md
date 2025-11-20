@@ -75,7 +75,7 @@ factory.componentFactory["CustomButtonSchema"] = &CustomButtonRenderer{}
 
 ### Input Validation Process
 ```go
-func (factory *SchemaFactory) ValidateProps(schemaType string, props map[string]interface{}) error {
+func (factory *SchemaFactory) ValidateProps(schemaType string, props map[string]any) error {
     // 1. Get schema definition
     schema, exists := factory.schemaRegistry[schemaType]
     if !exists {
@@ -119,7 +119,7 @@ func (r *CustomButtonRenderer) GetSchemaType() string {
     return "CustomButtonSchema"
 }
 
-func (r *CustomButtonRenderer) Render(ctx context.Context, props map[string]interface{}, schema *JsonSchema) (TemplComponent, error) {
+func (r *CustomButtonRenderer) Render(ctx context.Context, props map[string]any, schema *JsonSchema) (TemplComponent, error) {
     // Extract and type-convert properties
     buttonProps := atoms.ButtonProps{
         Text:     getStringProp(props, "text", ""),
@@ -153,7 +153,7 @@ func (r *CustomButtonRenderer) Render(ctx context.Context, props map[string]inte
 
 ### Property Extraction Helpers
 ```go
-func getStringProp(props map[string]interface{}, key string, defaultValue string) string {
+func getStringProp(props map[string]any, key string, defaultValue string) string {
     if value, exists := props[key]; exists {
         if str, ok := value.(string); ok {
             return str
@@ -162,7 +162,7 @@ func getStringProp(props map[string]interface{}, key string, defaultValue string
     return defaultValue
 }
 
-func getBoolProp(props map[string]interface{}, key string, defaultValue bool) bool {
+func getBoolProp(props map[string]any, key string, defaultValue bool) bool {
     if value, exists := props[key]; exists {
         if b, ok := value.(bool); ok {
             return b
@@ -296,7 +296,7 @@ func main() {
     factory, _ := engine.NewSchemaFactory("docs/ui/Schema")
     
     // Define component properties
-    props := map[string]interface{}{
+    props := map[string]any{
         "text":     "Save Changes",
         "variant":  "success",
         "size":     "lg",
@@ -342,7 +342,7 @@ func main() {
 ### Performance Monitoring
 ```go
 // Add timing metrics to each stage
-func (factory *SchemaFactory) RenderToTemplWithMetrics(ctx context.Context, schemaType string, props map[string]interface{}) (templ.Component, time.Duration, error) {
+func (factory *SchemaFactory) RenderToTemplWithMetrics(ctx context.Context, schemaType string, props map[string]any) (templ.Component, time.Duration, error) {
     start := time.Now()
     
     component, err := factory.RenderToTempl(ctx, schemaType, props)
@@ -368,7 +368,7 @@ func (factory *SchemaFactory) RenderToTemplWithMetrics(ctx context.Context, sche
 
 ### Error Recovery
 ```go
-func (factory *SchemaFactory) RenderWithFallback(ctx context.Context, schemaType string, props map[string]interface{}) templ.Component {
+func (factory *SchemaFactory) RenderWithFallback(ctx context.Context, schemaType string, props map[string]any) templ.Component {
     component, err := factory.RenderToTempl(ctx, schemaType, props)
     if err != nil {
         // Log error and return fallback component

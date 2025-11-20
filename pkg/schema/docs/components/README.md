@@ -109,7 +109,7 @@ schema.AddBusinessRule(rule)
 visibilityRule := schema.NewBusinessRule("admin-fields", "Admin Only Fields", schema.RuleTypeFieldVisibility).
     WithCondition(condition.NewCondition("user.role", condition.OpEqual, "admin")).
     WithAction(schema.ActionShowField, "sensitive_data", nil).
-    WithMetadata(map[string]interface{}{
+    WithMetadata(map[string]any{
         "component_hint": "Use security styling",
         "audit_required": true,
     }).
@@ -151,7 +151,7 @@ validationRule := schema.NewBusinessRule("payment-validation", "Payment Validati
         condition.NewCondition("payment_method", condition.OpEqual, "credit_card"),
     )).
     WithAction(schema.ActionRequireField, "security_code", nil).
-    WithAction(schema.ActionValidateLength, "security_code", map[string]interface{}{"min": 3, "max": 4}).
+    WithAction(schema.ActionValidateLength, "security_code", map[string]any{"min": 3, "max": 4}).
     Build()
 
 // Component with dynamic validation
@@ -1327,9 +1327,9 @@ templ FormField(props FormFieldProps) {
 
 ```go
 // Global component registry for schema field mapping
-var ComponentRegistry = make(map[schema.FieldType]interface{})
+var ComponentRegistry = make(map[schema.FieldType]any)
 
-func RegisterFieldComponent(fieldType schema.FieldType, component interface{}) {
+func RegisterFieldComponent(fieldType schema.FieldType, component any) {
     ComponentRegistry[fieldType] = component
 }
 

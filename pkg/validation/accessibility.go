@@ -110,18 +110,18 @@ const (
 
 // A11yRuleValidator interface for accessibility rule validators
 type A11yRuleValidator interface {
-	ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult
+	ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult
 	GetCategory() A11yCategory
 }
 
 // A11yValidationContext provides context for accessibility validation
 type A11yValidationContext struct {
-	Element   interface{}            `json:"element"`
-	Parent    interface{}            `json:"parent,omitempty"`
-	Children  []interface{}          `json:"children,omitempty"`
+	Element   any            `json:"element"`
+	Parent    any            `json:"parent,omitempty"`
+	Children  []any          `json:"children,omitempty"`
 	Path      []string              `json:"path"`
 	Config    A11yConfig            `json:"config"`
-	Metadata  map[string]interface{} `json:"metadata"`
+	Metadata  map[string]any `json:"metadata"`
 }
 
 // A11yRuleResult represents the result of a single accessibility rule
@@ -130,7 +130,7 @@ type A11yRuleResult struct {
 	Rule        string                 `json:"rule"`
 	Violations  []A11yViolation        `json:"violations,omitempty"`
 	Warnings    []A11yWarning          `json:"warnings,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata"`
+	Metadata    map[string]any `json:"metadata"`
 }
 
 // A11yViolation represents an accessibility violation
@@ -146,7 +146,7 @@ type A11yViolation struct {
 	Fix         string                `json:"fix,omitempty"`
 	Examples    []string              `json:"examples,omitempty"`
 	Resources   []A11yResource        `json:"resources,omitempty"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 }
 
 // A11yWarning represents an accessibility warning
@@ -158,7 +158,7 @@ type A11yWarning struct {
 	Level     A11yLevel             `json:"level"`
 	Location  *SourceLocation       `json:"location,omitempty"`
 	Fix       string                `json:"fix,omitempty"`
-	Context   map[string]interface{} `json:"context,omitempty"`
+	Context   map[string]any `json:"context,omitempty"`
 }
 
 // A11ySuggestion represents accessibility improvement suggestions
@@ -172,7 +172,7 @@ type A11ySuggestion struct {
 	AutoFix     bool                  `json:"autoFix"`
 	Examples    []string              `json:"examples,omitempty"`
 	Benefits    []string              `json:"benefits,omitempty"`
-	Context     map[string]interface{} `json:"context,omitempty"`
+	Context     map[string]any `json:"context,omitempty"`
 }
 
 // A11yImpact represents the impact level of accessibility issues
@@ -260,7 +260,7 @@ func NewAccessibilityValidator() *AccessibilityValidator {
 }
 
 // ValidateAccessibility validates accessibility for a component or element
-func (av *AccessibilityValidator) ValidateAccessibility(ctx *ValidationContext, value interface{}) *AccessibilityResult {
+func (av *AccessibilityValidator) ValidateAccessibility(ctx *ValidationContext, value any) *AccessibilityResult {
 	start := time.Now()
 	
 	result := &AccessibilityResult{
@@ -276,7 +276,7 @@ func (av *AccessibilityValidator) ValidateAccessibility(ctx *ValidationContext, 
 		Element:  value,
 		Config:   av.config,
 		Path:     []string{},
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 	}
 
 	// Run accessibility rules
@@ -577,11 +577,11 @@ func (av *AccessibilityValidator) checkStandardCompliance(result *AccessibilityR
 // AltTextValidator validates alternative text for images
 type AltTextValidator struct{}
 
-func (v *AltTextValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
+func (v *AltTextValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
 	result := &A11yRuleResult{
 		Passed:   true,
 		Rule:     "wcag111",
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 	}
 
 	// Check if element is an image or has image-like properties
@@ -623,9 +623,9 @@ func (v *AltTextValidator) GetCategory() A11yCategory {
 	return A11yCategoryPerceivable
 }
 
-func (v *AltTextValidator) isImageElement(element interface{}) bool {
+func (v *AltTextValidator) isImageElement(element any) bool {
 	// Simplified implementation - would check for image components/elements
-	if elementMap, ok := element.(map[string]interface{}); ok {
+	if elementMap, ok := element.(map[string]any); ok {
 		if elemType, exists := elementMap["type"]; exists {
 			if typeStr, ok := elemType.(string); ok {
 				return typeStr == "image" || typeStr == "img" || strings.Contains(typeStr, "image")
@@ -635,10 +635,10 @@ func (v *AltTextValidator) isImageElement(element interface{}) bool {
 	return false
 }
 
-func (v *AltTextValidator) getAltText(element interface{}) string {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *AltTextValidator) getAltText(element any) string {
+	if elementMap, ok := element.(map[string]any); ok {
 		if props, exists := elementMap["props"]; exists {
-			if propsMap, ok := props.(map[string]interface{}); ok {
+			if propsMap, ok := props.(map[string]any); ok {
 				if alt, exists := propsMap["alt"]; exists {
 					if altStr, ok := alt.(string); ok {
 						return altStr
@@ -650,8 +650,8 @@ func (v *AltTextValidator) getAltText(element interface{}) string {
 	return ""
 }
 
-func (v *AltTextValidator) getElementDescription(element interface{}) string {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *AltTextValidator) getElementDescription(element any) string {
+	if elementMap, ok := element.(map[string]any); ok {
 		if elemType, exists := elementMap["type"]; exists {
 			return fmt.Sprintf("%v element", elemType)
 		}
@@ -664,11 +664,11 @@ type ContrastValidator struct {
 	config ContrastConfig
 }
 
-func (v *ContrastValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
+func (v *ContrastValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
 	result := &A11yRuleResult{
 		Passed:   true,
 		Rule:     "wcag143",
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 	}
 
 	colors := v.extractColors(element)
@@ -692,7 +692,7 @@ func (v *ContrastValidator) ValidateA11y(element interface{}, context *A11yValid
 				Standard: A11yStandardWCAG21,
 				Level:    A11yLevelAA,
 				Fix:      "Increase contrast between text and background colors",
-				Context: map[string]interface{}{
+				Context: map[string]any{
 					"foregroundColor": colors.foreground,
 					"backgroundColor": colors.background,
 					"contrastRatio":   ratio,
@@ -723,12 +723,12 @@ type colorPair struct {
 	background string
 }
 
-func (v *ContrastValidator) extractColors(element interface{}) colorPair {
+func (v *ContrastValidator) extractColors(element any) colorPair {
 	colors := colorPair{}
 	
-	if elementMap, ok := element.(map[string]interface{}); ok {
+	if elementMap, ok := element.(map[string]any); ok {
 		if style, exists := elementMap["style"]; exists {
-			if styleMap, ok := style.(map[string]interface{}); ok {
+			if styleMap, ok := style.(map[string]any); ok {
 				if fg, exists := styleMap["color"]; exists {
 					if fgStr, ok := fg.(string); ok {
 						colors.foreground = fgStr
@@ -774,10 +774,10 @@ func (v *ContrastValidator) getRelativeLuminance(color string) float64 {
 	return math.Mod(colorValue, 255) / 255.0
 }
 
-func (v *ContrastValidator) isLargeText(element interface{}) bool {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *ContrastValidator) isLargeText(element any) bool {
+	if elementMap, ok := element.(map[string]any); ok {
 		if style, exists := elementMap["style"]; exists {
-			if styleMap, ok := style.(map[string]interface{}); ok {
+			if styleMap, ok := style.(map[string]any); ok {
 				if fontSize, exists := styleMap["fontSize"]; exists {
 					if sizeStr, ok := fontSize.(string); ok {
 						// Parse font size and determine if it's large text (18pt+ or 14pt+ bold)
@@ -802,8 +802,8 @@ func (v *ContrastValidator) parseFontSize(fontSize string) float64 {
 	return 16.0 // Default font size
 }
 
-func (v *ContrastValidator) getElementDescription(element interface{}) string {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *ContrastValidator) getElementDescription(element any) string {
+	if elementMap, ok := element.(map[string]any); ok {
 		if elemType, exists := elementMap["type"]; exists {
 			return fmt.Sprintf("%v element", elemType)
 		}
@@ -816,11 +816,11 @@ type KeyboardValidator struct {
 	config KeyboardConfig
 }
 
-func (v *KeyboardValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
+func (v *KeyboardValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
 	result := &A11yRuleResult{
 		Passed:   true,
 		Rule:     "wcag211",
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 	}
 
 	if v.isInteractiveElement(element) {
@@ -860,8 +860,8 @@ func (v *KeyboardValidator) GetCategory() A11yCategory {
 	return A11yCategoryOperable
 }
 
-func (v *KeyboardValidator) isInteractiveElement(element interface{}) bool {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *KeyboardValidator) isInteractiveElement(element any) bool {
+	if elementMap, ok := element.(map[string]any); ok {
 		if elemType, exists := elementMap["type"]; exists {
 			if typeStr, ok := elemType.(string); ok {
 				interactiveTypes := []string{"button", "input", "select", "textarea", "a", "link"}
@@ -875,7 +875,7 @@ func (v *KeyboardValidator) isInteractiveElement(element interface{}) bool {
 		
 		// Check for click handlers
 		if props, exists := elementMap["props"]; exists {
-			if propsMap, ok := props.(map[string]interface{}); ok {
+			if propsMap, ok := props.(map[string]any); ok {
 				if _, hasOnClick := propsMap["onClick"]; hasOnClick {
 					return true
 				}
@@ -885,10 +885,10 @@ func (v *KeyboardValidator) isInteractiveElement(element interface{}) bool {
 	return false
 }
 
-func (v *KeyboardValidator) isFocusable(element interface{}) bool {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *KeyboardValidator) isFocusable(element any) bool {
+	if elementMap, ok := element.(map[string]any); ok {
 		if props, exists := elementMap["props"]; exists {
-			if propsMap, ok := props.(map[string]interface{}); ok {
+			if propsMap, ok := props.(map[string]any); ok {
 				// Check for tabindex
 				if tabindex, exists := propsMap["tabindex"]; exists {
 					if tabindexStr, ok := tabindex.(string); ok {
@@ -905,8 +905,8 @@ func (v *KeyboardValidator) isFocusable(element interface{}) bool {
 	return v.isNaturallyFocusable(element)
 }
 
-func (v *KeyboardValidator) isNaturallyFocusable(element interface{}) bool {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *KeyboardValidator) isNaturallyFocusable(element any) bool {
+	if elementMap, ok := element.(map[string]any); ok {
 		if elemType, exists := elementMap["type"]; exists {
 			if typeStr, ok := elemType.(string); ok {
 				focusableTypes := []string{"button", "input", "select", "textarea", "a"}
@@ -921,10 +921,10 @@ func (v *KeyboardValidator) isNaturallyFocusable(element interface{}) bool {
 	return false
 }
 
-func (v *KeyboardValidator) hasKeyboardHandlers(element interface{}) bool {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *KeyboardValidator) hasKeyboardHandlers(element any) bool {
+	if elementMap, ok := element.(map[string]any); ok {
 		if props, exists := elementMap["props"]; exists {
-			if propsMap, ok := props.(map[string]interface{}); ok {
+			if propsMap, ok := props.(map[string]any); ok {
 				keyboardEvents := []string{"onKeyDown", "onKeyPress", "onKeyUp"}
 				for _, event := range keyboardEvents {
 					if _, exists := propsMap[event]; exists {
@@ -937,8 +937,8 @@ func (v *KeyboardValidator) hasKeyboardHandlers(element interface{}) bool {
 	return false
 }
 
-func (v *KeyboardValidator) getElementDescription(element interface{}) string {
-	if elementMap, ok := element.(map[string]interface{}); ok {
+func (v *KeyboardValidator) getElementDescription(element any) string {
+	if elementMap, ok := element.(map[string]any); ok {
 		if elemType, exists := elementMap["type"]; exists {
 			return fmt.Sprintf("%v element", elemType)
 		}
@@ -951,8 +951,8 @@ func (v *KeyboardValidator) getElementDescription(element interface{}) string {
 // StructureValidator validates semantic structure
 type StructureValidator struct{}
 
-func (v *StructureValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "wcag131", Metadata: make(map[string]interface{})}
+func (v *StructureValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "wcag131", Metadata: make(map[string]any)}
 }
 
 func (v *StructureValidator) GetCategory() A11yCategory {
@@ -962,8 +962,8 @@ func (v *StructureValidator) GetCategory() A11yCategory {
 // SkipLinksValidator validates skip links
 type SkipLinksValidator struct{}
 
-func (v *SkipLinksValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "wcag241", Metadata: make(map[string]interface{})}
+func (v *SkipLinksValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "wcag241", Metadata: make(map[string]any)}
 }
 
 func (v *SkipLinksValidator) GetCategory() A11yCategory {
@@ -973,8 +973,8 @@ func (v *SkipLinksValidator) GetCategory() A11yCategory {
 // LanguageValidator validates language attributes
 type LanguageValidator struct{}
 
-func (v *LanguageValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "wcag311", Metadata: make(map[string]interface{})}
+func (v *LanguageValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "wcag311", Metadata: make(map[string]any)}
 }
 
 func (v *LanguageValidator) GetCategory() A11yCategory {
@@ -984,8 +984,8 @@ func (v *LanguageValidator) GetCategory() A11yCategory {
 // ParsingValidator validates HTML parsing
 type ParsingValidator struct{}
 
-func (v *ParsingValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "wcag411", Metadata: make(map[string]interface{})}
+func (v *ParsingValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "wcag411", Metadata: make(map[string]any)}
 }
 
 func (v *ParsingValidator) GetCategory() A11yCategory {
@@ -997,8 +997,8 @@ type AriaValidator struct {
 	config ScreenReaderConfig
 }
 
-func (v *AriaValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "wcag412", Metadata: make(map[string]interface{})}
+func (v *AriaValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "wcag412", Metadata: make(map[string]any)}
 }
 
 func (v *AriaValidator) GetCategory() A11yCategory {
@@ -1008,8 +1008,8 @@ func (v *AriaValidator) GetCategory() A11yCategory {
 // FormLabelValidator validates form labels
 type FormLabelValidator struct{}
 
-func (v *FormLabelValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "form_labels", Metadata: make(map[string]interface{})}
+func (v *FormLabelValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "form_labels", Metadata: make(map[string]any)}
 }
 
 func (v *FormLabelValidator) GetCategory() A11yCategory {
@@ -1019,8 +1019,8 @@ func (v *FormLabelValidator) GetCategory() A11yCategory {
 // ButtonValidator validates button accessibility
 type ButtonValidator struct{}
 
-func (v *ButtonValidator) ValidateA11y(element interface{}, context *A11yValidationContext) *A11yRuleResult {
-	return &A11yRuleResult{Passed: true, Rule: "button_accessible", Metadata: make(map[string]interface{})}
+func (v *ButtonValidator) ValidateA11y(element any, context *A11yValidationContext) *A11yRuleResult {
+	return &A11yRuleResult{Passed: true, Rule: "button_accessible", Metadata: make(map[string]any)}
 }
 
 func (v *ButtonValidator) GetCategory() A11yCategory {

@@ -1717,8 +1717,8 @@ func (e *ExampleModalConfigs) AccessibleModal() EnhancedModalProps {
 }
 
 // GetUsageExamples returns various usage patterns and examples
-func (e *ExampleModalConfigs) GetUsageExamples() map[string]interface{} {
-	return map[string]interface{}{
+func (e *ExampleModalConfigs) GetUsageExamples() map[string]any {
+	return map[string]any{
 		"basic_confirmation":    e.SimpleConfirmationModal(),
 		"info_alert":            e.InfoAlertModal(),
 		"settings_drawer":       e.SidebarSettingsDrawer(),
@@ -1748,7 +1748,7 @@ func (e *ExampleModalConfigs) GetUsageExamples() map[string]interface{} {
 }
 
 // GetModalByUseCase returns a modal configuration for a specific use case
-func GetModalByUseCase(useCase string, params map[string]interface{}) (*EnhancedModalProps, error) {
+func GetModalByUseCase(useCase string, params map[string]any) (*EnhancedModalProps, error) {
 	examples := &ExampleModalConfigs{}
 
 	switch useCase {

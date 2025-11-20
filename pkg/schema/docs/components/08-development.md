@@ -718,7 +718,7 @@ Components that integrate with the schema system:
 
 ```go
 // Schema-driven form field that adapts based on field definition
-templ SchemaFormField(field schema.Field, value interface{}) {
+templ SchemaFormField(field schema.Field, value any) {
     switch field.Type {
     case schema.FieldTypeText:
         @FormField(FormFieldProps{
@@ -757,7 +757,7 @@ templ SchemaFormField(field schema.Field, value interface{}) {
 }
 
 // Component that renders entire forms from schema
-templ SchemaForm(schema *schema.Schema, data map[string]interface{}) {
+templ SchemaForm(schema *schema.Schema, data map[string]any) {
     <form 
         hx-post={ schema.SubmitEndpoint }
         hx-target="#form-result"

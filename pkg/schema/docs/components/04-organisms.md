@@ -26,7 +26,7 @@ Enterprise-grade data table with sorting, filtering, pagination, and bulk action
 ```go
 type DataTableProps struct {
     // Data configuration
-    Data        []map[string]interface{} // Table data
+    Data        []map[string]any // Table data
     Columns     []TableColumn           // Column definitions
     Schema      *schema.Schema          // Schema definition for validation
     
@@ -335,7 +335,7 @@ type WizardFormProps struct {
     Schema      *schema.Schema
     
     // Data management
-    FormData    map[string]interface{}
+    FormData    map[string]any
     Validation  map[string][]string // Validation errors
     
     // Business logic
@@ -875,7 +875,7 @@ templ ShoppingCart(props CartProps) {
 ```go
 func TestDataTable_SortingAndFiltering(t *testing.T) {
     props := DataTableProps{
-        Data: []map[string]interface{}{
+        Data: []map[string]any{
             {"id": 1, "name": "John", "role": "Admin"},
             {"id": 2, "name": "Jane", "role": "User"},
             {"id": 3, "name": "Bob", "role": "Admin"},

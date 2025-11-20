@@ -45,7 +45,7 @@ cssProps := &css.ExpandedStyles{
 ### 4. Theme Layer (Customization)
 ```go
 // Theme configuration
-theme := map[string]interface{}{
+theme := map[string]any{
     "primaryColor":   "#3b82f6",    // Blue
     "secondaryColor": "#6b7280",    // Gray
     "borderRadius":   "8px",
@@ -183,12 +183,12 @@ func generateResponsiveClasses(props ResponsiveProps) string {
 ### Responsive Component Example
 ```go
 // Responsive grid layout
-gridProps := map[string]interface{}{
-    "responsive": map[string]interface{}{
-        "mobile":  map[string]interface{}{"columns": 1, "gap": "4"},
-        "tablet":  map[string]interface{}{"columns": 2, "gap": "6"},
-        "desktop": map[string]interface{}{"columns": 3, "gap": "8"},
-        "large":   map[string]interface{}{"columns": 4, "gap": "10"},
+gridProps := map[string]any{
+    "responsive": map[string]any{
+        "mobile":  map[string]any{"columns": 1, "gap": "4"},
+        "tablet":  map[string]any{"columns": 2, "gap": "6"},
+        "desktop": map[string]any{"columns": 3, "gap": "8"},
+        "large":   map[string]any{"columns": 4, "gap": "10"},
     },
 }
 

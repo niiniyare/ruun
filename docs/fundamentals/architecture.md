@@ -98,8 +98,8 @@ graph LR
 ### Responsive Design
 ```go
 // Schema-driven responsive properties
-responsiveProps := map[string]interface{}{
-    "responsive": map[string]interface{}{
+responsiveProps := map[string]any{
+    "responsive": map[string]any{
         "mobile":  {"columns": 1, "padding": "2"},
         "tablet":  {"columns": 2, "padding": "4"},
         "desktop": {"columns": 3, "padding": "6"},

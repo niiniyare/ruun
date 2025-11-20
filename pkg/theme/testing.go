@@ -43,8 +43,8 @@ type ThemeTest struct {
 	Type        TestType               `json:"type"`
 	Severity    TestSeverity           `json:"severity"`
 	Run         func(ctx context.Context, theme *schema.Theme) *TestResult `json:"-"`
-	Expected    interface{}            `json:"expected,omitempty"`
-	Config      map[string]interface{} `json:"config,omitempty"`
+	Expected    any            `json:"expected,omitempty"`
+	Config      map[string]any `json:"config,omitempty"`
 }
 
 // TestType defines the type of test
@@ -78,7 +78,7 @@ type TestResult struct {
 	Duration    time.Duration          `json:"duration"`
 	Error       string                 `json:"error,omitempty"`
 	Details     string                 `json:"details,omitempty"`
-	Metrics     map[string]interface{} `json:"metrics,omitempty"`
+	Metrics     map[string]any `json:"metrics,omitempty"`
 	Suggestions []string               `json:"suggestions,omitempty"`
 	Artifacts   []TestArtifact         `json:"artifacts,omitempty"`
 }
@@ -455,7 +455,7 @@ func (tt *ThemeTester) testThemeStructure(ctx context.Context, theme *schema.The
 	return &TestResult{
 		Passed:  passed,
 		Details: details,
-		Metrics: map[string]interface{}{
+		Metrics: map[string]any{
 			"score":          validationResult.Score,
 			"criticalIssues": criticalIssues,
 			"warnings":       len(validationResult.Warnings),
@@ -499,7 +499,7 @@ func (tt *ThemeTester) testCompilationPerformance(ctx context.Context, theme *sc
 	return &TestResult{
 		Passed:  passed,
 		Details: fmt.Sprintf("Compilation took %v", compilationTime),
-		Metrics: map[string]interface{}{
+		Metrics: map[string]any{
 			"compilationTime": compilationTime.Milliseconds(),
 			"threshold":       100,
 		},
@@ -524,7 +524,7 @@ func (tt *ThemeTester) testCSSBundleSize(ctx context.Context, theme *schema.Them
 	return &TestResult{
 		Passed:  passed,
 		Details: fmt.Sprintf("CSS bundle size: %.2f KB", sizeKB),
-		Metrics: map[string]interface{}{
+		Metrics: map[string]any{
 			"sizeBytes":   sizeBytes,
 			"sizeKB":      sizeKB,
 			"threshold":   50,
@@ -537,7 +537,7 @@ func (tt *ThemeTester) testColorContrast(ctx context.Context, theme *schema.Them
 	return &TestResult{
 		Passed:  true,
 		Details: "All color combinations meet WCAG AA standards",
-		Metrics: map[string]interface{}{
+		Metrics: map[string]any{
 			"minContrast": 4.5,
 			"passedPairs": 15,
 			"failedPairs": 0,

@@ -164,7 +164,7 @@ func newConditionEvaluator() (*conditionEvaluator, error) {
 		NumCounters: 1000,
 		MaxCost:     10 << 20, // 10MB for expression cache
 		BufferItems: 64,
-		Cost: func(value interface{}) int64 {
+		Cost: func(value any) int64 {
 			return 1024 // Fixed cost per compiled expression
 		},
 	})
@@ -840,7 +840,7 @@ func NewThemeManager(config *ThemeManagerConfig) (*ThemeManager, error) {
 			MaxCost:     config.CacheMaxCost,
 			BufferItems: 64,
 			Metrics:     false,
-			Cost: func(value interface{}) int64 {
+			Cost: func(value any) int64 {
 				theme, ok := value.(*Theme)
 				if !ok {
 					return 1024

@@ -1176,11 +1176,11 @@ func (ec *EnhancedCompiler) calculateHash(content string) string {
 }
 
 // GetCacheStats returns cache statistics
-func (ec *EnhancedCompiler) GetCacheStats() map[string]interface{} {
+func (ec *EnhancedCompiler) GetCacheStats() map[string]any {
 	ec.cache.mu.RLock()
 	defer ec.cache.mu.RUnlock()
 
-	return map[string]interface{}{
+	return map[string]any{
 		"compiledThemes": len(ec.cache.compiled),
 		"cachedChunks":   len(ec.cache.chunks),
 		"lastCleanup":    ec.cache.lastCleanup,

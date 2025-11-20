@@ -12,8 +12,8 @@ import (
 	"strings"
 )
 
-// CheckboxGroupOption represents a single checkbox option for checkbox groups
-type CheckboxGroupOption struct {
+// CheckboxOption represents a single checkbox option for checkbox groups
+type CheckboxOption struct {
 	Value       string `json:"value"`
 	Label       string `json:"label"`
 	Description string `json:"description"`
@@ -53,7 +53,7 @@ type CheckboxGroupProps struct {
 	ID       string
 	Name     string
 	Values   []string // Array of selected values
-	Options  []CheckboxGroupOption
+	Options  []CheckboxOption
 	Required bool
 	Disabled bool
 	Readonly bool

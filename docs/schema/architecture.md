@@ -246,7 +246,7 @@ type SchemaValidator struct {
 
 func (v *SchemaValidator) ValidateSchema(schemaData []byte) error {
     // 1. Parse JSON
-    var rawSchema map[string]interface{}
+    var rawSchema map[string]any
     if err := json.Unmarshal(schemaData, &rawSchema); err != nil {
         return fmt.Errorf("invalid JSON: %w", err)
     }
@@ -558,9 +558,9 @@ type SecurityValidator struct {
 }
 
 func (v *SecurityValidator) ValidateAndSanitize(
-    input map[string]interface{},
+    input map[string]any,
     schema *Schema,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
     // 1. Schema validation
     if err := v.schemaValidator.Validate(input, schema); err != nil {
         return nil, fmt.Errorf("schema validation failed: %w", err)
@@ -572,7 +572,7 @@ func (v *SecurityValidator) ValidateAndSanitize(
     }
     
     // 3. Sanitize HTML content
-    sanitized := make(map[string]interface{})
+    sanitized := make(map[string]any)
     for key, value := range input {
         if strValue, ok := value.(string); ok {
             sanitized[key] = v.sanitizer.Sanitize(strValue)
@@ -675,7 +675,7 @@ type SchemaError struct {
     Type    ErrorType
     Message string
     Schema  *Schema
-    Context map[string]interface{}
+    Context map[string]any
 }
 
 type ErrorType int

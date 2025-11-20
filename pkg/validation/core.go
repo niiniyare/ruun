@@ -28,7 +28,7 @@ type ValidationResult struct {
 	Performance  *PerformanceMetrics       `json:"performance,omitempty"`
 	Accessibility *AccessibilityResult     `json:"accessibility,omitempty"`
 	Theme        *ThemeValidationResult    `json:"theme,omitempty"`
-	Metadata     map[string]interface{}    `json:"metadata,omitempty"`
+	Metadata     map[string]any    `json:"metadata,omitempty"`
 	Timestamp    time.Time                 `json:"timestamp"`
 }
 
@@ -42,7 +42,7 @@ type ValidationError struct {
 	Source     string                 `json:"source"`
 	Location   *SourceLocation        `json:"location,omitempty"`
 	Suggestion string                 `json:"suggestion,omitempty"`
-	Details    map[string]interface{} `json:"details,omitempty"`
+	Details    map[string]any `json:"details,omitempty"`
 	Timestamp  time.Time             `json:"timestamp"`
 }
 
@@ -54,7 +54,7 @@ type ValidationWarning struct {
 	Component string                 `json:"component,omitempty"`
 	Source    string                 `json:"source"`
 	Location  *SourceLocation        `json:"location,omitempty"`
-	Details   map[string]interface{} `json:"details,omitempty"`
+	Details   map[string]any `json:"details,omitempty"`
 }
 
 // SourceLocation represents the location where validation occurred
@@ -71,7 +71,7 @@ type ValidationContext struct {
 	Level     ValidationLevel           `json:"level"`
 	Component string                   `json:"component,omitempty"`
 	Source    string                   `json:"source"`
-	Metadata  map[string]interface{}   `json:"metadata,omitempty"`
+	Metadata  map[string]any   `json:"metadata,omitempty"`
 	Rules     []ValidationRule         `json:"rules,omitempty"`
 	Options   ValidationOptions        `json:"options"`
 }
@@ -97,13 +97,13 @@ type ValidationRule struct {
 	Category    string                 `json:"category"` // component, schema, accessibility, performance, theme
 	Level       ValidationLevel        `json:"level"`
 	Enabled     bool                  `json:"enabled"`
-	Config      map[string]interface{} `json:"config,omitempty"`
+	Config      map[string]any `json:"config,omitempty"`
 	Validator   Validator             `json:"-"`
 }
 
 // Validator interface for custom validation logic
 type Validator interface {
-	Validate(ctx *ValidationContext, value interface{}) *ValidationResult
+	Validate(ctx *ValidationContext, value any) *ValidationResult
 	GetRule() ValidationRule
 }
 
@@ -151,7 +151,7 @@ func NewValidationContext(ctx context.Context, level ValidationLevel, source str
 		ctx:      ctx,
 		Level:    level,
 		Source:   source,
-		Metadata: make(map[string]interface{}),
+		Metadata: make(map[string]any),
 		Options:  ValidationOptions{},
 	}
 }
@@ -163,13 +163,13 @@ func (e *ValidationEngine) AddRule(rule ValidationRule, validator Validator) {
 }
 
 // Validate performs validation on the given value
-func (e *ValidationEngine) Validate(ctx *ValidationContext, value interface{}) *ValidationResult {
+func (e *ValidationEngine) Validate(ctx *ValidationContext, value any) *ValidationResult {
 	start := time.Now()
 	result := &ValidationResult{
 		Valid:     true,
 		Level:     ctx.Level,
 		Timestamp: start,
-		Metadata:  make(map[string]interface{}),
+		Metadata:  make(map[string]any),
 	}
 
 	// Run applicable validation rules
@@ -245,20 +245,20 @@ func (e *ValidationEngine) mergeResults(base, addition *ValidationResult) *Valid
 }
 
 // ValidateComponent validates a UI component
-func (e *ValidationEngine) ValidateComponent(component interface{}, componentType string) *ValidationResult {
+func (e *ValidationEngine) ValidateComponent(component any, componentType string) *ValidationResult {
 	ctx := NewValidationContext(context.Background(), e.getDefaultLevel(), "component")
 	ctx.Component = componentType
 	return e.Validate(ctx, component)
 }
 
 // ValidateSchema validates a schema definition
-func (e *ValidationEngine) ValidateSchema(schema interface{}) *ValidationResult {
+func (e *ValidationEngine) ValidateSchema(schema any) *ValidationResult {
 	ctx := NewValidationContext(context.Background(), e.getDefaultLevel(), "schema")
 	return e.Validate(ctx, schema)
 }
 
 // ValidateRuntime validates runtime data
-func (e *ValidationEngine) ValidateRuntime(data interface{}) *ValidationResult {
+func (e *ValidationEngine) ValidateRuntime(data any) *ValidationResult {
 	ctx := NewValidationContext(context.Background(), e.getDefaultLevel(), "runtime")
 	return e.Validate(ctx, data)
 }
@@ -435,15 +435,15 @@ func (r *ValidationResult) GetErrorsByField(field string) []ValidationError {
 }
 
 // AddMetadata adds metadata to the validation context
-func (ctx *ValidationContext) AddMetadata(key string, value interface{}) {
+func (ctx *ValidationContext) AddMetadata(key string, value any) {
 	if ctx.Metadata == nil {
-		ctx.Metadata = make(map[string]interface{})
+		ctx.Metadata = make(map[string]any)
 	}
 	ctx.Metadata[key] = value
 }
 
 // GetMetadata retrieves metadata from the validation context
-func (ctx *ValidationContext) GetMetadata(key string) interface{} {
+func (ctx *ValidationContext) GetMetadata(key string) any {
 	if ctx.Metadata == nil {
 		return nil
 	}

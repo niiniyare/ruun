@@ -700,7 +700,7 @@ Schema expressions enable dynamic behavior through a safe expression language:
 
 **Layer 1: JSON Schema Validation**
 ```go
-func ValidateAgainstSchema(data interface{}, schemaPath string) error {
+func ValidateAgainstSchema(data any, schemaPath string) error {
     schema, err := loadSchema(schemaPath)
     if err != nil {
         return fmt.Errorf("failed to load schema: %w", err)
@@ -837,14 +837,14 @@ func (r *SchemaResolver) ResolveReferences(schema *Schema) (*Schema, error) {
     return r.resolveNode(resolved)
 }
 
-func (r *SchemaResolver) resolveNode(node interface{}) (interface{}, error) {
+func (r *SchemaResolver) resolveNode(node any) (any, error) {
     switch v := node.(type) {
-    case map[string]interface{}:
+    case map[string]any:
         if ref, hasRef := v["$ref"]; hasRef {
             return r.resolveReference(ref.(string))
         }
         
-        result := make(map[string]interface{})
+        result := make(map[string]any)
         for key, value := range v {
             resolved, err := r.resolveNode(value)
             if err != nil {
@@ -854,8 +854,8 @@ func (r *SchemaResolver) resolveNode(node interface{}) (interface{}, error) {
         }
         return result, nil
         
-    case []interface{}:
-        result := make([]interface{}, len(v))
+    case []any:
+        result := make([]any, len(v))
         for i, item := range v {
             resolved, err := r.resolveNode(item)
             if err != nil {

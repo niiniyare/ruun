@@ -11,55 +11,54 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/niiniyare/ruun/views/components/utils"
-	"strconv"
 )
 
-// LegacyInputType defines the type of input (legacy)
-type LegacyInputType string
+// InputType defines the type of input
+type InputType string
 
 const (
-	LegacyInputTypeText     LegacyInputType = "text"
-	LegacyInputTypeEmail    LegacyInputType = "email"
-	LegacyInputTypePassword LegacyInputType = "password"
-	LegacyInputTypeNumber   LegacyInputType = "number"
-	LegacyInputTypeTel      LegacyInputType = "tel"
-	LegacyInputTypeURL      LegacyInputType = "url"
-	LegacyInputTypeSearch   LegacyInputType = "search"
-	LegacyInputTypeDate     LegacyInputType = "date"
-	LegacyInputTypeTime     LegacyInputType = "time"
-	LegacyInputTypeDatetime LegacyInputType = "datetime-local"
-	LegacyInputTypeHidden   LegacyInputType = "hidden"
-	LegacyInputTypeFile     LegacyInputType = "file"
-	LegacyInputTypeRange    LegacyInputType = "range"
-	LegacyInputTypeColor    LegacyInputType = "color"
+	InputTypeText     InputType = "text"
+	InputTypeEmail    InputType = "email"
+	InputTypePassword InputType = "password"
+	InputTypeNumber   InputType = "number"
+	InputTypeTel      InputType = "tel"
+	InputTypeURL      InputType = "url"
+	InputTypeSearch   InputType = "search"
+	InputTypeDate     InputType = "date"
+	InputTypeTime     InputType = "time"
+	InputTypeDatetime InputType = "datetime-local"
+	InputTypeHidden   InputType = "hidden"
+	InputTypeFile     InputType = "file"
+	InputTypeRange    InputType = "range"
+	InputTypeColor    InputType = "color"
 )
 
-// LegacyInputSize defines the size variants for inputs (legacy)
-type LegacyInputSize string
+// InputSize defines the size variants for inputs
+type InputSize string
 
 const (
-	LegacyInputSizeSM LegacyInputSize = "sm"
-	LegacyInputSizeMD LegacyInputSize = "md"
-	LegacyInputSizeLG LegacyInputSize = "lg"
+	InputSizeSM InputSize = "sm"
+	InputSizeMD InputSize = "md"
+	InputSizeLG InputSize = "lg"
 )
 
-// LegacyInputState defines the visual state of the input (legacy)
-type LegacyInputState string
+// InputState defines the visual state of the input
+type InputState string
 
 const (
-	LegacyInputStateDefault LegacyInputState = "default"
-	LegacyInputStateError   LegacyInputState = "error"
-	LegacyInputStateSuccess LegacyInputState = "success"
-	LegacyInputStateWarning LegacyInputState = "warning"
+	InputStateDefault InputState = "default"
+	InputStateError   InputState = "error"
+	InputStateSuccess InputState = "success"
+	InputStateWarning InputState = "warning"
 )
 
 // InputProps defines the properties for the Input atom component
 // Following Atomic Design: pure presentation, no business logic
-type LegacyInputProps struct {
+type InputProps struct {
 	// Presentation
-	Type      LegacyInputType
-	Size      LegacyInputSize
-	State     LegacyInputState
+	Type      InputType
+	Size      InputSize
+	State     InputState
 	ClassName string
 
 	// Basic HTML attributes
@@ -93,7 +92,7 @@ type LegacyInputProps struct {
 }
 
 // inputClasses generates CSS classes using compiled theme classes and utils
-func legacyInputClasses(props LegacyInputProps) string {
+func inputClasses(props InputProps) string {
 	// Use compiled theme classes from JSON theme
 	return utils.TwMerge(
 		// Base input class from compiled theme
@@ -103,9 +102,9 @@ func legacyInputClasses(props LegacyInputProps) string {
 		fmt.Sprintf("input-%s", props.Size),
 
 		// State classes from compiled theme
-		utils.If(props.State == LegacyInputStateError, "input-error"),
-		utils.If(props.State == LegacyInputStateSuccess, "input-success"),
-		utils.If(props.State == LegacyInputStateWarning, "input-warning"),
+		utils.If(props.State == InputStateError, "input-error"),
+		utils.If(props.State == InputStateSuccess, "input-success"),
+		utils.If(props.State == InputStateWarning, "input-warning"),
 
 		// Interactive state classes
 		utils.If(props.Disabled, "input-disabled"),
@@ -118,7 +117,7 @@ func legacyInputClasses(props LegacyInputProps) string {
 
 // Input renders a pure presentation input atom
 // This is the core atomic component - single purpose, no business logic
-func LegacyInput(props LegacyInputProps) templ.Component {
+func Input(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -139,7 +138,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{legacyInputClasses(props)}
+		var templ_7745c5c3_Var2 = []any{inputClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -149,9 +148,9 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(string(props.Type) != "", string(props.Type), "text"))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(props.Type))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 115, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 114, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -169,7 +168,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 117, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 116, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -188,7 +187,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 120, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 119, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -207,7 +206,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 123, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 122, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -226,7 +225,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 126, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 125, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -267,9 +266,9 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.MinLength))
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(props.MinLength))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 141, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 140, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -286,9 +285,9 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.MaxLength))
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(props.MaxLength))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 144, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 143, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -307,7 +306,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Min)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 147, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 146, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -326,7 +325,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.Max)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 150, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 149, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -345,7 +344,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.Step)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 153, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 152, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -364,7 +363,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.Pattern)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 156, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 155, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -383,7 +382,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.Autocomplete)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 159, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 158, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -419,7 +418,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 163, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 162, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -438,7 +437,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 166, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 165, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -457,7 +456,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 169, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 168, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -476,7 +475,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 172, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 171, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -495,7 +494,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 175, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 174, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -514,7 +513,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineModel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 178, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 177, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -533,7 +532,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineChange)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 181, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 180, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -552,7 +551,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineBlur)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 184, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 183, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -571,7 +570,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineFocus)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 187, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 186, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -590,7 +589,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineInput)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 190, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 189, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -601,13 +600,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.State == InputStateError {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, " aria-invalid=\"true\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, ">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -616,7 +609,7 @@ func LegacyInput(props LegacyInputProps) templ.Component {
 }
 
 // Convenience components for common input types
-func LegacyTextInput(props LegacyInputProps) templ.Component {
+func TextInput(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -637,9 +630,9 @@ func LegacyTextInput(props LegacyInputProps) templ.Component {
 			templ_7745c5c3_Var26 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
-			Type:         LegacyInputTypeText,
-			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
+		templ_7745c5c3_Err = Input(InputProps{
+			Type:         InputTypeText,
+			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -671,7 +664,7 @@ func LegacyTextInput(props LegacyInputProps) templ.Component {
 	})
 }
 
-func LegacyEmailInput(props LegacyInputProps) templ.Component {
+func EmailInput(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -692,9 +685,9 @@ func LegacyEmailInput(props LegacyInputProps) templ.Component {
 			templ_7745c5c3_Var27 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
-			Type:         LegacyInputTypeEmail,
-			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
+		templ_7745c5c3_Err = Input(InputProps{
+			Type:         InputTypeEmail,
+			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -724,7 +717,7 @@ func LegacyEmailInput(props LegacyInputProps) templ.Component {
 	})
 }
 
-func LegacyPasswordInput(props LegacyInputProps) templ.Component {
+func PasswordInput(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -745,9 +738,9 @@ func LegacyPasswordInput(props LegacyInputProps) templ.Component {
 			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
-			Type:         LegacyInputTypePassword,
-			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
+		templ_7745c5c3_Err = Input(InputProps{
+			Type:         InputTypePassword,
+			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -779,7 +772,7 @@ func LegacyPasswordInput(props LegacyInputProps) templ.Component {
 	})
 }
 
-func LegacyNumberInput(props LegacyInputProps) templ.Component {
+func NumberInput(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -800,9 +793,9 @@ func LegacyNumberInput(props LegacyInputProps) templ.Component {
 			templ_7745c5c3_Var29 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
-			Type:         LegacyInputTypeNumber,
-			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
+		templ_7745c5c3_Err = Input(InputProps{
+			Type:         InputTypeNumber,
+			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -834,7 +827,7 @@ func LegacyNumberInput(props LegacyInputProps) templ.Component {
 	})
 }
 
-func LegacySearchInput(props LegacyInputProps) templ.Component {
+func SearchInput(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -855,9 +848,9 @@ func LegacySearchInput(props LegacyInputProps) templ.Component {
 			templ_7745c5c3_Var30 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
-			Type:         LegacyInputTypeSearch,
-			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
+		templ_7745c5c3_Err = Input(InputProps{
+			Type:         InputTypeSearch,
+			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -886,488 +879,13 @@ func LegacySearchInput(props LegacyInputProps) templ.Component {
 	})
 }
 
-// Textarea atom component
-
-// TextareaProps defines the properties for the Textarea atom component
-type TextareaProps struct {
-	// Presentation
-	Size      LegacyInputSize
-	State     LegacyInputState
-	ClassName string
-
-	// Basic HTML attributes
-	ID          string
-	Name        string
-	Value       string
-	Placeholder string
-	Rows        int
-	Cols        int
-	Required    bool
-	Disabled    bool
-	Readonly    bool
-	AutoFocus   bool
-	MinLength   int
-	MaxLength   int
-	Resize      bool
-	AutoResize  bool
-
-	// Interactive attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-}
-
-// textareaClasses generates CSS classes using compiled theme classes and utils
-func textareaClasses(props TextareaProps) string {
-	// Use compiled theme classes from JSON theme
-	return utils.TwMerge(
-		// Base textarea class from compiled theme (same as input)
-		"input",
-		"textarea",
-
-		// Size classes from compiled theme
-		fmt.Sprintf("input-%s", props.Size),
-
-		// State classes from compiled theme
-		utils.If(props.State == LegacyInputStateError, "input-error"),
-		utils.If(props.State == LegacyInputStateSuccess, "input-success"),
-		utils.If(props.State == LegacyInputStateWarning, "input-warning"),
-
-		// Interactive state classes
-		utils.If(props.Disabled, "input-disabled"),
-		utils.If(props.Readonly, "input-readonly"),
-
-		// Resize behavior
-		utils.If(!props.Resize, "resize-none"),
-		utils.If(props.AutoResize, "auto-resize"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// Textarea renders a pure presentation textarea atom
-func Textarea(props TextareaProps) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var31 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var31 == nil {
-			templ_7745c5c3_Var31 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var32 = []any{textareaClasses(props)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var32...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<textarea")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.ID != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, " id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var33 string
-			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 415, Col: 16}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Name != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, " name=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var34 string
-			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 418, Col: 20}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Placeholder != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, " placeholder=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var35 string
-			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 421, Col: 34}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Rows > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, " rows=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var36 string
-			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.Rows))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 424, Col: 34}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Cols > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, " cols=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var37 string
-			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.Cols))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 427, Col: 34}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 63, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Required {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, " required")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Disabled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, " disabled")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Readonly {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 66, " readonly")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AutoFocus {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, " autofocus")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.MinLength > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 68, " minlength=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var38 string
-			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.MinLength))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 442, Col: 44}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.MaxLength > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, " maxlength=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var39 string
-			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.MaxLength))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 445, Col: 44}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, " class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var40 string
-		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var32).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 73, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.HXPost != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, " hx-post=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var41 string
-			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 449, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXGet != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, " hx-get=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var42 string
-			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 452, Col: 23}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 77, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXTarget != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 78, " hx-target=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var43 string
-			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 455, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXSwap != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 80, " hx-swap=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var44 string
-			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 458, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXTrigger != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, " hx-trigger=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var45 string
-			templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 461, Col: 31}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AlpineModel != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, " x-model=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var46 string
-			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineModel)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 464, Col: 30}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AlpineChange != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, " x-on:change=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var47 string
-			templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineChange)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 467, Col: 35}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AlpineBlur != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, " x-on:blur=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var48 string
-			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineBlur)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 470, Col: 31}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AlpineFocus != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, " x-on:focus=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var49 string
-			templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineFocus)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 473, Col: 33}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AutoResize {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, " x-data=\"{ resize() { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' } }\" x-init=\"resize()\" x-on:input=\"resize()\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.State == InputStateError {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, " aria-invalid=\"true\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, ">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var50 string
-		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/input.templ`, Line: 483, Col: 15}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "</textarea>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
 // Builder Pattern (functional options)
-type LegacyInputOption func(*LegacyInputProps)
+type InputOption func(*InputProps)
 
-func NewLegacyInput(opts ...LegacyInputOption) LegacyInputProps {
-	props := LegacyInputProps{
-		Type:  LegacyInputTypeText,
-		Size:  LegacyInputSizeMD,
+func NewInput(opts ...InputOption) InputProps {
+	props := InputProps{
+		Type:  InputTypeText,
+		Size:  InputSizeMD,
 		State: InputStateDefault,
 	}
 	for _, opt := range opts {
@@ -1377,60 +895,60 @@ func NewLegacyInput(opts ...LegacyInputOption) LegacyInputProps {
 }
 
 // Type options
-func WithLegacyInputType(inputType LegacyInputType) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Type = inputType }
+func WithInputType(inputType InputType) InputOption {
+	return func(p *InputProps) { p.Type = inputType }
 }
 
-func WithLegacyInputSize(size LegacyInputSize) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Size = size }
+func WithInputSize(size InputSize) InputOption {
+	return func(p *InputProps) { p.Size = size }
 }
 
-func WithLegacyInputState(state LegacyInputState) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.State = state }
+func WithInputState(state InputState) InputOption {
+	return func(p *InputProps) { p.State = state }
 }
 
-func WithLegacyInputValue(value string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Value = value }
+func WithInputValue(value string) InputOption {
+	return func(p *InputProps) { p.Value = value }
 }
 
-func WithLegacyInputPlaceholder(placeholder string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Placeholder = placeholder }
+func WithInputPlaceholder(placeholder string) InputOption {
+	return func(p *InputProps) { p.Placeholder = placeholder }
 }
 
-func WithLegacyInputName(name string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Name = name }
+func WithInputName(name string) InputOption {
+	return func(p *InputProps) { p.Name = name }
 }
 
-func WithLegacyInputID(id string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.ID = id }
+func WithInputID(id string) InputOption {
+	return func(p *InputProps) { p.ID = id }
 }
 
-func AsLegacyRequired() LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Required = true }
+func AsRequired() InputOption {
+	return func(p *InputProps) { p.Required = true }
 }
 
-func AsLegacyInputDisabled() LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Disabled = true }
+func AsInputDisabled() InputOption {
+	return func(p *InputProps) { p.Disabled = true }
 }
 
-func AsLegacyReadonly() LegacyInputOption {
-	return func(p *LegacyInputProps) { p.Readonly = true }
+func AsReadonly() InputOption {
+	return func(p *InputProps) { p.Readonly = true }
 }
 
-func WithLegacyInputHXGet(url string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.HXGet = url }
+func WithInputHXGet(url string) InputOption {
+	return func(p *InputProps) { p.HXGet = url }
 }
 
-func WithLegacyInputHXPost(url string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.HXPost = url }
+func WithInputHXPost(url string) InputOption {
+	return func(p *InputProps) { p.HXPost = url }
 }
 
-func WithLegacyAlpineModel(model string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.AlpineModel = model }
+func WithAlpineModel(model string) InputOption {
+	return func(p *InputProps) { p.AlpineModel = model }
 }
 
-func WithLegacyInputClass(class string) LegacyInputOption {
-	return func(p *LegacyInputProps) { p.ClassName = class }
+func WithInputClass(class string) InputOption {
+	return func(p *InputProps) { p.ClassName = class }
 }
 
 // Key Improvements in this refactored version:
