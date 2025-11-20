@@ -89,3 +89,79 @@ func (s *MemoryStorage) ListThemes(ctx context.Context) ([]*Theme, error) {
 
 	return themes, nil
 }
+
+// TenantStorage is an interface for tenant configuration persistence.
+type TenantStorage interface {
+	GetTenant(ctx context.Context, tenantID string) (*TenantConfig, error)
+	SaveTenant(ctx context.Context, config *TenantConfig) error
+	DeleteTenant(ctx context.Context, tenantID string) error
+	ListTenants(ctx context.Context) ([]*TenantConfig, error)
+}
+
+// SimpleTenantStorage is an in-memory implementation of TenantStorage.
+type SimpleTenantStorage struct {
+	tenants map[string]*TenantConfig
+	mu      sync.RWMutex
+}
+
+// NewSimpleTenantStorage creates a new in-memory tenant storage.
+func NewSimpleTenantStorage() *SimpleTenantStorage {
+	return &SimpleTenantStorage{
+		tenants: make(map[string]*TenantConfig),
+	}
+}
+
+// GetTenant retrieves a tenant from memory.
+func (s *SimpleTenantStorage) GetTenant(ctx context.Context, tenantID string) (*TenantConfig, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	config, exists := s.tenants[tenantID]
+	if !exists {
+		return nil, NewErrorf(ErrCodeNotFound, "tenant not found: %s", tenantID)
+	}
+
+	return config, nil
+}
+
+// SaveTenant stores a tenant in memory.
+func (s *SimpleTenantStorage) SaveTenant(ctx context.Context, config *TenantConfig) error {
+	if config == nil {
+		return NewError(ErrCodeValidation, "tenant config cannot be nil")
+	}
+	if config.TenantID == "" {
+		return NewError(ErrCodeValidation, "tenant ID cannot be empty")
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.tenants[config.TenantID] = config
+	return nil
+}
+
+// DeleteTenant removes a tenant from memory.
+func (s *SimpleTenantStorage) DeleteTenant(ctx context.Context, tenantID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.tenants[tenantID]; !exists {
+		return NewErrorf(ErrCodeNotFound, "tenant not found: %s", tenantID)
+	}
+
+	delete(s.tenants, tenantID)
+	return nil
+}
+
+// ListTenants returns all tenants from memory.
+func (s *SimpleTenantStorage) ListTenants(ctx context.Context) ([]*TenantConfig, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	configs := make([]*TenantConfig, 0, len(s.tenants))
+	for _, config := range s.tenants {
+		configs = append(configs, config)
+	}
+
+	return configs, nil
+}

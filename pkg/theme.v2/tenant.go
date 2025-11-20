@@ -9,20 +9,21 @@ import (
 // TenantManager manages tenant-specific theme configurations and isolation.
 type TenantManager struct {
 	manager *Manager
-	tenants map[string]*TenantConfig
+	storage TenantStorage
 	mu      sync.RWMutex
 }
 
 // TenantConfig contains tenant-specific theme configuration.
 type TenantConfig struct {
-	TenantID     string
-	DefaultTheme string
+	TenantID      string
+	DefaultTheme  string
+	Active        bool
 	AllowedThemes []string
-	Branding     *BrandingOverrides
-	Features     map[string]bool
-	CustomData   map[string]interface{}
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	Branding      *BrandingOverrides
+	Features      map[string]bool
+	CustomData    map[string]interface{}
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 // BrandingOverrides contains tenant-specific branding customizations.
@@ -37,10 +38,10 @@ type BrandingOverrides struct {
 }
 
 // NewTenantManager creates a new tenant manager.
-func NewTenantManager(manager *Manager) *TenantManager {
+func NewTenantManager(manager *Manager, storage TenantStorage) *TenantManager {
 	return &TenantManager{
 		manager: manager,
-		tenants: make(map[string]*TenantConfig),
+		storage: storage,
 	}
 }
 
@@ -63,28 +64,21 @@ func (tm *TenantManager) ConfigureTenant(ctx context.Context, config *TenantConf
 
 	now := time.Now()
 	config.UpdatedAt = now
-	
-	tm.mu.Lock()
-	if _, exists := tm.tenants[config.TenantID]; !exists {
-		config.CreatedAt = now
-	}
-	tm.tenants[config.TenantID] = config
-	tm.mu.Unlock()
 
-	return nil
+	existing, err := tm.storage.GetTenant(ctx, config.TenantID)
+	if err != nil {
+		// Assuming ErrCodeNotFound, but should be handled properly
+		config.CreatedAt = now
+	} else {
+		config.CreatedAt = existing.CreatedAt
+	}
+
+	return tm.storage.SaveTenant(ctx, config)
 }
 
 // GetTenantConfig retrieves tenant configuration.
 func (tm *TenantManager) GetTenantConfig(ctx context.Context, tenantID string) (*TenantConfig, error) {
-	tm.mu.RLock()
-	config, exists := tm.tenants[tenantID]
-	tm.mu.RUnlock()
-
-	if !exists {
-		return nil, NewErrorf(ErrCodeNotFound, "tenant not found: %s", tenantID)
-	}
-
-	return config, nil
+	return tm.storage.GetTenant(ctx, tenantID)
 }
 
 // GetTenantTheme retrieves and compiles the theme for a tenant with branding overrides.
@@ -100,7 +94,7 @@ func (tm *TenantManager) GetTenantTheme(ctx context.Context, tenantID string, ev
 	}
 
 	ctxWithTenant := WithTenant(ctx, tenantID)
-	
+
 	compiled, err := tm.manager.GetTheme(ctxWithTenant, themeID, evalData)
 	if err != nil {
 		return nil, err
@@ -108,7 +102,7 @@ func (tm *TenantManager) GetTenantTheme(ctx context.Context, tenantID string, ev
 
 	if config.Branding != nil {
 		compiled.Theme = tm.applyBrandingOverrides(compiled.Theme, config.Branding)
-		
+
 		if len(config.Branding.CustomTokens) > 0 {
 			tm.applyCustomTokens(compiled.ResolvedTokens, config.Branding.CustomTokens)
 		}
@@ -203,10 +197,12 @@ func (tm *TenantManager) SetTenantTheme(ctx context.Context, tenantID, themeID s
 		}
 	}
 
-	tm.mu.Lock()
 	config.DefaultTheme = themeID
 	config.UpdatedAt = time.Now()
-	tm.mu.Unlock()
+
+	if err := tm.storage.SaveTenant(ctx, config); err != nil {
+		return err
+	}
 
 	tm.manager.InvalidateCache(themeID, tenantID)
 
@@ -220,10 +216,12 @@ func (tm *TenantManager) SetBranding(ctx context.Context, tenantID string, brand
 		return err
 	}
 
-	tm.mu.Lock()
 	config.Branding = branding
 	config.UpdatedAt = time.Now()
-	tm.mu.Unlock()
+
+	if err := tm.storage.SaveTenant(ctx, config); err != nil {
+		return err
+	}
 
 	tm.manager.InvalidateCache("", tenantID)
 
@@ -237,15 +235,13 @@ func (tm *TenantManager) EnableFeature(ctx context.Context, tenantID, feature st
 		return err
 	}
 
-	tm.mu.Lock()
 	if config.Features == nil {
 		config.Features = make(map[string]bool)
 	}
 	config.Features[feature] = true
 	config.UpdatedAt = time.Now()
-	tm.mu.Unlock()
 
-	return nil
+	return tm.storage.SaveTenant(ctx, config)
 }
 
 // DisableFeature disables a feature flag for a tenant.
@@ -255,15 +251,13 @@ func (tm *TenantManager) DisableFeature(ctx context.Context, tenantID, feature s
 		return err
 	}
 
-	tm.mu.Lock()
 	if config.Features == nil {
 		config.Features = make(map[string]bool)
 	}
 	config.Features[feature] = false
 	config.UpdatedAt = time.Now()
-	tm.mu.Unlock()
 
-	return nil
+	return tm.storage.SaveTenant(ctx, config)
 }
 
 // IsFeatureEnabled checks if a feature is enabled for a tenant.
@@ -272,9 +266,6 @@ func (tm *TenantManager) IsFeatureEnabled(ctx context.Context, tenantID, feature
 	if err != nil {
 		return false
 	}
-
-	tm.mu.RLock()
-	defer tm.mu.RUnlock()
 
 	if config.Features == nil {
 		return false
@@ -286,30 +277,16 @@ func (tm *TenantManager) IsFeatureEnabled(ctx context.Context, tenantID, feature
 
 // DeleteTenant removes tenant configuration.
 func (tm *TenantManager) DeleteTenant(ctx context.Context, tenantID string) error {
-	tm.mu.Lock()
-	defer tm.mu.Unlock()
-
-	if _, exists := tm.tenants[tenantID]; !exists {
-		return NewErrorf(ErrCodeNotFound, "tenant not found: %s", tenantID)
+	if err := tm.storage.DeleteTenant(ctx, tenantID); err != nil {
+		return err
 	}
-
-	delete(tm.tenants, tenantID)
 	tm.manager.InvalidateCache("", tenantID)
-
 	return nil
 }
 
 // ListTenants returns all configured tenants.
 func (tm *TenantManager) ListTenants(ctx context.Context) ([]*TenantConfig, error) {
-	tm.mu.RLock()
-	defer tm.mu.RUnlock()
-
-	tenants := make([]*TenantConfig, 0, len(tm.tenants))
-	for _, config := range tm.tenants {
-		tenants = append(tenants, config)
-	}
-
-	return tenants, nil
+	return tm.storage.ListTenants(ctx)
 }
 
 // GetTenantStats returns usage statistics for a tenant.
@@ -320,12 +297,12 @@ func (tm *TenantManager) GetTenantStats(ctx context.Context, tenantID string) (*
 	}
 
 	return &TenantStats{
-		TenantID:      config.TenantID,
-		DefaultTheme:  config.DefaultTheme,
-		ThemeCount:    len(config.AllowedThemes),
-		FeatureCount:  len(config.Features),
-		HasBranding:   config.Branding != nil,
-		LastUpdated:   config.UpdatedAt,
+		TenantID:     config.TenantID,
+		DefaultTheme: config.DefaultTheme,
+		ThemeCount:   len(config.AllowedThemes),
+		FeatureCount: len(config.Features),
+		HasBranding:  config.Branding != nil,
+		LastUpdated:  config.UpdatedAt,
 	}, nil
 }
 

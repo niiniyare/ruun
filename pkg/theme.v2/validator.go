@@ -17,27 +17,27 @@ type Validator struct {
 
 // ValidatorConfig configures the validator behavior.
 type ValidatorConfig struct {
-	StrictMode           bool
-	CheckAccessibility   bool
-	CheckPerformance     bool
-	CheckBestPractices   bool
-	MaxTokenDepth        int
-	MaxThemeSize         int64
-	RequiredCategories   []string
-	CustomRules          []ValidationRule
+	StrictMode         bool
+	CheckAccessibility bool
+	CheckPerformance   bool
+	CheckBestPractices bool
+	MaxTokenDepth      int
+	MaxThemeSize       int64
+	RequiredCategories []string
+	CustomRules        []ValidationRule
 }
 
 // DefaultValidatorConfig returns production-ready validator configuration.
 func DefaultValidatorConfig() *ValidatorConfig {
 	return &ValidatorConfig{
-		StrictMode:          false,
-		CheckAccessibility:  true,
-		CheckPerformance:    true,
-		CheckBestPractices:  true,
-		MaxTokenDepth:       5,
-		MaxThemeSize:        10 << 20, // 10MB
-		RequiredCategories:  []string{"colors", "spacing", "typography"},
-		CustomRules:         []ValidationRule{},
+		StrictMode:         false,
+		CheckAccessibility: true,
+		CheckPerformance:   true,
+		CheckBestPractices: true,
+		MaxTokenDepth:      5,
+		MaxThemeSize:       10 << 20, // 10MB
+		RequiredCategories: []string{"colors", "spacing", "typography"},
+		CustomRules:        []ValidationRule{},
 	}
 }
 
@@ -117,7 +117,7 @@ func (v *Validator) registerDefaultRules() {
 	v.rules = append(v.rules, v.validateColorContrast)
 	v.rules = append(v.rules, v.validateTokenDepth)
 	v.rules = append(v.rules, v.validateNamingConventions)
-	
+
 	if v.config.CheckAccessibility {
 		v.rules = append(v.rules, v.validateAccessibility)
 	}
@@ -333,7 +333,7 @@ func (v *Validator) calculateTokenDepth(refStr string, tokens *Tokens, currentDe
 		}
 		subcategory := segments[1]
 		key := strings.Join(segments[2:], ".")
-		
+
 		var tokenMap map[string]string
 		switch subcategory {
 		case "colors":
@@ -345,7 +345,7 @@ func (v *Validator) calculateTokenDepth(refStr string, tokens *Tokens, currentDe
 		case "interactive":
 			tokenMap = tokens.Semantic.Interactive
 		}
-		
+
 		if tokenMap != nil {
 			value = tokenMap[key]
 		}
@@ -537,6 +537,7 @@ func (v *Validator) GetStats() *ValidatorStats {
 type ValidationResult struct {
 	Valid  bool
 	Issues []ValidationIssue
+	Score  int
 }
 
 // ValidationIssue represents a single validation issue.
