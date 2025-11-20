@@ -221,9 +221,9 @@ func ErrorBoundary(props ErrorBoundaryProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:  getErrorIcon(props.Errors),
-			Size:  atoms.IconSizeLG,
-			Class: getErrorIconColor(props.Errors),
+			Name:      getErrorIcon(props.Errors),
+			Size:      atoms.IconSizeLG,
+			ClassName: getErrorIconColor(props.Errors),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -325,9 +325,9 @@ func ErrorBoundary(props ErrorBoundaryProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:  "chevron-down",
-				Size:  atoms.IconSizeXS,
-				Class: "transition-transform x-bind:class=\"{'rotate-180': showDetails}\"",
+				Name:      "chevron-down",
+				Size:      atoms.IconSizeXS,
+				ClassName: "transition-transform x-bind:class=\"{'rotate-180': showDetails}\"",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -381,7 +381,7 @@ func ErrorBoundary(props ErrorBoundaryProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = atoms.LoadingIcon().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.LoadingSpinner(atoms.LoadingSpinnerProps{}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -507,9 +507,9 @@ func errorDetailItem(errorDetail ErrorDetail) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:  getErrorTypeIcon(errorDetail.Type),
-			Size:  atoms.IconSizeXS,
-			Class: "mt-0.5 text-muted-foreground",
+			Name:      getErrorTypeIcon(errorDetail.Type),
+			Size:      atoms.IconSizeXS,
+			ClassName: "mt-0.5 text-muted-foreground",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -723,9 +723,9 @@ func Notification(props NotificationProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:  getNotificationIcon(props.Icon, props.Type),
-				Size:  atoms.IconSizeSM,
-				Class: getNotificationIconColor(props.Type),
+				Name:      getNotificationIcon(props.Icon, props.Type),
+				Size:      atoms.IconSizeSM,
+				ClassName: getNotificationIconColor(props.Type),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -967,9 +967,9 @@ func GlobalErrorHandler() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:  "alert-triangle",
-			Size:  atoms.IconSizeLG,
-			Class: "text-destructive",
+			Name:      "alert-triangle",
+			Size:      atoms.IconSizeLG,
+			ClassName: "text-destructive",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

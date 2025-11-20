@@ -12,9 +12,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/niiniyare/ruun/pkg/schema"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
-	"github.com/niiniyare/ruun/views/components/utils"
 	"strconv"
 	"strings"
 )

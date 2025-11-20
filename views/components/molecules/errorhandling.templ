@@ -157,7 +157,7 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 					@atoms.Icon(atoms.IconProps{
 						Name:  getErrorIcon(props.Errors),
 						Size:  atoms.IconSizeLG,
-						Class: getErrorIconColor(props.Errors),
+						ClassName: getErrorIconColor(props.Errors),
 					})
 				</div>
 				
@@ -203,7 +203,7 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 					@atoms.Icon(atoms.IconProps{
 						Name:  "chevron-down",
 						Size:  atoms.IconSizeXS,
-						Class: "transition-transform x-bind:class=\"{'rotate-180': showDetails}\"",
+						ClassName: "transition-transform x-bind:class=\"{'rotate-180': showDetails}\"",
 					})
 				</button>
 				
@@ -230,7 +230,7 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 		// Auto-retry indicator
 		if props.AutoRetry && props.RetryCount < props.MaxRetries {
 			<div class="flex items-center gap-2 text-sm">
-				@atoms.LoadingIcon()
+				@atoms.LoadingSpinner(atoms.LoadingSpinnerProps{})
 				<span x-text="`Retrying... (${retryCount}/${maxRetries})`"></span>
 				<span x-text="`Next attempt in ${retryCountdown}s`"></span>
 			</div>
@@ -283,7 +283,7 @@ templ errorDetailItem(errorDetail ErrorDetail) {
 		@atoms.Icon(atoms.IconProps{
 			Name:  getErrorTypeIcon(errorDetail.Type),
 			Size:  atoms.IconSizeXS,
-			Class: "mt-0.5 text-muted-foreground",
+			ClassName: "mt-0.5 text-muted-foreground",
 		})
 		<div class="space-y-1">
 			<div class="font-medium">{ errorDetail.Message }</div>
@@ -336,7 +336,7 @@ templ Notification(props NotificationProps) {
 					@atoms.Icon(atoms.IconProps{
 						Name:  getNotificationIcon(props.Icon, props.Type),
 						Size:  atoms.IconSizeSM,
-						Class: getNotificationIconColor(props.Type),
+						ClassName: getNotificationIconColor(props.Type),
 					})
 				</div>
 			}
@@ -431,7 +431,7 @@ templ GlobalErrorHandler() {
 					@atoms.Icon(atoms.IconProps{
 						Name:  "alert-triangle",
 						Size:  atoms.IconSizeLG,
-						Class: "text-destructive",
+						ClassName: "text-destructive",
 					})
 					<div>
 						<h2 class="text-lg font-semibold text-destructive">Critical Error</h2>

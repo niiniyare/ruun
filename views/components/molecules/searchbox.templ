@@ -2,8 +2,7 @@ package molecules
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 
@@ -18,197 +17,200 @@ const (
 
 // SearchSuggestion represents a suggestion item
 type SearchSuggestion struct {
-	Value       string
-	Label       string
-	Description string
-	Icon        string
-	Category    string
-	URL         string // For navigation suggestions
+	Value       string `json:"value"`
+	Label       string `json:"label"`
+	Description string `json:"description,omitempty"`
+	Icon        string `json:"icon,omitempty"`
+	Category    string `json:"category,omitempty"`
+	URL         string `json:"url,omitempty"` // For navigation suggestions
 }
 
 // SearchBoxProps defines the properties for the SearchBox component
 type SearchBoxProps struct {
-	Size            SearchBoxSize
-	ID              string
-	Name            string
-	Value           string
-	Placeholder     string
-	Suggestions     []SearchSuggestion
-	ShowSuggestions bool
-	Loading         bool
-	Disabled        bool
-	Class           string
+	// Basic properties
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	Value       string        `json:"value,omitempty"`
+	Placeholder string        `json:"placeholder,omitempty"`
+	Size        SearchBoxSize `json:"size,omitempty"`
+	Disabled    bool          `json:"disabled,omitempty"`
+	ClassName   string        `json:"className,omitempty"`
+	
 	// Search behavior
-	MinChars        int    // Minimum characters before showing suggestions
-	Debounce        int    // Debounce delay in milliseconds
-	ClearOnSelect   bool   // Clear input after selection
+	Suggestions   []SearchSuggestion `json:"suggestions,omitempty"`
+	Loading       bool               `json:"loading,omitempty"`
+	MinChars      int                `json:"minChars,omitempty"`      // Minimum characters before showing suggestions
+	Debounce      int                `json:"debounce,omitempty"`      // Debounce delay in milliseconds
+	ClearOnSelect bool               `json:"clearOnSelect,omitempty"` // Clear input after selection
+	
 	// HTMX attributes
-	HXPost          string // URL for search API
-	HXGet           string // URL for search API
-	HXTarget        string // Target for search results
-	HXSwap          string // Swap strategy
-	HXTrigger       string // Custom trigger
+	HXPost    string `json:"hxPost,omitempty"`    // URL for search API
+	HXGet     string `json:"hxGet,omitempty"`     // URL for search API
+	HXTarget  string `json:"hxTarget,omitempty"`  // Target for search results
+	HXSwap    string `json:"hxSwap,omitempty"`    // Swap strategy
+	HXTrigger string `json:"hxTrigger,omitempty"` // Custom trigger
+	
 	// Alpine.js attributes
-	AlpineData      string // Custom x-data
-	AlpineModel     string // x-model for input
-	AlpineSearch    string // Custom search method
-	AlpineSelect    string // Method called when suggestion is selected
-	AlpineClear     string // Method called when clear button is clicked
+	AlpineData   string `json:"alpineData,omitempty"`   // Custom x-data
+	AlpineModel  string `json:"alpineModel,omitempty"`  // x-model for input
+	AlpineSearch string `json:"alpineSearch,omitempty"` // Custom search method
+	AlpineSelect string `json:"alpineSelect,omitempty"` // Method called when suggestion is selected
+	AlpineClear  string `json:"alpineClear,omitempty"`  // Method called when clear button is clicked
+	
 	// Events
-	OnSearch        string // JavaScript function for search
-	OnSelect        string // JavaScript function for selection
-	OnClear         string // JavaScript function for clear
+	OnSearch string `json:"onSearch,omitempty"` // JavaScript function for search
+	OnSelect string `json:"onSelect,omitempty"` // JavaScript function for selection
+	OnClear  string `json:"onClear,omitempty"`  // JavaScript function for clear
 }
 
-// searchBoxClasses generates container classes
-func searchBoxClasses(props SearchBoxProps) string {
-	var classes []string
+// getSearchBoxClasses returns compiled theme classes for the search box
+func getSearchBoxClasses(props SearchBoxProps) string {
+	return utils.TwMerge(
+		"search-box",
+		fmt.Sprintf("search-box-%s", utils.IfElse(string(props.Size) != "", string(props.Size), "md")),
+		utils.If(props.Loading, "search-box-loading"),
+		utils.If(props.Disabled, "search-box-disabled"),
+		props.ClassName,
+	)
+}
 
-	// Base classes
-	classes = append(classes, "relative", "w-full")
+// getSuggestionsClasses returns compiled theme classes for the suggestions dropdown
+func getSuggestionsClasses() string {
+	return utils.TwMerge(
+		"search-suggestions",
+		"search-suggestions-dropdown",
+	)
+}
 
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
+// getSuggestionItemClasses returns compiled theme classes for suggestion items
+func getSuggestionItemClasses() string {
+	return utils.TwMerge(
+		"search-suggestion-item",
+	)
+}
+
+// buildSearchInputProps creates input props for the search input
+func buildSearchInputProps(props SearchBoxProps) atoms.InputProps {
+	// Convert size
+	inputSize := atoms.InputSizeMD
+	switch props.Size {
+	case SearchBoxSizeSM:
+		inputSize = atoms.InputSizeSM
+	case SearchBoxSizeLG:
+		inputSize = atoms.InputSizeLG
 	}
 
-	return strings.Join(classes, " ")
+	return atoms.InputProps{
+		ID:           props.ID,
+		Name:         props.Name,
+		Type:         "search",
+		Value:        props.Value,
+		Placeholder:  utils.IfElse(props.Placeholder != "", props.Placeholder, "Search..."),
+		Size:         inputSize,
+		Disabled:     props.Disabled,
+		ClassName:    "search-box-input",
+	}
 }
 
-// suggestionsClasses generates classes for the suggestions dropdown
-func suggestionsClasses(props SearchBoxProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"absolute",
-		"top-full",
-		"left-0",
-		"right-0",
-		"z-50",
-		"mt-1",
-		"max-h-60",
-		"overflow-auto",
-		"rounded-md",
-		"border",
-		"border-input",
-		"bg-popover",
-		"text-popover-foreground",
-		"shadow-md",
-	)
-
-	return strings.Join(classes, " ")
-}
-
-// suggestionItemClasses generates classes for individual suggestion items
-func suggestionItemClasses() string {
-	return strings.Join([]string{
-		"flex",
-		"cursor-pointer",
-		"select-none",
-		"items-center",
-		"gap-2",
-		"px-3",
-		"py-2",
-		"text-sm",
-		"hover:bg-accent",
-		"hover:text-accent-foreground",
-		"focus:bg-accent",
-		"focus:text-accent-foreground",
-		"focus:outline-none",
-	}, " ")
-}
-
-// SearchBox renders a search input with suggestions dropdown
+// SearchBox renders a search input with suggestions dropdown using refactored atoms
 templ SearchBox(props SearchBoxProps) {
-	<div
-		class={ searchBoxClasses(props) }
-		if props.AlpineData != "" {
-			x-data={ props.AlpineData }
-		} else {
-			x-data={ getDefaultAlpineData(props) }
-		}
-		x-on:click.away="showSuggestions = false"
+	<div 
+		class={ getSearchBoxClasses(props) }
+		x-data={ getSearchBoxAlpineData(props) }
+		x-on:click.away="hideSuggestions()"
 	>
-		// Search input with icon
-		<div class="relative">
-			<div class="absolute inset-y-0 left-0 flex items-center pl-3">
-				if props.Loading {
-					@atoms.LoadingIcon()
-				} else {
-					@atoms.Icon(atoms.IconProps{Name: "search", Size: atoms.IconSizeSM, Class: "text-muted-foreground"})
-				}
-			</div>
-			
-			@atoms.Input(atoms.InputProps{
-				Type:        atoms.InputTypeSearch,
-				Size:        atoms.InputSize(props.Size),
-				ID:          props.ID,
-				Name:        props.Name,
-				Value:       props.Value,
-				Placeholder: getPlaceholderValue(props.Placeholder),
-				Disabled:    props.Disabled,
-				Class:       "pl-9 pr-8",
-				HXPost:      props.HXPost,
-				HXGet:       props.HXGet,
-				HXTarget:    props.HXTarget,
-				HXSwap:      props.HXSwap,
-				HXTrigger:   getHXTriggerValue(props.HXTrigger),
-				AlpineModel: getAlpineModelValue(props.AlpineModel),
-				AlpineChange: "handleSearch()",
-				AlpineFocus: "showSuggestions = true",
-			})
+		// Search input container
+		<div class="search-box-input-container">
+			@atoms.Input(buildSearchInputProps(props))
 			
 			// Clear button
-			<button
-				type="button"
-				class="absolute inset-y-0 right-0 flex items-center pr-3"
-				x-show="searchQuery.length > 0"
-				x-on:click="clearSearch()"
-				aria-label="Clear search"
-			>
-				@atoms.Icon(atoms.IconProps{Name: "x", Size: atoms.IconSizeSM, Class: "text-muted-foreground hover:text-foreground"})
-			</button>
+			if !props.Disabled {
+				<button
+					type="button"
+					class="search-box-clear"
+					x-show="searchQuery.length > 0"
+					x-on:click="clearSearch()"
+					aria-label="Clear search"
+				>
+					@atoms.Icon(atoms.IconProps{
+						Name: "x",
+						Size: atoms.IconSizeSM,
+						ClassName: "search-box-clear-icon",
+					})
+				</button>
+			}
+			
+			// Loading indicator
+			if props.Loading {
+				<div class="search-box-loading-indicator">
+					@atoms.Icon(atoms.IconProps{
+						Name: "loader",
+						Size: atoms.IconSizeSM,
+						ClassName: "search-box-loading-icon",
+					})
+				</div>
+			}
 		</div>
 
 		// Suggestions dropdown
 		<div
-			class={ suggestionsClasses(props) }
-			x-show="showSuggestions && suggestions.length > 0"
-			x-transition:enter="transition ease-out duration-100"
-			x-transition:enter-start="transform opacity-0 scale-95"
-			x-transition:enter-end="transform opacity-100 scale-100"
-			x-transition:leave="transition ease-in duration-75"
-			x-transition:leave-start="transform opacity-100 scale-100"
-			x-transition:leave-end="transform opacity-0 scale-95"
+			class={ getSuggestionsClasses() }
+			x-show="showSuggestions && (suggestions.length > 0 || staticSuggestions.length > 0)"
+			x-transition:enter="search-suggestions-enter"
+			x-transition:enter-start="search-suggestions-enter-start"
+			x-transition:enter-end="search-suggestions-enter-end"
+			x-transition:leave="search-suggestions-leave"
+			x-transition:leave-start="search-suggestions-leave-start"
+			x-transition:leave-end="search-suggestions-leave-end"
 		>
 			// Static suggestions (from props)
-			for _, suggestion := range props.Suggestions {
-				@suggestionItem(suggestion, props)
-			}
+			<template x-for="(suggestion, index) in staticSuggestions" x-key="'static-' + index">
+				<div
+					class={ getSuggestionItemClasses() }
+					x-on:click="selectSuggestion(suggestion)"
+					x-bind:class="{ 'search-suggestion-item-selected': index === selectedIndex && !hasDynamicSuggestions }"
+				>
+					<div x-show="suggestion.icon" class="search-suggestion-icon">
+						@atoms.Icon(atoms.IconProps{
+							Name: "",
+							Size: atoms.IconSizeSM,
+							ClassName: "search-suggestion-icon-img",
+						})
+					</div>
+					<div class="search-suggestion-content">
+						<div class="search-suggestion-label" x-text="suggestion.label"></div>
+						<div x-show="suggestion.description" class="search-suggestion-description" x-text="suggestion.description"></div>
+					</div>
+					<div x-show="suggestion.category" class="search-suggestion-category" x-text="suggestion.category"></div>
+				</div>
+			</template>
 			
 			// Dynamic suggestions (from Alpine.js)
-			<template x-for="(suggestion, index) in suggestions" x-key="index">
+			<template x-for="(suggestion, index) in suggestions" x-key="'dynamic-' + index">
 				<div
-					class={ suggestionItemClasses() }
+					class={ getSuggestionItemClasses() }
 					x-on:click="selectSuggestion(suggestion)"
-					x-bind:class="{ 'bg-accent text-accent-foreground': index === selectedIndex }"
+					x-bind:class="{ 'search-suggestion-item-selected': (index + staticSuggestions.length) === selectedIndex }"
 				>
-					<span x-show="suggestion.icon" class="shrink-0">
-						@atoms.Icon(atoms.IconProps{Name: "", Size: atoms.IconSizeSM, Class: "text-muted-foreground"})
-					</span>
-					<div class="flex-1 min-w-0">
-						<div class="font-medium" x-text="suggestion.label"></div>
-						<div x-show="suggestion.description" class="text-xs text-muted-foreground" x-text="suggestion.description"></div>
+					<div x-show="suggestion.icon" class="search-suggestion-icon">
+						@atoms.Icon(atoms.IconProps{
+							Name: "",
+							Size: atoms.IconSizeSM,
+							ClassName: "search-suggestion-icon-img",
+						})
 					</div>
-					<div x-show="suggestion.category" class="text-xs text-muted-foreground" x-text="suggestion.category"></div>
+					<div class="search-suggestion-content">
+						<div class="search-suggestion-label" x-text="suggestion.label"></div>
+						<div x-show="suggestion.description" class="search-suggestion-description" x-text="suggestion.description"></div>
+					</div>
+					<div x-show="suggestion.category" class="search-suggestion-category" x-text="suggestion.category"></div>
 				</div>
 			</template>
 			
 			// No results message
 			<div
-				class="px-3 py-2 text-sm text-muted-foreground"
-				x-show="searchQuery.length >= minChars && suggestions.length === 0 && !loading"
+				class="search-suggestion-no-results"
+				x-show="searchQuery.length >= minChars && suggestions.length === 0 && staticSuggestions.length === 0 && !loading"
 			>
 				No results found
 			</div>
@@ -216,54 +218,31 @@ templ SearchBox(props SearchBoxProps) {
 	</div>
 }
 
-// suggestionItem renders a static suggestion item
-templ suggestionItem(suggestion SearchSuggestion, props SearchBoxProps) {
-	<div
-		class={ suggestionItemClasses() }
-		if suggestion.URL != "" {
-			hx-get={ suggestion.URL }
-			hx-target={ props.HXTarget }
-			hx-swap={ getHXSwapValue(props.HXSwap) }
-		}
-		x-on:click={ generateSelectSuggestionHandler(suggestion) }
-	>
-		if suggestion.Icon != "" {
-			<span class="shrink-0">
-				@atoms.Icon(atoms.IconProps{Name: suggestion.Icon, Size: atoms.IconSizeSM, Class: "text-muted-foreground"})
-			</span>
-		}
-		<div class="flex-1 min-w-0">
-			<div class="font-medium">{ suggestion.Label }</div>
-			if suggestion.Description != "" {
-				<div class="text-xs text-muted-foreground">{ suggestion.Description }</div>
-			}
-		</div>
-		if suggestion.Category != "" {
-			<div class="text-xs text-muted-foreground">{ suggestion.Category }</div>
-		}
-	</div>
-}
-
-// Helper function to generate default Alpine.js data
-func getDefaultAlpineData(props SearchBoxProps) string {
-	minChars := props.MinChars
-	if minChars == 0 {
-		minChars = 1
-	}
+// getSearchBoxAlpineData generates the Alpine.js data for the search box
+func getSearchBoxAlpineData(props SearchBoxProps) string {
+	minChars := utils.IfElse(props.MinChars > 0, props.MinChars, 2)
+	debounce := utils.IfElse(props.Debounce > 0, props.Debounce, 300)
 	
-	debounce := props.Debounce
-	if debounce == 0 {
-		debounce = 300
+	// Convert suggestions to JSON-safe format
+	staticSuggestions := "[]"
+	if len(props.Suggestions) > 0 {
+		staticSuggestions = formatSuggestionsForJS(props.Suggestions)
 	}
 
-	return `{
-		searchQuery: '` + props.Value + `',
+	return fmt.Sprintf(`{
+		searchQuery: '%s',
 		suggestions: [],
+		staticSuggestions: %s,
 		showSuggestions: false,
 		selectedIndex: -1,
-		loading: false,
-		minChars: ` + strconv.Itoa(minChars) + `,
+		loading: %t,
+		minChars: %d,
 		debounceTimer: null,
+		hasDynamicSuggestions: false,
+		
+		init() {
+			this.$watch('searchQuery', () => this.handleSearch());
+		},
 		
 		handleSearch() {
 			if (this.debounceTimer) {
@@ -272,229 +251,160 @@ func getDefaultAlpineData(props SearchBoxProps) string {
 			
 			this.debounceTimer = setTimeout(() => {
 				if (this.searchQuery.length >= this.minChars) {
-					this.search();
+					this.performSearch();
 				} else {
-					this.suggestions = [];
-					this.showSuggestions = false;
+					this.hideSuggestions();
 				}
-			}, ` + strconv.Itoa(debounce) + `);
+			}, %d);
 		},
 		
-		search() {
+		performSearch() {
 			this.loading = true;
-			// Custom search logic here
-			` + props.OnSearch + `
-			// Default HTMX search is handled by the input element
+			this.showSuggestions = true;
+			
+			// Custom search logic
+			if (%s) {
+				%s;
+			}
+			
+			// Filter static suggestions based on query
+			if (this.searchQuery.length > 0) {
+				this.staticSuggestions = %s.filter(suggestion => 
+					suggestion.label.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+					(suggestion.description && suggestion.description.toLowerCase().includes(this.searchQuery.toLowerCase()))
+				);
+			} else {
+				this.staticSuggestions = %s;
+			}
 		},
 		
 		selectSuggestion(suggestion) {
-			` + getClearOnSelectJS(props.ClearOnSelect) + `
-			this.showSuggestions = false;
-			this.selectedIndex = -1;
-			` + props.OnSelect + `
+			%s
+			this.hideSuggestions();
+			
+			// Custom select logic
+			if (%s) {
+				%s;
+			}
 			
 			// Navigate if URL is provided
-			if (suggestion.url) {
-				htmx.ajax('GET', suggestion.url, { target: '` + props.HXTarget + `', swap: '` + props.HXSwap + `' });
+			if (suggestion.url && '%s') {
+				htmx.ajax('GET', suggestion.url, { 
+					target: '%s', 
+					swap: '%s' 
+				});
 			}
 		},
 		
 		clearSearch() {
 			this.searchQuery = '';
 			this.suggestions = [];
-			this.showSuggestions = false;
-			this.selectedIndex = -1;
-			` + props.OnClear + `
+			this.hideSuggestions();
+			
+			// Custom clear logic
+			if (%s) {
+				%s;
+			}
 		},
 		
-		// Keyboard navigation
-		handleKeydown(event) {
-			if (!this.showSuggestions) return;
-			
-			switch (event.key) {
-				case 'ArrowDown':
-					event.preventDefault();
-					this.selectedIndex = Math.min(this.selectedIndex + 1, this.suggestions.length - 1);
-					break;
-				case 'ArrowUp':
-					event.preventDefault();
-					this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
-					break;
-				case 'Enter':
-					event.preventDefault();
-					if (this.selectedIndex >= 0) {
-						this.selectSuggestion(this.suggestions[this.selectedIndex]);
-					}
-					break;
-				case 'Escape':
-					this.showSuggestions = false;
-					this.selectedIndex = -1;
-					break;
+		hideSuggestions() {
+			this.showSuggestions = false;
+			this.selectedIndex = -1;
+			this.loading = false;
+		},
+		
+		showSuggestionsDropdown() {
+			if (this.searchQuery.length >= this.minChars || this.staticSuggestions.length > 0) {
+				this.showSuggestions = true;
 			}
 		}
-	}`
+	}`,
+		props.Value,
+		staticSuggestions,
+		props.Loading,
+		minChars,
+		debounce,
+		props.OnSearch != "",
+		utils.IfElse(props.OnSearch != "", props.OnSearch, ""),
+		staticSuggestions,
+		staticSuggestions,
+		utils.IfElse(props.ClearOnSelect, "this.searchQuery = '';", "this.searchQuery = suggestion.label;"),
+		props.OnSelect != "",
+		utils.IfElse(props.OnSelect != "", props.OnSelect, ""),
+		props.HXTarget,
+		props.HXTarget,
+		utils.IfElse(props.HXSwap != "", props.HXSwap, "innerHTML"),
+		props.OnClear != "",
+		utils.IfElse(props.OnClear != "", props.OnClear, ""),
+	)
 }
 
-// Helper function to convert SearchSuggestion to JavaScript object string
-func suggestionToJS(suggestion SearchSuggestion) string {
-	return `{
-		value: '` + suggestion.Value + `',
-		label: '` + suggestion.Label + `',
-		description: '` + suggestion.Description + `',
-		icon: '` + suggestion.Icon + `',
-		category: '` + suggestion.Category + `',
-		url: '` + suggestion.URL + `'
-	}`
-}
-
-// getHXSwapValue returns the HX swap value, defaulting to "innerHTML" if empty
-func getHXSwapValue(swap string) string {
-	if swap != "" {
-		return swap
+// formatSuggestionsForJS converts suggestions array to JavaScript array string
+func formatSuggestionsForJS(suggestions []SearchSuggestion) string {
+	if len(suggestions) == 0 {
+		return "[]"
 	}
-	return "innerHTML"
-}
-
-// generateSelectSuggestionHandler creates the x-on:click handler for selecting a suggestion
-func generateSelectSuggestionHandler(suggestion SearchSuggestion) string {
-	return fmt.Sprintf("selectSuggestion(%s)", suggestionToJS(suggestion))
-}
-
-// getClearOnSelectJS returns the JavaScript for clearing on select
-func getClearOnSelectJS(clearOnSelect bool) string {
-	if clearOnSelect {
-		return "this.searchQuery = '';"
+	
+	result := "["
+	for i, suggestion := range suggestions {
+		if i > 0 {
+			result += ","
+		}
+		result += fmt.Sprintf(`{
+			value: '%s',
+			label: '%s',
+			description: '%s',
+			icon: '%s',
+			category: '%s',
+			url: '%s'
+		}`,
+			suggestion.Value,
+			suggestion.Label,
+			suggestion.Description,
+			suggestion.Icon,
+			suggestion.Category,
+			suggestion.URL,
+		)
 	}
-	return "this.searchQuery = suggestion.label;"
-}
-
-// getPlaceholderValue returns the placeholder value, defaulting to "Search..." if empty
-func getPlaceholderValue(placeholder string) string {
-	if placeholder != "" {
-		return placeholder
-	}
-	return "Search..."
-}
-
-// getHXTriggerValue returns the HX trigger value, defaulting to "keyup changed delay:300ms" if empty
-func getHXTriggerValue(trigger string) string {
-	if trigger != "" {
-		return trigger
-	}
-	return "keyup changed delay:300ms"
-}
-
-// getAlpineModelValue returns the Alpine model value, defaulting to "searchQuery" if empty
-func getAlpineModelValue(model string) string {
-	if model != "" {
-		return model
-	}
-	return "searchQuery"
-}
-
-// getSearchSizeValue returns the search size value with default
-func getSearchSizeValue(size SearchBoxSize) SearchBoxSize {
-	if size != "" {
-		return size
-	}
-	return SearchBoxSizeMD
-}
-
-// getGlobalSearchID returns the global search ID with default
-func getGlobalSearchID(id string) string {
-	if id != "" {
-		return id
-	}
-	return "global-search"
-}
-
-// getGlobalSearchName returns the global search name with default
-func getGlobalSearchName(name string) string {
-	if name != "" {
-		return name
-	}
-	return "q"
-}
-
-// getGlobalSearchPlaceholder returns the global search placeholder with default
-func getGlobalSearchPlaceholder(placeholder string) string {
-	if placeholder != "" {
-		return placeholder
-	}
-	return "Search everything..."
-}
-
-// getGlobalSearchHXGet returns the global search HX get value with default
-func getGlobalSearchHXGet(hxGet string) string {
-	if hxGet != "" {
-		return hxGet
-	}
-	return "/search"
-}
-
-// getGlobalSearchHXTarget returns the global search HX target value with default
-func getGlobalSearchHXTarget(hxTarget string) string {
-	if hxTarget != "" {
-		return hxTarget
-	}
-	return "#search-results"
-}
-
-// getQuickSearchPlaceholder returns the placeholder for quick search
-func getQuickSearchPlaceholder(placeholder string) string {
-	if placeholder != "" {
-		return placeholder
-	}
-	return "Quick search..."
-}
-
-// getMinCharsValue returns the minimum characters value, defaulting to 2 if 0 or less
-func getMinCharsValue(minChars int) int {
-	if minChars > 0 {
-		return minChars
-	}
-	return 2
-}
-
-// getDebounceValue returns the debounce value, defaulting to 200 if 0 or less
-func getDebounceValue(debounce int) int {
-	if debounce > 0 {
-		return debounce
-	}
-	return 200
+	result += "]"
+	return result
 }
 
 // QuickSearchBox renders a simplified search box for quick searches
 templ QuickSearchBox(props SearchBoxProps) {
 	@SearchBox(SearchBoxProps{
-		Size:        props.Size,
-		ID:          props.ID,
-		Name:        props.Name,
+		ID:          utils.IfElse(props.ID != "", props.ID, "quick-search"),
+		Name:        utils.IfElse(props.Name != "", props.Name, "q"),
+		Size:        utils.IfElse(props.Size != "", props.Size, SearchBoxSizeSM),
+		Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Quick search..."),
+		MinChars:    utils.IfElse(props.MinChars > 0, props.MinChars, 1),
+		Debounce:    utils.IfElse(props.Debounce > 0, props.Debounce, 200),
 		Value:       props.Value,
-		Placeholder: getQuickSearchPlaceholder(props.Placeholder),
-		Class:       props.Class,
-		MinChars:    getMinCharsValue(props.MinChars),
-		Debounce:    getDebounceValue(props.Debounce),
+		ClassName:   utils.TwMerge("quick-search", props.ClassName),
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
-		HXSwap:     props.HXSwap,
+		HXSwap:      props.HXSwap,
+		OnSearch:    props.OnSearch,
+		OnSelect:    props.OnSelect,
+		OnClear:     props.OnClear,
 	})
 }
 
 // GlobalSearchBox renders a search box for global/site-wide search
 templ GlobalSearchBox(props SearchBoxProps) {
 	@SearchBox(SearchBoxProps{
-		Size:        getSearchSizeValue(props.Size),
-		ID:          getGlobalSearchID(props.ID),
-		Name:        getGlobalSearchName(props.Name),
+		ID:          utils.IfElse(props.ID != "", props.ID, "global-search"),
+		Name:        utils.IfElse(props.Name != "", props.Name, "search"),
+		Size:        utils.IfElse(props.Size != "", props.Size, SearchBoxSizeMD),
+		Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Search everything..."),
+		MinChars:    utils.IfElse(props.MinChars > 0, props.MinChars, 3),
+		Debounce:    utils.IfElse(props.Debounce > 0, props.Debounce, 300),
 		Value:       props.Value,
-		Placeholder: getGlobalSearchPlaceholder(props.Placeholder),
-		Class:       props.Class,
-		MinChars:    getMinCharsValue(props.MinChars),
-		Debounce:    getDebounceValue(props.Debounce),
-		HXGet:       getGlobalSearchHXGet(props.HXGet),
-		HXTarget:    getGlobalSearchHXTarget(props.HXTarget),
-		HXSwap:     getHXSwapValue(props.HXSwap),
+		ClassName:   utils.TwMerge("global-search", props.ClassName),
+		Suggestions: props.Suggestions,
+		HXGet:       utils.IfElse(props.HXGet != "", props.HXGet, "/search"),
+		HXTarget:    utils.IfElse(props.HXTarget != "", props.HXTarget, "#search-results"),
+		HXSwap:      utils.IfElse(props.HXSwap != "", props.HXSwap, "innerHTML"),
 		OnSearch:    props.OnSearch,
 		OnSelect:    props.OnSelect,
 		OnClear:     props.OnClear,

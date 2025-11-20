@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/components/utils"
 	"strings"
 )
 

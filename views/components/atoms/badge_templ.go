@@ -594,7 +594,7 @@ func badgeContent(props BadgeProps, children ...templ.Component) templ.Component
 				return templ_7745c5c3_Err
 			}
 			if props.IconLeft != "" {
-				templ_7745c5c3_Err = Icon(IconProps{Name: props.IconLeft, Size: IconSizeXS, Class: "mr-1"}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = Icon(IconProps{Name: props.IconLeft, Size: IconSizeXS, ClassName: "mr-1"}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -639,7 +639,7 @@ func badgeContent(props BadgeProps, children ...templ.Component) templ.Component
 				return templ_7745c5c3_Err
 			}
 			if props.IconRight != "" {
-				templ_7745c5c3_Err = Icon(IconProps{Name: props.IconRight, Size: IconSizeXS, Class: "ml-1"}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = Icon(IconProps{Name: props.IconRight, Size: IconSizeXS, ClassName: "ml-1"}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -807,7 +807,7 @@ func DefaultBadge(props BadgeProps, children ...templ.Component) templ.Component
 			Icon:          props.Icon,
 			IconLeft:      props.IconLeft,
 			IconRight:     props.IconRight,
-			ClassName:     props.ClassName,
+			Class:         props.Class,
 			ID:            props.ID,
 			Removable:     props.Removable,
 			OnRemove:      props.OnRemove,
@@ -860,7 +860,7 @@ func SuccessBadge(props BadgeProps, children ...templ.Component) templ.Component
 			Icon:          props.Icon,
 			IconLeft:      props.IconLeft,
 			IconRight:     props.IconRight,
-			ClassName:     props.ClassName,
+			Class:         props.Class,
 			ID:            props.ID,
 			Removable:     props.Removable,
 			OnRemove:      props.OnRemove,
@@ -913,7 +913,7 @@ func WarningBadge(props BadgeProps, children ...templ.Component) templ.Component
 			Icon:          props.Icon,
 			IconLeft:      props.IconLeft,
 			IconRight:     props.IconRight,
-			ClassName:     props.ClassName,
+			Class:         props.Class,
 			ID:            props.ID,
 			Removable:     props.Removable,
 			OnRemove:      props.OnRemove,
@@ -966,7 +966,7 @@ func DestructiveBadge(props BadgeProps, children ...templ.Component) templ.Compo
 			Icon:          props.Icon,
 			IconLeft:      props.IconLeft,
 			IconRight:     props.IconRight,
-			ClassName:     props.ClassName,
+			Class:         props.Class,
 			ID:            props.ID,
 			Removable:     props.Removable,
 			OnRemove:      props.OnRemove,
@@ -1405,7 +1405,7 @@ func NewBadgeWithOptions(opts ...BadgeOption) BadgeProps {
 }
 
 // Variant options
-func WithVariant(variant BadgeVariant) BadgeOption {
+func WithBadgeVariant(variant BadgeVariant) BadgeOption {
 	return func(p *BadgeProps) { p.Variant = variant }
 }
 
@@ -1434,7 +1434,7 @@ func WithOutline() BadgeOption {
 }
 
 // Size options
-func WithSize(size BadgeSize) BadgeOption {
+func WithBadgeSize(size BadgeSize) BadgeOption {
 	return func(p *BadgeProps) { p.Size = size }
 }
 
@@ -1451,27 +1451,27 @@ func WithLarge() BadgeOption {
 }
 
 // Content options
-func WithText(text any) BadgeOption {
+func WithBadgeText(text any) BadgeOption {
 	return func(p *BadgeProps) { p.Text = text }
 }
 
-func WithIcon(icon string) BadgeOption {
+func WithBadgeIcon(icon string) BadgeOption {
 	return func(p *BadgeProps) { p.Icon = icon }
 }
 
-func WithIconLeft(icon string) BadgeOption {
+func WithBadgeIconLeft(icon string) BadgeOption {
 	return func(p *BadgeProps) { p.IconLeft = icon }
 }
 
-func WithIconRight(icon string) BadgeOption {
+func WithBadgeIconRight(icon string) BadgeOption {
 	return func(p *BadgeProps) { p.IconRight = icon }
 }
 
-func WithClass(class string) BadgeOption {
+func WithBadgeClass(class string) BadgeOption {
 	return func(p *BadgeProps) { p.Class = class }
 }
 
-func WithID(id string) BadgeOption {
+func WithBadgeID(id string) BadgeOption {
 	return func(p *BadgeProps) { p.ID = id }
 }
 
@@ -1542,28 +1542,28 @@ func VisibleWhen(condition string) BadgeOption {
 }
 
 // HTMX options
-func WithHXPost(url string) BadgeOption {
+func WithBadgeHXPost(url string) BadgeOption {
 	return func(p *BadgeProps) { p.HXPost = url }
 }
 
-func WithHXGet(url string) BadgeOption {
+func WithBadgeHXGet(url string) BadgeOption {
 	return func(p *BadgeProps) { p.HXGet = url }
 }
 
-func WithHXTarget(target string) BadgeOption {
+func WithBadgeHXTarget(target string) BadgeOption {
 	return func(p *BadgeProps) { p.HXTarget = target }
 }
 
-func WithHXSwap(swap string) BadgeOption {
+func WithBadgeHXSwap(swap string) BadgeOption {
 	return func(p *BadgeProps) { p.HXSwap = swap }
 }
 
-func WithHXTrigger(trigger string) BadgeOption {
+func WithBadgeHXTrigger(trigger string) BadgeOption {
 	return func(p *BadgeProps) { p.HXTrigger = trigger }
 }
 
 // Alpine.js options
-func WithAlpineClick(handler string) BadgeOption {
+func WithBadgeAlpineClick(handler string) BadgeOption {
 	return func(p *BadgeProps) { p.AlpineClick = handler }
 }
 

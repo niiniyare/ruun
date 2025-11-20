@@ -1321,7 +1321,7 @@ package atoms
 
 import (
     "fmt"
-    "github.com/niiniyare/ruun/views/utils"
+    "github.com/niiniyare/ruun/pkg/utils"
 )
 
 type ButtonVariant string

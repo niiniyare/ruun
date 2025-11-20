@@ -11,7 +11,7 @@ import (
 
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/components/utils"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
 
 // ModalService provides business logic for modal operations

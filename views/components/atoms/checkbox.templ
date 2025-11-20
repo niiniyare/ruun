@@ -4,6 +4,25 @@ import (
 	"strings"
 )
 
+// CheckboxSize defines the size variants for checkboxes
+type CheckboxSize string
+
+const (
+	CheckboxSizeSM CheckboxSize = "sm"
+	CheckboxSizeMD CheckboxSize = "md"
+	CheckboxSizeLG CheckboxSize = "lg"
+)
+
+// CheckboxState defines the visual state of the checkbox
+type CheckboxState string
+
+const (
+	CheckboxStateDefault CheckboxState = "default"
+	CheckboxStateError   CheckboxState = "error"
+	CheckboxStateSuccess CheckboxState = "success"
+	CheckboxStateWarning CheckboxState = "warning"
+)
+
 // CheckboxOption represents a single checkbox option for checkbox groups
 type CheckboxOption struct {
 	Value       string `json:"value"`
@@ -22,6 +41,9 @@ type CheckboxProps struct {
 	Checked      bool
 	Label        string
 	Description  string
+	Icon         string // Optional icon for the checkbox
+	Size         CheckboxSize
+	State        CheckboxState
 	Required     bool
 	Disabled     bool
 	Readonly     bool
@@ -46,6 +68,8 @@ type CheckboxGroupProps struct {
 	Name         string
 	Values       []string // Array of selected values
 	Options      []CheckboxOption
+	Size         CheckboxSize
+	State        CheckboxState
 	Required     bool
 	Disabled     bool
 	Readonly     bool
@@ -360,7 +384,6 @@ templ CheckboxGroupInline(props CheckboxGroupProps) {
 		Class:        props.Class,
 		Size:         props.Size,
 		State:        props.State,
-		ClassName:    props.ClassName,
 		Inline:       true,
 		HXPost:       props.HXPost,
 		HXGet:        props.HXGet,
@@ -375,9 +398,9 @@ templ CheckboxGroupInline(props CheckboxGroupProps) {
 }
 
 // Builder Pattern (functional options)
-type CheckboxOption func(*CheckboxProps)
+type CheckboxConfig func(*CheckboxProps)
 
-func NewCheckbox(opts ...CheckboxOption) CheckboxProps {
+func NewCheckbox(opts ...CheckboxConfig) CheckboxProps {
 	props := CheckboxProps{
 		Size:  CheckboxSizeMD,
 		State: CheckboxStateDefault,
@@ -388,44 +411,44 @@ func NewCheckbox(opts ...CheckboxOption) CheckboxProps {
 	return props
 }
 
-func WithCheckboxSize(size CheckboxSize) CheckboxOption {
+func WithCheckboxSize(size CheckboxSize) CheckboxConfig {
 	return func(p *CheckboxProps) { p.Size = size }
 }
 
-func WithCheckboxState(state CheckboxState) CheckboxOption {
+func WithCheckboxState(state CheckboxState) CheckboxConfig {
 	return func(p *CheckboxProps) { p.State = state }
 }
 
-func WithCheckboxLabel(label string) CheckboxOption {
+func WithCheckboxLabel(label string) CheckboxConfig {
 	return func(p *CheckboxProps) { p.Label = label }
 }
 
-func WithCheckboxValue(value string) CheckboxOption {
+func WithCheckboxValue(value string) CheckboxConfig {
 	return func(p *CheckboxProps) { p.Value = value }
 }
 
-func WithCheckboxName(name string) CheckboxOption {
+func WithCheckboxName(name string) CheckboxConfig {
 	return func(p *CheckboxProps) { p.Name = name }
 }
 
-func WithCheckboxID(id string) CheckboxOption {
+func WithCheckboxID(id string) CheckboxConfig {
 	return func(p *CheckboxProps) { p.ID = id }
 }
 
-func AsCheckboxChecked() CheckboxOption {
+func AsCheckboxChecked() CheckboxConfig {
 	return func(p *CheckboxProps) { p.Checked = true }
 }
 
-func AsCheckboxRequired() CheckboxOption {
+func AsCheckboxRequired() CheckboxConfig {
 	return func(p *CheckboxProps) { p.Required = true }
 }
 
-func AsCheckboxDisabled() CheckboxOption {
+func AsCheckboxDisabled() CheckboxConfig {
 	return func(p *CheckboxProps) { p.Disabled = true }
 }
 
-func WithCheckboxClass(class string) CheckboxOption {
-	return func(p *CheckboxProps) { p.ClassName = class }
+func WithCheckboxClass(class string) CheckboxConfig {
+	return func(p *CheckboxProps) { p.Class = class }
 }
 
 // Key Improvements in this refactored version:

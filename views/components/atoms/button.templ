@@ -2,7 +2,7 @@ package atoms
 
 import (
 	"fmt"
-	"github.com/niiniyare/ruun/views/components/utils"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
 
 // ============================================================================
@@ -626,40 +626,40 @@ func NewButton(opts ...ButtonOption) ButtonProps {
 // Each function returns a ButtonOption that modifies ButtonProps
 // NOTE: These are chainable and order-independent (except for conflicting options)
 
-// WithVariant sets the button variant (primary, secondary, etc.)
-func WithVariant(variant ButtonVariant) ButtonOption {
+// WithButtonVariant sets the button variant (primary, secondary, etc.)
+func WithButtonVariant(variant ButtonVariant) ButtonOption {
 	return func(p *ButtonProps) { p.Variant = variant }
 }
 
-// WithSize sets the button size (xs, sm, md, lg, xl)
-func WithSize(size ButtonSize) ButtonOption {
+// WithButtonSize sets the button size (xs, sm, md, lg, xl)
+func WithButtonSize(size ButtonSize) ButtonOption {
 	return func(p *ButtonProps) { p.Size = size }
 }
 
 // WithText sets the button text content
 // NOTE: Children in the template take precedence over this
-func WithText(text string) ButtonOption {
+func WithButtonText(text string) ButtonOption {
 	return func(p *ButtonProps) { p.Text = text }
 }
 
 // WithIcon sets a single icon (for icon-only buttons)
 // NOTE: Don't use with WithIconLeft or WithIconRight
-func WithIcon(icon string) ButtonOption {
+func WithButtonIcon(icon string) ButtonOption {
 	return func(p *ButtonProps) { p.Icon = icon }
 }
 
 // WithIconLeft sets an icon on the left side of button content
-func WithIconLeft(icon string) ButtonOption {
+func WithButtonIconLeft(icon string) ButtonOption {
 	return func(p *ButtonProps) { p.IconLeft = icon }
 }
 
 // WithIconRight sets an icon on the right side of button content
-func WithIconRight(icon string) ButtonOption {
+func WithButtonIconRight(icon string) ButtonOption {
 	return func(p *ButtonProps) { p.IconRight = icon }
 }
 
 // WithID sets the HTML id attribute
-func WithID(id string) ButtonOption {
+func WithButtonID(id string) ButtonOption {
 	return func(p *ButtonProps) { p.ID = id }
 }
 
@@ -683,7 +683,7 @@ func WithValue(value string) ButtonOption {
 
 // WithClass adds custom CSS classes
 // NOTE: Uses TwMerge to intelligently resolve conflicts
-func WithClass(class string) ButtonOption {
+func WithButtonClass(class string) ButtonOption {
 	return func(p *ButtonProps) { p.ClassName = class }
 }
 
@@ -707,38 +707,38 @@ func AsLoading() ButtonOption {
 
 // WithHXPost sets the hx-post attribute for HTMX
 // NOTE: Requires HTMX library to be loaded
-func WithHXPost(url string) ButtonOption {
+func WithButtonHXPost(url string) ButtonOption {
 	return func(p *ButtonProps) { p.HXPost = url }
 }
 
 // WithHXGet sets the hx-get attribute for HTMX
 // NOTE: Requires HTMX library to be loaded
-func WithHXGet(url string) ButtonOption {
+func WithButtonHXGet(url string) ButtonOption {
 	return func(p *ButtonProps) { p.HXGet = url }
 }
 
 // WithHXTarget sets where HTMX should swap the response
 // Common values: "#result", "this", "closest .container"
-func WithHXTarget(target string) ButtonOption {
+func WithButtonHXTarget(target string) ButtonOption {
 	return func(p *ButtonProps) { p.HXTarget = target }
 }
 
 // WithHXSwap sets how HTMX should swap the response
 // Common values: "innerHTML", "outerHTML", "beforeend", "afterbegin"
-func WithHXSwap(swap string) ButtonOption {
+func WithButtonHXSwap(swap string) ButtonOption {
 	return func(p *ButtonProps) { p.HXSwap = swap }
 }
 
 // WithHXTrigger sets custom HTMX trigger conditions
 // Examples: "click", "click once", "click throttle:1s"
-func WithHXTrigger(trigger string) ButtonOption {
+func WithButtonHXTrigger(trigger string) ButtonOption {
 	return func(p *ButtonProps) { p.HXTrigger = trigger }
 }
 
 // WithAlpineClick sets Alpine.js click handler
 // NOTE: Requires Alpine.js library to be loaded
 // Example: "count++" where count is in Alpine data context
-func WithAlpineClick(handler string) ButtonOption {
+func WithButtonAlpineClick(handler string) ButtonOption {
 	return func(p *ButtonProps) { p.AlpineClick = handler }
 }
 
@@ -751,20 +751,20 @@ func WithAlpineClick(handler string) ButtonOption {
 //
 // NOTE: This is an internal helper, not exported
 // TODO: Consider making this configurable via theme tokens
-func mapButtonSizeToIconSize(size ButtonSize) string {
+func mapButtonSizeToIconSize(size ButtonSize) IconSize {
 	switch size {
 	case ButtonSizeXS:
-		return "xs"
+		return IconSizeXS
 	case ButtonSizeSM:
-		return "sm"
+		return IconSizeSM
 	case ButtonSizeMD:
-		return "md"
+		return IconSizeMD
 	case ButtonSizeLG:
-		return "lg"
+		return IconSizeLG
 	case ButtonSizeXL:
-		return "xl"
+		return IconSizeXL
 	default:
-		return "md"
+		return IconSizeMD
 	}
 }
 

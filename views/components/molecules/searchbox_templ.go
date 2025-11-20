@@ -10,9 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"strconv"
-	"strings"
 )
 
 // SearchBoxSize defines the size variants for the search box
@@ -26,108 +25,102 @@ const (
 
 // SearchSuggestion represents a suggestion item
 type SearchSuggestion struct {
-	Value       string
-	Label       string
-	Description string
-	Icon        string
-	Category    string
-	URL         string // For navigation suggestions
+	Value       string `json:"value"`
+	Label       string `json:"label"`
+	Description string `json:"description,omitempty"`
+	Icon        string `json:"icon,omitempty"`
+	Category    string `json:"category,omitempty"`
+	URL         string `json:"url,omitempty"` // For navigation suggestions
 }
 
 // SearchBoxProps defines the properties for the SearchBox component
 type SearchBoxProps struct {
-	Size            SearchBoxSize
-	ID              string
-	Name            string
-	Value           string
-	Placeholder     string
-	Suggestions     []SearchSuggestion
-	ShowSuggestions bool
-	Loading         bool
-	Disabled        bool
-	Class           string
+	// Basic properties
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	Value       string        `json:"value,omitempty"`
+	Placeholder string        `json:"placeholder,omitempty"`
+	Size        SearchBoxSize `json:"size,omitempty"`
+	Disabled    bool          `json:"disabled,omitempty"`
+	ClassName   string        `json:"className,omitempty"`
+
 	// Search behavior
-	MinChars      int  // Minimum characters before showing suggestions
-	Debounce      int  // Debounce delay in milliseconds
-	ClearOnSelect bool // Clear input after selection
+	Suggestions   []SearchSuggestion `json:"suggestions,omitempty"`
+	Loading       bool               `json:"loading,omitempty"`
+	MinChars      int                `json:"minChars,omitempty"`      // Minimum characters before showing suggestions
+	Debounce      int                `json:"debounce,omitempty"`      // Debounce delay in milliseconds
+	ClearOnSelect bool               `json:"clearOnSelect,omitempty"` // Clear input after selection
+
 	// HTMX attributes
-	HXPost    string // URL for search API
-	HXGet     string // URL for search API
-	HXTarget  string // Target for search results
-	HXSwap    string // Swap strategy
-	HXTrigger string // Custom trigger
+	HXPost    string `json:"hxPost,omitempty"`    // URL for search API
+	HXGet     string `json:"hxGet,omitempty"`     // URL for search API
+	HXTarget  string `json:"hxTarget,omitempty"`  // Target for search results
+	HXSwap    string `json:"hxSwap,omitempty"`    // Swap strategy
+	HXTrigger string `json:"hxTrigger,omitempty"` // Custom trigger
+
 	// Alpine.js attributes
-	AlpineData   string // Custom x-data
-	AlpineModel  string // x-model for input
-	AlpineSearch string // Custom search method
-	AlpineSelect string // Method called when suggestion is selected
-	AlpineClear  string // Method called when clear button is clicked
+	AlpineData   string `json:"alpineData,omitempty"`   // Custom x-data
+	AlpineModel  string `json:"alpineModel,omitempty"`  // x-model for input
+	AlpineSearch string `json:"alpineSearch,omitempty"` // Custom search method
+	AlpineSelect string `json:"alpineSelect,omitempty"` // Method called when suggestion is selected
+	AlpineClear  string `json:"alpineClear,omitempty"`  // Method called when clear button is clicked
+
 	// Events
-	OnSearch string // JavaScript function for search
-	OnSelect string // JavaScript function for selection
-	OnClear  string // JavaScript function for clear
+	OnSearch string `json:"onSearch,omitempty"` // JavaScript function for search
+	OnSelect string `json:"onSelect,omitempty"` // JavaScript function for selection
+	OnClear  string `json:"onClear,omitempty"`  // JavaScript function for clear
 }
 
-// searchBoxClasses generates container classes
-func searchBoxClasses(props SearchBoxProps) string {
-	var classes []string
+// getSearchBoxClasses returns compiled theme classes for the search box
+func getSearchBoxClasses(props SearchBoxProps) string {
+	return utils.TwMerge(
+		"search-box",
+		fmt.Sprintf("search-box-%s", utils.IfElse(string(props.Size) != "", string(props.Size), "md")),
+		utils.If(props.Loading, "search-box-loading"),
+		utils.If(props.Disabled, "search-box-disabled"),
+		props.ClassName,
+	)
+}
 
-	// Base classes
-	classes = append(classes, "relative", "w-full")
+// getSuggestionsClasses returns compiled theme classes for the suggestions dropdown
+func getSuggestionsClasses() string {
+	return utils.TwMerge(
+		"search-suggestions",
+		"search-suggestions-dropdown",
+	)
+}
 
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
+// getSuggestionItemClasses returns compiled theme classes for suggestion items
+func getSuggestionItemClasses() string {
+	return utils.TwMerge(
+		"search-suggestion-item",
+	)
+}
+
+// buildSearchInputProps creates input props for the search input
+func buildSearchInputProps(props SearchBoxProps) atoms.InputProps {
+	// Convert size
+	inputSize := atoms.InputSizeMD
+	switch props.Size {
+	case SearchBoxSizeSM:
+		inputSize = atoms.InputSizeSM
+	case SearchBoxSizeLG:
+		inputSize = atoms.InputSizeLG
 	}
 
-	return strings.Join(classes, " ")
+	return atoms.InputProps{
+		ID:          props.ID,
+		Name:        props.Name,
+		Type:        "search",
+		Value:       props.Value,
+		Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Search..."),
+		Size:        inputSize,
+		Disabled:    props.Disabled,
+		ClassName:   "search-box-input",
+	}
 }
 
-// suggestionsClasses generates classes for the suggestions dropdown
-func suggestionsClasses(props SearchBoxProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"absolute",
-		"top-full",
-		"left-0",
-		"right-0",
-		"z-50",
-		"mt-1",
-		"max-h-60",
-		"overflow-auto",
-		"rounded-md",
-		"border",
-		"border-input",
-		"bg-popover",
-		"text-popover-foreground",
-		"shadow-md",
-	)
-
-	return strings.Join(classes, " ")
-}
-
-// suggestionItemClasses generates classes for individual suggestion items
-func suggestionItemClasses() string {
-	return strings.Join([]string{
-		"flex",
-		"cursor-pointer",
-		"select-none",
-		"items-center",
-		"gap-2",
-		"px-3",
-		"py-2",
-		"text-sm",
-		"hover:bg-accent",
-		"hover:text-accent-foreground",
-		"focus:bg-accent",
-		"focus:text-accent-foreground",
-		"focus:outline-none",
-	}, " ")
-}
-
-// SearchBox renders a search input with suggestions dropdown
+// SearchBox renders a search input with suggestions dropdown using refactored atoms
 func SearchBox(props SearchBoxProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -149,7 +142,7 @@ func SearchBox(props SearchBoxProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{searchBoxClasses(props)}
+		var templ_7745c5c3_Var2 = []any{getSearchBoxClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -167,58 +160,59 @@ func SearchBox(props SearchBoxProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" x-data=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.AlpineData != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " x-data=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineData)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 127, Col: 28}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " x-data=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getDefaultAlpineData(props))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 129, Col: 39}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getSearchBoxAlpineData(props))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 119, Col: 40}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " x-on:click.away=\"showSuggestions = false\"><div class=\"relative\"><div class=\"absolute inset-y-0 left-0 flex items-center pl-3\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" x-on:click.away=\"hideSuggestions()\"><div class=\"search-box-input-container\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = atoms.Input(buildSearchInputProps(props)).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !props.Disabled {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button type=\"button\" class=\"search-box-clear\" x-show=\"searchQuery.length > 0\" x-on:click=\"clearSearch()\" aria-label=\"Clear search\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
+				Name:      "x",
+				Size:      atoms.IconSizeSM,
+				ClassName: "search-box-clear-icon",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		if props.Loading {
-			templ_7745c5c3_Err = atoms.LoadingIcon().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"search-box-loading-indicator\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "search", Size: atoms.IconSizeSM, Class: "text-muted-foreground"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
+				Name:      "loader",
+				Size:      atoms.IconSizeSM,
+				ClassName: "search-box-loading-icon",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -227,41 +221,30 @@ func SearchBox(props SearchBoxProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Input(atoms.InputProps{
-			Type:         atoms.InputTypeSearch,
-			Size:         atoms.InputSize(props.Size),
-			ID:           props.ID,
-			Name:         props.Name,
-			Value:        props.Value,
-			Placeholder:  getPlaceholderValue(props.Placeholder),
-			Disabled:     props.Disabled,
-			Class:        "pl-9 pr-8",
-			HXPost:       props.HXPost,
-			HXGet:        props.HXGet,
-			HXTarget:     props.HXTarget,
-			HXSwap:       props.HXSwap,
-			HXTrigger:    getHXTriggerValue(props.HXTrigger),
-			AlpineModel:  getAlpineModelValue(props.AlpineModel),
-			AlpineChange: "handleSearch()",
-			AlpineFocus:  "showSuggestions = true",
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var5 = []any{getSuggestionsClasses()}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<button type=\"button\" class=\"absolute inset-y-0 right-0 flex items-center pr-3\" x-show=\"searchQuery.length > 0\" x-on:click=\"clearSearch()\" aria-label=\"Clear search\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "x", Size: atoms.IconSizeSM, Class: "text-muted-foreground hover:text-foreground"}).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var5).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" x-show=\"showSuggestions && (suggestions.length > 0 || staticSuggestions.length > 0)\" x-transition:enter=\"search-suggestions-enter\" x-transition:enter-start=\"search-suggestions-enter-start\" x-transition:enter-end=\"search-suggestions-enter-end\" x-transition:leave=\"search-suggestions-leave\" x-transition:leave-start=\"search-suggestions-leave-start\" x-transition:leave-end=\"search-suggestions-leave-end\"><template x-for=\"(suggestion, index) in staticSuggestions\" x-key=\"'static-' + index\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 = []any{suggestionsClasses(props)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
+		var templ_7745c5c3_Var7 = []any{getSuggestionItemClasses()}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -269,31 +252,33 @@ func SearchBox(props SearchBoxProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var6).String())
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var7).String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 1, Col: 0}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" x-show=\"showSuggestions && suggestions.length > 0\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"transform opacity-0 scale-95\" x-transition:enter-end=\"transform opacity-100 scale-100\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"transform opacity-100 scale-100\" x-transition:leave-end=\"transform opacity-0 scale-95\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" x-on:click=\"selectSuggestion(suggestion)\" x-bind:class=\"{ 'search-suggestion-item-selected': index === selectedIndex && !hasDynamicSuggestions }\"><div x-show=\"suggestion.icon\" class=\"search-suggestion-icon\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, suggestion := range props.Suggestions {
-			templ_7745c5c3_Err = suggestionItem(suggestion, props).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<template x-for=\"(suggestion, index) in suggestions\" x-key=\"index\">")
+		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
+			Name:      "",
+			Size:      atoms.IconSizeSM,
+			ClassName: "search-suggestion-icon-img",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 = []any{suggestionItemClasses()}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><div class=\"search-suggestion-content\"><div class=\"search-suggestion-label\" x-text=\"suggestion.label\"></div><div x-show=\"suggestion.description\" class=\"search-suggestion-description\" x-text=\"suggestion.description\"></div></div><div x-show=\"suggestion.category\" class=\"search-suggestion-category\" x-text=\"suggestion.category\"></div></div></template><template x-for=\"(suggestion, index) in suggestions\" x-key=\"'dynamic-' + index\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 = []any{getSuggestionItemClasses()}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var9...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -301,24 +286,28 @@ func SearchBox(props SearchBoxProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var8).String())
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var9).String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 1, Col: 0}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" x-on:click=\"selectSuggestion(suggestion)\" x-bind:class=\"{ 'bg-accent text-accent-foreground': index === selectedIndex }\"><span x-show=\"suggestion.icon\" class=\"shrink-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" x-on:click=\"selectSuggestion(suggestion)\" x-bind:class=\"{ 'search-suggestion-item-selected': (index + staticSuggestions.length) === selectedIndex }\"><div x-show=\"suggestion.icon\" class=\"search-suggestion-icon\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "", Size: atoms.IconSizeSM, Class: "text-muted-foreground"}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
+			Name:      "",
+			Size:      atoms.IconSizeSM,
+			ClassName: "search-suggestion-icon-img",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span><div class=\"flex-1 min-w-0\"><div class=\"font-medium\" x-text=\"suggestion.label\"></div><div x-show=\"suggestion.description\" class=\"text-xs text-muted-foreground\" x-text=\"suggestion.description\"></div></div><div x-show=\"suggestion.category\" class=\"text-xs text-muted-foreground\" x-text=\"suggestion.category\"></div></div></template><div class=\"px-3 py-2 text-sm text-muted-foreground\" x-show=\"searchQuery.length >= minChars && suggestions.length === 0 && !loading\">No results found</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"search-suggestion-content\"><div class=\"search-suggestion-label\" x-text=\"suggestion.label\"></div><div x-show=\"suggestion.description\" class=\"search-suggestion-description\" x-text=\"suggestion.description\"></div></div><div x-show=\"suggestion.category\" class=\"search-suggestion-category\" x-text=\"suggestion.category\"></div></div></template><div class=\"search-suggestion-no-results\" x-show=\"searchQuery.length >= minChars && suggestions.length === 0 && staticSuggestions.length === 0 && !loading\">No results found</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -326,213 +315,31 @@ func SearchBox(props SearchBoxProps) templ.Component {
 	})
 }
 
-// suggestionItem renders a static suggestion item
-func suggestionItem(suggestion SearchSuggestion, props SearchBoxProps) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var10 == nil {
-			templ_7745c5c3_Var10 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var11 = []any{suggestionItemClasses()}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var11...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var11).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if suggestion.URL != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " hx-get=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(suggestion.URL)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 224, Col: 26}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" hx-target=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 225, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" hx-swap=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getHXSwapValue(props.HXSwap))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 226, Col: 41}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, " x-on:click=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(generateSelectSuggestionHandler(suggestion))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 228, Col: 58}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if suggestion.Icon != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<span class=\"shrink-0\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: suggestion.Icon, Size: atoms.IconSizeSM, Class: "text-muted-foreground"}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"flex-1 min-w-0\"><div class=\"font-medium\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(suggestion.Label)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 236, Col: 46}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if suggestion.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"text-xs text-muted-foreground\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var18 string
-			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(suggestion.Description)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 238, Col: 71}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if suggestion.Category != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"text-xs text-muted-foreground\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(suggestion.Category)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 242, Col: 67}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
+// getSearchBoxAlpineData generates the Alpine.js data for the search box
+func getSearchBoxAlpineData(props SearchBoxProps) string {
+	minChars := utils.IfElse(props.MinChars > 0, props.MinChars, 2)
+	debounce := utils.IfElse(props.Debounce > 0, props.Debounce, 300)
 
-// Helper function to generate default Alpine.js data
-func getDefaultAlpineData(props SearchBoxProps) string {
-	minChars := props.MinChars
-	if minChars == 0 {
-		minChars = 1
+	// Convert suggestions to JSON-safe format
+	staticSuggestions := "[]"
+	if len(props.Suggestions) > 0 {
+		staticSuggestions = formatSuggestionsForJS(props.Suggestions)
 	}
 
-	debounce := props.Debounce
-	if debounce == 0 {
-		debounce = 300
-	}
-
-	return `{
-		searchQuery: '` + props.Value + `',
+	return fmt.Sprintf(`{
+		searchQuery: '%s',
 		suggestions: [],
+		staticSuggestions: %s,
 		showSuggestions: false,
 		selectedIndex: -1,
-		loading: false,
-		minChars: ` + strconv.Itoa(minChars) + `,
+		loading: %t,
+		minChars: %d,
 		debounceTimer: null,
+		hasDynamicSuggestions: false,
+		
+		init() {
+			this.$watch('searchQuery', () => this.handleSearch());
+		},
 		
 		handleSearch() {
 			if (this.debounceTimer) {
@@ -541,196 +348,123 @@ func getDefaultAlpineData(props SearchBoxProps) string {
 			
 			this.debounceTimer = setTimeout(() => {
 				if (this.searchQuery.length >= this.minChars) {
-					this.search();
+					this.performSearch();
 				} else {
-					this.suggestions = [];
-					this.showSuggestions = false;
+					this.hideSuggestions();
 				}
-			}, ` + strconv.Itoa(debounce) + `);
+			}, %d);
 		},
 		
-		search() {
+		performSearch() {
 			this.loading = true;
-			// Custom search logic here
-			` + props.OnSearch + `
-			// Default HTMX search is handled by the input element
+			this.showSuggestions = true;
+			
+			// Custom search logic
+			if (%s) {
+				%s;
+			}
+			
+			// Filter static suggestions based on query
+			if (this.searchQuery.length > 0) {
+				this.staticSuggestions = %s.filter(suggestion => 
+					suggestion.label.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+					(suggestion.description && suggestion.description.toLowerCase().includes(this.searchQuery.toLowerCase()))
+				);
+			} else {
+				this.staticSuggestions = %s;
+			}
 		},
 		
 		selectSuggestion(suggestion) {
-			` + getClearOnSelectJS(props.ClearOnSelect) + `
-			this.showSuggestions = false;
-			this.selectedIndex = -1;
-			` + props.OnSelect + `
+			%s
+			this.hideSuggestions();
+			
+			// Custom select logic
+			if (%s) {
+				%s;
+			}
 			
 			// Navigate if URL is provided
-			if (suggestion.url) {
-				htmx.ajax('GET', suggestion.url, { target: '` + props.HXTarget + `', swap: '` + props.HXSwap + `' });
+			if (suggestion.url && '%s') {
+				htmx.ajax('GET', suggestion.url, { 
+					target: '%s', 
+					swap: '%s' 
+				});
 			}
 		},
 		
 		clearSearch() {
 			this.searchQuery = '';
 			this.suggestions = [];
-			this.showSuggestions = false;
-			this.selectedIndex = -1;
-			` + props.OnClear + `
+			this.hideSuggestions();
+			
+			// Custom clear logic
+			if (%s) {
+				%s;
+			}
 		},
 		
-		// Keyboard navigation
-		handleKeydown(event) {
-			if (!this.showSuggestions) return;
-			
-			switch (event.key) {
-				case 'ArrowDown':
-					event.preventDefault();
-					this.selectedIndex = Math.min(this.selectedIndex + 1, this.suggestions.length - 1);
-					break;
-				case 'ArrowUp':
-					event.preventDefault();
-					this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
-					break;
-				case 'Enter':
-					event.preventDefault();
-					if (this.selectedIndex >= 0) {
-						this.selectSuggestion(this.suggestions[this.selectedIndex]);
-					}
-					break;
-				case 'Escape':
-					this.showSuggestions = false;
-					this.selectedIndex = -1;
-					break;
+		hideSuggestions() {
+			this.showSuggestions = false;
+			this.selectedIndex = -1;
+			this.loading = false;
+		},
+		
+		showSuggestionsDropdown() {
+			if (this.searchQuery.length >= this.minChars || this.staticSuggestions.length > 0) {
+				this.showSuggestions = true;
 			}
 		}
-	}`
+	}`,
+		props.Value,
+		staticSuggestions,
+		props.Loading,
+		minChars,
+		debounce,
+		props.OnSearch != "",
+		utils.IfElse(props.OnSearch != "", props.OnSearch, ""),
+		staticSuggestions,
+		staticSuggestions,
+		utils.IfElse(props.ClearOnSelect, "this.searchQuery = '';", "this.searchQuery = suggestion.label;"),
+		props.OnSelect != "",
+		utils.IfElse(props.OnSelect != "", props.OnSelect, ""),
+		props.HXTarget,
+		props.HXTarget,
+		utils.IfElse(props.HXSwap != "", props.HXSwap, "innerHTML"),
+		props.OnClear != "",
+		utils.IfElse(props.OnClear != "", props.OnClear, ""),
+	)
 }
 
-// Helper function to convert SearchSuggestion to JavaScript object string
-func suggestionToJS(suggestion SearchSuggestion) string {
-	return `{
-		value: '` + suggestion.Value + `',
-		label: '` + suggestion.Label + `',
-		description: '` + suggestion.Description + `',
-		icon: '` + suggestion.Icon + `',
-		category: '` + suggestion.Category + `',
-		url: '` + suggestion.URL + `'
-	}`
-}
-
-// getHXSwapValue returns the HX swap value, defaulting to "innerHTML" if empty
-func getHXSwapValue(swap string) string {
-	if swap != "" {
-		return swap
+// formatSuggestionsForJS converts suggestions array to JavaScript array string
+func formatSuggestionsForJS(suggestions []SearchSuggestion) string {
+	if len(suggestions) == 0 {
+		return "[]"
 	}
-	return "innerHTML"
-}
 
-// generateSelectSuggestionHandler creates the x-on:click handler for selecting a suggestion
-func generateSelectSuggestionHandler(suggestion SearchSuggestion) string {
-	return fmt.Sprintf("selectSuggestion(%s)", suggestionToJS(suggestion))
-}
-
-// getClearOnSelectJS returns the JavaScript for clearing on select
-func getClearOnSelectJS(clearOnSelect bool) string {
-	if clearOnSelect {
-		return "this.searchQuery = '';"
+	result := "["
+	for i, suggestion := range suggestions {
+		if i > 0 {
+			result += ","
+		}
+		result += fmt.Sprintf(`{
+			value: '%s',
+			label: '%s',
+			description: '%s',
+			icon: '%s',
+			category: '%s',
+			url: '%s'
+		}`,
+			suggestion.Value,
+			suggestion.Label,
+			suggestion.Description,
+			suggestion.Icon,
+			suggestion.Category,
+			suggestion.URL,
+		)
 	}
-	return "this.searchQuery = suggestion.label;"
-}
-
-// getPlaceholderValue returns the placeholder value, defaulting to "Search..." if empty
-func getPlaceholderValue(placeholder string) string {
-	if placeholder != "" {
-		return placeholder
-	}
-	return "Search..."
-}
-
-// getHXTriggerValue returns the HX trigger value, defaulting to "keyup changed delay:300ms" if empty
-func getHXTriggerValue(trigger string) string {
-	if trigger != "" {
-		return trigger
-	}
-	return "keyup changed delay:300ms"
-}
-
-// getAlpineModelValue returns the Alpine model value, defaulting to "searchQuery" if empty
-func getAlpineModelValue(model string) string {
-	if model != "" {
-		return model
-	}
-	return "searchQuery"
-}
-
-// getSearchSizeValue returns the search size value with default
-func getSearchSizeValue(size SearchBoxSize) SearchBoxSize {
-	if size != "" {
-		return size
-	}
-	return SearchBoxSizeMD
-}
-
-// getGlobalSearchID returns the global search ID with default
-func getGlobalSearchID(id string) string {
-	if id != "" {
-		return id
-	}
-	return "global-search"
-}
-
-// getGlobalSearchName returns the global search name with default
-func getGlobalSearchName(name string) string {
-	if name != "" {
-		return name
-	}
-	return "q"
-}
-
-// getGlobalSearchPlaceholder returns the global search placeholder with default
-func getGlobalSearchPlaceholder(placeholder string) string {
-	if placeholder != "" {
-		return placeholder
-	}
-	return "Search everything..."
-}
-
-// getGlobalSearchHXGet returns the global search HX get value with default
-func getGlobalSearchHXGet(hxGet string) string {
-	if hxGet != "" {
-		return hxGet
-	}
-	return "/search"
-}
-
-// getGlobalSearchHXTarget returns the global search HX target value with default
-func getGlobalSearchHXTarget(hxTarget string) string {
-	if hxTarget != "" {
-		return hxTarget
-	}
-	return "#search-results"
-}
-
-// getQuickSearchPlaceholder returns the placeholder for quick search
-func getQuickSearchPlaceholder(placeholder string) string {
-	if placeholder != "" {
-		return placeholder
-	}
-	return "Quick search..."
-}
-
-// getMinCharsValue returns the minimum characters value, defaulting to 2 if 0 or less
-func getMinCharsValue(minChars int) int {
-	if minChars > 0 {
-		return minChars
-	}
-	return 2
-}
-
-// getDebounceValue returns the debounce value, defaulting to 200 if 0 or less
-func getDebounceValue(debounce int) int {
-	if debounce > 0 {
-		return debounce
-	}
-	return 200
+	result += "]"
+	return result
 }
 
 // QuickSearchBox renders a simplified search box for quick searches
@@ -750,23 +484,26 @@ func QuickSearchBox(props SearchBoxProps) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var20 == nil {
-			templ_7745c5c3_Var20 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = SearchBox(SearchBoxProps{
-			Size:        props.Size,
-			ID:          props.ID,
-			Name:        props.Name,
+			ID:          utils.IfElse(props.ID != "", props.ID, "quick-search"),
+			Name:        utils.IfElse(props.Name != "", props.Name, "q"),
+			Size:        utils.IfElse(props.Size != "", props.Size, SearchBoxSizeSM),
+			Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Quick search..."),
+			MinChars:    utils.IfElse(props.MinChars > 0, props.MinChars, 1),
+			Debounce:    utils.IfElse(props.Debounce > 0, props.Debounce, 200),
 			Value:       props.Value,
-			Placeholder: getQuickSearchPlaceholder(props.Placeholder),
-			Class:       props.Class,
-			MinChars:    getMinCharsValue(props.MinChars),
-			Debounce:    getDebounceValue(props.Debounce),
+			ClassName:   utils.TwMerge("quick-search", props.ClassName),
 			HXGet:       props.HXGet,
 			HXTarget:    props.HXTarget,
 			HXSwap:      props.HXSwap,
+			OnSearch:    props.OnSearch,
+			OnSelect:    props.OnSelect,
+			OnClear:     props.OnClear,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -792,23 +529,24 @@ func GlobalSearchBox(props SearchBoxProps) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var21 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var21 == nil {
-			templ_7745c5c3_Var21 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = SearchBox(SearchBoxProps{
-			Size:        getSearchSizeValue(props.Size),
-			ID:          getGlobalSearchID(props.ID),
-			Name:        getGlobalSearchName(props.Name),
+			ID:          utils.IfElse(props.ID != "", props.ID, "global-search"),
+			Name:        utils.IfElse(props.Name != "", props.Name, "search"),
+			Size:        utils.IfElse(props.Size != "", props.Size, SearchBoxSizeMD),
+			Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Search everything..."),
+			MinChars:    utils.IfElse(props.MinChars > 0, props.MinChars, 3),
+			Debounce:    utils.IfElse(props.Debounce > 0, props.Debounce, 300),
 			Value:       props.Value,
-			Placeholder: getGlobalSearchPlaceholder(props.Placeholder),
-			Class:       props.Class,
-			MinChars:    getMinCharsValue(props.MinChars),
-			Debounce:    getDebounceValue(props.Debounce),
-			HXGet:       getGlobalSearchHXGet(props.HXGet),
-			HXTarget:    getGlobalSearchHXTarget(props.HXTarget),
-			HXSwap:      getHXSwapValue(props.HXSwap),
+			ClassName:   utils.TwMerge("global-search", props.ClassName),
+			Suggestions: props.Suggestions,
+			HXGet:       utils.IfElse(props.HXGet != "", props.HXGet, "/search"),
+			HXTarget:    utils.IfElse(props.HXTarget != "", props.HXTarget, "#search-results"),
+			HXSwap:      utils.IfElse(props.HXSwap != "", props.HXSwap, "innerHTML"),
 			OnSearch:    props.OnSearch,
 			OnSelect:    props.OnSelect,
 			OnClear:     props.OnClear,

@@ -3,7 +3,7 @@ package molecules
 import (
 	"fmt"
 
-	"github.com/niiniyare/ruun/views/components/utils"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 
@@ -80,8 +80,8 @@ type SelectOption struct {
 func getFormFieldClasses(props FormFieldProps) string {
 	return utils.TwMerge(
 		"form-field",
-		fmt.Sprintf("form-field-%s", utils.If(props.Size != "", props.Size, "md")),
-		fmt.Sprintf("form-field-%s", utils.If(props.Variant != "", props.Variant, "default")),
+		fmt.Sprintf("form-field-%s", utils.IfElse(props.Size != "", props.Size, "md")),
+		fmt.Sprintf("form-field-%s", utils.IfElse(props.Variant != "", props.Variant, "default")),
 		utils.If(props.FullWidth, "form-field-full-width"),
 		utils.If(props.Required, "form-field-required"),
 		utils.If(props.Disabled, "form-field-disabled"),
@@ -96,7 +96,7 @@ func getFormFieldClasses(props FormFieldProps) string {
 func getLabelClasses(props FormFieldProps) string {
 	return utils.TwMerge(
 		"form-field-label",
-		fmt.Sprintf("form-field-label-%s", utils.If(props.Size != "", props.Size, "md")),
+		fmt.Sprintf("form-field-label-%s", utils.IfElse(props.Size != "", props.Size, "md")),
 		utils.If(props.Required, "form-field-label-required"),
 		utils.If(props.Disabled, "form-field-label-disabled"),
 		props.LabelClass,
@@ -119,8 +119,8 @@ func getValidationStateClasses(state string) string {
 	}
 }
 
-// getValidationMessageClasses returns compiled theme classes for validation messages
-func getValidationMessageClasses(state string) string {
+// getFormFieldValidationMessageClasses returns compiled theme classes for validation messages
+func getFormFieldValidationMessageClasses(state string) string {
 	switch state {
 	case ValidationStateInvalid:
 		return "validation-message validation-message-error"
@@ -157,33 +157,20 @@ func buildInputProps(props FormFieldProps) atoms.InputProps {
 		inputSize = atoms.InputSizeXL
 	}
 
-	// Convert variant
-	inputVariant := atoms.InputVariantDefault
-	switch props.Variant {
-	case "outline":
-		inputVariant = atoms.InputVariantOutline
-	case "filled":
-		inputVariant = atoms.InputVariantFilled
-	case "ghost":
-		inputVariant = atoms.InputVariantGhost
-	}
+	// Note: Variant is handled through CSS classes
 
 	return atoms.InputProps{
 		ID:          props.ID,
 		Name:        props.Name,
-		Type:        props.Type,
+		Type:        atoms.InputType(props.Type),
 		Value:       props.Value,
 		Placeholder: props.Placeholder,
 		Size:        inputSize,
-		Variant:     inputVariant,
 		State:       inputState,
 		Required:    props.Required,
 		Disabled:    props.Disabled,
 		Readonly:    props.Readonly,
-		FullWidth:   props.FullWidth,
-		ClassName:   props.InputClass,
-		Icon:        props.Icon,
-		AriaLabel:   props.AriaLabel,
+		ClassName:   utils.TwMerge(utils.If(props.FullWidth, "w-full"), props.InputClass),
 	}
 }
 
@@ -215,8 +202,8 @@ func buildCheckboxProps(props FormFieldProps, option SelectOption) atoms.Checkbo
 	}
 }
 
-// buildRadioProps creates radio props from FormField props
-func buildRadioProps(props FormFieldProps, option SelectOption) atoms.RadioProps {
+// buildRadioGroupProps creates radio props from FormField props
+func buildRadioGroupProps(props FormFieldProps) atoms.RadioProps {
 	radioSize := atoms.RadioSizeMD
 	switch props.Size {
 	case "sm":
@@ -230,15 +217,28 @@ func buildRadioProps(props FormFieldProps, option SelectOption) atoms.RadioProps
 		radioState = atoms.RadioStateError
 	}
 
+	// Convert SelectOptions to RadioOptions
+	var radioOptions []atoms.RadioOption
+	for _, option := range props.Options {
+		radioOptions = append(radioOptions, atoms.RadioOption{
+			Value:       option.Value,
+			Label:       option.Label,
+			Description: option.Description,
+			Disabled:    option.Disabled,
+			Icon:        option.Icon,
+		})
+	}
+
 	return atoms.RadioProps{
-		ID:       fmt.Sprintf("%s-%s", props.ID, option.Value),
+		ID:       props.ID,
 		Name:     props.Name,
-		Value:    option.Value,
-		Label:    option.Label,
-		Selected: option.Selected,
-		Disabled: props.Disabled || option.Disabled,
+		Value:    props.Value,
+		Options:  radioOptions,
 		Size:     radioSize,
 		State:    radioState,
-		Icon:     option.Icon,
+		Required: props.Required,
+		Disabled: props.Disabled,
+		Readonly: props.Readonly,
+		Class:    props.InputClass,
 	}
 }

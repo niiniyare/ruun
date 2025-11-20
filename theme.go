@@ -338,18 +338,21 @@ func (api *ThemeAPI) convertTokens(tokens map[string]any, components map[string]
 	return designTokens
 }
 
-func convertColors(tokens map[string]any) *schema.SemanticColors {
+func convertColors(tokens map[string]any) *schema.SemanticTokens {
 	colors, ok := tokens["colors"].(map[string]any)
 	if !ok {
-		return &schema.SemanticColors{}
+		return &schema.SemanticTokens{}
 	}
 
-	semanticColors := &schema.SemanticColors{
-		Background:  &schema.BackgroundColors{},
-		Text:        &schema.TextColors{},
-		Border:      &schema.BorderColors{},
-		Interactive: &schema.InteractiveColors{},
-		Feedback:    &schema.FeedbackColors{},
+	semanticColors := &schema.SemanticTokens{
+		// Background:  &schema.BackgroundColors{},
+		// Text:        &schema.TextColors{},
+		// Border:      &schema.BorderColors{},
+		// Interactive: &schema.InteractiveColors{},
+		// Feedback:    &schema.FeedbackColors{},
+		Colors:     map[string]string{},
+		Spacing:    map[string]string{},
+		Typography: map[string]string{},
 	}
 
 	for key, value := range colors {
@@ -557,7 +560,6 @@ func (b *CSSBeautifier) Beautify(css string) string {
 			result.WriteString("{\n")
 			buffer.Reset()
 			indentLevel++
-			inSelector = false
 
 		case '}':
 			// Write any remaining property

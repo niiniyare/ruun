@@ -1,7 +1,8 @@
 package molecules
 
 import (
-	"strings"
+	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 
@@ -9,12 +10,12 @@ import (
 type MenuItemType string
 
 const (
-	MenuItemButton    MenuItemType = "button"
-	MenuItemLink      MenuItemType = "link"
-	MenuItemDivider   MenuItemType = "divider"
-	MenuItemSubmenu   MenuItemType = "submenu"
-	MenuItemCheckbox  MenuItemType = "checkbox"
-	MenuItemRadio     MenuItemType = "radio"
+	MenuItemTypeButton   MenuItemType = "button"
+	MenuItemTypeLink     MenuItemType = "link"
+	MenuItemTypeDivider  MenuItemType = "divider"
+	MenuItemTypeSubmenu  MenuItemType = "submenu"
+	MenuItemTypeCheckbox MenuItemType = "checkbox"
+	MenuItemTypeRadio    MenuItemType = "radio"
 )
 
 // MenuItemSize defines the size variants for menu items
@@ -28,132 +29,127 @@ const (
 
 // MenuItemProps defines the properties for MenuItem components
 type MenuItemProps struct {
-	Type        MenuItemType
-	Size        MenuItemSize
-	Text        string
-	Description string
-	Value       string
-	URL         string
-	Icon        string
-	IconLeft    string
-	IconRight   string
-	Badge       string
-	BadgeVariant atoms.BadgeVariant
-	Active      bool
-	Selected    bool
-	Checked     bool
-	Disabled    bool
-	Destructive bool
-	Class       string
-	ID          string
-	Name        string
-	Target      string // For links: _blank, _self, etc.
+	// Basic properties
+	Type        MenuItemType `json:"type"`
+	Size        MenuItemSize `json:"size,omitempty"`
+	Text        string       `json:"text,omitempty"`
+	Description string       `json:"description,omitempty"`
+	Value       string       `json:"value,omitempty"`
+	URL         string       `json:"url,omitempty"`
+	Target      string       `json:"target,omitempty"` // For links: _blank, _self, etc.
+	ID          string       `json:"id,omitempty"`
+	Name        string       `json:"name,omitempty"`
+	ClassName   string       `json:"className,omitempty"`
+
+	// Visual elements
+	Icon         string                `json:"icon,omitempty"`
+	IconLeft     string                `json:"iconLeft,omitempty"`
+	IconRight    string                `json:"iconRight,omitempty"`
+	Badge        string                `json:"badge,omitempty"`
+	BadgeVariant atoms.BadgeVariant    `json:"badgeVariant,omitempty"`
+
+	// States
+	Active      bool `json:"active,omitempty"`
+	Selected    bool `json:"selected,omitempty"`
+	Checked     bool `json:"checked,omitempty"`
+	Disabled    bool `json:"disabled,omitempty"`
+	Destructive bool `json:"destructive,omitempty"`
+
 	// Submenu items
-	SubItems    []MenuItemProps
+	SubItems []MenuItemProps `json:"subItems,omitempty"`
+
 	// HTMX attributes
-	HXPost      string
-	HXGet       string
-	HXTarget    string
-	HXSwap      string
-	HXTrigger   string
+	HXPost    string `json:"hxPost,omitempty"`
+	HXGet     string `json:"hxGet,omitempty"`
+	HXTarget  string `json:"hxTarget,omitempty"`
+	HXSwap    string `json:"hxSwap,omitempty"`
+	HXTrigger string `json:"hxTrigger,omitempty"`
+
 	// Alpine.js attributes
-	AlpineClick string
-	AlpineShow  string // For submenu visibility
-	AlpineData  string // Custom x-data
+	AlpineClick string `json:"alpineClick,omitempty"`
+	AlpineShow  string `json:"alpineShow,omitempty"` // For submenu visibility
+	AlpineData  string `json:"alpineData,omitempty"` // Custom x-data
+
 	// Events
-	OnClick     string
-	OnSelect    string
+	OnClick  string `json:"onClick,omitempty"`
+	OnSelect string `json:"onSelect,omitempty"`
 }
 
-// menuItemClasses generates classes for menu items
-func menuItemClasses(props MenuItemProps) string {
-	var classes []string
-
-	// Base classes for interactive items
-	if props.Type != MenuItemDivider {
-		classes = append(classes,
-			"relative",
-			"flex",
-			"cursor-pointer",
-			"select-none",
-			"items-center",
-			"gap-2",
-			"rounded-sm",
-			"text-sm",
-			"transition-colors",
-			"focus:outline-none",
-			"focus:bg-accent",
-			"focus:text-accent-foreground",
+// getMenuItemClasses returns compiled theme classes for menu items
+func getMenuItemClasses(props MenuItemProps) string {
+	if props.Type == MenuItemTypeDivider {
+		return utils.TwMerge(
+			"menu-item-divider",
+			props.ClassName,
 		)
-
-		// Size-based padding
-		switch props.Size {
-		case MenuItemSizeSM:
-			classes = append(classes, "px-2", "py-1", "text-xs")
-		case MenuItemSizeMD:
-			classes = append(classes, "px-2", "py-1.5", "text-sm")
-		case MenuItemSizeLG:
-			classes = append(classes, "px-3", "py-2", "text-base")
-		default:
-			classes = append(classes, "px-2", "py-1.5", "text-sm")
-		}
-
-		// State-based styling
-		if props.Disabled {
-			classes = append(classes, "pointer-events-none", "opacity-50")
-		} else {
-			if props.Destructive {
-				classes = append(classes, "text-destructive", "focus:text-destructive")
-			}
-			classes = append(classes, "hover:bg-accent", "hover:text-accent-foreground")
-		}
-
-		if props.Active || props.Selected {
-			classes = append(classes, "bg-accent", "text-accent-foreground")
-		}
-	} else {
-		// Divider classes
-		classes = append(classes, "h-px", "bg-muted", "my-1", "-mx-1")
 	}
 
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+	return utils.TwMerge(
+		"menu-item",
+		fmt.Sprintf("menu-item-%s", string(props.Type)),
+		fmt.Sprintf("menu-item-%s", utils.IfElse(string(props.Size) != "", string(props.Size), "md")),
+		utils.If(props.Active || props.Selected, "menu-item-active"),
+		utils.If(props.Disabled, "menu-item-disabled"),
+		utils.If(props.Destructive, "menu-item-destructive"),
+		props.ClassName,
+	)
 }
 
-// getCheckboxOpacity returns the opacity class for checkbox items
-func getCheckboxOpacity(checked bool) string {
-	if checked {
-		return "w-2 h-2 bg-primary rounded-sm transition-opacity opacity-100"
-	}
-	return "w-2 h-2 bg-primary rounded-sm transition-opacity opacity-0"
+// getCheckboxIndicatorClasses returns compiled theme classes for checkbox indicator
+func getCheckboxIndicatorClasses(checked bool) string {
+	return utils.TwMerge(
+		"menu-item-checkbox-indicator",
+		utils.If(checked, "menu-item-checkbox-checked"),
+	)
 }
 
-// getRadioOpacity returns the opacity class for radio items
-func getRadioOpacity(checked bool) string {
-	if checked {
-		return "w-2 h-2 bg-primary rounded-full transition-opacity opacity-100"
-	}
-	return "w-2 h-2 bg-primary rounded-full transition-opacity opacity-0"
+// getRadioIndicatorClasses returns compiled theme classes for radio indicator
+func getRadioIndicatorClasses(checked bool) string {
+	return utils.TwMerge(
+		"menu-item-radio-indicator",
+		utils.If(checked, "menu-item-radio-checked"),
+	)
 }
 
-// getBadgeVariant returns the badge variant with default
-func getBadgeVariant(variant atoms.BadgeVariant) atoms.BadgeVariant {
-	if variant != "" {
-		return variant
+// buildBadgeProps creates badge props from menu item props
+func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
+	variant := props.BadgeVariant
+	if variant == "" {
+		variant = atoms.BadgeSecondary
 	}
-	return atoms.BadgeSecondary
+
+	return atoms.BadgeProps{
+		Variant:   variant,
+		Size:      atoms.BadgeSizeSM,
+		Class: "menu-item-badge",
+	}
 }
 
-// MenuItem renders a menu item component
+// buildIconProps creates icon props for menu item icons
+func buildIconProps(name string, position string) atoms.IconProps {
+	className := "menu-item-icon"
+	if position != "" {
+		className = fmt.Sprintf("menu-item-icon menu-item-icon-%s", position)
+	}
+
+	size := atoms.IconSizeSM
+	if position == "submenu" {
+		size = atoms.IconSizeXS
+	}
+
+	return atoms.IconProps{
+		Name:      name,
+		Size:      size,
+		ClassName: className,
+	}
+}
+
+// MenuItem renders a menu item component with compiled theme classes
 templ MenuItem(props MenuItemProps) {
 	switch props.Type {
-	case MenuItemDivider:
-		<div class={ menuItemClasses(props) }></div>
-	case MenuItemLink:
+	case MenuItemTypeDivider:
+		<div class={ getMenuItemClasses(props) }></div>
+	case MenuItemTypeLink:
 		<a
 			if props.URL != "" {
 				href={ props.URL }
@@ -164,7 +160,7 @@ templ MenuItem(props MenuItemProps) {
 			if props.ID != "" {
 				id={ props.ID }
 			}
-			class={ menuItemClasses(props) }
+			class={ getMenuItemClasses(props) }
 			if props.HXGet != "" {
 				hx-get={ props.HXGet }
 			}
@@ -186,12 +182,12 @@ templ MenuItem(props MenuItemProps) {
 		>
 			@menuItemContent(props)
 		</a>
-	case MenuItemCheckbox:
+	case MenuItemTypeCheckbox:
 		<label
 			if props.ID != "" {
 				id={ props.ID }
 			}
-			class={ menuItemClasses(props) }
+			class={ getMenuItemClasses(props) }
 			if props.AlpineClick != "" {
 				x-on:click={ props.AlpineClick }
 			}
@@ -210,19 +206,17 @@ templ MenuItem(props MenuItemProps) {
 				if props.Disabled {
 					disabled
 				}
-				class="sr-only"
+				class="menu-item-checkbox-input"
 			/>
-			<div class="flex items-center justify-center w-4 h-4 border rounded-sm border-input">
-				<div class={ getCheckboxOpacity(props.Checked) }></div>
-			</div>
+			<div class={ getCheckboxIndicatorClasses(props.Checked) }></div>
 			@menuItemContent(props)
 		</label>
-	case MenuItemRadio:
+	case MenuItemTypeRadio:
 		<label
 			if props.ID != "" {
 				id={ props.ID }
 			}
-			class={ menuItemClasses(props) }
+			class={ getMenuItemClasses(props) }
 			if props.AlpineClick != "" {
 				x-on:click={ props.AlpineClick }
 			}
@@ -241,19 +235,17 @@ templ MenuItem(props MenuItemProps) {
 				if props.Disabled {
 					disabled
 				}
-				class="sr-only"
+				class="menu-item-radio-input"
 			/>
-			<div class="flex items-center justify-center w-4 h-4 border rounded-full border-input">
-				<div class={ getRadioOpacity(props.Checked) }></div>
-			</div>
+			<div class={ getRadioIndicatorClasses(props.Checked) }></div>
 			@menuItemContent(props)
 		</label>
-	case MenuItemSubmenu:
+	case MenuItemTypeSubmenu:
 		<div
 			if props.ID != "" {
 				id={ props.ID }
 			}
-			class="relative"
+			class="menu-item-submenu-container"
 			if props.AlpineData != "" {
 				x-data={ props.AlpineData }
 			} else {
@@ -261,23 +253,23 @@ templ MenuItem(props MenuItemProps) {
 			}
 		>
 			<div
-				class={ menuItemClasses(props) }
+				class={ getMenuItemClasses(props) }
 				x-on:click="open = !open"
 				x-on:mouseenter="open = true"
 				x-on:mouseleave="open = false"
 			>
 				@menuItemContent(props)
-				@atoms.Icon(atoms.IconProps{Name: "chevron-right", Size: atoms.IconSizeXS, Class: "ml-auto"})
+				@atoms.Icon(buildIconProps("chevron-right", "submenu"))
 			</div>
 			<div
-				class="absolute left-full top-0 ml-1 min-w-[8rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-md z-50"
+				class="menu-item-submenu-dropdown"
 				x-show="open"
-				x-transition:enter="transition ease-out duration-100"
-				x-transition:enter-start="transform opacity-0 scale-95"
-				x-transition:enter-end="transform opacity-100 scale-100"
-				x-transition:leave="transition ease-in duration-75"
-				x-transition:leave-start="transform opacity-100 scale-100"
-				x-transition:leave-end="transform opacity-0 scale-95"
+				x-transition:enter="menu-submenu-enter"
+				x-transition:enter-start="menu-submenu-enter-start"
+				x-transition:enter-end="menu-submenu-enter-end"
+				x-transition:leave="menu-submenu-leave"
+				x-transition:leave-start="menu-submenu-leave-start"
+				x-transition:leave-end="menu-submenu-leave-end"
 			>
 				for _, subItem := range props.SubItems {
 					@MenuItem(subItem)
@@ -285,12 +277,12 @@ templ MenuItem(props MenuItemProps) {
 			</div>
 		</div>
 	default:
-		// MenuItemButton or default
+		// MenuItemTypeButton or default
 		<div
 			if props.ID != "" {
 				id={ props.ID }
 			}
-			class={ menuItemClasses(props) }
+			class={ getMenuItemClasses(props) }
 			if props.HXPost != "" {
 				hx-post={ props.HXPost }
 			}
@@ -317,82 +309,77 @@ templ MenuItem(props MenuItemProps) {
 	}
 }
 
-// menuItemContent renders the content of a menu item
+// menuItemContent renders the content of a menu item using refactored atoms
 templ menuItemContent(props MenuItemProps) {
 	// Left icon
 	if props.IconLeft != "" {
-		@atoms.Icon(atoms.IconProps{Name: props.IconLeft, Size: atoms.IconSizeSM, Class: "shrink-0"})
+		@atoms.Icon(buildIconProps(props.IconLeft, "left"))
 	}
 	
 	// Single icon (for icon-only items)
 	if props.Icon != "" && props.Text == "" {
-		@atoms.Icon(atoms.IconProps{Name: props.Icon, Size: atoms.IconSizeMD})
+		@atoms.Icon(buildIconProps(props.Icon, "single"))
 	}
 	
 	// Text content
 	if props.Text != "" {
-		<div class="flex flex-col gap-0.5">
-			<span>{ props.Text }</span>
+		<div class="menu-item-content">
+			<span class="menu-item-text">{ props.Text }</span>
 			if props.Description != "" {
-				<span class="text-xs text-muted-foreground">{ props.Description }</span>
+				<span class="menu-item-description">{ props.Description }</span>
 			}
 		</div>
 	}
 	
 	// Badge
 	if props.Badge != "" {
-		@atoms.Badge(atoms.BadgeProps{
-			Variant: getBadgeVariant(props.BadgeVariant),
-			Size:    atoms.BadgeSizeSM,
-		}) {
+		@atoms.Badge(buildBadgeProps(props)) {
 			{ props.Badge }
 		}
 	}
 	
 	// Right icon
 	if props.IconRight != "" {
-		@atoms.Icon(atoms.IconProps{Name: props.IconRight, Size: atoms.IconSizeSM, Class: "ml-auto shrink-0"})
+		@atoms.Icon(buildIconProps(props.IconRight, "right"))
 	}
 }
 
-// MenuDivider renders a menu divider
+// Helper components using the refactored MenuItem
 templ MenuDivider() {
 	@MenuItem(MenuItemProps{
-		Type: MenuItemDivider,
+		Type: MenuItemTypeDivider,
 	})
 }
 
-// MenuLink renders a link menu item
 templ MenuLink(props MenuItemProps) {
 	@MenuItem(MenuItemProps{
-		Type:        MenuItemLink,
-		Size:        props.Size,
-		Text:        props.Text,
-		Description: props.Description,
-		URL:         props.URL,
-		Target:      props.Target,
-		Icon:        props.Icon,
-		IconLeft:    props.IconLeft,
-		IconRight:   props.IconRight,
-		Badge:       props.Badge,
+		Type:         MenuItemTypeLink,
+		Size:         props.Size,
+		Text:         props.Text,
+		Description:  props.Description,
+		URL:          props.URL,
+		Target:       props.Target,
+		Icon:         props.Icon,
+		IconLeft:     props.IconLeft,
+		IconRight:    props.IconRight,
+		Badge:        props.Badge,
 		BadgeVariant: props.BadgeVariant,
-		Active:      props.Active,
-		Disabled:    props.Disabled,
-		Class:       props.Class,
-		ID:          props.ID,
-		HXGet:       props.HXGet,
-		HXPost:      props.HXPost,
-		HXTarget:    props.HXTarget,
-		HXSwap:      props.HXSwap,
-		HXTrigger:   props.HXTrigger,
-		AlpineClick: props.AlpineClick,
+		Active:       props.Active,
+		Disabled:     props.Disabled,
+		ClassName:    props.ClassName,
+		ID:           props.ID,
+		HXGet:        props.HXGet,
+		HXPost:       props.HXPost,
+		HXTarget:     props.HXTarget,
+		HXSwap:       props.HXSwap,
+		HXTrigger:    props.HXTrigger,
+		AlpineClick:  props.AlpineClick,
 	})
 }
 
-// MenuButton renders a button menu item
 templ MenuButton(props MenuItemProps) {
 	@MenuItem(MenuItemProps{
-		Type:        MenuItemButton,
+		Type:        MenuItemTypeButton,
 		Size:        props.Size,
 		Text:        props.Text,
 		Description: props.Description,
@@ -404,7 +391,7 @@ templ MenuButton(props MenuItemProps) {
 		BadgeVariant: props.BadgeVariant,
 		Disabled:    props.Disabled,
 		Destructive: props.Destructive,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Name:        props.Name,
 		HXPost:      props.HXPost,
@@ -417,17 +404,16 @@ templ MenuButton(props MenuItemProps) {
 	})
 }
 
-// MenuCheckbox renders a checkbox menu item
 templ MenuCheckbox(props MenuItemProps) {
 	@MenuItem(MenuItemProps{
-		Type:        MenuItemCheckbox,
+		Type:        MenuItemTypeCheckbox,
 		Size:        props.Size,
 		Text:        props.Text,
 		Description: props.Description,
 		Value:       props.Value,
 		Checked:     props.Checked,
 		Disabled:    props.Disabled,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Name:        props.Name,
 		AlpineClick: props.AlpineClick,
@@ -435,17 +421,16 @@ templ MenuCheckbox(props MenuItemProps) {
 	})
 }
 
-// MenuRadio renders a radio menu item
 templ MenuRadio(props MenuItemProps) {
 	@MenuItem(MenuItemProps{
-		Type:        MenuItemRadio,
+		Type:        MenuItemTypeRadio,
 		Size:        props.Size,
 		Text:        props.Text,
 		Description: props.Description,
 		Value:       props.Value,
 		Checked:     props.Checked,
 		Disabled:    props.Disabled,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Name:        props.Name,
 		AlpineClick: props.AlpineClick,
@@ -453,17 +438,16 @@ templ MenuRadio(props MenuItemProps) {
 	})
 }
 
-// MenuSubmenu renders a submenu item
 templ MenuSubmenu(props MenuItemProps) {
 	@MenuItem(MenuItemProps{
-		Type:        MenuItemSubmenu,
+		Type:        MenuItemTypeSubmenu,
 		Size:        props.Size,
 		Text:        props.Text,
 		Description: props.Description,
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		SubItems:    props.SubItems,
-		Class:       props.Class,
+		ClassName:   props.ClassName,
 		ID:          props.ID,
 		AlpineData:  props.AlpineData,
 	})

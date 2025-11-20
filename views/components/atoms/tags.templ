@@ -5,13 +5,37 @@ import (
 	"strings"
 )
 
+// TagVariant defines the visual style variants for tags
+type TagVariant string
+
+const (
+	TagDefault     TagVariant = "default"
+	TagSecondary   TagVariant = "secondary"
+	TagSuccess     TagVariant = "success"
+	TagWarning     TagVariant = "warning"
+	TagDestructive TagVariant = "destructive"
+	TagOutline     TagVariant = "outline"
+)
+
+// TagSize defines the size variants for tags
+type TagSize string
+
+const (
+	TagSizeSM TagSize = "sm"
+	TagSizeMD TagSize = "md"
+	TagSizeLG TagSize = "lg"
+)
+
 // TagProps defines the properties for individual Tag components
 type TagProps struct {
 	Text        string
 	Value       string
+	Variant     TagVariant
+	Size        TagSize
 	Selected    bool
 	Removable   bool
 	Disabled    bool
+	Icon        string // Optional icon for the tag
 	Class       string
 	ID          string
 	// Events
@@ -28,6 +52,8 @@ type TagProps struct {
 type TagsProps struct {
 	Tags        []TagProps
 	MaxTags     int
+	Variant     TagVariant
+	Size        TagSize
 	Editable    bool
 	Placeholder string
 	Class       string
@@ -396,7 +422,7 @@ func AsTagDisabled() TagOption {
 }
 
 func WithTagClass(class string) TagOption {
-	return func(p *TagProps) { p.ClassName = class }
+	return func(p *TagProps) { p.Class = class }
 }
 
 // Key Improvements in this refactored version:

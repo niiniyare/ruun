@@ -9,20 +9,21 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"strings"
 )
 
 // MenuItemType defines the type of menu item
 type MenuItemType string
 
 const (
-	MenuItemButton   MenuItemType = "button"
-	MenuItemLink     MenuItemType = "link"
-	MenuItemDivider  MenuItemType = "divider"
-	MenuItemSubmenu  MenuItemType = "submenu"
-	MenuItemCheckbox MenuItemType = "checkbox"
-	MenuItemRadio    MenuItemType = "radio"
+	MenuItemTypeButton   MenuItemType = "button"
+	MenuItemTypeLink     MenuItemType = "link"
+	MenuItemTypeDivider  MenuItemType = "divider"
+	MenuItemTypeSubmenu  MenuItemType = "submenu"
+	MenuItemTypeCheckbox MenuItemType = "checkbox"
+	MenuItemTypeRadio    MenuItemType = "radio"
 )
 
 // MenuItemSize defines the size variants for menu items
@@ -36,127 +37,122 @@ const (
 
 // MenuItemProps defines the properties for MenuItem components
 type MenuItemProps struct {
-	Type         MenuItemType
-	Size         MenuItemSize
-	Text         string
-	Description  string
-	Value        string
-	URL          string
-	Icon         string
-	IconLeft     string
-	IconRight    string
-	Badge        string
-	BadgeVariant atoms.BadgeVariant
-	Active       bool
-	Selected     bool
-	Checked      bool
-	Disabled     bool
-	Destructive  bool
-	Class        string
-	ID           string
-	Name         string
-	Target       string // For links: _blank, _self, etc.
+	// Basic properties
+	Type        MenuItemType `json:"type"`
+	Size        MenuItemSize `json:"size,omitempty"`
+	Text        string       `json:"text,omitempty"`
+	Description string       `json:"description,omitempty"`
+	Value       string       `json:"value,omitempty"`
+	URL         string       `json:"url,omitempty"`
+	Target      string       `json:"target,omitempty"` // For links: _blank, _self, etc.
+	ID          string       `json:"id,omitempty"`
+	Name        string       `json:"name,omitempty"`
+	ClassName   string       `json:"className,omitempty"`
+
+	// Visual elements
+	Icon         string             `json:"icon,omitempty"`
+	IconLeft     string             `json:"iconLeft,omitempty"`
+	IconRight    string             `json:"iconRight,omitempty"`
+	Badge        string             `json:"badge,omitempty"`
+	BadgeVariant atoms.BadgeVariant `json:"badgeVariant,omitempty"`
+
+	// States
+	Active      bool `json:"active,omitempty"`
+	Selected    bool `json:"selected,omitempty"`
+	Checked     bool `json:"checked,omitempty"`
+	Disabled    bool `json:"disabled,omitempty"`
+	Destructive bool `json:"destructive,omitempty"`
+
 	// Submenu items
-	SubItems []MenuItemProps
+	SubItems []MenuItemProps `json:"subItems,omitempty"`
+
 	// HTMX attributes
-	HXPost    string
-	HXGet     string
-	HXTarget  string
-	HXSwap    string
-	HXTrigger string
+	HXPost    string `json:"hxPost,omitempty"`
+	HXGet     string `json:"hxGet,omitempty"`
+	HXTarget  string `json:"hxTarget,omitempty"`
+	HXSwap    string `json:"hxSwap,omitempty"`
+	HXTrigger string `json:"hxTrigger,omitempty"`
+
 	// Alpine.js attributes
-	AlpineClick string
-	AlpineShow  string // For submenu visibility
-	AlpineData  string // Custom x-data
+	AlpineClick string `json:"alpineClick,omitempty"`
+	AlpineShow  string `json:"alpineShow,omitempty"` // For submenu visibility
+	AlpineData  string `json:"alpineData,omitempty"` // Custom x-data
+
 	// Events
-	OnClick  string
-	OnSelect string
+	OnClick  string `json:"onClick,omitempty"`
+	OnSelect string `json:"onSelect,omitempty"`
 }
 
-// menuItemClasses generates classes for menu items
-func menuItemClasses(props MenuItemProps) string {
-	var classes []string
-
-	// Base classes for interactive items
-	if props.Type != MenuItemDivider {
-		classes = append(classes,
-			"relative",
-			"flex",
-			"cursor-pointer",
-			"select-none",
-			"items-center",
-			"gap-2",
-			"rounded-sm",
-			"text-sm",
-			"transition-colors",
-			"focus:outline-none",
-			"focus:bg-accent",
-			"focus:text-accent-foreground",
+// getMenuItemClasses returns compiled theme classes for menu items
+func getMenuItemClasses(props MenuItemProps) string {
+	if props.Type == MenuItemTypeDivider {
+		return utils.TwMerge(
+			"menu-item-divider",
+			props.ClassName,
 		)
-
-		// Size-based padding
-		switch props.Size {
-		case MenuItemSizeSM:
-			classes = append(classes, "px-2", "py-1", "text-xs")
-		case MenuItemSizeMD:
-			classes = append(classes, "px-2", "py-1.5", "text-sm")
-		case MenuItemSizeLG:
-			classes = append(classes, "px-3", "py-2", "text-base")
-		default:
-			classes = append(classes, "px-2", "py-1.5", "text-sm")
-		}
-
-		// State-based styling
-		if props.Disabled {
-			classes = append(classes, "pointer-events-none", "opacity-50")
-		} else {
-			if props.Destructive {
-				classes = append(classes, "text-destructive", "focus:text-destructive")
-			}
-			classes = append(classes, "hover:bg-accent", "hover:text-accent-foreground")
-		}
-
-		if props.Active || props.Selected {
-			classes = append(classes, "bg-accent", "text-accent-foreground")
-		}
-	} else {
-		// Divider classes
-		classes = append(classes, "h-px", "bg-muted", "my-1", "-mx-1")
 	}
 
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+	return utils.TwMerge(
+		"menu-item",
+		fmt.Sprintf("menu-item-%s", string(props.Type)),
+		fmt.Sprintf("menu-item-%s", utils.IfElse(string(props.Size) != "", string(props.Size), "md")),
+		utils.If(props.Active || props.Selected, "menu-item-active"),
+		utils.If(props.Disabled, "menu-item-disabled"),
+		utils.If(props.Destructive, "menu-item-destructive"),
+		props.ClassName,
+	)
 }
 
-// getCheckboxOpacity returns the opacity class for checkbox items
-func getCheckboxOpacity(checked bool) string {
-	if checked {
-		return "w-2 h-2 bg-primary rounded-sm transition-opacity opacity-100"
-	}
-	return "w-2 h-2 bg-primary rounded-sm transition-opacity opacity-0"
+// getCheckboxIndicatorClasses returns compiled theme classes for checkbox indicator
+func getCheckboxIndicatorClasses(checked bool) string {
+	return utils.TwMerge(
+		"menu-item-checkbox-indicator",
+		utils.If(checked, "menu-item-checkbox-checked"),
+	)
 }
 
-// getRadioOpacity returns the opacity class for radio items
-func getRadioOpacity(checked bool) string {
-	if checked {
-		return "w-2 h-2 bg-primary rounded-full transition-opacity opacity-100"
-	}
-	return "w-2 h-2 bg-primary rounded-full transition-opacity opacity-0"
+// getRadioIndicatorClasses returns compiled theme classes for radio indicator
+func getRadioIndicatorClasses(checked bool) string {
+	return utils.TwMerge(
+		"menu-item-radio-indicator",
+		utils.If(checked, "menu-item-radio-checked"),
+	)
 }
 
-// getBadgeVariant returns the badge variant with default
-func getBadgeVariant(variant atoms.BadgeVariant) atoms.BadgeVariant {
-	if variant != "" {
-		return variant
+// buildBadgeProps creates badge props from menu item props
+func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
+	variant := props.BadgeVariant
+	if variant == "" {
+		variant = atoms.BadgeSecondary
 	}
-	return atoms.BadgeSecondary
+
+	return atoms.BadgeProps{
+		Variant: variant,
+		Size:    atoms.BadgeSizeSM,
+		Class:   "menu-item-badge",
+	}
 }
 
-// MenuItem renders a menu item component
+// buildIconProps creates icon props for menu item icons
+func buildIconProps(name string, position string) atoms.IconProps {
+	className := "menu-item-icon"
+	if position != "" {
+		className = fmt.Sprintf("menu-item-icon menu-item-icon-%s", position)
+	}
+
+	size := atoms.IconSizeSM
+	if position == "submenu" {
+		size = atoms.IconSizeXS
+	}
+
+	return atoms.IconProps{
+		Name:      name,
+		Size:      size,
+		ClassName: className,
+	}
+}
+
+// MenuItem renders a menu item component with compiled theme classes
 func MenuItem(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -179,8 +175,8 @@ func MenuItem(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch props.Type {
-		case MenuItemDivider:
-			var templ_7745c5c3_Var2 = []any{menuItemClasses(props)}
+		case MenuItemTypeDivider:
+			var templ_7745c5c3_Var2 = []any{getMenuItemClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -202,8 +198,8 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case MenuItemLink:
-			var templ_7745c5c3_Var4 = []any{menuItemClasses(props)}
+		case MenuItemTypeLink:
+			var templ_7745c5c3_Var4 = []any{getMenuItemClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -220,7 +216,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var5 templ.SafeURL
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(props.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 159, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 155, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -239,7 +235,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Target)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 162, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 158, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -258,7 +254,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 165, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 161, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -294,7 +290,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 169, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 165, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -313,7 +309,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 172, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 168, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -332,7 +328,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 175, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 171, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -351,7 +347,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 178, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 174, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -370,7 +366,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 181, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 177, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -389,7 +385,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 184, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 180, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -412,8 +408,8 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case MenuItemCheckbox:
-			var templ_7745c5c3_Var15 = []any{menuItemClasses(props)}
+		case MenuItemTypeCheckbox:
+			var templ_7745c5c3_Var15 = []any{getMenuItemClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var15...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -430,7 +426,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 192, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 188, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -466,7 +462,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 196, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 192, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -489,7 +485,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 202, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 198, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -508,7 +504,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 205, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 201, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -531,11 +527,11 @@ func MenuItem(props MenuItemProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, " class=\"sr-only\"><div class=\"flex items-center justify-center w-4 h-4 border rounded-sm border-input\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, " class=\"menu-item-checkbox-input\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var21 = []any{getCheckboxOpacity(props.Checked)}
+			var templ_7745c5c3_Var21 = []any{getCheckboxIndicatorClasses(props.Checked)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var21...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -553,7 +549,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -565,8 +561,8 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case MenuItemRadio:
-			var templ_7745c5c3_Var23 = []any{menuItemClasses(props)}
+		case MenuItemTypeRadio:
+			var templ_7745c5c3_Var23 = []any{getMenuItemClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var23...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -583,7 +579,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 223, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 217, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -619,7 +615,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 227, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 221, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -642,7 +638,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 233, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 227, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -661,7 +657,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 236, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 230, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -684,11 +680,11 @@ func MenuItem(props MenuItemProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, " class=\"sr-only\"><div class=\"flex items-center justify-center w-4 h-4 border rounded-full border-input\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, " class=\"menu-item-radio-input\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var29 = []any{getRadioOpacity(props.Checked)}
+			var templ_7745c5c3_Var29 = []any{getRadioIndicatorClasses(props.Checked)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var29...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -706,7 +702,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -718,7 +714,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case MenuItemSubmenu:
+		case MenuItemTypeSubmenu:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<div")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -731,7 +727,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 254, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 246, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 				if templ_7745c5c3_Err != nil {
@@ -742,7 +738,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, " class=\"relative\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 65, " class=\"menu-item-submenu-container\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -754,7 +750,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineData)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 258, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 250, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -774,7 +770,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var33 = []any{menuItemClasses(props)}
+			var templ_7745c5c3_Var33 = []any{getMenuItemClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var33...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -800,11 +796,11 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "chevron-right", Size: atoms.IconSizeXS, Class: "ml-auto"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.Icon(buildIconProps("chevron-right", "submenu")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "</div><div class=\"absolute left-full top-0 ml-1 min-w-[8rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-md z-50\" x-show=\"open\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"transform opacity-0 scale-95\" x-transition:enter-end=\"transform opacity-100 scale-100\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"transform opacity-100 scale-100\" x-transition:leave-end=\"transform opacity-0 scale-95\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 72, "</div><div class=\"menu-item-submenu-dropdown\" x-show=\"open\" x-transition:enter=\"menu-submenu-enter\" x-transition:enter-start=\"menu-submenu-enter-start\" x-transition:enter-end=\"menu-submenu-enter-end\" x-transition:leave=\"menu-submenu-leave\" x-transition:leave-start=\"menu-submenu-leave-start\" x-transition:leave-end=\"menu-submenu-leave-end\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -823,7 +819,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var35 = []any{menuItemClasses(props)}
+			var templ_7745c5c3_Var35 = []any{getMenuItemClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var35...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -840,7 +836,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var36 string
 				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 291, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 283, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 				if templ_7745c5c3_Err != nil {
@@ -876,7 +872,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var38 string
 				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 295, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 287, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 				if templ_7745c5c3_Err != nil {
@@ -895,7 +891,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 298, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 290, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
@@ -914,7 +910,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var40 string
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 301, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 293, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -933,7 +929,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var41 string
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 304, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 296, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
@@ -952,7 +948,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var42 string
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 307, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 299, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
@@ -971,7 +967,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var43 string
 				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 310, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 302, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 				if templ_7745c5c3_Err != nil {
@@ -999,7 +995,7 @@ func MenuItem(props MenuItemProps) templ.Component {
 	})
 }
 
-// menuItemContent renders the content of a menu item
+// menuItemContent renders the content of a menu item using refactored atoms
 func menuItemContent(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1022,26 +1018,26 @@ func menuItemContent(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if props.IconLeft != "" {
-			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: props.IconLeft, Size: atoms.IconSizeSM, Class: "shrink-0"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.Icon(buildIconProps(props.IconLeft, "left")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if props.Icon != "" && props.Text == "" {
-			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: props.Icon, Size: atoms.IconSizeMD}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.Icon(buildIconProps(props.Icon, "single")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if props.Text != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<div class=\"flex flex-col gap-0.5\"><span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<div class=\"menu-item-content\"><span class=\"menu-item-text\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var45 string
 			templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 335, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 327, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 			if templ_7745c5c3_Err != nil {
@@ -1052,14 +1048,14 @@ func menuItemContent(props MenuItemProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if props.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "<span class=\"text-xs text-muted-foreground\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "<span class=\"menu-item-description\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var46 string
 				templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 337, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 329, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 				if templ_7745c5c3_Err != nil {
@@ -1091,7 +1087,7 @@ func menuItemContent(props MenuItemProps) templ.Component {
 				var templ_7745c5c3_Var48 string
 				templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(props.Badge)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 348, Col: 16}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/menuitem.templ`, Line: 337, Col: 16}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 				if templ_7745c5c3_Err != nil {
@@ -1099,16 +1095,13 @@ func menuItemContent(props MenuItemProps) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = atoms.Badge(atoms.BadgeProps{
-				Variant: getBadgeVariant(props.BadgeVariant),
-				Size:    atoms.BadgeSizeSM,
-			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var47), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.Badge(buildBadgeProps(props)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var47), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if props.IconRight != "" {
-			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: props.IconRight, Size: atoms.IconSizeSM, Class: "ml-auto shrink-0"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = atoms.Icon(buildIconProps(props.IconRight, "right")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1117,7 +1110,7 @@ func menuItemContent(props MenuItemProps) templ.Component {
 	})
 }
 
-// MenuDivider renders a menu divider
+// Helper components using the refactored MenuItem
 func MenuDivider() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1140,7 +1133,7 @@ func MenuDivider() templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = MenuItem(MenuItemProps{
-			Type: MenuItemDivider,
+			Type: MenuItemTypeDivider,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -1149,7 +1142,6 @@ func MenuDivider() templ.Component {
 	})
 }
 
-// MenuLink renders a link menu item
 func MenuLink(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1172,7 +1164,7 @@ func MenuLink(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = MenuItem(MenuItemProps{
-			Type:         MenuItemLink,
+			Type:         MenuItemTypeLink,
 			Size:         props.Size,
 			Text:         props.Text,
 			Description:  props.Description,
@@ -1185,7 +1177,7 @@ func MenuLink(props MenuItemProps) templ.Component {
 			BadgeVariant: props.BadgeVariant,
 			Active:       props.Active,
 			Disabled:     props.Disabled,
-			Class:        props.Class,
+			ClassName:    props.ClassName,
 			ID:           props.ID,
 			HXGet:        props.HXGet,
 			HXPost:       props.HXPost,
@@ -1201,7 +1193,6 @@ func MenuLink(props MenuItemProps) templ.Component {
 	})
 }
 
-// MenuButton renders a button menu item
 func MenuButton(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1224,7 +1215,7 @@ func MenuButton(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = MenuItem(MenuItemProps{
-			Type:         MenuItemButton,
+			Type:         MenuItemTypeButton,
 			Size:         props.Size,
 			Text:         props.Text,
 			Description:  props.Description,
@@ -1236,7 +1227,7 @@ func MenuButton(props MenuItemProps) templ.Component {
 			BadgeVariant: props.BadgeVariant,
 			Disabled:     props.Disabled,
 			Destructive:  props.Destructive,
-			Class:        props.Class,
+			ClassName:    props.ClassName,
 			ID:           props.ID,
 			Name:         props.Name,
 			HXPost:       props.HXPost,
@@ -1254,7 +1245,6 @@ func MenuButton(props MenuItemProps) templ.Component {
 	})
 }
 
-// MenuCheckbox renders a checkbox menu item
 func MenuCheckbox(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1277,14 +1267,14 @@ func MenuCheckbox(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = MenuItem(MenuItemProps{
-			Type:        MenuItemCheckbox,
+			Type:        MenuItemTypeCheckbox,
 			Size:        props.Size,
 			Text:        props.Text,
 			Description: props.Description,
 			Value:       props.Value,
 			Checked:     props.Checked,
 			Disabled:    props.Disabled,
-			Class:       props.Class,
+			ClassName:   props.ClassName,
 			ID:          props.ID,
 			Name:        props.Name,
 			AlpineClick: props.AlpineClick,
@@ -1297,7 +1287,6 @@ func MenuCheckbox(props MenuItemProps) templ.Component {
 	})
 }
 
-// MenuRadio renders a radio menu item
 func MenuRadio(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1320,14 +1309,14 @@ func MenuRadio(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = MenuItem(MenuItemProps{
-			Type:        MenuItemRadio,
+			Type:        MenuItemTypeRadio,
 			Size:        props.Size,
 			Text:        props.Text,
 			Description: props.Description,
 			Value:       props.Value,
 			Checked:     props.Checked,
 			Disabled:    props.Disabled,
-			Class:       props.Class,
+			ClassName:   props.ClassName,
 			ID:          props.ID,
 			Name:        props.Name,
 			AlpineClick: props.AlpineClick,
@@ -1340,7 +1329,6 @@ func MenuRadio(props MenuItemProps) templ.Component {
 	})
 }
 
-// MenuSubmenu renders a submenu item
 func MenuSubmenu(props MenuItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -1363,14 +1351,14 @@ func MenuSubmenu(props MenuItemProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = MenuItem(MenuItemProps{
-			Type:        MenuItemSubmenu,
+			Type:        MenuItemTypeSubmenu,
 			Size:        props.Size,
 			Text:        props.Text,
 			Description: props.Description,
 			Icon:        props.Icon,
 			IconLeft:    props.IconLeft,
 			SubItems:    props.SubItems,
-			Class:       props.Class,
+			ClassName:   props.ClassName,
 			ID:          props.ID,
 			AlpineData:  props.AlpineData,
 		}).Render(ctx, templ_7745c5c3_Buffer)

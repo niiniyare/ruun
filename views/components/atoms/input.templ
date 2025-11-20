@@ -2,7 +2,7 @@ package atoms
 
 import (
 	"fmt"
-	"github.com/niiniyare/ruun/views/utils"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
 
 // InputType defines the type of input
@@ -32,8 +32,22 @@ const (
 	InputSizeSM InputSize = "sm"
 	InputSizeMD InputSize = "md"
 	InputSizeLG InputSize = "lg"
-)
+	InputSizeXL InputSize = "xl"
 
+)
+type InputVariant string
+
+const (
+	InputVariantOutline  InputVariant = "outline"
+	InputVariantFilled   InputVariant = "filled"
+	InputVariantGhost    InputVariant = "ghost"
+	InputVariantDefault  InputVariant = "default"
+	InputVariantUnderline InputVariant = "underline"
+	InputVariantFlushed  InputVariant = "flushed"
+	InputVariantSoft     InputVariant = "soft"
+	InputVariantSolid    InputVariant = "solid"
+	InputVariantContrast InputVariant = "contrast"
+)
 // InputState defines the visual state of the input
 type InputState string
 

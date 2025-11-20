@@ -12,6 +12,25 @@ import (
 	"strings"
 )
 
+// RadioSize defines the size variants for radio buttons
+type RadioSize string
+
+const (
+	RadioSizeSM RadioSize = "sm"
+	RadioSizeMD RadioSize = "md"
+	RadioSizeLG RadioSize = "lg"
+)
+
+// RadioState defines the visual state of the radio button
+type RadioState string
+
+const (
+	RadioStateDefault RadioState = "default"
+	RadioStateError   RadioState = "error"
+	RadioStateSuccess RadioState = "success"
+	RadioStateWarning RadioState = "warning"
+)
+
 // RadioOption represents a single radio button option
 type RadioOption struct {
 	Value       string `json:"value"`
@@ -27,6 +46,8 @@ type RadioProps struct {
 	Name     string
 	Value    string // Selected value
 	Options  []RadioOption
+	Size     RadioSize
+	State    RadioState
 	Required bool
 	Disabled bool
 	Readonly bool
@@ -208,7 +229,7 @@ func RadioGroup(props RadioProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-group")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 156, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 177, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -265,7 +286,7 @@ func RadioGroup(props RadioProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-" + option.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 169, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 190, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -287,7 +308,7 @@ func RadioGroup(props RadioProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-" + option.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 173, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 194, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -300,7 +321,7 @@ func RadioGroup(props RadioProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 174, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 195, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -313,7 +334,7 @@ func RadioGroup(props RadioProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 175, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 196, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -372,7 +393,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 190, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 211, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -391,7 +412,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 193, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 214, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -410,7 +431,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 196, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 217, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -429,7 +450,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 199, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 220, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -448,7 +469,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 202, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 223, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -467,7 +488,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineModel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 205, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 226, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -486,7 +507,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineChange)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 208, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 229, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -505,7 +526,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineBlur)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 211, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 232, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -524,7 +545,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineFocus)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 214, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 235, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -547,7 +568,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(option.Icon)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 222, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 243, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -565,7 +586,7 @@ func RadioGroup(props RadioProps) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 226, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 247, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -583,7 +604,7 @@ func RadioGroup(props RadioProps) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(option.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 231, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 252, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -640,7 +661,7 @@ func RadioGroupInline(props RadioProps) templ.Component {
 			Error:        props.Error,
 			Size:         props.Size,
 			State:        props.State,
-			ClassName:    props.ClassName,
+			Class:        props.Class,
 			Inline:       true,
 			HXPost:       props.HXPost,
 			HXGet:        props.HXGet,
@@ -660,9 +681,9 @@ func RadioGroupInline(props RadioProps) templ.Component {
 }
 
 // Builder Pattern (functional options)
-type RadioOption func(*RadioProps)
+type RadioConfig func(*RadioProps)
 
-func NewRadioGroup(opts ...RadioOption) RadioProps {
+func NewRadioGroup(opts ...RadioConfig) RadioProps {
 	props := RadioProps{
 		Size:  RadioSizeMD,
 		State: RadioStateDefault,
@@ -673,44 +694,44 @@ func NewRadioGroup(opts ...RadioOption) RadioProps {
 	return props
 }
 
-func WithRadioSize(size RadioSize) RadioOption {
+func WithRadioSize(size RadioSize) RadioConfig {
 	return func(p *RadioProps) { p.Size = size }
 }
 
-func WithRadioState(state RadioState) RadioOption {
+func WithRadioState(state RadioState) RadioConfig {
 	return func(p *RadioProps) { p.State = state }
 }
 
-func WithRadioName(name string) RadioOption {
+func WithRadioName(name string) RadioConfig {
 	return func(p *RadioProps) { p.Name = name }
 }
 
-func WithRadioValue(value string) RadioOption {
+func WithRadioValue(value string) RadioConfig {
 	return func(p *RadioProps) { p.Value = value }
 }
 
-func WithRadioOptions(options []RadioOption) RadioOption {
+func WithRadioOptions(options []RadioOption) RadioConfig {
 	return func(p *RadioProps) { p.Options = options }
 }
 
-func WithRadioID(id string) RadioOption {
+func WithRadioID(id string) RadioConfig {
 	return func(p *RadioProps) { p.ID = id }
 }
 
-func AsRadioRequired() RadioOption {
+func AsRadioRequired() RadioConfig {
 	return func(p *RadioProps) { p.Required = true }
 }
 
-func AsRadioDisabled() RadioOption {
+func AsRadioDisabled() RadioConfig {
 	return func(p *RadioProps) { p.Disabled = true }
 }
 
-func AsRadioInline() RadioOption {
+func AsRadioInline() RadioConfig {
 	return func(p *RadioProps) { p.Inline = true }
 }
 
-func WithRadioClass(class string) RadioOption {
-	return func(p *RadioProps) { p.ClassName = class }
+func WithRadioClass(class string) RadioConfig {
+	return func(p *RadioProps) { p.Class = class }
 }
 
 // Key Improvements in this refactored version:

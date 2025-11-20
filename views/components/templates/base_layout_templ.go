@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/organisms"
-	"github.com/niiniyare/ruun/views/components/utils"
 	"strings"
 )
 
