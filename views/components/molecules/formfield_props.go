@@ -3,7 +3,7 @@ package molecules
 import (
 	"fmt"
 
-	"github.com/niiniyare/ruun/views/components//utils"
+	"github.com/niiniyare/ruun/views/components/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 

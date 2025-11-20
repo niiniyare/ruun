@@ -165,8 +165,8 @@ templ renderBaseScripts(props BaseLayoutProps) {
 		// Theme store
 		document.addEventListener('alpine:init', () => {
 			Alpine.store('theme', {
-				current: '{{ .ThemeID }}',
-				dark: {{ .DarkMode }},
+				current: { "'" + props.ThemeID + "'" },
+				dark: { utils.If(props.DarkMode, "true", "false") },
 				
 				init() {
 					// Apply saved theme preference

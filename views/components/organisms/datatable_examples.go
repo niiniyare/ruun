@@ -60,37 +60,37 @@ func (e *DataTableExamples) BasicExample() *DataTableProps {
 // Example 2: Advanced DataTable with all features
 func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 	return &DataTableProps{
-		ID:           "advanced-table",
-		Title:        "Product Inventory",
-		Description:  "Comprehensive product management with advanced features",
-		Variant:      DataTableStriped,
-		Size:         DataTableSizeLG,
-		Density:      DataTableDensityCompact,
-		Selectable:   true,
-		MultiSelect:  true,
-		Sortable:     true,
-		Resizable:    true,
-		Filterable:   true,
-		Expandable:   true,
-		
+		ID:          "advanced-table",
+		Title:       "Product Inventory",
+		Description: "Comprehensive product management with advanced features",
+		Variant:     DataTableStriped,
+		Size:        DataTableSizeLG,
+		Density:     DataTableDensityCompact,
+		Selectable:  true,
+		MultiSelect: true,
+		Sortable:    true,
+		Resizable:   true,
+		Filterable:  true,
+		Expandable:  true,
+
 		Columns: []DataTableColumn{
 			{
-				Key:         "product_id",
-				Title:       "ID",
-				Type:        ColumnTypeNumber,
-				Width:       "80px",
-				Sortable:    true,
-				Filterable:  true,
-				Align:       "center",
+				Key:        "product_id",
+				Title:      "ID",
+				Type:       ColumnTypeNumber,
+				Width:      "80px",
+				Sortable:   true,
+				Filterable: true,
+				Align:      "center",
 			},
 			{
-				Key:         "name",
-				Title:       "Product Name",
-				Type:        ColumnTypeText,
-				Sortable:    true,
-				Searchable:  true,
-				Filterable:  true,
-				Clickable:   true,
+				Key:          "name",
+				Title:        "Product Name",
+				Type:         ColumnTypeText,
+				Sortable:     true,
+				Searchable:   true,
+				Filterable:   true,
+				Clickable:    true,
 				ClickHandler: "viewProduct",
 			},
 			{
@@ -129,8 +129,8 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				Sortable:   true,
 				Filterable: true,
 				BadgeMap: map[string]atoms.BadgeVariant{
-					"active":      atoms.BadgeSuccess,
-					"inactive":    atoms.BadgeSecondary,
+					"active":       atoms.BadgeSuccess,
+					"inactive":     atoms.BadgeSecondary,
 					"out_of_stock": atoms.BadgeDestructive,
 				},
 			},
@@ -148,7 +148,7 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				{Text: "Delete", Icon: "trash", Action: "delete", Destructive: true},
 			}),
 		},
-		
+
 		Rows: []DataTableRow{
 			{
 				ID: "prod-001",
@@ -191,7 +191,7 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				Variant: "warning", // Highlight out of stock items
 			},
 		},
-		
+
 		Search: DataTableSearch{
 			Enabled:       true,
 			Placeholder:   "Search products...",
@@ -200,13 +200,13 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 			Highlight:     true,
 			Advanced:      true,
 		},
-		
+
 		Filters: []DataTableFilter{
 			{
-				Key:      "category",
-				Label:    "Category",
-				Type:     "select",
-				Active:   false,
+				Key:    "category",
+				Label:  "Category",
+				Type:   "select",
+				Active: false,
 				Options: []molecules.SelectOption{
 					{Value: "Electronics", Label: "Electronics"},
 					{Value: "Clothing", Label: "Clothing"},
@@ -215,10 +215,10 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				},
 			},
 			{
-				Key:      "status",
-				Label:    "Status",
-				Type:     "select",
-				Active:   false,
+				Key:    "status",
+				Label:  "Status",
+				Type:   "select",
+				Active: false,
 				Options: []molecules.SelectOption{
 					{Value: "active", Label: "Active"},
 					{Value: "inactive", Label: "Inactive"},
@@ -232,13 +232,13 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				Active: false,
 			},
 		},
-		
+
 		QuickFilters: []DataTableFilter{
 			{Key: "status", Operator: FilterEquals, Value: "active", Label: "Active", Active: false},
 			{Key: "status", Operator: FilterEquals, Value: "out_of_stock", Label: "Out of Stock", Active: false},
 			{Key: "stock", Operator: FilterGreaterThan, Value: 50, Label: "High Stock", Active: false},
 		},
-		
+
 		Pagination: DataTablePagination{
 			Enabled:         true,
 			CurrentPage:     1,
@@ -251,7 +251,7 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 			ShowQuickJump:   true,
 			ServerSide:      true,
 		},
-		
+
 		Actions: []DataTableAction{
 			{
 				ID:      "add_product",
@@ -278,19 +278,19 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				Variant: atoms.ButtonGhost,
 			},
 		},
-		
+
 		BulkActions: []DataTableBulkAction{
 			{
-				ID:          "bulk_edit",
-				Text:        "Edit Selected",
-				Icon:        "edit",
-				Variant:     atoms.ButtonSecondary,
+				ID:      "bulk_edit",
+				Text:    "Edit Selected",
+				Icon:    "edit",
+				Variant: atoms.ButtonSecondary,
 			},
 			{
-				ID:          "bulk_activate",
-				Text:        "Activate Selected",
-				Icon:        "check",
-				Variant:     atoms.ButtonSuccess,
+				ID:      "bulk_activate",
+				Text:    "Activate Selected",
+				Icon:    "check",
+				Variant: atoms.ButtonSuccess,
 			},
 			{
 				ID:          "bulk_delete",
@@ -302,7 +302,7 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 				Message:     "Are you sure you want to delete the selected products?",
 			},
 		},
-		
+
 		Export: DataTableExport{
 			Enabled:    true,
 			Formats:    []ExportFormat{ExportCSV, ExportExcel, ExportPDF},
@@ -310,11 +310,11 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 			AllData:    true,
 			ServerSide: false,
 		},
-		
+
 		Aggregation: struct {
-			Enabled   bool                    `json:\"enabled\"`
-			Functions map[string]string      `json:\"functions\"`
-			Position  string                  `json:\"position\"`
+			Enabled   bool              `json:\"enabled\"`
+			Functions map[string]string `json:\"functions\"`
+			Position  string            `json:\"position\"`
 		}{
 			Enabled: true,
 			Functions: map[string]string{
@@ -323,12 +323,12 @@ func (e *DataTableExamples) AdvancedExample() *DataTableProps {
 			},
 			Position: "bottom",
 		},
-		
+
 		// HTMX Configuration
 		HXGet:    "/api/products",
 		HXTarget: "#product-table",
 		HXSwap:   "innerHTML",
-		
+
 		// Event Handlers
 		OnRowClick:   "handleProductClick",
 		OnRowSelect:  "handleProductSelect",
@@ -345,7 +345,7 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 	// Create a schema for users
 	userSchema := schema.NewSchema("user-table", schema.TypeForm, "User Management")
 	userSchema.Description = "Manage system users with role-based access"
-	
+
 	// Add fields to the schema
 	userSchema.AddField(schema.Field{
 		Name:       "id",
@@ -355,7 +355,7 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 		Sortable:   true,
 		Searchable: false,
 	})
-	
+
 	userSchema.AddField(schema.Field{
 		Name:       "full_name",
 		Type:       schema.FieldText,
@@ -364,7 +364,7 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 		Sortable:   true,
 		Searchable: true,
 	})
-	
+
 	userSchema.AddField(schema.Field{
 		Name:       "email",
 		Type:       schema.FieldEmail,
@@ -373,7 +373,7 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 		Sortable:   true,
 		Searchable: true,
 	})
-	
+
 	userSchema.AddField(schema.Field{
 		Name:     "role",
 		Type:     schema.FieldSelect,
@@ -385,33 +385,33 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 			{Value: "viewer", Label: "Viewer"},
 		},
 	})
-	
+
 	userSchema.AddField(schema.Field{
-		Name:       "status",
-		Type:       schema.FieldSelect,
-		Label:      "Status",
-		Sortable:   true,
+		Name:     "status",
+		Type:     schema.FieldSelect,
+		Label:    "Status",
+		Sortable: true,
 		Options: []schema.FieldOption{
 			{Value: "active", Label: "Active"},
 			{Value: "inactive", Label: "Inactive"},
 			{Value: "suspended", Label: "Suspended"},
 		},
 	})
-	
+
 	userSchema.AddField(schema.Field{
 		Name:     "created_at",
 		Type:     schema.FieldDatetime,
 		Label:    "Created At",
 		Sortable: true,
 	})
-	
+
 	userSchema.AddField(schema.Field{
 		Name:     "last_login",
 		Type:     schema.FieldDatetime,
 		Label:    "Last Login",
 		Sortable: true,
 	})
-	
+
 	// Add actions to the schema
 	userSchema.AddAction(schema.Action{
 		ID:   "add_user",
@@ -419,26 +419,26 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 		Icon: "plus",
 		Type: schema.ActionSubmit,
 	})
-	
+
 	userSchema.AddAction(schema.Action{
 		ID:   "edit_user",
 		Text: "Edit",
 		Icon: "edit",
 		Type: schema.ActionButton,
 	})
-	
+
 	userSchema.AddAction(schema.Action{
-		ID:              "delete_user",
-		Text:            "Delete",
-		Icon:            "trash",
-		Type:            schema.ActionButton,
-		Confirm:         true,
-		ConfirmMessage:  "Are you sure you want to delete this user?",
+		ID:             "delete_user",
+		Text:           "Delete",
+		Icon:           "trash",
+		Type:           schema.ActionButton,
+		Confirm:        true,
+		ConfirmMessage: "Are you sure you want to delete this user?",
 	})
-	
+
 	// Build DataTable from schema
 	builder := NewDataTableSchemaBuilder(userSchema)
-	
+
 	// Configure custom column mappings
 	builder.WithFieldMapping("role", ColumnMapping{
 		ColumnType: ColumnTypeBadge,
@@ -450,7 +450,7 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 			},
 		},
 	})
-	
+
 	builder.WithFieldMapping("status", ColumnMapping{
 		ColumnType: ColumnTypeBadge,
 		BadgeConfig: &BadgeConfig{
@@ -461,7 +461,7 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 			},
 		},
 	})
-	
+
 	// Configure table settings
 	config := &DataTableConfig{
 		EnableSelection:   true,
@@ -479,14 +479,14 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 		Size:              DataTableSizeMD,
 		Density:           DataTableDensityComfortable,
 	}
-	
+
 	builder.WithConfig(config)
-	
+
 	props, err := builder.Build(nil)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Add sample data
 	props.Rows = []DataTableRow{
 		{
@@ -526,11 +526,11 @@ func (e *DataTableExamples) SchemaExample() (*DataTableProps, error) {
 			},
 		},
 	}
-	
+
 	// Update pagination
 	props.Pagination.TotalItems = len(props.Rows)
 	props.Pagination.TotalPages = 1
-	
+
 	return props, nil
 }
 
@@ -549,12 +549,12 @@ func (e *DataTableExamples) BuilderExample() *DataTableProps {
 			Fixed:    true,
 		}).
 		AddColumn(DataTableColumn{
-			Key:         "customer",
-			Title:       "Customer",
-			Type:        ColumnTypeText,
-			Sortable:    true,
-			Searchable:  true,
-			Clickable:   true,
+			Key:        "customer",
+			Title:      "Customer",
+			Type:       ColumnTypeText,
+			Sortable:   true,
+			Searchable: true,
+			Clickable:  true,
 		}).
 		AddColumn(DataTableColumn{
 			Key:          "total",
@@ -673,7 +673,7 @@ func (e *DataTableExamples) ResponsiveExample() *DataTableProps {
 		Density:     DataTableDensityCondensed,
 		Responsive:  true,
 		Stackable:   true,
-		
+
 		Columns: []DataTableColumn{
 			{
 				Key:      "avatar",
@@ -691,16 +691,16 @@ func (e *DataTableExamples) ResponsiveExample() *DataTableProps {
 				Searchable: true,
 			},
 			{
-				Key:     "phone",
-				Title:   "Phone",
-				Type:    ColumnTypeText,
-				Hidden:  true, // Hide on mobile, show in expanded view
+				Key:    "phone",
+				Title:  "Phone",
+				Type:   ColumnTypeText,
+				Hidden: true, // Hide on mobile, show in expanded view
 			},
 			{
-				Key:      "status",
-				Title:    "Status",
-				Type:     ColumnTypeBadge,
-				Width:    "80px",
+				Key:   "status",
+				Title: "Status",
+				Type:  ColumnTypeBadge,
+				Width: "80px",
 				BadgeMap: map[string]atoms.BadgeVariant{
 					"online":  atoms.BadgeSuccess,
 					"offline": atoms.BadgeSecondary,
@@ -708,7 +708,7 @@ func (e *DataTableExamples) ResponsiveExample() *DataTableProps {
 				},
 			},
 		},
-		
+
 		Rows: []DataTableRow{
 			{
 				ID: "contact-1",
@@ -735,15 +735,15 @@ func (e *DataTableExamples) ResponsiveExample() *DataTableProps {
 				},
 			},
 		},
-		
+
 		HideColumns: []string{"phone"}, // Hidden on mobile
-		
+
 		Search: DataTableSearch{
 			Enabled:     true,
 			Placeholder: "Search contacts...",
 			MinLength:   1,
 		},
-		
+
 		Pagination: DataTablePagination{
 			Enabled:  true,
 			PageSize: 10,
@@ -768,13 +768,13 @@ func (e *DataTableExamples) VirtualizedExample() *DataTableProps {
 			},
 		}
 	}
-	
+
 	return &DataTableProps{
 		ID:          "virtualized-table",
 		Title:       "Large Dataset (10,000 rows)",
 		Description: "Demonstrates virtual scrolling for performance",
 		Virtualized: true,
-		
+
 		Columns: []DataTableColumn{
 			NumberColumn("id", "ID", 0),
 			TextColumn("name", "Name"),
@@ -792,26 +792,26 @@ func (e *DataTableExamples) VirtualizedExample() *DataTableProps {
 				Align: "center",
 			},
 		},
-		
+
 		Rows: rows,
-		
+
 		Search: DataTableSearch{
 			Enabled:    true,
 			ServerSide: true, // Server-side search for large datasets
 		},
-		
+
 		Pagination: DataTablePagination{
 			Enabled:    true,
 			ServerSide: true, // Server-side pagination
 			PageSize:   100,
 		},
-		
+
 		VirtualScrollOptions: map[string]any{
 			"rowHeight":    40,
 			"overscan":     10,
 			"enableResize": true,
 		},
-		
+
 		LazyLoad:  true,
 		CacheData: true,
 	}
@@ -823,7 +823,7 @@ func (e *DataTableExamples) CustomRenderingExample() *DataTableProps {
 		ID:          "custom-table",
 		Title:       "Custom Cell Rendering",
 		Description: "Demonstrates custom column rendering",
-		
+
 		Columns: []DataTableColumn{
 			TextColumn("product", "Product"),
 			{
@@ -840,19 +840,19 @@ func (e *DataTableExamples) CustomRenderingExample() *DataTableProps {
 				Sortable: false,
 			},
 			{
-				Key:      "progress",
-				Title:    "Completion",
-				Type:     ColumnTypeProgress,
-				Width:    "150px",
+				Key:   "progress",
+				Title: "Completion",
+				Type:  ColumnTypeProgress,
+				Width: "150px",
 			},
 			{
-				Key:      "link",
-				Title:    "Documentation",
-				Type:     ColumnTypeLink,
+				Key:       "link",
+				Title:     "Documentation",
+				Type:      ColumnTypeLink,
 				Clickable: true,
 			},
 		},
-		
+
 		Rows: []DataTableRow{
 			{
 				ID: "item-1",
@@ -886,7 +886,7 @@ func (e *DataTableExamples) GroupingExample() *DataTableProps {
 		ID:          "grouped-table",
 		Title:       "Sales by Region",
 		Description: "Revenue data grouped by region",
-		
+
 		Columns: []DataTableColumn{
 			TextColumn("region", "Region"),
 			TextColumn("salesperson", "Salesperson"),
@@ -894,7 +894,7 @@ func (e *DataTableExamples) GroupingExample() *DataTableProps {
 			NumberColumn("deals", "Deals Closed", 0),
 			DateColumn("last_sale", "Last Sale", "2006-01-02"),
 		},
-		
+
 		Rows: []DataTableRow{
 			{
 				ID: "sale-1",
@@ -927,7 +927,7 @@ func (e *DataTableExamples) GroupingExample() *DataTableProps {
 				},
 			},
 		},
-		
+
 		Grouping: struct {
 			Enabled     bool     `json:"enabled"`
 			Columns     []string `json:"columns"`
@@ -938,11 +938,11 @@ func (e *DataTableExamples) GroupingExample() *DataTableProps {
 			Columns:     []string{"region"},
 			Collapsible: true,
 		},
-		
+
 		Aggregation: struct {
-			Enabled   bool                `json:"enabled"`
-			Functions map[string]string   `json:"functions"`
-			Position  string              `json:"position"`
+			Enabled   bool              `json:"enabled"`
+			Functions map[string]string `json:"functions"`
+			Position  string            `json:"position"`
 		}{
 			Enabled: true,
 			Functions: map[string]string{
@@ -957,7 +957,7 @@ func (e *DataTableExamples) GroupingExample() *DataTableProps {
 // GetAllExamples returns all available examples
 func (e *DataTableExamples) GetAllExamples() map[string]*DataTableProps {
 	examples := make(map[string]*DataTableProps)
-	
+
 	examples["basic"] = e.BasicExample()
 	examples["advanced"] = e.AdvancedExample()
 	examples["builder"] = e.BuilderExample()
@@ -965,12 +965,12 @@ func (e *DataTableExamples) GetAllExamples() map[string]*DataTableProps {
 	examples["virtualized"] = e.VirtualizedExample()
 	examples["custom"] = e.CustomRenderingExample()
 	examples["grouping"] = e.GroupingExample()
-	
+
 	// Schema example requires error handling
 	if schemaExample, err := e.SchemaExample(); err == nil {
 		examples["schema"] = schemaExample
 	}
-	
+
 	return examples
 }
 
@@ -986,12 +986,12 @@ func (e *DataTableExamples) GetExampleByName(name string) (*DataTableProps, bool
 func ProductTableHandler(w http.ResponseWriter, r *http.Request) {
 	examples := &DataTableExamples{}
 	props := examples.AdvancedExample()
-	
+
 	// Apply query parameters for filtering, sorting, pagination
 	if searchQuery := r.URL.Query().Get("search"); searchQuery != "" {
 		props.Search.Query = searchQuery
 	}
-	
+
 	// Render the table
 	component := organisms.DataTable(*props)
 	component.Render(r.Context(), w)

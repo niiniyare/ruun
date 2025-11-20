@@ -11,7 +11,6 @@ import (
 
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/components/molecules"
 	"github.com/niiniyare/ruun/views/components/utils"
 )
 
@@ -19,32 +18,32 @@ import (
 type ModalService struct {
 	// Configuration
 	DefaultCacheTimeout time.Duration
-	MaxModalStack      int
-	
+	MaxModalStack       int
+
 	// Feature flags
-	EnableModalStack   bool
-	EnableAutoSave     bool
-	EnableVersioning   bool
-	EnableFileUpload   bool
-	EnableSearch       bool
-	
+	EnableModalStack bool
+	EnableAutoSave   bool
+	EnableVersioning bool
+	EnableFileUpload bool
+	EnableSearch     bool
+
 	// Performance settings
-	MaxFileSize        int64 // bytes
-	UploadConcurrency  int
-	SearchDebounce     time.Duration
-	AutoSaveInterval   time.Duration
-	
+	MaxFileSize       int64 // bytes
+	UploadConcurrency int
+	SearchDebounce    time.Duration
+	AutoSaveInterval  time.Duration
+
 	// Integration providers
 	FileProvider       FileUploadProvider
 	SearchProvider     SearchProvider
 	ValidationProvider ValidationProvider
 	WorkflowProvider   WorkflowProvider
 	PermissionProvider ModalPermissionProvider
-	
+
 	// Storage providers
-	DataProvider       ModalDataProvider
-	StateProvider      ModalStateProvider
-	CacheProvider      CacheProvider
+	DataProvider  ModalDataProvider
+	StateProvider ModalStateProvider
+	CacheProvider CacheProvider
 }
 
 // ModalDataProvider interface for data persistence
@@ -116,87 +115,87 @@ type CacheProvider interface {
 
 // ModalStackState represents the current modal stack state
 type ModalStackState struct {
-	SessionID    string                 `json:"sessionId"`
-	Stack        []ModalStackItem       `json:"stack"`
-	MaxDepth     int                    `json:"maxDepth"`
-	CurrentDepth int                    `json:"currentDepth"`
-	LastUpdated  time.Time              `json:"lastUpdated"`
+	SessionID    string           `json:"sessionId"`
+	Stack        []ModalStackItem `json:"stack"`
+	MaxDepth     int              `json:"maxDepth"`
+	CurrentDepth int              `json:"currentDepth"`
+	LastUpdated  time.Time        `json:"lastUpdated"`
 }
 
 // ModalStackItem represents a modal in the stack
 type ModalStackItem struct {
-	ID          string                `json:"id"`
-	Type        EnhancedModalType     `json:"type"`
-	Props       *EnhancedModalProps   `json:"props"`
-	Data        map[string]any        `json:"data,omitempty"`
-	State       ModalState            `json:"state"`
-	OpenedAt    time.Time             `json:"openedAt"`
-	ParentID    string                `json:"parentId,omitempty"`
-	Context     map[string]any        `json:"context,omitempty"`
+	ID       string              `json:"id"`
+	Type     EnhancedModalType   `json:"type"`
+	Props    *EnhancedModalProps `json:"props"`
+	Data     map[string]any      `json:"data,omitempty"`
+	State    ModalState          `json:"state"`
+	OpenedAt time.Time           `json:"openedAt"`
+	ParentID string              `json:"parentId,omitempty"`
+	Context  map[string]any      `json:"context,omitempty"`
 }
 
 // ModalState represents the current state of a modal
 type ModalState struct {
 	// Basic state
-	Open         bool              `json:"open"`
-	Loading      bool              `json:"loading"`
-	Saving       bool              `json:"saving"`
-	Dirty        bool              `json:"dirty"`
-	Valid        bool              `json:"valid"`
-	
+	Open    bool `json:"open"`
+	Loading bool `json:"loading"`
+	Saving  bool `json:"saving"`
+	Dirty   bool `json:"dirty"`
+	Valid   bool `json:"valid"`
+
 	// Multi-step state
-	CurrentStep  int               `json:"currentStep"`
-	TotalSteps   int               `json:"totalSteps"`
-	CompletedSteps []int           `json:"completedSteps"`
-	SkippedSteps []int             `json:"skippedSteps"`
-	
+	CurrentStep    int   `json:"currentStep"`
+	TotalSteps     int   `json:"totalSteps"`
+	CompletedSteps []int `json:"completedSteps"`
+	SkippedSteps   []int `json:"skippedSteps"`
+
 	// Form state
-	FormData     map[string]any    `json:"formData"`
-	Errors       map[string]string `json:"errors"`
-	Touched      map[string]bool   `json:"touched"`
-	ValidationState string         `json:"validationState"`
-	
+	FormData        map[string]any    `json:"formData"`
+	Errors          map[string]string `json:"errors"`
+	Touched         map[string]bool   `json:"touched"`
+	ValidationState string            `json:"validationState"`
+
 	// File upload state
-	UploadQueue  []UploadTask      `json:"uploadQueue,omitempty"`
-	UploadProgress map[string]int  `json:"uploadProgress,omitempty"`
-	UploadedFiles []FileMetadata   `json:"uploadedFiles,omitempty"`
-	
+	UploadQueue    []UploadTask   `json:"uploadQueue,omitempty"`
+	UploadProgress map[string]int `json:"uploadProgress,omitempty"`
+	UploadedFiles  []FileMetadata `json:"uploadedFiles,omitempty"`
+
 	// Search state
-	SearchQuery  string            `json:"searchQuery"`
-	SearchResults []SearchResult   `json:"searchResults"`
-	SearchLoading bool             `json:"searchLoading"`
-	SelectedItems []string         `json:"selectedItems"`
-	
+	SearchQuery   string         `json:"searchQuery"`
+	SearchResults []SearchResult `json:"searchResults"`
+	SearchLoading bool           `json:"searchLoading"`
+	SelectedItems []string       `json:"selectedItems"`
+
 	// Auto-save state
-	LastSaved    *time.Time        `json:"lastSaved,omitempty"`
-	AutoSaveEnabled bool           `json:"autoSaveEnabled"`
-	SaveCount    int               `json:"saveCount"`
-	
+	LastSaved       *time.Time `json:"lastSaved,omitempty"`
+	AutoSaveEnabled bool       `json:"autoSaveEnabled"`
+	SaveCount       int        `json:"saveCount"`
+
 	// Workflow state
-	WorkflowID   string            `json:"workflowId,omitempty"`
-	InstanceID   string            `json:"instanceId,omitempty"`
-	WorkflowState string           `json:"workflowState,omitempty"`
-	
+	WorkflowID    string `json:"workflowId,omitempty"`
+	InstanceID    string `json:"instanceId,omitempty"`
+	WorkflowState string `json:"workflowState,omitempty"`
+
 	// Version control state
-	CurrentVersion string          `json:"currentVersion,omitempty"`
-	HasVersions  bool              `json:"hasVersions"`
-	CanUndo      bool              `json:"canUndo"`
-	CanRedo      bool              `json:"canRedo"`
-	
+	CurrentVersion string `json:"currentVersion,omitempty"`
+	HasVersions    bool   `json:"hasVersions"`
+	CanUndo        bool   `json:"canUndo"`
+	CanRedo        bool   `json:"canRedo"`
+
 	// Custom state
-	CustomState  map[string]any    `json:"customState,omitempty"`
+	CustomState map[string]any `json:"customState,omitempty"`
 }
 
 // Supporting data structures
 
 // DataVersion represents a versioned data snapshot
 type DataVersion struct {
-	ID        string            `json:"id"`
-	Version   string            `json:"version"`
-	Data      map[string]any    `json:"data"`
-	Comment   string            `json:"comment,omitempty"`
-	CreatedAt time.Time         `json:"createdAt"`
-	CreatedBy string            `json:"createdBy,omitempty"`
+	ID        string         `json:"id"`
+	Version   string         `json:"version"`
+	Data      map[string]any `json:"data"`
+	Comment   string         `json:"comment,omitempty"`
+	CreatedAt time.Time      `json:"createdAt"`
+	CreatedBy string         `json:"createdBy,omitempty"`
 }
 
 // UploadedFile represents a file being uploaded
@@ -210,15 +209,15 @@ type UploadedFile struct {
 
 // FileMetadata represents uploaded file metadata
 type FileMetadata struct {
-	ID          string            `json:"id"`
-	Name        string            `json:"name"`
-	Size        int64             `json:"size"`
-	Type        string            `json:"type"`
-	URL         string            `json:"url"`
-	ThumbnailURL string           `json:"thumbnailUrl,omitempty"`
-	UploadedAt  time.Time         `json:"uploadedAt"`
-	UploadedBy  string            `json:"uploadedBy,omitempty"`
-	Metadata    map[string]string `json:"metadata,omitempty"`
+	ID           string            `json:"id"`
+	Name         string            `json:"name"`
+	Size         int64             `json:"size"`
+	Type         string            `json:"type"`
+	URL          string            `json:"url"`
+	ThumbnailURL string            `json:"thumbnailUrl,omitempty"`
+	UploadedAt   time.Time         `json:"uploadedAt"`
+	UploadedBy   string            `json:"uploadedBy,omitempty"`
+	Metadata     map[string]string `json:"metadata,omitempty"`
 }
 
 // FileConstraints represents file upload constraints
@@ -230,66 +229,66 @@ type FileConstraints struct {
 
 // UploadTask represents a file upload task
 type UploadTask struct {
-	ID       string            `json:"id"`
-	File     *UploadedFile     `json:"file"`
-	Progress int               `json:"progress"`
-	Status   string            `json:"status"` // "pending", "uploading", "completed", "failed"
-	Error    string            `json:"error,omitempty"`
+	ID       string        `json:"id"`
+	File     *UploadedFile `json:"file"`
+	Progress int           `json:"progress"`
+	Status   string        `json:"status"` // "pending", "uploading", "completed", "failed"
+	Error    string        `json:"error,omitempty"`
 }
 
 // SearchResult represents a search result item
 type SearchResult struct {
-	ID          string            `json:"id"`
-	Type        string            `json:"type"`
-	Title       string            `json:"title"`
-	Description string            `json:"description,omitempty"`
-	URL         string            `json:"url,omitempty"`
-	Icon        string            `json:"icon,omitempty"`
-	Score       float64           `json:"score"`
-	Metadata    map[string]any    `json:"metadata,omitempty"`
+	ID          string         `json:"id"`
+	Type        string         `json:"type"`
+	Title       string         `json:"title"`
+	Description string         `json:"description,omitempty"`
+	URL         string         `json:"url,omitempty"`
+	Icon        string         `json:"icon,omitempty"`
+	Score       float64        `json:"score"`
+	Metadata    map[string]any `json:"metadata,omitempty"`
 }
 
 // SearchSuggestion represents a search suggestion
 type SearchSuggestion struct {
-	Query       string            `json:"query"`
-	Type        string            `json:"type"`
-	Count       int               `json:"count,omitempty"`
-	Score       float64           `json:"score"`
+	Query string  `json:"query"`
+	Type  string  `json:"type"`
+	Count int     `json:"count,omitempty"`
+	Score float64 `json:"score"`
 }
 
 // ValidationRule represents a validation rule
 type ValidationRule struct {
-	Type        string            `json:"type"`
-	Value       any               `json:"value,omitempty"`
-	Message     string            `json:"message,omitempty"`
-	Conditions  map[string]any    `json:"conditions,omitempty"`
+	Type       string         `json:"type"`
+	Value      any            `json:"value,omitempty"`
+	Message    string         `json:"message,omitempty"`
+	Conditions map[string]any `json:"conditions,omitempty"`
 }
 
 // ValidationResult represents validation result
 type ValidationResult struct {
-	Valid   bool              `json:"valid"`
-	Errors  map[string]string `json:"errors,omitempty"`
+	Valid    bool              `json:"valid"`
+	Errors   map[string]string `json:"errors,omitempty"`
 	Warnings map[string]string `json:"warnings,omitempty"`
 }
 
 // WorkflowInstance represents a workflow instance
 type WorkflowInstance struct {
-	ID          string            `json:"id"`
-	WorkflowID  string            `json:"workflowId"`
-	State       string            `json:"state"`
-	CurrentStep string            `json:"currentStep"`
-	Data        map[string]any    `json:"data"`
-	CreatedAt   time.Time         `json:"createdAt"`
-	UpdatedAt   time.Time         `json:"updatedAt"`
+	ID          string         `json:"id"`
+	WorkflowID  string         `json:"workflowId"`
+	State       string         `json:"state"`
+	CurrentStep string         `json:"currentStep"`
+	Data        map[string]any `json:"data"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
 }
 
 // WorkflowState represents workflow execution state
 type WorkflowState struct {
-	Current     string            `json:"current"`
-	Previous    []string          `json:"previous"`
-	Available   []string          `json:"available"`
-	Data        map[string]any    `json:"data"`
-	Metadata    map[string]any    `json:"metadata"`
+	Current   string         `json:"current"`
+	Previous  []string       `json:"previous"`
+	Available []string       `json:"available"`
+	Data      map[string]any `json:"data"`
+	Metadata  map[string]any `json:"metadata"`
 }
 
 // User represents the current user (referenced from navigation logic)
@@ -306,16 +305,16 @@ type User struct {
 func NewModalService() *ModalService {
 	return &ModalService{
 		DefaultCacheTimeout: 5 * time.Minute,
-		MaxModalStack:      5,
-		EnableModalStack:   true,
-		EnableAutoSave:     true,
-		EnableVersioning:   false,
-		EnableFileUpload:   true,
-		EnableSearch:       true,
-		MaxFileSize:        10 * 1024 * 1024, // 10MB
-		UploadConcurrency:  3,
-		SearchDebounce:     300 * time.Millisecond,
-		AutoSaveInterval:   30 * time.Second,
+		MaxModalStack:       5,
+		EnableModalStack:    true,
+		EnableAutoSave:      true,
+		EnableVersioning:    false,
+		EnableFileUpload:    true,
+		EnableSearch:        true,
+		MaxFileSize:         10 * 1024 * 1024, // 10MB
+		UploadConcurrency:   3,
+		SearchDebounce:      300 * time.Millisecond,
+		AutoSaveInterval:    30 * time.Second,
 	}
 }
 
@@ -332,54 +331,54 @@ func (s *ModalService) OpenModal(ctx context.Context, sessionID string, props *E
 			}
 		}
 	}
-	
+
 	// Initialize modal state
 	state := &ModalState{
-		Open:           true,
-		Loading:        false,
-		Saving:         false,
-		Dirty:          false,
-		Valid:          true,
-		CurrentStep:    1,
-		TotalSteps:     len(props.Steps),
-		FormData:       make(map[string]any),
-		Errors:         make(map[string]string),
-		Touched:        make(map[string]bool),
+		Open:            true,
+		Loading:         false,
+		Saving:          false,
+		Dirty:           false,
+		Valid:           true,
+		CurrentStep:     1,
+		TotalSteps:      len(props.Steps),
+		FormData:        make(map[string]any),
+		Errors:          make(map[string]string),
+		Touched:         make(map[string]bool),
 		AutoSaveEnabled: props.AutoSave,
-		CustomState:    make(map[string]any),
+		CustomState:     make(map[string]any),
 	}
-	
+
 	// Initialize form data if provided
 	if props.FormData != nil {
 		state.FormData = props.FormData
 	}
-	
+
 	// Load initial data if URL provided
 	if props.LoadDataURL != "" && props.LoadOnOpen {
 		if err := s.loadModalData(ctx, props.LoadDataURL, state); err != nil {
 			return nil, fmt.Errorf("failed to load initial data: %w", err)
 		}
 	}
-	
+
 	// Start workflow if specified
 	if props.WorkflowID != "" {
 		if err := s.startModalWorkflow(ctx, props, state); err != nil {
 			return nil, fmt.Errorf("failed to start workflow: %w", err)
 		}
 	}
-	
+
 	// Add to modal stack if enabled
 	if s.EnableModalStack && s.StateProvider != nil {
 		if err := s.StateProvider.PushModal(ctx, sessionID, props.ID, props); err != nil {
 			return nil, fmt.Errorf("failed to add to modal stack: %w", err)
 		}
 	}
-	
+
 	// Setup auto-save if enabled
 	if props.AutoSave && s.EnableAutoSave {
 		s.setupAutoSave(ctx, props.ID, state)
 	}
-	
+
 	return state, nil
 }
 
@@ -390,28 +389,28 @@ func (s *ModalService) CloseModal(ctx context.Context, sessionID string, modalID
 	if err != nil {
 		return fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	// Check if can close (dirty state, validation, etc.)
 	if !forced && state.Dirty {
 		// This would typically trigger a confirmation dialog
 		return fmt.Errorf("modal has unsaved changes")
 	}
-	
+
 	// Stop auto-save
 	if state.AutoSaveEnabled {
 		s.stopAutoSave(ctx, modalID)
 	}
-	
+
 	// Clean up file uploads
 	if len(state.UploadQueue) > 0 {
 		s.cancelPendingUploads(ctx, modalID)
 	}
-	
+
 	// Complete workflow if active
 	if state.InstanceID != "" {
 		s.completeModalWorkflow(ctx, state)
 	}
-	
+
 	// Remove from modal stack
 	if s.EnableModalStack && s.StateProvider != nil {
 		_, err := s.StateProvider.PopModal(ctx, sessionID)
@@ -419,12 +418,12 @@ func (s *ModalService) CloseModal(ctx context.Context, sessionID string, modalID
 			return fmt.Errorf("failed to remove from modal stack: %w", err)
 		}
 	}
-	
+
 	// Clean up cached data
 	if s.CacheProvider != nil {
 		s.CacheProvider.Delete(ctx, fmt.Sprintf("modal_state_%s", modalID))
 	}
-	
+
 	return nil
 }
 
@@ -434,16 +433,16 @@ func (s *ModalService) UpdateModalData(ctx context.Context, modalID string, fiel
 	if err != nil {
 		return nil, fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	// Update form data
 	oldValue := state.FormData[field]
 	state.FormData[field] = value
 	state.Touched[field] = true
 	state.Dirty = true
-	
+
 	// Clear previous error for this field
 	delete(state.Errors, field)
-	
+
 	// Validate field if validation provider is available
 	var result *ValidationResult
 	if s.ValidationProvider != nil {
@@ -451,27 +450,27 @@ func (s *ModalService) UpdateModalData(ctx context.Context, modalID string, fiel
 		if err != nil {
 			return nil, fmt.Errorf("validation failed: %w", err)
 		}
-		
+
 		if !result.Valid {
 			for field, error := range result.Errors {
 				state.Errors[field] = error
 			}
 		}
-		
+
 		// Update overall validation state
 		state.Valid = len(state.Errors) == 0
 	}
-	
+
 	// Trigger auto-save if enabled and data is valid
 	if state.AutoSaveEnabled && state.Valid {
 		go s.triggerAutoSave(ctx, modalID, state)
 	}
-	
+
 	// Save state
 	if err := s.saveModalState(ctx, modalID, state); err != nil {
 		return nil, fmt.Errorf("failed to save modal state: %w", err)
 	}
-	
+
 	return result, nil
 }
 
@@ -481,7 +480,7 @@ func (s *ModalService) SubmitModal(ctx context.Context, modalID string, submitUR
 	if err != nil {
 		return nil, fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	// Validate all data before submission
 	if s.ValidationProvider != nil {
 		// Get form schema from modal props (would need to be passed in or stored)
@@ -489,7 +488,7 @@ func (s *ModalService) SubmitModal(ctx context.Context, modalID string, submitUR
 		if err != nil {
 			return nil, fmt.Errorf("validation failed: %w", err)
 		}
-		
+
 		if !result.Valid {
 			state.Errors = result.Errors
 			state.Valid = false
@@ -500,11 +499,11 @@ func (s *ModalService) SubmitModal(ctx context.Context, modalID string, submitUR
 			}, nil
 		}
 	}
-	
+
 	// Mark as saving
 	state.Saving = true
 	s.saveModalState(ctx, modalID, state)
-	
+
 	// Save data using data provider
 	if s.DataProvider != nil {
 		if err := s.DataProvider.Save(ctx, modalID, state.FormData); err != nil {
@@ -513,16 +512,16 @@ func (s *ModalService) SubmitModal(ctx context.Context, modalID string, submitUR
 			return nil, fmt.Errorf("failed to save data: %w", err)
 		}
 	}
-	
+
 	// Mark as clean and not saving
 	state.Dirty = false
 	state.Saving = false
 	state.SaveCount++
 	now := time.Now()
 	state.LastSaved = &now
-	
+
 	s.saveModalState(ctx, modalID, state)
-	
+
 	return &ModalSubmissionResult{
 		Success: true,
 		Data:    state.FormData,
@@ -531,11 +530,11 @@ func (s *ModalService) SubmitModal(ctx context.Context, modalID string, submitUR
 
 // ModalSubmissionResult represents the result of modal submission
 type ModalSubmissionResult struct {
-	Success bool               `json:"success"`
-	Data    map[string]any     `json:"data,omitempty"`
-	Errors  map[string]string  `json:"errors,omitempty"`
-	Message string             `json:"message,omitempty"`
-	RedirectURL string         `json:"redirectUrl,omitempty"`
+	Success     bool              `json:"success"`
+	Data        map[string]any    `json:"data,omitempty"`
+	Errors      map[string]string `json:"errors,omitempty"`
+	Message     string            `json:"message,omitempty"`
+	RedirectURL string            `json:"redirectUrl,omitempty"`
 }
 
 // Step navigation methods
@@ -546,20 +545,20 @@ func (s *ModalService) NextStep(ctx context.Context, modalID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	if state.CurrentStep >= state.TotalSteps {
 		return fmt.Errorf("already at last step")
 	}
-	
+
 	// Validate current step before proceeding
 	if s.ValidationProvider != nil {
 		// Validation logic for current step
 		// This would validate only the fields relevant to the current step
 	}
-	
+
 	state.CurrentStep++
 	state.CompletedSteps = append(state.CompletedSteps, state.CurrentStep-1)
-	
+
 	return s.saveModalState(ctx, modalID, state)
 }
 
@@ -569,13 +568,13 @@ func (s *ModalService) PrevStep(ctx context.Context, modalID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	if state.CurrentStep <= 1 {
 		return fmt.Errorf("already at first step")
 	}
-	
+
 	state.CurrentStep--
-	
+
 	return s.saveModalState(ctx, modalID, state)
 }
 
@@ -585,13 +584,13 @@ func (s *ModalService) GoToStep(ctx context.Context, modalID string, step int) e
 	if err != nil {
 		return fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	if step < 1 || step > state.TotalSteps {
 		return fmt.Errorf("invalid step number: %d", step)
 	}
-	
+
 	state.CurrentStep = step
-	
+
 	return s.saveModalState(ctx, modalID, state)
 }
 
@@ -602,12 +601,12 @@ func (s *ModalService) UploadFile(ctx context.Context, modalID string, file *Upl
 	if !s.EnableFileUpload || s.FileProvider == nil {
 		return nil, fmt.Errorf("file upload not enabled")
 	}
-	
+
 	state, err := s.getModalState(ctx, modalID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	// Create upload task
 	task := &UploadTask{
 		ID:       generateUploadTaskID(),
@@ -615,10 +614,10 @@ func (s *ModalService) UploadFile(ctx context.Context, modalID string, file *Upl
 		Progress: 0,
 		Status:   "pending",
 	}
-	
+
 	state.UploadQueue = append(state.UploadQueue, *task)
 	s.saveModalState(ctx, modalID, state)
-	
+
 	// Perform upload
 	task.Status = "uploading"
 	metadata, err := s.FileProvider.Upload(ctx, file)
@@ -628,12 +627,12 @@ func (s *ModalService) UploadFile(ctx context.Context, modalID string, file *Upl
 		s.saveModalState(ctx, modalID, state)
 		return nil, fmt.Errorf("upload failed: %w", err)
 	}
-	
+
 	// Update state
 	task.Status = "completed"
 	task.Progress = 100
 	state.UploadedFiles = append(state.UploadedFiles, *metadata)
-	
+
 	// Remove from queue
 	for i, queueTask := range state.UploadQueue {
 		if queueTask.ID == task.ID {
@@ -641,10 +640,10 @@ func (s *ModalService) UploadFile(ctx context.Context, modalID string, file *Upl
 			break
 		}
 	}
-	
+
 	state.Dirty = true
 	s.saveModalState(ctx, modalID, state)
-	
+
 	return metadata, nil
 }
 
@@ -655,17 +654,17 @@ func (s *ModalService) Search(ctx context.Context, modalID string, query string,
 	if !s.EnableSearch || s.SearchProvider == nil {
 		return nil, fmt.Errorf("search not enabled")
 	}
-	
+
 	state, err := s.getModalState(ctx, modalID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get modal state: %w", err)
 	}
-	
+
 	// Update search state
 	state.SearchQuery = query
 	state.SearchLoading = true
 	s.saveModalState(ctx, modalID, state)
-	
+
 	// Perform search
 	results, err := s.SearchProvider.Search(ctx, query, filters)
 	if err != nil {
@@ -673,12 +672,12 @@ func (s *ModalService) Search(ctx context.Context, modalID string, query string,
 		s.saveModalState(ctx, modalID, state)
 		return nil, fmt.Errorf("search failed: %w", err)
 	}
-	
+
 	// Update state with results
 	state.SearchResults = results
 	state.SearchLoading = false
 	s.saveModalState(ctx, modalID, state)
-	
+
 	return results, nil
 }
 
@@ -695,7 +694,7 @@ func (s *ModalService) getModalState(ctx context.Context, modalID string) (*Moda
 			}
 		}
 	}
-	
+
 	// Fallback to creating new state
 	return &ModalState{
 		FormData:    make(map[string]any),
@@ -711,12 +710,12 @@ func (s *ModalService) saveModalState(ctx context.Context, modalID string, state
 		if err != nil {
 			return fmt.Errorf("failed to marshal state: %w", err)
 		}
-		
+
 		if err := s.CacheProvider.Set(ctx, fmt.Sprintf("modal_state_%s", modalID), data, s.DefaultCacheTimeout); err != nil {
 			return fmt.Errorf("failed to cache state: %w", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -730,16 +729,16 @@ func (s *ModalService) startModalWorkflow(ctx context.Context, props *EnhancedMo
 	if s.WorkflowProvider == nil {
 		return nil
 	}
-	
+
 	instance, err := s.WorkflowProvider.StartWorkflow(ctx, props.WorkflowID, state.FormData)
 	if err != nil {
 		return err
 	}
-	
+
 	state.WorkflowID = props.WorkflowID
 	state.InstanceID = instance.ID
 	state.WorkflowState = instance.State
-	
+
 	return nil
 }
 
@@ -747,7 +746,7 @@ func (s *ModalService) completeModalWorkflow(ctx context.Context, state *ModalSt
 	if s.WorkflowProvider == nil || state.InstanceID == "" {
 		return nil
 	}
-	
+
 	return s.WorkflowProvider.CompleteWorkflow(ctx, state.InstanceID, state.FormData)
 }
 
@@ -783,10 +782,10 @@ func generateUploadTaskID() string {
 
 func getEnhancedModalOverlayClasses(props EnhancedModalProps) string {
 	classes := []string{}
-	
+
 	// Base classes
 	classes = append(classes, "enhanced-modal-overlay", "fixed", "inset-0", "z-50")
-	
+
 	// Type-specific positioning
 	switch props.Type {
 	case EnhancedModalDialog:
@@ -796,7 +795,7 @@ func getEnhancedModalOverlayClasses(props EnhancedModalProps) string {
 		} else {
 			classes = append(classes, "items-start", "pt-16")
 		}
-		
+
 	case EnhancedModalDrawer:
 		classes = append(classes, "flex")
 		switch props.Position {
@@ -809,18 +808,18 @@ func getEnhancedModalOverlayClasses(props EnhancedModalProps) string {
 		case EnhancedModalPositionBottom:
 			classes = append(classes, "items-end")
 		}
-		
+
 	case EnhancedModalBottomSheet:
 		classes = append(classes, "flex", "items-end")
-		
+
 	case EnhancedModalFullscreen:
 		// No flex needed for fullscreen
-		
+
 	case EnhancedModalPopover:
 		classes = append(classes, "flex")
 		// Position would be set dynamically based on trigger element
 	}
-	
+
 	// Backdrop
 	if props.Backdrop {
 		if props.BlurBackdrop {
@@ -829,31 +828,31 @@ func getEnhancedModalOverlayClasses(props EnhancedModalProps) string {
 			classes = append(classes, "bg-black/80")
 		}
 	}
-	
+
 	// Mobile responsiveness
 	if props.MobileFullscreen {
 		classes = append(classes, "sm:flex", "sm:items-center", "sm:justify-center", "sm:p-4")
 	}
-	
+
 	// Custom classes
 	if props.OverlayClass != "" {
 		classes = append(classes, props.OverlayClass)
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
 func getEnhancedModalContentClasses(props EnhancedModalProps) string {
 	classes := []string{}
-	
+
 	// Base classes
 	classes = append(classes, "enhanced-modal-content", "relative", "bg-background", "text-foreground", "shadow-lg", "focus:outline-none")
-	
+
 	// Type-specific styles
 	switch props.Type {
 	case EnhancedModalDialog, EnhancedModalPopover:
 		classes = append(classes, "rounded-lg", "border")
-		
+
 	case EnhancedModalDrawer:
 		switch props.Position {
 		case EnhancedModalPositionRight:
@@ -867,17 +866,17 @@ func getEnhancedModalContentClasses(props EnhancedModalProps) string {
 		default:
 			classes = append(classes, "h-full", "border-l", "rounded-l-lg")
 		}
-		
+
 	case EnhancedModalBottomSheet:
 		classes = append(classes, "w-full", "border-t", "rounded-t-lg")
 		if props.MobileFullscreen {
 			classes = append(classes, "h-full", "sm:h-auto", "sm:max-h-[90vh]", "sm:rounded-lg", "sm:border")
 		}
-		
+
 	case EnhancedModalFullscreen:
 		classes = append(classes, "w-screen", "h-screen")
 	}
-	
+
 	// Size classes
 	if props.Type != EnhancedModalFullscreen && props.Type != EnhancedModalBottomSheet {
 		switch props.Size {
@@ -912,7 +911,7 @@ func getEnhancedModalContentClasses(props EnhancedModalProps) string {
 			classes = append(classes, "w-full", "max-w-md")
 		}
 	}
-	
+
 	// Drawer specific width for different positions
 	if props.Type == EnhancedModalDrawer && props.Size != EnhancedModalSizeFull {
 		switch props.Position {
@@ -948,12 +947,12 @@ func getEnhancedModalContentClasses(props EnhancedModalProps) string {
 			}
 		}
 	}
-	
+
 	// Scrollable content
 	if props.Scrollable {
 		classes = append(classes, "max-h-[90vh]", "flex", "flex-col")
 	}
-	
+
 	// Theme variant classes
 	switch props.Variant {
 	case EnhancedModalDestructive:
@@ -965,23 +964,23 @@ func getEnhancedModalContentClasses(props EnhancedModalProps) string {
 	case EnhancedModalInfo:
 		classes = append(classes, "border-info/20")
 	}
-	
+
 	// Custom content classes
 	if props.ContentClass != "" {
 		classes = append(classes, props.ContentClass)
 	}
-	
+
 	// Base custom class
 	if props.Class != "" {
 		classes = append(classes, props.Class)
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
 func getEnhancedModalHeaderClasses(props EnhancedModalProps) string {
 	classes := []string{"enhanced-modal-header", "flex", "items-start", "justify-between", "p-6"}
-	
+
 	// Variant-specific styling
 	switch props.Variant {
 	case EnhancedModalDestructive:
@@ -995,57 +994,57 @@ func getEnhancedModalHeaderClasses(props EnhancedModalProps) string {
 	default:
 		classes = append(classes, "border-b")
 	}
-	
+
 	// Fullscreen header styling
 	if props.Type == EnhancedModalFullscreen {
 		classes = append(classes, "bg-background/95", "backdrop-blur", "border-b", "sticky", "top-0", "z-10")
 	}
-	
+
 	// Custom header classes
 	if props.HeaderClass != "" {
 		classes = append(classes, props.HeaderClass)
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
 func getEnhancedModalBodyClasses(props EnhancedModalProps) string {
 	classes := []string{"enhanced-modal-body", "p-6"}
-	
+
 	// Scrollable content
 	if props.Scrollable {
 		classes = append(classes, "overflow-y-auto", "flex-1")
 	}
-	
+
 	// Type-specific body styling
 	if props.Type == EnhancedModalFullscreen {
 		classes = append(classes, "container", "mx-auto", "max-w-6xl")
 	}
-	
+
 	// Custom body classes
 	if props.BodyClass != "" {
 		classes = append(classes, props.BodyClass)
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
 func getEnhancedModalFooterClasses(props EnhancedModalProps) string {
 	classes := []string{"enhanced-modal-footer", "flex", "items-center", "justify-between", "gap-2", "p-6", "border-t"}
-	
+
 	// Fullscreen footer styling
 	if props.Type == EnhancedModalFullscreen {
 		classes = append(classes, "bg-background/95", "backdrop-blur", "sticky", "bottom-0", "z-10")
 	}
-	
+
 	// Mobile optimization
 	classes = append(classes, "flex-col", "sm:flex-row")
-	
+
 	// Custom footer classes
 	if props.FooterClass != "" {
 		classes = append(classes, props.FooterClass)
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
@@ -1053,7 +1052,7 @@ func getEnhancedModalFooterClasses(props EnhancedModalProps) string {
 
 func getStepNavItemClasses(step EnhancedModalStep, index int, props EnhancedModalProps) string {
 	classes := []string{"step-nav-item", "flex", "items-center", "text-sm"}
-	
+
 	if step.Active {
 		classes = append(classes, "text-primary")
 	} else if step.Completed {
@@ -1061,23 +1060,23 @@ func getStepNavItemClasses(step EnhancedModalStep, index int, props EnhancedModa
 	} else {
 		classes = append(classes, "text-muted-foreground")
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
 func getStepNavButtonClasses(step EnhancedModalStep, index int, props EnhancedModalProps) string {
 	classes := []string{"step-nav-button"}
-	
+
 	if props.StepNavigation && !props.LinearProgress {
 		classes = append(classes, "cursor-pointer", "transition-colors", "hover:text-primary")
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
 func getStepIconContainerClasses(step EnhancedModalStep, index int, props EnhancedModalProps) string {
 	classes := []string{"flex", "items-center", "justify-center", "w-8", "h-8", "rounded-full", "border-2"}
-	
+
 	if step.Active {
 		classes = append(classes, "bg-primary", "border-primary", "text-primary-foreground")
 	} else if step.Completed {
@@ -1085,7 +1084,7 @@ func getStepIconContainerClasses(step EnhancedModalStep, index int, props Enhanc
 	} else {
 		classes = append(classes, "border-muted-foreground", "text-muted-foreground")
 	}
-	
+
 	return utils.TwMerge(strings.Join(classes, " "))
 }
 
@@ -1099,12 +1098,12 @@ func getActionsByPosition(actions []EnhancedModalAction, position string) []Enha
 			filtered = append(filtered, action)
 		}
 	}
-	
+
 	// Sort by priority
 	sort.Slice(filtered, func(i, j int) bool {
 		return filtered[i].Priority < filtered[j].Priority
 	})
-	
+
 	return filtered
 }
 
@@ -1112,7 +1111,7 @@ func getEnhancedModalActionVariant(action EnhancedModalAction) atoms.ButtonVaria
 	if action.Variant != "" {
 		return action.Variant
 	}
-	
+
 	// Default variants based on action type
 	switch action.Type {
 	case "primary", "submit", "save":
@@ -1146,11 +1145,11 @@ func getEnhancedModalActionType(action EnhancedModalAction) string {
 
 func getEnhancedModalActionClasses(action EnhancedModalAction) string {
 	classes := []string{}
-	
+
 	if action.FullWidth {
 		classes = append(classes, "w-full", "sm:w-auto")
 	}
-	
+
 	return strings.Join(classes, " ")
 }
 
@@ -1173,7 +1172,7 @@ func getEnhancedModalActionSwap(action EnhancedModalAction, modalProps EnhancedM
 
 func getEnhancedModalActionClick(action EnhancedModalAction, modalProps EnhancedModalProps) string {
 	clickHandler := action.AlpineClick
-	
+
 	// Add confirmation if specified
 	if action.ConfirmText != "" {
 		confirmHandler := fmt.Sprintf("if(confirm('%s'))", action.ConfirmText)
@@ -1183,7 +1182,7 @@ func getEnhancedModalActionClick(action EnhancedModalAction, modalProps Enhanced
 			clickHandler = confirmHandler
 		}
 	}
-	
+
 	// Add auto-close if specified
 	if action.AutoClose {
 		if clickHandler != "" {
@@ -1192,7 +1191,7 @@ func getEnhancedModalActionClick(action EnhancedModalAction, modalProps Enhanced
 			clickHandler = "closeModal()"
 		}
 	}
-	
+
 	// Add default actions based on type
 	if clickHandler == "" {
 		switch action.Type {
@@ -1204,7 +1203,7 @@ func getEnhancedModalActionClick(action EnhancedModalAction, modalProps Enhanced
 			clickHandler = "saveForm()"
 		}
 	}
-	
+
 	return clickHandler
 }
 
@@ -1281,7 +1280,7 @@ func getHeaderIconClasses(variant EnhancedModalVariant) string {
 // Header title classes based on variant
 func getHeaderTitleClasses(variant EnhancedModalVariant) string {
 	classes := []string{"text-lg", "font-semibold"}
-	
+
 	switch variant {
 	case EnhancedModalDestructive:
 		classes = append(classes, "text-destructive")
@@ -1294,7 +1293,7 @@ func getHeaderTitleClasses(variant EnhancedModalVariant) string {
 	default:
 		classes = append(classes, "text-foreground")
 	}
-	
+
 	return strings.Join(classes, " ")
 }
 
@@ -1304,16 +1303,16 @@ func getEnhancedModalAlpineData(props EnhancedModalProps) string {
 	if initialData == nil {
 		initialData = make(map[string]any)
 	}
-	
+
 	initialDataJSON, _ := json.Marshal(initialData)
-	
+
 	totalSteps := len(props.Steps)
 	if totalSteps == 0 {
 		totalSteps = 1
 	}
-	
+
 	autoSaveInterval := utils.IfElse(props.AutoSaveInterval > 0, props.AutoSaveInterval, 30)
-	
+
 	return fmt.Sprintf(`{
 		// Core modal state
 		open: %s,

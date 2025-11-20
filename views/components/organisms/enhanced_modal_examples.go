@@ -3,7 +3,6 @@ package organisms
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/atoms"
@@ -103,20 +102,20 @@ func (e *ExampleModalConfigs) InfoAlertModal() EnhancedModalProps {
 // SidebarSettingsDrawer demonstrates a settings drawer modal
 func (e *ExampleModalConfigs) SidebarSettingsDrawer() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "settings-drawer",
-		Name:           "settingsDrawer",
-		Title:          "Settings",
-		Subtitle:       "Customize your experience",
-		Type:           EnhancedModalDrawer,
-		Size:           EnhancedModalSizeMD,
-		Position:       EnhancedModalPositionRight,
-		Dismissible:    true,
-		CloseOnEscape:  true,
-		CloseOnOverlay: true,
-		Scrollable:     true,
-		Header:         true,
-		Footer:         true,
-		AutoSave:       true,
+		ID:               "settings-drawer",
+		Name:             "settingsDrawer",
+		Title:            "Settings",
+		Subtitle:         "Customize your experience",
+		Type:             EnhancedModalDrawer,
+		Size:             EnhancedModalSizeMD,
+		Position:         EnhancedModalPositionRight,
+		Dismissible:      true,
+		CloseOnEscape:    true,
+		CloseOnOverlay:   true,
+		Scrollable:       true,
+		Header:           true,
+		Footer:           true,
+		AutoSave:         true,
 		AutoSaveInterval: 5,
 		FormData: map[string]any{
 			"theme":         "light",
@@ -126,11 +125,11 @@ func (e *ExampleModalConfigs) SidebarSettingsDrawer() EnhancedModalProps {
 		},
 		Actions: []EnhancedModalAction{
 			{
-				ID:        "reset",
-				Text:      "Reset to Defaults",
-				Type:      "secondary",
-				Variant:   atoms.ButtonOutline,
-				Position:  "left",
+				ID:          "reset",
+				Text:        "Reset to Defaults",
+				Type:        "secondary",
+				Variant:     atoms.ButtonOutline,
+				Position:    "left",
 				AlpineClick: "resetSettings()",
 			},
 			{
@@ -194,25 +193,25 @@ func (e *ExampleModalConfigs) NotificationDrawer() EnhancedModalProps {
 // UserProfileEditModal demonstrates a form modal for editing user profiles
 func (e *ExampleModalConfigs) UserProfileEditModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "edit-profile",
-		Name:           "profileModal",
-		Title:          "Edit Profile",
-		Description:    "Update your profile information",
-		Type:           EnhancedModalDialog,
-		Size:           EnhancedModalSizeLG,
-		Dismissible:    true,
-		CloseOnEscape:  true,
-		CloseOnOverlay: false,
-		Scrollable:     true,
-		Header:         true,
-		Footer:         true,
-		AutoFocus:      true,
-		TrapFocus:      true,
-		RestoreFocus:   true,
-		FormValidation: true,
-		AutoSave:       true,
+		ID:               "edit-profile",
+		Name:             "profileModal",
+		Title:            "Edit Profile",
+		Description:      "Update your profile information",
+		Type:             EnhancedModalDialog,
+		Size:             EnhancedModalSizeLG,
+		Dismissible:      true,
+		CloseOnEscape:    true,
+		CloseOnOverlay:   false,
+		Scrollable:       true,
+		Header:           true,
+		Footer:           true,
+		AutoFocus:        true,
+		TrapFocus:        true,
+		RestoreFocus:     true,
+		FormValidation:   true,
+		AutoSave:         true,
 		AutoSaveInterval: 30,
-		ConfirmOnClose: true,
+		ConfirmOnClose:   true,
 		FormSchema: &schema.FormSchema{
 			ID:      "user-profile",
 			Version: "1.0.0",
@@ -246,9 +245,9 @@ func (e *ExampleModalConfigs) UserProfileEditModal() EnhancedModalProps {
 					Placeholder: "Enter your phone number",
 				},
 				{
-					Name: "bio",
-					Label: "Bio",
-					Type: schema.FieldText,
+					Name:        "bio",
+					Label:       "Bio",
+					Type:        schema.FieldText,
 					Placeholder: "Tell us about yourself",
 				},
 			},
@@ -288,22 +287,22 @@ func (e *ExampleModalConfigs) UserProfileEditModal() EnhancedModalProps {
 // CreateProjectModal demonstrates a complex form modal with validation
 func (e *ExampleModalConfigs) CreateProjectModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "create-project",
-		Name:           "createProjectModal",
-		Title:          "Create New Project",
-		Description:    "Set up your new project with initial configuration",
-		Type:           EnhancedModalDialog,
-		Size:           EnhancedModalSizeXL,
-		Dismissible:    true,
-		CloseOnEscape:  true,
-		CloseOnOverlay: false,
-		Scrollable:     true,
-		Header:         true,
-		Footer:         true,
-		AutoFocus:      true,
-		TrapFocus:      true,
-		FormValidation: true,
-		AutoSave:       true,
+		ID:               "create-project",
+		Name:             "createProjectModal",
+		Title:            "Create New Project",
+		Description:      "Set up your new project with initial configuration",
+		Type:             EnhancedModalDialog,
+		Size:             EnhancedModalSizeXL,
+		Dismissible:      true,
+		CloseOnEscape:    true,
+		CloseOnOverlay:   false,
+		Scrollable:       true,
+		Header:           true,
+		Footer:           true,
+		AutoFocus:        true,
+		TrapFocus:        true,
+		FormValidation:   true,
+		AutoSave:         true,
 		AutoSaveInterval: 15,
 		FormSchema: &schema.FormSchema{
 			ID:      "create-project",
@@ -324,9 +323,9 @@ func (e *ExampleModalConfigs) CreateProjectModal() EnhancedModalProps {
 					Placeholder: "Describe your project",
 				},
 				{
-					Name:    "category",
-					Label:   "Category",
-					Type:    schema.FieldSelect,
+					Name:     "category",
+					Label:    "Category",
+					Type:     schema.FieldSelect,
 					Required: true,
 					Options: []schema.FieldOption{
 						{Value: "web", Label: "Web Application"},
@@ -336,9 +335,9 @@ func (e *ExampleModalConfigs) CreateProjectModal() EnhancedModalProps {
 					},
 				},
 				{
-					Name:    "framework",
-					Label:   "Framework",
-					Type:    schema.FieldSelect,
+					Name:  "framework",
+					Label: "Framework",
+					Type:  schema.FieldSelect,
 					Options: []schema.FieldOption{
 						{Value: "react", Label: "React"},
 						{Value: "vue", Label: "Vue.js"},
@@ -392,22 +391,22 @@ func (e *ExampleModalConfigs) CreateProjectModal() EnhancedModalProps {
 // OnboardingWizardModal demonstrates a multi-step onboarding process
 func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "onboarding-wizard",
-		Name:           "onboardingModal",
-		Title:          "Welcome to Our Platform",
-		Subtitle:       "Let's get you set up in just a few steps",
-		Type:           EnhancedModalDialog,
-		Size:           EnhancedModalSizeLG,
-		Dismissible:    false, // Prevent dismissing during onboarding
-		CloseOnEscape:  false,
-		CloseOnOverlay: false,
-		Header:         true,
-		Footer:         true,
-		ShowProgress:   true,
-		ShowStepNav:    true,
-		StepNavigation: true,
-		LinearProgress: true,
-		AutoSave:       true,
+		ID:               "onboarding-wizard",
+		Name:             "onboardingModal",
+		Title:            "Welcome to Our Platform",
+		Subtitle:         "Let's get you set up in just a few steps",
+		Type:             EnhancedModalDialog,
+		Size:             EnhancedModalSizeLG,
+		Dismissible:      false, // Prevent dismissing during onboarding
+		CloseOnEscape:    false,
+		CloseOnOverlay:   false,
+		Header:           true,
+		Footer:           true,
+		ShowProgress:     true,
+		ShowStepNav:      true,
+		StepNavigation:   true,
+		LinearProgress:   true,
+		AutoSave:         true,
 		AutoSaveInterval: 10,
 		Steps: []EnhancedModalStep{
 			{
@@ -427,9 +426,9 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 							Placeholder: "Enter your full name",
 						},
 						{
-							Name:    "role",
-							Label:   "Role",
-							Type:    schema.FieldSelect,
+							Name:     "role",
+							Label:    "Role",
+							Type:     schema.FieldSelect,
 							Required: true,
 							Options: []schema.FieldOption{
 								{Value: "developer", Label: "Developer"},
@@ -450,9 +449,9 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 				Content: &schema.FormSchema{
 					Fields: []schema.Field{
 						{
-							Name:    "theme",
-							Label:   "Theme",
-							Type:    schema.FieldRadio,
+							Name:     "theme",
+							Label:    "Theme",
+							Type:     schema.FieldRadio,
 							Required: true,
 							Options: []schema.FieldOption{
 								{Value: "light", Label: "Light"},
@@ -461,9 +460,9 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 							},
 						},
 						{
-							Name:    "language",
-							Label:   "Language",
-							Type:    schema.FieldSelect,
+							Name:     "language",
+							Label:    "Language",
+							Type:     schema.FieldSelect,
 							Required: true,
 							Options: []schema.FieldOption{
 								{Value: "en", Label: "English"},
@@ -531,14 +530,14 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 		},
 		Actions: []EnhancedModalAction{
 			{
-				ID:       "complete",
-				Text:     "Get Started",
-				Type:     "primary",
-				Variant:  atoms.ButtonPrimary,
-				Position: "right",
-				HXPost:   "/api/onboarding/complete",
-				HXTarget: "body",
-				HXSwap:   "none",
+				ID:          "complete",
+				Text:        "Get Started",
+				Type:        "primary",
+				Variant:     atoms.ButtonPrimary,
+				Position:    "right",
+				HXPost:      "/api/onboarding/complete",
+				HXTarget:    "body",
+				HXSwap:      "none",
 				AlpineClick: "completeOnboarding()",
 			},
 		},
@@ -548,23 +547,23 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 // ProductCreationWizard demonstrates a complex multi-step product creation process
 func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "product-wizard",
-		Name:           "productWizard",
-		Title:          "Create New Product",
-		Type:           EnhancedModalDialog,
-		Size:           EnhancedModalSizeXL,
-		Dismissible:    true,
-		CloseOnEscape:  true,
-		CloseOnOverlay: false,
-		Header:         true,
-		Footer:         true,
-		ShowProgress:   true,
-		ShowStepNav:    true,
-		StepNavigation: true,
-		LinearProgress: false, // Allow jumping between steps
-		AutoSave:       true,
+		ID:               "product-wizard",
+		Name:             "productWizard",
+		Title:            "Create New Product",
+		Type:             EnhancedModalDialog,
+		Size:             EnhancedModalSizeXL,
+		Dismissible:      true,
+		CloseOnEscape:    true,
+		CloseOnOverlay:   false,
+		Header:           true,
+		Footer:           true,
+		ShowProgress:     true,
+		ShowStepNav:      true,
+		StepNavigation:   true,
+		LinearProgress:   false, // Allow jumping between steps
+		AutoSave:         true,
 		AutoSaveInterval: 20,
-		ConfirmOnClose: true,
+		ConfirmOnClose:   true,
 		Steps: []EnhancedModalStep{
 			{
 				ID:          "basic-info",
@@ -606,9 +605,9 @@ func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 				Content: &schema.FormSchema{
 					Fields: []schema.Field{
 						{
-							Name: "category",
+							Name:  "category",
 							Label: "Primary Category",
-							Type: schema.FieldSelect,
+							Type:  schema.FieldSelect,
 							Options: []schema.FieldOption{
 								{Value: "electronics", Label: "Electronics"},
 								{Value: "clothing", Label: "Clothing"},
@@ -648,12 +647,12 @@ func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 		},
 		Actions: []EnhancedModalAction{
 			{
-				ID:        "save-draft",
-				Text:      "Save as Draft",
-				Type:      "secondary",
-				Variant:   atoms.ButtonOutline,
-				Position:  "left",
-				HXPost:    "/api/products/draft",
+				ID:          "save-draft",
+				Text:        "Save as Draft",
+				Type:        "secondary",
+				Variant:     atoms.ButtonOutline,
+				Position:    "left",
+				HXPost:      "/api/products/draft",
 				AlpineClick: "saveDraft()",
 			},
 			{
@@ -785,24 +784,24 @@ func (e *ExampleModalConfigs) ProductLookupModal() EnhancedModalProps {
 // DocumentUploadModal demonstrates a document upload modal
 func (e *ExampleModalConfigs) DocumentUploadModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:              "document-upload",
-		Name:            "documentUploadModal",
-		Title:           "Upload Documents",
-		Description:     "Upload important documents for your application",
-		Type:            EnhancedModalDialog,
-		Size:            EnhancedModalSizeLG,
-		Dismissible:     true,
-		CloseOnEscape:   true,
-		CloseOnOverlay:  true,
-		Header:          true,
-		Footer:          true,
-		FileUpload:      true,
-		UploadURL:       "/api/documents/upload",
-		UploadMultiple:  true,
-		UploadMaxFiles:  5,
-		UploadMaxSize:   10, // 10MB
-		UploadAccept:    ".pdf,.doc,.docx,.txt",
-		ShowProgress:    true,
+		ID:             "document-upload",
+		Name:           "documentUploadModal",
+		Title:          "Upload Documents",
+		Description:    "Upload important documents for your application",
+		Type:           EnhancedModalDialog,
+		Size:           EnhancedModalSizeLG,
+		Dismissible:    true,
+		CloseOnEscape:  true,
+		CloseOnOverlay: true,
+		Header:         true,
+		Footer:         true,
+		FileUpload:     true,
+		UploadURL:      "/api/documents/upload",
+		UploadMultiple: true,
+		UploadMaxFiles: 5,
+		UploadMaxSize:  10, // 10MB
+		UploadAccept:   ".pdf,.doc,.docx,.txt",
+		ShowProgress:   true,
 		Actions: []EnhancedModalAction{
 			{
 				ID:        "cancel",
@@ -829,26 +828,26 @@ func (e *ExampleModalConfigs) DocumentUploadModal() EnhancedModalProps {
 // ImageGalleryUpload demonstrates an image upload modal with preview
 func (e *ExampleModalConfigs) ImageGalleryUpload() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:              "image-upload",
-		Name:            "imageUploadModal",
-		Title:           "Upload Images",
-		Description:     "Add images to your gallery",
-		Type:            EnhancedModalDialog,
-		Size:            EnhancedModalSizeXL,
-		Dismissible:     true,
-		CloseOnEscape:   true,
-		CloseOnOverlay:  false,
-		Header:          true,
-		Footer:          true,
-		FileUpload:      true,
-		UploadURL:       "/api/gallery/upload",
-		UploadMultiple:  true,
-		UploadMaxFiles:  20,
-		UploadMaxSize:   5, // 5MB per image
-		UploadAccept:    ".jpg,.jpeg,.png,.gif,.webp",
-		ShowProgress:    true,
-		AutoSave:        false, // Don't auto-save file uploads
-		ConfirmOnClose:  true,
+		ID:             "image-upload",
+		Name:           "imageUploadModal",
+		Title:          "Upload Images",
+		Description:    "Add images to your gallery",
+		Type:           EnhancedModalDialog,
+		Size:           EnhancedModalSizeXL,
+		Dismissible:    true,
+		CloseOnEscape:  true,
+		CloseOnOverlay: false,
+		Header:         true,
+		Footer:         true,
+		FileUpload:     true,
+		UploadURL:      "/api/gallery/upload",
+		UploadMultiple: true,
+		UploadMaxFiles: 20,
+		UploadMaxSize:  5, // 5MB per image
+		UploadAccept:   ".jpg,.jpeg,.png,.gif,.webp",
+		ShowProgress:   true,
+		AutoSave:       false, // Don't auto-save file uploads
+		ConfirmOnClose: true,
 		Actions: []EnhancedModalAction{
 			{
 				ID:          "remove-all",
@@ -888,20 +887,20 @@ func (e *ExampleModalConfigs) ImageGalleryUpload() EnhancedModalProps {
 // DataVisualizationModal demonstrates a fullscreen data modal
 func (e *ExampleModalConfigs) DataVisualizationModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "data-visualization",
-		Name:           "dataModal",
-		Title:          "Sales Analytics Dashboard",
-		Subtitle:       "Comprehensive view of your sales data",
-		Type:           EnhancedModalFullscreen,
-		Dismissible:    true,
-		CloseOnEscape:  true,
-		Header:         true,
-		Footer:         true,
-		Scrollable:     true,
-		HXGet:          "/api/analytics/dashboard",
-		LoadOnOpen:     true,
-		ReloadOnOpen:   true,
-		LoadingText:    "Loading analytics data...",
+		ID:            "data-visualization",
+		Name:          "dataModal",
+		Title:         "Sales Analytics Dashboard",
+		Subtitle:      "Comprehensive view of your sales data",
+		Type:          EnhancedModalFullscreen,
+		Dismissible:   true,
+		CloseOnEscape: true,
+		Header:        true,
+		Footer:        true,
+		Scrollable:    true,
+		HXGet:         "/api/analytics/dashboard",
+		LoadOnOpen:    true,
+		ReloadOnOpen:  true,
+		LoadingText:   "Loading analytics data...",
 		Actions: []EnhancedModalAction{
 			{
 				ID:          "export",
@@ -939,17 +938,17 @@ func (e *ExampleModalConfigs) DataVisualizationModal() EnhancedModalProps {
 // ReportViewerModal demonstrates a fullscreen document viewer
 func (e *ExampleModalConfigs) ReportViewerModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:             "report-viewer",
-		Name:           "reportViewer",
-		Title:          "Monthly Report",
-		Type:           EnhancedModalFullscreen,
-		Dismissible:    true,
-		CloseOnEscape:  true,
-		Header:         true,
-		Footer:         true,
-		Scrollable:     true,
-		HXGet:          "/api/reports/monthly/view",
-		LoadOnOpen:     true,
+		ID:            "report-viewer",
+		Name:          "reportViewer",
+		Title:         "Monthly Report",
+		Type:          EnhancedModalFullscreen,
+		Dismissible:   true,
+		CloseOnEscape: true,
+		Header:        true,
+		Footer:        true,
+		Scrollable:    true,
+		HXGet:         "/api/reports/monthly/view",
+		LoadOnOpen:    true,
 		Actions: []EnhancedModalAction{
 			{
 				ID:          "download-pdf",
@@ -1029,23 +1028,23 @@ func (e *ExampleModalConfigs) MobileShareSheet() EnhancedModalProps {
 		MobileFullscreen: false,
 		Actions: []EnhancedModalAction{
 			{
-				ID:        "copy-link",
-				Text:      "Copy Link",
-				Type:      "secondary",
-				Variant:   atoms.ButtonOutline,
-				IconLeft:  "copy",
-				FullWidth: true,
-				Position:  "center",
+				ID:          "copy-link",
+				Text:        "Copy Link",
+				Type:        "secondary",
+				Variant:     atoms.ButtonOutline,
+				IconLeft:    "copy",
+				FullWidth:   true,
+				Position:    "center",
 				AlpineClick: "copyToClipboard()",
 			},
 			{
-				ID:        "share-email",
-				Text:      "Share via Email",
-				Type:      "secondary",
-				Variant:   atoms.ButtonOutline,
-				IconLeft:  "mail",
-				FullWidth: true,
-				Position:  "center",
+				ID:          "share-email",
+				Text:        "Share via Email",
+				Type:        "secondary",
+				Variant:     atoms.ButtonOutline,
+				IconLeft:    "mail",
+				FullWidth:   true,
+				Position:    "center",
 				AlpineClick: "shareViaEmail()",
 			},
 		},
@@ -1156,29 +1155,29 @@ func (e *ExampleModalConfigs) QuickActionsPopover() EnhancedModalProps {
 // WorkflowApprovalModal demonstrates a workflow approval modal with business logic
 func (e *ExampleModalConfigs) WorkflowApprovalModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:               "workflow-approval",
-		Name:             "approvalModal",
-		Title:            "Approval Required",
-		Description:      "Review and approve this expense request",
-		Type:             EnhancedModalDialog,
-		Size:             EnhancedModalSizeLG,
-		Variant:          EnhancedModalInfo,
-		Icon:             "check-circle",
-		Dismissible:      true,
-		CloseOnEscape:    true,
-		CloseOnOverlay:   false,
-		Header:           true,
-		Footer:           true,
-		Scrollable:       true,
-		WorkflowID:       "expense-approval",
-		ProcessID:        "exp-001",
-		TaskID:           "approval-123",
-		EntityID:         "expense-456",
-		EntityType:       "expense",
+		ID:                  "workflow-approval",
+		Name:                "approvalModal",
+		Title:               "Approval Required",
+		Description:         "Review and approve this expense request",
+		Type:                EnhancedModalDialog,
+		Size:                EnhancedModalSizeLG,
+		Variant:             EnhancedModalInfo,
+		Icon:                "check-circle",
+		Dismissible:         true,
+		CloseOnEscape:       true,
+		CloseOnOverlay:      false,
+		Header:              true,
+		Footer:              true,
+		Scrollable:          true,
+		WorkflowID:          "expense-approval",
+		ProcessID:           "exp-001",
+		TaskID:              "approval-123",
+		EntityID:            "expense-456",
+		EntityType:          "expense",
 		RequiredPermissions: []string{"approve_expenses"},
-		SecureMode:       true,
-		HXGet:            "/api/expenses/456/approval-details",
-		LoadOnOpen:       true,
+		SecureMode:          true,
+		HXGet:               "/api/expenses/456/approval-details",
+		LoadOnOpen:          true,
 		FormSchema: &schema.FormSchema{
 			Fields: []schema.Field{
 				{
@@ -1188,9 +1187,9 @@ func (e *ExampleModalConfigs) WorkflowApprovalModal() EnhancedModalProps {
 					Placeholder: "Add any comments about this approval",
 				},
 				{
-					Name:    "notifySubmitter",
-					Label:   "Notify Submitter",
-					Type:    schema.FieldCheckbox,
+					Name:  "notifySubmitter",
+					Label: "Notify Submitter",
+					Type:  schema.FieldCheckbox,
 					Options: []schema.FieldOption{
 						{Value: "notify", Label: "Send notification to submitter"},
 					},
@@ -1199,16 +1198,16 @@ func (e *ExampleModalConfigs) WorkflowApprovalModal() EnhancedModalProps {
 		},
 		Actions: []EnhancedModalAction{
 			{
-				ID:          "reject",
-				Text:        "Reject",
-				Type:        "destructive",
-				Variant:     atoms.ButtonDestructive,
-				Position:    "left",
-				ConfirmText: "Are you sure you want to reject this request?",
+				ID:             "reject",
+				Text:           "Reject",
+				Type:           "destructive",
+				Variant:        atoms.ButtonDestructive,
+				Position:       "left",
+				ConfirmText:    "Are you sure you want to reject this request?",
 				RequiredFields: []string{"comments"},
-				HXPost:      "/api/expenses/456/reject",
-				HXTarget:    "#expense-details",
-				AutoClose:   true,
+				HXPost:         "/api/expenses/456/reject",
+				HXTarget:       "#expense-details",
+				AutoClose:      true,
 			},
 			{
 				ID:        "cancel",
@@ -1219,15 +1218,15 @@ func (e *ExampleModalConfigs) WorkflowApprovalModal() EnhancedModalProps {
 				Position:  "right",
 			},
 			{
-				ID:          "approve",
-				Text:        "Approve",
-				Type:        "primary",
-				Variant:     atoms.ButtonPrimary,
-				AutoClose:   true,
-				Position:    "right",
-				HXPost:      "/api/expenses/456/approve",
-				HXTarget:    "#expense-details",
-				IconLeft:    "check",
+				ID:        "approve",
+				Text:      "Approve",
+				Type:      "primary",
+				Variant:   atoms.ButtonPrimary,
+				AutoClose: true,
+				Position:  "right",
+				HXPost:    "/api/expenses/456/approve",
+				HXTarget:  "#expense-details",
+				IconLeft:  "check",
 			},
 		},
 	}
@@ -1298,12 +1297,12 @@ func (e *ExampleModalConfigs) DataImportWizard() EnhancedModalProps {
 		},
 		Actions: []EnhancedModalAction{
 			{
-				ID:        "cancel",
-				Text:      "Cancel",
-				Type:      "cancel",
-				Variant:   atoms.ButtonOutline,
-				AutoClose: true,
-				Position:  "right",
+				ID:          "cancel",
+				Text:        "Cancel",
+				Type:        "cancel",
+				Variant:     atoms.ButtonOutline,
+				AutoClose:   true,
+				Position:    "right",
 				ConfirmText: "Are you sure you want to cancel the import? All progress will be lost.",
 			},
 			{
@@ -1332,7 +1331,7 @@ func (e *ExampleModalConfigs) GetSchemaBasedModal(modalType string) (*ModalSchem
 			"This action cannot be undone. Are you sure you want to delete this item?",
 			true,
 		), nil
-		
+
 	case "user-form":
 		userSchema := &schema.FormSchema{
 			ID:      "user-form",
@@ -1350,7 +1349,7 @@ func (e *ExampleModalConfigs) GetSchemaBasedModal(modalType string) (*ModalSchem
 			},
 		}
 		return CreateFormModalSchema("user-form", "Edit User", userSchema), nil
-		
+
 	case "search-users":
 		return CreateSearchModalSchema(
 			"search-users",
@@ -1358,7 +1357,7 @@ func (e *ExampleModalConfigs) GetSchemaBasedModal(modalType string) (*ModalSchem
 			"/api/users/search",
 			true,
 		), nil
-		
+
 	case "upload-documents":
 		return CreateUploadModalSchema(
 			"upload-documents",
@@ -1367,7 +1366,7 @@ func (e *ExampleModalConfigs) GetSchemaBasedModal(modalType string) (*ModalSchem
 			5,
 			[]string{".pdf", ".doc", ".docx", ".txt"},
 		), nil
-		
+
 	default:
 		return nil, fmt.Errorf("unknown modal type: %s", modalType)
 	}
@@ -1656,17 +1655,17 @@ func (e *ExampleModalConfigs) ExampleHTMXIntegration() map[string]string {
 // Performance optimization examples
 func (e *ExampleModalConfigs) PerformanceOptimizedModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:           "performance-modal",
-		Name:         "perfModal",
-		Title:        "Large Dataset",
-		Type:         EnhancedModalDialog,
-		Size:         EnhancedModalSizeLG,
-		LazyLoad:     true,        // Lazy load content
-		DebounceMs:   500,         // Debounce search
-		AnimationDuration: 200,    // Faster animations
-		HXGet:        "/api/data/large-dataset",
-		LoadOnOpen:   false,       // Manual loading
-		ReloadOnOpen: false,       // Don't reload if already loaded
+		ID:                "performance-modal",
+		Name:              "perfModal",
+		Title:             "Large Dataset",
+		Type:              EnhancedModalDialog,
+		Size:              EnhancedModalSizeLG,
+		LazyLoad:          true, // Lazy load content
+		DebounceMs:        500,  // Debounce search
+		AnimationDuration: 200,  // Faster animations
+		HXGet:             "/api/data/large-dataset",
+		LoadOnOpen:        false, // Manual loading
+		ReloadOnOpen:      false, // Don't reload if already loaded
 		Actions: []EnhancedModalAction{
 			{
 				ID:          "load-data",
@@ -1686,31 +1685,31 @@ func (e *ExampleModalConfigs) PerformanceOptimizedModal() EnhancedModalProps {
 // Accessibility-focused modal example
 func (e *ExampleModalConfigs) AccessibleModal() EnhancedModalProps {
 	return EnhancedModalProps{
-		ID:               "accessible-modal",
-		Name:             "accessibleModal",
-		Title:            "Accessible Form",
-		Description:      "Form with full accessibility support",
-		Type:             EnhancedModalDialog,
-		Size:             EnhancedModalSizeMD,
-		AutoFocus:        true,
-		TrapFocus:        true,
-		RestoreFocus:     true,
-		AriaLabel:        "Edit user profile form",
-		AriaDescription:  "accessible-modal-description",
-		Role:             "dialog",
-		FormValidation:   true,
+		ID:              "accessible-modal",
+		Name:            "accessibleModal",
+		Title:           "Accessible Form",
+		Description:     "Form with full accessibility support",
+		Type:            EnhancedModalDialog,
+		Size:            EnhancedModalSizeMD,
+		AutoFocus:       true,
+		TrapFocus:       true,
+		RestoreFocus:    true,
+		AriaLabel:       "Edit user profile form",
+		AriaDescription: "accessible-modal-description",
+		Role:            "dialog",
+		FormValidation:  true,
 		Actions: []EnhancedModalAction{
 			{
-				ID:      "cancel",
-				Text:    "Cancel",
-				Variant: atoms.ButtonOutline,
+				ID:        "cancel",
+				Text:      "Cancel",
+				Variant:   atoms.ButtonOutline,
 				AutoClose: true,
 			},
 			{
-				ID:      "save",
-				Text:    "Save Changes",
-				Variant: atoms.ButtonPrimary,
-				Type:    "submit",
+				ID:             "save",
+				Text:           "Save Changes",
+				Variant:        atoms.ButtonPrimary,
+				Type:           "submit",
 				RequiredFields: []string{"name", "email"},
 			},
 		},
@@ -1721,37 +1720,37 @@ func (e *ExampleModalConfigs) AccessibleModal() EnhancedModalProps {
 func (e *ExampleModalConfigs) GetUsageExamples() map[string]interface{} {
 	return map[string]interface{}{
 		"basic_confirmation":    e.SimpleConfirmationModal(),
-		"info_alert":           e.InfoAlertModal(),
-		"settings_drawer":      e.SidebarSettingsDrawer(),
-		"notifications_drawer": e.NotificationDrawer(),
-		"profile_edit_form":    e.UserProfileEditModal(),
-		"create_project_form":  e.CreateProjectModal(),
-		"onboarding_wizard":    e.OnboardingWizardModal(),
-		"product_wizard":       e.ProductCreationWizard(),
-		"user_search":          e.UserSearchModal(),
-		"product_lookup":       e.ProductLookupModal(),
-		"document_upload":      e.DocumentUploadModal(),
-		"image_gallery":        e.ImageGalleryUpload(),
-		"data_visualization":   e.DataVisualizationModal(),
-		"report_viewer":        e.ReportViewerModal(),
-		"mobile_menu":          e.MobileMenuBottomSheet(),
-		"share_sheet":          e.MobileShareSheet(),
-		"profile_popover":      e.UserProfilePopover(),
-		"quick_actions":        e.QuickActionsPopover(),
-		"workflow_approval":    e.WorkflowApprovalModal(),
-		"data_import":          e.DataImportWizard(),
+		"info_alert":            e.InfoAlertModal(),
+		"settings_drawer":       e.SidebarSettingsDrawer(),
+		"notifications_drawer":  e.NotificationDrawer(),
+		"profile_edit_form":     e.UserProfileEditModal(),
+		"create_project_form":   e.CreateProjectModal(),
+		"onboarding_wizard":     e.OnboardingWizardModal(),
+		"product_wizard":        e.ProductCreationWizard(),
+		"user_search":           e.UserSearchModal(),
+		"product_lookup":        e.ProductLookupModal(),
+		"document_upload":       e.DocumentUploadModal(),
+		"image_gallery":         e.ImageGalleryUpload(),
+		"data_visualization":    e.DataVisualizationModal(),
+		"report_viewer":         e.ReportViewerModal(),
+		"mobile_menu":           e.MobileMenuBottomSheet(),
+		"share_sheet":           e.MobileShareSheet(),
+		"profile_popover":       e.UserProfilePopover(),
+		"quick_actions":         e.QuickActionsPopover(),
+		"workflow_approval":     e.WorkflowApprovalModal(),
+		"data_import":           e.DataImportWizard(),
 		"performance_optimized": e.PerformanceOptimizedModal(),
 		"accessibility_focused": e.AccessibleModal(),
-		"alpine_data":          e.GetModalAlpineData(),
-		"css_styles":           e.GetModalCSS(),
-		"htmx_integration":     e.ExampleHTMXIntegration(),
+		"alpine_data":           e.GetModalAlpineData(),
+		"css_styles":            e.GetModalCSS(),
+		"htmx_integration":      e.ExampleHTMXIntegration(),
 	}
 }
 
 // GetModalByUseCase returns a modal configuration for a specific use case
 func GetModalByUseCase(useCase string, params map[string]interface{}) (*EnhancedModalProps, error) {
 	examples := &ExampleModalConfigs{}
-	
+
 	switch useCase {
 	case "delete_confirmation":
 		modal := examples.SimpleConfirmationModal()
@@ -1762,7 +1761,7 @@ func GetModalByUseCase(useCase string, params map[string]interface{}) (*Enhanced
 			modal.Description = description
 		}
 		return &modal, nil
-		
+
 	case "edit_form":
 		modal := examples.UserProfileEditModal()
 		if title, ok := params["title"].(string); ok {
@@ -1772,7 +1771,7 @@ func GetModalByUseCase(useCase string, params map[string]interface{}) (*Enhanced
 			modal.FormSchema = formSchema
 		}
 		return &modal, nil
-		
+
 	case "search_select":
 		modal := examples.UserSearchModal()
 		if title, ok := params["title"].(string); ok {
@@ -1785,7 +1784,7 @@ func GetModalByUseCase(useCase string, params map[string]interface{}) (*Enhanced
 			modal.MultiSelect = multiSelect
 		}
 		return &modal, nil
-		
+
 	case "file_upload":
 		modal := examples.DocumentUploadModal()
 		if title, ok := params["title"].(string); ok {
@@ -1801,7 +1800,7 @@ func GetModalByUseCase(useCase string, params map[string]interface{}) (*Enhanced
 			modal.UploadAccept = acceptedTypes
 		}
 		return &modal, nil
-		
+
 	default:
 		return nil, fmt.Errorf("unknown use case: %s", useCase)
 	}
@@ -1810,7 +1809,7 @@ func GetModalByUseCase(useCase string, params map[string]interface{}) (*Enhanced
 // GetModalTemplateByType returns a basic modal template for a given type
 func GetModalTemplateByType(modalType EnhancedModalType) EnhancedModalProps {
 	examples := &ExampleModalConfigs{}
-	
+
 	switch modalType {
 	case EnhancedModalDialog:
 		return examples.SimpleConfirmationModal()
@@ -1832,11 +1831,11 @@ func CreateCustomModalExample(req CustomModalRequest) (*EnhancedModalProps, erro
 	if req.ID == "" {
 		return nil, fmt.Errorf("modal ID is required")
 	}
-	
+
 	if req.Title == "" {
 		return nil, fmt.Errorf("modal title is required")
 	}
-	
+
 	props := &EnhancedModalProps{
 		ID:             req.ID,
 		Name:           req.Name,
@@ -1863,7 +1862,7 @@ func CreateCustomModalExample(req CustomModalRequest) (*EnhancedModalProps, erro
 		LoadOnOpen:     req.LoadOnOpen,
 		Context:        context.Background(),
 	}
-	
+
 	// Set defaults based on type
 	switch req.Type {
 	case EnhancedModalDrawer:
@@ -1873,52 +1872,52 @@ func CreateCustomModalExample(req CustomModalRequest) (*EnhancedModalProps, erro
 		if props.Size == "" {
 			props.Size = EnhancedModalSizeMD
 		}
-		
+
 	case EnhancedModalBottomSheet:
 		props.MobileFullscreen = true
-		
+
 	case EnhancedModalFullscreen:
 		props.Size = EnhancedModalSizeFull
-		
+
 	case EnhancedModalPopover:
 		props.Backdrop = false
 		if props.Size == "" {
 			props.Size = EnhancedModalSizeAuto
 		}
-		
+
 	default: // Dialog
 		if props.Size == "" {
 			props.Size = EnhancedModalSizeMD
 		}
 		props.Centered = true
 	}
-	
+
 	return props, nil
 }
 
 // CustomModalRequest defines the requirements for a custom modal
 type CustomModalRequest struct {
-	ID             string                    `json:"id"`
-	Name           string                    `json:"name,omitempty"`
-	Title          string                    `json:"title"`
-	Description    string                    `json:"description,omitempty"`
-	Type           EnhancedModalType         `json:"type"`
-	Size           EnhancedModalSize         `json:"size,omitempty"`
-	Position       EnhancedModalPosition     `json:"position,omitempty"`
-	Variant        EnhancedModalVariant      `json:"variant,omitempty"`
-	Icon           string                    `json:"icon,omitempty"`
-	Dismissible    bool                      `json:"dismissible"`
-	CloseOnEscape  bool                      `json:"closeOnEscape"`
-	CloseOnOverlay bool                      `json:"closeOnOverlay"`
-	ShowHeader     bool                      `json:"showHeader"`
-	ShowFooter     bool                      `json:"showFooter"`
-	Scrollable     bool                      `json:"scrollable"`
-	AutoFocus      bool                      `json:"autoFocus"`
-	TrapFocus      bool                      `json:"trapFocus"`
-	RestoreFocus   bool                      `json:"restoreFocus"`
-	FormSchema     *schema.FormSchema        `json:"formSchema,omitempty"`
-	InitialData    map[string]any            `json:"initialData,omitempty"`
-	Actions        []EnhancedModalAction     `json:"actions,omitempty"`
-	LoadURL        string                    `json:"loadUrl,omitempty"`
-	LoadOnOpen     bool                      `json:"loadOnOpen"`
+	ID             string                `json:"id"`
+	Name           string                `json:"name,omitempty"`
+	Title          string                `json:"title"`
+	Description    string                `json:"description,omitempty"`
+	Type           EnhancedModalType     `json:"type"`
+	Size           EnhancedModalSize     `json:"size,omitempty"`
+	Position       EnhancedModalPosition `json:"position,omitempty"`
+	Variant        EnhancedModalVariant  `json:"variant,omitempty"`
+	Icon           string                `json:"icon,omitempty"`
+	Dismissible    bool                  `json:"dismissible"`
+	CloseOnEscape  bool                  `json:"closeOnEscape"`
+	CloseOnOverlay bool                  `json:"closeOnOverlay"`
+	ShowHeader     bool                  `json:"showHeader"`
+	ShowFooter     bool                  `json:"showFooter"`
+	Scrollable     bool                  `json:"scrollable"`
+	AutoFocus      bool                  `json:"autoFocus"`
+	TrapFocus      bool                  `json:"trapFocus"`
+	RestoreFocus   bool                  `json:"restoreFocus"`
+	FormSchema     *schema.FormSchema    `json:"formSchema,omitempty"`
+	InitialData    map[string]any        `json:"initialData,omitempty"`
+	Actions        []EnhancedModalAction `json:"actions,omitempty"`
+	LoadURL        string                `json:"loadUrl,omitempty"`
+	LoadOnOpen     bool                  `json:"loadOnOpen"`
 }

@@ -19,7 +19,7 @@ func ExampleSidebarNavigation() NavigationProps {
 		Collapsible: true,
 		Collapsed:   false,
 		Variant:     "default",
-		
+
 		// Search configuration
 		Search: NavigationSearch{
 			Enabled:     true,
@@ -27,7 +27,7 @@ func ExampleSidebarNavigation() NavigationProps {
 			MinLength:   2,
 			Debounce:    300,
 		},
-		
+
 		// Mobile menu
 		MobileMenu: NavigationMobileMenu{
 			Enabled:     true,
@@ -36,27 +36,27 @@ func ExampleSidebarNavigation() NavigationProps {
 			CloseButton: true,
 			Swipeable:   true,
 		},
-		
+
 		// Navigation items with nested structure
 		Items: []NavigationItem{
 			{
-				ID:   "dashboard",
-				Text: "Dashboard",
-				Icon: "home",
-				URL:  "/dashboard",
+				ID:     "dashboard",
+				Text:   "Dashboard",
+				Icon:   "home",
+				URL:    "/dashboard",
 				Active: true,
 			},
 			{
-				ID:   "divider-main",
+				ID:      "divider-main",
 				Divider: true,
 			},
 			{
-				ID:          "analytics",
-				Text:        "Analytics",
-				Description: "View reports and insights",
-				Icon:        "bar-chart-3",
-				URL:         "/analytics",
-				Badge:       "New",
+				ID:           "analytics",
+				Text:         "Analytics",
+				Description:  "View reports and insights",
+				Icon:         "bar-chart-3",
+				URL:          "/analytics",
+				Badge:        "New",
 				BadgeVariant: atoms.BadgePrimary,
 			},
 			{
@@ -66,11 +66,11 @@ func ExampleSidebarNavigation() NavigationProps {
 				Collapsible: true,
 				Items: []NavigationItem{
 					{
-						ID:   "users-list",
-						Text: "All Users",
-						URL:  "/users",
-						Icon: "list",
-						Badge: "1,234",
+						ID:           "users-list",
+						Text:         "All Users",
+						URL:          "/users",
+						Icon:         "list",
+						Badge:        "1,234",
 						BadgeVariant: atoms.BadgeSecondary,
 					},
 					{
@@ -95,11 +95,11 @@ func ExampleSidebarNavigation() NavigationProps {
 				Collapsed:   true,
 				Items: []NavigationItem{
 					{
-						ID:   "content-posts",
-						Text: "Posts",
-						URL:  "/content/posts",
-						Icon: "edit-3",
-						Badge: "42",
+						ID:           "content-posts",
+						Text:         "Posts",
+						URL:          "/content/posts",
+						Icon:         "edit-3",
+						Badge:        "42",
 						BadgeVariant: atoms.BadgeDestructive,
 					},
 					{
@@ -117,7 +117,7 @@ func ExampleSidebarNavigation() NavigationProps {
 				},
 			},
 			{
-				ID:   "divider-admin",
+				ID:      "divider-admin",
 				Divider: true,
 			},
 			{
@@ -128,7 +128,7 @@ func ExampleSidebarNavigation() NavigationProps {
 				URL:         "/settings",
 			},
 		},
-		
+
 		// Auth context
 		AuthContext: &AuthContext{
 			User: &User{
@@ -142,13 +142,13 @@ func ExampleSidebarNavigation() NavigationProps {
 			},
 			Authenticated: true,
 		},
-		
+
 		// User interface
 		UserName:   "John Doe",
 		UserAvatar: "/assets/avatars/admin.jpg",
 		UserOnline: true,
 		UserRole:   "Administrator",
-		
+
 		// User menu
 		UserMenu: []NavigationItem{
 			{
@@ -164,7 +164,7 @@ func ExampleSidebarNavigation() NavigationProps {
 				Icon: "settings",
 			},
 			{
-				ID:   "divider-user",
+				ID:      "divider-user",
 				Divider: true,
 			},
 			{
@@ -180,20 +180,20 @@ func ExampleSidebarNavigation() NavigationProps {
 				Icon: "log-out",
 			},
 		},
-		
+
 		// Performance
 		LazyLoad:  true,
 		CacheData: true,
-		
+
 		// Theme
 		DarkMode: false,
-		
+
 		// Accessibility
 		AriaLabel: "Main navigation",
 		AriaLabels: map[string]string{
-			"search":      "Search navigation",
-			"userMenu":    "User menu",
-			"mobileMenu":  "Mobile menu",
+			"search":     "Search navigation",
+			"userMenu":   "User menu",
+			"mobileMenu": "Mobile menu",
 		},
 	}
 }
@@ -201,13 +201,13 @@ func ExampleSidebarNavigation() NavigationProps {
 // ExampleTopbarNavigation demonstrates a topbar navigation
 func ExampleTopbarNavigation() NavigationProps {
 	return NavigationProps{
-		ID:    "main-topbar",
-		Type:  NavigationTopbar,
-		Size:  NavigationSizeMD,
-		Title: "My Application",
-		Logo:  "/assets/logo.svg",
+		ID:      "main-topbar",
+		Type:    NavigationTopbar,
+		Size:    NavigationSizeMD,
+		Title:   "My Application",
+		Logo:    "/assets/logo.svg",
 		LogoURL: "/",
-		
+
 		// Search configuration
 		Search: NavigationSearch{
 			Enabled:     true,
@@ -215,7 +215,7 @@ func ExampleTopbarNavigation() NavigationProps {
 			MinLength:   1,
 			Debounce:    500,
 		},
-		
+
 		// Mobile menu
 		MobileMenu: NavigationMobileMenu{
 			Enabled:     true,
@@ -223,7 +223,7 @@ func ExampleTopbarNavigation() NavigationProps {
 			Overlay:     true,
 			CloseButton: true,
 		},
-		
+
 		// Topbar navigation items
 		Items: []NavigationItem{
 			{
@@ -233,11 +233,11 @@ func ExampleTopbarNavigation() NavigationProps {
 				Icon: "home",
 			},
 			{
-				ID:   "projects",
-				Text: "Projects",
-				URL:  "/projects",
-				Icon: "folder",
-				Badge: "3",
+				ID:           "projects",
+				Text:         "Projects",
+				URL:          "/projects",
+				Icon:         "folder",
+				Badge:        "3",
 				BadgeVariant: atoms.BadgePrimary,
 			},
 			{
@@ -273,7 +273,7 @@ func ExampleTopbarNavigation() NavigationProps {
 				},
 			},
 		},
-		
+
 		// Auth context
 		AuthContext: &AuthContext{
 			User: &User{
@@ -287,13 +287,13 @@ func ExampleTopbarNavigation() NavigationProps {
 			},
 			Authenticated: true,
 		},
-		
+
 		// User interface
 		UserName:   "Jane Smith",
 		UserAvatar: "/assets/avatars/dev.jpg",
 		UserOnline: true,
 		UserRole:   "Developer",
-		
+
 		// User menu
 		UserMenu: []NavigationItem{
 			{
@@ -309,7 +309,7 @@ func ExampleTopbarNavigation() NavigationProps {
 				Icon: "credit-card",
 			},
 			{
-				ID:   "divider-user",
+				ID:      "divider-user",
 				Divider: true,
 			},
 			{
@@ -319,27 +319,27 @@ func ExampleTopbarNavigation() NavigationProps {
 				Icon: "log-out",
 			},
 		},
-		
+
 		// Notifications
 		Notifications: []Notification{
 			{
-				ID:      "notif-1",
-				Type:    "info",
-				Title:   "Welcome to the platform",
-				Message: "Your account has been successfully verified.",
-				Read:    false,
+				ID:        "notif-1",
+				Type:      "info",
+				Title:     "Welcome to the platform",
+				Message:   "Your account has been successfully verified.",
+				Read:      false,
 				CreatedAt: time.Now().Add(-5 * time.Minute),
 			},
 			{
-				ID:      "notif-2",
-				Type:    "warning",
-				Title:   "Storage limit warning",
-				Message: "You're approaching your storage limit.",
-				Read:    true,
+				ID:        "notif-2",
+				Type:      "warning",
+				Title:     "Storage limit warning",
+				Message:   "You're approaching your storage limit.",
+				Read:      true,
 				CreatedAt: time.Now().Add(-2 * time.Hour),
 			},
 		},
-		
+
 		// Accessibility
 		AriaLabel: "Main navigation",
 	}
@@ -351,7 +351,7 @@ func ExampleBreadcrumbNavigation() NavigationProps {
 		ID:   "breadcrumb-nav",
 		Type: NavigationBreadcrumb,
 		Size: NavigationSizeMD,
-		
+
 		// Breadcrumb items
 		Breadcrumbs: []BreadcrumbItem{
 			{
@@ -379,9 +379,9 @@ func ExampleBreadcrumbNavigation() NavigationProps {
 				Active: true,
 			},
 		},
-		
+
 		Separator: "/",
-		
+
 		// Accessibility
 		AriaLabel: "Breadcrumb navigation",
 	}
@@ -394,22 +394,22 @@ func ExampleTabsNavigation() NavigationProps {
 		Type:       NavigationTabs,
 		Size:       NavigationSizeMD,
 		TabVariant: "underline",
-		
+
 		// Tab items
 		Items: []NavigationItem{
 			{
-				ID:   "overview",
-				Text: "Overview",
-				URL:  "/project/overview",
-				Icon: "eye",
+				ID:     "overview",
+				Text:   "Overview",
+				URL:    "/project/overview",
+				Icon:   "eye",
 				Active: true,
 			},
 			{
-				ID:   "files",
-				Text: "Files",
-				URL:  "/project/files",
-				Icon: "folder",
-				Badge: "24",
+				ID:           "files",
+				Text:         "Files",
+				URL:          "/project/files",
+				Icon:         "folder",
+				Badge:        "24",
 				BadgeVariant: atoms.BadgeSecondary,
 			},
 			{
@@ -419,15 +419,15 @@ func ExampleTabsNavigation() NavigationProps {
 				Icon: "settings",
 			},
 			{
-				ID:   "analytics",
-				Text: "Analytics",
-				URL:  "/project/analytics",
-				Icon: "trending-up",
-				Badge: "New",
+				ID:           "analytics",
+				Text:         "Analytics",
+				URL:          "/project/analytics",
+				Icon:         "trending-up",
+				Badge:        "New",
 				BadgeVariant: atoms.BadgeSuccess,
 			},
 		},
-		
+
 		// Accessibility
 		AriaLabel: "Content navigation tabs",
 	}
@@ -441,7 +441,7 @@ func ExampleStepsNavigation() NavigationProps {
 		Size:        NavigationSizeMD,
 		CurrentStep: 2,
 		TotalSteps:  4,
-		
+
 		// Step items
 		Items: []NavigationItem{
 			{
@@ -469,7 +469,7 @@ func ExampleStepsNavigation() NavigationProps {
 				Icon:        "rocket",
 			},
 		},
-		
+
 		// Accessibility
 		AriaLabel: "Setup progress steps",
 	}
@@ -484,13 +484,13 @@ func ExampleMinimalSidebar() NavigationProps {
 		Variant:     "minimal",
 		Collapsible: true,
 		Collapsed:   false,
-		
+
 		// Minimal navigation items
 		Items: []NavigationItem{
 			{
-				ID:   "dashboard",
-				Icon: "home",
-				URL:  "/dashboard",
+				ID:     "dashboard",
+				Icon:   "home",
+				URL:    "/dashboard",
 				Active: true,
 			},
 			{
@@ -499,10 +499,10 @@ func ExampleMinimalSidebar() NavigationProps {
 				URL:  "/analytics",
 			},
 			{
-				ID:   "users",
-				Icon: "users",
-				URL:  "/users",
-				Badge: "12",
+				ID:           "users",
+				Icon:         "users",
+				URL:          "/users",
+				Badge:        "12",
 				BadgeVariant: atoms.BadgeDestructive,
 			},
 			{
@@ -511,7 +511,7 @@ func ExampleMinimalSidebar() NavigationProps {
 				URL:  "/settings",
 			},
 		},
-		
+
 		// Auth context with minimal user
 		AuthContext: &AuthContext{
 			User: &User{
@@ -521,9 +521,9 @@ func ExampleMinimalSidebar() NavigationProps {
 			},
 			Authenticated: true,
 		},
-		
+
 		UserAvatar: "/assets/avatars/user.jpg",
-		
+
 		// Accessibility
 		AriaLabel: "Minimal navigation",
 	}
@@ -539,7 +539,7 @@ func ExampleCardSidebar() NavigationProps {
 		Description: "Development workspace",
 		Variant:     "card",
 		Logo:        "/assets/project-logo.svg",
-		
+
 		// Card navigation items with groups
 		Items: []NavigationItem{
 			{
@@ -551,25 +551,25 @@ func ExampleCardSidebar() NavigationProps {
 				Active:      true,
 			},
 			{
-				ID:   "divider-dev",
+				ID:      "divider-dev",
 				Divider: true,
 			},
 			{
-				ID:          "code",
-				Text:        "Code Repository",
-				Description: "Browse and manage code",
-				Icon:        "code",
-				URL:         "/project/code",
-				Badge:       "3 PRs",
+				ID:           "code",
+				Text:         "Code Repository",
+				Description:  "Browse and manage code",
+				Icon:         "code",
+				URL:          "/project/code",
+				Badge:        "3 PRs",
 				BadgeVariant: atoms.BadgeWarning,
 			},
 			{
-				ID:          "issues",
-				Text:        "Issues & Bugs",
-				Description: "Track and resolve issues",
-				Icon:        "bug",
-				URL:         "/project/issues",
-				Badge:       "7",
+				ID:           "issues",
+				Text:         "Issues & Bugs",
+				Description:  "Track and resolve issues",
+				Icon:         "bug",
+				URL:          "/project/issues",
+				Badge:        "7",
 				BadgeVariant: atoms.BadgeDestructive,
 			},
 			{
@@ -580,7 +580,7 @@ func ExampleCardSidebar() NavigationProps {
 				URL:         "/project/deployments",
 			},
 			{
-				ID:   "divider-tools",
+				ID:      "divider-tools",
 				Divider: true,
 			},
 			{
@@ -591,7 +591,7 @@ func ExampleCardSidebar() NavigationProps {
 				URL:         "/project/docs",
 			},
 		},
-		
+
 		// Team user context
 		AuthContext: &AuthContext{
 			User: &User{
@@ -603,12 +603,12 @@ func ExampleCardSidebar() NavigationProps {
 			},
 			Authenticated: true,
 		},
-		
+
 		UserName:   "Sarah Wilson",
 		UserAvatar: "/assets/avatars/teamlead.jpg",
 		UserRole:   "Team Lead",
 		UserOnline: true,
-		
+
 		// Project-specific user menu
 		UserMenu: []NavigationItem{
 			{
@@ -624,20 +624,20 @@ func ExampleCardSidebar() NavigationProps {
 				Icon: "users",
 			},
 			{
-				ID:   "divider-project",
+				ID:      "divider-project",
 				Divider: true,
 			},
 			{
-				ID:   "switch-project",
-				Text: "Switch Project",
+				ID:          "switch-project",
+				Text:        "Switch Project",
 				AlpineClick: "showProjectSwitcher()",
-				Icon: "shuffle",
+				Icon:        "shuffle",
 			},
 		},
-		
+
 		// Performance
 		LazyLoad: true,
-		
+
 		// Accessibility
 		AriaLabel: "Project navigation",
 	}
@@ -646,19 +646,19 @@ func ExampleCardSidebar() NavigationProps {
 // ExamplePublicNavigation demonstrates navigation for non-authenticated users
 func ExamplePublicNavigation() NavigationProps {
 	return NavigationProps{
-		ID:    "public-nav",
-		Type:  NavigationTopbar,
-		Size:  NavigationSizeMD,
-		Title: "Company Website",
-		Logo:  "/assets/company-logo.svg",
+		ID:      "public-nav",
+		Type:    NavigationTopbar,
+		Size:    NavigationSizeMD,
+		Title:   "Company Website",
+		Logo:    "/assets/company-logo.svg",
 		LogoURL: "/",
-		
+
 		// Public navigation items
 		Items: []NavigationItem{
 			{
-				ID:   "home",
-				Text: "Home",
-				URL:  "/",
+				ID:     "home",
+				Text:   "Home",
+				URL:    "/",
 				Active: true,
 			},
 			{
@@ -672,15 +672,15 @@ func ExamplePublicNavigation() NavigationProps {
 				Collapsible: true,
 				Items: []NavigationItem{
 					{
-						ID:   "product-a",
-						Text: "Product A",
-						URL:  "/products/a",
+						ID:          "product-a",
+						Text:        "Product A",
+						URL:         "/products/a",
 						Description: "Our flagship product",
 					},
 					{
-						ID:   "product-b",
-						Text: "Product B",
-						URL:  "/products/b",
+						ID:          "product-b",
+						Text:        "Product B",
+						URL:         "/products/b",
 						Description: "Enterprise solution",
 					},
 					{
@@ -701,10 +701,10 @@ func ExamplePublicNavigation() NavigationProps {
 				URL:  "/contact",
 			},
 		},
-		
+
 		// No auth context (public site)
 		AuthContext: nil,
-		
+
 		// Call-to-action items in user menu area
 		UserMenu: []NavigationItem{
 			{
@@ -713,14 +713,14 @@ func ExamplePublicNavigation() NavigationProps {
 				URL:  "/auth/login",
 			},
 			{
-				ID:   "signup",
-				Text: "Get Started",
-				URL:  "/auth/signup",
-				Badge: "Free",
+				ID:           "signup",
+				Text:         "Get Started",
+				URL:          "/auth/signup",
+				Badge:        "Free",
 				BadgeVariant: atoms.BadgeSuccess,
 			},
 		},
-		
+
 		// Accessibility
 		AriaLabel: "Main website navigation",
 	}
@@ -734,7 +734,7 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 		Size:  NavigationSizeMD,
 		Title: "Mobile App",
 		Logo:  "/assets/mobile-logo.svg",
-		
+
 		// Mobile-optimized navigation
 		MobileMenu: NavigationMobileMenu{
 			Enabled:     true,
@@ -743,30 +743,30 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 			CloseButton: true,
 			Swipeable:   true,
 		},
-		
+
 		// Touch-optimized items
 		Items: []NavigationItem{
 			{
-				ID:   "feed",
-				Text: "Feed",
-				Icon: "rss",
-				URL:  "/feed",
+				ID:     "feed",
+				Text:   "Feed",
+				Icon:   "rss",
+				URL:    "/feed",
 				Active: true,
 			},
 			{
-				ID:   "discover",
-				Text: "Discover",
-				Icon: "compass",
-				URL:  "/discover",
-				Badge: "3",
+				ID:           "discover",
+				Text:         "Discover",
+				Icon:         "compass",
+				URL:          "/discover",
+				Badge:        "3",
 				BadgeVariant: atoms.BadgePrimary,
 			},
 			{
-				ID:   "messages",
-				Text: "Messages",
-				Icon: "message-circle",
-				URL:  "/messages",
-				Badge: "12",
+				ID:           "messages",
+				Text:         "Messages",
+				Icon:         "message-circle",
+				URL:          "/messages",
+				Badge:        "12",
 				BadgeVariant: atoms.BadgeDestructive,
 			},
 			{
@@ -776,7 +776,7 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 				URL:  "/profile",
 			},
 		},
-		
+
 		// Mobile user context
 		AuthContext: &AuthContext{
 			User: &User{
@@ -787,11 +787,11 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 			},
 			Authenticated: true,
 		},
-		
+
 		UserName:   "Alex",
 		UserAvatar: "/assets/avatars/mobile-user.jpg",
 		UserOnline: true,
-		
+
 		// Mobile-specific user menu
 		UserMenu: []NavigationItem{
 			{
@@ -801,11 +801,11 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 				Icon: "edit",
 			},
 			{
-				ID:   "notifications",
-				Text: "Notifications",
-				URL:  "/notifications",
-				Icon: "bell",
-				Badge: "5",
+				ID:           "notifications",
+				Text:         "Notifications",
+				URL:          "/notifications",
+				Icon:         "bell",
+				Badge:        "5",
 				BadgeVariant: atoms.BadgeDestructive,
 			},
 			{
@@ -815,7 +815,7 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 				Icon: "settings",
 			},
 			{
-				ID:   "divider-mobile",
+				ID:      "divider-mobile",
 				Divider: true,
 			},
 			{
@@ -831,7 +831,7 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 				Icon: "log-out",
 			},
 		},
-		
+
 		// Search for mobile
 		Search: NavigationSearch{
 			Enabled:     true,
@@ -839,24 +839,24 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 			MinLength:   1,
 			Debounce:    300,
 		},
-		
+
 		// Mobile notifications
 		Notifications: []Notification{
 			{
-				ID:      "mobile-notif-1",
-				Type:    "info",
-				Title:   "New message",
-				Message: "You have a new message from Sarah",
-				Read:    false,
-				Icon:    "message-circle",
-				URL:     "/messages/sarah",
+				ID:        "mobile-notif-1",
+				Type:      "info",
+				Title:     "New message",
+				Message:   "You have a new message from Sarah",
+				Read:      false,
+				Icon:      "message-circle",
+				URL:       "/messages/sarah",
 				CreatedAt: time.Now().Add(-2 * time.Minute),
 			},
 		},
-		
+
 		// Touch-optimized performance
 		LazyLoad: true,
-		
+
 		// Accessibility
 		AriaLabel: "Mobile navigation",
 		AriaLabels: map[string]string{
@@ -870,7 +870,7 @@ func ExampleMobileResponsiveNavigation() NavigationProps {
 func CreateTestAuthContext(userRole string) *AuthContext {
 	var roles []string
 	var permissions []string
-	
+
 	switch userRole {
 	case "admin":
 		roles = []string{"admin", "moderator", "user"}
@@ -884,7 +884,7 @@ func CreateTestAuthContext(userRole string) *AuthContext {
 	default:
 		return nil
 	}
-	
+
 	return &AuthContext{
 		User: &User{
 			ID:          "test-" + userRole,

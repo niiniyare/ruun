@@ -632,12 +632,13 @@ func WithUser(user User) EnrichOption {
 	}
 }
 
-// WithTenant creates an EnrichOption that sets the tenant ID
-func WithTenant(tenantID string) EnrichOption {
-	return func(config *EnrichConfig) {
-		config.Extensions["tenant_id"] = tenantID
-	}
-}
+// TODO: there us duplicate WithTenant at theme.go fix later
+// // WithTenant creates an EnrichOption that sets the tenant ID
+// func WithTenant(tenantID string) EnrichOption {
+// 	return func(config *EnrichConfig) {
+// 		config.Extensions["tenant_id"] = tenantID
+// 	}
+// }
 
 // WithPermissions creates an EnrichOption that sets permissions
 func WithPermissions(permissions []string) EnrichOption {

@@ -9,90 +9,89 @@ import (
 
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/components/molecules"
 )
 
 // NavigationSchemaBuilder provides schema-driven Navigation configuration
 type NavigationSchemaBuilder struct {
-	schema         *schema.Schema
-	config         *NavigationConfig
-	menuItems      []NavigationMenuItem
-	permissions    []NavigationPermission
-	themes         []NavigationTheme
-	authContext    *AuthContext
+	schema      *schema.Schema
+	config      *NavigationConfig
+	menuItems   []NavigationMenuItem
+	permissions []NavigationPermission
+	themes      []NavigationTheme
+	authContext *AuthContext
 }
 
 // NavigationConfig holds configuration for schema-driven navigation
 type NavigationConfig struct {
 	// Display options
-	Title               string                 `json:"title,omitempty"`
-	Description         string                 `json:"description,omitempty"`
-	Logo                string                 `json:"logo,omitempty"`
-	LogoURL             string                 `json:"logoURL,omitempty"`
-	
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Logo        string `json:"logo,omitempty"`
+	LogoURL     string `json:"logoURL,omitempty"`
+
 	// Layout configuration
-	Layout              NavigationLayout       `json:"layout"`
-	Variant             NavigationVariant      `json:"variant"`
-	Size                NavigationSize         `json:"size"`
-	Position            NavigationPosition     `json:"position"`
-	
+	Layout   NavigationLayout   `json:"layout"`
+	Variant  NavigationVariant  `json:"variant"`
+	Size     NavigationSize     `json:"size"`
+	Position NavigationPosition `json:"position"`
+
 	// Feature flags
-	EnableSearch        bool                   `json:"enableSearch"`
-	EnableBreadcrumbs   bool                   `json:"enableBreadcrumbs"`
-	EnableNotifications bool                   `json:"enableNotifications"`
-	EnableUserMenu      bool                   `json:"enableUserMenu"`
-	EnableMobileMenu    bool                   `json:"enableMobileMenu"`
-	EnableCollapsible   bool                   `json:"enableCollapsible"`
-	EnableReordering    bool                   `json:"enableReordering"`
-	
+	EnableSearch        bool `json:"enableSearch"`
+	EnableBreadcrumbs   bool `json:"enableBreadcrumbs"`
+	EnableNotifications bool `json:"enableNotifications"`
+	EnableUserMenu      bool `json:"enableUserMenu"`
+	EnableMobileMenu    bool `json:"enableMobileMenu"`
+	EnableCollapsible   bool `json:"enableCollapsible"`
+	EnableReordering    bool `json:"enableReordering"`
+
 	// Search configuration
-	SearchConfig        SearchConfig           `json:"searchConfig"`
-	
+	SearchConfig SearchConfig `json:"searchConfig"`
+
 	// Responsive behavior
-	ResponsiveConfig    ResponsiveConfig       `json:"responsiveConfig"`
-	
+	ResponsiveConfig ResponsiveConfig `json:"responsiveConfig"`
+
 	// Theme configuration
-	ThemeConfig         ThemeConfig            `json:"themeConfig"`
-	
+	ThemeConfig ThemeConfig `json:"themeConfig"`
+
 	// Animation configuration
-	AnimationConfig     AnimationConfig        `json:"animationConfig"`
-	
+	AnimationConfig AnimationConfig `json:"animationConfig"`
+
 	// Security configuration
-	SecurityConfig      SecurityConfig         `json:"securityConfig"`
-	
+	SecurityConfig SecurityConfig `json:"securityConfig"`
+
 	// Performance configuration
-	PerformanceConfig   PerformanceConfig      `json:"performanceConfig"`
-	
+	PerformanceConfig PerformanceConfig `json:"performanceConfig"`
+
 	// Accessibility configuration
-	AccessibilityConfig AccessibilityConfig    `json:"accessibilityConfig"`
-	
+	AccessibilityConfig AccessibilityConfig `json:"accessibilityConfig"`
+
 	// Custom templates
-	CustomTemplates     map[string]string      `json:"customTemplates,omitempty"`
+	CustomTemplates map[string]string `json:"customTemplates,omitempty"`
 }
 
 // NavigationLayout defines navigation layout types
 type NavigationLayout string
 
 const (
-	LayoutSidebarMain   NavigationLayout = "sidebar-main"   // Sidebar + main content
-	LayoutTopbarMain    NavigationLayout = "topbar-main"    // Topbar + main content
-	LayoutBoth          NavigationLayout = "both"           // Sidebar + topbar + main
-	LayoutTabs          NavigationLayout = "tabs"           // Tab navigation only
-	LayoutBreadcrumb    NavigationLayout = "breadcrumb"     // Breadcrumb only
-	LayoutSteps         NavigationLayout = "steps"          // Step navigation
-	LayoutMega          NavigationLayout = "mega"           // Mega menu
+	LayoutSidebarMain NavigationLayout = "sidebar-main" // Sidebar + main content
+	LayoutTopbarMain  NavigationLayout = "topbar-main"  // Topbar + main content
+	LayoutBoth        NavigationLayout = "both"         // Sidebar + topbar + main
+	LayoutTabs        NavigationLayout = "tabs"         // Tab navigation only
+	LayoutBreadcrumb  NavigationLayout = "breadcrumb"   // Breadcrumb only
+	LayoutSteps       NavigationLayout = "steps"        // Step navigation
+	LayoutMega        NavigationLayout = "mega"         // Mega menu
 )
 
 // NavigationVariant defines visual variants
 type NavigationVariant string
 
 const (
-	VariantDefault   NavigationVariant = "default"
-	VariantMinimal   NavigationVariant = "minimal"
-	VariantSidebar   NavigationVariant = "sidebar"
-	VariantTopbar    NavigationVariant = "topbar"
-	VariantFloating  NavigationVariant = "floating"
-	VariantCard      NavigationVariant = "card"
+	VariantDefault  NavigationVariant = "default"
+	VariantMinimal  NavigationVariant = "minimal"
+	VariantSidebar  NavigationVariant = "sidebar"
+	VariantTopbar   NavigationVariant = "topbar"
+	VariantFloating NavigationVariant = "floating"
+	VariantCard     NavigationVariant = "card"
 )
 
 // NavigationPosition defines navigation position
@@ -108,82 +107,82 @@ const (
 // NavigationMenuItem represents a navigation menu item with schema support
 type NavigationMenuItem struct {
 	// Core properties
-	ID          string                 `json:"id"`
-	Type        MenuItemType           `json:"type"`
-	Text        string                 `json:"text"`
-	Description string                 `json:"description,omitempty"`
-	URL         string                 `json:"url,omitempty"`
-	Icon        string                 `json:"icon,omitempty"`
-	Image       string                 `json:"image,omitempty"`
-	
+	ID          string       `json:"id"`
+	Type        MenuItemType `json:"type"`
+	Text        string       `json:"text"`
+	Description string       `json:"description,omitempty"`
+	URL         string       `json:"url,omitempty"`
+	Icon        string       `json:"icon,omitempty"`
+	Image       string       `json:"image,omitempty"`
+
 	// Visual properties
-	Badge       BadgeConfig            `json:"badge,omitempty"`
-	Color       string                 `json:"color,omitempty"`
-	Order       int                    `json:"order"`
-	Group       string                 `json:"group,omitempty"`
-	
+	Badge BadgeConfig `json:"badge,omitempty"`
+	Color string      `json:"color,omitempty"`
+	Order int         `json:"order"`
+	Group string      `json:"group,omitempty"`
+
 	// Behavior properties
-	Active      bool                   `json:"active"`
-	Disabled    bool                   `json:"disabled"`
-	Hidden      bool                   `json:"hidden"`
-	External    bool                   `json:"external"`
-	NewTab      bool                   `json:"newTab"`
-	Divider     bool                   `json:"divider"`
-	
+	Active   bool `json:"active"`
+	Disabled bool `json:"disabled"`
+	Hidden   bool `json:"hidden"`
+	External bool `json:"external"`
+	NewTab   bool `json:"newTab"`
+	Divider  bool `json:"divider"`
+
 	// Hierarchy
-	Items       []NavigationMenuItem   `json:"items,omitempty"`
-	ParentID    string                 `json:"parentId,omitempty"`
-	Collapsible bool                   `json:"collapsible"`
-	Collapsed   bool                   `json:"collapsed"`
-	Depth       int                    `json:"depth"`
-	
+	Items       []NavigationMenuItem `json:"items,omitempty"`
+	ParentID    string               `json:"parentId,omitempty"`
+	Collapsible bool                 `json:"collapsible"`
+	Collapsed   bool                 `json:"collapsed"`
+	Depth       int                  `json:"depth"`
+
 	// Permissions and access control
-	Permissions []string               `json:"permissions,omitempty"`
-	Roles       []string               `json:"roles,omitempty"`
-	Condition   string                 `json:"condition,omitempty"`
-	
+	Permissions []string `json:"permissions,omitempty"`
+	Roles       []string `json:"roles,omitempty"`
+	Condition   string   `json:"condition,omitempty"`
+
 	// HTMX integration
-	HTMXConfig  HTMXConfig             `json:"htmxConfig,omitempty"`
-	
+	HTMXConfig HTMXConfig `json:"htmxConfig,omitempty"`
+
 	// Alpine.js integration
-	AlpineConfig AlpineConfig          `json:"alpineConfig,omitempty"`
-	
+	AlpineConfig AlpineConfig `json:"alpineConfig,omitempty"`
+
 	// Metadata
-	Metadata    map[string]any         `json:"metadata,omitempty"`
-	Tags        []string               `json:"tags,omitempty"`
-	Category    string                 `json:"category,omitempty"`
-	
+	Metadata map[string]any `json:"metadata,omitempty"`
+	Tags     []string       `json:"tags,omitempty"`
+	Category string         `json:"category,omitempty"`
+
 	// Analytics
-	TrackingID  string                 `json:"trackingId,omitempty"`
-	Analytics   AnalyticsConfig        `json:"analytics,omitempty"`
+	TrackingID string          `json:"trackingId,omitempty"`
+	Analytics  AnalyticsConfig `json:"analytics,omitempty"`
 }
 
 // MenuItemType defines different types of menu items
 type MenuItemType string
 
 const (
-	MenuItemLink      MenuItemType = "link"
-	MenuItemButton    MenuItemType = "button"
-	MenuItemDivider   MenuItemType = "divider"
-	MenuItemHeading   MenuItemType = "heading"
-	MenuItemDropdown  MenuItemType = "dropdown"
-	MenuItemMega      MenuItemType = "mega"
-	MenuItemSearch    MenuItemType = "search"
-	MenuItemUser      MenuItemType = "user"
-	MenuItemTheme     MenuItemType = "theme"
-	MenuItemLanguage  MenuItemType = "language"
+	MenuItemLink     MenuItemType = "link"
+	MenuItemButton   MenuItemType = "button"
+	MenuItemDivider  MenuItemType = "divider"
+	MenuItemHeading  MenuItemType = "heading"
+	MenuItemDropdown MenuItemType = "dropdown"
+	MenuItemMega     MenuItemType = "mega"
+	MenuItemSearch   MenuItemType = "search"
+	MenuItemUser     MenuItemType = "user"
+	MenuItemTheme    MenuItemType = "theme"
+	MenuItemLanguage MenuItemType = "language"
 )
 
 // BadgeConfig configures item badges
 type BadgeConfig struct {
-	Text     string              `json:"text,omitempty"`
-	Count    int                 `json:"count,omitempty"`
-	Variant  atoms.BadgeVariant  `json:"variant"`
-	Color    string              `json:"color,omitempty"`
-	Icon     string              `json:"icon,omitempty"`
-	Position string              `json:"position"` // "top-right", "top-left", etc.
-	Animated bool                `json:"animated"`
-	Pulse    bool                `json:"pulse"`
+	Text     string             `json:"text,omitempty"`
+	Count    int                `json:"count,omitempty"`
+	Variant  atoms.BadgeVariant `json:"variant"`
+	Color    string             `json:"color,omitempty"`
+	Icon     string             `json:"icon,omitempty"`
+	Position string             `json:"position"` // "top-right", "top-left", etc.
+	Animated bool               `json:"animated"`
+	Pulse    bool               `json:"pulse"`
 }
 
 // HTMXConfig configures HTMX behavior
@@ -200,20 +199,20 @@ type HTMXConfig struct {
 
 // AlpineConfig configures Alpine.js behavior
 type AlpineConfig struct {
-	Click   string `json:"click,omitempty"`
-	Show    string `json:"show,omitempty"`
-	If      string `json:"if,omitempty"`
-	Model   string `json:"model,omitempty"`
-	Data    string `json:"data,omitempty"`
-	Init    string `json:"init,omitempty"`
+	Click string `json:"click,omitempty"`
+	Show  string `json:"show,omitempty"`
+	If    string `json:"if,omitempty"`
+	Model string `json:"model,omitempty"`
+	Data  string `json:"data,omitempty"`
+	Init  string `json:"init,omitempty"`
 }
 
 // AnalyticsConfig configures analytics tracking
 type AnalyticsConfig struct {
-	Enabled     bool              `json:"enabled"`
-	Events      []AnalyticsEvent  `json:"events,omitempty"`
-	Properties  map[string]string `json:"properties,omitempty"`
-	Provider    string            `json:"provider,omitempty"` // "google", "mixpanel", etc.
+	Enabled    bool              `json:"enabled"`
+	Events     []AnalyticsEvent  `json:"events,omitempty"`
+	Properties map[string]string `json:"properties,omitempty"`
+	Provider   string            `json:"provider,omitempty"` // "google", "mixpanel", etc.
 }
 
 // AnalyticsEvent defines trackable events
@@ -228,10 +227,10 @@ type NavigationPermission struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
-	Actions     []string `json:"actions"`     // "view", "edit", "delete", etc.
-	Resources   []string `json:"resources"`   // menu items, sections, etc.
-	Roles       []string `json:"roles"`       // required roles
-	Conditions  []string `json:"conditions"`  // additional conditions
+	Actions     []string `json:"actions"`    // "view", "edit", "delete", etc.
+	Resources   []string `json:"resources"`  // menu items, sections, etc.
+	Roles       []string `json:"roles"`      // required roles
+	Conditions  []string `json:"conditions"` // additional conditions
 }
 
 // SearchConfig configures navigation search
@@ -248,55 +247,55 @@ type SearchConfig struct {
 
 // ResponsiveConfig configures responsive behavior
 type ResponsiveConfig struct {
-	Breakpoints    map[string]int    `json:"breakpoints"`
-	MobileFirst    bool              `json:"mobileFirst"`
-	CollapseMobile bool              `json:"collapseMobile"`
-	HiddenMobile   []string          `json:"hiddenMobile"`   // items to hide on mobile
-	OnlyMobile     []string          `json:"onlyMobile"`     // items only on mobile
-	TouchOptimized bool              `json:"touchOptimized"`
+	Breakpoints    map[string]int `json:"breakpoints"`
+	MobileFirst    bool           `json:"mobileFirst"`
+	CollapseMobile bool           `json:"collapseMobile"`
+	HiddenMobile   []string       `json:"hiddenMobile"` // items to hide on mobile
+	OnlyMobile     []string       `json:"onlyMobile"`   // items only on mobile
+	TouchOptimized bool           `json:"touchOptimized"`
 }
 
 // ThemeConfig configures theming
 type ThemeConfig struct {
-	DefaultTheme  string              `json:"defaultTheme"`
+	DefaultTheme    string            `json:"defaultTheme"`
 	AvailableThemes []NavigationTheme `json:"availableThemes"`
-	AutoDetect    bool                `json:"autoDetect"`
-	Persistent    bool                `json:"persistent"`
-	SystemTheme   bool                `json:"systemTheme"`
+	AutoDetect      bool              `json:"autoDetect"`
+	Persistent      bool              `json:"persistent"`
+	SystemTheme     bool              `json:"systemTheme"`
 }
 
 // NavigationTheme defines a navigation theme
 type NavigationTheme struct {
-	ID          string            `json:"id"`
-	Name        string            `json:"name"`
-	Description string            `json:"description,omitempty"`
-	Colors      ThemeColors       `json:"colors"`
-	Fonts       ThemeFonts        `json:"fonts,omitempty"`
-	Spacing     ThemeSpacing      `json:"spacing,omitempty"`
-	Borders     ThemeBorders      `json:"borders,omitempty"`
-	Shadows     ThemeShadows      `json:"shadows,omitempty"`
-	Animations  ThemeAnimations   `json:"animations,omitempty"`
+	ID          string          `json:"id"`
+	Name        string          `json:"name"`
+	Description string          `json:"description,omitempty"`
+	Colors      ThemeColors     `json:"colors"`
+	Fonts       ThemeFonts      `json:"fonts,omitempty"`
+	Spacing     ThemeSpacing    `json:"spacing,omitempty"`
+	Borders     ThemeBorders    `json:"borders,omitempty"`
+	Shadows     ThemeShadows    `json:"shadows,omitempty"`
+	Animations  ThemeAnimations `json:"animations,omitempty"`
 }
 
 // ThemeColors defines theme colors
 type ThemeColors struct {
-	Primary     string `json:"primary"`
-	Secondary   string `json:"secondary"`
-	Background  string `json:"background"`
-	Surface     string `json:"surface"`
-	Text        string `json:"text"`
-	TextMuted   string `json:"textMuted"`
-	Border      string `json:"border"`
-	Hover       string `json:"hover"`
-	Active      string `json:"active"`
-	Selected    string `json:"selected"`
+	Primary    string `json:"primary"`
+	Secondary  string `json:"secondary"`
+	Background string `json:"background"`
+	Surface    string `json:"surface"`
+	Text       string `json:"text"`
+	TextMuted  string `json:"textMuted"`
+	Border     string `json:"border"`
+	Hover      string `json:"hover"`
+	Active     string `json:"active"`
+	Selected   string `json:"selected"`
 }
 
 // ThemeFonts defines theme typography
 type ThemeFonts struct {
-	Family    string `json:"family"`
-	Size      string `json:"size"`
-	Weight    string `json:"weight"`
+	Family     string `json:"family"`
+	Size       string `json:"size"`
+	Weight     string `json:"weight"`
 	LineHeight string `json:"lineHeight"`
 }
 
@@ -334,53 +333,53 @@ type ThemeAnimations struct {
 
 // AnimationConfig configures animations
 type AnimationConfig struct {
-	Enabled         bool   `json:"enabled"`
-	Duration        string `json:"duration"`
-	Easing          string `json:"easing"`
-	ReducedMotion   bool   `json:"reducedMotion"`
-	Prefers         string `json:"prefers"` // "motion", "no-motion"
+	Enabled       bool   `json:"enabled"`
+	Duration      string `json:"duration"`
+	Easing        string `json:"easing"`
+	ReducedMotion bool   `json:"reducedMotion"`
+	Prefers       string `json:"prefers"` // "motion", "no-motion"
 }
 
 // SecurityConfig configures security features
 type SecurityConfig struct {
-	CSRFProtection   bool     `json:"csrfProtection"`
-	ClickjackProtection bool  `json:"clickjackProtection"`
-	ContentSecurity  bool     `json:"contentSecurity"`
-	AllowedOrigins   []string `json:"allowedOrigins,omitempty"`
-	TrustedDomains   []string `json:"trustedDomains,omitempty"`
+	CSRFProtection      bool     `json:"csrfProtection"`
+	ClickjackProtection bool     `json:"clickjackProtection"`
+	ContentSecurity     bool     `json:"contentSecurity"`
+	AllowedOrigins      []string `json:"allowedOrigins,omitempty"`
+	TrustedDomains      []string `json:"trustedDomains,omitempty"`
 }
 
 // PerformanceConfig configures performance features
 type PerformanceConfig struct {
-	LazyLoad         bool `json:"lazyLoad"`
-	Prefetch         bool `json:"prefetch"`
-	Cache            bool `json:"cache"`
-	CacheDuration    int  `json:"cacheDuration"` // seconds
-	Debounce         bool `json:"debounce"`
-	VirtualScrolling bool `json:"virtualScrolling"`
+	LazyLoad          bool `json:"lazyLoad"`
+	Prefetch          bool `json:"prefetch"`
+	Cache             bool `json:"cache"`
+	CacheDuration     int  `json:"cacheDuration"` // seconds
+	Debounce          bool `json:"debounce"`
+	VirtualScrolling  bool `json:"virtualScrolling"`
 	ImageOptimization bool `json:"imageOptimization"`
 }
 
 // AccessibilityConfig configures accessibility features
 type AccessibilityConfig struct {
-	ARIA             bool              `json:"aria"`
-	KeyboardNav      bool              `json:"keyboardNav"`
-	FocusManagement  bool              `json:"focusManagement"`
-	ScreenReader     bool              `json:"screenReader"`
-	HighContrast     bool              `json:"highContrast"`
-	ReducedMotion    bool              `json:"reducedMotion"`
-	CustomLabels     map[string]string `json:"customLabels,omitempty"`
-	SkipLinks        bool              `json:"skipLinks"`
+	ARIA            bool              `json:"aria"`
+	KeyboardNav     bool              `json:"keyboardNav"`
+	FocusManagement bool              `json:"focusManagement"`
+	ScreenReader    bool              `json:"screenReader"`
+	HighContrast    bool              `json:"highContrast"`
+	ReducedMotion   bool              `json:"reducedMotion"`
+	CustomLabels    map[string]string `json:"customLabels,omitempty"`
+	SkipLinks       bool              `json:"skipLinks"`
 }
 
 // AuthContext provides authentication context for navigation
 type AuthContext struct {
-	User        *User    `json:"user,omitempty"`
-	Roles       []string `json:"roles"`
-	Permissions []string `json:"permissions"`
-	Authenticated bool   `json:"authenticated"`
-	SessionID   string   `json:"sessionId,omitempty"`
-	CSRF        string   `json:"csrf,omitempty"`
+	User          *User    `json:"user,omitempty"`
+	Roles         []string `json:"roles"`
+	Permissions   []string `json:"permissions"`
+	Authenticated bool     `json:"authenticated"`
+	SessionID     string   `json:"sessionId,omitempty"`
+	CSRF          string   `json:"csrf,omitempty"`
 }
 
 // NewNavigationSchemaBuilder creates a new schema-driven navigation builder
@@ -408,7 +407,7 @@ func getDefaultNavigationConfig() *NavigationConfig {
 		EnableMobileMenu:    true,
 		EnableCollapsible:   true,
 		EnableReordering:    false,
-		
+
 		SearchConfig: SearchConfig{
 			Enabled:       true,
 			Placeholder:   "Search navigation...",
@@ -419,7 +418,7 @@ func getDefaultNavigationConfig() *NavigationConfig {
 			HighlightTerm: true,
 			Shortcuts:     true,
 		},
-		
+
 		ResponsiveConfig: ResponsiveConfig{
 			Breakpoints: map[string]int{
 				"sm": 640,
@@ -431,14 +430,14 @@ func getDefaultNavigationConfig() *NavigationConfig {
 			CollapseMobile: true,
 			TouchOptimized: true,
 		},
-		
+
 		ThemeConfig: ThemeConfig{
-			DefaultTheme:    "light",
-			AutoDetect:     true,
-			Persistent:     true,
-			SystemTheme:    true,
+			DefaultTheme: "light",
+			AutoDetect:   true,
+			Persistent:   true,
+			SystemTheme:  true,
 		},
-		
+
 		AnimationConfig: AnimationConfig{
 			Enabled:       true,
 			Duration:      "200ms",
@@ -446,13 +445,13 @@ func getDefaultNavigationConfig() *NavigationConfig {
 			ReducedMotion: true,
 			Prefers:       "motion",
 		},
-		
+
 		SecurityConfig: SecurityConfig{
 			CSRFProtection:      true,
 			ClickjackProtection: true,
 			ContentSecurity:     true,
 		},
-		
+
 		PerformanceConfig: PerformanceConfig{
 			LazyLoad:          true,
 			Prefetch:          true,
@@ -462,7 +461,7 @@ func getDefaultNavigationConfig() *NavigationConfig {
 			VirtualScrolling:  false,
 			ImageOptimization: true,
 		},
-		
+
 		AccessibilityConfig: AccessibilityConfig{
 			ARIA:            true,
 			KeyboardNav:     true,
@@ -472,11 +471,11 @@ func getDefaultNavigationConfig() *NavigationConfig {
 			ReducedMotion:   true,
 			SkipLinks:       true,
 			CustomLabels: map[string]string{
-				"navigation":     "Main navigation",
-				"search":         "Search navigation",
-				"userMenu":       "User menu",
-				"mobileMenu":     "Mobile menu",
-				"breadcrumbs":    "Breadcrumb navigation",
+				"navigation":  "Main navigation",
+				"search":      "Search navigation",
+				"userMenu":    "User menu",
+				"mobileMenu":  "Mobile menu",
+				"breadcrumbs": "Breadcrumb navigation",
 			},
 		},
 	}
@@ -1036,19 +1035,19 @@ func (config *NavigationConfig) Validate() error {
 	if config.SearchConfig.MinLength < 1 {
 		return fmt.Errorf("searchConfig.minLength must be at least 1")
 	}
-	
+
 	if config.SearchConfig.MaxResults < 1 {
 		return fmt.Errorf("searchConfig.maxResults must be at least 1")
 	}
-	
+
 	if config.SearchConfig.Debounce < 0 {
 		return fmt.Errorf("searchConfig.debounce must be non-negative")
 	}
-	
+
 	if config.PerformanceConfig.CacheDuration < 0 {
 		return fmt.Errorf("performanceConfig.cacheDuration must be non-negative")
 	}
-	
+
 	return nil
 }
 
@@ -1057,21 +1056,21 @@ func (item *NavigationMenuItem) Validate() error {
 	if item.ID == "" {
 		return fmt.Errorf("menu item ID is required")
 	}
-	
+
 	if item.Text == "" {
 		return fmt.Errorf("menu item text is required")
 	}
-	
+
 	if item.Type == MenuItemLink && item.URL == "" {
 		return fmt.Errorf("link menu items must have a URL")
 	}
-	
+
 	// Validate nested items
 	for i, subItem := range item.Items {
 		if err := subItem.Validate(); err != nil {
 			return fmt.Errorf("nested item %d: %w", i, err)
 		}
 	}
-	
+
 	return nil
 }

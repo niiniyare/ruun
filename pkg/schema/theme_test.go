@@ -7,473 +7,1164 @@ import (
 	"testing"
 	"time"
 
+	"github.com/niiniyare/ruun/pkg/logger"
 	"github.com/stretchr/testify/suite"
 )
 
-// ThemeTestSuite tests the theme functionality
-type ThemeTestSuite struct {
+// =============================================================================
+// THEME BASICS TEST SUITE
+// =============================================================================
+
+// ThemeBasicsTestSuite tests basic theme structure and operations
+type ThemeBasicsTestSuite struct {
 	suite.Suite
+	theme *Theme
 }
 
-func TestThemeTestSuite(t *testing.T) {
-	suite.Run(t, new(ThemeTestSuite))
+func TestThemeBasicsTestSuite(t *testing.T) {
+	suite.Run(t, new(ThemeBasicsTestSuite))
 }
 
-// ==================== Basic Theme Tests ====================
-func (suite *ThemeTestSuite) TestThemeStructure() {
-	theme := &Theme{
-		ID:          "test-theme-id",
+func (s *ThemeBasicsTestSuite) SetupTest() {
+	s.theme = &Theme{
+		ID:          "test-theme",
 		Name:        "Test Theme",
+		Description: "A theme for testing",
 		Version:     "1.0.0",
-		Description: "A test theme",
 		Author:      "Test Author",
 		Tokens:      GetDefaultTokens(),
 	}
-	suite.Require().Equal("test-theme-id", theme.ID)
-	suite.Require().Equal("Test Theme", theme.Name)
-	suite.Require().Equal("1.0.0", theme.Version)
-	suite.Require().Equal("A test theme", theme.Description)
-	suite.Require().Equal("Test Author", theme.Author)
-	suite.Require().NotNil(theme.Tokens)
 }
-func (suite *ThemeTestSuite) TestTokens() {
-	tokens := GetDefaultTokens()
-	suite.Require().NotNil(tokens)
-	suite.Require().NotNil(tokens.Primitives)
-	suite.Require().NotNil(tokens.Semantic)
-	suite.Require().NotNil(tokens.Components)
+
+func (s *ThemeBasicsTestSuite) TestValidate_ValidTheme() {
+	err := s.theme.Validate()
+	s.NoError(err)
 }
-func (suite *ThemeTestSuite) TestTokenReference() {
-	ref := TokenReference("colors.primary.base")
-	suite.Require().True(ref.IsReference())
-	suite.Require().Equal("colors.primary.base", ref.Path())
-	suite.Require().Equal("colors.primary.base", ref.String())
-	// Test non-reference
-	nonRef := TokenReference("#123456")
-	suite.Require().False(nonRef.IsReference())
+
+func (s *ThemeBasicsTestSuite) TestValidate_MissingID() {
+	s.theme.ID = ""
+	err := s.theme.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "empty_theme_id")
 }
-func (suite *ThemeTestSuite) TestThemeRegistry() {
-	registry := NewThemeRegistry()
-	suite.Require().NotNil(registry)
-	// Test registry methods exist (they return placeholder values for now)
-	exists := registry.Exists("test-theme")
-	suite.Require().False(exists) // Should be false for non-existent theme
+
+func (s *ThemeBasicsTestSuite) TestValidate_MissingName() {
+	s.theme.Name = ""
+	err := s.theme.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "empty_theme_name")
 }
-func (suite *ThemeTestSuite) TestThemeManager() {
-	registry := NewThemeRegistry()
-	tokenManager := NewTokenRegistry()
-	manager := NewThemeManager(registry, tokenManager)
-	suite.Require().NotNil(manager)
+
+func (s *ThemeBasicsTestSuite) TestValidate_NilTokens() {
+	s.theme.Tokens = nil
+	err := s.theme.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "nil_tokens")
 }
-func (suite *ThemeTestSuite) TestDarkModeConfig() {
-	darkModeConfig := &DarkModeConfig{
+
+func (s *ThemeBasicsTestSuite) TestValidate_InvalidTokens() {
+	s.theme.Tokens = &DesignTokens{
+		Primitives: &PrimitiveTokens{
+			Colors: map[string]string{
+				"primary": "semantic.colors.primary", // Invalid
+			},
+		},
+	}
+	err := s.theme.Validate()
+	s.Error(err)
+}
+
+func (s *ThemeBasicsTestSuite) TestValidate_CustomCSSTooBig() {
+	s.theme.CustomCSS = string(make([]byte, 2<<20)) // 2MB
+	err := s.theme.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "custom_css_too_large")
+}
+
+func (s *ThemeBasicsTestSuite) TestValidate_CustomJSTooBig() {
+	s.theme.CustomJS = string(make([]byte, 2<<20)) // 2MB
+	err := s.theme.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "custom_js_too_large")
+}
+
+func (s *ThemeBasicsTestSuite) TestClone() {
+	cloned := s.theme.Clone()
+	s.NotNil(cloned)
+	s.NotSame(s.theme, cloned)
+	s.Equal(s.theme.ID, cloned.ID)
+	s.NotSame(s.theme.Tokens, cloned.Tokens)
+
+	// Modify cloned - should not affect original
+	cloned.Name = "Modified Name"
+	s.Equal("Test Theme", s.theme.Name)
+	s.Equal("Modified Name", cloned.Name)
+}
+
+func (s *ThemeBasicsTestSuite) TestClone_NilTheme() {
+	var theme *Theme
+	cloned := theme.Clone()
+	s.Nil(cloned)
+}
+
+func (s *ThemeBasicsTestSuite) TestToJSON() {
+	jsonData, err := s.theme.ToJSON()
+	s.NoError(err)
+	s.NotEmpty(jsonData)
+	s.Contains(string(jsonData), `"test-theme"`)
+	s.Contains(string(jsonData), `"Test Theme"`)
+}
+
+func (s *ThemeBasicsTestSuite) TestFromJSON() {
+	jsonData, err := s.theme.ToJSON()
+	s.Require().NoError(err)
+
+	parsed, err := ThemeFromJSON(jsonData)
+	s.NoError(err)
+	s.NotNil(parsed)
+	s.Equal(s.theme.ID, parsed.ID)
+	s.Equal(s.theme.Name, parsed.Name)
+}
+
+func (s *ThemeBasicsTestSuite) TestFromJSON_Invalid() {
+	invalidJSON := []byte(`{"invalid": "json"`)
+	_, err := ThemeFromJSON(invalidJSON)
+	s.Error(err)
+}
+
+func (s *ThemeBasicsTestSuite) TestToYAML() {
+	yamlData, err := s.theme.ToYAML()
+	s.NoError(err)
+	s.NotEmpty(yamlData)
+	s.Contains(string(yamlData), "test-theme")
+	s.Contains(string(yamlData), "Test Theme")
+}
+
+func (s *ThemeBasicsTestSuite) TestFromYAML() {
+	yamlData, err := s.theme.ToYAML()
+	s.Require().NoError(err)
+
+	parsed, err := ThemeFromYAML(yamlData)
+	s.NoError(err)
+	s.NotNil(parsed)
+	s.Equal(s.theme.ID, parsed.ID)
+}
+
+// =============================================================================
+// DARK MODE TEST SUITE
+// =============================================================================
+
+// DarkModeTestSuite tests dark mode configuration
+type DarkModeTestSuite struct {
+	suite.Suite
+}
+
+func TestDarkModeTestSuite(t *testing.T) {
+	suite.Run(t, new(DarkModeTestSuite))
+}
+
+func (s *DarkModeTestSuite) TestValidate_ValidConfig() {
+	config := &DarkModeConfig{
+		Enabled:  true,
+		Default:  false,
+		Strategy: "auto",
+		DarkTokens: &DesignTokens{
+			Semantic: &SemanticTokens{
+				Colors: map[string]string{
+					"background": "primitives.colors.gray-900",
+				},
+			},
+		},
+	}
+
+	err := config.Validate()
+	s.NoError(err)
+}
+
+func (s *DarkModeTestSuite) TestValidate_InvalidStrategy() {
+	config := &DarkModeConfig{
+		Enabled:  true,
+		Strategy: "invalid",
+	}
+
+	err := config.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "invalid_dark_mode_strategy")
+}
+
+func (s *DarkModeTestSuite) TestValidate_ValidStrategies() {
+	strategies := []string{"class", "media", "auto"}
+	for _, strategy := range strategies {
+		s.Run(strategy, func() {
+			config := &DarkModeConfig{
+				Enabled:  true,
+				Strategy: strategy,
+			}
+			err := config.Validate()
+			s.NoError(err)
+		})
+	}
+}
+
+func (s *DarkModeTestSuite) TestClone() {
+	original := &DarkModeConfig{
 		Enabled:  true,
 		Default:  true,
 		Strategy: "auto",
-	}
-	suite.Require().True(darkModeConfig.Enabled)
-	suite.Require().True(darkModeConfig.Default)
-	suite.Require().Equal("auto", darkModeConfig.Strategy)
-}
-func (suite *ThemeTestSuite) TestAccessibilityConfig() {
-	accessibilityConfig := &AccessibilityConfig{
-		HighContrast:     true,
-		ReducedMotion:    false,
-		FocusIndicator:   true,
-		ScreenReaderOnly: true,
-		KeyboardNav:      true,
-	}
-	suite.Require().True(accessibilityConfig.HighContrast)
-	suite.Require().False(accessibilityConfig.ReducedMotion)
-	suite.Require().True(accessibilityConfig.FocusIndicator)
-	suite.Require().True(accessibilityConfig.ScreenReaderOnly)
-	suite.Require().True(accessibilityConfig.KeyboardNav)
-}
-func (suite *ThemeTestSuite) TestThemeWithAllComponents() {
-	theme := &Theme{
-		ID:          "complete-theme-id",
-		Name:        "Complete Theme",
-		Version:     "2.0.0", // TODO: Validate thee version for the future
-		Description: "A complete theme with all components",
-		Tokens:      GetDefaultTokens(),
-		DarkMode: &DarkModeConfig{
-			Enabled: true,
-			Default: true,
+		DarkTokens: &DesignTokens{
+			Primitives: &PrimitiveTokens{
+				Colors: map[string]string{
+					"background": "#000000",
+				},
+			},
 		},
-		Accessibility: &AccessibilityConfig{
-			HighContrast:     true,
-			FocusIndicator:   true,
-			ScreenReaderOnly: true,
-		},
-		CustomCSS: "/* Custom theme styles */",
 	}
-	suite.Require().Equal("complete-theme-id", theme.ID)
-	suite.Require().Equal("Complete Theme", theme.Name)
-	suite.Require().NotNil(theme.Tokens)
-	suite.Require().NotNil(theme.DarkMode)
-	suite.Require().NotNil(theme.Accessibility)
-	suite.Require().Contains(theme.CustomCSS, "Custom theme styles")
+
+	cloned := original.Clone()
+	s.NotNil(cloned)
+	s.NotSame(original, cloned)
+	s.NotSame(original.DarkTokens, cloned.DarkTokens)
+
+	// Modify cloned
+	cloned.Enabled = false
+	s.True(original.Enabled)
+	s.False(cloned.Enabled)
 }
 
-// ==================== Performance Benchmarks ====================
-// BenchmarkTokenResolution measures token resolution performance
-func BenchmarkTokenResolution(b *testing.B) {
-	registry := NewTokenRegistry()
-	err := registry.SetTokens(GetDefaultTokens())
-	if err != nil {
-		b.Fatal("Failed to set tokens:", err)
-	}
-	ctx := context.Background()
-	tokenRef := TokenReference("semantic.colors.background.default")
-	b.ReportAllocs()
-	for b.Loop() {
-		_, err := registry.ResolveToken(ctx, tokenRef)
-		if err != nil {
-			b.Fatal("Token resolution failed:", err)
-		}
-	}
+// =============================================================================
+// ACCESSIBILITY TEST SUITE
+// =============================================================================
+
+// AccessibilityTestSuite tests accessibility configuration
+type AccessibilityTestSuite struct {
+	suite.Suite
 }
 
-// BenchmarkTokenResolutionConcurrent measures concurrent token resolution
-func BenchmarkTokenResolutionConcurrent(b *testing.B) {
-	registry := NewTokenRegistry()
-	err := registry.SetTokens(GetDefaultTokens())
-	if err != nil {
-		b.Fatal("Failed to set tokens:", err)
+func TestAccessibilityTestSuite(t *testing.T) {
+	suite.Run(t, new(AccessibilityTestSuite))
+}
+
+func (s *AccessibilityTestSuite) TestValidate_ValidConfig() {
+	config := &AccessibilityConfig{
+		HighContrast:          true,
+		MinContrastRatio:      4.5,
+		FocusIndicator:        true,
+		FocusOutlineColor:     "#0066cc",
+		FocusOutlineWidth:     "2px",
+		KeyboardNav:           true,
+		ReducedMotion:         false,
+		ScreenReaderOptimized: true,
+		AriaLive:              "polite",
 	}
-	ctx := context.Background()
-	tokenRefs := []TokenReference{
-		"semantic.colors.background.default",
-		"semantic.colors.text.default",
-		"semantic.spacing.component.default",
-		"components.button.primary.background",
-		"primitives.colors.blue.500",
-	}
-	b.ResetTimer()
-	b.ReportAllocs()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			for _, tokenRef := range tokenRefs {
-				_, err := registry.ResolveToken(ctx, tokenRef)
-				if err != nil {
-					b.Fatal("Token resolution failed:", err)
-				}
+
+	err := config.Validate()
+	s.NoError(err)
+}
+
+func (s *AccessibilityTestSuite) TestValidate_InvalidContrastRatio() {
+	testCases := []float64{-1, 22, 100}
+	for _, ratio := range testCases {
+		s.Run(fmt.Sprintf("ratio_%.0f", ratio), func() {
+			config := &AccessibilityConfig{
+				MinContrastRatio: ratio,
 			}
-		}
-	})
-}
-
-// BenchmarkThemeRegistration measures theme registration performance
-func BenchmarkThemeRegistration(b *testing.B) {
-	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
-	b.ReportAllocs()
-	for i := 0; b.Loop(); i++ {
-		theme := &Theme{
-			ID:      fmt.Sprintf("bench-theme-%d", i),
-			Name:    fmt.Sprintf("Benchmark Theme %d", i),
-			Version: "1.0.0",
-			Tokens:  GetDefaultTokens(),
-		}
-		err := manager.RegisterTheme(theme)
-		if err != nil {
-			b.Fatal("Theme registration failed:", err)
-		}
-	}
-}
-
-// BenchmarkThemeRetrieval measures theme retrieval performance
-func BenchmarkThemeRetrieval(b *testing.B) {
-	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
-	ctx := context.Background()
-	// Pre-populate with themes
-	for i := range 100 {
-		theme := &Theme{
-			ID:      fmt.Sprintf("theme-%d", i),
-			Name:    fmt.Sprintf("Theme %d", i),
-			Version: "1.0.0",
-			Tokens:  GetDefaultTokens(),
-		}
-		manager.RegisterTheme(theme)
-	}
-	b.ReportAllocs()
-	for i := 0; b.Loop(); i++ {
-		themeID := fmt.Sprintf("theme-%d", i%100)
-		_, err := manager.GetTheme(ctx, themeID)
-		if err != nil {
-			b.Fatal("Theme retrieval failed:", err)
-		}
-	}
-}
-
-// BenchmarkThemeCloning measures deep copy performance
-func BenchmarkThemeCloning(b *testing.B) {
-	theme := &Theme{
-		ID:      "clone-benchmark",
-		Name:    "Clone Benchmark Theme",
-		Version: "1.0.0",
-		Tokens:  GetDefaultTokens(),
-		DarkMode: &DarkModeConfig{
-			Enabled:  true,
-			Strategy: "auto",
-		},
-		Accessibility: &AccessibilityConfig{
-			HighContrast:     true,
-			MinContrastRatio: 4.5,
-			KeyboardNav:      true,
-		},
-	}
-	b.ReportAllocs()
-	for b.Loop() {
-		_, err := deepCopyTheme(theme)
-		if err != nil {
-			b.Fatal("Theme cloning failed:", err)
-		}
-	}
-}
-
-// BenchmarkCacheOperations measures cache performance
-func BenchmarkCacheOperations(b *testing.B) {
-	cache := NewThemeCache(1000, 5*time.Minute)
-	// Pre-populate cache
-	for i := range 100 {
-		theme := &Theme{
-			ID:      fmt.Sprintf("cache-theme-%d", i),
-			Name:    fmt.Sprintf("Cache Theme %d", i),
-			Version: "1.0.0",
-			Tokens:  GetDefaultTokens(),
-		}
-		cache.Set(theme.ID, theme)
-	}
-	b.ResetTimer()
-	b.ReportAllocs()
-	b.Run("Get", func(b *testing.B) {
-		for i := 0; b.Loop(); i++ {
-			key := fmt.Sprintf("cache-theme-%d", i%100)
-			_, _ = cache.Get(key)
-		}
-	})
-	b.Run("Set", func(b *testing.B) {
-		for i := 0; b.Loop(); i++ {
-			theme := &Theme{
-				ID:      fmt.Sprintf("new-theme-%d", i),
-				Name:    fmt.Sprintf("New Theme %d", i),
-				Version: "1.0.0",
-				Tokens:  GetDefaultTokens(),
-			}
-			cache.Set(theme.ID, theme)
-		}
-	})
-	b.Run("Concurrent", func(b *testing.B) {
-		b.RunParallel(func(pb *testing.PB) {
-			for pb.Next() {
-				// Mix of reads and writes
-				if b.N%2 == 0 {
-					key := fmt.Sprintf("cache-theme-%d", b.N%100)
-					_, _ = cache.Get(key)
-				} else {
-					theme := &Theme{
-						ID:      fmt.Sprintf("concurrent-theme-%d", b.N),
-						Name:    fmt.Sprintf("Concurrent Theme %d", b.N),
-						Version: "1.0.0",
-						Tokens:  GetDefaultTokens(),
-					}
-					cache.Set(theme.ID, theme)
-				}
-			}
+			err := config.Validate()
+			s.Error(err)
+			s.Contains(err.Error(), "invalid_contrast_ratio")
 		})
-	})
-}
-
-// BenchmarkTokenCompilation measures token compilation performance
-func BenchmarkTokenCompilation(b *testing.B) {
-	registry := NewTokenRegistry()
-	tokens := GetDefaultTokens()
-	b.ReportAllocs()
-	for b.Loop() {
-		err := registry.SetTokens(tokens)
-		if err != nil {
-			b.Fatal("Token compilation failed:", err)
-		}
 	}
 }
 
-// BenchmarkThemeOverrides measures theme override application performance
-func BenchmarkThemeOverrides(b *testing.B) {
-	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
-	ctx := context.Background()
-	// Register base theme
-	baseTheme := &Theme{
-		ID:      "base-override-theme",
-		Name:    "Base Override Theme",
-		Version: "1.0.0",
-		Tokens:  GetDefaultTokens(),
+func (s *AccessibilityTestSuite) TestValidate_InvalidAriaLive() {
+	config := &AccessibilityConfig{
+		AriaLive: "invalid",
 	}
-	manager.RegisterTheme(baseTheme)
-	overrides := &ThemeOverrides{
-		TokenOverrides: map[string]string{
-			"colors.primary.500":   "#custom-primary",
-			"spacing.base":         "1.5rem",
-			"typography.size.base": "18px",
-		},
-		ComponentOverrides: map[string]any{
-			"button.borderRadius": "12px",
-			"input.height":        "44px",
-		},
-		CustomCSS: ".custom { color: #override; ",
-	}
-	b.ReportAllocs()
-	for b.Loop() {
-		_, err := manager.GetThemeWithOverrides(ctx, "base-override-theme", overrides)
-		if err != nil {
-			b.Fatal("Theme override failed:", err)
-		}
-	}
+	err := config.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "invalid_aria_live")
 }
 
-// BenchmarkConcurrentThemeAccess measures concurrent theme operations
-func BenchmarkConcurrentThemeAccess(b *testing.B) {
-	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
-	ctx := context.Background()
-	// Pre-populate with themes
-	for i := range 50 {
-		theme := &Theme{
-			ID:      fmt.Sprintf("concurrent-theme-%d", i),
-			Name:    fmt.Sprintf("Concurrent Theme %d", i),
-			Version: "1.0.0",
-			Tokens:  GetDefaultTokens(),
-		}
-		manager.RegisterTheme(theme)
-	}
-	b.ResetTimer()
-	b.ReportAllocs()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			// Mix of operations
-			switch b.N % 3 {
-			case 0:
-				// Get theme
-				themeID := fmt.Sprintf("concurrent-theme-%d", b.N%50)
-				_, _ = manager.GetTheme(ctx, themeID)
-			case 1:
-				// List themes
-				_, _ = manager.ListThemes(ctx)
-			case 2:
-				// Register new theme
-				newTheme := &Theme{
-					ID:      fmt.Sprintf("new-concurrent-theme-%d", b.N),
-					Name:    fmt.Sprintf("New Concurrent Theme %d", b.N),
-					Version: "1.0.0",
-					Tokens:  GetDefaultTokens(),
-				}
-				_ = manager.RegisterTheme(newTheme)
+func (s *AccessibilityTestSuite) TestValidate_ValidAriaLive() {
+	validValues := []string{"off", "polite", "assertive"}
+	for _, value := range validValues {
+		s.Run(value, func() {
+			config := &AccessibilityConfig{
+				AriaLive: value,
 			}
-		}
-	})
-}
-
-// ==================== Performance Tests ====================
-// TestTokenResolutionPerformance verifies token resolution meets <1ms p95 target
-func TestTokenResolutionPerformance(t *testing.T) {
-	registry := NewTokenRegistry()
-	err := registry.SetTokens(GetDefaultTokens())
-	if err != nil {
-		t.Fatal("Failed to set tokens:", err)
-	}
-	ctx := context.Background()
-	tokenRef := TokenReference("semantic.colors.background.default")
-	// Warm up
-	for range 100 {
-		_, _ = registry.ResolveToken(ctx, tokenRef)
-	}
-	// Measure performance
-	iterations := 1000
-	durations := make([]time.Duration, iterations)
-	for i := range iterations {
-		start := time.Now()
-		_, err := registry.ResolveToken(ctx, tokenRef)
-		durations[i] = time.Since(start)
-		if err != nil {
-			t.Fatal("Token resolution failed:", err)
-		}
-	}
-	// Calculate percentiles
-	p95 := calculatePercentile(durations, 95)
-	p99 := calculatePercentile(durations, 99)
-	avg := calculateAverage(durations)
-	t.Logf("Token Resolution Performance:")
-	t.Logf("  Average: %v", avg)
-	t.Logf("  P95: %v", p95)
-	t.Logf("  P99: %v", p99)
-	// Verify p95 < 1ms target
-	if p95 > time.Millisecond {
-		t.Errorf("Token resolution P95 (%v) exceeds 1ms target", p95)
+			err := config.Validate()
+			s.NoError(err)
+		})
 	}
 }
 
-// TestConcurrentSafety verifies thread safety under concurrent access
-func TestConcurrentSafety(t *testing.T) {
-	manager := NewThemeManager(NewThemeRegistry(), NewTokenRegistry())
-	ctx := context.Background()
+// =============================================================================
+// THEME CONDITIONS TEST SUITE
+// =============================================================================
+
+// ThemeConditionsTestSuite tests conditional theme overrides
+type ThemeConditionsTestSuite struct {
+	suite.Suite
+	ctx context.Context
+}
+
+func TestThemeConditionsTestSuite(t *testing.T) {
+	suite.Run(t, new(ThemeConditionsTestSuite))
+}
+
+func (s *ThemeConditionsTestSuite) SetupTest() {
+	s.ctx = context.Background()
+}
+
+func (s *ThemeConditionsTestSuite) TestThemeCondition_Validate() {
+	condition := &ThemeCondition{
+		ID:         "test-condition",
+		Expression: "user.role == 'admin'",
+		Priority:   100,
+		TokenOverrides: map[string]string{
+			"semantic.colors.background": "primitives.colors.gray-900",
+		},
+		Description: "Admin users get dark background",
+	}
+
+	err := condition.Validate()
+	s.NoError(err)
+}
+
+func (s *ThemeConditionsTestSuite) TestThemeCondition_Validate_MissingID() {
+	condition := &ThemeCondition{
+		Expression: "user.role == 'admin'",
+		TokenOverrides: map[string]string{
+			"semantic.colors.background": "primitives.colors.gray-900",
+		},
+	}
+
+	err := condition.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "empty_condition_id")
+}
+
+func (s *ThemeConditionsTestSuite) TestThemeCondition_Validate_MissingExpression() {
+	condition := &ThemeCondition{
+		ID: "test",
+		TokenOverrides: map[string]string{
+			"semantic.colors.background": "primitives.colors.gray-900",
+		},
+	}
+
+	err := condition.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "empty_expression")
+}
+
+func (s *ThemeConditionsTestSuite) TestThemeCondition_Validate_EmptyOverrides() {
+	condition := &ThemeCondition{
+		ID:             "test",
+		Expression:     "user.role == 'admin'",
+		TokenOverrides: map[string]string{},
+	}
+
+	err := condition.Validate()
+	s.Error(err)
+	s.Contains(err.Error(), "empty_overrides")
+}
+
+func (s *ThemeConditionsTestSuite) TestThemeCondition_Clone() {
+	original := &ThemeCondition{
+		ID:         "test",
+		Expression: "user.role == 'admin'",
+		Priority:   100,
+		TokenOverrides: map[string]string{
+			"semantic.colors.background": "primitives.colors.gray-900",
+		},
+	}
+
+	cloned := original.Clone()
+	s.NotNil(cloned)
+	s.NotSame(original, cloned)
+
+	// Modify cloned - should not affect original
+	cloned.Priority = 200
+	cloned.TokenOverrides["new.token"] = "new.value"
+	s.Equal(100, original.Priority)
+	s.Equal(200, cloned.Priority)
+	s.NotContains(original.TokenOverrides, "new.token")
+	s.Contains(cloned.TokenOverrides, "new.token")
+}
+
+// =============================================================================
+// THEME MANAGER TEST SUITE
+// =============================================================================
+
+// ThemeManagerTestSuite tests theme manager operations
+type ThemeManagerTestSuite struct {
+	suite.Suite
+	manager *ThemeManager
+	ctx     context.Context
+}
+
+func TestThemeManagerTestSuite(t *testing.T) {
+	suite.Run(t, new(ThemeManagerTestSuite))
+}
+
+func (s *ThemeManagerTestSuite) SetupTest() {
+	config := DefaultThemeManagerConfig()
+	config.ValidateOnRegister = true
+	config.EnableCaching = true
+	config.Logger = logger.WithFields(logger.Fields{"test": "theme_manager"})
+
+	var err error
+	s.manager, err = NewThemeManager(config)
+	s.Require().NoError(err)
+
+	s.ctx = context.Background()
+}
+
+func (s *ThemeManagerTestSuite) TearDownTest() {
+	if s.manager != nil {
+		s.manager.Close()
+	}
+}
+
+func (s *ThemeManagerTestSuite) TestNewThemeManager_NilConfig() {
+	manager, err := NewThemeManager(nil)
+	s.NoError(err)
+	s.NotNil(manager)
+	defer manager.Close()
+}
+
+func (s *ThemeManagerTestSuite) TestRegisterTheme_Global() {
+	theme := &Theme{
+		ID:     "global-theme",
+		Name:   "Global Theme",
+		Tokens: GetDefaultTokens(),
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.NoError(err)
+
+	// Should be able to retrieve it
+	retrieved, err := s.manager.GetTheme(s.ctx, "global-theme", nil)
+	s.NoError(err)
+	s.NotNil(retrieved)
+	s.Equal("global-theme", retrieved.ID)
+}
+
+func (s *ThemeManagerTestSuite) TestRegisterTheme_TenantSpecific() {
+	tenantCtx := WithTenant(s.ctx, "tenant-123")
+
+	theme := &Theme{
+		ID:     "tenant-theme",
+		Name:   "Tenant Theme",
+		Tokens: GetDefaultTokens(),
+	}
+
+	err := s.manager.RegisterTheme(tenantCtx, theme)
+	s.NoError(err)
+
+	// Should be retrievable with tenant context
+	retrieved, err := s.manager.GetTheme(tenantCtx, "tenant-theme", nil)
+	s.NoError(err)
+	s.NotNil(retrieved)
+	s.Equal("tenant-theme", retrieved.ID)
+
+	// Should NOT be retrievable without tenant context
+	_, err = s.manager.GetTheme(s.ctx, "tenant-theme", nil)
+	s.Error(err)
+	s.Contains(err.Error(), "theme_not_found")
+}
+
+func (s *ThemeManagerTestSuite) TestRegisterTheme_NilTheme() {
+	err := s.manager.RegisterTheme(s.ctx, nil)
+	s.Error(err)
+	s.Contains(err.Error(), "nil_theme")
+}
+
+func (s *ThemeManagerTestSuite) TestRegisterTheme_InvalidTheme() {
+	theme := &Theme{
+		ID:     "invalid",
+		Name:   "Invalid Theme",
+		Tokens: nil, // Invalid: nil tokens
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Error(err)
+}
+
+func (s *ThemeManagerTestSuite) TestRegisterTheme_SetsTimestamps() {
+	theme := &Theme{
+		ID:     "timestamp-test",
+		Name:   "Timestamp Test",
+		Tokens: GetDefaultTokens(),
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	retrieved, err := s.manager.GetTheme(s.ctx, "timestamp-test", nil)
+	s.Require().NoError(err)
+
+	s.False(retrieved.createdAt.IsZero())
+	s.False(retrieved.updatedAt.IsZero())
+}
+
+func (s *ThemeManagerTestSuite) TestGetTheme_NotFound() {
+	_, err := s.manager.GetTheme(s.ctx, "nonexistent", nil)
+	s.Error(err)
+	s.Contains(err.Error(), "theme_not_found")
+}
+
+func (s *ThemeManagerTestSuite) TestGetTheme_DefaultFallback() {
+	// Register default theme
+	defaultTheme := &Theme{
+		ID:     "default",
+		Name:   "Default Theme",
+		Tokens: GetDefaultTokens(),
+	}
+	err := s.manager.RegisterTheme(s.ctx, defaultTheme)
+	s.Require().NoError(err)
+
+	// Configure default
+	s.manager.config.DefaultThemeID = "default"
+
+	// Request nonexistent theme - should fallback to default
+	retrieved, err := s.manager.GetTheme(s.ctx, "nonexistent", nil)
+	s.NoError(err)
+	s.NotNil(retrieved)
+	s.Equal("default", retrieved.ID)
+}
+
+func (s *ThemeManagerTestSuite) TestGetTheme_WithConditionalOverrides() {
+	// Register theme with conditions
+	theme := &Theme{
+		ID:     "conditional-theme",
+		Name:   "Conditional Theme",
+		Tokens: GetDefaultTokens(),
+		Conditions: []*ThemeCondition{
+			{
+				ID:         "admin-dark",
+				Expression: "user.role == 'admin'",
+				Priority:   100,
+				TokenOverrides: map[string]string{
+					"semantic.colors.background": "#000000",
+				},
+			},
+		},
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	// Get theme with evaluation data matching condition
+	evalData := map[string]any{
+		"user": map[string]any{
+			"role": "admin",
+		},
+	}
+
+	retrieved, err := s.manager.GetTheme(s.ctx, "conditional-theme", evalData)
+	s.NoError(err)
+	s.NotNil(retrieved)
+
+	// Background color should be overridden
+	s.Equal("#000000", retrieved.Tokens.Semantic.Colors["background"])
+}
+
+func (s *ThemeManagerTestSuite) TestGetTheme_ConditionPriority() {
+	// Register theme with multiple conditions
+	theme := &Theme{
+		ID:     "priority-test",
+		Name:   "Priority Test",
+		Tokens: GetDefaultTokens(),
+		Conditions: []*ThemeCondition{
+			{
+				ID:         "low-priority",
+				Expression: "true", // Always true
+				Priority:   10,
+				TokenOverrides: map[string]string{
+					"semantic.colors.background": "#111111",
+				},
+			},
+			{
+				ID:         "high-priority",
+				Expression: "true", // Always true
+				Priority:   100,
+				TokenOverrides: map[string]string{
+					"semantic.colors.background": "#222222",
+				},
+			},
+		},
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	retrieved, err := s.manager.GetTheme(s.ctx, "priority-test", map[string]any{})
+	s.NoError(err)
+
+	// High priority should win
+	s.Equal("#222222", retrieved.Tokens.Semantic.Colors["background"])
+}
+
+func (s *ThemeManagerTestSuite) TestListThemes_Global() {
+	// Register multiple global themes
+	for i := range 3 {
+		theme := &Theme{
+			ID:     fmt.Sprintf("theme-%d", i),
+			Name:   fmt.Sprintf("Theme %d", i),
+			Tokens: GetDefaultTokens(),
+		}
+		err := s.manager.RegisterTheme(s.ctx, theme)
+		s.Require().NoError(err)
+	}
+
+	themes, err := s.manager.ListThemes(s.ctx)
+	s.NoError(err)
+	s.Len(themes, 3)
+}
+
+func (s *ThemeManagerTestSuite) TestListThemes_Tenant() {
+	tenantCtx := WithTenant(s.ctx, "tenant-123")
+
+	// Register tenant themes
+	for i := range 2 {
+		theme := &Theme{
+			ID:     fmt.Sprintf("tenant-theme-%d", i),
+			Name:   fmt.Sprintf("Tenant Theme %d", i),
+			Tokens: GetDefaultTokens(),
+		}
+		err := s.manager.RegisterTheme(tenantCtx, theme)
+		s.Require().NoError(err)
+	}
+
+	// Register global themes
+	globalTheme := &Theme{
+		ID:     "global-theme",
+		Name:   "Global Theme",
+		Tokens: GetDefaultTokens(),
+	}
+	err := s.manager.RegisterTheme(s.ctx, globalTheme)
+	s.Require().NoError(err)
+
+	// List with tenant context - should include both tenant and global
+	themes, err := s.manager.ListThemes(tenantCtx)
+	s.NoError(err)
+	s.GreaterOrEqual(len(themes), 3)
+}
+
+func (s *ThemeManagerTestSuite) TestUnregisterTheme() {
+	theme := &Theme{
+		ID:     "unregister-test",
+		Name:   "Unregister Test",
+		Tokens: GetDefaultTokens(),
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	// Unregister
+	err = s.manager.UnregisterTheme(s.ctx, "unregister-test")
+	s.NoError(err)
+
+	// Should not be retrievable
+	_, err = s.manager.GetTheme(s.ctx, "unregister-test", nil)
+	s.Error(err)
+	s.Contains(err.Error(), "theme_not_found")
+}
+
+func (s *ThemeManagerTestSuite) TestUnregisterTheme_NotFound() {
+	err := s.manager.UnregisterTheme(s.ctx, "nonexistent")
+	s.Error(err)
+	s.Contains(err.Error(), "theme_not_found")
+}
+
+// =============================================================================
+// THEME CACHING TEST SUITE
+// =============================================================================
+
+// ThemeCachingTestSuite tests theme caching behavior
+type ThemeCachingTestSuite struct {
+	suite.Suite
+	manager *ThemeManager
+	ctx     context.Context
+}
+
+func TestThemeCachingTestSuite(t *testing.T) {
+	suite.Run(t, new(ThemeCachingTestSuite))
+}
+
+func (s *ThemeCachingTestSuite) SetupTest() {
+	config := DefaultThemeManagerConfig()
+	config.EnableCaching = true
+
+	var err error
+	s.manager, err = NewThemeManager(config)
+	s.Require().NoError(err)
+
+	s.ctx = context.Background()
+}
+
+func (s *ThemeCachingTestSuite) TearDownTest() {
+	if s.manager != nil {
+		s.manager.Close()
+	}
+}
+
+func (s *ThemeCachingTestSuite) TestCacheHit() {
+	theme := &Theme{
+		ID:     "cache-test",
+		Name:   "Cache Test",
+		Tokens: GetDefaultTokens(),
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	// First retrieval - cache miss
+	start1 := time.Now()
+	theme1, err := s.manager.GetTheme(s.ctx, "cache-test", nil)
+	duration1 := time.Since(start1)
+	s.NoError(err)
+	s.NotNil(theme1)
+
+	// Second retrieval - cache hit (should be faster)
+	start2 := time.Now()
+	theme2, err := s.manager.GetTheme(s.ctx, "cache-test", nil)
+	duration2 := time.Since(start2)
+	s.NoError(err)
+	s.NotNil(theme2)
+
+	// Second should generally be faster due to cache
+	// (Though not guaranteed on all systems, so we just verify it works)
+	s.Less(duration2, duration1*2) // At least not slower
+}
+
+func (s *ThemeCachingTestSuite) TestCacheInvalidation() {
+	theme := &Theme{
+		ID:     "invalidation-test",
+		Name:   "Invalidation Test",
+		Tokens: GetDefaultTokens(),
+	}
+
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	// Retrieve to populate cache
+	_, err = s.manager.GetTheme(s.ctx, "invalidation-test", nil)
+	s.NoError(err)
+
+	// Re-register (should invalidate cache)
+	theme.Name = "Updated Name"
+	err = s.manager.RegisterTheme(s.ctx, theme)
+	s.NoError(err)
+
+	// Should get updated theme
+	retrieved, err := s.manager.GetTheme(s.ctx, "invalidation-test", nil)
+	s.NoError(err)
+	s.Equal("Updated Name", retrieved.Name)
+}
+
+func (s *ThemeCachingTestSuite) TestCacheWithDifferentTenants() {
+	theme := &Theme{
+		ID:     "multi-tenant-cache",
+		Name:   "Multi-Tenant Cache",
+		Tokens: GetDefaultTokens(),
+	}
+
+	// Register for tenant1
+	tenant1Ctx := WithTenant(s.ctx, "tenant-1")
+	err := s.manager.RegisterTheme(tenant1Ctx, theme)
+	s.Require().NoError(err)
+
+	// Register for tenant2 with different name
+	theme2 := theme.Clone()
+	theme2.Name = "Tenant 2 Theme"
+	tenant2Ctx := WithTenant(s.ctx, "tenant-2")
+	err = s.manager.RegisterTheme(tenant2Ctx, theme2)
+	s.Require().NoError(err)
+
+	// Retrieve from tenant1
+	retrieved1, err := s.manager.GetTheme(tenant1Ctx, "multi-tenant-cache", nil)
+	s.NoError(err)
+	s.Equal("Multi-Tenant Cache", retrieved1.Name)
+
+	// Retrieve from tenant2
+	retrieved2, err := s.manager.GetTheme(tenant2Ctx, "multi-tenant-cache", nil)
+	s.NoError(err)
+	s.Equal("Tenant 2 Theme", retrieved2.Name)
+}
+
+// =============================================================================
+// THEME CONCURRENCY TEST SUITE
+// =============================================================================
+
+// ThemeConcurrencyTestSuite tests concurrent theme operations
+type ThemeConcurrencyTestSuite struct {
+	suite.Suite
+	manager *ThemeManager
+	ctx     context.Context
+}
+
+func TestThemeConcurrencyTestSuite(t *testing.T) {
+	suite.Run(t, new(ThemeConcurrencyTestSuite))
+}
+
+func (s *ThemeConcurrencyTestSuite) SetupTest() {
+	var err error
+	s.manager, err = NewThemeManager(DefaultThemeManagerConfig())
+	s.Require().NoError(err)
+
+	s.ctx = context.Background()
+}
+
+func (s *ThemeConcurrencyTestSuite) TearDownTest() {
+	if s.manager != nil {
+		s.manager.Close()
+	}
+}
+
+func (s *ThemeConcurrencyTestSuite) TestConcurrentRegistration() {
+	const numGoroutines = 50
 	var wg sync.WaitGroup
-	errorChan := make(chan error, 100)
-	// Concurrent theme operations
-	for i := range 50 {
+	errors := make(chan error, numGoroutines)
+
+	for i := range numGoroutines {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 			theme := &Theme{
-				ID:      fmt.Sprintf("safety-theme-%d", id),
-				Name:    fmt.Sprintf("Safety Theme %d", id),
-				Version: "1.0.0",
-				Tokens:  GetDefaultTokens(),
+				ID:     fmt.Sprintf("concurrent-theme-%d", id),
+				Name:   fmt.Sprintf("Concurrent Theme %d", id),
+				Tokens: GetDefaultTokens(),
 			}
-			err := manager.RegisterTheme(theme)
-			if err != nil {
-				errorChan <- fmt.Errorf("registration failed for theme %d: %v", id, err)
-				return
-			}
-			// Immediate retrieval
-			_, err = manager.GetTheme(ctx, theme.ID)
-			if err != nil {
-				errorChan <- fmt.Errorf("retrieval failed for theme %d: %v", id, err)
+			if err := s.manager.RegisterTheme(s.ctx, theme); err != nil {
+				errors <- err
 			}
 		}(i)
 	}
+
 	wg.Wait()
-	close(errorChan)
+	close(errors)
+
 	// Check for errors
-	for err := range errorChan {
-		t.Error("Concurrent safety error:", err)
+	for err := range errors {
+		s.Fail("Concurrent registration error: %v", err)
 	}
-	// Verify all themes were registered
-	themes, err := manager.ListThemes(ctx)
-	if err != nil {
-		t.Fatal("Failed to list themes:", err)
+
+	// Verify all themes registered
+	themes, err := s.manager.ListThemes(s.ctx)
+	s.NoError(err)
+	s.GreaterOrEqual(len(themes), numGoroutines)
+}
+
+func (s *ThemeConcurrencyTestSuite) TestConcurrentRetrieval() {
+	// Register a theme first
+	theme := &Theme{
+		ID:     "concurrent-get",
+		Name:   "Concurrent Get",
+		Tokens: GetDefaultTokens(),
 	}
-	if len(themes) < 50 {
-		t.Errorf("Expected at least 50 themes, got %d", len(themes))
+	err := s.manager.RegisterTheme(s.ctx, theme)
+	s.Require().NoError(err)
+
+	const numGoroutines = 100
+	var wg sync.WaitGroup
+	errors := make(chan error, numGoroutines)
+
+	for range numGoroutines {
+		wg.Go(func() {
+			retrieved, err := s.manager.GetTheme(s.ctx, "concurrent-get", nil)
+			if err != nil {
+				errors <- err
+				return
+			}
+			if retrieved.ID != "concurrent-get" {
+				errors <- fmt.Errorf("wrong theme retrieved: %s", retrieved.ID)
+			}
+		})
+	}
+
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		close(errors)
+		for err := range errors {
+			s.Fail("Concurrent retrieval error: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		s.Fail("Concurrent retrieval timed out")
 	}
 }
 
-// Helper functions for performance calculations
-func calculatePercentile(durations []time.Duration, percentile int) time.Duration {
-	if len(durations) == 0 {
-		return 0
+func (s *ThemeConcurrencyTestSuite) TestConcurrentMultiTenantOperations() {
+	const numTenants = 10
+	const numThemesPerTenant = 5
+	var wg sync.WaitGroup
+	errors := make(chan error, numTenants*numThemesPerTenant)
+
+	for tenant := range numTenants {
+		for themeNum := range numThemesPerTenant {
+			wg.Add(1)
+			go func(tenantID int, themeID int) {
+				defer wg.Done()
+
+				tenantCtx := WithTenant(s.ctx, fmt.Sprintf("tenant-%d", tenantID))
+				theme := &Theme{
+					ID:     fmt.Sprintf("theme-%d-%d", tenantID, themeID),
+					Name:   fmt.Sprintf("Theme %d-%d", tenantID, themeID),
+					Tokens: GetDefaultTokens(),
+				}
+
+				if err := s.manager.RegisterTheme(tenantCtx, theme); err != nil {
+					errors <- err
+					return
+				}
+
+				// Immediately try to retrieve
+				retrieved, err := s.manager.GetTheme(tenantCtx, theme.ID, nil)
+				if err != nil {
+					errors <- err
+					return
+				}
+				if retrieved.ID != theme.ID {
+					errors <- fmt.Errorf("retrieved wrong theme: expected %s, got %s", theme.ID, retrieved.ID)
+				}
+			}(tenant, themeNum)
+		}
 	}
-	// Simple percentile calculation (not sorting for performance)
-	index := (len(durations) * percentile) / 100
-	if index >= len(durations) {
-		index = len(durations) - 1
+
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		close(errors)
+		for err := range errors {
+			s.Fail("Multi-tenant concurrent error: %v", err)
+		}
+	case <-time.After(10 * time.Second):
+		s.Fail("Multi-tenant concurrent operations timed out")
 	}
-	return durations[index]
 }
-func calculateAverage(durations []time.Duration) time.Duration {
-	if len(durations) == 0 {
-		return 0
+
+// =============================================================================
+// MULTI-TENANCY TEST SUITE
+// =============================================================================
+
+// MultiTenancyTestSuite tests multi-tenant functionality
+type MultiTenancyTestSuite struct {
+	suite.Suite
+	manager *ThemeManager
+	ctx     context.Context
+}
+
+func TestMultiTenancyTestSuite(t *testing.T) {
+	suite.Run(t, new(MultiTenancyTestSuite))
+}
+
+func (s *MultiTenancyTestSuite) SetupTest() {
+	var err error
+	s.manager, err = NewThemeManager(DefaultThemeManagerConfig())
+	s.Require().NoError(err)
+
+	s.ctx = context.Background()
+}
+
+func (s *MultiTenancyTestSuite) TearDownTest() {
+	if s.manager != nil {
+		s.manager.Close()
 	}
-	var total time.Duration
-	for _, d := range durations {
-		total += d
+}
+
+func (s *MultiTenancyTestSuite) TestWithTenant() {
+	tenantCtx := WithTenant(s.ctx, "test-tenant")
+	tenantID := GetTenant(tenantCtx)
+	s.Equal("test-tenant", tenantID)
+}
+
+func (s *MultiTenancyTestSuite) TestGetTenant_NoTenant() {
+	tenantID := GetTenant(s.ctx)
+	s.Empty(tenantID)
+}
+
+func (s *MultiTenancyTestSuite) TestTenantIsolation() {
+	// Register theme for tenant1
+	tenant1Ctx := WithTenant(s.ctx, "tenant-1")
+	theme1 := &Theme{
+		ID:     "isolated-theme",
+		Name:   "Tenant 1 Theme",
+		Tokens: GetDefaultTokens(),
 	}
-	return total / time.Duration(len(durations))
+	err := s.manager.RegisterTheme(tenant1Ctx, theme1)
+	s.Require().NoError(err)
+
+	// Register different theme with same ID for tenant2
+	tenant2Ctx := WithTenant(s.ctx, "tenant-2")
+	theme2 := &Theme{
+		ID:     "isolated-theme",
+		Name:   "Tenant 2 Theme",
+		Tokens: GetDefaultTokens(),
+	}
+	err = s.manager.RegisterTheme(tenant2Ctx, theme2)
+	s.Require().NoError(err)
+
+	// Retrieve from tenant1
+	retrieved1, err := s.manager.GetTheme(tenant1Ctx, "isolated-theme", nil)
+	s.NoError(err)
+	s.Equal("Tenant 1 Theme", retrieved1.Name)
+
+	// Retrieve from tenant2
+	retrieved2, err := s.manager.GetTheme(tenant2Ctx, "isolated-theme", nil)
+	s.NoError(err)
+	s.Equal("Tenant 2 Theme", retrieved2.Name)
+}
+
+func (s *MultiTenancyTestSuite) TestTenantCanAccessGlobalThemes() {
+	// Register global theme
+	globalTheme := &Theme{
+		ID:     "global-accessible",
+		Name:   "Global Theme",
+		Tokens: GetDefaultTokens(),
+	}
+	err := s.manager.RegisterTheme(s.ctx, globalTheme)
+	s.Require().NoError(err)
+
+	// Tenant should be able to access global theme
+	tenantCtx := WithTenant(s.ctx, "tenant-123")
+	retrieved, err := s.manager.GetTheme(tenantCtx, "global-accessible", nil)
+	s.NoError(err)
+	s.Equal("Global Theme", retrieved.Name)
+}
+
+// =============================================================================
+// DEFAULT THEME TEST SUITE
+// =============================================================================
+
+// DefaultThemeTestSuite tests the default theme
+type DefaultThemeTestSuite struct {
+	suite.Suite
+	theme *Theme
+}
+
+func TestDefaultThemeTestSuite(t *testing.T) {
+	suite.Run(t, new(DefaultThemeTestSuite))
+}
+
+func (s *DefaultThemeTestSuite) SetupTest() {
+	s.theme = GetDefaultTheme()
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_Valid() {
+	err := s.theme.Validate()
+	s.NoError(err)
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_HasRequiredFields() {
+	s.NotEmpty(s.theme.ID)
+	s.NotEmpty(s.theme.Name)
+	s.NotNil(s.theme.Tokens)
+	s.NotNil(s.theme.DarkMode)
+	s.NotNil(s.theme.Accessibility)
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_DarkModeEnabled() {
+	s.True(s.theme.DarkMode.Enabled)
+	s.NotNil(s.theme.DarkMode.DarkTokens)
+	s.NotEmpty(s.theme.DarkMode.DarkTokens.Semantic.Colors)
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_AccessibilityConfigured() {
+	s.True(s.theme.Accessibility.FocusIndicator)
+	s.True(s.theme.Accessibility.KeyboardNav)
+	s.Greater(s.theme.Accessibility.MinContrastRatio, 0.0)
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_HasConditions() {
+	s.NotEmpty(s.theme.Conditions)
+	for _, cond := range s.theme.Conditions {
+		err := cond.Validate()
+		s.NoError(err)
+	}
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_Serializable() {
+	// Should be able to serialize to JSON
+	jsonData, err := s.theme.ToJSON()
+	s.NoError(err)
+	s.NotEmpty(jsonData)
+
+	// Should be able to deserialize
+	parsed, err := ThemeFromJSON(jsonData)
+	s.NoError(err)
+	s.NotNil(parsed)
+	s.Equal(s.theme.ID, parsed.ID)
+}
+
+func (s *DefaultThemeTestSuite) TestDefaultTheme_Serializable_YAML() {
+	// Should be able to serialize to YAML
+	yamlData, err := s.theme.ToYAML()
+	s.NoError(err)
+	s.NotEmpty(yamlData)
+
+	// Should be able to deserialize
+	parsed, err := ThemeFromYAML(yamlData)
+	s.NoError(err)
+	s.NotNil(parsed)
+	s.Equal(s.theme.ID, parsed.ID)
+}
+
+// =============================================================================
+// CONTEXT KEY TEST SUITE
+// =============================================================================
+
+// ContextKeyTestSuite tests context key functionality
+type ContextKeyTestSuite struct {
+	suite.Suite
+	ctx context.Context
+}
+
+func TestContextKeyTestSuite(t *testing.T) {
+	suite.Run(t, new(ContextKeyTestSuite))
+}
+
+func (s *ContextKeyTestSuite) SetupTest() {
+	s.ctx = context.Background()
+}
+
+func (s *ContextKeyTestSuite) TestWithTenant_String() {
+	ctx := WithTenant(s.ctx, "tenant-123")
+	tenantID := GetTenant(ctx)
+	s.Equal("tenant-123", tenantID)
+}
+
+func (s *ContextKeyTestSuite) TestWithTenant_UUID() {
+	uuid := "550e8400-e29b-41d4-a716-446655440000"
+	ctx := WithTenant(s.ctx, uuid)
+	tenantID := GetTenant(ctx)
+	s.Equal(uuid, tenantID)
+}
+
+func (s *ContextKeyTestSuite) TestWithTenant_Empty() {
+	ctx := WithTenant(s.ctx, "")
+	tenantID := GetTenant(ctx)
+	s.Empty(tenantID)
+}
+
+func (s *ContextKeyTestSuite) TestGetTenant_NoValue() {
+	tenantID := GetTenant(s.ctx)
+	s.Empty(tenantID)
+}
+
+func (s *ContextKeyTestSuite) TestGetTenant_WrongType() {
+	// Put wrong type in context (shouldn't happen in practice)
+	ctx := context.WithValue(s.ctx, tenantKey{}, 12345)
+	tenantID := GetTenant(ctx)
+	s.Empty(tenantID) // Should return empty, not panic
 }

@@ -10,56 +10,56 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/niiniyare/ruun/views/utils"
+	"github.com/niiniyare/ruun/views/components/utils"
 	"strconv"
 )
 
-// InputType defines the type of input
-type InputType string
+// LegacyInputType defines the type of input (legacy)
+type LegacyInputType string
 
 const (
-	InputTypeText     InputType = "text"
-	InputTypeEmail    InputType = "email"
-	InputTypePassword InputType = "password"
-	InputTypeNumber   InputType = "number"
-	InputTypeTel      InputType = "tel"
-	InputTypeURL      InputType = "url"
-	InputTypeSearch   InputType = "search"
-	InputTypeDate     InputType = "date"
-	InputTypeTime     InputType = "time"
-	InputTypeDatetime InputType = "datetime-local"
-	InputTypeHidden   InputType = "hidden"
-	InputTypeFile     InputType = "file"
-	InputTypeRange    InputType = "range"
-	InputTypeColor    InputType = "color"
+	LegacyInputTypeText     LegacyInputType = "text"
+	LegacyInputTypeEmail    LegacyInputType = "email"
+	LegacyInputTypePassword LegacyInputType = "password"
+	LegacyInputTypeNumber   LegacyInputType = "number"
+	LegacyInputTypeTel      LegacyInputType = "tel"
+	LegacyInputTypeURL      LegacyInputType = "url"
+	LegacyInputTypeSearch   LegacyInputType = "search"
+	LegacyInputTypeDate     LegacyInputType = "date"
+	LegacyInputTypeTime     LegacyInputType = "time"
+	LegacyInputTypeDatetime LegacyInputType = "datetime-local"
+	LegacyInputTypeHidden   LegacyInputType = "hidden"
+	LegacyInputTypeFile     LegacyInputType = "file"
+	LegacyInputTypeRange    LegacyInputType = "range"
+	LegacyInputTypeColor    LegacyInputType = "color"
 )
 
-// InputSize defines the size variants for inputs
-type InputSize string
+// LegacyInputSize defines the size variants for inputs (legacy)
+type LegacyInputSize string
 
 const (
-	InputSizeSM InputSize = "sm"
-	InputSizeMD InputSize = "md"
-	InputSizeLG InputSize = "lg"
+	LegacyInputSizeSM LegacyInputSize = "sm"
+	LegacyInputSizeMD LegacyInputSize = "md"
+	LegacyInputSizeLG LegacyInputSize = "lg"
 )
 
-// InputState defines the visual state of the input
-type InputState string
+// LegacyInputState defines the visual state of the input (legacy)
+type LegacyInputState string
 
 const (
-	InputStateDefault InputState = "default"
-	InputStateError   InputState = "error"
-	InputStateSuccess InputState = "success"
-	InputStateWarning InputState = "warning"
+	LegacyInputStateDefault LegacyInputState = "default"
+	LegacyInputStateError   LegacyInputState = "error"
+	LegacyInputStateSuccess LegacyInputState = "success"
+	LegacyInputStateWarning LegacyInputState = "warning"
 )
 
 // InputProps defines the properties for the Input atom component
 // Following Atomic Design: pure presentation, no business logic
-type InputProps struct {
+type LegacyInputProps struct {
 	// Presentation
-	Type      InputType
-	Size      InputSize
-	State     InputState
+	Type      LegacyInputType
+	Size      LegacyInputSize
+	State     LegacyInputState
 	ClassName string
 
 	// Basic HTML attributes
@@ -93,7 +93,7 @@ type InputProps struct {
 }
 
 // inputClasses generates CSS classes using compiled theme classes and utils
-func inputClasses(props InputProps) string {
+func legacyInputClasses(props LegacyInputProps) string {
 	// Use compiled theme classes from JSON theme
 	return utils.TwMerge(
 		// Base input class from compiled theme
@@ -103,9 +103,9 @@ func inputClasses(props InputProps) string {
 		fmt.Sprintf("input-%s", props.Size),
 
 		// State classes from compiled theme
-		utils.If(props.State == InputStateError, "input-error"),
-		utils.If(props.State == InputStateSuccess, "input-success"),
-		utils.If(props.State == InputStateWarning, "input-warning"),
+		utils.If(props.State == LegacyInputStateError, "input-error"),
+		utils.If(props.State == LegacyInputStateSuccess, "input-success"),
+		utils.If(props.State == LegacyInputStateWarning, "input-warning"),
 
 		// Interactive state classes
 		utils.If(props.Disabled, "input-disabled"),
@@ -118,7 +118,7 @@ func inputClasses(props InputProps) string {
 
 // Input renders a pure presentation input atom
 // This is the core atomic component - single purpose, no business logic
-func Input(props InputProps) templ.Component {
+func LegacyInput(props LegacyInputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -139,7 +139,7 @@ func Input(props InputProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{inputClasses(props)}
+		var templ_7745c5c3_Var2 = []any{legacyInputClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -616,7 +616,7 @@ func Input(props InputProps) templ.Component {
 }
 
 // Convenience components for common input types
-func TextInput(props InputProps) templ.Component {
+func LegacyTextInput(props LegacyInputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -637,9 +637,9 @@ func TextInput(props InputProps) templ.Component {
 			templ_7745c5c3_Var26 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Input(InputProps{
-			Type:         InputTypeText,
-			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
+		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
+			Type:         LegacyInputTypeText,
+			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -671,7 +671,7 @@ func TextInput(props InputProps) templ.Component {
 	})
 }
 
-func EmailInput(props InputProps) templ.Component {
+func LegacyEmailInput(props LegacyInputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -692,9 +692,9 @@ func EmailInput(props InputProps) templ.Component {
 			templ_7745c5c3_Var27 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Input(InputProps{
-			Type:         InputTypeEmail,
-			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
+		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
+			Type:         LegacyInputTypeEmail,
+			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -724,7 +724,7 @@ func EmailInput(props InputProps) templ.Component {
 	})
 }
 
-func PasswordInput(props InputProps) templ.Component {
+func LegacyPasswordInput(props LegacyInputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -745,9 +745,9 @@ func PasswordInput(props InputProps) templ.Component {
 			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Input(InputProps{
-			Type:         InputTypePassword,
-			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
+		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
+			Type:         LegacyInputTypePassword,
+			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -779,7 +779,7 @@ func PasswordInput(props InputProps) templ.Component {
 	})
 }
 
-func NumberInput(props InputProps) templ.Component {
+func LegacyNumberInput(props LegacyInputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -800,9 +800,9 @@ func NumberInput(props InputProps) templ.Component {
 			templ_7745c5c3_Var29 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Input(InputProps{
-			Type:         InputTypeNumber,
-			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
+		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
+			Type:         LegacyInputTypeNumber,
+			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -834,7 +834,7 @@ func NumberInput(props InputProps) templ.Component {
 	})
 }
 
-func SearchInput(props InputProps) templ.Component {
+func LegacySearchInput(props LegacyInputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -855,9 +855,9 @@ func SearchInput(props InputProps) templ.Component {
 			templ_7745c5c3_Var30 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Input(InputProps{
-			Type:         InputTypeSearch,
-			Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
+		templ_7745c5c3_Err = LegacyInput(LegacyInputProps{
+			Type:         LegacyInputTypeSearch,
+			Size:         utils.IfElse(props.Size != "", props.Size, LegacyInputSizeMD),
 			State:        props.State,
 			ClassName:    props.ClassName,
 			ID:           props.ID,
@@ -891,8 +891,8 @@ func SearchInput(props InputProps) templ.Component {
 // TextareaProps defines the properties for the Textarea atom component
 type TextareaProps struct {
 	// Presentation
-	Size      InputSize
-	State     InputState
+	Size      LegacyInputSize
+	State     LegacyInputState
 	ClassName string
 
 	// Basic HTML attributes
@@ -935,9 +935,9 @@ func textareaClasses(props TextareaProps) string {
 		fmt.Sprintf("input-%s", props.Size),
 
 		// State classes from compiled theme
-		utils.If(props.State == InputStateError, "input-error"),
-		utils.If(props.State == InputStateSuccess, "input-success"),
-		utils.If(props.State == InputStateWarning, "input-warning"),
+		utils.If(props.State == LegacyInputStateError, "input-error"),
+		utils.If(props.State == LegacyInputStateSuccess, "input-success"),
+		utils.If(props.State == LegacyInputStateWarning, "input-warning"),
 
 		// Interactive state classes
 		utils.If(props.Disabled, "input-disabled"),
@@ -1362,12 +1362,12 @@ func Textarea(props TextareaProps) templ.Component {
 }
 
 // Builder Pattern (functional options)
-type InputOption func(*InputProps)
+type LegacyInputOption func(*LegacyInputProps)
 
-func NewInput(opts ...InputOption) InputProps {
-	props := InputProps{
-		Type:  InputTypeText,
-		Size:  InputSizeMD,
+func NewLegacyInput(opts ...LegacyInputOption) LegacyInputProps {
+	props := LegacyInputProps{
+		Type:  LegacyInputTypeText,
+		Size:  LegacyInputSizeMD,
 		State: InputStateDefault,
 	}
 	for _, opt := range opts {
@@ -1377,60 +1377,60 @@ func NewInput(opts ...InputOption) InputProps {
 }
 
 // Type options
-func WithInputType(inputType InputType) InputOption {
-	return func(p *InputProps) { p.Type = inputType }
+func WithLegacyInputType(inputType LegacyInputType) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Type = inputType }
 }
 
-func WithInputSize(size InputSize) InputOption {
-	return func(p *InputProps) { p.Size = size }
+func WithLegacyInputSize(size LegacyInputSize) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Size = size }
 }
 
-func WithInputState(state InputState) InputOption {
-	return func(p *InputProps) { p.State = state }
+func WithLegacyInputState(state LegacyInputState) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.State = state }
 }
 
-func WithInputValue(value string) InputOption {
-	return func(p *InputProps) { p.Value = value }
+func WithLegacyInputValue(value string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Value = value }
 }
 
-func WithInputPlaceholder(placeholder string) InputOption {
-	return func(p *InputProps) { p.Placeholder = placeholder }
+func WithLegacyInputPlaceholder(placeholder string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Placeholder = placeholder }
 }
 
-func WithInputName(name string) InputOption {
-	return func(p *InputProps) { p.Name = name }
+func WithLegacyInputName(name string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Name = name }
 }
 
-func WithInputID(id string) InputOption {
-	return func(p *InputProps) { p.ID = id }
+func WithLegacyInputID(id string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.ID = id }
 }
 
-func AsRequired() InputOption {
-	return func(p *InputProps) { p.Required = true }
+func AsLegacyRequired() LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Required = true }
 }
 
-func AsInputDisabled() InputOption {
-	return func(p *InputProps) { p.Disabled = true }
+func AsLegacyInputDisabled() LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Disabled = true }
 }
 
-func AsReadonly() InputOption {
-	return func(p *InputProps) { p.Readonly = true }
+func AsLegacyReadonly() LegacyInputOption {
+	return func(p *LegacyInputProps) { p.Readonly = true }
 }
 
-func WithInputHXGet(url string) InputOption {
-	return func(p *InputProps) { p.HXGet = url }
+func WithLegacyInputHXGet(url string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.HXGet = url }
 }
 
-func WithInputHXPost(url string) InputOption {
-	return func(p *InputProps) { p.HXPost = url }
+func WithLegacyInputHXPost(url string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.HXPost = url }
 }
 
-func WithAlpineModel(model string) InputOption {
-	return func(p *InputProps) { p.AlpineModel = model }
+func WithLegacyAlpineModel(model string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.AlpineModel = model }
 }
 
-func WithInputClass(class string) InputOption {
-	return func(p *InputProps) { p.ClassName = class }
+func WithLegacyInputClass(class string) LegacyInputOption {
+	return func(p *LegacyInputProps) { p.ClassName = class }
 }
 
 // Key Improvements in this refactored version:

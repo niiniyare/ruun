@@ -1,0 +1,862 @@
+package schema
+
+import (
+	"context"
+	"encoding/json"
+	"strings"
+	"testing"
+
+	"gopkg.in/yaml.v3"
+)
+
+// =============================================================================
+// TOKEN REFERENCE FUZZING
+// =============================================================================
+
+// FuzzTokenReference_IsReference tests TokenReference.IsReference with random inputs
+func FuzzTokenReference_IsReference(f *testing.F) {
+	// Seed with known cases
+	seeds := []string{
+		"primitives.colors.primary",
+		"semantic.colors.background",
+		"components.button.primary.background-color",
+		"#3b82f6",
+		"hsl(217, 91%, 60%)",
+		"1rem",
+		"16px",
+		"calc(100% - 2rem)",
+		"transparent",
+		"",
+		".",
+		"..",
+		"...",
+		"a",
+		"a.b",
+		"a.b.c",
+		"123",
+		"0.5",
+		"primitives..colors",
+		"primitives.colors.",
+		".primitives.colors",
+		"primitives colors primary",
+		"primitives-colors-primary",
+		"primitives_colors_primary",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, input string) {
+		ref := TokenReference(input)
+		isRef := ref.IsReference()
+
+		// Should never panic
+		_ = isRef
+
+		// If it's a reference, it should have dots
+		if isRef && !strings.Contains(input, ".") {
+			t.Errorf("IsReference returned true for input without dots: %q", input)
+		}
+
+		// If it's a reference, should have at least 2 segments
+		if isRef {
+			parts := strings.Split(input, ".")
+			if len(parts) < 2 {
+				t.Errorf("IsReference returned true for input with <2 segments: %q", input)
+			}
+		}
+
+		// CSS functions should not be references
+		cssFunctions := []string{"calc(", "var(", "url(", "hsl(", "rgb(", "rgba(", "linear-gradient("}
+		for _, fn := range cssFunctions {
+			if strings.HasPrefix(strings.TrimSpace(input), fn) && isRef {
+				t.Errorf("IsReference returned true for CSS function: %q", input)
+			}
+		}
+
+		// Hex colors should not be references
+		if strings.HasPrefix(strings.TrimSpace(input), "#") && isRef {
+			t.Errorf("IsReference returned true for hex color: %q", input)
+		}
+	})
+}
+
+// FuzzTokenReference_Validate tests TokenReference.Validate with random inputs
+func FuzzTokenReference_Validate(f *testing.F) {
+	seeds := []string{
+		"primitives.colors.primary",
+		"semantic.colors.background",
+		"#3b82f6",
+		"",
+		"a.b",
+		"a.b.c.d.e.f.g.h.i.j",
+		"colors..primary",
+		".colors.primary",
+		"colors.primary.",
+		"colors.pri mary",
+		"colors.primary!",
+		"123.456",
+		"a-b-c.d-e-f",
+		"a_b_c.d_e_f",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, input string) {
+		ref := TokenReference(input)
+		err := ref.Validate()
+
+		// Should never panic
+		_ = err
+
+		// Empty strings should always error
+		if strings.TrimSpace(input) == "" && err == nil {
+			t.Errorf("Validate returned no error for empty string")
+		}
+
+		// If it's not a reference (CSS literal), should always be valid
+		if !ref.IsReference() && err != nil {
+			t.Errorf("Validate returned error for CSS literal: %q, error: %v", input, err)
+		}
+
+		// If valid, should be able to call Path() without panic
+		if err == nil {
+			_ = ref.Path()
+			_ = ref.String()
+		}
+	})
+}
+
+// =============================================================================
+// TOKEN PATH FUZZING
+// =============================================================================
+
+// FuzzDesignTokens_GetToken tests GetToken with random paths
+func FuzzDesignTokens_GetToken(f *testing.F) {
+	// Create a test token structure
+	tokens := &DesignTokens{
+		Primitives: &PrimitiveTokens{
+			Colors: map[string]string{
+				"primary": "hsl(217, 91%, 60%)",
+				"white":   "#ffffff",
+			},
+			Spacing: map[string]string{
+				"md": "1rem",
+			},
+		},
+		Semantic: &SemanticTokens{
+			Colors: map[string]string{
+				"background": "primitives.colors.white",
+			},
+		},
+	}
+
+	seeds := []string{
+		"primitives.colors.primary",
+		"primitives.spacing.md",
+		"semantic.colors.background",
+		"",
+		"primitives",
+		"primitives.colors",
+		"invalid.colors.primary",
+		"primitives.invalid.primary",
+		"primitives.colors.nonexistent",
+		"a.b.c.d.e.f",
+		"...",
+		"primitives..colors.primary",
+		"primitives.colors.primary.extra.segments",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, path string) {
+		_, err := tokens.GetToken(path)
+
+		// Should never panic
+		_ = err
+
+		// Valid paths should not error
+		validPaths := []string{
+			"primitives.colors.primary",
+			"primitives.spacing.md",
+			"semantic.colors.background",
+		}
+		for _, validPath := range validPaths {
+			if path == validPath && err != nil {
+				t.Errorf("GetToken returned error for valid path %q: %v", path, err)
+			}
+		}
+	})
+}
+
+// =============================================================================
+// TOKEN RESOLUTION FUZZING
+// =============================================================================
+
+// FuzzTokenResolver_Resolve tests token resolution with random references
+func FuzzTokenResolver_Resolve(f *testing.F) {
+	tokens := &DesignTokens{
+		Primitives: &PrimitiveTokens{
+			Colors: map[string]string{
+				"primary":   "hsl(217, 91%, 60%)",
+				"secondary": "hsl(270, 50%, 60%)",
+			},
+			Spacing: map[string]string{
+				"sm": "0.5rem",
+				"md": "1rem",
+			},
+		},
+		Semantic: &SemanticTokens{
+			Colors: map[string]string{
+				"background": "primitives.colors.primary",
+				"text":       "primitives.colors.secondary",
+			},
+		},
+	}
+
+	resolver, err := NewTokenResolver(tokens)
+	if err != nil {
+		f.Fatal(err)
+	}
+	defer resolver.Close()
+
+	seeds := []string{
+		"primitives.colors.primary",
+		"semantic.colors.background",
+		"#3b82f6",
+		"1rem",
+		"",
+		"invalid.path",
+		"primitives.colors.nonexistent",
+		"hsl(217, 91%, 60%)",
+		"calc(100% - 2rem)",
+		"a.b.c",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, refStr string) {
+		ctx := context.Background()
+		ref := TokenReference(refStr)
+
+		_, err := resolver.Resolve(ctx, ref)
+
+		// Should never panic
+		_ = err
+
+		// CSS literals should always resolve successfully
+		if !ref.IsReference() {
+			if err != nil {
+				t.Errorf("Resolve failed for CSS literal %q: %v", refStr, err)
+			}
+		}
+
+		// Known valid references should resolve
+		validRefs := []string{
+			"primitives.colors.primary",
+			"semantic.colors.background",
+		}
+		for _, valid := range validRefs {
+			if refStr == valid && err != nil {
+				t.Errorf("Resolve failed for valid reference %q: %v", refStr, err)
+			}
+		}
+	})
+}
+
+// =============================================================================
+// JSON DESERIALIZATION FUZZING
+// =============================================================================
+
+// FuzzTokensFromJSON tests JSON deserialization with malformed input
+func FuzzTokensFromJSON(f *testing.F) {
+	// Seed with valid and invalid JSON
+	seeds := [][]byte{
+		[]byte(`{"primitives":{"colors":{"primary":"hsl(217, 91%, 60%)"}}}`),
+		[]byte(`{}`),
+		[]byte(`{"primitives":null}`),
+		[]byte(`{"primitives":{"colors":{}}}`),
+		[]byte(`{"invalid":"structure"}`),
+		[]byte(`{`),
+		[]byte(`}`),
+		[]byte(`[]`),
+		[]byte(`"string"`),
+		[]byte(`123`),
+		[]byte(`true`),
+		[]byte(`null`),
+		[]byte(`{"primitives":{"colors":{"primary":"semantic.colors.primary"}}}`), // Invalid: primitive with reference
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, data []byte) {
+		tokens, err := TokensFromJSON(data)
+
+		// Should never panic
+		_ = tokens
+		_ = err
+
+		// If successful, tokens should be valid
+		if err == nil && tokens != nil {
+			if validateErr := tokens.Validate(); validateErr != nil {
+				t.Errorf("TokensFromJSON returned invalid tokens: %v", validateErr)
+			}
+		}
+
+		// Empty/invalid JSON should error
+		trimmed := strings.TrimSpace(string(data))
+		if len(trimmed) == 0 && err == nil {
+			t.Errorf("TokensFromJSON accepted empty input")
+		}
+	})
+}
+
+// FuzzThemeFromJSON tests theme deserialization with malformed input
+func FuzzThemeFromJSON(f *testing.F) {
+	validTheme := `{
+		"id": "test",
+		"name": "Test Theme",
+		"tokens": {
+			"primitives": {
+				"colors": {"primary": "hsl(217, 91%, 60%)"}
+			}
+		}
+	}`
+
+	seeds := [][]byte{
+		[]byte(validTheme),
+		[]byte(`{}`),
+		[]byte(`{"id":"test"}`),
+		[]byte(`{"id":"test","name":"Test"}`),
+		[]byte(`{`),
+		[]byte(`}`),
+		[]byte(`[]`),
+		[]byte(`null`),
+		[]byte(`{"id":"","name":"Test","tokens":null}`),
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, data []byte) {
+		theme, err := ThemeFromJSON(data)
+
+		// Should never panic
+		_ = theme
+		_ = err
+
+		// If successful, theme should be valid
+		if err == nil && theme != nil {
+			if validateErr := theme.Validate(); validateErr != nil {
+				t.Errorf("ThemeFromJSON returned invalid theme: %v", validateErr)
+			}
+		}
+	})
+}
+
+// =============================================================================
+// YAML DESERIALIZATION FUZZING
+// =============================================================================
+
+// FuzzThemeFromYAML tests YAML deserialization with malformed input
+func FuzzThemeFromYAML(f *testing.F) {
+	validYAML := `
+id: test
+name: Test Theme
+tokens:
+  primitives:
+    colors:
+      primary: "hsl(217, 91%, 60%)"
+`
+
+	seeds := [][]byte{
+		[]byte(validYAML),
+		[]byte(`id: test`),
+		[]byte(`{}`),
+		[]byte(`[]`),
+		[]byte(`---`),
+		[]byte(`id: test\nname:`),
+		[]byte(`id: "test"\nname: "Test"\ntokens: null`),
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, data []byte) {
+		theme, err := ThemeFromYAML(data)
+
+		// Should never panic
+		_ = theme
+		_ = err
+
+		// If successful, theme should be valid
+		if err == nil && theme != nil {
+			if validateErr := theme.Validate(); validateErr != nil {
+				t.Errorf("ThemeFromYAML returned invalid theme: %v", validateErr)
+			}
+		}
+	})
+}
+
+// =============================================================================
+// TOKEN OVERRIDE FUZZING
+// =============================================================================
+
+// FuzzThemeCondition_Validate tests condition validation with random inputs
+func FuzzThemeCondition_Validate(f *testing.F) {
+	seeds := []string{
+		"user.role == 'admin'",
+		"true",
+		"false",
+		"user.age > 18",
+		"tenant.plan == 'enterprise' && user.role == 'admin'",
+		"",
+		"invalid expression",
+		"user.role ==",
+		"== 'admin'",
+		"user.role",
+		"123",
+		"user.role == 'admin' || user.role == 'superadmin'",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, expression string) {
+		condition := &ThemeCondition{
+			ID:         "fuzz-test",
+			Expression: expression,
+			TokenOverrides: map[string]string{
+				"semantic.colors.background": "#000000",
+			},
+		}
+
+		err := condition.Validate()
+
+		// Should never panic
+		_ = err
+
+		// Empty expression should error
+		if strings.TrimSpace(expression) == "" && err == nil {
+			t.Errorf("Validate accepted empty expression")
+		}
+	})
+}
+
+// =============================================================================
+// THEME ID FUZZING
+// =============================================================================
+
+// FuzzTheme_Validate tests theme validation with random IDs and names
+func FuzzTheme_Validate(f *testing.F) {
+	tokens := GetDefaultTokens()
+
+	seeds := []struct {
+		id   string
+		name string
+	}{
+		{"valid-id", "Valid Name"},
+		{"", "Name"},
+		{"id", ""},
+		{"", ""},
+		{"id-123", "Theme 123"},
+		{"UPPERCASE", "UPPERCASE"},
+		{"with spaces", "With Spaces"},
+		{"with\nnewline", "With\nNewline"},
+		{"unicode-テスト", "Unicode テスト"},
+		{"very-long-id-that-goes-on-and-on-and-on-and-on", "Very Long Name"},
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed.id, seed.name)
+	}
+
+	f.Fuzz(func(t *testing.T, id, name string) {
+		theme := &Theme{
+			ID:     id,
+			Name:   name,
+			Tokens: tokens,
+		}
+
+		err := theme.Validate()
+
+		// Should never panic
+		_ = err
+
+		// Empty ID should error
+		if strings.TrimSpace(id) == "" && err == nil {
+			t.Errorf("Validate accepted empty ID")
+		}
+
+		// Empty name should error
+		if strings.TrimSpace(name) == "" && err == nil {
+			t.Errorf("Validate accepted empty name")
+		}
+
+		// If both ID and name are non-empty, should be valid
+		if strings.TrimSpace(id) != "" && strings.TrimSpace(name) != "" && err != nil {
+			// Some error is acceptable (could be from tokens), but should not panic
+			_ = err
+		}
+	})
+}
+
+// =============================================================================
+// COMPONENT PATH FUZZING
+// =============================================================================
+
+// FuzzComponentTokenPath tests component token path parsing
+func FuzzComponentTokenPath(f *testing.F) {
+	tokens := &DesignTokens{
+		Primitives: &PrimitiveTokens{
+			Colors: map[string]string{"primary": "hsl(217, 91%, 60%)"},
+		},
+		Components: &ComponentTokens{
+			"button": ComponentVariants{
+				"primary": StyleProperties{
+					"background-color": "primitives.colors.primary",
+				},
+			},
+		},
+	}
+
+	seeds := []string{
+		"components.button.primary.background-color",
+		"components.button.primary",
+		"components.button",
+		"components",
+		"components.button.primary.color.extra",
+		"components..button.primary.color",
+		"components.button..primary.color",
+		"components.invalid.primary.color",
+		"components.button.invalid.color",
+		"components.button.primary.invalid",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, path string) {
+		_, err := tokens.GetToken(path)
+
+		// Should never panic
+		_ = err
+
+		// Valid path should work
+		if path == "components.button.primary.background-color" && err != nil {
+			t.Errorf("GetToken failed for valid component path: %v", err)
+		}
+
+		// Too short paths should error
+		if len(strings.Split(path, ".")) < 3 && strings.HasPrefix(path, "components.") && err == nil {
+			t.Errorf("GetToken accepted short component path: %q", path)
+		}
+	})
+}
+
+// =============================================================================
+// CIRCULAR REFERENCE FUZZING
+// =============================================================================
+
+// FuzzCircularReferences tests detection of circular token references
+func FuzzCircularReferences(f *testing.F) {
+	seeds := []struct {
+		refA string
+		refB string
+		refC string
+	}{
+		{"primitives.colors.primary", "semantic.colors.primary", "primitives.colors.primary"},
+		{"semantic.colors.a", "semantic.colors.b", "semantic.colors.a"},
+		{"semantic.colors.x", "semantic.colors.y", "semantic.colors.z"},
+		{"primitives.colors.base", "primitives.colors.base", "primitives.colors.base"},
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed.refA, seed.refB, seed.refC)
+	}
+
+	f.Fuzz(func(t *testing.T, refA, refB, refC string) {
+		// Create tokens with potential circular references
+		tokens := &DesignTokens{
+			Primitives: &PrimitiveTokens{
+				Colors: map[string]string{
+					"base": "hsl(0, 0%, 50%)",
+				},
+			},
+			Semantic: &SemanticTokens{
+				Colors: map[string]string{
+					"a": refA,
+					"b": refB,
+					"c": refC,
+				},
+			},
+		}
+
+		// Attempt to create resolver and resolve
+		resolver, err := NewTokenResolver(tokens)
+		if err != nil {
+			// Invalid tokens are OK
+			return
+		}
+		defer resolver.Close()
+
+		ctx := context.Background()
+		ref := TokenReference("semantic.colors.a")
+		_, err = resolver.Resolve(ctx, ref)
+
+		// Should never panic, even with circular references
+		_ = err
+
+		// If we detect circular reference, error should mention it
+		if err != nil && strings.Contains(strings.ToLower(err.Error()), "circular") {
+			// Good - circular reference was detected
+		}
+	})
+}
+
+// =============================================================================
+// CUSTOM CSS/JS SIZE FUZZING
+// =============================================================================
+
+// FuzzTheme_CustomCode tests custom CSS/JS size validation
+func FuzzTheme_CustomCode(f *testing.F) {
+	tokens := GetDefaultTokens()
+
+	seeds := []int{
+		0,
+		1,
+		100,
+		1000,
+		10000,
+		100000,
+		1000000,
+		2000000,
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed, seed)
+	}
+
+	f.Fuzz(func(t *testing.T, cssSize, jsSize int) {
+		// Limit sizes to prevent OOM
+		if cssSize < 0 {
+			cssSize = 0
+		}
+		if jsSize < 0 {
+			jsSize = 0
+		}
+		if cssSize > 10<<20 {
+			cssSize = 10 << 20
+		}
+		if jsSize > 10<<20 {
+			jsSize = 10 << 20
+		}
+
+		theme := &Theme{
+			ID:        "fuzz-test",
+			Name:      "Fuzz Test",
+			Tokens:    tokens,
+			CustomCSS: string(make([]byte, cssSize)),
+			CustomJS:  string(make([]byte, jsSize)),
+		}
+
+		err := theme.Validate()
+
+		// Should never panic
+		_ = err
+
+		// Size limits should be enforced (1MB)
+		maxSize := 1 << 20
+		if cssSize > maxSize && err == nil {
+			t.Errorf("Validate accepted CSS larger than %d bytes", maxSize)
+		}
+		if jsSize > maxSize && err == nil {
+			t.Errorf("Validate accepted JS larger than %d bytes", maxSize)
+		}
+	})
+}
+
+// =============================================================================
+// CLONE DEEP COPY FUZZING
+// =============================================================================
+
+// FuzzDesignTokens_Clone tests deep cloning behavior
+func FuzzDesignTokens_Clone(f *testing.F) {
+	seeds := []struct {
+		key   string
+		value string
+	}{
+		{"primary", "hsl(217, 91%, 60%)"},
+		{"white", "#ffffff"},
+		{"spacing-md", "1rem"},
+		{"", ""},
+		{"key", ""},
+		{"", "value"},
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed.key, seed.value)
+	}
+
+	f.Fuzz(func(t *testing.T, key, value string) {
+		// Skip empty keys as they're not valid
+		if key == "" {
+			return
+		}
+
+		original := &DesignTokens{
+			Primitives: &PrimitiveTokens{
+				Colors: map[string]string{
+					key: value,
+				},
+			},
+		}
+
+		cloned := original.Clone()
+
+		// Should never panic
+		if cloned == nil {
+			t.Error("Clone returned nil")
+			return
+		}
+
+		// Should be different instances
+		if original == cloned {
+			t.Error("Clone returned same instance")
+		}
+
+		// Should have same values
+		if cloned.Primitives.Colors[key] != value {
+			t.Errorf("Clone lost value: expected %q, got %q", value, cloned.Primitives.Colors[key])
+		}
+
+		// Modifying clone should not affect original
+		cloned.Primitives.Colors[key] = "modified"
+		if original.Primitives.Colors[key] == "modified" {
+			t.Error("Modifying clone affected original")
+		}
+	})
+}
+
+// =============================================================================
+// SERIALIZATION ROUND-TRIP FUZZING
+// =============================================================================
+
+// FuzzSerializationRoundTrip tests JSON serialization/deserialization round-trip
+func FuzzSerializationRoundTrip(f *testing.F) {
+	seeds := []string{
+		"primary",
+		"hsl(217, 91%, 60%)",
+		"#ffffff",
+		"test-theme",
+		"",
+		"unicode-テスト",
+		"with\nnewlines",
+		"with\ttabs",
+		"with\"quotes\"",
+		"with'apostrophes'",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, value string) {
+		// Skip empty values
+		if value == "" {
+			return
+		}
+
+		original := &DesignTokens{
+			Primitives: &PrimitiveTokens{
+				Colors: map[string]string{
+					"test": value,
+				},
+			},
+		}
+
+		// Serialize to JSON
+		jsonData, err := json.Marshal(original)
+		if err != nil {
+			// Some values may not be JSON-serializable
+			return
+		}
+
+		// Deserialize
+		var deserialized DesignTokens
+		err = json.Unmarshal(jsonData, &deserialized)
+		if err != nil {
+			t.Errorf("Failed to deserialize: %v", err)
+			return
+		}
+
+		// Should have same value
+		if deserialized.Primitives.Colors["test"] != value {
+			t.Errorf("Round-trip lost value: expected %q, got %q",
+				value, deserialized.Primitives.Colors["test"])
+		}
+	})
+}
+
+// FuzzYAMLSerializationRoundTrip tests YAML serialization/deserialization round-trip
+func FuzzYAMLSerializationRoundTrip(f *testing.F) {
+	seeds := []string{
+		"primary",
+		"hsl(217, 91%, 60%)",
+		"#ffffff",
+		"test-theme",
+		"unicode-テスト",
+	}
+
+	for _, seed := range seeds {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, value string) {
+		// Skip empty values
+		if value == "" {
+			return
+		}
+
+		original := &DesignTokens{
+			Primitives: &PrimitiveTokens{
+				Colors: map[string]string{
+					"test": value,
+				},
+			},
+		}
+
+		// Serialize to YAML
+		yamlData, err := yaml.Marshal(original)
+		if err != nil {
+			return
+		}
+
+		// Deserialize
+		var deserialized DesignTokens
+		err = yaml.Unmarshal(yamlData, &deserialized)
+		if err != nil {
+			t.Errorf("Failed to deserialize YAML: %v", err)
+			return
+		}
+
+		// Should have same value
+		if deserialized.Primitives.Colors["test"] != value {
+			t.Errorf("YAML round-trip lost value: expected %q, got %q",
+				value, deserialized.Primitives.Colors["test"])
+		}
+	})
+}

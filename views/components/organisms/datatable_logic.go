@@ -2,9 +2,7 @@ package organisms
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,70 +16,70 @@ import (
 // DataTableService provides business logic for data table operations
 type DataTableService struct {
 	// Configuration
-	DefaultPageSize   int
+	DefaultPageSize  int
 	MaxPageSize      int
 	DefaultSortOrder SortDirection
-	
+
 	// Feature flags
 	EnableVirtualization bool
 	EnableCaching        bool
-	CacheTimeout        time.Duration
-	
+	CacheTimeout         time.Duration
+
 	// Performance settings
-	MaxRows             int
-	ChunkSize           int
-	SearchDebounce      time.Duration
+	MaxRows        int
+	ChunkSize      int
+	SearchDebounce time.Duration
 }
 
 // NewDataTableService creates a new service with default configuration
 func NewDataTableService() *DataTableService {
 	return &DataTableService{
-		DefaultPageSize:     25,
-		MaxPageSize:        1000,
-		DefaultSortOrder:   SortAsc,
+		DefaultPageSize:      25,
+		MaxPageSize:          1000,
+		DefaultSortOrder:     SortAsc,
 		EnableVirtualization: true,
-		EnableCaching:      true,
-		CacheTimeout:       5 * time.Minute,
-		MaxRows:           10000,
-		ChunkSize:         100,
-		SearchDebounce:    300 * time.Millisecond,
+		EnableCaching:        true,
+		CacheTimeout:         5 * time.Minute,
+		MaxRows:              10000,
+		ChunkSize:            100,
+		SearchDebounce:       300 * time.Millisecond,
 	}
 }
 
 // DataTableQuery represents a query for data table operations
 type DataTableQuery struct {
 	// Pagination
-	Page     int                 `json:"page"`
-	PageSize int                 `json:"pageSize"`
-	
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+
 	// Sorting
-	SortBy    string             `json:"sortBy"`
-	SortOrder SortDirection      `json:"sortOrder"`
-	MultiSort []SortCriteria     `json:"multiSort,omitempty"`
-	
+	SortBy    string         `json:"sortBy"`
+	SortOrder SortDirection  `json:"sortOrder"`
+	MultiSort []SortCriteria `json:"multiSort,omitempty"`
+
 	// Search
-	Search       string           `json:"search"`
-	SearchFields []string         `json:"searchFields,omitempty"`
-	
+	Search       string   `json:"search"`
+	SearchFields []string `json:"searchFields,omitempty"`
+
 	// Filtering
 	Filters      []FilterCriteria `json:"filters"`
 	QuickFilters []string         `json:"quickFilters,omitempty"`
-	
+
 	// Selection
-	SelectedRows []string         `json:"selectedRows,omitempty"`
-	
+	SelectedRows []string `json:"selectedRows,omitempty"`
+
 	// Display options
 	VisibleColumns []string       `json:"visibleColumns,omitempty"`
 	ColumnWidths   map[string]int `json:"columnWidths,omitempty"`
-	
+
 	// Advanced options
-	GroupBy      []string         `json:"groupBy,omitempty"`
-	Aggregates   []AggregateCriteria `json:"aggregates,omitempty"`
-	
+	GroupBy    []string            `json:"groupBy,omitempty"`
+	Aggregates []AggregateCriteria `json:"aggregates,omitempty"`
+
 	// Meta
-	RequestID    string          `json:"requestId,omitempty"`
-	UserID       string          `json:"userId,omitempty"`
-	SessionID    string          `json:"sessionId,omitempty"`
+	RequestID string `json:"requestId,omitempty"`
+	UserID    string `json:"userId,omitempty"`
+	SessionID string `json:"sessionId,omitempty"`
 }
 
 // SortCriteria represents sorting criteria for multi-column sorting
@@ -93,11 +91,11 @@ type SortCriteria struct {
 
 // FilterCriteria represents filtering criteria
 type FilterCriteria struct {
-	Column   string           `json:"column"`
-	Operator FilterOperator   `json:"operator"`
-	Value    any              `json:"value"`
-	Values   []any            `json:"values,omitempty"`
-	Type     string           `json:"type,omitempty"`
+	Column   string         `json:"column"`
+	Operator FilterOperator `json:"operator"`
+	Value    any            `json:"value"`
+	Values   []any          `json:"values,omitempty"`
+	Type     string         `json:"type,omitempty"`
 }
 
 // AggregateCriteria represents aggregation criteria
@@ -110,66 +108,66 @@ type AggregateCriteria struct {
 // DataTableResponse represents the response from data table operations
 type DataTableResponse struct {
 	// Data
-	Rows         []DataTableRow    `json:"rows"`
-	TotalRows    int               `json:"totalRows"`
-	FilteredRows int               `json:"filteredRows"`
-	
+	Rows         []DataTableRow `json:"rows"`
+	TotalRows    int            `json:"totalRows"`
+	FilteredRows int            `json:"filteredRows"`
+
 	// Pagination
-	Page         int               `json:"page"`
-	PageSize     int               `json:"pageSize"`
-	TotalPages   int               `json:"totalPages"`
-	HasNext      bool              `json:"hasNext"`
-	HasPrev      bool              `json:"hasPrev"`
-	
+	Page       int  `json:"page"`
+	PageSize   int  `json:"pageSize"`
+	TotalPages int  `json:"totalPages"`
+	HasNext    bool `json:"hasNext"`
+	HasPrev    bool `json:"hasPrev"`
+
 	// Aggregations
-	Aggregates   map[string]any    `json:"aggregates,omitempty"`
-	
+	Aggregates map[string]any `json:"aggregates,omitempty"`
+
 	// Performance
-	QueryTime    time.Duration     `json:"queryTime"`
-	CacheHit     bool              `json:"cacheHit"`
-	
+	QueryTime time.Duration `json:"queryTime"`
+	CacheHit  bool          `json:"cacheHit"`
+
 	// Meta
-	RequestID    string            `json:"requestId"`
-	Timestamp    time.Time         `json:"timestamp"`
-	Warnings     []string          `json:"warnings,omitempty"`
+	RequestID string    `json:"requestId"`
+	Timestamp time.Time `json:"timestamp"`
+	Warnings  []string  `json:"warnings,omitempty"`
 }
 
 // ProcessQuery processes a data table query and returns results
 func (s *DataTableService) ProcessQuery(ctx context.Context, data []DataTableRow, query DataTableQuery) (*DataTableResponse, error) {
 	startTime := time.Now()
-	
+
 	// Validate query
 	if err := s.validateQuery(query); err != nil {
 		return nil, fmt.Errorf("invalid query: %w", err)
 	}
-	
+
 	// Apply search
 	filteredData, err := s.applySearch(data, query.Search, query.SearchFields)
 	if err != nil {
 		return nil, fmt.Errorf("search failed: %w", err)
 	}
-	
+
 	// Apply filters
 	filteredData, err = s.applyFilters(filteredData, query.Filters)
 	if err != nil {
 		return nil, fmt.Errorf("filtering failed: %w", err)
 	}
-	
+
 	// Apply sorting
 	if query.SortBy != "" {
 		filteredData = s.applySorting(filteredData, query.SortBy, query.SortOrder)
 	} else if len(query.MultiSort) > 0 {
 		filteredData = s.applyMultiSorting(filteredData, query.MultiSort)
 	}
-	
+
 	// Calculate aggregates
 	aggregates := s.calculateAggregates(filteredData, query.Aggregates)
-	
+
 	// Apply pagination
 	paginatedData, totalPages := s.applyPagination(filteredData, query.Page, query.PageSize)
-	
+
 	queryTime := time.Since(startTime)
-	
+
 	response := &DataTableResponse{
 		Rows:         paginatedData,
 		TotalRows:    len(data),
@@ -184,7 +182,7 @@ func (s *DataTableService) ProcessQuery(ctx context.Context, data []DataTableRow
 		RequestID:    query.RequestID,
 		Timestamp:    time.Now(),
 	}
-	
+
 	return response, nil
 }
 
@@ -193,26 +191,26 @@ func (s *DataTableService) validateQuery(query DataTableQuery) error {
 	if query.Page < 1 {
 		return fmt.Errorf("page must be >= 1")
 	}
-	
+
 	if query.PageSize < 1 {
 		return fmt.Errorf("pageSize must be >= 1")
 	}
-	
+
 	if query.PageSize > s.MaxPageSize {
 		return fmt.Errorf("pageSize must be <= %d", s.MaxPageSize)
 	}
-	
+
 	if query.SortOrder != "" && query.SortOrder != SortAsc && query.SortOrder != SortDesc {
 		return fmt.Errorf("invalid sort order: %s", query.SortOrder)
 	}
-	
+
 	// Validate filter operators
 	for _, filter := range query.Filters {
 		if !s.isValidFilterOperator(filter.Operator) {
 			return fmt.Errorf("invalid filter operator: %s", filter.Operator)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -224,7 +222,7 @@ func (s *DataTableService) isValidFilterOperator(op FilterOperator) bool {
 		FilterLessThan, FilterLessEqual, FilterBetween, FilterIsNull,
 		FilterIsNotNull, FilterIn, FilterNotIn,
 	}
-	
+
 	for _, valid := range validOperators {
 		if op == valid {
 			return true
@@ -238,20 +236,20 @@ func (s *DataTableService) applySearch(data []DataTableRow, searchQuery string, 
 	if searchQuery == "" {
 		return data, nil
 	}
-	
+
 	searchQuery = strings.ToLower(strings.TrimSpace(searchQuery))
 	if len(searchQuery) < 2 { // Minimum search length
 		return data, nil
 	}
-	
+
 	var results []DataTableRow
-	
+
 	for _, row := range data {
 		if s.rowMatchesSearch(row, searchQuery, searchFields) {
 			results = append(results, row)
 		}
 	}
-	
+
 	return results, nil
 }
 
@@ -266,7 +264,7 @@ func (s *DataTableService) rowMatchesSearch(row DataTableRow, searchQuery string
 		}
 		return false
 	}
-	
+
 	// Search specific fields
 	for _, field := range searchFields {
 		if value, exists := row.Data[field]; exists {
@@ -275,7 +273,7 @@ func (s *DataTableService) rowMatchesSearch(row DataTableRow, searchQuery string
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -284,7 +282,7 @@ func (s *DataTableService) valueMatchesSearch(value any, searchQuery string) boo
 	if value == nil {
 		return false
 	}
-	
+
 	valueStr := strings.ToLower(fmt.Sprintf("%v", value))
 	return strings.Contains(valueStr, searchQuery)
 }
@@ -294,24 +292,24 @@ func (s *DataTableService) applyFilters(data []DataTableRow, filters []FilterCri
 	if len(filters) == 0 {
 		return data, nil
 	}
-	
+
 	var results []DataTableRow
-	
+
 	for _, row := range data {
 		matches := true
-		
+
 		for _, filter := range filters {
 			if !s.rowMatchesFilter(row, filter) {
 				matches = false
 				break
 			}
 		}
-		
+
 		if matches {
 			results = append(results, row)
 		}
 	}
-	
+
 	return results, nil
 }
 
@@ -321,57 +319,57 @@ func (s *DataTableService) rowMatchesFilter(row DataTableRow, filter FilterCrite
 	if !exists {
 		return filter.Operator == FilterIsNull
 	}
-	
+
 	switch filter.Operator {
 	case FilterEquals:
 		return s.compareValues(value, filter.Value) == 0
-		
+
 	case FilterNotEquals:
 		return s.compareValues(value, filter.Value) != 0
-		
+
 	case FilterContains:
 		return s.stringContains(value, filter.Value)
-		
+
 	case FilterNotContains:
 		return !s.stringContains(value, filter.Value)
-		
+
 	case FilterStartsWith:
 		return s.stringStartsWith(value, filter.Value)
-		
+
 	case FilterEndsWith:
 		return s.stringEndsWith(value, filter.Value)
-		
+
 	case FilterGreaterThan:
 		return s.compareValues(value, filter.Value) > 0
-		
+
 	case FilterGreaterEqual:
 		return s.compareValues(value, filter.Value) >= 0
-		
+
 	case FilterLessThan:
 		return s.compareValues(value, filter.Value) < 0
-		
+
 	case FilterLessEqual:
 		return s.compareValues(value, filter.Value) <= 0
-		
+
 	case FilterBetween:
 		if len(filter.Values) != 2 {
 			return false
 		}
 		return s.compareValues(value, filter.Values[0]) >= 0 &&
-			   s.compareValues(value, filter.Values[1]) <= 0
-			   
+			s.compareValues(value, filter.Values[1]) <= 0
+
 	case FilterIsNull:
 		return value == nil
-		
+
 	case FilterIsNotNull:
 		return value != nil
-		
+
 	case FilterIn:
 		return s.valueInSlice(value, filter.Values)
-		
+
 	case FilterNotIn:
 		return !s.valueInSlice(value, filter.Values)
-		
+
 	default:
 		return false
 	}
@@ -388,11 +386,11 @@ func (s *DataTableService) compareValues(a, b any) int {
 	if b == nil {
 		return 1
 	}
-	
+
 	// Try to compare as strings first
 	aStr := fmt.Sprintf("%v", a)
 	bStr := fmt.Sprintf("%v", b)
-	
+
 	// Try to parse as numbers
 	if aFloat, errA := strconv.ParseFloat(aStr, 64); errA == nil {
 		if bFloat, errB := strconv.ParseFloat(bStr, 64); errB == nil {
@@ -404,7 +402,7 @@ func (s *DataTableService) compareValues(a, b any) int {
 			return 0
 		}
 	}
-	
+
 	// Try to parse as time
 	if aTime, errA := time.Parse(time.RFC3339, aStr); errA == nil {
 		if bTime, errB := time.Parse(time.RFC3339, bStr); errB == nil {
@@ -416,7 +414,7 @@ func (s *DataTableService) compareValues(a, b any) int {
 			return 0
 		}
 	}
-	
+
 	// Fall back to string comparison
 	return strings.Compare(aStr, bStr)
 }
@@ -457,23 +455,23 @@ func (s *DataTableService) applySorting(data []DataTableRow, sortBy string, sort
 	if sortBy == "" {
 		return data
 	}
-	
+
 	// Make a copy to avoid modifying the original slice
 	sorted := make([]DataTableRow, len(data))
 	copy(sorted, data)
-	
+
 	sort.Slice(sorted, func(i, j int) bool {
 		valueI := sorted[i].Data[sortBy]
 		valueJ := sorted[j].Data[sortBy]
-		
+
 		comparison := s.compareValues(valueI, valueJ)
-		
+
 		if sortOrder == SortDesc {
 			return comparison > 0
 		}
 		return comparison < 0
 	})
-	
+
 	return sorted
 }
 
@@ -482,23 +480,23 @@ func (s *DataTableService) applyMultiSorting(data []DataTableRow, criteria []Sor
 	if len(criteria) == 0 {
 		return data
 	}
-	
+
 	// Sort criteria by priority
 	sort.Slice(criteria, func(i, j int) bool {
 		return criteria[i].Priority < criteria[j].Priority
 	})
-	
+
 	// Make a copy to avoid modifying the original slice
 	sorted := make([]DataTableRow, len(data))
 	copy(sorted, data)
-	
+
 	sort.Slice(sorted, func(i, j int) bool {
 		for _, criterion := range criteria {
 			valueI := sorted[i].Data[criterion.Column]
 			valueJ := sorted[j].Data[criterion.Column]
-			
+
 			comparison := s.compareValues(valueI, valueJ)
-			
+
 			if comparison != 0 {
 				if criterion.Direction == SortDesc {
 					return comparison > 0
@@ -508,24 +506,24 @@ func (s *DataTableService) applyMultiSorting(data []DataTableRow, criteria []Sor
 		}
 		return false // All criteria are equal
 	})
-	
+
 	return sorted
 }
 
 // calculateAggregates calculates aggregates for the data
 func (s *DataTableService) calculateAggregates(data []DataTableRow, aggregates []AggregateCriteria) map[string]any {
 	results := make(map[string]any)
-	
+
 	for _, agg := range aggregates {
 		key := agg.Column + "_" + agg.Function
 		if agg.Label != "" {
 			key = agg.Label
 		}
-		
+
 		switch agg.Function {
 		case "count":
 			results[key] = len(data)
-			
+
 		case "sum":
 			sum := 0.0
 			count := 0
@@ -538,7 +536,7 @@ func (s *DataTableService) calculateAggregates(data []DataTableRow, aggregates [
 				}
 			}
 			results[key] = sum
-			
+
 		case "avg":
 			sum := 0.0
 			count := 0
@@ -555,7 +553,7 @@ func (s *DataTableService) calculateAggregates(data []DataTableRow, aggregates [
 			} else {
 				results[key] = 0
 			}
-			
+
 		case "min":
 			var min *float64
 			for _, row := range data {
@@ -570,7 +568,7 @@ func (s *DataTableService) calculateAggregates(data []DataTableRow, aggregates [
 			if min != nil {
 				results[key] = *min
 			}
-			
+
 		case "max":
 			var max *float64
 			for _, row := range data {
@@ -587,7 +585,7 @@ func (s *DataTableService) calculateAggregates(data []DataTableRow, aggregates [
 			}
 		}
 	}
-	
+
 	return results
 }
 
@@ -615,22 +613,22 @@ func (s *DataTableService) toFloat(value any) (float64, error) {
 func (s *DataTableService) applyPagination(data []DataTableRow, page, pageSize int) ([]DataTableRow, int) {
 	totalRows := len(data)
 	totalPages := (totalRows + pageSize - 1) / pageSize
-	
+
 	if totalPages == 0 {
 		return []DataTableRow{}, 0
 	}
-	
+
 	if page > totalPages {
 		page = totalPages
 	}
-	
+
 	start := (page - 1) * pageSize
 	end := start + pageSize
-	
+
 	if end > totalRows {
 		end = totalRows
 	}
-	
+
 	return data[start:end], totalPages
 }
 
@@ -639,20 +637,20 @@ func BuildDataTableFromSchema(ctx context.Context, tableSchema *schema.Schema) (
 	if tableSchema == nil {
 		return nil, fmt.Errorf("schema cannot be nil")
 	}
-	
+
 	props := &DataTableProps{
 		ID:          tableSchema.ID,
 		Title:       tableSchema.Title,
 		Description: tableSchema.Description,
 		Columns:     []DataTableColumn{},
 		Rows:        []DataTableRow{},
-		
+
 		// Default configuration
 		Selectable:  true,
 		MultiSelect: true,
 		Sortable:    true,
 		Filterable:  true,
-		
+
 		// Search configuration
 		Search: DataTableSearch{
 			Enabled:     true,
@@ -660,7 +658,7 @@ func BuildDataTableFromSchema(ctx context.Context, tableSchema *schema.Schema) (
 			MinLength:   2,
 			Delay:       300,
 		},
-		
+
 		// Pagination configuration
 		Pagination: DataTablePagination{
 			Enabled:         true,
@@ -670,40 +668,40 @@ func BuildDataTableFromSchema(ctx context.Context, tableSchema *schema.Schema) (
 			ShowTotal:       true,
 			ShowPageSize:    true,
 		},
-		
+
 		// Export configuration
 		Export: DataTableExport{
 			Enabled: true,
 			Formats: []ExportFormat{ExportCSV, ExportExcel, ExportPDF},
 		},
 	}
-	
+
 	// Build columns from schema fields
 	for _, field := range tableSchema.Fields {
 		column := buildColumnFromField(field)
 		props.Columns = append(props.Columns, column)
 	}
-	
+
 	// Set up default actions
 	props.Actions = buildDefaultActions()
 	props.BulkActions = buildDefaultBulkActions()
 	props.RowActions = buildDefaultRowActions()
-	
+
 	return props, nil
 }
 
 // buildColumnFromField converts a schema field to a data table column
 func buildColumnFromField(field schema.Field) DataTableColumn {
 	column := DataTableColumn{
-		Key:          field.Name,
-		Title:        getFieldDisplayName(field),
-		Visible:      !field.Hidden,
-		Sortable:     field.Sortable,
-		Searchable:   field.Searchable,
-		Filterable:   true,
-		SchemaField:  &field,
+		Key:         field.Name,
+		Title:       getFieldDisplayName(field),
+		Visible:     !field.Hidden,
+		Sortable:    field.Sortable,
+		Searchable:  field.Searchable,
+		Filterable:  true,
+		SchemaField: &field,
 	}
-	
+
 	// Map field types to column types
 	switch field.Type {
 	case schema.FieldText, schema.FieldTextarea:
@@ -730,7 +728,7 @@ func buildColumnFromField(field schema.Field) DataTableColumn {
 	default:
 		column.Type = ColumnTypeText
 	}
-	
+
 	// Set column alignment based on type
 	switch column.Type {
 	case ColumnTypeNumber, ColumnTypeCurrency, ColumnTypePercent:
@@ -740,7 +738,7 @@ func buildColumnFromField(field schema.Field) DataTableColumn {
 	default:
 		column.Align = "left"
 	}
-	
+
 	return column
 }
 
@@ -755,10 +753,10 @@ func getFieldDisplayName(field schema.Field) string {
 // buildBadgeMapFromOptions creates a badge variant map from field options
 func buildBadgeMapFromOptions(options []schema.FieldOption) map[string]atoms.BadgeVariant {
 	badgeMap := make(map[string]atoms.BadgeVariant)
-	
+
 	for i, option := range options {
 		var variant atoms.BadgeVariant
-		
+
 		// Assign variants in a cycle
 		switch i % 4 {
 		case 0:
@@ -770,10 +768,10 @@ func buildBadgeMapFromOptions(options []schema.FieldOption) map[string]atoms.Bad
 		case 3:
 			variant = atoms.BadgeWarning
 		}
-		
+
 		badgeMap[option.Value] = variant
 	}
-	
+
 	return badgeMap
 }
 
@@ -783,8 +781,8 @@ func isImageField(field schema.Field) bool {
 	if field.Validation != nil {
 		// This is a simplified check - in practice you'd check MIME types, extensions, etc.
 		return strings.Contains(strings.ToLower(field.Name), "image") ||
-			   strings.Contains(strings.ToLower(field.Name), "photo") ||
-			   strings.Contains(strings.ToLower(field.Name), "avatar")
+			strings.Contains(strings.ToLower(field.Name), "photo") ||
+			strings.Contains(strings.ToLower(field.Name), "avatar")
 	}
 	return false
 }

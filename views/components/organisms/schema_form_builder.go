@@ -3,10 +3,10 @@ package organisms
 import (
 	"fmt"
 	"strings"
-	
+
 	"github.com/niiniyare/ruun/pkg/schema"
-	"github.com/niiniyare/ruun/views/components/molecules"
 	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
 	"github.com/niiniyare/ruun/views/components/utils"
 )
 
@@ -23,22 +23,22 @@ func NewSchemaFormBuilder(schema *schema.Schema) *SchemaFormBuilder {
 			Layout:             FormLayoutVertical,
 			Size:               FormSizeMD,
 			ValidationStrategy: "realtime",
-			AutoSave:          false,
-			AutoSaveInterval:  30,
-			ShowProgress:      false,
-			ShowSaveState:     true,
-			Locale:            "en",
-			Method:            "POST",
-			HXSwap:           "innerHTML",
-			ContentType:      "application/json",
+			AutoSave:           false,
+			AutoSaveInterval:   30,
+			ShowProgress:       false,
+			ShowSaveState:      true,
+			Locale:             "en",
+			Method:             "POST",
+			HXSwap:             "innerHTML",
+			ContentType:        "application/json",
 		},
 	}
-	
+
 	// Initialize from schema
 	if schema != nil {
 		builder.initializeFromSchema(schema)
 	}
-	
+
 	return builder
 }
 
@@ -47,7 +47,7 @@ func (b *SchemaFormBuilder) initializeFromSchema(s *schema.Schema) {
 	b.props.ID = s.ID
 	b.props.Title = s.Title
 	b.props.Description = s.Description
-	
+
 	if s.Config != nil {
 		b.props.SubmitURL = s.Config.Action
 		b.props.Method = utils.IfElse(s.Config.Method != "", s.Config.Method, "POST")
@@ -55,30 +55,30 @@ func (b *SchemaFormBuilder) initializeFromSchema(s *schema.Schema) {
 		b.props.ContentType = s.Config.Encoding
 		b.props.Headers = s.Config.Headers
 	}
-	
+
 	if s.Layout != nil {
 		b.props.Layout = mapSchemaLayoutToFormLayout(s.Layout.Type)
 		b.props.GridCols = s.Layout.Columns
 	}
-	
+
 	if s.Validation != nil {
 		b.props.ValidationStrategy = mapSchemaValidationStrategy(s.Validation)
 		if s.Validation.ServerURL != "" {
 			b.props.ValidationURL = s.Validation.ServerURL
 		}
 	}
-	
+
 	// Convert schema sections to form sections
 	if len(s.Children) > 0 {
 		b.props.Sections = b.convertSchemaChildrenToSections(s.Children)
 		b.props.ShowProgress = len(s.Children) > 1
 	}
-	
+
 	// Security configuration
 	if s.Security != nil && s.Security.CSRF != nil && s.Security.CSRF.Enabled {
 		b.props.CSRFField = s.Security.CSRF.FieldName
 	}
-	
+
 	// HTMX configuration
 	if s.HTMX != nil {
 		b.props.HXTarget = utils.IfElse(s.HTMX.Target != "", s.HTMX.Target, b.props.HXTarget)
@@ -228,10 +228,10 @@ func (b *SchemaFormBuilder) AddAction(action EnhancedFormAction) *SchemaFormBuil
 
 func (b *SchemaFormBuilder) AddSubmitAction(text string, variant atoms.ButtonVariant) *SchemaFormBuilder {
 	return b.AddAction(EnhancedFormAction{
-		ID:      "submit",
-		Type:    "submit",
-		Text:    text,
-		Variant: variant,
+		ID:       "submit",
+		Type:     "submit",
+		Text:     text,
+		Variant:  variant,
 		Position: "right",
 	})
 }
@@ -275,7 +275,7 @@ func (b *SchemaFormBuilder) Build() EnhancedFormProps {
 		b.AddCancelAction("Cancel")
 		b.AddSubmitAction("Submit", atoms.ButtonPrimary)
 	}
-	
+
 	return b.props
 }
 
@@ -288,7 +288,7 @@ func (b *SchemaFormBuilder) BuildAsTemplate() string {
 
 func (b *SchemaFormBuilder) convertSchemaChildrenToSections(children []schema.Schema) []EnhancedFormSection {
 	sections := make([]EnhancedFormSection, 0, len(children))
-	
+
 	for _, child := range children {
 		section := EnhancedFormSection{
 			ID:          child.ID,
@@ -298,7 +298,7 @@ func (b *SchemaFormBuilder) convertSchemaChildrenToSections(children []schema.Sc
 			Fields:      b.convertSchemaFieldsToFormFields(child.Fields),
 			Order:       len(sections) + 1,
 		}
-		
+
 		// Configure section layout
 		if child.Layout != nil {
 			section.Layout = mapSchemaLayoutToFormLayout(child.Layout.Type)
@@ -306,25 +306,25 @@ func (b *SchemaFormBuilder) convertSchemaChildrenToSections(children []schema.Sc
 			section.Collapsible = child.Layout.Collapsible
 			section.Collapsed = child.Layout.Collapsed
 		}
-		
+
 		sections = append(sections, section)
 	}
-	
+
 	return sections
 }
 
 func (b *SchemaFormBuilder) convertSchemaFieldsToFormFields(fields []schema.Field) []molecules.FormFieldProps {
 	formFields := make([]molecules.FormFieldProps, 0, len(fields))
-	
+
 	for _, field := range fields {
 		if field.Hidden {
 			continue
 		}
-		
+
 		formField := b.convertSchemaFieldToFormField(field)
 		formFields = append(formFields, formField)
 	}
-	
+
 	return formFields
 }
 
@@ -344,28 +344,28 @@ func (b *SchemaFormBuilder) convertSchemaFieldToFormField(field schema.Field) mo
 		Readonly:    field.Readonly,
 		FullWidth:   true,
 	}
-	
+
 	// Apply validation rules
 	if field.Validation != nil {
 		b.applySchemaValidationToFormField(&formField, field.Validation)
 	}
-	
+
 	// Apply field constraints
 	b.applySchemaConstraintsToFormField(&formField, field)
-	
+
 	// Apply styling and layout
 	if field.Style != nil {
 		formField.Class = field.Style.Class
 	}
-	
+
 	if field.Layout != nil {
 		formField.FullWidth = field.Layout.FullWidth
 	}
-	
+
 	// Handle field options
 	if len(field.Options) > 0 {
 		formField.Options = convertSchemaOptionsToFormOptions(field.Options)
-		
+
 		// Set default selection
 		for i, option := range field.Options {
 			if option.Default {
@@ -373,7 +373,7 @@ func (b *SchemaFormBuilder) convertSchemaFieldToFormField(field schema.Field) mo
 			}
 		}
 	}
-	
+
 	// Apply conditional logic
 	if field.Conditional != nil && len(field.Conditional.Rules) > 0 {
 		formField.Condition = b.buildConditionalExpression(field.Conditional.Rules)
@@ -381,18 +381,18 @@ func (b *SchemaFormBuilder) convertSchemaFieldToFormField(field schema.Field) mo
 		deps := b.extractConditionalDependencies(field.Conditional.Rules)
 		formField.Dependencies = deps
 	}
-	
+
 	// Add HTMX integration
 	b.applyHTMXIntegrationToFormField(&formField, field)
-	
-	// Add Alpine.js integration  
+
+	// Add Alpine.js integration
 	b.applyAlpineIntegrationToFormField(&formField, field)
-	
+
 	// Apply theme integration
 	formField.ThemeID = b.props.ThemeID
 	formField.TokenOverrides = b.props.TokenOverrides
 	formField.DarkMode = b.props.DarkMode
-	
+
 	return formField
 }
 
@@ -424,24 +424,24 @@ func mapSchemaValidationStrategy(validation *schema.Validation) string {
 
 func (b *SchemaFormBuilder) applySchemaValidationToFormField(formField *molecules.FormFieldProps, validation *schema.FieldValidation) {
 	formField.ValidationState = molecules.ValidationStateIdle
-	
+
 	// Add validation rules
 	if validation.Required {
 		formField.Required = true
 	}
-	
+
 	if validation.MinLength > 0 {
 		formField.MinLength = validation.MinLength
 	}
-	
+
 	if validation.MaxLength > 0 {
 		formField.MaxLength = validation.MaxLength
 	}
-	
+
 	if validation.Pattern != "" {
 		formField.Pattern = validation.Pattern
 	}
-	
+
 	// Set validation strategy
 	switch b.props.ValidationStrategy {
 	case "realtime":
@@ -450,7 +450,7 @@ func (b *SchemaFormBuilder) applySchemaValidationToFormField(formField *molecule
 	case "onblur":
 		// Will be handled in Alpine.js
 	}
-	
+
 	// Custom validation rules
 	if len(validation.Custom) > 0 {
 		rules := make([]molecules.ValidationRule, 0, len(validation.Custom))
@@ -505,7 +505,7 @@ func (b *SchemaFormBuilder) applySchemaConstraintsToFormField(formField *molecul
 			}
 		}
 	}
-	
+
 	// Apply autocomplete
 	if field.Config != nil {
 		if autocomplete, ok := field.Config["autocomplete"].(string); ok {
@@ -521,13 +521,13 @@ func (b *SchemaFormBuilder) applyHTMXIntegrationToFormField(formField *molecules
 		formField.HXTarget = fmt.Sprintf("#field-%s-feedback", field.Name)
 		formField.HXTrigger = "change, keyup delay:300ms"
 	}
-	
+
 	// Data source integration for dynamic options
 	if field.DataSource != nil && field.DataSource.URL != "" {
 		formField.HXGet = field.DataSource.URL
 		formField.HXTrigger = "load, search"
 	}
-	
+
 	// Field-specific HTMX configuration
 	if field.HTMX != nil {
 		if field.HTMX.Get != "" {
@@ -551,10 +551,10 @@ func (b *SchemaFormBuilder) applyHTMXIntegrationToFormField(formField *molecules
 func (b *SchemaFormBuilder) applyAlpineIntegrationToFormField(formField *molecules.FormFieldProps, field schema.Field) {
 	// Basic Alpine model binding
 	formField.AlpineModel = fmt.Sprintf("formData.%s", field.Name)
-	
+
 	// Field change handling
 	formField.AlpineChange = fmt.Sprintf("updateField('%s', $event.target.value)", field.Name)
-	
+
 	// Validation strategy integration
 	switch b.props.ValidationStrategy {
 	case "onblur":
@@ -562,7 +562,7 @@ func (b *SchemaFormBuilder) applyAlpineIntegrationToFormField(formField *molecul
 	case "realtime":
 		formField.AlpineInput = fmt.Sprintf("updateField('%s', $event.target.value)", field.Name)
 	}
-	
+
 	// Field-specific Alpine.js configuration
 	if field.Alpine != nil {
 		if field.Alpine.Model != "" {
@@ -592,27 +592,27 @@ func (b *SchemaFormBuilder) buildConditionalExpression(rules []schema.Conditiona
 	if len(rules) == 0 {
 		return ""
 	}
-	
+
 	expressions := make([]string, 0, len(rules))
-	
+
 	for _, rule := range rules {
 		expr := b.buildSingleConditionalExpression(rule)
 		if expr != "" {
 			expressions = append(expressions, expr)
 		}
 	}
-	
+
 	if len(expressions) == 0 {
 		return ""
 	}
-	
+
 	// Combine with AND logic by default
 	return strings.Join(expressions, " && ")
 }
 
 func (b *SchemaFormBuilder) buildSingleConditionalExpression(rule schema.ConditionalRule) string {
 	fieldRef := fmt.Sprintf("formData.%s", rule.Field)
-	
+
 	switch rule.Operator {
 	case "eq", "equals":
 		return fmt.Sprintf("%s === '%s'", fieldRef, rule.Value)
@@ -647,21 +647,21 @@ func (b *SchemaFormBuilder) buildSingleConditionalExpression(rule schema.Conditi
 	case "not_empty":
 		return fmt.Sprintf("%s && %s !== ''", fieldRef, fieldRef)
 	}
-	
+
 	return ""
 }
 
 func (b *SchemaFormBuilder) extractConditionalDependencies(rules []schema.ConditionalRule) []string {
 	deps := make([]string, 0, len(rules))
 	seen := make(map[string]bool)
-	
+
 	for _, rule := range rules {
 		if !seen[rule.Field] {
 			deps = append(deps, rule.Field)
 			seen[rule.Field] = true
 		}
 	}
-	
+
 	return deps
 }
 

@@ -27,6 +27,7 @@ func NewMockS3Client() *MockS3Client {
 		metadata: make(map[string]map[string]string),
 	}
 }
+
 func (m *MockS3Client) GetObject(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
 	key := aws.ToString(params.Key)
 	data, exists := m.objects[key]
@@ -37,6 +38,7 @@ func (m *MockS3Client) GetObject(ctx context.Context, params *s3.GetObjectInput,
 		Body: io.NopCloser(bytes.NewReader(data)),
 	}, nil
 }
+
 func (m *MockS3Client) PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
 	key := aws.ToString(params.Key)
 	data, err := io.ReadAll(params.Body)
@@ -51,12 +53,14 @@ func (m *MockS3Client) PutObject(ctx context.Context, params *s3.PutObjectInput,
 		ETag: aws.String("\"mock-etag\""),
 	}, nil
 }
+
 func (m *MockS3Client) DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
 	key := aws.ToString(params.Key)
 	delete(m.objects, key)
 	delete(m.metadata, key)
 	return &s3.DeleteObjectOutput{}, nil
 }
+
 func (m *MockS3Client) HeadObject(ctx context.Context, params *s3.HeadObjectInput, optFns ...func(*s3.Options)) (*s3.HeadObjectOutput, error) {
 	key := aws.ToString(params.Key)
 	data, exists := m.objects[key]
@@ -76,6 +80,7 @@ func (m *MockS3Client) HeadObject(ctx context.Context, params *s3.HeadObjectInpu
 		Metadata:      metadata,
 	}, nil
 }
+
 func (m *MockS3Client) ListObjectsV2(ctx context.Context, params *s3.ListObjectsV2Input, optFns ...func(*s3.Options)) (*s3.ListObjectsV2Output, error) {
 	prefix := aws.ToString(params.Prefix)
 	var contents []types.Object
@@ -94,6 +99,7 @@ func (m *MockS3Client) ListObjectsV2(ctx context.Context, params *s3.ListObjects
 		Contents: contents,
 	}, nil
 }
+
 func TestNewS3Storage(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -165,6 +171,7 @@ func TestNewS3Storage(t *testing.T) {
 		})
 	}
 }
+
 func TestS3Storage_SetAndGet(t *testing.T) {
 	// Since we can't easily mock the S3 client due to interface complexity,
 	// we'll test with a simple validation approach
@@ -226,6 +233,7 @@ func TestS3Storage_SetAndGet(t *testing.T) {
 		}
 	})
 }
+
 func TestS3Storage_KeyGeneration(t *testing.T) {
 	storage := &S3Storage{
 		bucket:    "test-bucket",
@@ -261,6 +269,7 @@ func TestS3Storage_KeyGeneration(t *testing.T) {
 		})
 	}
 }
+
 func TestS3Storage_Validation(t *testing.T) {
 	storage := &S3Storage{
 		bucket:    "test-bucket",
@@ -301,6 +310,7 @@ func TestS3Storage_Validation(t *testing.T) {
 		})
 	}
 }
+
 func TestS3Storage_Stats_Structure(t *testing.T) {
 	// Test the S3Stats structure
 	stats := &S3Stats{
@@ -323,6 +333,7 @@ func TestS3Storage_Stats_Structure(t *testing.T) {
 		t.Errorf("S3Stats.TotalSize = %v, want 1024", stats.TotalSize)
 	}
 }
+
 func TestS3ObjectInfo_Structure(t *testing.T) {
 	// Test the S3ObjectInfo structure
 	now := time.Now()
@@ -354,6 +365,7 @@ func TestS3ObjectInfo_Structure(t *testing.T) {
 		t.Errorf("S3ObjectInfo.Metadata[schema-id] = %v, want user.profile", info.Metadata["schema-id"])
 	}
 }
+
 func TestS3Storage_BatchOperations_Structure(t *testing.T) {
 	// Test that batch operations handle empty inputs correctly
 	storage := &S3Storage{
@@ -383,6 +395,7 @@ func TestS3Storage_BatchOperations_Structure(t *testing.T) {
 	_ = storage
 	_ = ctx
 }
+
 func TestS3Storage_Configuration(t *testing.T) {
 	// Test different prefix configurations
 	tests := []struct {
@@ -429,6 +442,7 @@ func TestS3Storage_Configuration(t *testing.T) {
 		})
 	}
 }
+
 func BenchmarkS3Storage_KeyGeneration(b *testing.B) {
 	storage := &S3Storage{
 		bucket:    "test-bucket",
@@ -440,12 +454,13 @@ func BenchmarkS3Storage_KeyGeneration(b *testing.B) {
 		"forms.user.registration",
 		"complex.nested.schema.with.many.parts",
 	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for i := 0; b.Loop(); i++ {
 		id := schemaIDs[i%len(schemaIDs)]
 		_ = storage.getKey(id)
 	}
 }
+
 func BenchmarkS3Storage_Validation(b *testing.B) {
 	schemaIDs := []string{
 		"user.profile",
@@ -453,8 +468,8 @@ func BenchmarkS3Storage_Validation(b *testing.B) {
 		"admin.dashboard",
 		"reports.monthly.sales",
 	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for i := 0; b.Loop(); i++ {
 		id := schemaIDs[i%len(schemaIDs)]
 		_ = validateSchemaID(id)
 	}

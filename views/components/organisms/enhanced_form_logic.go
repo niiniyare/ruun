@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	
+
 	"github.com/niiniyare/ruun/pkg/schema"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
@@ -90,7 +90,7 @@ func getSectionFieldsClasses(section EnhancedFormSection, formProps EnhancedForm
 		cols := utils.IfElse(section.Columns > 0, section.Columns, 2)
 		return fmt.Sprintf("grid gap-4 %s", getGridClasses(cols))
 	}
-	
+
 	switch section.Layout {
 	case "horizontal":
 		return "grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -132,16 +132,16 @@ func getEnhancedFormAlpineData(props EnhancedFormProps) string {
 	if initialData == nil {
 		initialData = make(map[string]any)
 	}
-	
+
 	initialDataJSON, _ := json.Marshal(initialData)
-	
+
 	sections := len(props.Sections)
 	if props.Schema != nil && len(props.Schema.Children) > 0 {
 		sections = len(props.Schema.Children)
 	}
-	
+
 	autoSaveInterval := utils.IfElse(props.AutoSaveInterval > 0, props.AutoSaveInterval, 30)
-	
+
 	return fmt.Sprintf(`{
 		// Core form state
 		formData: %s,
@@ -497,34 +497,34 @@ func convertSchemaFieldToFormField(field schema.Field, props EnhancedFormProps) 
 		Disabled:    props.ReadOnly || field.Disabled,
 		Readonly:    field.Readonly,
 	}
-	
+
 	// Add validation integration
 	if field.Validation != nil {
 		formField.ValidationState = molecules.ValidationStateIdle
 		formField.OnValidate = utils.IfElse(props.ValidationURL != "", props.ValidationURL, "")
 		formField.ValidationDebounce = 300
 	}
-	
+
 	// Add HTMX integration for real-time validation
 	if props.ValidationStrategy == "realtime" && props.ValidationURL != "" {
 		formField.HXPost = props.ValidationURL
 		formField.HXTarget = fmt.Sprintf("#field-%s-feedback", field.Name)
 		formField.HXTrigger = "change, keyup delay:300ms"
 	}
-	
+
 	// Add Alpine.js integration
 	formField.AlpineModel = fmt.Sprintf("formData.%s", field.Name)
 	formField.AlpineChange = fmt.Sprintf("updateField('%s', $event.target.value)", field.Name)
-	
+
 	if props.ValidationStrategy == "onblur" {
 		formField.AlpineBlur = fmt.Sprintf("validateField('%s')", field.Name)
 	}
-	
+
 	// Handle field options for select/radio/checkbox types
 	if len(field.Options) > 0 {
 		formField.Options = convertSchemaOptionsToFormOptions(field.Options)
 	}
-	
+
 	return enhanceFormFieldProps(formField, props)
 }
 
@@ -567,11 +567,11 @@ func getFieldValueFromData(fieldName string, data map[string]any) string {
 	if data == nil {
 		return ""
 	}
-	
+
 	if value, exists := data[fieldName]; exists && value != nil {
 		return fmt.Sprintf("%v", value)
 	}
-	
+
 	return ""
 }
 
@@ -597,28 +597,28 @@ func enhanceFormFieldProps(field molecules.FormFieldProps, formProps EnhancedFor
 	if formProps.ThemeID != "" {
 		field.ThemeID = formProps.ThemeID
 	}
-	
+
 	if formProps.TokenOverrides != nil {
 		field.TokenOverrides = formProps.TokenOverrides
 	}
-	
+
 	field.DarkMode = formProps.DarkMode
-	
+
 	// Apply form-level settings
 	if formProps.ReadOnly {
 		field.Disabled = true
 	}
-	
+
 	// Ensure validation integration
 	if field.ValidationState == "" {
 		field.ValidationState = molecules.ValidationStateIdle
 	}
-	
+
 	// Add form context to Alpine model
 	if field.AlpineModel == "" && field.Name != "" {
 		field.AlpineModel = fmt.Sprintf("formData.%s", field.Name)
 	}
-	
+
 	return field
 }
 
@@ -627,14 +627,14 @@ func enhanceFormFieldProps(field molecules.FormFieldProps, formProps EnhancedFor
 func getActionsByPosition(actions []EnhancedFormAction, position string) []EnhancedFormAction {
 	var filtered []EnhancedFormAction
 	defaultPosition := utils.IfElse(position == "right", "right", position)
-	
+
 	for _, action := range actions {
 		actionPosition := utils.IfElse(action.Position != "", action.Position, "right")
 		if actionPosition == defaultPosition {
 			filtered = append(filtered, action)
 		}
 	}
-	
+
 	return filtered
 }
 
@@ -667,7 +667,7 @@ func getActionClickHandler(action EnhancedFormAction, formProps EnhancedFormProp
 	if action.OnClick != "" {
 		return action.OnClick
 	}
-	
+
 	switch action.Type {
 	case "submit":
 		return "submitForm()"
