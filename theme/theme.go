@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Theme struct {
@@ -12,7 +14,7 @@ type Theme struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	Version     string `json:"version,omitempty" yaml:"version,omitempty"`
 	Author      string `json:"author,omitempty" yaml:"author,omitempty"`
-	
+
 	Tokens        *Tokens              `json:"tokens" yaml:"tokens"`
 	DarkMode      *DarkModeConfig      `json:"darkMode,omitempty" yaml:"darkMode,omitempty"`
 	Conditions    []*Condition         `json:"conditions,omitempty" yaml:"conditions,omitempty"`
@@ -20,16 +22,16 @@ type Theme struct {
 	CustomCSS     string               `json:"customCSS,omitempty" yaml:"customCSS,omitempty"`
 	CustomJS      string               `json:"customJS,omitempty" yaml:"customJS,omitempty"`
 	Metadata      *ThemeMetadata       `json:"metadata,omitempty" yaml:"metadata,omitempty"`
-	
+
 	createdAt time.Time
 	updatedAt time.Time
 }
 
 type DarkModeConfig struct {
-	Enabled    bool     `json:"enabled" yaml:"enabled"`
-	Default    bool     `json:"default,omitempty" yaml:"default,omitempty"`
-	Strategy   string   `json:"strategy,omitempty" yaml:"strategy,omitempty"`
-	DarkTokens *Tokens  `json:"darkTokens,omitempty" yaml:"darkTokens,omitempty"`
+	Enabled    bool    `json:"enabled" yaml:"enabled"`
+	Default    bool    `json:"default,omitempty" yaml:"default,omitempty"`
+	Strategy   string  `json:"strategy,omitempty" yaml:"strategy,omitempty"`
+	DarkTokens *Tokens `json:"darkTokens,omitempty" yaml:"darkTokens,omitempty"`
 }
 
 type Condition struct {
@@ -53,14 +55,14 @@ type AccessibilityConfig struct {
 }
 
 type ThemeMetadata struct {
-	Tags       []string               `json:"tags,omitempty" yaml:"tags,omitempty"`
-	License    string                 `json:"license,omitempty" yaml:"license,omitempty"`
-	Repository string                 `json:"repository,omitempty" yaml:"repository,omitempty"`
-	Homepage   string                 `json:"homepage,omitempty" yaml:"homepage,omitempty"`
-	Preview    string                 `json:"preview,omitempty" yaml:"preview,omitempty"`
-	CustomData map[string]interface{} `json:"customData,omitempty" yaml:"customData,omitempty"`
-	CreatedAt  time.Time              `json:"createdAt,omitempty" yaml:"createdAt,omitempty"`
-	UpdatedAt  time.Time              `json:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
+	Tags       []string       `json:"tags,omitempty" yaml:"tags,omitempty"`
+	License    string         `json:"license,omitempty" yaml:"license,omitempty"`
+	Repository string         `json:"repository,omitempty" yaml:"repository,omitempty"`
+	Homepage   string         `json:"homepage,omitempty" yaml:"homepage,omitempty"`
+	Preview    string         `json:"preview,omitempty" yaml:"preview,omitempty"`
+	CustomData map[string]any `json:"customData,omitempty" yaml:"customData,omitempty"`
+	CreatedAt  time.Time      `json:"createdAt" yaml:"createdAt,omitempty"`
+	UpdatedAt  time.Time      `json:"updatedAt" yaml:"updatedAt,omitempty"`
 }
 
 func (t *Theme) Validate() error {
@@ -73,30 +75,30 @@ func (t *Theme) Validate() error {
 	if t.Tokens == nil {
 		return NewError(ErrCodeValidation, "theme tokens cannot be nil")
 	}
-	
+
 	if err := t.Tokens.Validate(); err != nil {
 		return WrapError(ErrCodeValidation, "invalid tokens", err)
 	}
-	
+
 	if t.DarkMode != nil {
 		if err := t.DarkMode.Validate(); err != nil {
 			return WrapError(ErrCodeValidation, "invalid dark mode", err)
 		}
 	}
-	
+
 	for i, cond := range t.Conditions {
 		if err := cond.Validate(); err != nil {
 			return WrapError(ErrCodeValidation,
 				fmt.Sprintf("invalid condition %d (%s)", i, cond.ID), err)
 		}
 	}
-	
+
 	if t.Accessibility != nil {
 		if err := t.Accessibility.Validate(); err != nil {
 			return WrapError(ErrCodeValidation, "invalid accessibility", err)
 		}
 	}
-	
+
 	const maxCustomCodeSize = 1 << 20
 	if len(t.CustomCSS) > maxCustomCodeSize {
 		return NewErrorf(ErrCodeValidation,
@@ -106,7 +108,7 @@ func (t *Theme) Validate() error {
 		return NewErrorf(ErrCodeValidation,
 			"custom JS exceeds maximum size of %d bytes", maxCustomCodeSize)
 	}
-	
+
 	return nil
 }
 
@@ -114,7 +116,7 @@ func (d *DarkModeConfig) Validate() error {
 	if d == nil {
 		return nil
 	}
-	
+
 	if d.Strategy != "" {
 		validStrategies := map[string]bool{
 			"class": true,
@@ -126,13 +128,13 @@ func (d *DarkModeConfig) Validate() error {
 				"invalid dark mode strategy: %s (must be class, media, or auto)", d.Strategy)
 		}
 	}
-	
+
 	if d.DarkTokens != nil {
 		if err := d.DarkTokens.Validate(); err != nil {
 			return WrapError(ErrCodeValidation, "invalid dark tokens", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -146,7 +148,7 @@ func (c *Condition) Validate() error {
 	if c.Overrides == nil || len(c.Overrides) == 0 {
 		return NewError(ErrCodeValidation, "overrides cannot be empty")
 	}
-	
+
 	for path, value := range c.Overrides {
 		if path == "" {
 			return NewError(ErrCodeValidation, "override path cannot be empty")
@@ -157,7 +159,7 @@ func (c *Condition) Validate() error {
 				fmt.Sprintf("invalid override value for '%s'", path), err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -165,12 +167,12 @@ func (a *AccessibilityConfig) Validate() error {
 	if a == nil {
 		return nil
 	}
-	
+
 	if a.MinContrastRatio < 0 || a.MinContrastRatio > 21 {
 		return NewErrorf(ErrCodeValidation,
 			"contrast ratio must be between 0 and 21, got: %f", a.MinContrastRatio)
 	}
-	
+
 	if a.AriaLive != "" {
 		validValues := map[string]bool{
 			"off":       true,
@@ -182,15 +184,30 @@ func (a *AccessibilityConfig) Validate() error {
 				"invalid ARIA live value: %s (must be off, polite, or assertive)", a.AriaLive)
 		}
 	}
-	
+
 	return nil
+}
+
+func (t *Theme) ToYAML() ([]byte, error) {
+	return yaml.Marshal(t)
+}
+
+func ThemeFromYAML(data []byte) (*Theme, error) {
+	var theme Theme
+	if err := yaml.Unmarshal(data, &theme); err != nil {
+		return nil, WrapError(ErrCodeValidation, "failed to parse theme YAML", err)
+	}
+	if err := theme.Validate(); err != nil {
+		return nil, WrapError(ErrCodeValidation, "invalid theme", err)
+	}
+	return &theme, nil
 }
 
 func (t *Theme) Clone() *Theme {
 	if t == nil {
 		return nil
 	}
-	
+
 	cloned := &Theme{
 		ID:          t.ID,
 		Name:        t.Name,
@@ -202,7 +219,7 @@ func (t *Theme) Clone() *Theme {
 		createdAt:   t.createdAt,
 		updatedAt:   t.updatedAt,
 	}
-	
+
 	if t.Tokens != nil {
 		cloned.Tokens = t.Tokens.Clone()
 	}
@@ -221,7 +238,7 @@ func (t *Theme) Clone() *Theme {
 			cloned.Conditions[i] = cond.Clone()
 		}
 	}
-	
+
 	return cloned
 }
 

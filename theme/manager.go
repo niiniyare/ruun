@@ -289,6 +289,23 @@ func (m *Manager) GetStats() *ManagerStats {
 	}
 }
 
+func (m *Manager) WarmCache(ctx context.Context, themeIDs []string) error {
+	for _, themeID := range themeIDs {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		// Preload theme
+		_, err := m.GetTheme(ctx, themeID, nil)
+		if err != nil {
+			return fmt.Errorf("failed to warm cache for theme %s: %w", themeID, err)
+		}
+	}
+	return nil
+}
+
 // loadTheme loads a theme from memory or storage.
 func (m *Manager) loadTheme(ctx context.Context, themeID string) (*Theme, error) {
 	m.mu.RLock()
