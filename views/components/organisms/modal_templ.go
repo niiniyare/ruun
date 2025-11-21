@@ -797,7 +797,7 @@ func getDefaultModalAlpineData(props ModalProps) string {
 	}`
 }
 
-func getHeaderIconClasses(variant ModalVariant) string {
+func getBasicHeaderIconClasses(variant ModalVariant) string {
 	switch variant {
 	case ModalDestructive:
 		return "text-destructive"
@@ -810,7 +810,7 @@ func getHeaderIconClasses(variant ModalVariant) string {
 	}
 }
 
-func getHeaderTitleClasses(variant ModalVariant) string {
+func getBasicHeaderTitleClasses(variant ModalVariant) string {
 	classes := []string{"text-lg", "font-semibold"}
 
 	switch variant {

@@ -98,10 +98,10 @@ type WorkflowProvider interface {
 
 // ModalPermissionProvider interface for permission-based modal access
 type ModalPermissionProvider interface {
-	CanOpenModal(ctx context.Context, user *User, modalType string, entityID string) bool
-	CanPerformAction(ctx context.Context, user *User, modalID string, action string) bool
-	GetVisibleActions(ctx context.Context, user *User, actions []EnhancedModalAction) ([]EnhancedModalAction, error)
-	ValidateSecureAccess(ctx context.Context, user *User, modalProps *EnhancedModalProps) error
+	CanOpenModal(ctx context.Context, user *ModalUser, modalType string, entityID string) bool
+	CanPerformAction(ctx context.Context, user *ModalUser, modalID string, action string) bool
+	GetVisibleActions(ctx context.Context, user *ModalUser, actions []EnhancedModalAction) ([]EnhancedModalAction, error)
+	ValidateSecureAccess(ctx context.Context, user *ModalUser, modalProps *EnhancedModalProps) error
 }
 
 // CacheProvider interface for caching modal data
@@ -291,8 +291,8 @@ type WorkflowState struct {
 	Metadata  map[string]any `json:"metadata"`
 }
 
-// User represents the current user (referenced from navigation logic)
-type User struct {
+// ModalUser represents the current user for modal contexts
+type ModalUser struct {
 	ID          string   `json:"id"`
 	Username    string   `json:"username"`
 	Email       string   `json:"email"`
@@ -767,8 +767,8 @@ func (s *ModalService) cancelPendingUploads(ctx context.Context, modalID string)
 	// Implementation would cancel pending uploads
 }
 
-func getUserFromContext(ctx context.Context) *User {
-	if user, ok := ctx.Value("user").(*User); ok {
+func getUserFromContext(ctx context.Context) *ModalUser {
+	if user, ok := ctx.Value("user").(*ModalUser); ok {
 		return user
 	}
 	return nil
@@ -1090,7 +1090,7 @@ func getStepIconContainerClasses(step EnhancedModalStep, index int, props Enhanc
 
 // Action helper functions
 
-func getActionsByPosition(actions []EnhancedModalAction, position string) []EnhancedModalAction {
+func getModalActionsByPosition(actions []EnhancedModalAction, position string) []EnhancedModalAction {
 	var filtered []EnhancedModalAction
 	for _, action := range actions {
 		actionPosition := utils.IfElse(action.Position != "", action.Position, "right")
@@ -1262,7 +1262,7 @@ func getModalShowExpression(props EnhancedModalProps) string {
 }
 
 // Header icon classes based on variant
-func getHeaderIconClasses(variant EnhancedModalVariant) string {
+func getEnhancedHeaderIconClasses(variant EnhancedModalVariant) string {
 	switch variant {
 	case EnhancedModalDestructive:
 		return "text-destructive"
@@ -1278,7 +1278,7 @@ func getHeaderIconClasses(variant EnhancedModalVariant) string {
 }
 
 // Header title classes based on variant
-func getHeaderTitleClasses(variant EnhancedModalVariant) string {
+func getEnhancedHeaderTitleClasses(variant EnhancedModalVariant) string {
 	classes := []string{"text-lg", "font-semibold"}
 
 	switch variant {

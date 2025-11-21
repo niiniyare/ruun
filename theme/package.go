@@ -286,7 +286,7 @@ func GenerateThemeBundle(ctx context.Context, bundle *ThemeSystemBundle, themeID
 	}, nil
 }
 
-// ExportThemeBundle exports a theme bundle for a tenant
+// ExportTenantThemeBundle exports a theme bundle for a tenant
 func ExportTenantThemeBundle(ctx context.Context, bundle *MultiTenantBundle, tenantID, themeID string) (*ThemeBundle, error) {
 	// Get tenant theme
 	compiled, err := bundle.TenantManager.GetTenantTheme(ctx, tenantID, nil)
@@ -336,7 +336,7 @@ func PreloadThemes(ctx context.Context, manager *Manager, themeIDs []string) err
 	return nil
 }
 
-// CloseBundle closes all components in the bundle
+// Close closes all components in the bundle
 func (tsb *ThemeSystemBundle) Close() error {
 	var errs []error
 
@@ -357,7 +357,7 @@ func (tsb *ThemeSystemBundle) Close() error {
 	return nil
 }
 
-// CloseMultiTenantBundle closes all components in the multi-tenant bundle
+// Close closes all components in the multi-tenant bundle
 func (mtb *MultiTenantBundle) Close() error {
 	return mtb.ThemeSystemBundle.Close()
 }

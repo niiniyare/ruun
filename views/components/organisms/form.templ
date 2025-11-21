@@ -187,8 +187,8 @@ func getProgressStyle(totalSteps int) string {
 	return "`width: ${(currentStep / " + strconv.Itoa(totalSteps) + ") * 100}%`"
 }
 
-// getSectionAlpineData generates Alpine data for collapsible sections
-func getSectionAlpineData(collapsed bool) string {
+// getBasicSectionAlpineData generates Alpine data for collapsible sections  
+func getBasicSectionAlpineData(collapsed bool) string {
 	if collapsed {
 		return "{ open: false }"
 	}
@@ -200,8 +200,8 @@ func getStepShowExpression(stepNumber int) string {
 	return "currentStep === " + strconv.Itoa(stepNumber)
 }
 
-// getSectionClasses generates classes for form sections
-func getSectionClasses(sectionClass string) string {
+// getBasicSectionClasses generates classes for form sections
+func getBasicSectionClasses(sectionClass string) string {
 	return "space-y-4 " + sectionClass
 }
 
@@ -317,9 +317,9 @@ templ formSection(section FormSection, stepNumber int, formProps FormProps) {
 		if section.ID != "" {
 			id={ section.ID }
 		}
-		class={ getSectionClasses(section.Class) }
+		class={ getBasicSectionClasses(section.Class) }
 		if section.Collapsible {
-			x-data={ getSectionAlpineData(section.Collapsed) }
+			x-data={ getBasicSectionAlpineData(section.Collapsed) }
 		}
 		if formProps.ShowProgress {
 			x-show={ getStepShowExpression(stepNumber) }
@@ -354,7 +354,7 @@ templ formSection(section FormSection, stepNumber int, formProps FormProps) {
 
 		// Section fields
 		<div
-			class={ getSectionFieldsClasses(formProps) }
+			class={ getBasicSectionFieldsClasses(formProps) }
 			if section.Collapsible {
 				x-show="open"
 				x-transition
@@ -367,8 +367,8 @@ templ formSection(section FormSection, stepNumber int, formProps FormProps) {
 	</div>
 }
 
-// getSectionFieldsClasses returns classes for section fields based on form layout
-func getSectionFieldsClasses(props FormProps) string {
+// getBasicSectionFieldsClasses returns classes for section fields based on form layout
+func getBasicSectionFieldsClasses(props FormProps) string {
 	switch props.Layout {
 	case FormLayoutGrid:
 		if props.GridCols > 2 {

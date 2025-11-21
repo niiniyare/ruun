@@ -947,7 +947,7 @@ func renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, form
 			templ_7745c5c3_Var34 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var35 = []any{getSectionClasses(section, formProps)}
+		var templ_7745c5c3_Var35 = []any{getEnhancedSectionClasses(section, formProps)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var35...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -998,9 +998,9 @@ func renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, form
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var38 string
-			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(getSectionAlpineData(section))
+			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(getEnhancedSectionAlpineData(section))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 370, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 370, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
@@ -1144,7 +1144,7 @@ func renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, form
 				return templ_7745c5c3_Err
 			}
 		}
-		var templ_7745c5c3_Var43 = []any{getSectionFieldsClasses(section, formProps)}
+		var templ_7745c5c3_Var43 = []any{getEnhancedSectionFieldsClasses(section, formProps)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var43...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -1234,7 +1234,7 @@ func renderFormActions(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, action := range getActionsByPosition(props.Actions, "left") {
+		for _, action := range getFormActionsByPosition(props.Actions, "left") {
 			templ_7745c5c3_Err = renderEnhancedFormAction(action, props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1244,7 +1244,7 @@ func renderFormActions(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, action := range getActionsByPosition(props.Actions, "center") {
+		for _, action := range getFormActionsByPosition(props.Actions, "center") {
 			templ_7745c5c3_Err = renderEnhancedFormAction(action, props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1254,13 +1254,13 @@ func renderFormActions(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, action := range getActionsByPosition(props.Actions, "right") {
+		for _, action := range getFormActionsByPosition(props.Actions, "right") {
 			templ_7745c5c3_Err = renderEnhancedFormAction(action, props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if len(getActionsByPosition(props.Actions, "right")) == 0 && len(props.Actions) == 0 {
+		if len(getFormActionsByPosition(props.Actions, "right")) == 0 && len(props.Actions) == 0 {
 			templ_7745c5c3_Err = renderDefaultFormActions(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

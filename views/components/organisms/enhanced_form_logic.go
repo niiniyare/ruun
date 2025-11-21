@@ -75,7 +75,7 @@ func getDirectFieldsClasses(props EnhancedFormProps) string {
 	}
 }
 
-func getSectionClasses(section EnhancedFormSection, formProps EnhancedFormProps) string {
+func getEnhancedSectionClasses(section EnhancedFormSection, formProps EnhancedFormProps) string {
 	return utils.TwMerge(
 		"form-section",
 		"p-6 bg-card rounded-lg border",
@@ -85,7 +85,7 @@ func getSectionClasses(section EnhancedFormSection, formProps EnhancedFormProps)
 	)
 }
 
-func getSectionFieldsClasses(section EnhancedFormSection, formProps EnhancedFormProps) string {
+func getEnhancedSectionFieldsClasses(section EnhancedFormSection, formProps EnhancedFormProps) string {
 	if section.Layout == "grid" || (section.Layout == "" && formProps.Layout == FormLayoutGrid) {
 		cols := utils.IfElse(section.Columns > 0, section.Columns, 2)
 		return fmt.Sprintf("grid gap-4 %s", getGridClasses(cols))
@@ -473,7 +473,7 @@ func getSchemaVersion(props EnhancedFormProps) string {
 
 // Section management functions
 
-func getSectionAlpineData(section EnhancedFormSection) string {
+func getEnhancedSectionAlpineData(section EnhancedFormSection) string {
 	return fmt.Sprintf(`{
 		collapsed: %s,
 		toggleSection() {
@@ -522,7 +522,7 @@ func convertSchemaFieldToFormField(field schema.Field, props EnhancedFormProps) 
 
 	// Handle field options for select/radio/checkbox types
 	if len(field.Options) > 0 {
-		formField.Options = convertSchemaOptionsToFormOptions(field.Options)
+		formField.Options = convertEnhancedSchemaOptionsToFormOptions(field.Options)
 	}
 
 	return enhanceFormFieldProps(formField, props)
@@ -575,7 +575,7 @@ func getFieldValueFromData(fieldName string, data map[string]any) string {
 	return ""
 }
 
-func convertSchemaOptionsToFormOptions(options []schema.FieldOption) []molecules.SelectOption {
+func convertEnhancedSchemaOptionsToFormOptions(options []schema.FieldOption) []molecules.SelectOption {
 	formOptions := make([]molecules.SelectOption, len(options))
 	for i, option := range options {
 		formOptions[i] = molecules.SelectOption{
@@ -624,7 +624,7 @@ func enhanceFormFieldProps(field molecules.FormFieldProps, formProps EnhancedFor
 
 // Action management functions
 
-func getActionsByPosition(actions []EnhancedFormAction, position string) []EnhancedFormAction {
+func getFormActionsByPosition(actions []EnhancedFormAction, position string) []EnhancedFormAction {
 	var filtered []EnhancedFormAction
 	defaultPosition := utils.IfElse(position == "right", "right", position)
 

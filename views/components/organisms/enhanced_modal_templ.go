@@ -1049,7 +1049,7 @@ func enhancedModalHeader(props EnhancedModalProps) templ.Component {
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 				Name:  props.Icon,
 				Size:  atoms.IconSizeLG,
-				Class: getHeaderIconClasses(props.Variant),
+				Class: getEnhancedHeaderIconClasses(props.Variant),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1064,7 +1064,7 @@ func enhancedModalHeader(props EnhancedModalProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if props.Title != "" {
-			var templ_7745c5c3_Var33 = []any{getHeaderTitleClasses(props.Variant)}
+			var templ_7745c5c3_Var33 = []any{getEnhancedHeaderTitleClasses(props.Variant)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var33...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2121,7 +2121,7 @@ func enhancedModalFooter(props EnhancedModalProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, action := range getActionsByPosition(props.Actions, "left") {
+		for _, action := range getModalActionsByPosition(props.Actions, "left") {
 			templ_7745c5c3_Err = enhancedModalAction(action, props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2167,13 +2167,13 @@ func enhancedModalFooter(props EnhancedModalProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		for _, action := range getActionsByPosition(props.Actions, "center") {
+		for _, action := range getModalActionsByPosition(props.Actions, "center") {
 			templ_7745c5c3_Err = enhancedModalAction(action, props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		for _, action := range getActionsByPosition(props.Actions, "right") {
+		for _, action := range getModalActionsByPosition(props.Actions, "right") {
 			templ_7745c5c3_Err = enhancedModalAction(action, props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

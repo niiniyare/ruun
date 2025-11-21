@@ -45,7 +45,7 @@ type NavigationConfig struct {
 	EnableReordering    bool `json:"enableReordering"`
 
 	// Search configuration
-	SearchConfig SearchConfig `json:"searchConfig"`
+	SearchConfig NavigationSearchConfig `json:"searchConfig"`
 
 	// Responsive behavior
 	ResponsiveConfig ResponsiveConfig `json:"responsiveConfig"`
@@ -54,7 +54,7 @@ type NavigationConfig struct {
 	ThemeConfig ThemeConfig `json:"themeConfig"`
 
 	// Animation configuration
-	AnimationConfig AnimationConfig `json:"animationConfig"`
+	AnimationConfig NavigationAnimationConfig `json:"animationConfig"`
 
 	// Security configuration
 	SecurityConfig SecurityConfig `json:"securityConfig"`
@@ -116,7 +116,7 @@ type NavigationMenuItem struct {
 	Image       string       `json:"image,omitempty"`
 
 	// Visual properties
-	Badge BadgeConfig `json:"badge,omitempty"`
+	Badge NavigationBadgeConfig `json:"badge,omitempty"`
 	Color string      `json:"color,omitempty"`
 	Order int         `json:"order"`
 	Group string      `json:"group,omitempty"`
@@ -173,8 +173,8 @@ const (
 	MenuItemLanguage MenuItemType = "language"
 )
 
-// BadgeConfig configures item badges
-type BadgeConfig struct {
+// NavigationBadgeConfig configures item badges for navigation
+type NavigationBadgeConfig struct {
 	Text     string             `json:"text,omitempty"`
 	Count    int                `json:"count,omitempty"`
 	Variant  atoms.BadgeVariant `json:"variant"`
@@ -233,8 +233,8 @@ type NavigationPermission struct {
 	Conditions  []string `json:"conditions"` // additional conditions
 }
 
-// SearchConfig configures navigation search
-type SearchConfig struct {
+// NavigationSearchConfig configures navigation search
+type NavigationSearchConfig struct {
 	Enabled       bool     `json:"enabled"`
 	Placeholder   string   `json:"placeholder"`
 	MinLength     int      `json:"minLength"`
@@ -331,8 +331,8 @@ type ThemeAnimations struct {
 	Delay    string `json:"delay"`
 }
 
-// AnimationConfig configures animations
-type AnimationConfig struct {
+// NavigationAnimationConfig configures animations for navigation
+type NavigationAnimationConfig struct {
 	Enabled       bool   `json:"enabled"`
 	Duration      string `json:"duration"`
 	Easing        string `json:"easing"`
@@ -408,7 +408,7 @@ func getDefaultNavigationConfig() *NavigationConfig {
 		EnableCollapsible:   true,
 		EnableReordering:    false,
 
-		SearchConfig: SearchConfig{
+		NavigationSearchConfig: NavigationSearchConfig{
 			Enabled:       true,
 			Placeholder:   "Search navigation...",
 			MinLength:     2,
@@ -438,7 +438,7 @@ func getDefaultNavigationConfig() *NavigationConfig {
 			SystemTheme:  true,
 		},
 
-		AnimationConfig: AnimationConfig{
+		NavigationAnimationConfig: NavigationAnimationConfig{
 			Enabled:       true,
 			Duration:      "200ms",
 			Easing:        "ease-in-out",
@@ -727,7 +727,7 @@ func (b *NavigationSchemaBuilder) generateItemsFromSchema(ctx context.Context) (
 				if b.shouldIncludeFieldInNav(field) {
 					subItem := NavigationItem{
 						ID:   fmt.Sprintf("%s_%s", child.ID, field.Name),
-						Text: getFieldDisplayName(field),
+						Text: getNavigationFieldDisplayName(field),
 						URL:  fmt.Sprintf("/%s/%s", strings.ToLower(child.ID), field.Name),
 						Icon: b.getFieldIcon(field),
 					}
@@ -743,7 +743,7 @@ func (b *NavigationSchemaBuilder) generateItemsFromSchema(ctx context.Context) (
 			if b.shouldIncludeFieldInNav(field) {
 				item := NavigationItem{
 					ID:   field.Name,
-					Text: getFieldDisplayName(field),
+					Text: getNavigationFieldDisplayName(field),
 					URL:  fmt.Sprintf("/%s", field.Name),
 					Icon: b.getFieldIcon(field),
 				}
@@ -839,7 +839,7 @@ func (b *NavigationSchemaBuilder) buildNavigationClasses() string {
 	if b.config.EnableCollapsible {
 		classes = append(classes, "nav-collapsible")
 	}
-	if b.config.AnimationConfig.Enabled {
+	if b.config.NavigationAnimationConfig.Enabled {
 		classes = append(classes, "nav-animated")
 	}
 
@@ -849,9 +849,9 @@ func (b *NavigationSchemaBuilder) buildNavigationClasses() string {
 func (b *NavigationSchemaBuilder) buildAlpineData() string {
 	config := map[string]any{
 		"searchEnabled":    b.config.EnableSearch,
-		"searchMinLength":  b.config.SearchConfig.MinLength,
-		"searchDebounce":   b.config.SearchConfig.Debounce,
-		"animationEnabled": b.config.AnimationConfig.Enabled,
+		"searchMinLength":  b.config.NavigationSearchConfig.MinLength,
+		"searchDebounce":   b.config.NavigationSearchConfig.Debounce,
+		"animationEnabled": b.config.NavigationAnimationConfig.Enabled,
 		"responsive":       b.config.ResponsiveConfig,
 		"themes":           b.themes,
 		"currentTheme":     b.config.ThemeConfig.DefaultTheme,
@@ -992,7 +992,7 @@ func getSchemaDisplayName(schema *schema.Schema) string {
 	return strings.Title(strings.ReplaceAll(schema.ID, "_", " "))
 }
 
-func getFieldDisplayName(field schema.Field) string {
+func getNavigationFieldDisplayName(field schema.Field) string {
 	if field.Label != "" {
 		return field.Label
 	}
@@ -1032,15 +1032,15 @@ func (item *NavigationMenuItem) FromJSON(data []byte) error {
 
 // Validate validates the navigation configuration
 func (config *NavigationConfig) Validate() error {
-	if config.SearchConfig.MinLength < 1 {
+	if config.NavigationSearchConfig.MinLength < 1 {
 		return fmt.Errorf("searchConfig.minLength must be at least 1")
 	}
 
-	if config.SearchConfig.MaxResults < 1 {
+	if config.NavigationSearchConfig.MaxResults < 1 {
 		return fmt.Errorf("searchConfig.maxResults must be at least 1")
 	}
 
-	if config.SearchConfig.Debounce < 0 {
+	if config.NavigationSearchConfig.Debounce < 0 {
 		return fmt.Errorf("searchConfig.debounce must be non-negative")
 	}
 

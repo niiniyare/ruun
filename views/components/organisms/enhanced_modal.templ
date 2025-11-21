@@ -458,7 +458,7 @@ templ enhancedModalHeader(props EnhancedModalProps) {
 						@atoms.Icon(atoms.IconProps{
 							Name:  props.Icon,
 							Size:  atoms.IconSizeLG,
-							Class: getHeaderIconClasses(props.Variant),
+							Class: getEnhancedHeaderIconClasses(props.Variant),
 						})
 					</div>
 				}
@@ -466,7 +466,7 @@ templ enhancedModalHeader(props EnhancedModalProps) {
 				// Header content
 				<div class="space-y-1 flex-1 min-w-0">
 					if props.Title != "" {
-						<h2 class={ getHeaderTitleClasses(props.Variant) }>
+						<h2 class={ getEnhancedHeaderTitleClasses(props.Variant) }>
 							{ props.Title }
 						</h2>
 					}
@@ -874,7 +874,7 @@ templ enhancedModalFooter(props EnhancedModalProps) {
 	<div class={ getEnhancedModalFooterClasses(props) }>
 		// Left side actions
 		<div class="flex items-center gap-2">
-			for _, action := range getActionsByPosition(props.Actions, "left") {
+			for _, action := range getModalActionsByPosition(props.Actions, "left") {
 				@enhancedModalAction(action, props)
 			}
 			
@@ -918,12 +918,12 @@ templ enhancedModalFooter(props EnhancedModalProps) {
 			}
 			
 			// Center actions
-			for _, action := range getActionsByPosition(props.Actions, "center") {
+			for _, action := range getModalActionsByPosition(props.Actions, "center") {
 				@enhancedModalAction(action, props)
 			}
 			
 			// Right actions
-			for _, action := range getActionsByPosition(props.Actions, "right") {
+			for _, action := range getModalActionsByPosition(props.Actions, "right") {
 				@enhancedModalAction(action, props)
 			}
 			

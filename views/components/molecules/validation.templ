@@ -162,7 +162,7 @@ templ validationMessage(message ValidationMessage, inline bool) {
 			@atoms.Icon(atoms.IconProps{
 				Name:  getValidationIcon(message.Type),
 				Size:  atoms.IconSizeXS,
-				Class: "mt-0.5 shrink-0 " + getValidationIconColor(message.Type),
+				ClassName: "mt-0.5 shrink-0 " + getValidationIconColor(message.Type),
 			})
 			<span class="text-sm">{ message.Message }</span>
 		</div>
@@ -185,7 +185,7 @@ templ FieldValidator(fieldName string, rules []ValidationRule, children ...templ
 			// Validation indicator
 			<div class="absolute right-3 top-1/2 transform -translate-y-1/2">
 				<div x-show="isValidating" class="text-muted-foreground">
-					@atoms.LoadingIcon()
+					@atoms.Icon(atoms.IconProps{Name: "loader", Size: atoms.IconSizeXS, ClassName: "animate-spin"})
 				</div>
 				<div x-show="!isValidating && isValid" class="text-success">
 					@atoms.Icon(atoms.IconProps{Name: "check", Size: atoms.IconSizeXS})
@@ -261,7 +261,7 @@ templ ValidationSummary(props ValidationSummaryProps) {
 				@atoms.Icon(atoms.IconProps{
 					Name:  "alert-triangle",
 					Size:  atoms.IconSizeSM,
-					Class: "text-destructive",
+					ClassName: "text-destructive",
 				})
 				<h3 class="font-medium text-destructive">{ props.Title }</h3>
 				if props.ShowCounts {
@@ -277,7 +277,7 @@ templ ValidationSummary(props ValidationSummaryProps) {
 					@atoms.Icon(atoms.IconProps{
 						Name:  "chevron-down",
 						Size:  atoms.IconSizeXS,
-						Class: "transition-transform x-bind:class=\"{'rotate-180': collapsed}\"",
+						ClassName: "transition-transform x-bind:class=\"{'rotate-180': collapsed}\"",
 					})
 				</button>
 			}
@@ -331,7 +331,7 @@ templ validationMessageList(messages []ValidationMessage, groupByField bool) {
 					@atoms.Icon(atoms.IconProps{
 						Name:  getValidationIcon(message.Type),
 						Size:  atoms.IconSizeXS,
-						Class: getValidationIconColor(message.Type) + " mt-0.5",
+						ClassName: getValidationIconColor(message.Type) + " mt-0.5",
 					})
 					<span>{ message.Message }</span>
 				</li>
@@ -353,7 +353,7 @@ templ groupedValidationMessages(messages []ValidationMessage) {
 							@atoms.Icon(atoms.IconProps{
 								Name:  getValidationIcon(message.Type),
 								Size:  atoms.IconSizeXS,
-								Class: getValidationIconColor(message.Type) + " mt-0.5",
+								ClassName: getValidationIconColor(message.Type) + " mt-0.5",
 							})
 							<span>{ message.Message }</span>
 						</li>

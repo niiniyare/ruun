@@ -365,9 +365,9 @@ templ renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, for
 		if section.ID != "" {
 			id={ section.ID }
 		}
-		class={ getSectionClasses(section, formProps) }
+		class={ getEnhancedSectionClasses(section, formProps) }
 		if section.Collapsible {
-			x-data={ getSectionAlpineData(section) }
+			x-data={ getEnhancedSectionAlpineData(section) }
 		}
 		if formProps.ShowProgress {
 			x-show={ fmt.Sprintf("currentStep === %d", stepNumber) }
@@ -415,7 +415,7 @@ templ renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, for
 		
 		// Section fields
 		<div
-			class={ getSectionFieldsClasses(section, formProps) }
+			class={ getEnhancedSectionFieldsClasses(section, formProps) }
 			if section.Collapsible {
 				x-show="!collapsed"
 				x-transition:enter="transition ease-out duration-200"
@@ -437,25 +437,25 @@ templ renderFormActions(props EnhancedFormProps) {
 		<div class="flex justify-between w-full">
 			// Left-aligned actions
 			<div class="flex gap-2">
-				for _, action := range getActionsByPosition(props.Actions, "left") {
+				for _, action := range getFormActionsByPosition(props.Actions, "left") {
 					@renderEnhancedFormAction(action, props)
 				}
 			</div>
 			
 			// Center-aligned actions
 			<div class="flex gap-2">
-				for _, action := range getActionsByPosition(props.Actions, "center") {
+				for _, action := range getFormActionsByPosition(props.Actions, "center") {
 					@renderEnhancedFormAction(action, props)
 				}
 			</div>
 			
 			// Right-aligned actions (default)
 			<div class="flex gap-2">
-				for _, action := range getActionsByPosition(props.Actions, "right") {
+				for _, action := range getFormActionsByPosition(props.Actions, "right") {
 					@renderEnhancedFormAction(action, props)
 				}
 				// Add default actions if none specified
-				if len(getActionsByPosition(props.Actions, "right")) == 0 && len(props.Actions) == 0 {
+				if len(getFormActionsByPosition(props.Actions, "right")) == 0 && len(props.Actions) == 0 {
 					@renderDefaultFormActions(props)
 				}
 			</div>

@@ -364,7 +364,7 @@ func (b *SchemaFormBuilder) convertSchemaFieldToFormField(field schema.Field) mo
 
 	// Handle field options
 	if len(field.Options) > 0 {
-		formField.Options = convertSchemaOptionsToFormOptions(field.Options)
+		formField.Options = convertBasicSchemaOptionsToFormOptions(field.Options)
 
 		// Set default selection
 		for i, option := range field.Options {

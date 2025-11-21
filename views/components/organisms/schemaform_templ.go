@@ -306,7 +306,7 @@ func convertSchemaToFormFields(schemaFields []SchemaField, props SchemaFormProps
 			Max:       convertToString(field.Max),
 			Pattern:   field.Pattern,
 			// Options for select fields
-			Options:  convertSchemaOptionsToFormOptions(field.Options),
+			Options:  convertBasicSchemaOptionsToFormOptions(field.Options),
 			Multiple: field.Multiple,
 			// HTMX for dynamic fields
 			HXPost:    getFieldValidationURL(field.Reference, field.Name),
@@ -414,8 +414,8 @@ func getSchemaFormActions(props SchemaFormProps) []FormAction {
 	return actions
 }
 
-// convertSchemaOptionsToFormOptions converts schema options to form options
-func convertSchemaOptionsToFormOptions(options []SchemaFieldOption) []molecules.SelectOption {
+// convertBasicSchemaOptionsToFormOptions converts schema options to form options
+func convertBasicSchemaOptionsToFormOptions(options []SchemaFieldOption) []molecules.SelectOption {
 	formOptions := make([]molecules.SelectOption, len(options))
 	for i, option := range options {
 		formOptions[i] = molecules.SelectOption{

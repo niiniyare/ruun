@@ -694,7 +694,7 @@ func BuildDataTableFromSchema(ctx context.Context, tableSchema *schema.Schema) (
 func buildColumnFromField(field schema.Field) DataTableColumn {
 	column := DataTableColumn{
 		Key:         field.Name,
-		Title:       getFieldDisplayName(field),
+		Title:       getDataTableFieldDisplayName(field),
 		Visible:     !field.Hidden,
 		Sortable:    field.Sortable,
 		Searchable:  field.Searchable,
@@ -742,8 +742,8 @@ func buildColumnFromField(field schema.Field) DataTableColumn {
 	return column
 }
 
-// getFieldDisplayName returns the display name for a field
-func getFieldDisplayName(field schema.Field) string {
+// getDataTableFieldDisplayName returns the display name for a field
+func getDataTableFieldDisplayName(field schema.Field) string {
 	if field.Label != "" {
 		return field.Label
 	}

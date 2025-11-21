@@ -279,12 +279,12 @@ type SearchFilter struct {
 	Name         string         `json:"name" yaml:"name"`
 	Type         string         `json:"type" yaml:"type"` // "text", "select", "date", "range"
 	Label        string         `json:"label,omitempty" yaml:"label,omitempty"`
-	Options      []FilterOption `json:"options,omitempty" yaml:"options,omitempty"`
+	Options      []ModalFilterOption `json:"options,omitempty" yaml:"options,omitempty"`
 	DefaultValue any            `json:"defaultValue,omitempty" yaml:"defaultValue,omitempty"`
 }
 
-// FilterOption defines filter option
-type FilterOption struct {
+// ModalFilterOption defines filter option for modals
+type ModalFilterOption struct {
 	Value string `json:"value" yaml:"value"`
 	Label string `json:"label" yaml:"label"`
 	Icon  string `json:"icon,omitempty" yaml:"icon,omitempty"`
@@ -423,7 +423,7 @@ type StepContent struct {
 // StepValidation defines step-specific validation
 type StepValidation struct {
 	ValidateOn      string           `json:"validateOn,omitempty" yaml:"validateOn,omitempty"` // "next", "always", "blur", "submit"
-	Rules           []ValidationRule `json:"rules,omitempty" yaml:"rules,omitempty"`
+	Rules           []ModalValidationRule `json:"rules,omitempty" yaml:"rules,omitempty"`
 	CustomValidator string           `json:"customValidator,omitempty" yaml:"customValidator,omitempty"`
 	ErrorMessage    string           `json:"errorMessage,omitempty" yaml:"errorMessage,omitempty"`
 	Required        []string         `json:"required,omitempty" yaml:"required,omitempty"` // Required fields
@@ -568,7 +568,7 @@ type ErrorDisplayConfig struct {
 type ValidationConfig struct {
 	Enabled        bool             `json:"enabled" yaml:"enabled"`
 	Strategy       string           `json:"strategy" yaml:"strategy"`
-	Rules          []ValidationRule `json:"rules,omitempty" yaml:"rules,omitempty"`
+	Rules          []ModalValidationRule `json:"rules,omitempty" yaml:"rules,omitempty"`
 	ServerEndpoint string           `json:"serverEndpoint,omitempty" yaml:"serverEndpoint,omitempty"`
 	RealtimeFields []string         `json:"realtimeFields,omitempty" yaml:"realtimeFields,omitempty"`
 }
@@ -584,8 +584,8 @@ type SubmitConfig struct {
 	DataTransform string `json:"dataTransform,omitempty" yaml:"dataTransform,omitempty"`
 }
 
-// ValidationRule defines individual validation rules
-type ValidationRule struct {
+// ModalValidationRule defines individual validation rules for modal schemas
+type ModalValidationRule struct {
 	Field     string `json:"field" yaml:"field"`
 	Type      string `json:"type" yaml:"type"`
 	Value     any    `json:"value,omitempty" yaml:"value,omitempty"`

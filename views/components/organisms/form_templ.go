@@ -195,8 +195,8 @@ func getProgressStyle(totalSteps int) string {
 	return "`width: ${(currentStep / " + strconv.Itoa(totalSteps) + ") * 100}%`"
 }
 
-// getSectionAlpineData generates Alpine data for collapsible sections
-func getSectionAlpineData(collapsed bool) string {
+// getBasicSectionAlpineData generates Alpine data for collapsible sections
+func getBasicSectionAlpineData(collapsed bool) string {
 	if collapsed {
 		return "{ open: false }"
 	}
@@ -208,8 +208,8 @@ func getStepShowExpression(stepNumber int) string {
 	return "currentStep === " + strconv.Itoa(stepNumber)
 }
 
-// getSectionClasses generates classes for form sections
-func getSectionClasses(sectionClass string) string {
+// getBasicSectionClasses generates classes for form sections
+func getBasicSectionClasses(sectionClass string) string {
 	return "space-y-4 " + sectionClass
 }
 
@@ -731,7 +731,7 @@ func formSection(section FormSection, stepNumber int, formProps FormProps) templ
 			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var26 = []any{getSectionClasses(section.Class)}
+		var templ_7745c5c3_Var26 = []any{getBasicSectionClasses(section.Class)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var26...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -782,9 +782,9 @@ func formSection(section FormSection, stepNumber int, formProps FormProps) templ
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var29 string
-			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(getSectionAlpineData(section.Collapsed))
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(getBasicSectionAlpineData(section.Collapsed))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 322, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 322, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -888,7 +888,7 @@ func formSection(section FormSection, stepNumber int, formProps FormProps) templ
 				return templ_7745c5c3_Err
 			}
 		}
-		var templ_7745c5c3_Var33 = []any{getSectionFieldsClasses(formProps)}
+		var templ_7745c5c3_Var33 = []any{getBasicSectionFieldsClasses(formProps)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var33...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -934,8 +934,8 @@ func formSection(section FormSection, stepNumber int, formProps FormProps) templ
 	})
 }
 
-// getSectionFieldsClasses returns classes for section fields based on form layout
-func getSectionFieldsClasses(props FormProps) string {
+// getBasicSectionFieldsClasses returns classes for section fields based on form layout
+func getBasicSectionFieldsClasses(props FormProps) string {
 	switch props.Layout {
 	case FormLayoutGrid:
 		if props.GridCols > 2 {

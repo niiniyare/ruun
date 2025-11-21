@@ -25,14 +25,14 @@ type Compiler struct {
 
 // CompilerConfig configures the CSS compiler behavior.
 type CompilerConfig struct {
-	EnableCaching    bool
-	EnableMinify     bool
-	EnableSourceMap  bool
-	EnableVariables  bool
-	Prefix           string
-	CacheTTL         time.Duration
-	CacheSize        int64
-	IncludeComments  bool
+	EnableCaching     bool
+	EnableMinify      bool
+	EnableSourceMap   bool
+	EnableVariables   bool
+	Prefix            string
+	CacheTTL          time.Duration
+	CacheSize         int64
+	IncludeComments   bool
 	GenerateUtilities bool
 }
 
@@ -105,7 +105,7 @@ func (c *Compiler) Compile(ctx context.Context, tokens *Tokens, theme *Theme) (s
 
 		if theme.DarkMode != nil && theme.DarkMode.Enabled && theme.DarkMode.DarkTokens != nil {
 			darkVars := c.generateCSSVariables(theme.DarkMode.DarkTokens)
-			
+
 			selector := c.getDarkModeSelector(theme.DarkMode.Strategy)
 			buf.WriteString(fmt.Sprintf("%s {\n", selector))
 			buf.WriteString(darkVars)
@@ -174,7 +174,7 @@ func (c *Compiler) generateCSSVariables(tokens *Tokens) string {
 
 // writeCategoryVariables writes CSS variables for a token category.
 func (c *Compiler) writeCategoryVariables(buf *bytes.Buffer, prefix string, tokens map[string]string) {
-	if tokens == nil || len(tokens) == 0 {
+	if len(tokens) == 0 {
 		return
 	}
 
@@ -187,7 +187,7 @@ func (c *Compiler) writeCategoryVariables(buf *bytes.Buffer, prefix string, toke
 	for _, key := range keys {
 		varName := c.makeVariableName(prefix, key)
 		value := tokens[key]
-		buf.WriteString(fmt.Sprintf("  %s: %s;\n", varName, value))
+		fmt.Fprintf(buf, "  %s: %s;\n", varName, value)
 	}
 }
 

@@ -370,9 +370,9 @@ func validationMessage(message ValidationMessage, inline bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:  getValidationIcon(message.Type),
-			Size:  atoms.IconSizeXS,
-			Class: "mt-0.5 shrink-0 " + getValidationIconColor(message.Type),
+			Name:      getValidationIcon(message.Type),
+			Size:      atoms.IconSizeXS,
+			ClassName: "mt-0.5 shrink-0 " + getValidationIconColor(message.Type),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -447,7 +447,7 @@ func FieldValidator(fieldName string, rules []ValidationRule, children ...templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.LoadingIcon().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "loader", Size: atoms.IconSizeXS, ClassName: "animate-spin"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -660,9 +660,9 @@ func ValidationSummary(props ValidationSummaryProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:  "alert-triangle",
-			Size:  atoms.IconSizeSM,
-			Class: "text-destructive",
+			Name:      "alert-triangle",
+			Size:      atoms.IconSizeSM,
+			ClassName: "text-destructive",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -700,9 +700,9 @@ func ValidationSummary(props ValidationSummaryProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:  "chevron-down",
-				Size:  atoms.IconSizeXS,
-				Class: "transition-transform x-bind:class=\"{'rotate-180': collapsed}\"",
+				Name:      "chevron-down",
+				Size:      atoms.IconSizeXS,
+				ClassName: "transition-transform x-bind:class=\"{'rotate-180': collapsed}\"",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -791,9 +791,9 @@ func validationMessageList(messages []ValidationMessage, groupByField bool) temp
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-					Name:  getValidationIcon(message.Type),
-					Size:  atoms.IconSizeXS,
-					Class: getValidationIconColor(message.Type) + " mt-0.5",
+					Name:      getValidationIcon(message.Type),
+					Size:      atoms.IconSizeXS,
+					ClassName: getValidationIconColor(message.Type) + " mt-0.5",
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -858,9 +858,9 @@ func groupedValidationMessages(messages []ValidationMessage) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-					Name:  getValidationIcon(message.Type),
-					Size:  atoms.IconSizeXS,
-					Class: getValidationIconColor(message.Type) + " mt-0.5",
+					Name:      getValidationIcon(message.Type),
+					Size:      atoms.IconSizeXS,
+					ClassName: getValidationIconColor(message.Type) + " mt-0.5",
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
