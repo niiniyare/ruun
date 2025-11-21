@@ -489,7 +489,7 @@ func convertSchemaFieldToFormField(field schema.Field, props EnhancedFormProps) 
 		ID:          field.Name,
 		Name:        field.Name,
 		Label:       field.GetLocalizedLabel(utils.IfElse(props.Locale != "", props.Locale, "en")),
-		Type:        mapSchemaFieldTypeToFormFieldType(field.Type),
+		Type:        molecules.FormFieldType(mapSchemaFieldTypeToFormFieldType(field.Type)),
 		Value:       getFieldValueFromData(field.Name, props.InitialData),
 		Placeholder: field.GetLocalizedPlaceholder(utils.IfElse(props.Locale != "", props.Locale, "en")),
 		HelpText:    field.Description,
@@ -530,7 +530,7 @@ func convertSchemaFieldToFormField(field schema.Field, props EnhancedFormProps) 
 
 func mapSchemaFieldTypeToFormFieldType(fieldType schema.FieldType) string {
 	switch fieldType {
-	case schema.FieldString:
+	case schema.FieldText:
 		return "text"
 	case schema.FieldEmail:
 		return "email"
@@ -538,7 +538,7 @@ func mapSchemaFieldTypeToFormFieldType(fieldType schema.FieldType) string {
 		return "password"
 	case schema.FieldNumber:
 		return "number"
-	case schema.FieldText:
+	case schema.FieldTextarea:
 		return "textarea"
 	case schema.FieldSelect:
 		return "select"
@@ -550,13 +550,13 @@ func mapSchemaFieldTypeToFormFieldType(fieldType schema.FieldType) string {
 		return "date"
 	case schema.FieldTime:
 		return "time"
-	case schema.FieldDatetime:
+	case schema.FieldDateTime:
 		return "datetime"
 	case schema.FieldFile:
 		return "file"
-	case schema.FieldUrl:
+	case schema.FieldURL:
 		return "url"
-	case schema.FieldTel:
+	case schema.FieldPhone:
 		return "tel"
 	default:
 		return "text"

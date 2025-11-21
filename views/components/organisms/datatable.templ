@@ -891,9 +891,6 @@ templ dataTableActionMenuItem(action DataTableAction, rowId string) {
 		} else if rowId != "" {
 			x-on:click={ fmt.Sprintf("executeRowAction('%s', '%s')", action.ID, rowId) }
 		}
-		if action.OnClick != "" {
-			onclick={ action.OnClick }
-		}
 	>
 		if action.Icon != "" {
 			@atoms.Icon(atoms.IconProps{Name: action.Icon, Size: atoms.IconSizeXS})
@@ -1418,12 +1415,8 @@ templ dataTableTableHeader(props DataTableProps) {
 							<span class="datatable-th-text">{ column.Title }</span>
 							
 							if column.HelpText != "" {
-								@molecules.Tooltip(molecules.TooltipProps{
-									Content: column.HelpText,
-									Position: "top",
-								}) {
-									@atoms.Icon(atoms.IconProps{Name: "help-circle", Size: atoms.IconSizeXS, Class: "datatable-help-icon"})
-								}
+								// TODO: Add tooltip component
+								@atoms.Icon(atoms.IconProps{Name: "help-circle", Size: atoms.IconSizeXS, ClassName: "datatable-help-icon"})
 							}
 							
 							if column.Sortable {
@@ -1431,7 +1424,7 @@ templ dataTableTableHeader(props DataTableProps) {
 									@atoms.Icon(atoms.IconProps{
 										Name:  getSortIcon(column.Key, props),
 										Size:  atoms.IconSizeXS,
-										Class: getSortIconClasses(column.Key, props),
+										ClassName: getSortIconClasses(column.Key, props),
 									})
 								</div>
 							}
@@ -1543,30 +1536,34 @@ templ dataTableCell(row DataTableRow, column DataTableColumn, props DataTablePro
 		}
 	case ColumnTypeProgress:
 		if progress, ok := row.Data[column.Key].(float64); ok {
-			@molecules.ProgressBar(molecules.ProgressProps{
-				Value: progress,
-				Max:   100,
-				Size:  molecules.ProgressSizeSM,
-				ShowLabel: true,
-			})
+			<div class="progress-bar-placeholder">
+				<div class="bg-secondary rounded-full h-2">
+					<div class="bg-primary h-2 rounded-full" style={ "width: " + fmt.Sprintf("%.0f%%", progress) }></div>
+				</div>
+				<span class="text-xs text-muted-foreground">{ fmt.Sprintf("%.0f%%", progress) }</span>
+			</div>
 		}
 	case ColumnTypeRating:
 		if rating, ok := row.Data[column.Key].(float64); ok {
-			@molecules.StarRating(molecules.RatingProps{
-				Value: rating,
-				Max:   5,
-				ReadOnly: true,
-				Size: "sm",
-			})
+			<div class="star-rating-placeholder">
+				for i := 1; i <= 5; i++ {
+					if float64(i) <= rating {
+						<span class="text-yellow-400">★</span>
+					} else {
+						<span class="text-gray-300">★</span>
+					}
+				}
+			</div>
 		}
 	case ColumnTypeAvatar:
 		if avatar, ok := row.Data[column.Key].(map[string]any); ok {
-			@atoms.Avatar(atoms.AvatarProps{
-				Src:  utils.GetStringValue(avatar["src"]),
-				Alt:  utils.GetStringValue(avatar["alt"]),
-				Name: utils.GetStringValue(avatar["name"]),
-				Size: atoms.AvatarSizeSM,
-			})
+			<div class="avatar-placeholder">
+				if utils.GetStringValue(avatar["src"]) != "" {
+					<img src={ utils.GetStringValue(avatar["src"]) } alt={ utils.GetStringValue(avatar["alt"]) } class="w-8 h-8 rounded-full" />
+				} else {
+					<div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs">{ utils.GetStringValue(avatar["name"])[:1] }</div>
+				}
+			</div>
 		}
 	case ColumnTypeImage:
 		if imageURL, ok := row.Data[column.Key].(string); ok && imageURL != "" {
@@ -1591,7 +1588,7 @@ templ dataTableCell(row DataTableRow, column DataTableColumn, props DataTablePro
 				for _, tag := range tags {
 					@atoms.Badge(atoms.BadgeProps{
 						Variant: atoms.BadgeSecondary,
-						Size:    atoms.BadgeSizeXS,
+						Size:    atoms.BadgeSizeSM,
 					}) {
 						{ utils.GetStringValue(tag) }
 					}
@@ -1627,7 +1624,7 @@ templ dataTableCell(row DataTableRow, column DataTableColumn, props DataTablePro
 			@atoms.Icon(atoms.IconProps{
 				Name:  utils.IfElse(checked, "check-circle", "x-circle"),
 				Size:  atoms.IconSizeSM,
-				Class: utils.IfElse(checked, "text-success", "text-muted"),
+				ClassName: utils.IfElse(checked, "text-success", "text-muted"),
 			})
 		}
 	case ColumnTypeCustom:
@@ -1665,8 +1662,8 @@ templ dataTableRowActions(row DataTableRow, props DataTableProps) {
 				role="menu"
 			>
 				// Row-specific actions
-				for _, action := range row.Actions {
-					@dataTableActionMenuItem(action, row.ID)
+				for _, menuItem := range row.Actions {
+					@molecules.MenuItem(menuItem)
 				}
 				
 				// Default row actions
@@ -1686,7 +1683,7 @@ templ dataTableRowActions(row DataTableRow, props DataTableProps) {
 templ dataTableLoading(props DataTableProps) {
 	<div class="datatable-loading">
 		<div class="datatable-loading-content">
-			@atoms.LoadingSpinner(atoms.LoadingProps{Size: atoms.LoadingMD})
+			@atoms.Icon(atoms.IconProps{Name: "loader-2", ClassName: "animate-spin"})
 			<span class="datatable-loading-text">Loading data...</span>
 		</div>
 	</div>
@@ -1695,7 +1692,7 @@ templ dataTableLoading(props DataTableProps) {
 templ dataTableError(props DataTableProps) {
 	<div class="datatable-error">
 		<div class="datatable-error-content">
-			@atoms.Icon(atoms.IconProps{Name: "alert-triangle", Size: atoms.IconSizeLG, Class: "datatable-error-icon"})
+			@atoms.Icon(atoms.IconProps{Name: "alert-triangle", Size: atoms.IconSizeLG, ClassName: "datatable-error-icon"})
 			<h3 class="datatable-error-title">Error loading data</h3>
 			<p class="datatable-error-message">{ props.Error }</p>
 			<button class="datatable-retry-button" x-on:click="retryLoad()">
@@ -1711,7 +1708,7 @@ templ dataTableEmpty(props DataTableProps) {
 			@atoms.Icon(atoms.IconProps{
 				Name:  utils.IfElse(props.EmptyIcon != "", props.EmptyIcon, "inbox"),
 				Size:  atoms.IconSizeLG,
-				Class: "datatable-empty-icon",
+				ClassName: "datatable-empty-icon",
 			})
 			<h3 class="datatable-empty-title">No data available</h3>
 			<p class="datatable-empty-message">
@@ -1735,15 +1732,13 @@ templ dataTableSearch(props DataTableProps) {
 		Value:       props.Search.Query,
 		Placeholder: utils.IfElse(props.Search.Placeholder != "", props.Search.Placeholder, "Search..."),
 		Size:        molecules.SearchBoxSizeMD,
-		Icon:        "search",
-		ClearButton: true,
-		Delay:       utils.IfElse(props.Search.Delay > 0, props.Search.Delay, 300),
-		MinLength:   utils.IfElse(props.Search.MinLength > 0, props.Search.MinLength, 2),
+		Debounce:    utils.IfElse(props.Search.Delay > 0, props.Search.Delay, 300),
+		MinChars:    utils.IfElse(props.Search.MinLength > 0, props.Search.MinLength, 2),
 		HXGet:       props.HXGet,
 		HXTarget:    props.HXTarget,
 		HXSwap:      props.HXSwap,
 		HXTrigger:   "keyup changed delay:300ms",
-		Class:       "datatable-search",
+		ClassName:   "datatable-search",
 	})
 }
 
@@ -1794,16 +1789,19 @@ templ dataTablePagination(props DataTableProps) {
 			if props.Pagination.ShowPageSize && len(props.Pagination.PageSizeOptions) > 0 {
 				<div class="datatable-page-size">
 					<label class="datatable-page-size-label">Rows per page:</label>
-					@molecules.Select(molecules.SelectProps{
-						ID:    props.ID + "_pagesize",
-						Name:  "pageSize",
-						Value: strconv.Itoa(props.Pagination.PageSize),
-						Size:  molecules.SelectSizeSM,
-						Options: getPageSizeOptions(props.Pagination.PageSizeOptions),
-						HXGet:  props.HXGet,
-						HXTarget: props.HXTarget,
-						Class: "datatable-page-size-select",
-					})
+					<select 
+						id={ props.ID + "_pagesize" }
+						name="pageSize"
+						class="datatable-page-size-select"
+						hx-get={ props.HXGet }
+						hx-target={ props.HXTarget }
+					>
+						for _, size := range props.Pagination.PageSizeOptions {
+							<option value={ strconv.Itoa(size) } selected?={ size == props.Pagination.PageSize }>
+								{ strconv.Itoa(size) }
+							</option>
+						}
+					</select>
 				</div>
 			}
 			
@@ -1815,7 +1813,6 @@ templ dataTablePagination(props DataTableProps) {
 					Icon:     "chevron-left",
 					Disabled: props.Pagination.CurrentPage <= 1,
 					AlpineClick: "changePage(" + strconv.Itoa(props.Pagination.CurrentPage-1) + ")",
-					AriaLabel: "Previous page",
 				})
 				
 				// Page numbers
@@ -1825,8 +1822,7 @@ templ dataTablePagination(props DataTableProps) {
 						Size:    atoms.ButtonSizeSM,
 						Text:    strconv.Itoa(i),
 						AlpineClick: "changePage(" + strconv.Itoa(i) + ")",
-						AriaLabel: "Go to page " + strconv.Itoa(i),
-						Class: "datatable-page-button",
+						ClassName: "datatable-page-button",
 					})
 				}
 				
@@ -1836,7 +1832,6 @@ templ dataTablePagination(props DataTableProps) {
 					Icon:     "chevron-right",
 					Disabled: props.Pagination.CurrentPage >= props.Pagination.TotalPages,
 					AlpineClick: "changePage(" + strconv.Itoa(props.Pagination.CurrentPage+1) + ")",
-					AriaLabel: "Next page",
 				})
 			</div>
 			
@@ -1844,13 +1839,13 @@ templ dataTablePagination(props DataTableProps) {
 			if props.Pagination.ShowQuickJump {
 				<div class="datatable-quick-jump">
 					<label class="datatable-quick-jump-label">Go to page:</label>
-					@molecules.Input(molecules.InputProps{
-						Type:     molecules.InputTypeNumber,
-						Size:     molecules.InputSizeSM,
-						Min:      "1",
-						Max:      strconv.Itoa(props.Pagination.TotalPages),
-						Value:    strconv.Itoa(props.Pagination.CurrentPage),
-						Class:    "datatable-quick-jump-input",
+					@atoms.Input(atoms.InputProps{
+						Type:         atoms.InputTypeNumber,
+						Size:         atoms.InputSizeSM,
+						Min:          "1",
+						Max:          strconv.Itoa(props.Pagination.TotalPages),
+						Value:        strconv.Itoa(props.Pagination.CurrentPage),
+						ClassName:    "datatable-quick-jump-input",
 						AlpineChange: "jumpToPage($event.target.value)",
 					})
 				</div>

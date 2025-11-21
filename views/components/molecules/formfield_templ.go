@@ -82,16 +82,16 @@ func FormField(props FormFieldProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Type)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(props.Type))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/formfield.templ`, Line: 15, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/formfield.templ`, Line: 15, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Label != "" && props.Type != "checkbox" {
+		if props.Label != "" && props.Type != FormFieldCheckbox {
 			templ_7745c5c3_Err = renderFieldLabel(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -109,7 +109,7 @@ func FormField(props FormFieldProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(props.ValidationMessages) > 0 {
+		if len(props.Errors) > 0 {
 			templ_7745c5c3_Err = renderValidationMessages(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -276,8 +276,8 @@ func renderValidationMessages(props FormFieldProps) templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		for _, message := range props.ValidationMessages {
-			var templ_7745c5c3_Var15 = []any{getFormFieldValidationMessageClasses(props.ValidationState)}
+		for _, message := range props.Errors {
+			var templ_7745c5c3_Var15 = []any{getFormFieldValidationMessageClasses(string(props.ValidationState))}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var15...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -302,7 +302,7 @@ func renderValidationMessages(props FormFieldProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/formfield.templ`, Line: 59, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/formfield.templ`, Line: 59, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -340,32 +340,32 @@ func renderFieldInput(props FormFieldProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch props.Type {
-		case "text", "email", "password", "number", "search", "url", "tel":
+		case FormFieldText, FormFieldEmail, FormFieldPassword, FormFieldNumber, FormFieldSearch, FormFieldURL, FormFieldTel:
 			templ_7745c5c3_Err = atoms.Input(buildInputProps(props)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "radio":
+		case FormFieldRadio:
 			templ_7745c5c3_Err = renderRadioGroup(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "checkbox":
+		case FormFieldCheckbox:
 			templ_7745c5c3_Err = renderCheckbox(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "checkbox-group":
+		case FormFieldCheckboxGroup:
 			templ_7745c5c3_Err = renderCheckboxGroup(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "select":
+		case FormFieldSelect:
 			templ_7745c5c3_Err = renderSelect(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case "textarea":
+		case FormFieldTextarea:
 			templ_7745c5c3_Err = renderTextarea(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

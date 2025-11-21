@@ -3490,7 +3490,7 @@ func getNavigationAlpineData(collapsed bool) string {
 	return "{ collapsed: false }"
 }
 
-func getNavItemAlpineData(collapsed bool) string {
+func getNavItemOpenState(collapsed bool) string {
 	if collapsed {
 		return "{ open: false }"
 	}

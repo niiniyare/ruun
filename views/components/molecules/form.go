@@ -13,60 +13,60 @@ package molecules
 // 	"github.com/niiniyare/ruun/views/components/atoms"
 // )
 //
-// // FormFieldType defines the input type for the form field
-// type FormFieldType string
+// FormFieldType defines the input type for the form field
+type FormFieldType string
+
+const (
+	// Basic input types
+	FormFieldText     FormFieldType = "text"
+	FormFieldEmail    FormFieldType = "email"
+	FormFieldPassword FormFieldType = "password"
+	FormFieldNumber   FormFieldType = "number"
+	FormFieldSearch   FormFieldType = "search"
+	FormFieldURL      FormFieldType = "url"
+	FormFieldTel      FormFieldType = "tel"
+
+	// Selection types
+	FormFieldRadio         FormFieldType = "radio"
+	FormFieldCheckbox      FormFieldType = "checkbox"
+	FormFieldCheckboxGroup FormFieldType = "checkbox-group"
+	FormFieldSelect        FormFieldType = "select"
+	FormFieldMultiSelect   FormFieldType = "multi-select"
+	FormFieldAutoComplete  FormFieldType = "autocomplete"
+
+	// Date and time types
+	FormFieldDate      FormFieldType = "date"
+	FormFieldTime      FormFieldType = "time"
+	FormFieldDateTime  FormFieldType = "datetime"
+	FormFieldDateRange FormFieldType = "date-range"
+
+	// Complex input types
+	FormFieldTextarea FormFieldType = "textarea"
+	FormFieldTags     FormFieldType = "tags"
+	FormFieldFile     FormFieldType = "file"
+	FormFieldRange    FormFieldType = "range"
+	FormFieldColor    FormFieldType = "color"
+)
 //
-// const (
-// 	// Basic input types
-// 	FormFieldText     FormFieldType = "text"
-// 	FormFieldEmail    FormFieldType = "email"
-// 	FormFieldPassword FormFieldType = "password"
-// 	FormFieldNumber   FormFieldType = "number"
-// 	FormFieldSearch   FormFieldType = "search"
-// 	FormFieldURL      FormFieldType = "url"
-// 	FormFieldTel      FormFieldType = "tel"
+// FormFieldSize defines the size variants for form fields
+type FormFieldSize string
+
+const (
+	FormFieldSizeSM FormFieldSize = "sm"
+	FormFieldSizeMD FormFieldSize = "md"
+	FormFieldSizeLG FormFieldSize = "lg"
+	FormFieldSizeXL FormFieldSize = "xl"
+)
 //
-// 	// Selection types
-// 	FormFieldRadio         FormFieldType = "radio"
-// 	FormFieldCheckbox      FormFieldType = "checkbox"
-// 	FormFieldCheckboxGroup FormFieldType = "checkbox-group"
-// 	FormFieldSelect        FormFieldType = "select"
-// 	FormFieldMultiSelect   FormFieldType = "multi-select"
-// 	FormFieldAutoComplete  FormFieldType = "autocomplete"
-//
-// 	// Date and time types
-// 	FormFieldDate      FormFieldType = "date"
-// 	FormFieldTime      FormFieldType = "time"
-// 	FormFieldDateTime  FormFieldType = "datetime"
-// 	FormFieldDateRange FormFieldType = "date-range"
-//
-// 	// Complex input types
-// 	FormFieldTextarea FormFieldType = "textarea"
-// 	FormFieldTags     FormFieldType = "tags"
-// 	FormFieldFile     FormFieldType = "file"
-// 	FormFieldRange    FormFieldType = "range"
-// 	FormFieldColor    FormFieldType = "color"
-// )
-//
-// // FormFieldSize defines the size variants for form fields
-// type FormFieldSize string
-//
-// const (
-// 	FormFieldSizeSM FormFieldSize = "sm"
-// 	FormFieldSizeMD FormFieldSize = "md"
-// 	FormFieldSizeLG FormFieldSize = "lg"
-// 	FormFieldSizeXL FormFieldSize = "xl"
-// )
-//
-// // FormFieldVariant defines the visual variant
-// type FormFieldVariant string
-//
-// const (
-// 	FormFieldVariantDefault FormFieldVariant = "default"
-// 	FormFieldVariantOutline FormFieldVariant = "outline"
-// 	FormFieldVariantGhost   FormFieldVariant = "ghost"
-// 	FormFieldVariantFilled  FormFieldVariant = "filled"
-// )
+// FormFieldVariant defines the visual variant
+type FormFieldVariant string
+
+const (
+	FormFieldVariantDefault FormFieldVariant = "default"
+	FormFieldVariantOutline FormFieldVariant = "outline"
+	FormFieldVariantGhost   FormFieldVariant = "ghost"
+	FormFieldVariantFilled  FormFieldVariant = "filled"
+)
 //
 // // Token keys for validation states and field styling
 // const (
@@ -105,217 +105,218 @@ type ValidationRule struct {
 }
 //
 // // FormFieldProps defines the comprehensive properties for the FormField component
-// type FormFieldProps struct {
-// 	// Core identification
-// 	Type    FormFieldType
-// 	Size    FormFieldSize
-// 	Variant FormFieldVariant
-// 	ID      string
-// 	Name    string
-// 	Label   string
-// 	Value   string
+type FormFieldProps struct {
+	// Core identification
+	Type    FormFieldType
+	Size    FormFieldSize
+	Variant FormFieldVariant
+	ID      string
+	Name    string
+	Label   string
+	Value   string
+
+	// Display & UX
+	Placeholder    string
+	HelpText       string
+	ErrorText      string
+	SuccessText    string
+	WarningText    string
+	Icon           string // Leading icon
+	IconPosition   string // "left" or "right"
+	Tooltip        string
+	Description    string // Rich description (supports markdown)
+	HideLabel      bool   // Accessible label that's visually hidden
+	LabelPosition  string // "top", "left", "right", "inline"
+	CharacterCount bool   // Show character count for text inputs
+
+	// State
+	Required  bool
+	Disabled  bool
+	Readonly  bool
+	Loading   bool
+	AutoFocus bool
+
+	// Validation
+	ValidationRules []ValidationRule
+	ValidateOnBlur  bool
+	ValidateOnInput bool
+	DebounceMs      int // Debounce validation
+
+	// NEW: Validation state integration
+	ValidationState    ValidationState        `json:"validationState,omitempty"`    // idle, validating, valid, invalid, warning
+	ValidationLoading  bool                   `json:"validationLoading,omitempty"`  // Async validation in progress
+	ClientRules        *ClientValidationRules `json:"clientRules,omitempty"`        // For immediate client-side validation
+	OnValidate         string                 `json:"onValidate,omitempty"`         // HTMX validation endpoint
+	ValidationDebounce int                    `json:"validationDebounce,omitempty"` // Debounce timing in ms
+	Errors             []string               `json:"errors,omitempty"`             // Current validation errors
+
+	// Input constraints
+	MinLength    int
+	MaxLength    int
+	Min          string
+	Max          string
+	Step         string
+	Pattern      string
+	Autocomplete string
+
+	// Select/Multi-select specific
+	Options      []SelectOption
+	Multiple     bool
+	Searchable   bool
+	Clearable    bool
+	Creatable    bool // Allow creating new options
+	GroupOptions bool // Enable option grouping
+
+	// Multi-value fields (checkbox groups, multi-select)
+	Values []string
+
+	// Layout for checkbox/radio groups
+	Inline      bool
+	Columns     int
+	ColumnsMD   int    // Responsive columns for medium screens
+	ColumnsLG   int    // Responsive columns for large screens
+	Orientation string // "horizontal" or "vertical"
+	ItemSpacing string // spacing class
+
+	// Textarea specific
+	Rows       int
+	Cols       int
+	Resizable  bool
+	AutoResize bool // Auto-grow textarea
+
+	// Date/Time specific
+	ShowCalendar  bool
+	Format24      bool
+	StartDate     string
+	EndDate       string
+	MinDate       string
+	MaxDate       string
+	DisabledDates []string // ISO date strings
+	DateFormat    string   // Display format
+
+	// Autocomplete specific
+	SearchURL    string
+	MinChars     int
+	MaxResults   int
+	Debounce     int
+	ShowClear    bool
+	ShowIcon     bool
+	FreeForm     bool // Allow non-matching values
+	RemoteSearch bool
+
+	// Tags specific
+	TagsEditable    bool
+	MaxTags         int
+	TagValidator    string // Alpine.js expression
+	TagsOptions     []SelectOption
+	AllowDuplicates bool
+
+	// File upload specific
+	Accept        string // File types
+	MaxFileSize   int64  // In bytes
+	MaxFiles      int
+	ShowPreview   bool
+	DropZone      bool
+	MultipleFiles bool
+
+	// Range/Slider specific
+	ShowValue     bool
+	ShowMinMax    bool
+	Marks         map[int]string // Value labels
+	RangeMinValue string
+	RangeMaxValue string
+
+	// Styling
+	Class        string
+	LabelClass   string
+	InputClass   string
+	WrapperClass string
+	ErrorClass   string
+	HelperClass  string
+	FullWidth    bool
+	Rounded      string // "none", "sm", "md", "lg", "full"
+
+	// HTMX attributes
+	HXPost      string
+	HXGet       string
+	HXPut       string
+	HXPatch     string
+	HXDelete    string
+	HXTarget    string
+	HXSwap      string
+	HXTrigger   string
+	HXIndicator string
+	HXConfirm   string
+	HXInclude   string
+	HXHeaders   string
+	HXSync      string
+	HXValidate  string // Custom HTMX validation endpoint
+
+	// Alpine.js attributes
+	AlpineModel  string
+	AlpineChange string
+	AlpineBlur   string
+	AlpineFocus  string
+	AlpineInput  string
+	AlpineClick  string
+	AlpineInit   string
+	AlpineShow   string
+	AlpineBind   string
+
+	// Accessibility
+	AriaLabel       string
+	AriaDescribedBy string
+	AriaRequired    string
+	AriaInvalid     string
+	TabIndex        int
+	Role            string
+
+	// Advanced features
+	Mask         string // Input mask pattern
+	Transform    string // "uppercase", "lowercase", "capitalize"
+	CopyButton   bool   // Add copy to clipboard button
+	ShowPassword bool   // Toggle for password visibility
+	GenerateID   bool   // Auto-generate ID if not provided
+	Prefix       string // Text prefix
+	Suffix       string // Text suffix
+	PrefixIcon   string
+	SuffixIcon   string
+
+	// Internationalization
+	Locale string
+	RTL    bool
+
+	// NEW: Token-based theming (replaces legacy CSS classes)
+	Tokens         map[string]string `json:"tokens,omitempty"`         // Resolved token values
+	ThemeID        string            `json:"themeID,omitempty"`        // Active theme identifier
+	TokenOverrides map[string]string `json:"tokenOverrides,omitempty"` // Tenant-specific token overrides
+	DarkMode       bool              `json:"darkMode,omitempty"`       // Dark mode preference
+
+	// Conditional rendering
+	Condition    string   // Condition.Condition expression for conditional display
+	Dependencies []string // Field IDs this field depends on
+}
 //
-// 	// Display & UX
-// 	Placeholder    string
-// 	HelpText       string
-// 	ErrorText      string
-// 	SuccessText    string
-// 	WarningText    string
-// 	Icon           string // Leading icon
-// 	IconPosition   string // "left" or "right"
-// 	Tooltip        string
-// 	Description    string // Rich description (supports markdown)
-// 	HideLabel      bool   // Accessible label that's visually hidden
-// 	LabelPosition  string // "top", "left", "right", "inline"
-// 	CharacterCount bool   // Show character count for text inputs
-//
-// 	// State
-// 	Required  bool
-// 	Disabled  bool
-// 	Readonly  bool
-// 	Loading   bool
-// 	AutoFocus bool
-//
-// 	// Validation
-// 	ValidationRules []ValidationRule
-// 	ValidateOnBlur  bool
-// 	ValidateOnInput bool
-// 	DebounceMs      int // Debounce validation
-//
-// 	// NEW: Validation state integration
-// 	ValidationState    ValidationState        `json:"validationState,omitempty"`    // idle, validating, valid, invalid, warning
-// 	ValidationLoading  bool                   `json:"validationLoading,omitempty"`  // Async validation in progress
-// 	ClientRules        *ClientValidationRules `json:"clientRules,omitempty"`        // For immediate client-side validation
-// 	OnValidate         string                 `json:"onValidate,omitempty"`         // HTMX validation endpoint
-// 	ValidationDebounce int                    `json:"validationDebounce,omitempty"` // Debounce timing in ms
-// 	Errors             []string               `json:"errors,omitempty"`             // Current validation errors
-//
-// 	// Input constraints
-// 	MinLength    int
-// 	MaxLength    int
-// 	Min          string
-// 	Max          string
-// 	Step         string
-// 	Pattern      string
-// 	Autocomplete string
-//
-// 	// Select/Multi-select specific
-// 	Options      []SelectOption
-// 	Multiple     bool
-// 	Searchable   bool
-// 	Clearable    bool
-// 	Creatable    bool // Allow creating new options
-// 	GroupOptions bool // Enable option grouping
-//
-// 	// Multi-value fields (checkbox groups, multi-select)
-// 	Values []string
-//
-// 	// Layout for checkbox/radio groups
-// 	Inline      bool
-// 	Columns     int
-// 	ColumnsMD   int    // Responsive columns for medium screens
-// 	ColumnsLG   int    // Responsive columns for large screens
-// 	Orientation string // "horizontal" or "vertical"
-// 	ItemSpacing string // spacing class
-//
-// 	// Textarea specific
-// 	Rows       int
-// 	Cols       int
-// 	Resizable  bool
-// 	AutoResize bool // Auto-grow textarea
-//
-// 	// Date/Time specific
-// 	ShowCalendar  bool
-// 	Format24      bool
-// 	StartDate     string
-// 	EndDate       string
-// 	MinDate       string
-// 	MaxDate       string
-// 	DisabledDates []string // ISO date strings
-// 	DateFormat    string   // Display format
-//
-// 	// Autocomplete specific
-// 	SearchURL    string
-// 	MinChars     int
-// 	MaxResults   int
-// 	Debounce     int
-// 	ShowClear    bool
-// 	ShowIcon     bool
-// 	FreeForm     bool // Allow non-matching values
-// 	RemoteSearch bool
-//
-// 	// Tags specific
-// 	TagsEditable    bool
-// 	MaxTags         int
-// 	TagValidator    string // Alpine.js expression
-// 	TagsOptions     []SelectOption
-// 	AllowDuplicates bool
-//
-// 	// File upload specific
-// 	Accept        string // File types
-// 	MaxFileSize   int64  // In bytes
-// 	MaxFiles      int
-// 	ShowPreview   bool
-// 	DropZone      bool
-// 	MultipleFiles bool
-//
-// 	// Range/Slider specific
-// 	ShowValue     bool
-// 	ShowMinMax    bool
-// 	Marks         map[int]string // Value labels
-// 	RangeMinValue string
-// 	RangeMaxValue string
-//
-// 	// Styling
-// 	Class        string
-// 	LabelClass   string
-// 	InputClass   string
-// 	WrapperClass string
-// 	ErrorClass   string
-// 	HelperClass  string
-// 	FullWidth    bool
-// 	Rounded      string // "none", "sm", "md", "lg", "full"
-//
-// 	// HTMX attributes
-// 	HXPost      string
-// 	HXGet       string
-// 	HXPut       string
-// 	HXPatch     string
-// 	HXDelete    string
-// 	HXTarget    string
-// 	HXSwap      string
-// 	HXTrigger   string
-// 	HXIndicator string
-// 	HXConfirm   string
-// 	HXInclude   string
-// 	HXHeaders   string
-// 	HXSync      string
-// 	HXValidate  string // Custom HTMX validation endpoint
-//
-// 	// Alpine.js attributes
-// 	AlpineModel  string
-// 	AlpineChange string
-// 	AlpineBlur   string
-// 	AlpineFocus  string
-// 	AlpineInput  string
-// 	AlpineClick  string
-// 	AlpineInit   string
-// 	AlpineShow   string
-// 	AlpineBind   string
-//
-// 	// Accessibility
-// 	AriaLabel       string
-// 	AriaDescribedBy string
-// 	AriaRequired    string
-// 	AriaInvalid     string
-// 	TabIndex        int
-// 	Role            string
-//
-// 	// Advanced features
-// 	Mask         string // Input mask pattern
-// 	Transform    string // "uppercase", "lowercase", "capitalize"
-// 	CopyButton   bool   // Add copy to clipboard button
-// 	ShowPassword bool   // Toggle for password visibility
-// 	GenerateID   bool   // Auto-generate ID if not provided
-// 	Prefix       string // Text prefix
-// 	Suffix       string // Text suffix
-// 	PrefixIcon   string
-// 	SuffixIcon   string
-//
-// 	// Internationalization
-// 	Locale string
-// 	RTL    bool
-//
-// 	// NEW: Token-based theming (replaces legacy CSS classes)
-// 	Tokens         map[string]string `json:"tokens,omitempty"`         // Resolved token values
-// 	ThemeID        string            `json:"themeID,omitempty"`        // Active theme identifier
-// 	TokenOverrides map[string]string `json:"tokenOverrides,omitempty"` // Tenant-specific token overrides
-// 	DarkMode       bool              `json:"darkMode,omitempty"`       // Dark mode preference
-//
-// 	// Conditional rendering
-// 	Condition    string   // Condition.Condition expression for conditional display
-// 	Dependencies []string // Field IDs this field depends on
-// }
-//
-// // ValidationState represents the state of validation.
-// type ValidationState string
-//
-// // Define the possible validation states.
-// const (
-// 	Idle       ValidationState = "idle"
-// 	Validating ValidationState = "validating"
-// 	Valid      ValidationState = "valid"
-// 	Invalid    ValidationState = "invalid"
-// 	Warning    ValidationState = "warning"
-// )
+// ValidationState represents the state of validation.
+type ValidationState string
+
+// Define the possible validation states.
+const (
+	ValidationStateIdle       ValidationState = "idle"
+	ValidationStateValidating ValidationState = "validating"
+	ValidationStateValid      ValidationState = "valid"
+	ValidationStateInvalid    ValidationState = "invalid"
+	ValidationStateWarning    ValidationState = "warning"
+)
 //
 // // String returns the string representation of ValidationState
 // func (v ValidationState) String() string {
 // 	return string(v)
 // }
 //
-// // ClientValidationRules represents validation rules that can be executed client-side
-// type ClientValidationRules struct {
+// ClientValidationRules represents validation rules that can be executed client-side
+type ClientValidationRules struct {
+}
 // 	FieldName    string                 `json:"fieldName"`
 // 	Required     bool                   `json:"required"`
 // 	MinLength    *int                   `json:"minLength,omitempty"`

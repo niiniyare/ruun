@@ -84,7 +84,7 @@ type SearchProvider interface {
 // ValidationProvider interface for form validation
 type ValidationProvider interface {
 	ValidateField(ctx context.Context, field string, value any, rules []ValidationRule) (*ValidationResult, error)
-	ValidateForm(ctx context.Context, data map[string]any, schema *schema.FormSchema) (*ValidationResult, error)
+	ValidateForm(ctx context.Context, data map[string]any, schema *schema.Schema) (*ValidationResult, error)
 	ValidateStep(ctx context.Context, stepData map[string]any, step *EnhancedModalStep) (*ValidationResult, error)
 }
 

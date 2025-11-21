@@ -712,7 +712,7 @@ func buildColumnFromField(field schema.Field) DataTableColumn {
 		column.Type = ColumnTypeLink
 	case schema.FieldDate:
 		column.Type = ColumnTypeDate
-	case schema.FieldDatetime:
+	case schema.FieldDateTime:
 		column.Type = ColumnTypeDateTime
 	case schema.FieldSelect, schema.FieldRadio:
 		column.Type = ColumnTypeBadge
@@ -760,7 +760,7 @@ func buildBadgeMapFromOptions(options []schema.FieldOption) map[string]atoms.Bad
 		// Assign variants in a cycle
 		switch i % 4 {
 		case 0:
-			variant = atoms.BadgePrimary
+			variant = atoms.BadgeDefault
 		case 1:
 			variant = atoms.BadgeSecondary
 		case 2:

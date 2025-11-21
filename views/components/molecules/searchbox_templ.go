@@ -360,7 +360,7 @@ func getSearchBoxAlpineData(props SearchBoxProps) string {
 			this.showSuggestions = true;
 			
 			// Custom search logic
-			if (%s) {
+			if (%t) {
 				%s;
 			}
 			
@@ -380,7 +380,7 @@ func getSearchBoxAlpineData(props SearchBoxProps) string {
 			this.hideSuggestions();
 			
 			// Custom select logic
-			if (%s) {
+			if (%t) {
 				%s;
 			}
 			
@@ -399,7 +399,7 @@ func getSearchBoxAlpineData(props SearchBoxProps) string {
 			this.hideSuggestions();
 			
 			// Custom clear logic
-			if (%s) {
+			if (%t) {
 				%s;
 			}
 		},

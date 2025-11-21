@@ -12,11 +12,11 @@ templ FormField(props FormFieldProps) {
 			data-field-id={ props.ID }
 		}
 		if props.Type != "" {
-			data-field-type={ props.Type }
+			data-field-type={ string(props.Type) }
 		}
 
 		// Label section
-		if props.Label != "" && props.Type != "checkbox" {
+		if props.Label != "" && props.Type != FormFieldCheckbox {
 			@renderFieldLabel(props)
 		}
 
@@ -27,7 +27,7 @@ templ FormField(props FormFieldProps) {
 		</div>
 
 		// Validation messages
-		if len(props.ValidationMessages) > 0 {
+		if len(props.Errors) > 0 {
 			@renderValidationMessages(props)
 		}
 
@@ -55,25 +55,25 @@ templ renderFieldLabel(props FormFieldProps) {
 
 // renderValidationMessages shows validation error messages with compiled theme classes
 templ renderValidationMessages(props FormFieldProps) {
-	for _, message := range props.ValidationMessages {
-		<div class={ getFormFieldValidationMessageClasses(props.ValidationState) }>{ message }</div>
+	for _, message := range props.Errors {
+		<div class={ getFormFieldValidationMessageClasses(string(props.ValidationState)) }>{ message }</div>
 	}
 }
 
 // renderFieldInput renders the appropriate input based on field type
 templ renderFieldInput(props FormFieldProps) {
 	switch props.Type {
-	case "text", "email", "password", "number", "search", "url", "tel":
+	case FormFieldText, FormFieldEmail, FormFieldPassword, FormFieldNumber, FormFieldSearch, FormFieldURL, FormFieldTel:
 		@atoms.Input(buildInputProps(props))
-	case "radio":
+	case FormFieldRadio:
 		@renderRadioGroup(props)
-	case "checkbox":
+	case FormFieldCheckbox:
 		@renderCheckbox(props)
-	case "checkbox-group":
+	case FormFieldCheckboxGroup:
 		@renderCheckboxGroup(props)
-	case "select":
+	case FormFieldSelect:
 		@renderSelect(props)
-	case "textarea":
+	case FormFieldTextarea:
 		@renderTextarea(props)
 	default:
 		@atoms.Input(buildInputProps(props))

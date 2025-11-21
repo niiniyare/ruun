@@ -22,11 +22,19 @@ type Manager struct {
 	compiler  *Compiler
 	validator *Validator
 	evaluator ConditionEvaluator
-	
+
 	themes map[string]*Theme
 	mu     sync.RWMutex
-	
-	config *ManagerConfig
+
+	config          *ManagerConfig
+	DebugMode       bool        // NEW
+	DebugLogger     DebugLogger // NEW
+	EnableProfiling bool        // NEW
+}
+type DebugLogger interface {
+	LogResolution(ref string, result *ResolvedToken, duration time.Duration)
+	LogCompilation(themeID string, size int, duration time.Duration)
+	LogCacheOperation(operation string, key string, hit bool)
 }
 
 // ManagerConfig configures the theme manager behavior.
@@ -38,7 +46,7 @@ type ManagerConfig struct {
 	AutoCompile        bool
 	StrictMode         bool
 	MaxThemes          int
-	
+
 	ResolverConfig  *ResolverConfig
 	CompilerConfig  *CompilerConfig
 	ValidatorConfig *ValidatorConfig
@@ -366,7 +374,7 @@ func (m *Manager) setTokenValue(tokens *Tokens, path, value string) error {
 	}
 
 	category := segments[0]
-	
+
 	switch category {
 	case "primitives":
 		return m.setPrimitiveValue(tokens.Primitives, segments[1:], value)
@@ -492,9 +500,29 @@ func (m *Manager) preloadThemes(ctx context.Context) error {
 
 // Close closes the manager and releases resources.
 func (m *Manager) Close() error {
-	m.resolver.Close()
-	if m.compiler.cache != nil {
+	// Add context with timeout:
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var errs []error
+
+	// Flush caches
+	if m.resolver != nil {
+		m.resolver.Close()
+	}
+
+	if m.compiler != nil && m.compiler.cache != nil {
+		m.compiler.cache.Wait() // Wait for pending cache writes
 		m.compiler.cache.Close()
+	}
+
+	// Notify observers of shutdown
+	if observableMgr, ok := any(m).(*ObservableManager); ok {
+		observableMgr.notifyShutdown(ctx)
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("errors during shutdown: %v", errs)
 	}
 	return nil
 }

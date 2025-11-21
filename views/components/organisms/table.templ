@@ -26,29 +26,6 @@ const (
 	TableHover    TableVariant = "hover"
 )
 
-// ColumnType defines the type of column for special rendering
-type ColumnType string
-
-const (
-	ColumnTypeText     ColumnType = "text"
-	ColumnTypeNumber   ColumnType = "number"
-	ColumnTypeDate     ColumnType = "date"
-	ColumnTypeBadge    ColumnType = "badge"
-	ColumnTypeActions  ColumnType = "actions"
-	ColumnTypeCheckbox ColumnType = "checkbox"
-	ColumnTypeImage    ColumnType = "image"
-	ColumnTypeLink     ColumnType = "link"
-	ColumnTypeProgress ColumnType = "progress"
-)
-
-// SortDirection defines the sort direction
-type SortDirection string
-
-const (
-	SortNone SortDirection = ""
-	SortAsc  SortDirection = "asc"
-	SortDesc SortDirection = "desc"
-)
 
 // TableColumn represents a table column definition
 type TableColumn struct {
@@ -646,32 +623,6 @@ func getRowClasses(row TableRow, props TableProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getSortKey(column TableColumn) string {
-	if column.SortKey != "" {
-		return column.SortKey
-	}
-	return column.Key
-}
-
-func getSortIcon(columnKey string, props TableProps) string {
-	if props.SortColumn == columnKey {
-		if props.SortDirection == SortAsc {
-			return "chevron-up"
-		} else if props.SortDirection == SortDesc {
-			return "chevron-down"
-		}
-	}
-	return "chevron-down"
-}
-
-func getBadgeVariant(value string, badgeMap map[string]atoms.BadgeVariant) atoms.BadgeVariant {
-	if badgeMap != nil {
-		if variant, exists := badgeMap[value]; exists {
-			return variant
-		}
-	}
-	return atoms.BadgeDefault
-}
 
 func getStringValue(value any) string {
 	if value == nil {

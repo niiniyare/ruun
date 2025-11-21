@@ -588,7 +588,7 @@ func (b *SchemaFormBuilder) applyAlpineIntegrationToFormField(formField *molecul
 
 // Conditional logic functions
 
-func (b *SchemaFormBuilder) buildConditionalExpression(rules []schema.ConditionalRule) string {
+func (b *SchemaFormBuilder) buildConditionalExpression(rules []schema.Conditional) string {
 	if len(rules) == 0 {
 		return ""
 	}
@@ -610,7 +610,7 @@ func (b *SchemaFormBuilder) buildConditionalExpression(rules []schema.Conditiona
 	return strings.Join(expressions, " && ")
 }
 
-func (b *SchemaFormBuilder) buildSingleConditionalExpression(rule schema.ConditionalRule) string {
+func (b *SchemaFormBuilder) buildSingleConditionalExpression(rule schema.Conditional) string {
 	fieldRef := fmt.Sprintf("formData.%s", rule.Field)
 
 	switch rule.Operator {
@@ -651,7 +651,7 @@ func (b *SchemaFormBuilder) buildSingleConditionalExpression(rule schema.Conditi
 	return ""
 }
 
-func (b *SchemaFormBuilder) extractConditionalDependencies(rules []schema.ConditionalRule) []string {
+func (b *SchemaFormBuilder) extractConditionalDependencies(rules []schema.Conditional) []string {
 	deps := make([]string, 0, len(rules))
 	seen := make(map[string]bool)
 

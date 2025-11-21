@@ -2,6 +2,7 @@ package theme
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -16,6 +17,7 @@ type Observer interface {
 	OnCacheHit(ctx context.Context, event *CacheEvent)
 	OnCacheMiss(ctx context.Context, event *CacheEvent)
 	OnTenantConfigured(ctx context.Context, event *TenantEvent)
+	OnShutdown(ctx context.Context) error
 }
 
 // ObservableManager wraps a Manager with observer support.
@@ -139,9 +141,26 @@ func (om *ObservableManager) notifyThemeRegistered(ctx context.Context, event *T
 	copy(observers, om.observers)
 	om.mu.RUnlock()
 
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var wg sync.WaitGroup
 	for _, observer := range observers {
-		go observer.OnThemeRegistered(ctx, event)
+		select {
+		case <-ctx.Done():
+			// TODO: Log timeout/cancellation
+			return
+		default:
+			wg.Add(1)
+			go func(obs Observer) {
+				defer wg.Done()
+				obs.OnThemeRegistered(ctx, event)
+			}(observer)
+		}
 	}
+
+	// NOTE: Optional: wait for all started goroutines to complete
+	wg.Wait()
 }
 
 // notifyThemeUpdated notifies all observers of theme updates.
@@ -180,13 +199,88 @@ func (om *ObservableManager) notifyThemeCompiled(ctx context.Context, event *Com
 	}
 }
 
+// notifyShutdown notifies all observers of system shutdown with graceful termination.
+func (om *ObservableManager) notifyShutdown(ctx context.Context) error {
+	om.mu.RLock()
+	observers := make([]Observer, len(om.observers))
+	copy(observers, om.observers)
+	om.mu.RUnlock()
+
+	if len(observers) == 0 {
+		return nil
+	}
+
+	// Set a reasonable timeout for shutdown notifications
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	var (
+		wg     sync.WaitGroup
+		mu     sync.Mutex
+		errors []error
+	)
+
+	// Notify all observers concurrently
+	for _, observer := range observers {
+		wg.Add(1)
+		go func(obs Observer) {
+			defer wg.Done()
+
+			if err := obs.OnShutdown(ctx); err != nil {
+				mu.Lock()
+				errors = append(errors, fmt.Errorf("observer %T: %w", obs, err))
+				mu.Unlock()
+			}
+		}(observer)
+	}
+
+	// Wait for all notifications to complete or timeout
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	// Wait for completion or context cancellation
+	select {
+	case <-done:
+		// All observers notified
+	case <-ctx.Done():
+		// Timeout or cancellation occurred
+		mu.Lock()
+		errors = append(errors, fmt.Errorf("shutdown notification timeout: %w", ctx.Err()))
+		mu.Unlock()
+	}
+
+	// Return combined errors if any occurred
+	if len(errors) > 0 {
+		return fmt.Errorf("shutdown notifications completed with errors: %v", errors)
+	}
+
+	return nil
+}
+
+// Shutdown gracefully shuts down the observable manager and notifies all observers.
+func (om *ObservableManager) Shutdown(ctx context.Context) error {
+	// First notify all observers of shutdown
+	if err := om.notifyShutdown(ctx); err != nil {
+		// TODO:Log the error but continue with manager shutdownc
+		// You might want to inject a logger here
+		fmt.Printf("Warning during observer shutdown: %v\n", err)
+	}
+
+	// Then perform any manager-specific cleanup
+	// This would call the underlying Manager's shutdown if it exists
+	return nil
+}
+
 // ThemeEvent represents a theme lifecycle event.
 type ThemeEvent struct {
 	ThemeID   string
 	ThemeName string
 	Action    string
 	Timestamp time.Time
-	Metadata  map[string]interface{}
+	Metadata  map[string]any
 }
 
 // CompilationEvent represents a theme compilation event.
@@ -197,18 +291,18 @@ type CompilationEvent struct {
 	CSSSize   int
 	FromCache bool
 	Timestamp time.Time
-	Metadata  map[string]interface{}
+	Metadata  map[string]any
 }
 
 // ValidationEvent represents a validation event.
 type ValidationEvent struct {
-	ThemeID     string
-	Valid       bool
-	IssueCount  int
-	ErrorCount  int
-	Timestamp   time.Time
-	Issues      []ValidationIssue
-	Metadata    map[string]interface{}
+	ThemeID    string
+	Valid      bool
+	IssueCount int
+	ErrorCount int
+	Timestamp  time.Time
+	Issues     []ValidationIssue
+	Metadata   map[string]any
 }
 
 // CacheEvent represents a cache operation event.
@@ -226,7 +320,7 @@ type TenantEvent struct {
 	Action    string
 	ThemeID   string
 	Timestamp time.Time
-	Metadata  map[string]interface{}
+	Metadata  map[string]any
 }
 
 // LoggingObserver is an observer that logs events using structured logging.
@@ -236,9 +330,9 @@ type LoggingObserver struct {
 
 // Logger interface for structured logging.
 type Logger interface {
-	Info(msg string, keysAndValues ...interface{})
-	Error(msg string, err error, keysAndValues ...interface{})
-	Debug(msg string, keysAndValues ...interface{})
+	Info(msg string, keysAndValues ...any)
+	Error(msg string, err error, keysAndValues ...any)
+	Debug(msg string, keysAndValues ...any)
 }
 
 // NewLoggingObserver creates a new logging observer.
@@ -316,18 +410,26 @@ func (lo *LoggingObserver) OnTenantConfigured(ctx context.Context, event *Tenant
 	)
 }
 
+// OnShutdown handles logging observer shutdown.
+func (lo *LoggingObserver) OnShutdown(ctx context.Context) error {
+	lo.logger.Info("logging observer shutting down")
+	// TODO: Perform any cleanup needed for the logging observer
+	// For example, flush any buffered logs
+	return nil
+}
+
 // MetricsObserver is an observer that collects metrics.
 type MetricsObserver struct {
 	mu sync.RWMutex
-	
-	themeRegistrations   uint64
-	themeUpdates         uint64
-	themeDeletions       uint64
-	themeCompilations    uint64
-	validationFailures   uint64
-	cacheHits            uint64
-	cacheMisses          uint64
-	
+
+	themeRegistrations uint64
+	themeUpdates       uint64
+	themeDeletions     uint64
+	themeCompilations  uint64
+	validationFailures uint64
+	cacheHits          uint64
+	cacheMisses        uint64
+
 	totalCompilationTime time.Duration
 	avgCSSSize           float64
 	cssCount             uint64
@@ -363,10 +465,10 @@ func (mo *MetricsObserver) OnThemeDeleted(ctx context.Context, event *ThemeEvent
 func (mo *MetricsObserver) OnThemeCompiled(ctx context.Context, event *CompilationEvent) {
 	mo.mu.Lock()
 	defer mo.mu.Unlock()
-	
+
 	mo.themeCompilations++
 	mo.totalCompilationTime += event.Duration
-	
+
 	mo.cssCount++
 	mo.avgCSSSize = (mo.avgCSSSize*float64(mo.cssCount-1) + float64(event.CSSSize)) / float64(mo.cssCount)
 }
@@ -394,7 +496,14 @@ func (mo *MetricsObserver) OnCacheMiss(ctx context.Context, event *CacheEvent) {
 
 // OnTenantConfigured records tenant configuration metrics.
 func (mo *MetricsObserver) OnTenantConfigured(ctx context.Context, event *TenantEvent) {
-	// Optional: track tenant configuration changes
+	// TODO: POptional: track tenant configuration changes
+}
+
+// OnShutdown handles metrics observer shutdown.
+func (mo *MetricsObserver) OnShutdown(ctx context.Context) error {
+	// TODO: Perform any cleanup needed for the metrics observer
+	// For example, export final metrics or close connections
+	return nil
 }
 
 // GetMetrics returns current metrics.
@@ -414,16 +523,16 @@ func (mo *MetricsObserver) GetMetrics() *Metrics {
 	}
 
 	return &Metrics{
-		ThemeRegistrations:     mo.themeRegistrations,
-		ThemeUpdates:           mo.themeUpdates,
-		ThemeDeletions:         mo.themeDeletions,
-		ThemeCompilations:      mo.themeCompilations,
-		ValidationFailures:     mo.validationFailures,
-		CacheHits:              mo.cacheHits,
-		CacheMisses:            mo.cacheMisses,
-		CacheHitRate:           cacheHitRate,
-		AvgCompilationTime:     avgCompilationTime,
-		AvgCSSSize:             int(mo.avgCSSSize),
+		ThemeRegistrations: mo.themeRegistrations,
+		ThemeUpdates:       mo.themeUpdates,
+		ThemeDeletions:     mo.themeDeletions,
+		ThemeCompilations:  mo.themeCompilations,
+		ValidationFailures: mo.validationFailures,
+		CacheHits:          mo.cacheHits,
+		CacheMisses:        mo.cacheMisses,
+		CacheHitRate:       cacheHitRate,
+		AvgCompilationTime: avgCompilationTime,
+		AvgCSSSize:         int(mo.avgCSSSize),
 	}
 }
 

@@ -75,9 +75,9 @@ func NewResolver(config *ResolverConfig) (*Resolver, error) {
 	}
 
 	return &Resolver{
-		cache:    cache,
-		cacheTTL: config.CacheTTL,
-		maxDepth: config.MaxDepth,
+		cache:      cache,
+		cacheTTL:   config.CacheTTL,
+		maxDepth:   config.MaxDepth,
 		strictMode: config.StrictMode,
 	}, nil
 }
@@ -211,7 +211,7 @@ func (r *Resolver) getTokenValue(path string, tokens *Tokens) (string, error) {
 
 	category := segments[0]
 	subcategory := segments[1]
-	
+
 	switch category {
 	case "primitives":
 		return r.getPrimitiveValue(subcategory, segments[2:], tokens.Primitives)
@@ -463,23 +463,41 @@ func (r *Resolver) resolveComponentTokens(ctx context.Context, components *Compo
 // resolveCompoundValue resolves compound CSS values that may contain multiple token references.
 // Example: "1rem 2rem" or "1px solid semantic.colors.border"
 func (r *Resolver) resolveCompoundValue(ctx context.Context, value string, theme *Theme, tenantID string, darkMode bool) (string, error) {
-	parts := strings.Fields(value)
-	resolved := make([]string, len(parts))
+	if !strings.Contains(value, " ") {
+		// Fast path for single values
+		ref := TokenReference(value)
+		if ref.IsReference() {
+			result, err := r.Resolve(ctx, ref, theme, tenantID, darkMode)
+			if err != nil {
+				return "", err
+			}
+			return result.Value, nil
+		}
+		return value, nil
+	}
 
+	var sb strings.Builder
+	sb.Grow(len(value)) // Pre-allocate
+
+	parts := strings.Fields(value)
 	for i, part := range parts {
+		if i > 0 {
+			sb.WriteByte(' ')
+		}
+
 		ref := TokenReference(part)
 		if ref.IsReference() {
 			result, err := r.Resolve(ctx, ref, theme, tenantID, darkMode)
 			if err != nil {
 				return "", err
 			}
-			resolved[i] = result.Value
+			sb.WriteString(result.Value)
 		} else {
-			resolved[i] = part
+			sb.WriteString(part)
 		}
 	}
 
-	return strings.Join(resolved, " "), nil
+	return sb.String(), nil
 }
 
 // mergeTokens merges two token sets with the second overriding the first.
@@ -677,8 +695,8 @@ func (r *Resolver) InvalidateCache(themeID, tenantID string) {
 // GetStats returns resolver statistics.
 func (r *Resolver) GetStats() *ResolverStats {
 	stats := &ResolverStats{
-		MaxDepth:      r.maxDepth,
-		StrictMode:    r.strictMode,
+		MaxDepth:       r.maxDepth,
+		StrictMode:     r.strictMode,
 		CachingEnabled: r.cache != nil,
 	}
 
@@ -708,3 +726,16 @@ func (r *Resolver) Close() {
 		r.cache.Close()
 	}
 }
+
+// func (r *Resolver) Resolve(ctx context.Context, ref TokenReference, theme *Theme, tenantID string, darkMode bool) (*ResolvedToken, error) {
+// 	start := time.Now()
+//
+// 	result, err := r.resolveInternal(ctx, ref, theme, tenantID, darkMode)
+//
+// 	// Debug logging
+// 	if r.config.DebugMode && r.config.DebugLogger != nil {
+// 		r.config.DebugLogger.LogResolution(string(ref), result, time.Since(start))
+// 	}
+//
+// 	return result, err
+// }

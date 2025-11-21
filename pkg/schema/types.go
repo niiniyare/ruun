@@ -217,11 +217,19 @@ type ChangelogEntry struct {
 	Migration   string    `json:"migration,omitempty"` // Migration guide
 }
 
-// // ThemeConfig stores theme configuration for a schema
-// type ThemeConfig struct {
-// 	ID        string          `json:"id,omitempty"`        // Theme ID to use
-// 	Overrides *ThemeOverrides `json:"overrides,omitempty"` // Theme overrides
-// }
+// Theme represents a complete theme configuration
+type Theme struct {
+	ID        string                 `json:"id"`                   // Theme identifier
+	Name      string                 `json:"name"`                 // Human-readable name
+	Version   string                 `json:"version,omitempty"`    // Theme version
+	Tokens    map[string]interface{} `json:"tokens,omitempty"`     // Design tokens
+	Overrides map[string]interface{} `json:"overrides,omitempty"`  // Theme overrides
+}
+
+// FormSchema represents a form schema structure for the organism layer
+type FormSchema struct {
+	Schema *Schema `json:"schema"` // Reference to base schema
+}
 
 // Helper methods for enterprise features
 // IsCSRFEnabled checks if CSRF protection is enabled

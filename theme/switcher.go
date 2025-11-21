@@ -183,7 +183,7 @@ func (ts *ThemeSwitcher) SwitchTheme(ctx context.Context, themeID, userID, tenan
 	// Save preferences
 	if ts.config.EnablePersistence && ts.storage != nil {
 		if err := ts.storage.SavePreferences(ctx, userID, prefs); err != nil {
-			// Log but don't fail
+			// TODO:  Log but don't fail
 		}
 	}
 
@@ -239,7 +239,7 @@ func (ts *ThemeSwitcher) ToggleDarkMode(ctx context.Context, userID, tenantID st
 	// Save preferences
 	if ts.config.EnablePersistence && ts.storage != nil {
 		if err := ts.storage.SavePreferences(ctx, userID, prefs); err != nil {
-			// Log but don't fail
+			// TODO: Log but don't fail
 		}
 	}
 

@@ -34,30 +34,6 @@ const (
 	TableHover    TableVariant = "hover"
 )
 
-// ColumnType defines the type of column for special rendering
-type ColumnType string
-
-const (
-	ColumnTypeText     ColumnType = "text"
-	ColumnTypeNumber   ColumnType = "number"
-	ColumnTypeDate     ColumnType = "date"
-	ColumnTypeBadge    ColumnType = "badge"
-	ColumnTypeActions  ColumnType = "actions"
-	ColumnTypeCheckbox ColumnType = "checkbox"
-	ColumnTypeImage    ColumnType = "image"
-	ColumnTypeLink     ColumnType = "link"
-	ColumnTypeProgress ColumnType = "progress"
-)
-
-// SortDirection defines the sort direction
-type SortDirection string
-
-const (
-	SortNone SortDirection = ""
-	SortAsc  SortDirection = "asc"
-	SortDesc SortDirection = "desc"
-)
-
 // TableColumn represents a table column definition
 type TableColumn struct {
 	Key        string     // Data key
@@ -233,7 +209,7 @@ func Table(props TableProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 193, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 170, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -269,7 +245,7 @@ func Table(props TableProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineData)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 197, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 174, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -287,7 +263,7 @@ func Table(props TableProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getDefaultTableAlpineData(props))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 199, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 176, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -315,7 +291,7 @@ func Table(props TableProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 207, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 184, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -334,7 +310,7 @@ func Table(props TableProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 210, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 187, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -600,7 +576,7 @@ func tableHeader(props TableProps) templ.Component {
 					var templ_7745c5c3_Var18 string
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + column.Width)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 313, Col: 39}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 290, Col: 39}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {
@@ -619,7 +595,7 @@ func tableHeader(props TableProps) templ.Component {
 					var templ_7745c5c3_Var19 string
 					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("sort('" + getSortKey(column) + "')")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 316, Col: 56}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 293, Col: 56}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 					if templ_7745c5c3_Err != nil {
@@ -637,7 +613,7 @@ func tableHeader(props TableProps) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(column.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 320, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 297, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -758,7 +734,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(row.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 351, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 328, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -794,7 +770,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(props.OnRowClick + "('" + row.ID + "')")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 355, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 332, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -813,7 +789,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(row.URL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 358, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 335, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -826,7 +802,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 359, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 336, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -839,7 +815,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 360, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 337, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -862,7 +838,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(row.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 370, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 347, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
@@ -875,7 +851,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs("selectedRows.includes('" + row.ID + "')")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 371, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 348, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -888,7 +864,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs("toggleRowSelection('" + row.ID + "')")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 372, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 349, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -901,7 +877,7 @@ func tableRow(row TableRow, props TableProps) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs("{'opacity-100': selectedRows.includes('" + row.ID + "'), 'opacity-0': !selectedRows.includes('" + row.ID + "')}")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 377, Col: 135}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 354, Col: 135}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -994,7 +970,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 					var templ_7745c5c3_Var38 string
 					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(badgeText)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 404, Col: 15}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 381, Col: 15}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 					if templ_7745c5c3_Err != nil {
@@ -1035,7 +1011,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 				var templ_7745c5c3_Var39 templ.SafeURL
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinURLErrs(url)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 419, Col: 16}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 396, Col: 16}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
@@ -1048,7 +1024,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 				var templ_7745c5c3_Var40 string
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(getStringValue(row.Data[column.Key]))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 420, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 397, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -1062,7 +1038,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 				var templ_7745c5c3_Var41 string
 				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(getStringValue(row.Data[column.Key]))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 423, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 400, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
@@ -1078,7 +1054,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 				var templ_7745c5c3_Var42 string
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + strconv.Itoa(progress) + "%")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 431, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 408, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
@@ -1091,7 +1067,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 				var templ_7745c5c3_Var43 string
 				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(progress))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 434, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 411, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 				if templ_7745c5c3_Err != nil {
@@ -1106,7 +1082,7 @@ func tableCell(row TableRow, column TableColumn, props TableProps) templ.Compone
 			var templ_7745c5c3_Var44 string
 			templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(getStringValue(row.Data[column.Key]))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 438, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 415, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 			if templ_7745c5c3_Err != nil {
@@ -1251,7 +1227,7 @@ func tableError(errorMsg string) templ.Component {
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(errorMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 490, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 467, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 		if templ_7745c5c3_Err != nil {
@@ -1301,7 +1277,7 @@ func tableEmpty(message string) templ.Component {
 		var templ_7745c5c3_Var50 string
 		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 499, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 476, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {
@@ -1343,7 +1319,7 @@ func tablePagination(props TableProps) templ.Component {
 		var templ_7745c5c3_Var52 string
 		templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa((props.CurrentPage-1)*props.PageSize + 1))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 507, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 484, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 		if templ_7745c5c3_Err != nil {
@@ -1356,7 +1332,7 @@ func tablePagination(props TableProps) templ.Component {
 		var templ_7745c5c3_Var53 string
 		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(min(props.CurrentPage*props.PageSize, props.TotalItems)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 507, Col: 144}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 484, Col: 144}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 		if templ_7745c5c3_Err != nil {
@@ -1369,7 +1345,7 @@ func tablePagination(props TableProps) templ.Component {
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.TotalItems))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 507, Col: 182}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 484, Col: 182}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 		if templ_7745c5c3_Err != nil {
@@ -1405,7 +1381,7 @@ func tablePagination(props TableProps) templ.Component {
 				var templ_7745c5c3_Var56 string
 				templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 525, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 502, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 				if templ_7745c5c3_Err != nil {
@@ -1476,7 +1452,7 @@ func tableAction(action TableAction) templ.Component {
 			var templ_7745c5c3_Var59 string
 			templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(action.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 554, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/table.templ`, Line: 531, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 			if templ_7745c5c3_Err != nil {
@@ -1593,33 +1569,6 @@ func getRowClasses(row TableRow, props TableProps) string {
 	}
 
 	return strings.Join(classes, " ")
-}
-
-func getSortKey(column TableColumn) string {
-	if column.SortKey != "" {
-		return column.SortKey
-	}
-	return column.Key
-}
-
-func getSortIcon(columnKey string, props TableProps) string {
-	if props.SortColumn == columnKey {
-		if props.SortDirection == SortAsc {
-			return "chevron-up"
-		} else if props.SortDirection == SortDesc {
-			return "chevron-down"
-		}
-	}
-	return "chevron-down"
-}
-
-func getBadgeVariant(value string, badgeMap map[string]atoms.BadgeVariant) atoms.BadgeVariant {
-	if badgeMap != nil {
-		if variant, exists := badgeMap[value]; exists {
-			return variant
-		}
-	}
-	return atoms.BadgeDefault
 }
 
 func getStringValue(value any) string {

@@ -757,7 +757,7 @@ func renderSaveStateIndicator(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Spinner(atoms.SpinnerProps{Size: atoms.SpinnerSizeSM}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.LoadingSpinner(atoms.LoadingSpinnerProps{Size: "sm"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -765,7 +765,7 @@ func renderSaveStateIndicator(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "check", Size: atoms.IconSizeSM, Class: "text-success"}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "check", Size: atoms.IconSizeSM, ClassName: "text-success"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -773,7 +773,7 @@ func renderSaveStateIndicator(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "edit", Size: atoms.IconSizeSM, Class: "text-warning"}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{Name: "edit", Size: atoms.IconSizeSM, ClassName: "text-warning"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1102,10 +1102,9 @@ func renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, form
 						return templ_7745c5c3_Err
 					}
 					templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-						Name:  "chevron-down",
-						Size:  atoms.IconSizeSM,
-						Class: "transition-transform duration-200",
-						XBind: "{'rotate-180': !collapsed}",
+						Name:      "chevron-down",
+						Size:      atoms.IconSizeSM,
+						ClassName: "transition-transform duration-200",
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -1128,7 +1127,7 @@ func renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, form
 				var templ_7745c5c3_Var42 string
 				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(section.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 411, Col: 83}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 410, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 				if templ_7745c5c3_Err != nil {
@@ -1308,7 +1307,7 @@ func renderEnhancedFormAction(action EnhancedFormAction, formProps EnhancedFormP
 			var templ_7745c5c3_Var49 string
 			templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(action.Condition)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 470, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 469, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 			if templ_7745c5c3_Err != nil {
@@ -1338,7 +1337,7 @@ func renderEnhancedFormAction(action EnhancedFormAction, formProps EnhancedFormP
 			var templ_7745c5c3_Var51 string
 			templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(action.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 487, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/enhanced_form.templ`, Line: 486, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 			if templ_7745c5c3_Err != nil {
@@ -1347,18 +1346,18 @@ func renderEnhancedFormAction(action EnhancedFormAction, formProps EnhancedFormP
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Type:     getActionType(action.Type),
-			Variant:  getActionVariant(action.Variant),
-			Size:     getActionSize(action.Size),
-			Icon:     action.Icon,
-			Loading:  action.Loading,
-			Disabled: action.Disabled,
-			Class:    action.Class,
-			ID:       action.ID,
-			OnClick:  getActionClickHandler(action, formProps),
-			HXAction: action.HXAction,
-			HXTarget: getActionTarget(action.HXTarget, formProps.HXTarget),
-			HXSwap:   getActionSwap(action.HXSwap, formProps.HXSwap),
+			Type:        getActionType(action.Type),
+			Variant:     getActionVariant(action.Variant),
+			Size:        getActionSize(action.Size),
+			Icon:        action.Icon,
+			Loading:     action.Loading,
+			Disabled:    action.Disabled,
+			ClassName:   action.Class,
+			ID:          action.ID,
+			AlpineClick: getActionClickHandler(action, formProps),
+			HXPost:      action.HXAction,
+			HXTarget:    getActionTarget(action.HXTarget, formProps.HXTarget),
+			HXSwap:      getActionSwap(action.HXSwap, formProps.HXSwap),
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var50), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -1394,11 +1393,15 @@ func renderDefaultFormActions(props EnhancedFormProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Type:    "button",
-			Variant: atoms.ButtonOutline,
-			Text:    "Cancel",
-			OnClick: "cancelForm()",
+			Type:        "button",
+			Variant:     atoms.ButtonOutline,
+			Text:        "Cancel",
+			AlpineClick: "cancelForm()",
 		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "<div x-bind:class=\"{'opacity-50': submitting, 'cursor-not-allowed': submitting}\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1406,8 +1409,11 @@ func renderDefaultFormActions(props EnhancedFormProps) templ.Component {
 			Type:    "submit",
 			Variant: atoms.ButtonPrimary,
 			Text:    getSubmitButtonText(props),
-			XBind:   "{'opacity-50': submitting, 'cursor-not-allowed': submitting}",
 		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1437,7 +1443,7 @@ func renderDebugPanel(props EnhancedFormProps) templ.Component {
 			templ_7745c5c3_Var53 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "<details class=\"debug-panel mt-8 p-4 bg-muted rounded-lg border\" x-data=\"{ open: false }\"><summary class=\"cursor-pointer font-medium text-sm flex items-center gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<details class=\"debug-panel mt-8 p-4 bg-muted rounded-lg border\" x-data=\"{ open: false }\"><summary class=\"cursor-pointer font-medium text-sm flex items-center gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1445,12 +1451,12 @@ func renderDebugPanel(props EnhancedFormProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "Form Debug Information</summary><div class=\"mt-4 space-y-4 text-xs\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\"><div><h4 class=\"font-medium mb-2\">Form State</h4><pre class=\"bg-background p-3 rounded overflow-auto\" x-text=\"JSON.stringify(formState, null, 2)\"></pre></div><div><h4 class=\"font-medium mb-2\">Validation Errors</h4><pre class=\"bg-background p-3 rounded overflow-auto\" x-text=\"JSON.stringify(errors, null, 2)\"></pre></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "Form Debug Information</summary><div class=\"mt-4 space-y-4 text-xs\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\"><div><h4 class=\"font-medium mb-2\">Form State</h4><pre class=\"bg-background p-3 rounded overflow-auto\" x-text=\"JSON.stringify(formState, null, 2)\"></pre></div><div><h4 class=\"font-medium mb-2\">Validation Errors</h4><pre class=\"bg-background p-3 rounded overflow-auto\" x-text=\"JSON.stringify(errors, null, 2)\"></pre></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if props.Schema != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "<div><h4 class=\"font-medium mb-2\">Schema Information</h4><div class=\"grid grid-cols-2 gap-2 text-sm\"><span>Schema ID: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "<div><h4 class=\"font-medium mb-2\">Schema Information</h4><div class=\"grid grid-cols-2 gap-2 text-sm\"><span>Schema ID: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1463,7 +1469,7 @@ func renderDebugPanel(props EnhancedFormProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "</span> <span>Schema Type: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</span> <span>Schema Type: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1476,7 +1482,7 @@ func renderDebugPanel(props EnhancedFormProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 103, "</span> <span>Version: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</span> <span>Version: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1489,7 +1495,7 @@ func renderDebugPanel(props EnhancedFormProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "</span> <span>Fields: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "</span> <span>Fields: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1502,12 +1508,12 @@ func renderDebugPanel(props EnhancedFormProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 105, "</span></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</span></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "</div></details>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 108, "</div></details>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

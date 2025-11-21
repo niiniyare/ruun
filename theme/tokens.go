@@ -2,9 +2,7 @@ package theme
 
 import (
 	"fmt"
-	"maps"
 	"regexp"
-	"slices"
 	"strings"
 )
 
@@ -62,7 +60,13 @@ func (tr TokenReference) IsReference() bool {
 
 	// All segments must be non-empty
 	// Example: "primitives..colors" is invalid
-	return !slices.Contains(segments, "")
+	for _, segment := range segments {
+		if segment == "" {
+			return false
+		}
+	}
+
+	return true
 }
 
 // isCSSLiteral determines if a value is a direct CSS value rather than a token reference.
@@ -141,7 +145,13 @@ func (tr TokenReference) isCSSLiteral(value string) bool {
 		"hidden", "visible", "scroll",
 	}
 	lowerValue := strings.ToLower(value)
-	return slices.Contains(keywords, lowerValue)
+	for _, kw := range keywords {
+		if lowerValue == kw {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Validate checks if the token reference is valid according to the token path rules.
@@ -690,7 +700,9 @@ func cloneStringMap(m map[string]string) map[string]string {
 	}
 
 	cloned := make(map[string]string, len(m))
-	maps.Copy(cloned, m)
+	for k, v := range m {
+		cloned[k] = v
+	}
 
 	return cloned
 }

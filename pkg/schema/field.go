@@ -28,10 +28,12 @@ type Field struct {
 	Icon        string `json:"icon,omitempty" validate:"icon_name"`  // Icon to display
 	Error       string `json:"error,omitempty" validate:"max=200"`   // Custom error message
 	// State flags
-	Required bool `json:"required,omitempty"` // Field must have value
-	Disabled bool `json:"disabled,omitempty"` // Field cannot be edited
-	Readonly bool `json:"readonly,omitempty"` // Value visible but not editable
-	Hidden   bool `json:"hidden,omitempty"`   // Field not displayed
+	Required   bool `json:"required,omitempty"`   // Field must have value
+	Disabled   bool `json:"disabled,omitempty"`   // Field cannot be edited
+	Readonly   bool `json:"readonly,omitempty"`   // Value visible but not editable
+	Hidden     bool `json:"hidden,omitempty"`     // Field not displayed
+	Sortable   bool `json:"sortable,omitempty"`   // Field can be sorted in tables
+	Searchable bool `json:"searchable,omitempty"` // Field can be searched in tables
 	// Values
 	Value   any           `json:"value,omitempty"`                   // Current value
 	Default any           `json:"default,omitempty"`                 // Default value (supports ${expressions})

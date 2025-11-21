@@ -315,15 +315,15 @@ templ renderSaveStateIndicator(props EnhancedFormProps) {
 	<div class="save-state-indicator mb-4" x-show="showSaveState">
 		<div class="flex items-center gap-2 text-sm text-muted-foreground">
 			<div x-show="saving" class="flex items-center gap-2">
-				@atoms.Spinner(atoms.SpinnerProps{Size: atoms.SpinnerSizeSM})
+				@atoms.LoadingSpinner(atoms.LoadingSpinnerProps{Size: "sm"})
 				<span>Saving...</span>
 			</div>
 			<div x-show="!saving && lastSaved" class="flex items-center gap-2">
-				@atoms.Icon(atoms.IconProps{Name: "check", Size: atoms.IconSizeSM, Class: "text-success"})
+				@atoms.Icon(atoms.IconProps{Name: "check", Size: atoms.IconSizeSM, ClassName: "text-success"})
 				<span x-text="'Last saved ' + lastSaved"></span>
 			</div>
 			<div x-show="!saving && dirty && !lastSaved" class="flex items-center gap-2">
-				@atoms.Icon(atoms.IconProps{Name: "edit", Size: atoms.IconSizeSM, Class: "text-warning"})
+				@atoms.Icon(atoms.IconProps{Name: "edit", Size: atoms.IconSizeSM, ClassName: "text-warning"})
 				<span>Unsaved changes</span>
 			</div>
 		</div>
@@ -400,8 +400,7 @@ templ renderEnhancedFormSection(section EnhancedFormSection, stepNumber int, for
 								@atoms.Icon(atoms.IconProps{
 									Name: "chevron-down",
 									Size: atoms.IconSizeSM,
-									Class: "transition-transform duration-200",
-									XBind: "{'rotate-180': !collapsed}",
+									ClassName: "transition-transform duration-200",
 								})
 							</button>
 						}
@@ -471,18 +470,18 @@ templ renderEnhancedFormAction(action EnhancedFormAction, formProps EnhancedForm
 		}
 	>
 		@atoms.Button(atoms.ButtonProps{
-			Type:     getActionType(action.Type),
-			Variant:  getActionVariant(action.Variant),
-			Size:     getActionSize(action.Size),
-			Icon:     action.Icon,
-			Loading:  action.Loading,
-			Disabled: action.Disabled,
-			Class:    action.Class,
-			ID:       action.ID,
-			OnClick:  getActionClickHandler(action, formProps),
-			HXAction: action.HXAction,
-			HXTarget: getActionTarget(action.HXTarget, formProps.HXTarget),
-			HXSwap:   getActionSwap(action.HXSwap, formProps.HXSwap),
+			Type:        getActionType(action.Type),
+			Variant:     getActionVariant(action.Variant),
+			Size:        getActionSize(action.Size),
+			Icon:        action.Icon,
+			Loading:     action.Loading,
+			Disabled:    action.Disabled,
+			ClassName:   action.Class,
+			ID:          action.ID,
+			AlpineClick: getActionClickHandler(action, formProps),
+			HXPost:      action.HXAction,
+			HXTarget:    getActionTarget(action.HXTarget, formProps.HXTarget),
+			HXSwap:      getActionSwap(action.HXSwap, formProps.HXSwap),
 		}) {
 			{ action.Text }
 		}
@@ -495,14 +494,15 @@ templ renderDefaultFormActions(props EnhancedFormProps) {
 		Type:    "button",
 		Variant: atoms.ButtonOutline,
 		Text:    "Cancel",
-		OnClick: "cancelForm()",
+		AlpineClick: "cancelForm()",
 	})
-	@atoms.Button(atoms.ButtonProps{
-		Type:    "submit",
-		Variant: atoms.ButtonPrimary,
-		Text:    getSubmitButtonText(props),
-		XBind:   "{'opacity-50': submitting, 'cursor-not-allowed': submitting}",
-	})
+	<div x-bind:class="{'opacity-50': submitting, 'cursor-not-allowed': submitting}">
+		@atoms.Button(atoms.ButtonProps{
+			Type:    "submit",
+			Variant: atoms.ButtonPrimary,
+			Text:    getSubmitButtonText(props),
+		})
+	</div>
 }
 
 // renderDebugPanel renders debug information for development

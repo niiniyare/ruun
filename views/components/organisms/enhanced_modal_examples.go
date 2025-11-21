@@ -212,7 +212,7 @@ func (e *ExampleModalConfigs) UserProfileEditModal() EnhancedModalProps {
 		AutoSave:         true,
 		AutoSaveInterval: 30,
 		ConfirmOnClose:   true,
-		FormSchema: &schema.FormSchema{
+		FormSchema: &schema.Schema{
 			ID:      "user-profile",
 			Version: "1.0.0",
 			Title:   "User Profile",
@@ -304,7 +304,7 @@ func (e *ExampleModalConfigs) CreateProjectModal() EnhancedModalProps {
 		FormValidation:   true,
 		AutoSave:         true,
 		AutoSaveInterval: 15,
-		FormSchema: &schema.FormSchema{
+		FormSchema: &schema.Schema{
 			ID:      "create-project",
 			Version: "1.0.0",
 			Title:   "Project Information",
@@ -416,7 +416,7 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 				Icon:        "hand",
 				Required:    false,
 				Active:      true,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{
 							Name:        "fullName",
@@ -446,7 +446,7 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 				Description: "Configure your workspace preferences",
 				Icon:        "settings",
 				Required:    true,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{
 							Name:     "theme",
@@ -491,7 +491,7 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 				Icon:        "users",
 				Required:    false,
 				Skippable:   true,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{
 							Name:        "teamName",
@@ -514,7 +514,7 @@ func (e *ExampleModalConfigs) OnboardingWizardModal() EnhancedModalProps {
 				Description: "Your account is ready to go",
 				Icon:        "check-circle",
 				Required:    false,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{
 							Name:  "newsletter",
@@ -572,7 +572,7 @@ func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 				Icon:        "package",
 				Required:    true,
 				Active:      true,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{Name: "name", Label: "Product Name", Type: schema.FieldString, Required: true},
 						{Name: "sku", Label: "SKU", Type: schema.FieldString, Required: true},
@@ -587,7 +587,7 @@ func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 				Description: "Set price and inventory details",
 				Icon:        "dollar-sign",
 				Required:    true,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{Name: "price", Label: "Price", Type: schema.FieldNumber, Required: true},
 						{Name: "costPrice", Label: "Cost Price", Type: schema.FieldNumber},
@@ -602,7 +602,7 @@ func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 				Description: "Organize your product",
 				Icon:        "tag",
 				Required:    false,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{
 							Name:  "category",
@@ -634,7 +634,7 @@ func (e *ExampleModalConfigs) ProductCreationWizard() EnhancedModalProps {
 				Description: "Shipping information and physical dimensions",
 				Icon:        "truck",
 				Required:    false,
-				Content: &schema.FormSchema{
+				Content: &schema.Schema{
 					Fields: []schema.Field{
 						{Name: "weight", Label: "Weight (kg)", Type: schema.FieldNumber},
 						{Name: "length", Label: "Length (cm)", Type: schema.FieldNumber},
@@ -1178,7 +1178,7 @@ func (e *ExampleModalConfigs) WorkflowApprovalModal() EnhancedModalProps {
 		SecureMode:          true,
 		HXGet:               "/api/expenses/456/approval-details",
 		LoadOnOpen:          true,
-		FormSchema: &schema.FormSchema{
+		FormSchema: &schema.Schema{
 			Fields: []schema.Field{
 				{
 					Name:        "comments",
@@ -1333,7 +1333,7 @@ func (e *ExampleModalConfigs) GetSchemaBasedModal(modalType string) (*ModalSchem
 		), nil
 
 	case "user-form":
-		userSchema := &schema.FormSchema{
+		userSchema := &schema.Schema{
 			ID:      "user-form",
 			Version: "1.0.0",
 			Title:   "User Information",
@@ -1767,7 +1767,7 @@ func GetModalByUseCase(useCase string, params map[string]any) (*EnhancedModalPro
 		if title, ok := params["title"].(string); ok {
 			modal.Title = title
 		}
-		if formSchema, ok := params["form_schema"].(*schema.FormSchema); ok {
+		if formSchema, ok := params["form_schema"].(*schema.Schema); ok {
 			modal.FormSchema = formSchema
 		}
 		return &modal, nil
@@ -1915,7 +1915,7 @@ type CustomModalRequest struct {
 	AutoFocus      bool                  `json:"autoFocus"`
 	TrapFocus      bool                  `json:"trapFocus"`
 	RestoreFocus   bool                  `json:"restoreFocus"`
-	FormSchema     *schema.FormSchema    `json:"formSchema,omitempty"`
+	FormSchema     *schema.Schema    `json:"formSchema,omitempty"`
 	InitialData    map[string]any        `json:"initialData,omitempty"`
 	Actions        []EnhancedModalAction `json:"actions,omitempty"`
 	LoadURL        string                `json:"loadUrl,omitempty"`

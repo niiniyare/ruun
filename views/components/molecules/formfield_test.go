@@ -110,11 +110,11 @@ func (s *FormFieldTestSuite) TestValidationStateClasses() {
 			state    string
 			expected string
 		}{
-			{ValidationStateIdle, "form-field-state-idle"},
-			{ValidationStateValidating, "form-field-state-validating"},
-			{ValidationStateValid, "form-field-state-valid"},
-			{ValidationStateInvalid, "form-field-state-invalid"},
-			{ValidationStateWarning, "form-field-state-warning"},
+			{string(ValidationStateIdle), "form-field-state-idle"},
+			{string(ValidationStateValidating), "form-field-state-validating"},
+			{string(ValidationStateValid), "form-field-state-valid"},
+			{string(ValidationStateInvalid), "form-field-state-invalid"},
+			{string(ValidationStateWarning), "form-field-state-warning"},
 		}
 		
 		for _, tc := range testCases {

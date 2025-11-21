@@ -2,67 +2,9 @@ package molecules
 
 import (
 	"fmt"
-
 	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
-
-// FormField validation state constants
-const (
-	ValidationStateIdle       = "idle"
-	ValidationStateValidating = "validating"
-	ValidationStateValid      = "valid"
-	ValidationStateInvalid    = "invalid"
-	ValidationStateWarning    = "warning"
-)
-
-// FormFieldProps represents the molecule-level form field component
-// This integrates atoms with schema field definitions and provides
-// comprehensive form functionality with compiled theme classes
-type FormFieldProps struct {
-	// Basic properties
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Label       string `json:"label"`
-	Type        string `json:"type"`
-	Value       string `json:"value"`
-	Placeholder string `json:"placeholder,omitempty"`
-	Required    bool   `json:"required,omitempty"`
-	Disabled    bool   `json:"disabled,omitempty"`
-	Readonly    bool   `json:"readonly,omitempty"`
-
-	// Enhanced display
-	Description string `json:"description,omitempty"` // Rich text description
-	HelpText    string `json:"helpText,omitempty"`    // Helper text below field
-	Tooltip     string `json:"tooltip,omitempty"`     // Tooltip on hover
-	Icon        string `json:"icon,omitempty"`        // Leading icon
-
-	// Validation state integration
-	ValidationState    string   `json:"validationState,omitempty"`    // idle, validating, valid, invalid, warning
-	ValidationLoading  bool     `json:"validationLoading,omitempty"`  // Async validation in progress
-	ValidationMessages []string `json:"validationMessages,omitempty"` // Current validation messages
-	OnValidate         string   `json:"onValidate,omitempty"`         // HTMX validation endpoint
-	ValidationDebounce int      `json:"validationDebounce,omitempty"` // Debounce timing in ms
-
-	// Molecule-specific styling
-	Size       string `json:"size,omitempty"`       // sm, md, lg, xl
-	Variant    string `json:"variant,omitempty"`    // default, outline, filled, ghost
-	FullWidth  bool   `json:"fullWidth,omitempty"`  // Expand to container width
-	ClassName  string `json:"className,omitempty"`  // Additional CSS classes
-	LabelClass string `json:"labelClass,omitempty"` // Label-specific classes
-	InputClass string `json:"inputClass,omitempty"` // Input-specific classes
-
-	// Options for select/radio/checkbox types
-	Options []SelectOption `json:"options,omitempty"` // From molecules/form.go
-
-	// Accessibility
-	AriaLabel       string `json:"ariaLabel,omitempty"`
-	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
-
-	// Framework integration
-	HTMXProps   map[string]string `json:"htmxProps,omitempty"`   // HTMX attributes
-	AlpineProps map[string]string `json:"alpineProps,omitempty"` // Alpine.js bindings
-}
 
 // SelectOption represents an option for select fields (from form.go)
 type SelectOption struct {
@@ -80,15 +22,15 @@ type SelectOption struct {
 func getFormFieldClasses(props FormFieldProps) string {
 	return utils.TwMerge(
 		"form-field",
-		fmt.Sprintf("form-field-%s", utils.IfElse(props.Size != "", props.Size, "md")),
-		fmt.Sprintf("form-field-%s", utils.IfElse(props.Variant != "", props.Variant, "default")),
+		fmt.Sprintf("form-field-%s", string(props.Size)),
+		fmt.Sprintf("form-field-%s", string(props.Variant)),
 		utils.If(props.FullWidth, "form-field-full-width"),
 		utils.If(props.Required, "form-field-required"),
 		utils.If(props.Disabled, "form-field-disabled"),
 		utils.If(props.Readonly, "form-field-readonly"),
 		utils.If(props.ValidationLoading, "form-field-validating"),
-		getValidationStateClasses(props.ValidationState),
-		props.ClassName,
+		getValidationStateClasses(string(props.ValidationState)),
+		props.Class,
 	)
 }
 
@@ -96,7 +38,7 @@ func getFormFieldClasses(props FormFieldProps) string {
 func getLabelClasses(props FormFieldProps) string {
 	return utils.TwMerge(
 		"form-field-label",
-		fmt.Sprintf("form-field-label-%s", utils.IfElse(props.Size != "", props.Size, "md")),
+		fmt.Sprintf("form-field-label-%s", string(props.Size)),
 		utils.If(props.Required, "form-field-label-required"),
 		utils.If(props.Disabled, "form-field-label-disabled"),
 		props.LabelClass,
@@ -106,13 +48,13 @@ func getLabelClasses(props FormFieldProps) string {
 // getValidationStateClasses returns compiled theme classes for validation state
 func getValidationStateClasses(state string) string {
 	switch state {
-	case ValidationStateValidating:
+	case "validating":
 		return "form-field-state-validating"
-	case ValidationStateValid:
+	case "valid":
 		return "form-field-state-valid"
-	case ValidationStateInvalid:
+	case "invalid":
 		return "form-field-state-invalid"
-	case ValidationStateWarning:
+	case "warning":
 		return "form-field-state-warning"
 	default:
 		return "form-field-state-idle"
@@ -122,11 +64,11 @@ func getValidationStateClasses(state string) string {
 // getFormFieldValidationMessageClasses returns compiled theme classes for validation messages
 func getFormFieldValidationMessageClasses(state string) string {
 	switch state {
-	case ValidationStateInvalid:
+	case "invalid", "error":
 		return "validation-message validation-message-error"
-	case ValidationStateWarning:
+	case "warning":
 		return "validation-message validation-message-warning"
-	case ValidationStateValid:
+	case "valid", "success":
 		return "validation-message validation-message-success"
 	default:
 		return "validation-message validation-message-info"
@@ -149,20 +91,18 @@ func buildInputProps(props FormFieldProps) atoms.InputProps {
 	// Convert size
 	inputSize := atoms.InputSizeMD
 	switch props.Size {
-	case "sm":
+	case FormFieldSizeSM:
 		inputSize = atoms.InputSizeSM
-	case "lg":
+	case FormFieldSizeLG:
 		inputSize = atoms.InputSizeLG
-	case "xl":
+	case FormFieldSizeXL:
 		inputSize = atoms.InputSizeXL
 	}
-
-	// Note: Variant is handled through CSS classes
 
 	return atoms.InputProps{
 		ID:          props.ID,
 		Name:        props.Name,
-		Type:        atoms.InputType(props.Type),
+		Type:        atoms.InputType(string(props.Type)),
 		Value:       props.Value,
 		Placeholder: props.Placeholder,
 		Size:        inputSize,
@@ -178,9 +118,9 @@ func buildInputProps(props FormFieldProps) atoms.InputProps {
 func buildCheckboxProps(props FormFieldProps, option SelectOption) atoms.CheckboxProps {
 	checkboxSize := atoms.CheckboxSizeMD
 	switch props.Size {
-	case "sm":
+	case FormFieldSizeSM:
 		checkboxSize = atoms.CheckboxSizeSM
-	case "lg":
+	case FormFieldSizeLG:
 		checkboxSize = atoms.CheckboxSizeLG
 	}
 
@@ -206,9 +146,9 @@ func buildCheckboxProps(props FormFieldProps, option SelectOption) atoms.Checkbo
 func buildRadioGroupProps(props FormFieldProps) atoms.RadioProps {
 	radioSize := atoms.RadioSizeMD
 	switch props.Size {
-	case "sm":
+	case FormFieldSizeSM:
 		radioSize = atoms.RadioSizeSM
-	case "lg":
+	case FormFieldSizeLG:
 		radioSize = atoms.RadioSizeLG
 	}
 
@@ -217,7 +157,7 @@ func buildRadioGroupProps(props FormFieldProps) atoms.RadioProps {
 		radioState = atoms.RadioStateError
 	}
 
-	// Convert SelectOptions to RadioOptions
+	// Convert SelectOptions to RadioOptions - need to get options from props
 	var radioOptions []atoms.RadioOption
 	for _, option := range props.Options {
 		radioOptions = append(radioOptions, atoms.RadioOption{
