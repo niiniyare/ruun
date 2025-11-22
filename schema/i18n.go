@@ -16,6 +16,7 @@ import (
 type I18nManager struct {
 	config       *I18nConfig
 	translations map[string]*Translation // locale -> translation
+	currentLocale string                  // current active locale
 	mu           sync.RWMutex
 
 	// Public fields for backward compatibility
@@ -68,6 +69,7 @@ func NewI18nManager(config *I18nConfig) *I18nManager {
 	manager := &I18nManager{
 		config:           config,
 		translations:     make(map[string]*Translation),
+		currentLocale:    config.DefaultLocale,
 		Enabled:          true,
 		DefaultLocale:    config.DefaultLocale,
 		SupportedLocales: config.SupportedLocales,
@@ -296,6 +298,43 @@ func (m *I18nManager) GetSupportedLocales() []string {
 	defer m.mu.RUnlock()
 
 	return append([]string{}, m.config.SupportedLocales...)
+}
+
+// SetLocale sets the current active locale
+func (m *I18nManager) SetLocale(locale string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	m.currentLocale = locale
+}
+
+// LoadDefaultTranslations loads default translations for supported locales
+func (m *I18nManager) LoadDefaultTranslations() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Load translations for each supported locale
+	for _, locale := range m.config.SupportedLocales {
+		if _, exists := m.translations[locale]; !exists {
+			// Create basic default translations
+			m.translations[locale] = &Translation{
+				Locale: locale,
+				Translations: map[string]interface{}{
+					"common.save":   "Save",
+					"common.cancel": "Cancel",
+					"common.ok":     "OK",
+				},
+			}
+		}
+	}
+	return nil
+}
+
+// GetValidationMessage returns a validation message for a specific error type
+func (m *I18nManager) GetValidationMessage(errorType string, params map[string]any) string {
+	key := fmt.Sprintf("validation.%s", errorType)
+	locale := m.GetLocale()
+	return m.T(locale, key, params)
 }
 
 // DetectLocale detects best locale from preferences

@@ -24,8 +24,8 @@ func TestBuilderFoundationTestSuite(t *testing.T) {
 }
 
 // Test basic builder creation and Foundation components initialization
-func (suite *BuilderFoundationTestSuite) TestNewBuilder() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+func (suite *BuilderFoundationTestSuite) TestNewSchemaBuilder() {
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	require.NotNil(suite.T(), builder)
 	require.NotNil(suite.T(), builder.schema)
 	require.NotNil(suite.T(), builder.mixinSupport)
@@ -38,7 +38,7 @@ func (suite *BuilderFoundationTestSuite) TestNewBuilder() {
 
 // Test mixin support in builder
 func (suite *BuilderFoundationTestSuite) TestBuilderMixinSupport() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test applying built-in audit mixin
 	builder.WithMixin("audit_fields")
 	schema, err := builder.Build(suite.ctx)
@@ -66,7 +66,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderMixinSupport() {
 
 // Test custom mixin support
 func (suite *BuilderFoundationTestSuite) TestBuilderCustomMixin() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	customMixin := &Mixin{
 		ID:          "custom_test",
 		Name:        "Custom Test Mixin",
@@ -103,7 +103,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderCustomMixin() {
 
 // Test repeatable field support
 func (suite *BuilderFoundationTestSuite) TestBuilderRepeatableSupport() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Create a repeatable field for invoice line items
 	repeatableField := &RepeatableField{
 		Field: Field{
@@ -135,7 +135,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderRepeatableSupport() {
 
 // Test validation registry support
 func (suite *BuilderFoundationTestSuite) TestBuilderValidationSupport() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Add a custom validator
 	builder.WithCustomValidator("custom_test", func(ctx context.Context, value any, params map[string]any) error {
 		if value == "invalid" {
@@ -151,8 +151,10 @@ func (suite *BuilderFoundationTestSuite) TestBuilderValidationSupport() {
 	// 	},
 	// }
 	// builder.WithAsyncValidator(asyncValidator)
-	_ = builder.GetValidator()
-	// Note: GetValidator returns nil if no validator was set via WithValidator
+	validator, exists := builder.GetValidator("custom_test")
+	// Note: GetValidator returns validator func and boolean indicating if it exists
+	require.True(suite.T(), exists, "custom validator should exist")
+	require.NotNil(suite.T(), validator, "validator function should not be nil")
 	// require.NotNil(suite.T(), registry)
 	// Test custom validator - Note: GetValidator returns Validator interface, not ValidationRegistry
 	// Custom validator testing would require different approach since Validator is an interface
@@ -164,7 +166,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderValidationSupport() {
 
 // Test custom validation registry
 func (suite *BuilderFoundationTestSuite) TestBuilderCustomValidationRegistry() {
-	_ = NewBuilder("test-schema", TypeForm, "Test Schema")
+	_ = NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Skip custom registry test to avoid import cycle
 	// ValidationRegistry is not directly accessible through Builder interface
 	// Skip these tests as they reference non-existent methods
@@ -172,7 +174,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderCustomValidationRegistry() {
 
 // Test business rule support
 func (suite *BuilderFoundationTestSuite) TestBuilderBusinessRuleSupport() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Add a field to work with
 	builder.AddTextField("status", "Status", true)
 	builder.AddTextField("conditional_field", "Conditional Field", false)
@@ -196,7 +198,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderBusinessRuleSupport() {
 
 // Test business rule builder support
 func (suite *BuilderFoundationTestSuite) TestBuilderBusinessRuleBuilderSupport() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Add fields to work with
 	builder.AddTextField("amount", "Amount", true)
 	builder.AddTextField("tax", "Tax", false)
@@ -214,7 +216,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderBusinessRuleBuilderSupport()
 
 // Test applying business rules through builder
 func (suite *BuilderFoundationTestSuite) TestBuilderApplyBusinessRules() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Add fields
 	builder.AddTextField("field1", "Field 1", false)
 	builder.AddTextField("field2", "Field 2", false)
@@ -242,7 +244,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderApplyBusinessRules() {
 
 // Test BuildWithRules method
 func (suite *BuilderFoundationTestSuite) TestBuilderBuildWithRules() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Add fields
 	builder.AddTextField("name", "Name", true)
 	builder.AddTextField("optional_field", "Optional Field", false)
@@ -294,7 +296,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderBuildWithRules() {
 
 // Test multiple mixin application
 func (suite *BuilderFoundationTestSuite) TestBuilderMultipleMixins() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Apply audit mixin twice to test multiple mixin application
 	builder.WithMixin("audit_fields")
 	schema, err := builder.Build(suite.ctx)
@@ -316,7 +318,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderMultipleMixins() {
 
 // Test Foundation feature integration
 func (suite *BuilderFoundationTestSuite) TestFoundationIntegration() {
-	builder := NewBuilder("invoice-form", TypeForm, "Invoice Form")
+	builder := NewSchemaBuilder("invoice-form", TypeForm, "Invoice Form")
 	// Apply audit mixin for tracking
 	builder.WithMixin("audit_fields")
 	// Add invoice fields
@@ -393,7 +395,7 @@ func (suite *BuilderFoundationTestSuite) TestFoundationIntegration() {
 
 // Test error handling in Foundation features
 func (suite *BuilderFoundationTestSuite) TestFoundationErrorHandling() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test non-existent mixin (should not crash)
 	builder.WithMixin("non_existent_mixin")
 	schema, err := builder.Build(suite.ctx)
@@ -413,17 +415,17 @@ func (suite *BuilderFoundationTestSuite) TestFoundationErrorHandling() {
 
 // Test accessor methods
 func (suite *BuilderFoundationTestSuite) TestBuilderAccessors() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test mixin registry accessor
 	mixinRegistry := builder.GetMixinRegistry()
 	require.NotNil(suite.T(), mixinRegistry)
 	require.IsType(suite.T(), &MixinRegistry{}, mixinRegistry)
 	// Test validation registry accessor
-	validationRegistry := builder.GetValidator()
-	// Note: GetValidator returns nil if no validator was set via WithValidator
-	// require.NotNil(suite.T(), validationRegistry)
-	// Skip type assertion since ValidationRegistry is not exported
-	_ = validationRegistry
+	// Note: GetValidator(name) returns validator function and boolean
+	validator, exists := builder.GetValidator("test_validator")
+	// Since no test_validator was added, it should not exist
+	require.False(suite.T(), exists)
+	require.Nil(suite.T(), validator)
 	// Test business rule engine accessor
 	ruleEngine := builder.GetBusinessRuleEngine()
 	require.NotNil(suite.T(), ruleEngine)
@@ -432,7 +434,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderAccessors() {
 
 // Test builder field addition methods
 func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test AddTextField
 	builder.AddTextField("username", "Username", true)
 	schema, err := builder.Build(suite.ctx)
@@ -442,7 +444,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 	require.Equal(suite.T(), FieldText, field.Type)
 	require.True(suite.T(), field.Required)
 	// Test AddEmailField
-	builder = NewBuilder("test-email", TypeForm, "Test Email")
+	builder = NewSchemaBuilder("test-email", TypeForm, "Test Email")
 	builder.AddEmailField("email", "Email Address", true)
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -450,7 +452,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 	require.True(suite.T(), exists)
 	require.Equal(suite.T(), FieldEmail, field.Type)
 	// Test AddNumberField
-	builder = NewBuilder("test-number", TypeForm, "Test Number")
+	builder = NewSchemaBuilder("test-number", TypeForm, "Test Number")
 	min := float64(0)
 	max := float64(100)
 	builder.AddNumberField("age", "Age", false, &min, &max)
@@ -465,15 +467,15 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 		require.Equal(suite.T(), &max, field.Validation.Max)
 	}
 	// Test AddPasswordField
-	builder = NewBuilder("test-password", TypeForm, "Test Password")
-	builder.AddPasswordField("password", "Password", true)
+	builder = NewSchemaBuilder("test-password", TypeForm, "Test Password")
+	builder.AddPasswordField("password", "Password", true, 8)
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
 	field, exists = schema.GetField("password")
 	require.True(suite.T(), exists)
 	require.Equal(suite.T(), FieldPassword, field.Type)
 	// Test AddSelectField
-	builder = NewBuilder("test-select", TypeForm, "Test Select")
+	builder = NewSchemaBuilder("test-select", TypeForm, "Test Select")
 	options := []FieldOption{
 		{Value: "option1", Label: "Option 1"},
 		{Value: "option2", Label: "Option 2"},
@@ -485,7 +487,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 	require.True(suite.T(), exists)
 	require.Equal(suite.T(), FieldSelect, field.Type)
 	// Test AddTextareaField
-	builder = NewBuilder("test-textarea", TypeForm, "Test Textarea")
+	builder = NewSchemaBuilder("test-textarea", TypeForm, "Test Textarea")
 	builder.AddTextareaField("description", "Description", false, 5)
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -493,7 +495,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 	require.True(suite.T(), exists)
 	require.Equal(suite.T(), FieldTextarea, field.Type)
 	// Test AddDateField
-	builder = NewBuilder("test-date", TypeForm, "Test Date")
+	builder = NewSchemaBuilder("test-date", TypeForm, "Test Date")
 	builder.AddDateField("birthdate", "Birth Date", false)
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -502,7 +504,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 	require.Equal(suite.T(), FieldDate, field.Type)
 	// Skip AddFileField test as method doesn't exist
 	// Test AddCheckboxField
-	builder = NewBuilder("test-checkbox", TypeForm, "Test Checkbox")
+	builder = NewSchemaBuilder("test-checkbox", TypeForm, "Test Checkbox")
 	builder.AddCheckboxField("terms", "Accept Terms", true)
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -514,7 +516,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderFieldMethods() {
 
 // Test builder action methods
 func (suite *BuilderFoundationTestSuite) TestBuilderActionMethods() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test AddSubmitButton
 	builder.AddSubmitButton("Submit Form")
 	schema, err := builder.Build(suite.ctx)
@@ -523,7 +525,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderActionMethods() {
 	require.Equal(suite.T(), ActionSubmit, schema.Actions[0].Type)
 	require.Equal(suite.T(), "Submit Form", schema.Actions[0].Text)
 	// Test AddResetButton
-	builder = NewBuilder("test-reset", TypeForm, "Test Reset")
+	builder = NewSchemaBuilder("test-reset", TypeForm, "Test Reset")
 	builder.AddResetButton("Reset Form")
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -536,7 +538,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderActionMethods() {
 
 // Test builder security methods
 func (suite *BuilderFoundationTestSuite) TestBuilderSecurityMethods() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test WithCSRF
 	builder.WithCSRF()
 	schema, err := builder.Build(suite.ctx)
@@ -545,7 +547,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderSecurityMethods() {
 	require.NotNil(suite.T(), schema.Security.CSRF)
 	require.True(suite.T(), schema.Security.CSRF.Enabled)
 	// Test WithRateLimit
-	builder = NewBuilder("test-rate", TypeForm, "Test Rate")
+	builder = NewSchemaBuilder("test-rate", TypeForm, "Test Rate")
 	builder.WithRateLimit(10, 60)
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -555,7 +557,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderSecurityMethods() {
 	require.Equal(suite.T(), 10, schema.Security.RateLimit.MaxRequests)
 	require.Equal(suite.T(), time.Duration(0), schema.Security.RateLimit.Window) // Window not set by WithRateLimit method
 	// Test WithHTMX
-	builder = NewBuilder("test-htmx", TypeForm, "Test HTMX")
+	builder = NewSchemaBuilder("test-htmx", TypeForm, "Test HTMX")
 	builder.WithHTMX("/submit", "#results")
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -564,7 +566,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderSecurityMethods() {
 	require.True(suite.T(), schema.HTMX.Enabled)
 	require.Equal(suite.T(), "#results", schema.HTMX.Target)
 	// Test WithAlpine
-	builder = NewBuilder("test-alpine", TypeForm, "Test Alpine")
+	builder = NewSchemaBuilder("test-alpine", TypeForm, "Test Alpine")
 	builder.WithAlpine("{ open: false, toggle() { this.open = !this.open } }")
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -575,7 +577,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderSecurityMethods() {
 
 // Test builder layout methods
 func (suite *BuilderFoundationTestSuite) TestBuilderLayoutMethods() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test WithLayout
 	layout := &Layout{
 		Type:    "grid",
@@ -589,13 +591,13 @@ func (suite *BuilderFoundationTestSuite) TestBuilderLayoutMethods() {
 	require.Equal(suite.T(), LayoutGrid, schema.Layout.Type)
 	require.Equal(suite.T(), 2, schema.Layout.Columns)
 	// Test WithDescription
-	builder = NewBuilder("test-desc", TypeForm, "Test Description")
+	builder = NewSchemaBuilder("test-desc", TypeForm, "Test Description")
 	builder.WithDescription("This is a test form")
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
 	require.Equal(suite.T(), "This is a test form", schema.Description)
 	// Test WithTags
-	builder = NewBuilder("test-tags", TypeForm, "Test Tags")
+	builder = NewSchemaBuilder("test-tags", TypeForm, "Test Tags")
 	builder.WithTags("form", "test", "example")
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -603,7 +605,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderLayoutMethods() {
 	require.Contains(suite.T(), schema.Tags, "test")
 	require.Contains(suite.T(), schema.Tags, "example")
 	// Test WithVersion
-	builder = NewBuilder("test-version", TypeForm, "Test Version")
+	builder = NewSchemaBuilder("test-version", TypeForm, "Test Version")
 	builder.WithVersion("1.2.3")
 	schema, err = builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -612,7 +614,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderLayoutMethods() {
 
 // Test builder conditional fields
 func (suite *BuilderFoundationTestSuite) TestBuilderConditionalFields() {
-	builder := NewBuilder("test-conditional", TypeForm, "Test Conditional")
+	builder := NewSchemaBuilder("test-conditional", TypeForm, "Test Conditional")
 	// Add base fields
 	builder.AddSelectField("account_type", "Account Type", true, []FieldOption{
 		{Value: "personal", Label: "Personal"},
@@ -624,16 +626,24 @@ func (suite *BuilderFoundationTestSuite) TestBuilderConditionalFields() {
 		Type:     FieldText,
 		Label:    "Company Name",
 		Required: true,
-		Conditional: &Conditional{
-			Show: &ConditionGroup{
-				Logic: "AND",
-				Conditions: []Condition{
-					{Field: "account_type", Operator: "equal", Value: "business"},
+		Conditional: &FieldConditional{
+			Show: &condition.ConditionGroup{
+				Conjunction: condition.ConjunctionAnd,
+				Children: []any{
+					&condition.ConditionRule{
+						ID: "account_type_check",
+						Left: condition.Expression{
+							Type:  condition.ValueTypeField,
+							Field: "account_type",
+						},
+						Op:    condition.OpEqual,
+						Right: "business",
+					},
 				},
 			},
 		},
 	}
-	builder.schema.AddField(businessField)
+	builder.AddField(businessField)
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
 	require.Len(suite.T(), schema.Fields, 2)
@@ -646,7 +656,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderConditionalFields() {
 
 // Test builder validation
 func (suite *BuilderFoundationTestSuite) TestBuilderValidation() {
-	builder := NewBuilder("test-validation", TypeForm, "Test Validation")
+	builder := NewSchemaBuilder("test-validation", TypeForm, "Test Validation")
 	// Add field with validation
 	builder.AddTextField("username", "Username", true)
 	builder.AddEmailField("email", "Email", true)
@@ -658,14 +668,14 @@ func (suite *BuilderFoundationTestSuite) TestBuilderValidation() {
 	err = schema.Validate(suite.ctx)
 	require.NoError(suite.T(), err)
 	// Test with invalid schema
-	invalidBuilder := NewBuilder("", TypeForm, "")
+	invalidBuilder := NewSchemaBuilder("", TypeForm, "")
 	_, err = invalidBuilder.Build(suite.ctx)
 	require.Error(suite.T(), err)
 }
 
 // Test builder metadata and configuration
 func (suite *BuilderFoundationTestSuite) TestBuilderMetadata() {
-	builder := NewBuilder("test-meta", TypeForm, "Test Meta")
+	builder := NewSchemaBuilder("test-meta", TypeForm, "Test Meta")
 	// Test adding metadata
 	builder.WithDescription("Test form with metadata")
 	builder.WithTags("test", "meta")
@@ -695,7 +705,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderMetadata() {
 
 // Test builder methods for better coverage
 func (suite *BuilderFoundationTestSuite) TestBuilderAdditionalMethods() {
-	builder := NewBuilder("test-additional", TypeForm, "Test Additional")
+	builder := NewSchemaBuilder("test-additional", TypeForm, "Test Additional")
 	// Test WithEvaluator
 	evaluator := condition.NewEvaluator(nil, condition.DefaultEvalOptions())
 	builder.WithEvaluator(evaluator)
@@ -720,7 +730,7 @@ func (suite *BuilderFoundationTestSuite) TestBuilderAdditionalMethods() {
 // Test builder fluent interface with Foundation features
 func (suite *BuilderFoundationTestSuite) TestBuilderFluentInterface() {
 	// Test that all Foundation methods return *Builder for chaining
-	schema, err := NewBuilder("fluent-test", TypeForm, "Fluent Test").
+	schema, err := NewSchemaBuilder("fluent-test", TypeForm, "Fluent Test").
 		WithDescription("Testing fluent interface").
 		WithMixin("audit_fields").
 		WithCustomValidator("test", func(ctx context.Context, value any, params map[string]any) error {

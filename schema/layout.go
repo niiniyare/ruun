@@ -790,6 +790,13 @@ func (v *layoutValidator) checkDuplicateIDs(layout *Layout, collector *ErrorColl
 type LayoutBuilder struct {
 	layout    Layout
 	evaluator *condition.Evaluator
+	
+	// Public fields for direct access (backward compatibility)
+	Type    LayoutType
+	Columns int
+	Gap     string
+	Tabs    []Tab
+	Steps   []Step
 }
 
 // NewLayout starts building a layout
@@ -798,16 +805,19 @@ func NewLayout(layoutType LayoutType) *LayoutBuilder {
 		layout: Layout{
 			Type: layoutType,
 		},
+		Type: layoutType,
 	}
 }
 
 func (b *LayoutBuilder) WithColumns(columns int) *LayoutBuilder {
 	b.layout.Columns = columns
+	b.Columns = columns
 	return b
 }
 
 func (b *LayoutBuilder) WithGap(gap string) *LayoutBuilder {
 	b.layout.Gap = gap
+	b.Gap = gap
 	return b
 }
 
@@ -1126,13 +1136,19 @@ func NewFlexLayout(direction string) *LayoutBuilder {
 }
 
 // NewTabLayout creates a tabbed layout
-func NewTabLayout() *LayoutBuilder {
-	return NewLayout(LayoutTabs)
+func NewTabLayout(tabs []Tab) *LayoutBuilder {
+	builder := NewLayout(LayoutTabs)
+	builder.layout.Tabs = tabs
+	builder.Tabs = tabs
+	return builder
 }
 
 // NewStepLayout creates a multi-step wizard
-func NewStepLayout() *LayoutBuilder {
-	return NewLayout(LayoutSteps)
+func NewStepLayout(steps []Step) *LayoutBuilder {
+	builder := NewLayout(LayoutSteps)
+	builder.layout.Steps = steps
+	builder.Steps = steps
+	return builder
 }
 
 // NewSectionLayout creates a sectioned layout

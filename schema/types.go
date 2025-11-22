@@ -323,6 +323,32 @@ func (w *Workflow) GetAvailableActions(ctx context.Context, data map[string]any,
 	return available
 }
 
+// SchemaI18n holds schema-level translations
+type SchemaI18n struct {
+	Title       map[string]string `json:"title,omitempty"`
+	Description map[string]string `json:"description,omitempty"`
+	Direction   map[string]string `json:"direction,omitempty"`
+}
+
+// IsRTLForSchemaI18n checks if a locale requires right-to-left text direction
+func IsRTLForSchemaI18n(schemaI18n *SchemaI18n, locale string) bool {
+	// Check if direction is explicitly set in SchemaI18n
+	if schemaI18n != nil && schemaI18n.Direction != nil {
+		if direction, ok := schemaI18n.Direction[locale]; ok {
+			return direction == "rtl"
+		}
+	}
+	
+	// Fall back to default RTL language detection
+	rtlLanguages := map[string]bool{
+		"ar": true, // Arabic
+		"he": true, // Hebrew
+		"fa": true, // Persian/Farsi
+		"ur": true, // Urdu
+	}
+	return rtlLanguages[locale]
+}
+
 // IsI18nEnabled checks if internationalization is enabled
 func (i *I18nManager) IsI18nEnabled() bool {
 	return i != nil && i.config != nil && i.config.DefaultLocale != ""

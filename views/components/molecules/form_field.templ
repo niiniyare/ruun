@@ -1,0 +1,257 @@
+package molecules
+
+import (
+    "github.com/niiniyare/ruun/views/components/atoms"
+    "github.com/niiniyare/ruun/pkg/utils"
+)
+
+// FormFieldType defines the input type
+type FormFieldType string
+
+const (
+    FormFieldText     FormFieldType = "text"
+    FormFieldEmail    FormFieldType = "email" 
+    FormFieldPassword FormFieldType = "password"
+    FormFieldNumber   FormFieldType = "number"
+    FormFieldTextarea FormFieldType = "textarea"
+    FormFieldSelect   FormFieldType = "select"
+    FormFieldCheckbox FormFieldType = "checkbox"
+    FormFieldRadio    FormFieldType = "radio"
+)
+
+// FormFieldOption represents select/radio/checkbox options
+type FormFieldOption struct {
+    Value    string
+    Label    string
+    Selected bool
+    Disabled bool
+}
+
+// FormFieldProps defines all properties for FormField molecule
+type FormFieldProps struct {
+    // Core properties
+    ID          string
+    Name        string
+    Type        FormFieldType
+    Label       string
+    Value       string
+    Placeholder string
+    HelpText    string
+    
+    // Options for select/radio/checkbox
+    Options     []FormFieldOption
+    
+    // State (pre-computed externally)
+    Required    bool
+    Disabled    bool
+    Readonly    bool
+    HasError    bool
+    
+    // Validation (pre-computed externally) 
+    Errors      []string
+    
+    // Styling (pre-resolved externally)
+    ClassName   string
+    LabelClass  string
+    InputClass  string
+    ErrorClass  string
+    
+    // Event handlers (function names)
+    OnChange    string
+    OnBlur      string
+    OnFocus     string
+    
+    // HTMX attributes (pre-resolved externally)
+    HXPost      string
+    HXTarget    string
+    HXSwap      string
+    HXTrigger   string
+}
+
+script FormFieldEvents(props FormFieldProps) {
+    // Simple event delegation for form field
+    function handleFieldEvent(event, eventType) {
+        const fieldId = event.target.id;
+        const value = event.target.value;
+        
+        // Call external handler if provided
+        if (props[eventType] && window[props[eventType]]) {
+            window[props[eventType]](fieldId, value, event);
+        }
+    }
+    
+    // Bind events to field
+    document.addEventListener('DOMContentLoaded', function() {
+        const field = document.getElementById(props.ID);
+        if (field) {
+            if (props.OnChange) {
+                field.addEventListener('change', (e) => handleFieldEvent(e, 'OnChange'));
+            }
+            if (props.OnBlur) {
+                field.addEventListener('blur', (e) => handleFieldEvent(e, 'OnBlur'));
+            }
+            if (props.OnFocus) {
+                field.addEventListener('focus', (e) => handleFieldEvent(e, 'OnFocus'));
+            }
+        }
+    });
+}
+
+// getFieldClass builds CSS class string
+func getFieldClass(props FormFieldProps) string {
+    return utils.TwMerge(
+        "form-field",
+        utils.If(props.Required, "form-field-required"),
+        utils.If(props.Disabled, "form-field-disabled"),
+        utils.If(props.HasError, "form-field-error"),
+        props.ClassName,
+    )
+}
+
+// FormField renders a form field molecule with label, input, and validation
+templ FormField(props FormFieldProps) {
+    @FormFieldEvents(props)
+    
+    <div class={getFieldClass(props)}>
+        // Label
+        if props.Label != "" {
+            @atoms.Label(atoms.LabelProps{
+                For:      props.ID,
+                Text:     props.Label,
+                Required: props.Required,
+                Disabled: props.Disabled,
+                ClassName: props.LabelClass,
+            })
+        }
+        
+        // Input based on type
+        <div class="form-field-input">
+            @renderInput(props)
+        </div>
+        
+        // Help text
+        if props.HelpText != "" {
+            <div class="form-field-help">
+                {props.HelpText}
+            </div>
+        }
+        
+        // Error messages
+        if len(props.Errors) > 0 {
+            <div class={utils.TwMerge("form-field-errors", props.ErrorClass)}>
+                for _, error := range props.Errors {
+                    <div class="form-field-error-message">
+                        {error}
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+// renderInput renders the appropriate input based on type
+templ renderInput(props FormFieldProps) {
+    switch props.Type {
+    case FormFieldText, FormFieldEmail, FormFieldPassword, FormFieldNumber:
+        @atoms.Input(atoms.InputProps{
+            ID:          props.ID,
+            Name:        props.Name,
+            Type:        atoms.InputType(props.Type),
+            Value:       props.Value,
+            Placeholder: props.Placeholder,
+            Required:    props.Required,
+            Disabled:    props.Disabled,
+            Readonly:    props.Readonly,
+            ClassName:   props.InputClass,
+            HXPost:      props.HXPost,
+            HXTarget:    props.HXTarget,
+            HXSwap:      props.HXSwap,
+            HXTrigger:   props.HXTrigger,
+        })
+        
+    case FormFieldTextarea:
+        @atoms.Textarea(atoms.TextareaProps{
+            ID:          props.ID,
+            Name:        props.Name,
+            Value:       props.Value,
+            Placeholder: props.Placeholder,
+            Required:    props.Required,
+            Disabled:    props.Disabled,
+            Readonly:    props.Readonly,
+            ClassName:   props.InputClass,
+        })
+        
+    case FormFieldSelect:
+        @atoms.Select(atoms.SelectProps{
+            ID:       props.ID,
+            Name:     props.Name,
+            Value:    props.Value,
+            Options:  convertToSelectOptions(props.Options),
+            Required: props.Required,
+            Disabled: props.Disabled,
+            ClassName: props.InputClass,
+        })
+        
+    case FormFieldCheckbox:
+        if len(props.Options) > 0 {
+            for _, option := range props.Options {
+                @atoms.Checkbox(atoms.CheckboxProps{
+                    ID:       props.ID + "-" + option.Value,
+                    Name:     props.Name,
+                    Value:    option.Value,
+                    Label:    option.Label,
+                    Checked:  option.Selected,
+                    Disabled: props.Disabled || option.Disabled,
+                })
+            }
+        } else {
+            @atoms.Checkbox(atoms.CheckboxProps{
+                ID:      props.ID,
+                Name:    props.Name,
+                Value:   props.Value,
+                Label:   props.Label,
+                Checked: props.Value == "true",
+                Disabled: props.Disabled,
+            })
+        }
+        
+    case FormFieldRadio:
+        for _, option := range props.Options {
+            @atoms.Radio(atoms.RadioProps{
+                ID:       props.ID + "-" + option.Value,
+                Name:     props.Name,
+                Value:    option.Value,
+                Label:    option.Label,
+                Checked:  option.Selected,
+                Disabled: props.Disabled || option.Disabled,
+            })
+        }
+        
+    default:
+        @atoms.Input(atoms.InputProps{
+            ID:          props.ID,
+            Name:        props.Name,
+            Type:        "text",
+            Value:       props.Value,
+            Placeholder: props.Placeholder,
+            Required:    props.Required,
+            Disabled:    props.Disabled,
+            Readonly:    props.Readonly,
+            ClassName:   props.InputClass,
+        })
+    }
+}
+
+// convertToSelectOptions converts FormField options to Select atom options
+func convertToSelectOptions(options []FormFieldOption) []atoms.SelectOption {
+    selectOptions := make([]atoms.SelectOption, len(options))
+    for i, option := range options {
+        selectOptions[i] = atoms.SelectOption{
+            Value:    option.Value,
+            Label:    option.Label,
+            Selected: option.Selected,
+            Disabled: option.Disabled,
+        }
+    }
+    return selectOptions
+}

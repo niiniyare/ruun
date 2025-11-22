@@ -368,3 +368,25 @@ func (v *schemaValidator) checkCycle(s *Schema, fieldName string, visited, stack
 	stack[fieldName] = false
 	return nil
 }
+
+// ApplySchemaI18nLocalization applies internationalization to schema elements
+func (s *Schema) ApplySchemaI18nLocalization(schemaI18n *SchemaI18n, locale string) (*Schema, error) {
+	if schemaI18n == nil {
+		return s, nil
+	}
+	
+	// Create a copy of the schema to modify
+	localized := *s
+	
+	// Apply localized title
+	if title, ok := schemaI18n.Title[locale]; ok && title != "" {
+		localized.Title = title
+	}
+	
+	// Apply localized description
+	if desc, ok := schemaI18n.Description[locale]; ok && desc != "" {
+		localized.Description = desc
+	}
+	
+	return &localized, nil
+}

@@ -34,7 +34,13 @@ func TestI18nTestSuite(t *testing.T) {
 
 // Test I18nManager creation and basic functionality
 func (suite *I18nTestSuite) TestI18nManagerCreation() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	suite.Require().NotNil(manager)
 	suite.Require().Equal("en", manager.GetLocale())
 	// Test locale change
@@ -44,7 +50,13 @@ func (suite *I18nTestSuite) TestI18nManagerCreation() {
 
 // Test loading default translations
 func (suite *I18nTestSuite) TestLoadDefaultTranslations() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Test English validation message
@@ -198,18 +210,18 @@ func (suite *I18nTestSuite) TestRTLDetection() {
 	suite.Require().False(IsRTLForSchemaI18n(nil, "en"))
 	suite.Require().False(IsRTLForSchemaI18n(nil, "es"))
 	suite.Require().False(IsRTLForSchemaI18n(nil, "fr"))
-	// Test existing Schema.IsRTL method with I18n struct
+	// Test existing Schema.IsRTL method with I18nManager struct
 	schema := &Schema{
 		ID: "test-schema",
-		I18n: &I18n{
-			Direction: "rtl",
+		I18n: &I18nManager{
+			DefaultLocale: "ar",
 		},
 	}
 	suite.Require().True(schema.IsRTL("ar"))
 	schemaLTR := &Schema{
 		ID: "test-schema",
-		I18n: &I18n{
-			Direction: "ltr",
+		I18n: &I18nManager{
+			DefaultLocale: "en",
 		},
 	}
 	suite.Require().False(schemaLTR.IsRTL("en"))
@@ -271,7 +283,13 @@ func (suite *I18nTestSuite) TestI18nLoader() {
 
 // Test message interpolation
 func (suite *I18nTestSuite) TestMessageInterpolation() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Test simple interpolation
@@ -309,7 +327,13 @@ func (suite *I18nTestSuite) TestFallbackBehavior() {
 
 // Test action message retrieval
 func (suite *I18nTestSuite) TestActionMessages() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Test English action messages
@@ -327,7 +351,13 @@ func (suite *I18nTestSuite) TestActionMessages() {
 
 // Test status messages
 func (suite *I18nTestSuite) TestStatusMessages() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Test English status messages
@@ -343,7 +373,13 @@ func (suite *I18nTestSuite) TestStatusMessages() {
 
 // Test pluralization
 func (suite *I18nTestSuite) TestPluralization() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	// Add custom plural messages for testing
 	manager.mu.Lock()
 	if manager.messages["en"] == nil {
@@ -423,7 +459,13 @@ func (suite *I18nTestSuite) TestEdgeCases() {
 
 // Test concurrent access
 func (suite *I18nTestSuite) TestConcurrentAccess() {
-	manager := NewI18nManager("en", "en")
+	config := &I18nConfig{
+		DefaultLocale:    "en",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}
+	manager := NewI18nManager(config)
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Test concurrent reads and writes

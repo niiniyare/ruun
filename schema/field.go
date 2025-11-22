@@ -308,6 +308,7 @@ type FieldI18n struct {
 	Placeholder map[string]string `json:"placeholder,omitempty"`
 	Help        map[string]string `json:"help,omitempty"`
 	Description map[string]string `json:"description,omitempty"`
+	Tooltip     map[string]string `json:"tooltip,omitempty"`
 }
 
 // FieldHTMX defines HTMX behavior
@@ -535,6 +536,21 @@ func (f *Field) GetLocalizedDescription(locale string) string {
 	return translated
 }
 
+// GetLocalizedTooltip returns localized tooltip text
+func (f *Field) GetLocalizedTooltip(locale string) string {
+	if f.I18n != nil && f.I18n.Tooltip != nil {
+		if tooltip, ok := f.I18n.Tooltip[locale]; ok && tooltip != "" {
+			return tooltip
+		}
+	}
+	key := f.Name + "Tooltip"
+	translated := T_Field(locale, key)
+	if translated == humanizeFieldID(key) {
+		return f.Tooltip
+	}
+	return translated
+}
+
 // Type Checking Methods
 
 // IsSelectionType checks if field is a selection type
@@ -571,6 +587,195 @@ func (f *Field) IsDateTimeType() bool {
 		return true
 	}
 	return false
+}
+
+// IsLayoutType checks if field is a layout/container type
+func (f *Field) IsLayoutType() bool {
+	switch f.Type {
+	case FieldGroup, FieldFieldset, FieldTabs, FieldPanel, FieldCollapse:
+		return true
+	}
+	return false
+}
+
+// GetOptionLabel returns label for an option value
+func (f *Field) GetOptionLabel(value string) string {
+	for _, option := range f.Options {
+		if option.Value == value {
+			return option.Label
+		}
+	}
+	return value
+}
+
+// GetLabel returns the field label or a humanized version of the name
+func (f *Field) GetLabel() string {
+	if f.Label != "" {
+		return f.Label
+	}
+	return humanizeFieldID(f.Name)
+}
+
+// GetPlaceholder returns the field placeholder
+func (f *Field) GetPlaceholder() string {
+	return f.Placeholder
+}
+
+// GetHelp returns the field help text
+func (f *Field) GetHelp() string {
+	return f.Help
+}
+
+// TextConfig represents text field configuration
+type TextConfig struct {
+	MaxLength    int    `json:"maxLength,omitempty"`
+	MinLength    int    `json:"minLength,omitempty"`
+	Autocomplete string `json:"autocomplete,omitempty"`
+	Prefix       string `json:"prefix,omitempty"`
+	Suffix       string `json:"suffix,omitempty"`
+}
+
+// GetTextConfig returns text-specific configuration
+func (f *Field) GetTextConfig() (*TextConfig, error) {
+	if f.Config == nil {
+		return &TextConfig{}, nil
+	}
+	
+	config := &TextConfig{}
+	if maxLen, ok := f.Config["maxLength"].(int); ok {
+		config.MaxLength = maxLen
+	}
+	if minLen, ok := f.Config["minLength"].(int); ok {
+		config.MinLength = minLen
+	}
+	if autocomplete, ok := f.Config["autocomplete"].(string); ok {
+		config.Autocomplete = autocomplete
+	}
+	if prefix, ok := f.Config["prefix"].(string); ok {
+		config.Prefix = prefix
+	}
+	if suffix, ok := f.Config["suffix"].(string); ok {
+		config.Suffix = suffix
+	}
+	
+	return config, nil
+}
+
+// SelectConfig represents select field configuration
+type SelectConfig struct {
+	Multiple      bool   `json:"multiple,omitempty"`
+	Searchable    bool   `json:"searchable,omitempty"`
+	Clearable     bool   `json:"clearable,omitempty"`
+	Createable    bool   `json:"createable,omitempty"`
+	MaxSelections int    `json:"maxSelections,omitempty"`
+	Placeholder   string `json:"placeholder,omitempty"`
+}
+
+// GetSelectConfig returns select-specific configuration
+func (f *Field) GetSelectConfig() (*SelectConfig, error) {
+	if f.Config == nil {
+		return &SelectConfig{}, nil
+	}
+	
+	config := &SelectConfig{}
+	if multiple, ok := f.Config["multiple"].(bool); ok {
+		config.Multiple = multiple
+	}
+	if searchable, ok := f.Config["searchable"].(bool); ok {
+		config.Searchable = searchable
+	}
+	if clearable, ok := f.Config["clearable"].(bool); ok {
+		config.Clearable = clearable
+	}
+	if createable, ok := f.Config["createable"].(bool); ok {
+		config.Createable = createable
+	}
+	if maxSel, ok := f.Config["maxSelections"].(int); ok {
+		config.MaxSelections = maxSel
+	}
+	if placeholder, ok := f.Config["placeholder"].(string); ok {
+		config.Placeholder = placeholder
+	}
+	
+	return config, nil
+}
+
+// FileConfig represents file field configuration
+type FileConfig struct {
+	Accept      string `json:"accept,omitempty"`
+	MaxSize     int64  `json:"maxSize,omitempty"`
+	Multiple    bool   `json:"multiple,omitempty"`
+	PreviewMode string `json:"previewMode,omitempty"`
+	AutoUpload  bool   `json:"autoUpload,omitempty"`
+}
+
+// GetFileConfig returns file-specific configuration
+func (f *Field) GetFileConfig() (*FileConfig, error) {
+	if f.Config == nil {
+		return &FileConfig{}, nil
+	}
+	
+	config := &FileConfig{}
+	if accept, ok := f.Config["accept"].(string); ok {
+		config.Accept = accept
+	}
+	if maxSize, ok := f.Config["maxSize"].(int64); ok {
+		config.MaxSize = maxSize
+	}
+	if multiple, ok := f.Config["multiple"].(bool); ok {
+		config.Multiple = multiple
+	}
+	if previewMode, ok := f.Config["previewMode"].(string); ok {
+		config.PreviewMode = previewMode
+	}
+	if autoUpload, ok := f.Config["autoUpload"].(bool); ok {
+		config.AutoUpload = autoUpload
+	}
+	
+	return config, nil
+}
+
+// RelationConfig represents relation field configuration
+type RelationConfig struct {
+	Entity       string `json:"entity,omitempty"`
+	DisplayField string `json:"displayField,omitempty"`
+	ValueField   string `json:"valueField,omitempty"`
+	SearchField  string `json:"searchField,omitempty"`
+	TargetSchema string `json:"targetSchema,omitempty"`
+	Multiple     bool   `json:"multiple,omitempty"`
+	CreateNew    bool   `json:"createNew,omitempty"`
+}
+
+// GetRelationConfig returns relation-specific configuration
+func (f *Field) GetRelationConfig() (*RelationConfig, error) {
+	if f.Config == nil {
+		return &RelationConfig{}, nil
+	}
+	
+	config := &RelationConfig{}
+	if entity, ok := f.Config["entity"].(string); ok {
+		config.Entity = entity
+	}
+	if displayField, ok := f.Config["displayField"].(string); ok {
+		config.DisplayField = displayField
+	}
+	if valueField, ok := f.Config["valueField"].(string); ok {
+		config.ValueField = valueField
+	}
+	if searchField, ok := f.Config["searchField"].(string); ok {
+		config.SearchField = searchField
+	}
+	if targetSchema, ok := f.Config["targetSchema"].(string); ok {
+		config.TargetSchema = targetSchema
+	}
+	if multiple, ok := f.Config["multiple"].(bool); ok {
+		config.Multiple = multiple
+	}
+	if createNew, ok := f.Config["createNew"].(bool); ok {
+		config.CreateNew = createNew
+	}
+	
+	return config, nil
 }
 
 // fieldValidator validates field configuration

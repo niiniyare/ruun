@@ -11,6 +11,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// Context represents test context data
+type Context struct {
+	UserID string
+}
+
 // FieldTestSuite tests the Field functionality
 type FieldTestSuite struct {
 	suite.Suite
@@ -37,7 +42,7 @@ func (s *FieldTestSuite) TestFieldTypes() {
 		// Date/time
 		FieldDate, FieldTime, FieldDateTime, FieldDateRange, FieldMonth, FieldYear, FieldQuarter,
 		// Text content
-		FieldTextarea, FieldRichText, FieldCode, FieldJson,
+		FieldTextarea, FieldRichText, FieldCode, FieldJSON,
 		// Selection
 		FieldSelect, FieldMultiSelect, FieldRadio, FieldCheckbox, FieldCheckboxes,
 		FieldTreeSelect, FieldCascader, FieldTransfer,
@@ -526,9 +531,17 @@ func (s *FieldTestSuite) TestIsVisibleSimpleFormat() {
 	s.field.SetEvaluator(s.evaluator)
 	s.field.Conditional = &FieldConditional{
 		Show: &condition.ConditionGroup{
-			Conjunction: "and",
-			Conditions: []Condition{
-				{Field: "status", Operator: "equal", Value: "active"},
+			Conjunction: condition.ConjunctionAnd,
+			Children: []any{
+				&condition.ConditionRule{
+					ID: "status_check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "status",
+					},
+					Op:    condition.OpEqual,
+					Right: "active",
+				},
 			},
 		},
 	}
@@ -544,11 +557,19 @@ func (s *FieldTestSuite) TestIsVisibleSimpleFormat() {
 
 func (s *FieldTestSuite) TestIsVisibleHideCondition() {
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &Conditional{
-		Hide: &ConditionGroup{
-			Logic: "AND",
-			Conditions: []Condition{
-				{Field: "user_type", Operator: "equal", Value: "guest"},
+	s.field.Conditional = &FieldConditional{
+		Hide: &condition.ConditionGroup{
+			Conjunction: condition.ConjunctionAnd,
+			Children: []any{
+				&condition.ConditionRule{
+					ID: "user_type_check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "user_type",
+					},
+					Op:    condition.OpEqual,
+					Right: "guest",
+				},
 			},
 		},
 	}
@@ -566,8 +587,8 @@ func (s *FieldTestSuite) TestIsVisibleAdvancedFormat() {
 	s.field.SetEvaluator(s.evaluator)
 	builder := condition.NewBuilder(condition.ConjunctionAnd)
 	builder.AddRule("status", condition.OpEqual, "active")
-	s.field.Conditional = &Conditional{
-		ShowAdvanced: builder.Build(),
+	s.field.Conditional = &FieldConditional{
+		Show: builder.Build(),
 	}
 	data := map[string]any{"status": "active"}
 	visible, err := s.field.IsVisible(context.Background(), data)
@@ -578,11 +599,19 @@ func (s *FieldTestSuite) TestIsVisibleAdvancedFormat() {
 func (s *FieldTestSuite) TestIsRequiredConditional() {
 	s.field.Required = false // Set to false so conditional controls requirement
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &Conditional{
-		Required: &ConditionGroup{
-			Logic: "AND",
-			Conditions: []Condition{
-				{Field: "amount", Operator: "greater", Value: 1000.0},
+	s.field.Conditional = &FieldConditional{
+		Required: &condition.ConditionGroup{
+			Conjunction: condition.ConjunctionAnd,
+			Children: []any{
+				&condition.ConditionRule{
+					ID: "amount_check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "amount",
+					},
+					Op:    condition.OpGreater,
+					Right: 1000.0,
+				},
 			},
 		},
 	}
@@ -598,12 +627,28 @@ func (s *FieldTestSuite) TestIsRequiredConditional() {
 
 func (s *FieldTestSuite) TestIsDisabledConditional() {
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &Conditional{
-		Disabled: &ConditionGroup{
-			Logic: "OR",
-			Conditions: []Condition{
-				{Field: "terms_accepted", Operator: "not_equal", Value: true},
-				{Field: "email_verified", Operator: "not_equal", Value: true},
+	s.field.Conditional = &FieldConditional{
+		Disabled: &condition.ConditionGroup{
+			Conjunction: condition.ConjunctionOr,
+			Children: []any{
+				&condition.ConditionRule{
+					ID: "terms_accepted_check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "terms_accepted",
+					},
+					Op:    condition.OpNotEqual,
+					Right: true,
+				},
+				&condition.ConditionRule{
+					ID: "email_verified_check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "email_verified",
+					},
+					Op:    condition.OpNotEqual,
+					Right: true,
+				},
 			},
 		},
 	}
@@ -618,11 +663,19 @@ func (s *FieldTestSuite) TestIsDisabledConditional() {
 }
 
 func (s *FieldTestSuite) TestIsVisibleWithoutEvaluator() {
-	s.field.Conditional = &Conditional{
-		Show: &ConditionGroup{
-			Logic: "AND",
-			Conditions: []Condition{
-				{Field: "status", Operator: "equal", Value: "active"},
+	s.field.Conditional = &FieldConditional{
+		Show: &condition.ConditionGroup{
+			Conjunction: condition.ConjunctionAnd,
+			Children: []any{
+				&condition.ConditionRule{
+					ID: "status_check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "status",
+					},
+					Op:    condition.OpEqual,
+					Right: "active",
+				},
 			},
 		},
 	}
@@ -721,11 +774,11 @@ func (s *FieldTestSuite) TestGetLabelLocalized() {
 			"fr": "Étiquette française",
 		},
 	}
-	label := s.field.GetLabel("en")
+	label := s.field.GetLocalizedLabel("en")
 	s.Require().Equal("English Label", label)
-	label = s.field.GetLabel("fr")
+	label = s.field.GetLocalizedLabel("fr")
 	s.Require().Equal("Étiquette française", label)
-	label = s.field.GetLabel("de")
+	label = s.field.GetLocalizedLabel("de")
 	s.Require().Equal("Default Label", label)
 }
 
@@ -737,9 +790,9 @@ func (s *FieldTestSuite) TestGetPlaceholderLocalized() {
 			"fr": "Entrez votre valeur",
 		},
 	}
-	placeholder := s.field.GetPlaceholder("fr")
+	placeholder := s.field.GetLocalizedPlaceholder("fr")
 	s.Require().Equal("Entrez votre valeur", placeholder)
-	placeholder = s.field.GetPlaceholder("de")
+	placeholder = s.field.GetLocalizedPlaceholder("de")
 	s.Require().Equal("Enter value", placeholder)
 }
 
@@ -751,7 +804,7 @@ func (s *FieldTestSuite) TestGetHelpLocalized() {
 			"fr": "Aide française",
 		},
 	}
-	help := s.field.GetHelp("fr")
+	help := s.field.GetLocalizedHelp("fr")
 	s.Require().Equal("Aide française", help)
 }
 
@@ -933,7 +986,7 @@ func (s *FieldTestSuite) TestFieldCustomMessages() {
 	minLen := 5
 	s.field.Validation = &FieldValidation{
 		MinLength: &minLen,
-		Messages: &Messages{
+		Messages: &ValidationMessages{
 			MinLength: "Custom min length message",
 		},
 	}
@@ -944,31 +997,15 @@ func (s *FieldTestSuite) TestFieldCustomMessages() {
 
 // ==================== Condition Conversion Tests ====================
 func (s *FieldTestSuite) TestConditionGroupConversion() {
-	cg := &ConditionGroup{
-		Logic: "AND",
-		Conditions: []Condition{
-			{Field: "status", Operator: "equal", Value: "active"},
-			{Field: "age", Operator: "greater", Value: 18.0},
-		},
-	}
-	converted := cg.ToConditionGroup()
-	s.Require().NotNil(converted)
-	s.Require().Equal(condition.ConjunctionAnd, converted.Conjunction)
-	// Don't check internal structure, just verify it can be used
+	// Test disabled - old ConditionGroup type no longer exists
+	// This functionality has been replaced with the new condition package
+	s.T().Skip("Test disabled - old condition types no longer supported")
 }
 
 func (s *FieldTestSuite) TestConditionGroupConversionOR() {
-	cg := &ConditionGroup{
-		Logic: "OR",
-		Conditions: []Condition{
-			{Field: "premium", Operator: "equal", Value: true},
-			{Field: "vip", Operator: "equal", Value: true},
-		},
-	}
-	converted := cg.ToConditionGroup()
-	s.Require().NotNil(converted)
-	s.Require().Equal(condition.ConjunctionOr, converted.Conjunction)
-	// Don't check internal structure, just verify it can be used
+	// Test disabled - old ConditionGroup type no longer exists  
+	// This functionality has been replaced with the new condition package
+	s.T().Skip("Test disabled - old condition types no longer supported")
 }
 
 // Run the test suite
@@ -985,8 +1022,8 @@ func (s *FieldTestSuite) TestFieldSetGetEvaluator() {
 }
 
 func (s *FieldTestSuite) TestFieldApplyTransform() {
-	s.field.Transform = &Transform{
-		Type: "uppercase",
+	s.field.Transform = &FieldTransform{
+		Type: TransformUpperCase,
 	}
 	result, err := s.field.ApplyTransform("hello world")
 	s.Require().NoError(err)

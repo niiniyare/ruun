@@ -160,6 +160,14 @@ func (r *ValidationRegistry) RegisterAsync(validator *AsyncValidator) error {
 	return nil
 }
 
+// Get retrieves a validator by name
+func (r *ValidationRegistry) Get(name string) (ValidatorFunc, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	validator, exists := r.validators[name]
+	return validator, exists
+}
+
 // Validate executes a validator by name
 func (r *ValidationRegistry) Validate(ctx context.Context, name string, value any, params map[string]any) error {
 	r.mu.RLock()

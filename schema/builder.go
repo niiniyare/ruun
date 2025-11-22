@@ -11,15 +11,19 @@ import (
 
 // SchemaBuilder provides fluent API for building schemas
 type SchemaBuilder struct {
-	schema    *Schema
-	evaluator *condition.Evaluator
-	mixins    *MixinRegistry
-	errors    []error
+	schema            *Schema
+	evaluator         *condition.Evaluator
+	mixins            *MixinRegistry
+	mixinSupport      *MixinRegistry           // Alias for backward compatibility
+	ruleEngine        *BusinessRuleEngine
+	validatorRegistry *ValidationRegistry
+	errors            []error
 }
 
 // NewSchemaBuilder creates a new schema builder
 func NewSchemaBuilder(id string, schemaType Type, title string) *SchemaBuilder {
 	now := time.Now()
+	mixinRegistry := NewMixinRegistry()
 	return &SchemaBuilder{
 		schema: &Schema{
 			ID:          id,
@@ -35,8 +39,11 @@ func NewSchemaBuilder(id string, schemaType Type, title string) *SchemaBuilder {
 				UpdatedAt: now,
 			},
 		},
-		mixins: NewMixinRegistry(),
-		errors: []error{},
+		mixins:            mixinRegistry,
+		mixinSupport:      mixinRegistry, // Same instance for backward compatibility
+		ruleEngine:        NewBusinessRuleEngine(),
+		validatorRegistry: NewValidationRegistry(),
+		errors:            []error{},
 	}
 }
 
@@ -99,6 +106,10 @@ func (b *SchemaBuilder) AddFields(fields ...Field) *SchemaBuilder {
 	return b
 }
 
+func (b *SchemaBuilder) AddFieldWithConfig(field Field) *SchemaBuilder {
+	return b.AddField(field)
+}
+
 // Action Management
 
 func (b *SchemaBuilder) AddAction(action Action) *SchemaBuilder {
@@ -154,6 +165,18 @@ func (b *SchemaBuilder) WithRateLimit(maxRequests int, windowSeconds int) *Schem
 	return b
 }
 
+func (b *SchemaBuilder) WithCSRF() *SchemaBuilder {
+	if b.schema.Security == nil {
+		b.schema.Security = &Security{}
+	}
+	b.schema.Security.CSRF = &CSRF{
+		Enabled:    true,
+		FieldName:  "_csrf_token",
+		HeaderName: "X-CSRF-Token",
+	}
+	return b
+}
+
 func (b *SchemaBuilder) WithTenant(field, isolation string) *SchemaBuilder {
 	b.schema.Tenant = &Tenant{
 		Enabled:   true,
@@ -171,6 +194,53 @@ func (b *SchemaBuilder) WithWorkflow(workflow *Workflow) *SchemaBuilder {
 func (b *SchemaBuilder) WithValidation(validation *Validation) *SchemaBuilder {
 	b.schema.Validation = validation
 	return b
+}
+
+func (b *SchemaBuilder) WithCustomValidator(name string, validator ValidatorFunc) *SchemaBuilder {
+	b.validatorRegistry.Register(name, validator)
+	return b
+}
+
+func (b *SchemaBuilder) GetValidator(name string) (ValidatorFunc, bool) {
+	return b.validatorRegistry.Get(name)
+}
+
+func (b *SchemaBuilder) WithBusinessRule(rule *BusinessRule) *SchemaBuilder {
+	if rule != nil {
+		b.ruleEngine.AddRule(rule)
+	}
+	return b
+}
+
+func (b *SchemaBuilder) GetBusinessRuleEngine() *BusinessRuleEngine {
+	return b.ruleEngine
+}
+
+func (b *SchemaBuilder) GetMixinRegistry() *MixinRegistry {
+	return b.mixins
+}
+
+func (b *SchemaBuilder) WithBusinessRuleBuilder(ruleBuilder *BusinessRuleBuilder) *SchemaBuilder {
+	if ruleBuilder != nil {
+		if rule, err := ruleBuilder.Build(); err == nil {
+			b.ruleEngine.AddRule(rule)
+		} else {
+			b.errors = append(b.errors, fmt.Errorf("failed to build business rule: %w", err))
+		}
+	}
+	return b
+}
+
+func (b *SchemaBuilder) ApplyBusinessRules(ctx context.Context, data map[string]any) (*Schema, error) {
+	schema, err := b.Build(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return b.ruleEngine.ApplyRules(ctx, schema, data)
+}
+
+func (b *SchemaBuilder) BuildWithRules(ctx context.Context, data map[string]any) (*Schema, error) {
+	return b.ApplyBusinessRules(ctx, data)
 }
 
 func (b *SchemaBuilder) WithEvents(events *Events) *SchemaBuilder {
@@ -227,6 +297,43 @@ func (b *SchemaBuilder) WithCustomMixin(mixin *Mixin) *SchemaBuilder {
 		return b
 	}
 	return b.WithMixin(mixin.ID)
+}
+
+// Helper Functions
+
+// NewSimpleConfig creates a simple config with default encoding
+func NewSimpleConfig(action, method string) *Config {
+	return &Config{
+		Action:   action,
+		Method:   method,
+		Encoding: "application/json",
+	}
+}
+
+// CreateOption creates a field option
+func CreateOption(value, label string) FieldOption {
+	return FieldOption{
+		Value: value,
+		Label: label,
+	}
+}
+
+// CreateOptionWithIcon creates a field option with icon
+func CreateOptionWithIcon(value, label, icon string) FieldOption {
+	return FieldOption{
+		Value: value,
+		Label: label,
+		Icon:  icon,
+	}
+}
+
+// CreateGroupedOption creates a field option with group
+func CreateGroupedOption(value, label, group string) FieldOption {
+	return FieldOption{
+		Value: value,
+		Label: label,
+		Group: group,
+	}
 }
 
 // Build Methods
@@ -373,6 +480,24 @@ func (b *SchemaBuilder) AddDateField(name, label string, required bool) *SchemaB
 	})
 }
 
+// WithRepeatable adds a repeatable field
+func (b *SchemaBuilder) WithRepeatable(repeatableField *RepeatableField) *SchemaBuilder {
+	return b.AddField(Field{
+		Name:        repeatableField.Name,
+		Type:        FieldRepeatable,
+		Label:       repeatableField.Label,
+		Required:    repeatableField.Required,
+		Description: repeatableField.Description,
+		// Convert RepeatableField properties to Field config
+		Config: map[string]any{
+			"template":  repeatableField.Template,
+			"minItems":  repeatableField.MinItems,
+			"maxItems":  repeatableField.MaxItems,
+			"itemLabel": repeatableField.ItemLabel,
+		},
+	})
+}
+
 // AddSubmitButton adds a submit button
 func (b *SchemaBuilder) AddSubmitButton(text string) *SchemaBuilder {
 	return b.AddAction(Action{
@@ -404,6 +529,22 @@ func (b *SchemaBuilder) AddCancelButton(text string) *SchemaBuilder {
 		Variant: "outline",
 		Size:    "md",
 	})
+}
+
+// AddButton adds a custom button with specified variant
+func (b *SchemaBuilder) AddButton(id, text, variant string) *SchemaBuilder {
+	return b.AddAction(Action{
+		ID:      id,
+		Type:    ActionButton,
+		Text:    text,
+		Variant: variant,
+		Size:    "md",
+	})
+}
+
+// AddActionWithConfig adds a custom action with full configuration
+func (b *SchemaBuilder) AddActionWithConfig(action Action) *SchemaBuilder {
+	return b.AddAction(action)
 }
 
 // Validation Helpers
