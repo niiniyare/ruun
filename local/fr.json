@@ -1,0 +1,54 @@
+{
+  "locale": "fr",
+  "metadata": {
+    "version": "1.0.0",
+    "author": "ERP Team",
+    "lastUpdated": "2024-01-15"
+  },
+  "translations": {
+    "common": {
+      "welcome": "Bienvenue",
+      "hello": "Bonjour {name}",
+      "goodbye": "Au revoir",
+      "yes": "Oui",
+      "no": "Non",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "create": "Créer",
+      "update": "Mettre à jour",
+      "search": "Rechercher",
+      "loading": "Chargement...",
+      "error": "Une erreur s'est produite",
+      "success": "Opération réussie"
+    },
+    "messages": {
+      "items": "aucun élément|un élément|{count} éléments",
+      "notifications": "aucune notification|{count} notification|{count} notifications",
+      "selected": "aucun élément sélectionné|{count} élément sélectionné|{count} éléments sélectionnés"
+    },
+    "fields": {
+      "email": "Adresse E-mail",
+      "password": "Mot de passe",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "city": "Ville",
+      "country": "Pays",
+      "postalCode": "Code Postal",
+      "description": "Description"
+    },
+    "validation": {
+      "required": "{field} est requis",
+      "email": "{field} doit être une adresse e-mail valide",
+      "minLength": "{field} doit contenir au moins {min} caractères",
+      "maxLength": "{field} doit contenir au maximum {max} caractères",
+      "min": "{field} doit être au moins {min}",
+      "max": "{field} doit être au maximum {max}",
+      "pattern": "Le format de {field} est invalide",
+      "unique": "{field} est déjà utilisé",
+      "passwordMatch": "Les mots de passe ne correspondent pas"
+    },
+    "actions": {

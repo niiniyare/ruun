@@ -1,0 +1,110 @@
+{
+  "locale": "es",
+  "metadata": {
+    "version": "1.0.0",
+    "author": "ERP Team",
+    "lastUpdated": "2024-01-15"
+  },
+  "translations": {
+    "common": {
+      "welcome": "Bienvenido",
+      "hello": "Hola {name}",
+      "goodbye": "Adiós",
+      "yes": "Sí",
+      "no": "No",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "create": "Crear",
+      "update": "Actualizar",
+      "search": "Buscar",
+      "loading": "Cargando...",
+      "error": "Ocurrió un error",
+      "success": "Operación exitosa"
+    },
+    "messages": {
+      "items": "sin elementos|un elemento|{count} elementos",
+      "notifications": "sin notificaciones|{count} notificación|{count} notificaciones",
+      "selected": "ningún elemento seleccionado|{count} elemento seleccionado|{count} elementos seleccionados"
+    },
+    "fields": {
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "country": "País",
+      "postalCode": "Código Postal",
+      "description": "Descripción"
+    },
+    "validation": {
+      "required": "{field} es requerido",
+      "email": "{field} debe ser un correo electrónico válido",
+      "minLength": "{field} debe tener al menos {min} caracteres",
+      "maxLength": "{field} debe tener como máximo {max} caracteres",
+      "min": "{field} debe ser al menos {min}",
+      "max": "{field} debe ser como máximo {max}",
+      "pattern": "El formato de {field} es inválido",
+      "unique": "{field} ya está en uso",
+      "passwordMatch": "Las contraseñas no coinciden"
+    },
+    "actions": {
+      "submit": "Enviar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "create": "Crear Nuevo",
+      "update": "Actualizar",
+      "search": "Buscar",
+      "filter": "Filtrar",
+      "export": "Exportar",
+      "import": "Importar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "finish": "Finalizar"
+    },
+    "confirmations": {
+      "delete": "¿Está seguro de que desea eliminar este elemento?",
+      "deleteTitle": "Confirmar Eliminación",
+      "unsavedChanges": "Tiene cambios sin guardar. ¿Está seguro de que desea salir?",
+      "unsavedTitle": "Cambios Sin Guardar"
+    },
+    "errors": {
+      "notFound": "{resource} no encontrado",
+      "serverError": "Ocurrió un error en el servidor",
+      "unauthorized": "No está autorizado para realizar esta acción",
+      "validation": "Por favor corrija los errores e intente nuevamente",
+      "network": "Error de red. Por favor verifique su conexión."
+    },
+    "invoice": {
+      "title": "Factura",
+      "number": "Número de Factura",
+      "date": "Fecha de Factura",
+      "dueDate": "Fecha de Vencimiento",
+      "customer": "Cliente",
+      "items": "Líneas de Artículos",
+      "subtotal": "Subtotal",
+      "tax": "Impuesto",
+      "total": "Total",
+      "status": {
+        "draft": "Borrador",
+        "pending": "Pendiente",
+        "paid": "Pagado",
+        "overdue": "Vencido"
+      }
+    },
+    "user": {
+      "profile": "Perfil de Usuario",
+      "settings": "Configuración",
+      "logout": "Cerrar Sesión",
+      "greeting": "¡Hola, {name}!",
+      "lastLogin": "Último inicio de sesión: {date}",
+      "permissions": "Permisos"
+    }
+  }
+}
