@@ -23,26 +23,26 @@ func TestBuilderExtendedTestSuite(t *testing.T) {
 
 // Test builder configuration methods
 func (suite *BuilderExtendedTestSuite) TestBuilderConfiguration() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test WithVersion
 	builder.WithVersion("1.2.0")
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
 	require.Equal(suite.T(), "1.2.0", schema.Version)
 	// Test WithCategory
-	builder2 := NewBuilder("test-schema-2", TypeForm, "Test Schema 2")
+	builder2 := NewSchemaBuilder("test-schema-2", TypeForm, "Test Schema 2")
 	builder2.WithCategory("finance")
 	schema2, err := builder2.Build(suite.ctx)
 	require.NoError(suite.T(), err)
 	require.Equal(suite.T(), "finance", schema2.Category)
 	// Test WithModule
-	builder3 := NewBuilder("test-schema-3", TypeForm, "Test Schema 3")
+	builder3 := NewSchemaBuilder("test-schema-3", TypeForm, "Test Schema 3")
 	builder3.WithModule("accounting")
 	schema3, err := builder3.Build(suite.ctx)
 	require.NoError(suite.T(), err)
 	require.Equal(suite.T(), "accounting", schema3.Module)
 	// Test WithTags
-	builder4 := NewBuilder("test-schema-4", TypeForm, "Test Schema 4")
+	builder4 := NewSchemaBuilder("test-schema-4", TypeForm, "Test Schema 4")
 	builder4.WithTags("tag1", "tag2", "tag3")
 	schema4, err := builder4.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -53,7 +53,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderConfiguration() {
 
 // Test builder with config
 func (suite *BuilderExtendedTestSuite) TestBuilderWithConfig() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	config := &Config{
 		Method:   "POST",
 		Action:   "/api/users",
@@ -69,7 +69,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithConfig() {
 
 // Test builder with layout
 func (suite *BuilderExtendedTestSuite) TestBuilderWithLayout() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	layout := &Layout{
 		Type:    LayoutGrid,
 		Columns: 2,
@@ -85,7 +85,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithLayout() {
 
 // Test builder with tenant
 func (suite *BuilderExtendedTestSuite) TestBuilderWithTenant() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	builder.WithTenant("organization_id", "strict")
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -97,7 +97,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithTenant() {
 
 // Test builder with security
 func (suite *BuilderExtendedTestSuite) TestBuilderWithSecurity() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	security := &Security{
 		CSRF: &CSRF{
 			Enabled:    true,
@@ -115,7 +115,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithSecurity() {
 
 // Test builder with rate limit
 func (suite *BuilderExtendedTestSuite) TestBuilderWithRateLimit() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	builder.WithRateLimit(100, 60)
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -127,7 +127,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithRateLimit() {
 
 // Test builder with HTMX
 func (suite *BuilderExtendedTestSuite) TestBuilderWithHTMX() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	builder.WithHTMX("/api/submit", "#result")
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -140,7 +140,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithHTMX() {
 
 // Test builder with Alpine
 func (suite *BuilderExtendedTestSuite) TestBuilderWithAlpine() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	builder.WithAlpine("{ count: 0, increment() { this.count++ } }")
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -151,7 +151,7 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithAlpine() {
 
 // Test builder with i18n
 func (suite *BuilderExtendedTestSuite) TestBuilderWithI18n() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	builder.WithI18n("en", "en", "es", "fr", "de")
 	schema, err := builder.Build(suite.ctx)
 	require.NoError(suite.T(), err)
@@ -165,11 +165,11 @@ func (suite *BuilderExtendedTestSuite) TestBuilderWithI18n() {
 
 // Test additional field methods
 func (suite *BuilderExtendedTestSuite) TestAdditionalFieldMethods() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test AddEmailField
 	builder.AddEmailField("email", "Email Address", true)
 	// Test AddPasswordField
-	builder.AddPasswordField("password", "Password", true)
+	builder.AddPasswordField("password", "Password", true, 8)
 	// Test AddSelectField
 	options := []FieldOption{
 		{Value: "option1", Label: "Option 1"},
@@ -199,7 +199,7 @@ func (suite *BuilderExtendedTestSuite) TestAdditionalFieldMethods() {
 
 // Test additional action methods
 func (suite *BuilderExtendedTestSuite) TestAdditionalActionMethods() {
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	// Test AddResetButton
 	builder.AddResetButton("Reset Form")
 	// Test AddButton
@@ -228,7 +228,7 @@ func (suite *BuilderExtendedTestSuite) TestAdditionalActionMethods() {
 // Test MustBuild method
 func (suite *BuilderExtendedTestSuite) TestMustBuild() {
 	// Test successful build
-	builder := NewBuilder("test-schema", TypeForm, "Test Schema")
+	builder := NewSchemaBuilder("test-schema", TypeForm, "Test Schema")
 	builder.AddTextField("name", "Name", true)
 	schema := builder.MustBuild(suite.ctx)
 	require.NotNil(suite.T(), schema)

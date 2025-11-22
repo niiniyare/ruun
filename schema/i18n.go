@@ -17,6 +17,11 @@ type I18nManager struct {
 	config       *I18nConfig
 	translations map[string]*Translation // locale -> translation
 	mu           sync.RWMutex
+
+	// Public fields for backward compatibility
+	Enabled          bool     `json:"enabled"`
+	DefaultLocale    string   `json:"defaultLocale"`
+	SupportedLocales []string `json:"supportedLocales"`
 }
 
 // I18nConfig configures the i18n system
@@ -61,8 +66,11 @@ func NewI18nManager(config *I18nConfig) *I18nManager {
 	}
 
 	manager := &I18nManager{
-		config:       config,
-		translations: make(map[string]*Translation),
+		config:           config,
+		translations:     make(map[string]*Translation),
+		Enabled:          true,
+		DefaultLocale:    config.DefaultLocale,
+		SupportedLocales: config.SupportedLocales,
 	}
 
 	return manager

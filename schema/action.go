@@ -36,6 +36,9 @@ type Action struct {
 	HTMX   *ActionHTMX   `json:"htmx,omitempty"`
 	Alpine *ActionAlpine `json:"alpine,omitempty"`
 
+	// Theming
+	Theme *ActionTheme `json:"theme,omitempty"`
+
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
 }
@@ -108,6 +111,15 @@ type ActionAlpine struct {
 	XOn   string `json:"xOn,omitempty"`
 	XBind string `json:"xBind,omitempty"`
 	XShow string `json:"xShow,omitempty"`
+}
+
+// ActionTheme defines action-specific theming
+type ActionTheme struct {
+	Colors       map[string]string `json:"colors,omitempty"`
+	BorderRadius string            `json:"borderRadius,omitempty"`
+	FontSize     string            `json:"fontSize,omitempty"`
+	Padding      string            `json:"padding,omitempty"`
+	CustomCSS    string            `json:"customCss,omitempty"`
 }
 
 // Core Methods
@@ -333,6 +345,100 @@ func (a *Action) GetThrottleDelay() int {
 	return 0
 }
 
+// GetIconPosition returns the icon position (defaults to "left")
+func (a *Action) GetIconPosition() string {
+	if a.Position != "" {
+		return a.Position
+	}
+	return "left"
+}
+
+// HasIcon returns true if the action has an icon
+func (a *Action) HasIcon() bool {
+	return a.Icon != ""
+}
+
+// HasConfirmation returns true if the action has confirmation enabled
+func (a *Action) HasConfirmation() bool {
+	return a.Confirm != nil && a.Confirm.Enabled
+}
+
+// RequiresPermission checks if the action requires a specific permission
+func (a *Action) RequiresPermission(permission string) bool {
+	if a.Permissions == nil {
+		return false
+	}
+	for _, perm := range a.Permissions.Required {
+		if perm == permission {
+			return true
+		}
+	}
+	return false
+}
+
+// ApplyTheme applies a theme to the action
+func (a *Action) ApplyTheme(theme *ActionTheme) {
+	a.Theme = theme
+}
+
+// GetConfig returns the action config, initializing it if nil
+func (a *Action) GetConfig() *ActionConfig {
+	if a.Config == nil {
+		a.Config = &ActionConfig{}
+	}
+	return a.Config
+}
+
+// GetHTMXConfig returns the HTMX config, initializing it if nil
+func (a *Action) GetHTMXConfig() *ActionHTMX {
+	if a.HTMX == nil {
+		a.HTMX = &ActionHTMX{}
+	}
+	return a.HTMX
+}
+
+// GetAlpineConfig returns the Alpine config, initializing it if nil
+func (a *Action) GetAlpineConfig() *ActionAlpine {
+	if a.Alpine == nil {
+		a.Alpine = &ActionAlpine{}
+	}
+	return a.Alpine
+}
+
+// GetVariantClass returns CSS class based on variant
+func (a *Action) GetVariantClass() string {
+	switch a.Variant {
+	case "primary":
+		return "action-primary"
+	case "secondary":
+		return "action-secondary"
+	case "outline":
+		return "action-outline"
+	case "ghost":
+		return "action-ghost"
+	case "destructive":
+		return "action-destructive"
+	default:
+		return "action-primary" // Default fallback
+	}
+}
+
+// GetSizeClass returns CSS class based on size
+func (a *Action) GetSizeClass() string {
+	switch a.Size {
+	case "sm":
+		return "action-sm"
+	case "md":
+		return "action-md"
+	case "lg":
+		return "action-lg"
+	case "xl":
+		return "action-xl"
+	default:
+		return "action-md" // Default fallback
+	}
+}
+
 // State Management
 
 // SetLoading sets loading state
@@ -464,6 +570,11 @@ func (b *ActionBuilder) WithConfirmation(message, title string) *ActionBuilder {
 
 func (b *ActionBuilder) WithConditional(conditional *ActionConditional) *ActionBuilder {
 	b.action.Conditional = conditional
+	return b
+}
+
+func (b *ActionBuilder) WithCondition(condition *condition.ConditionGroup) *ActionBuilder {
+	b.action.Conditional = &ActionConditional{Show: condition}
 	return b
 }
 

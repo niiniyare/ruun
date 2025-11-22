@@ -8,6 +8,28 @@ import (
 	"github.com/niiniyare/ruun/pkg/condition"
 )
 
+// Config defines form configuration for submission
+type Config struct {
+	Action   string            `json:"action,omitempty"`   // Form action URL
+	Method   string            `json:"method,omitempty"`   // HTTP method (GET, POST, etc.)
+	Encoding string            `json:"encoding,omitempty"` // Form encoding type
+	Timeout  int               `json:"timeout,omitempty"`  // Request timeout in seconds
+	Headers  map[string]string `json:"headers,omitempty"`  // Additional headers
+}
+
+// Validator interface for validating schemas and fields
+type Validator interface {
+	ValidateSchema(ctx context.Context, schema *Schema) error
+	ValidateField(ctx context.Context, field *Field, value any) error
+	ValidateData(ctx context.Context, schema *Schema, data map[string]any) error
+}
+
+// ValidationCallback is a callback function for async validation
+type ValidationCallback func(fieldName string, errors []string)
+
+// RepeatableManager is an alias for RepeatableOperations to maintain compatibility
+type RepeatableManager = RepeatableOperations
+
 // Security defines security and access control configuration
 type Security struct {
 	CSRF          *CSRF       `json:"csrf,omitempty"`                        // CSRF protection
@@ -302,17 +324,18 @@ func (w *Workflow) GetAvailableActions(ctx context.Context, data map[string]any,
 }
 
 // IsI18nEnabled checks if internationalization is enabled
-func (i *I18n) IsI18nEnabled() bool {
-	return i != nil && i.Enabled
+func (i *I18nManager) IsI18nEnabled() bool {
+	return i != nil && i.config != nil && i.config.DefaultLocale != ""
 }
 
+
 // GetLocale returns the default locale or fallback
-func (i *I18n) GetLocale() string {
-	if i == nil {
+func (i *I18nManager) GetLocale() string {
+	if i == nil || i.config == nil {
 		return "en-US"
 	}
-	if i.DefaultLocale != "" {
-		return i.DefaultLocale
+	if i.config.DefaultLocale != "" {
+		return i.config.DefaultLocale
 	}
 	return "en-US"
 }

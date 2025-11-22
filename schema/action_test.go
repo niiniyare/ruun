@@ -62,10 +62,10 @@ func (suite *ActionTestSuite) TestActionHasConfirmation() {
 	action := &Action{ID: "test"}
 	suite.Require().False(action.HasConfirmation())
 	// With disabled confirmation
-	action.Confirm = &Confirm{Enabled: false}
+	action.Confirm = &ActionConfirm{Enabled: false}
 	suite.Require().False(action.HasConfirmation())
 	// With enabled confirmation
-	action.Confirm = &Confirm{Enabled: true}
+	action.Confirm = &ActionConfirm{Enabled: true}
 	suite.Require().True(action.HasConfirmation())
 }
 func (suite *ActionTestSuite) TestActionRequiresPermission() {
@@ -147,10 +147,9 @@ func (suite *ActionTestSuite) TestActionApplyTheme() {
 	action.ApplyTheme(nil)
 	suite.Require().Nil(action.Theme) // Should remain nil
 	// Test applying valid theme
-	theme := &Theme{
-		ID:     "test-theme-id",
-		Name:   "test-theme",
-		Tokens: GetDefaultTokens(),
+	theme := &ActionTheme{
+		Colors:       map[string]string{"primary": "#007bff"},
+		BorderRadius: "8px",
 	}
 	action.ApplyTheme(theme)
 	suite.Require().NotNil(action.Theme) // Should be initialized
@@ -252,7 +251,9 @@ func (suite *ActionTestSuite) TestActionEnabled() {
 		Text:     "Enabled Button",
 		Disabled: false,
 	}
-	require.True(suite.T(), enabledAction.IsEnabled())
+	enabled, err := enabledAction.IsEnabled(context.Background(), nil)
+	require.NoError(suite.T(), err)
+	require.True(suite.T(), enabled)
 	// Test disabled action
 	disabledAction := &Action{
 		ID:       "disabled_action",
@@ -260,7 +261,9 @@ func (suite *ActionTestSuite) TestActionEnabled() {
 		Text:     "Disabled Button",
 		Disabled: true,
 	}
-	require.False(suite.T(), disabledAction.IsEnabled())
+	enabled, err = disabledAction.IsEnabled(context.Background(), nil)
+	require.NoError(suite.T(), err)
+	require.False(suite.T(), enabled)
 }
 
 // Test action variant classes
@@ -443,7 +446,7 @@ func (suite *ActionTestSuite) TestActionCopy() {
 		Icon:     "original-icon",
 		Variant:  "secondary",
 		Disabled: true,
-		Confirm:  &Confirm{Message: "Original confirm"},
+		Confirm:  &ActionConfirm{Message: "Original confirm"},
 	}
 	// Test clone if method exists
 	cloned := original.Clone()
@@ -457,12 +460,17 @@ func (suite *ActionTestSuite) TestActionWithConditions() {
 		ID:   "conditional-action",
 		Type: ActionButton,
 		Text: "Conditional Button",
-		Conditional: &Conditional{
-			Show: &ConditionGroup{
-				Logic: "AND",
-				Conditions: []Condition{
-					{Field: "user_role", Operator: "equal", Value: "admin"},
-				},
+		Conditional: &ActionConditional{
+			Show: &condition.ConditionGroup{
+				Conjunction: condition.ConjunctionAnd,
+				Children: []any{&condition.ConditionRule{
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "user_role",
+					},
+					Op:    condition.OpEqual,
+					Right: "admin",
+				}},
 			},
 		},
 	}

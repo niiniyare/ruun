@@ -142,6 +142,18 @@ func (b *SchemaBuilder) WithSecurity(security *Security) *SchemaBuilder {
 	return b
 }
 
+func (b *SchemaBuilder) WithRateLimit(maxRequests int, windowSeconds int) *SchemaBuilder {
+	if b.schema.Security == nil {
+		b.schema.Security = &Security{}
+	}
+	b.schema.Security.RateLimit = &RateLimit{
+		Enabled:     true,
+		MaxRequests: maxRequests,
+		Window:      time.Duration(windowSeconds) * time.Second,
+	}
+	return b
+}
+
 func (b *SchemaBuilder) WithTenant(field, isolation string) *SchemaBuilder {
 	b.schema.Tenant = &Tenant{
 		Enabled:   true,
@@ -167,11 +179,16 @@ func (b *SchemaBuilder) WithEvents(events *Events) *SchemaBuilder {
 }
 
 func (b *SchemaBuilder) WithI18n(defaultLocale string, supported ...string) *SchemaBuilder {
-	b.schema.I18n = &I18n{
-		Enabled:          true,
+	config := &I18nConfig{
 		DefaultLocale:    defaultLocale,
+		FallbackLocale:   defaultLocale,
 		SupportedLocales: supported,
+		TranslationsPath: "./locales",
+		FilePattern:      "{locale}.json",
+		EnableCache:      true,
+		EnablePlurals:    true,
 	}
+	b.schema.I18n = NewI18nManager(config)
 	return b
 }
 

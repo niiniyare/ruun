@@ -21,7 +21,7 @@ type Runtime struct {
 	handlers *EventHandlers
 
 	// Pluggable components
-	validator   schemaValidator
+	validator   Validator
 	renderer    Renderer
 	conditional ConditionalEngine
 
@@ -385,7 +385,7 @@ func (r *Runtime) validateField(ctx context.Context, fieldName string) error {
 
 	value, _ := r.state.GetValue(fieldName)
 
-	if err := r.validator.ValidateSchema(ctx, r.schema); err != nil {
+	if err := r.validator.ValidateField(ctx, field, value); err != nil {
 		r.state.SetErrors(fieldName, []string{err.Error()})
 		return err
 	}

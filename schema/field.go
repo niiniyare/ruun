@@ -292,6 +292,16 @@ type FieldRuntime struct {
 	Reason   string `json:"reason,omitempty"`
 }
 
+// IsVisible returns whether the field is visible
+func (fr *FieldRuntime) IsVisible() bool {
+	return fr != nil && fr.Visible
+}
+
+// IsEditable returns whether the field is editable
+func (fr *FieldRuntime) IsEditable() bool {
+	return fr != nil && fr.Editable
+}
+
 // FieldI18n holds translations
 type FieldI18n struct {
 	Label       map[string]string `json:"label,omitempty"`

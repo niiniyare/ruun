@@ -110,8 +110,36 @@ func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data m
 	if schema == nil {
 		return fmt.Errorf("schema cannot be nil")
 	}
-	// Use the existing schema data validation method
-	return schema.ValidateData(ctx, data)
+	
+	collector := NewErrorCollector()
+	
+	// Validate each field's data
+	for _, field := range schema.Fields {
+		value, exists := data[field.Name]
+		
+		// Check required fields
+		if field.Required && (!exists || isEmpty(value)) {
+			collector.AddValidationError(field.Name, "required", 
+				fmt.Sprintf("%s is required", field.Label))
+			continue
+		}
+		
+		// Validate field value if exists
+		if exists && !isEmpty(value) {
+			if err := field.ValidateValue(ctx, value); err != nil {
+				if schemaErr, ok := err.(SchemaError); ok {
+					collector.AddFieldError(field.Name, schemaErr)
+				} else {
+					collector.AddValidationError(field.Name, "invalid_value", err.Error())
+				}
+			}
+		}
+	}
+	
+	if collector.HasErrors() {
+		return collector.Errors()
+	}
+	return nil
 }
 
 // ValidateDataDetailed validates form data against a schema and returns detailed results
@@ -382,8 +410,8 @@ func (v *DataValidator) validateString(field FieldInterface, value any) []string
 			errors = append(errors, "Invalid pattern validation")
 		} else if !matched {
 			message := "Invalid format"
-			if validation.PatternMessage != "" {
-				message = validation.PatternMessage
+			if validation.Messages != nil && validation.Messages.Pattern != "" {
+				message = validation.Messages.Pattern
 			}
 			errors = append(errors, message)
 		}
@@ -429,8 +457,8 @@ func (v *DataValidator) validatePassword(field FieldInterface, value any) []stri
 			matched, _ := regexp.MatchString(validation.Pattern, str)
 			if !matched {
 				message := "Password does not meet complexity requirements"
-				if validation.PatternMessage != "" {
-					message = validation.PatternMessage
+				if validation.Messages != nil && validation.Messages.Pattern != "" {
+					message = validation.Messages.Pattern
 				}
 				errors = append(errors, message)
 			}
