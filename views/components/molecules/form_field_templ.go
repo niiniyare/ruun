@@ -64,51 +64,11 @@ type FormFieldProps struct {
 	InputClass string
 	ErrorClass string
 
-	// Event handlers (function names)
+	// Event handlers (pre-resolved HTML attributes)
 	OnChange string
 	OnBlur   string
 	OnFocus  string
-
-	// HTMX attributes (pre-resolved externally)
-	HXPost    string
-	HXTarget  string
-	HXSwap    string
-	HXTrigger string
-}
-
-func FormFieldEvents(props FormFieldProps) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_FormFieldEvents_e404`,
-		Function: `function __templ_FormFieldEvents_e404(props){// Simple event delegation for form field
-    function handleFieldEvent(event, eventType) {
-        const fieldId = event.target.id;
-        const value = event.target.value;
-        
-        // Call external handler if provided
-        if (props[eventType] && window[props[eventType]]) {
-            window[props[eventType]](fieldId, value, event);
-        }
-    }
-    
-    // Bind events to field
-    document.addEventListener('DOMContentLoaded', function() {
-        const field = document.getElementById(props.ID);
-        if (field) {
-            if (props.OnChange) {
-                field.addEventListener('change', (e) => handleFieldEvent(e, 'OnChange'));
-            }
-            if (props.OnBlur) {
-                field.addEventListener('blur', (e) => handleFieldEvent(e, 'OnBlur'));
-            }
-            if (props.OnFocus) {
-                field.addEventListener('focus', (e) => handleFieldEvent(e, 'OnFocus'));
-            }
-        }
-    });
-}`,
-		Call:       templ.SafeScript(`__templ_FormFieldEvents_e404`, props),
-		CallInline: templ.SafeScriptInline(`__templ_FormFieldEvents_e404`, props),
-	}
+	OnInput  string
 }
 
 // getFieldClass builds CSS class string
@@ -144,10 +104,6 @@ func FormField(props FormFieldProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = FormFieldEvents(props).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		var templ_7745c5c3_Var2 = []any{getFieldClass(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
@@ -175,7 +131,8 @@ func FormField(props FormFieldProps) templ.Component {
 				For:       props.ID,
 				Text:      props.Label,
 				Required:  props.Required,
-				Disabled:  props.Disabled,
+				Size:      atoms.LabelSizeMD,
+				State:     utils.IfElse(props.Disabled, atoms.LabelStateDisabled, atoms.LabelStateDefault),
 				ClassName: props.LabelClass,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -202,7 +159,7 @@ func FormField(props FormFieldProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.HelpText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/form_field.templ`, Line: 135, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/form_field.templ`, Line: 100, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -244,7 +201,7 @@ func FormField(props FormFieldProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(error)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/form_field.templ`, Line: 144, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/form_field.templ`, Line: 109, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -302,10 +259,10 @@ func renderInput(props FormFieldProps) templ.Component {
 				Disabled:    props.Disabled,
 				Readonly:    props.Readonly,
 				ClassName:   props.InputClass,
-				HXPost:      props.HXPost,
-				HXTarget:    props.HXTarget,
-				HXSwap:      props.HXSwap,
-				HXTrigger:   props.HXTrigger,
+				OnChange:    props.OnChange,
+				OnBlur:      props.OnBlur,
+				OnFocus:     props.OnFocus,
+				OnInput:     props.OnInput,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -320,6 +277,10 @@ func renderInput(props FormFieldProps) templ.Component {
 				Disabled:    props.Disabled,
 				Readonly:    props.Readonly,
 				ClassName:   props.InputClass,
+				OnChange:    props.OnChange,
+				OnBlur:      props.OnBlur,
+				OnFocus:     props.OnFocus,
+				OnInput:     props.OnInput,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -333,6 +294,9 @@ func renderInput(props FormFieldProps) templ.Component {
 				Required:  props.Required,
 				Disabled:  props.Disabled,
 				ClassName: props.InputClass,
+				OnChange:  props.OnChange,
+				OnBlur:    props.OnBlur,
+				OnFocus:   props.OnFocus,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -347,6 +311,9 @@ func renderInput(props FormFieldProps) templ.Component {
 						Label:    option.Label,
 						Checked:  option.Selected,
 						Disabled: props.Disabled || option.Disabled,
+						Size:     atoms.CheckboxSizeMD,
+						State:    utils.IfElse(props.Disabled || option.Disabled, atoms.CheckboxStateDisabled, utils.IfElse(props.HasError, atoms.CheckboxStateError, atoms.CheckboxStateDefault)),
+						OnChange: props.OnChange,
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -360,6 +327,9 @@ func renderInput(props FormFieldProps) templ.Component {
 					Label:    props.Label,
 					Checked:  props.Value == "true",
 					Disabled: props.Disabled,
+					Size:     atoms.CheckboxSizeMD,
+					State:    utils.IfElse(props.Disabled, atoms.CheckboxStateDisabled, utils.IfElse(props.HasError, atoms.CheckboxStateError, atoms.CheckboxStateDefault)),
+					OnChange: props.OnChange,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -374,6 +344,9 @@ func renderInput(props FormFieldProps) templ.Component {
 					Label:    option.Label,
 					Checked:  option.Selected,
 					Disabled: props.Disabled || option.Disabled,
+					Size:     atoms.RadioSizeMD,
+					State:    utils.IfElse(props.Disabled || option.Disabled, atoms.RadioStateDisabled, utils.IfElse(props.HasError, atoms.RadioStateError, atoms.RadioStateDefault)),
+					OnChange: props.OnChange,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -390,6 +363,10 @@ func renderInput(props FormFieldProps) templ.Component {
 				Disabled:    props.Disabled,
 				Readonly:    props.Readonly,
 				ClassName:   props.InputClass,
+				OnChange:    props.OnChange,
+				OnBlur:      props.OnBlur,
+				OnFocus:     props.OnFocus,
+				OnInput:     props.OnInput,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

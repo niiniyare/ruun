@@ -17,8 +17,8 @@ import (
 	"strings"
 )
 
-// EnhancedPageLayoutProps defines properties for the enhanced page layout
-type EnhancedPageLayoutProps struct {
+// PageLayoutProps defines properties for the enhanced page layout
+type PageLayoutProps struct {
 	// Extends base layout
 	BaseLayoutProps
 
@@ -145,8 +145,8 @@ type ActionConfig struct {
 	AlpineClick string              `json:"alpineClick"`
 }
 
-// EnhancedPageLayout renders a page layout with enhanced organisms
-func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Component) templ.Component {
+// PageLayout renders a page layout with enhanced organisms
+func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -179,7 +179,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			var templ_7745c5c3_Var3 = []any{getEnhancedPageLayoutClasses(props)}
+			var templ_7745c5c3_Var3 = []any{getPageLayoutClasses(props)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -191,7 +191,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var3).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -202,9 +202,9 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getEnhancedPageLayoutAlpineData(props))
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getPageLayoutAlpineData(props))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 145, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 145, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -215,7 +215,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				return templ_7745c5c3_Err
 			}
 			if props.Type == PageLayoutSidebar || props.Type == PageLayoutCombined {
-				templ_7745c5c3_Err = renderEnhancedSidebar(props).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderSidebar(props).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -232,7 +232,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var6).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -243,7 +243,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				return templ_7745c5c3_Err
 			}
 			if props.Type == PageLayoutTopbar || props.Type == PageLayoutCombined {
-				templ_7745c5c3_Err = renderEnhancedTopbar(props).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderTopbar(props).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -260,7 +260,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var8).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -271,7 +271,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				return templ_7745c5c3_Err
 			}
 			if props.Header != nil && (props.Header.Title != "" || len(props.Header.Actions) > 0) {
-				templ_7745c5c3_Err = renderEnhancedPageHeader(props.Header).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderPageHeader(props.Header).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -303,7 +303,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var10).String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 1, Col: 0}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 1, Col: 0}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -329,7 +329,7 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 				return templ_7745c5c3_Err
 			}
 			if props.Footer != nil && props.Footer.Show {
-				templ_7745c5c3_Err = renderEnhancedPageFooter(props.Footer).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderPageFooter(props.Footer).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -358,8 +358,8 @@ func EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compone
 	})
 }
 
-// renderEnhancedSidebar renders the sidebar navigation
-func renderEnhancedSidebar(props EnhancedPageLayoutProps) templ.Component {
+// renderSidebar renders the sidebar navigation
+func renderSidebar(props PageLayoutProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -402,8 +402,8 @@ func renderEnhancedSidebar(props EnhancedPageLayoutProps) templ.Component {
 	})
 }
 
-// renderEnhancedTopbar renders the topbar navigation
-func renderEnhancedTopbar(props EnhancedPageLayoutProps) templ.Component {
+// renderTopbar renders the topbar navigation
+func renderTopbar(props PageLayoutProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -445,8 +445,8 @@ func renderEnhancedTopbar(props EnhancedPageLayoutProps) templ.Component {
 	})
 }
 
-// renderEnhancedPageHeader renders the page header
-func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
+// renderPageHeader renders the page header
+func renderPageHeader(header *PageHeaderConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -479,7 +479,7 @@ func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var15).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -520,7 +520,7 @@ func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(header.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 256, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 256, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -546,7 +546,7 @@ func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(header.Badge.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 262, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 262, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -574,7 +574,7 @@ func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(header.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 267, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 267, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -610,7 +610,7 @@ func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
 					var templ_7745c5c3_Var22 string
 					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(action.Text)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 288, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 288, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {
@@ -670,8 +670,8 @@ func renderEnhancedPageHeader(header *PageHeaderConfig) templ.Component {
 	})
 }
 
-// renderEnhancedPageFooter renders the page footer
-func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
+// renderPageFooter renders the page footer
+func renderPageFooter(footer *PageFooterConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -704,7 +704,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var24).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -722,7 +722,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(footer.Copyright)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 317, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 317, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -746,7 +746,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 				var templ_7745c5c3_Var27 templ.SafeURL
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinURLErrs(link.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 323, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 323, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -769,7 +769,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(link.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 330, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 330, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -802,7 +802,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 				var templ_7745c5c3_Var29 templ.SafeURL
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinURLErrs(social.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 342, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 342, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -815,7 +815,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(social.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 346, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 346, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
@@ -851,7 +851,7 @@ func renderEnhancedPageFooter(footer *PageFooterConfig) templ.Component {
 }
 
 // renderMobileNavigation renders mobile navigation overlay
-func renderMobileNavigation(props EnhancedPageLayoutProps) templ.Component {
+func renderMobileNavigation(props PageLayoutProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -999,7 +999,7 @@ func renderErrorState(errorMsg string) templ.Component {
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(errorMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/enhanced_page_layout.templ`, Line: 463, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/page_layout.templ`, Line: 463, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -1045,7 +1045,7 @@ func renderErrorState(errorMsg string) templ.Component {
 
 // Helper functions
 
-func getEnhancedPageLayoutClasses(props EnhancedPageLayoutProps) string {
+func getPageLayoutClasses(props PageLayoutProps) string {
 	classes := []string{"min-h-screen", "flex"}
 
 	switch props.Type {
@@ -1062,7 +1062,7 @@ func getEnhancedPageLayoutClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getContentWrapperClasses(props EnhancedPageLayoutProps) string {
+func getContentWrapperClasses(props PageLayoutProps) string {
 	classes := []string{"flex-1", "flex", "flex-col", "overflow-hidden"}
 
 	if props.Type == PageLayoutSidebar || props.Type == PageLayoutCombined {
@@ -1072,7 +1072,7 @@ func getContentWrapperClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getMainContentClasses(props EnhancedPageLayoutProps) string {
+func getMainContentClasses(props PageLayoutProps) string {
 	classes := []string{"flex-1", "overflow-auto"}
 
 	if props.ContentProps.Background != "" {
@@ -1082,7 +1082,7 @@ func getMainContentClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getPageContentClasses(props EnhancedPageLayoutProps) string {
+func getPageContentClasses(props PageLayoutProps) string {
 	classes := []string{"page-content"}
 
 	// Container and max-width
@@ -1132,7 +1132,7 @@ func getPageContentClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getEnhancedPageLayoutAlpineData(props EnhancedPageLayoutProps) string {
+func getPageLayoutAlpineData(props PageLayoutProps) string {
 	data := map[string]any{
 		"sidebarCollapsed": false,
 		"mobileMenuOpen":   false,
@@ -1147,28 +1147,28 @@ func getEnhancedPageLayoutAlpineData(props EnhancedPageLayoutProps) string {
 	return string(jsonData)
 }
 
-func getUserMenu(props EnhancedPageLayoutProps) []organisms.NavigationItem {
+func getUserMenu(props PageLayoutProps) []organisms.NavigationItem {
 	if props.Navigation != nil && props.Navigation.User != nil {
 		return props.Navigation.User.Menu
 	}
 	return nil
 }
 
-func getUserName(props EnhancedPageLayoutProps) string {
+func getUserName(props PageLayoutProps) string {
 	if props.Navigation != nil && props.Navigation.User != nil {
 		return props.Navigation.User.Name
 	}
 	return ""
 }
 
-func getUserAvatar(props EnhancedPageLayoutProps) string {
+func getUserAvatar(props PageLayoutProps) string {
 	if props.Navigation != nil && props.Navigation.User != nil {
 		return props.Navigation.User.Avatar
 	}
 	return ""
 }
 
-func getSearchConfig(props EnhancedPageLayoutProps) *organisms.SearchConfig {
+func getSearchConfig(props PageLayoutProps) *organisms.SearchConfig {
 	if props.Navigation != nil && props.Navigation.EnableSearch {
 		return &organisms.SearchConfig{
 			Enabled:     true,

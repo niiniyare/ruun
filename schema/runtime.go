@@ -298,6 +298,13 @@ func (b *RuntimeBuilder) MustBuild() *Runtime {
 	return runtime
 }
 
+// NewRuntimeWithValidator creates a runtime with a schema and validator
+func NewRuntimeWithValidator(schema *Schema, validator Validator) *Runtime {
+	return NewRuntime(schema).
+		WithValidator(validator).
+		MustBuild()
+}
+
 // Runtime Methods
 
 // HandleChange handles field change

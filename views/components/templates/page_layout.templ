@@ -9,8 +9,8 @@ import (
 	"github.com/niiniyare/ruun/pkg/utils"
 )
 
-// EnhancedPageLayoutProps defines properties for the enhanced page layout
-type EnhancedPageLayoutProps struct {
+// PageLayoutProps defines properties for the enhanced page layout
+type PageLayoutProps struct {
 	// Extends base layout
 	BaseLayoutProps
 	
@@ -137,30 +137,30 @@ type ActionConfig struct {
 	AlpineClick string                   `json:"alpineClick"`
 }
 
-// EnhancedPageLayout renders a page layout with enhanced organisms
-templ EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Component) {
+// PageLayout renders a page layout with enhanced organisms
+templ PageLayout(props PageLayoutProps, children ...templ.Component) {
 	@BaseLayout(props.BaseLayoutProps) {
 		<div 
-			class={ getEnhancedPageLayoutClasses(props) }
-			x-data={ getEnhancedPageLayoutAlpineData(props) }
+			class={ getPageLayoutClasses(props) }
+			x-data={ getPageLayoutAlpineData(props) }
 		>
 			// Sidebar navigation
 			if props.Type == PageLayoutSidebar || props.Type == PageLayoutCombined {
-				@renderEnhancedSidebar(props)
+				@renderSidebar(props)
 			}
 			
 			// Main content wrapper
 			<div class={ getContentWrapperClasses(props) }>
 				// Topbar navigation
 				if props.Type == PageLayoutTopbar || props.Type == PageLayoutCombined {
-					@renderEnhancedTopbar(props)
+					@renderTopbar(props)
 				}
 				
 				// Main content area
 				<main class={ getMainContentClasses(props) }>
 					// Page header
 					if props.Header != nil && (props.Header.Title != "" || len(props.Header.Actions) > 0) {
-						@renderEnhancedPageHeader(props.Header)
+						@renderPageHeader(props.Header)
 					}
 					
 					// Content states
@@ -180,7 +180,7 @@ templ EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compon
 				
 				// Page footer
 				if props.Footer != nil && props.Footer.Show {
-					@renderEnhancedPageFooter(props.Footer)
+					@renderPageFooter(props.Footer)
 				}
 			</div>
 			
@@ -192,8 +192,8 @@ templ EnhancedPageLayout(props EnhancedPageLayoutProps, children ...templ.Compon
 	}
 }
 
-// renderEnhancedSidebar renders the sidebar navigation
-templ renderEnhancedSidebar(props EnhancedPageLayoutProps) {
+// renderSidebar renders the sidebar navigation
+templ renderSidebar(props PageLayoutProps) {
 	if props.Navigation != nil && props.Navigation.Sidebar != nil {
 		@organisms.Navigation(organisms.NavigationProps{
 			Type:        organisms.NavigationSidebar,
@@ -211,8 +211,8 @@ templ renderEnhancedSidebar(props EnhancedPageLayoutProps) {
 	}
 }
 
-// renderEnhancedTopbar renders the topbar navigation
-templ renderEnhancedTopbar(props EnhancedPageLayoutProps) {
+// renderTopbar renders the topbar navigation
+templ renderTopbar(props PageLayoutProps) {
 	if props.Navigation != nil && props.Navigation.Topbar != nil {
 		@organisms.Navigation(organisms.NavigationProps{
 			Type:         organisms.NavigationTopbar,
@@ -229,8 +229,8 @@ templ renderEnhancedTopbar(props EnhancedPageLayoutProps) {
 	}
 }
 
-// renderEnhancedPageHeader renders the page header
-templ renderEnhancedPageHeader(header *PageHeaderConfig) {
+// renderPageHeader renders the page header
+templ renderPageHeader(header *PageHeaderConfig) {
 	<header class={ "page-header border-b border-border " + header.Class }>
 		<div class="container mx-auto px-6 py-6">
 			// Breadcrumbs
@@ -306,8 +306,8 @@ templ renderEnhancedPageHeader(header *PageHeaderConfig) {
 	</header>
 }
 
-// renderEnhancedPageFooter renders the page footer
-templ renderEnhancedPageFooter(footer *PageFooterConfig) {
+// renderPageFooter renders the page footer
+templ renderPageFooter(footer *PageFooterConfig) {
 	<footer class={ "page-footer border-t border-border bg-background " + footer.Class }>
 		<div class="container mx-auto px-6 py-6">
 			<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -359,7 +359,7 @@ templ renderEnhancedPageFooter(footer *PageFooterConfig) {
 }
 
 // renderMobileNavigation renders mobile navigation overlay
-templ renderMobileNavigation(props EnhancedPageLayoutProps) {
+templ renderMobileNavigation(props PageLayoutProps) {
 	<div 
 		class="mobile-navigation lg:hidden"
 		x-data="{ mobileMenuOpen: false }"
@@ -475,7 +475,7 @@ templ renderErrorState(errorMsg string) {
 
 // Helper functions
 
-func getEnhancedPageLayoutClasses(props EnhancedPageLayoutProps) string {
+func getPageLayoutClasses(props PageLayoutProps) string {
 	classes := []string{"min-h-screen", "flex"}
 	
 	switch props.Type {
@@ -492,7 +492,7 @@ func getEnhancedPageLayoutClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getContentWrapperClasses(props EnhancedPageLayoutProps) string {
+func getContentWrapperClasses(props PageLayoutProps) string {
 	classes := []string{"flex-1", "flex", "flex-col", "overflow-hidden"}
 	
 	if props.Type == PageLayoutSidebar || props.Type == PageLayoutCombined {
@@ -502,7 +502,7 @@ func getContentWrapperClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getMainContentClasses(props EnhancedPageLayoutProps) string {
+func getMainContentClasses(props PageLayoutProps) string {
 	classes := []string{"flex-1", "overflow-auto"}
 	
 	if props.ContentProps.Background != "" {
@@ -512,7 +512,7 @@ func getMainContentClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getPageContentClasses(props EnhancedPageLayoutProps) string {
+func getPageContentClasses(props PageLayoutProps) string {
 	classes := []string{"page-content"}
 	
 	// Container and max-width
@@ -562,7 +562,7 @@ func getPageContentClasses(props EnhancedPageLayoutProps) string {
 	return strings.Join(classes, " ")
 }
 
-func getEnhancedPageLayoutAlpineData(props EnhancedPageLayoutProps) string {
+func getPageLayoutAlpineData(props PageLayoutProps) string {
 	data := map[string]any{
 		"sidebarCollapsed": false,
 		"mobileMenuOpen":   false,
@@ -577,28 +577,28 @@ func getEnhancedPageLayoutAlpineData(props EnhancedPageLayoutProps) string {
 	return string(jsonData)
 }
 
-func getUserMenu(props EnhancedPageLayoutProps) []organisms.NavigationItem {
+func getUserMenu(props PageLayoutProps) []organisms.NavigationItem {
 	if props.Navigation != nil && props.Navigation.User != nil {
 		return props.Navigation.User.Menu
 	}
 	return nil
 }
 
-func getUserName(props EnhancedPageLayoutProps) string {
+func getUserName(props PageLayoutProps) string {
 	if props.Navigation != nil && props.Navigation.User != nil {
 		return props.Navigation.User.Name
 	}
 	return ""
 }
 
-func getUserAvatar(props EnhancedPageLayoutProps) string {
+func getUserAvatar(props PageLayoutProps) string {
 	if props.Navigation != nil && props.Navigation.User != nil {
 		return props.Navigation.User.Avatar
 	}
 	return ""
 }
 
-func getSearchConfig(props EnhancedPageLayoutProps) *organisms.SearchConfig {
+func getSearchConfig(props PageLayoutProps) *organisms.SearchConfig {
 	if props.Navigation != nil && props.Navigation.EnableSearch {
 		return &organisms.SearchConfig{
 			Enabled:     true,

@@ -123,13 +123,13 @@ func getRadioIndicatorClasses(checked bool) string {
 func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
 	variant := props.BadgeVariant
 	if variant == "" {
-		variant = atoms.BadgeSecondary
+		variant = atoms.BadgeVariantSecondary
 	}
 
 	return atoms.BadgeProps{
-		Variant: variant,
-		Size:    atoms.BadgeSizeSM,
-		Class:   "menu-item-badge",
+		Variant:   variant,
+		Size:      atoms.BadgeSizeSM,
+		ClassName: "menu-item-badge",
 	}
 }
 

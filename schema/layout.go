@@ -1177,3 +1177,48 @@ func CreateBreakpoints(mobile, tablet, desktop int) *Breakpoints {
 		},
 	}
 }
+
+// ValidateLayout validates the layout configuration
+func (l *Layout) ValidateLayout(fieldMap map[string]*Field) error {
+	if l == nil {
+		return nil
+	}
+
+	// Validate sections
+	for i, section := range l.Sections {
+		for j, field := range section.Fields {
+			if _, exists := fieldMap[field]; !exists {
+				return fmt.Errorf("section %d field %d: field '%s' not found in schema", i, j, field)
+			}
+		}
+	}
+
+	// Validate groups
+	for i, group := range l.Groups {
+		for j, field := range group.Fields {
+			if _, exists := fieldMap[field]; !exists {
+				return fmt.Errorf("group %d field %d: field '%s' not found in schema", i, j, field)
+			}
+		}
+	}
+
+	// Validate tabs
+	for i, tab := range l.Tabs {
+		for j, field := range tab.Fields {
+			if _, exists := fieldMap[field]; !exists {
+				return fmt.Errorf("tab %d field %d: field '%s' not found in schema", i, j, field)
+			}
+		}
+	}
+
+	// Validate steps
+	for i, step := range l.Steps {
+		for j, field := range step.Fields {
+			if _, exists := fieldMap[field]; !exists {
+				return fmt.Errorf("step %d field %d: field '%s' not found in schema", i, j, field)
+			}
+		}
+	}
+
+	return nil
+}

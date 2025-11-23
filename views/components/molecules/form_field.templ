@@ -56,45 +56,11 @@ type FormFieldProps struct {
     InputClass  string
     ErrorClass  string
     
-    // Event handlers (function names)
+    // Event handlers (pre-resolved HTML attributes)
     OnChange    string
     OnBlur      string
     OnFocus     string
-    
-    // HTMX attributes (pre-resolved externally)
-    HXPost      string
-    HXTarget    string
-    HXSwap      string
-    HXTrigger   string
-}
-
-script FormFieldEvents(props FormFieldProps) {
-    // Simple event delegation for form field
-    function handleFieldEvent(event, eventType) {
-        const fieldId = event.target.id;
-        const value = event.target.value;
-        
-        // Call external handler if provided
-        if (props[eventType] && window[props[eventType]]) {
-            window[props[eventType]](fieldId, value, event);
-        }
-    }
-    
-    // Bind events to field
-    document.addEventListener('DOMContentLoaded', function() {
-        const field = document.getElementById(props.ID);
-        if (field) {
-            if (props.OnChange) {
-                field.addEventListener('change', (e) => handleFieldEvent(e, 'OnChange'));
-            }
-            if (props.OnBlur) {
-                field.addEventListener('blur', (e) => handleFieldEvent(e, 'OnBlur'));
-            }
-            if (props.OnFocus) {
-                field.addEventListener('focus', (e) => handleFieldEvent(e, 'OnFocus'));
-            }
-        }
-    });
+    OnInput     string
 }
 
 // getFieldClass builds CSS class string
@@ -110,16 +76,15 @@ func getFieldClass(props FormFieldProps) string {
 
 // FormField renders a form field molecule with label, input, and validation
 templ FormField(props FormFieldProps) {
-    @FormFieldEvents(props)
-    
     <div class={getFieldClass(props)}>
         // Label
         if props.Label != "" {
             @atoms.Label(atoms.LabelProps{
-                For:      props.ID,
-                Text:     props.Label,
-                Required: props.Required,
-                Disabled: props.Disabled,
+                For:       props.ID,
+                Text:      props.Label,
+                Required:  props.Required,
+                Size:      atoms.LabelSizeMD,
+                State:     utils.IfElse(props.Disabled, atoms.LabelStateDisabled, atoms.LabelStateDefault),
                 ClassName: props.LabelClass,
             })
         }
@@ -163,10 +128,10 @@ templ renderInput(props FormFieldProps) {
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
             ClassName:   props.InputClass,
-            HXPost:      props.HXPost,
-            HXTarget:    props.HXTarget,
-            HXSwap:      props.HXSwap,
-            HXTrigger:   props.HXTrigger,
+            OnChange:    props.OnChange,
+            OnBlur:      props.OnBlur,
+            OnFocus:     props.OnFocus,
+            OnInput:     props.OnInput,
         })
         
     case FormFieldTextarea:
@@ -179,17 +144,24 @@ templ renderInput(props FormFieldProps) {
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
             ClassName:   props.InputClass,
+            OnChange:    props.OnChange,
+            OnBlur:      props.OnBlur,
+            OnFocus:     props.OnFocus,
+            OnInput:     props.OnInput,
         })
         
     case FormFieldSelect:
         @atoms.Select(atoms.SelectProps{
-            ID:       props.ID,
-            Name:     props.Name,
-            Value:    props.Value,
-            Options:  convertToSelectOptions(props.Options),
-            Required: props.Required,
-            Disabled: props.Disabled,
+            ID:        props.ID,
+            Name:      props.Name,
+            Value:     props.Value,
+            Options:   convertToSelectOptions(props.Options),
+            Required:  props.Required,
+            Disabled:  props.Disabled,
             ClassName: props.InputClass,
+            OnChange:  props.OnChange,
+            OnBlur:    props.OnBlur,
+            OnFocus:   props.OnFocus,
         })
         
     case FormFieldCheckbox:
@@ -202,16 +174,22 @@ templ renderInput(props FormFieldProps) {
                     Label:    option.Label,
                     Checked:  option.Selected,
                     Disabled: props.Disabled || option.Disabled,
+                    Size:     atoms.CheckboxSizeMD,
+                    State:    utils.IfElse(props.Disabled || option.Disabled, atoms.CheckboxStateDisabled, utils.IfElse(props.HasError, atoms.CheckboxStateError, atoms.CheckboxStateDefault)),
+                    OnChange: props.OnChange,
                 })
             }
         } else {
             @atoms.Checkbox(atoms.CheckboxProps{
-                ID:      props.ID,
-                Name:    props.Name,
-                Value:   props.Value,
-                Label:   props.Label,
-                Checked: props.Value == "true",
+                ID:       props.ID,
+                Name:     props.Name,
+                Value:    props.Value,
+                Label:    props.Label,
+                Checked:  props.Value == "true",
                 Disabled: props.Disabled,
+                Size:     atoms.CheckboxSizeMD,
+                State:    utils.IfElse(props.Disabled, atoms.CheckboxStateDisabled, utils.IfElse(props.HasError, atoms.CheckboxStateError, atoms.CheckboxStateDefault)),
+                OnChange: props.OnChange,
             })
         }
         
@@ -224,6 +202,9 @@ templ renderInput(props FormFieldProps) {
                 Label:    option.Label,
                 Checked:  option.Selected,
                 Disabled: props.Disabled || option.Disabled,
+                Size:     atoms.RadioSizeMD,
+                State:    utils.IfElse(props.Disabled || option.Disabled, atoms.RadioStateDisabled, utils.IfElse(props.HasError, atoms.RadioStateError, atoms.RadioStateDefault)),
+                OnChange: props.OnChange,
             })
         }
         
@@ -238,6 +219,10 @@ templ renderInput(props FormFieldProps) {
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
             ClassName:   props.InputClass,
+            OnChange:    props.OnChange,
+            OnBlur:      props.OnBlur,
+            OnFocus:     props.OnFocus,
+            OnInput:     props.OnInput,
         })
     }
 }

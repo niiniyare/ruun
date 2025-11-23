@@ -23,6 +23,9 @@ type I18nManager struct {
 	Enabled          bool     `json:"enabled"`
 	DefaultLocale    string   `json:"defaultLocale"`
 	SupportedLocales []string `json:"supportedLocales"`
+	
+	// Direct message access for testing
+	messages map[string]map[string]string
 }
 
 // I18nConfig configures the i18n system
@@ -73,6 +76,7 @@ func NewI18nManager(config *I18nConfig) *I18nManager {
 		Enabled:          true,
 		DefaultLocale:    config.DefaultLocale,
 		SupportedLocales: config.SupportedLocales,
+		messages:         make(map[string]map[string]string),
 	}
 
 	return manager
@@ -317,13 +321,62 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 	for _, locale := range m.config.SupportedLocales {
 		if _, exists := m.translations[locale]; !exists {
 			// Create basic default translations
-			m.translations[locale] = &Translation{
-				Locale: locale,
-				Translations: map[string]interface{}{
-					"common.save":   "Save",
-					"common.cancel": "Cancel",
-					"common.ok":     "OK",
+			translations := map[string]interface{}{
+				"common": map[string]interface{}{
+					"save":   "Save",
+					"cancel": "Cancel",
+					"ok":     "OK",
 				},
+				"validation": map[string]interface{}{
+					"required":       "{{.field}} is required",
+					"min_length":     "{{.field}} must be at least {{.min}} characters",
+					"invalid_email":  "Please enter a valid email address",
+					"invalid_range":  "{{.field}} must be between {{.min}} and {{.max}}",
+				},
+				"actions": map[string]interface{}{
+					"save":   "Save",
+					"cancel": "Cancel",
+					"submit": "Submit",
+					"delete": "Delete",
+				},
+				"messages": map[string]interface{}{
+					"save_success": "Changes saved successfully",
+					"save_error":   "Failed to save changes",
+					"loading":      "Loading...",
+				},
+			}
+			
+			// Add Spanish translations
+			if locale == "es" {
+				translations = map[string]interface{}{
+					"common": map[string]interface{}{
+						"save":   "Guardar",
+						"cancel": "Cancelar",
+						"ok":     "OK",
+					},
+					"validation": map[string]interface{}{
+						"required":       "{{.field}} es requerido",
+						"min_length":     "{{.field}} debe tener al menos {{.min}} caracteres",
+						"invalid_email":  "Por favor ingresa una dirección de correo válida",
+						"invalid_range":  "{{.field}} debe estar entre {{.min}} y {{.max}}",
+					},
+					"actions": map[string]interface{}{
+						"save":   "Guardar",
+						"cancel": "Cancelar",
+						"submit": "Enviar",
+						"delete": "Eliminar",
+					},
+					"messages": map[string]interface{}{
+						"save_success": "Cambios guardados exitosamente",
+						"save_error":   "Error al guardar cambios",
+						"loading":      "Cargando...",
+					},
+				}
+			}
+			
+			m.translations[locale] = &Translation{
+				Locale:       locale,
+				Translations: translations,
 			}
 		}
 	}
@@ -335,6 +388,23 @@ func (m *I18nManager) GetValidationMessage(errorType string, params map[string]a
 	key := fmt.Sprintf("validation.%s", errorType)
 	locale := m.GetLocale()
 	return m.T(locale, key, params)
+}
+
+// interpolateMessage interpolates parameters into a message template
+func (m *I18nManager) interpolateMessage(message string, params map[string]any) string {
+	return m.interpolate(message, params)
+}
+
+// GetMessage gets a translation message for the current locale
+func (m *I18nManager) GetMessage(key string, params map[string]any) string {
+	locale := m.GetLocale()
+	return m.T(locale, key, params)
+}
+
+// GetPluralMessage gets a pluralized message
+func (m *I18nManager) GetPluralMessage(key string, count int, locale string) string {
+	params := map[string]any{"count": count}
+	return m.TCount(locale, key, count, params)
 }
 
 // DetectLocale detects best locale from preferences
@@ -743,4 +813,77 @@ func formatCurrency(num float64) string {
 
 func formatPercent(num float64) string {
 	return fmt.Sprintf("%.1f%%", num*100)
+}
+
+// I18nLoader loads translation files from filesystem
+type I18nLoader struct {
+	basePath string
+	cache    map[string]map[string]string
+	mu       sync.RWMutex
+}
+
+// NewI18nLoader creates a new translation file loader
+func NewI18nLoader(basePath string) *I18nLoader {
+	return &I18nLoader{
+		basePath: basePath,
+		cache:    make(map[string]map[string]string),
+	}
+}
+
+// LoadLocale loads translations for a specific locale
+func (l *I18nLoader) LoadLocale(locale string) (map[string]string, error) {
+	l.mu.RLock()
+	if cached, ok := l.cache[locale]; ok {
+		l.mu.RUnlock()
+		return cached, nil
+	}
+	l.mu.RUnlock()
+
+	// Load from file
+	filename := filepath.Join(l.basePath, locale+".json")
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("read file: %w", err)
+	}
+
+	var translations map[string]interface{}
+	if err := json.Unmarshal(data, &translations); err != nil {
+		return nil, fmt.Errorf("unmarshal json: %w", err)
+	}
+
+	// Flatten the translations
+	flattened := flattenJSON(translations)
+
+	// Cache the result
+	l.mu.Lock()
+	l.cache[locale] = flattened
+	l.mu.Unlock()
+
+	return flattened, nil
+}
+
+// flattenJSON flattens a nested JSON structure
+func flattenJSON(data map[string]interface{}) map[string]string {
+	result := make(map[string]string)
+	flattenJSONHelper(data, "", result)
+	return result
+}
+
+// flattenJSONHelper recursively flattens JSON
+func flattenJSONHelper(data map[string]interface{}, prefix string, result map[string]string) {
+	for key, value := range data {
+		fullKey := key
+		if prefix != "" {
+			fullKey = prefix + "." + key
+		}
+
+		switch v := value.(type) {
+		case string:
+			result[fullKey] = v
+		case map[string]interface{}:
+			flattenJSONHelper(v, fullKey, result)
+		default:
+			result[fullKey] = fmt.Sprintf("%v", v)
+		}
+	}
 }

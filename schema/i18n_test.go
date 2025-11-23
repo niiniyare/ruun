@@ -312,7 +312,12 @@ func (suite *I18nTestSuite) TestMessageInterpolation() {
 
 // Test fallback behavior
 func (suite *I18nTestSuite) TestFallbackBehavior() {
-	manager := NewI18nManager("de", "en") // German with English fallback
+	manager := NewI18nManager(&I18nConfig{
+		DefaultLocale:    "de",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"de", "en"},
+		EnableCache:      true,
+	}) // German with English fallback
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Should fall back to English since German is not available
@@ -426,7 +431,12 @@ func (suite *I18nTestSuite) TestJSONFlattening() {
 
 // Test edge cases
 func (suite *I18nTestSuite) TestEdgeCases() {
-	manager := NewI18nManager("", "en") // Empty locale
+	manager := NewI18nManager(&I18nConfig{
+		DefaultLocale:    "",
+		FallbackLocale:   "en",
+		SupportedLocales: []string{"en"},
+		EnableCache:      true,
+	}) // Empty locale
 	err := manager.LoadDefaultTranslations()
 	suite.Require().NoError(err)
 	// Should fall back to default locale
@@ -676,7 +686,12 @@ func TestI18nManager_interpolateMessage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := NewI18nManager(tt.locale, tt.fallbackLocale)
+			i := NewI18nManager(&I18nConfig{
+				DefaultLocale:    tt.locale,
+				FallbackLocale:   tt.fallbackLocale,
+				SupportedLocales: []string{tt.locale, tt.fallbackLocale},
+				EnableCache:      true,
+			})
 			got := i.interpolateMessage(tt.message, tt.params)
 			if got != tt.want {
 				t.Errorf("interpolateMessage() = %v, want %v", got, tt.want)

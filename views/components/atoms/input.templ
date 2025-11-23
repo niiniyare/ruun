@@ -1,434 +1,239 @@
 package atoms
 
 import (
-	"fmt"
-	"github.com/niiniyare/ruun/pkg/utils"
+    "strconv"
+    "github.com/niiniyare/ruun/pkg/utils"
 )
 
-// InputType defines the type of input
+// InputType defines the HTML input type
 type InputType string
 
 const (
-	InputTypeText     InputType = "text"
-	InputTypeEmail    InputType = "email"
-	InputTypePassword InputType = "password"
-	InputTypeNumber   InputType = "number"
-	InputTypeTel      InputType = "tel"
-	InputTypeURL      InputType = "url"
-	InputTypeSearch   InputType = "search"
-	InputTypeDate     InputType = "date"
-	InputTypeTime     InputType = "time"
-	InputTypeDatetime InputType = "datetime-local"
-	InputTypeHidden   InputType = "hidden"
-	InputTypeFile     InputType = "file"
-	InputTypeRange    InputType = "range"
-	InputTypeColor    InputType = "color"
+    InputText     InputType = "text"
+    InputEmail    InputType = "email"
+    InputPassword InputType = "password"
+    InputNumber   InputType = "number"
+    InputTel      InputType = "tel"
+    InputURL      InputType = "url"
+    InputSearch   InputType = "search"
+    InputFile     InputType = "file"
+    InputDate     InputType = "date"
+    InputTime     InputType = "time"
+    InputDatetime InputType = "datetime-local"
+    InputHidden   InputType = "hidden"
+    InputRange    InputType = "range"
+    InputColor    InputType = "color"
 )
 
-// InputSize defines the size variants for inputs
+// InputSize defines the size variants
 type InputSize string
 
 const (
-	InputSizeSM InputSize = "sm"
-	InputSizeMD InputSize = "md"
-	InputSizeLG InputSize = "lg"
-	InputSizeXL InputSize = "xl"
-
+    InputSizeXS InputSize = "xs"
+    InputSizeSM InputSize = "sm"
+    InputSizeMD InputSize = "md"
+    InputSizeLG InputSize = "lg"
+    InputSizeXL InputSize = "xl"
 )
-type InputVariant string
 
-const (
-	InputVariantOutline  InputVariant = "outline"
-	InputVariantFilled   InputVariant = "filled"
-	InputVariantGhost    InputVariant = "ghost"
-	InputVariantDefault  InputVariant = "default"
-	InputVariantUnderline InputVariant = "underline"
-	InputVariantFlushed  InputVariant = "flushed"
-	InputVariantSoft     InputVariant = "soft"
-	InputVariantSolid    InputVariant = "solid"
-	InputVariantContrast InputVariant = "contrast"
-)
-// InputState defines the visual state of the input
+// InputState defines the visual state variants
 type InputState string
 
 const (
-	InputStateDefault InputState = "default"
-	InputStateError   InputState = "error"
-	InputStateSuccess InputState = "success"
-	InputStateWarning InputState = "warning"
+    InputStateDefault InputState = "default"
+    InputStateError   InputState = "error"
+    InputStateSuccess InputState = "success"
+    InputStateWarning InputState = "warning"
+    InputStateDisabled InputState = "disabled"
 )
 
-// InputProps defines the properties for the Input atom component
-// Following Atomic Design: pure presentation, no business logic
+// InputProps defines all properties for the Input atom
 type InputProps struct {
-	// Presentation
-	Type      InputType
-	Size      InputSize
-	State     InputState
-	ClassName string
-	
-	// Basic HTML attributes
-	ID           string
-	Name         string
-	Value        string
-	Placeholder  string
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	AutoFocus    bool
-	MinLength    int
-	MaxLength    int
-	Min          string
-	Max          string
-	Step         string
-	Pattern      string
-	Autocomplete string
-	
-	// Interactive attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-	AlpineInput  string
+    // Core HTML attributes
+    ID          string    `json:"id"`
+    Name        string    `json:"name"`
+    Type        InputType `json:"type"`
+    Value       string    `json:"value"`
+    Placeholder string    `json:"placeholder"`
+    
+    // Constraints and validation
+    Required    bool   `json:"required"`
+    Disabled    bool   `json:"disabled"`
+    Readonly    bool   `json:"readonly"`
+    AutoFocus   bool   `json:"autoFocus"`
+    AutoComplete string `json:"autoComplete"`
+    
+    // Input-specific constraints
+    MinLength   int    `json:"minLength"`
+    MaxLength   int    `json:"maxLength"`
+    Min         string `json:"min"`
+    Max         string `json:"max"`
+    Step        string `json:"step"`
+    Pattern     string `json:"pattern"`
+    Accept      string `json:"accept"` // For file inputs
+    Multiple    bool   `json:"multiple"` // For file inputs
+    
+    // Visual presentation (resolved externally)
+    Size        InputSize  `json:"size"`
+    State       InputState `json:"state"`
+    ClassName   string     `json:"className"`
+    FullWidth   bool       `json:"fullWidth"`
+    
+    // Event handlers (pre-resolved externally)
+    OnChange    string `json:"onChange"`
+    OnBlur      string `json:"onBlur"`
+    OnFocus     string `json:"onFocus"`
+    OnInput     string `json:"onInput"`
+    OnKeyDown   string `json:"onKeyDown"`
+    OnKeyUp     string `json:"onKeyUp"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// inputClasses generates CSS classes using compiled theme classes and utils
-func inputClasses(props InputProps) string {
-	// Use compiled theme classes from JSON theme
-	return utils.TwMerge(
-		// Base input class from compiled theme
-		"input",
-		
-		// Size classes from compiled theme
-		fmt.Sprintf("input-%s", props.Size),
-		
-		// State classes from compiled theme
-		utils.If(props.State == InputStateError, "input-error"),
-		utils.If(props.State == InputStateSuccess, "input-success"), 
-		utils.If(props.State == InputStateWarning, "input-warning"),
-		
-		// Interactive state classes
-		utils.If(props.Disabled, "input-disabled"),
-		utils.If(props.Readonly, "input-readonly"),
-		
-		// Custom classes
-		props.ClassName,
-	)
+// getInputClasses builds the CSS class string using design tokens
+func getInputClasses(props InputProps) string {
+    return utils.TwMerge(
+        // Base class with design token references
+        "input",
+        
+        // Size classes (map to design tokens)
+        "input-"+string(props.Size),
+        
+        // State classes (map to design tokens)
+        "input-"+string(props.State),
+        
+        // Layout utilities
+        utils.If(props.FullWidth, "input-full-width"),
+        utils.If(props.Disabled, "input-disabled"),
+        utils.If(props.Readonly, "input-readonly"),
+        
+        // Custom classes
+        props.ClassName,
+    )
+}
+
+// buildInputAttributes creates all HTML attributes for the input
+func buildInputAttributes(props InputProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "type":        string(props.Type),
+        "class":       getInputClasses(props),
+        "value":       props.Value,
+        "placeholder": props.Placeholder,
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    
+    // Boolean attributes
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.Readonly {
+        attrs["readonly"] = "readonly"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    if props.Multiple {
+        attrs["multiple"] = "multiple"
+    }
+    
+    // Constraint attributes
+    if props.AutoComplete != "" {
+        attrs["autocomplete"] = props.AutoComplete
+    }
+    if props.MinLength > 0 {
+        attrs["minlength"] = strconv.Itoa(props.MinLength)
+    }
+    if props.MaxLength > 0 {
+        attrs["maxlength"] = strconv.Itoa(props.MaxLength)
+    }
+    if props.Min != "" {
+        attrs["min"] = props.Min
+    }
+    if props.Max != "" {
+        attrs["max"] = props.Max
+    }
+    if props.Step != "" {
+        attrs["step"] = props.Step
+    }
+    if props.Pattern != "" {
+        attrs["pattern"] = props.Pattern
+    }
+    if props.Accept != "" {
+        attrs["accept"] = props.Accept
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnInput != "" {
+        attrs["oninput"] = props.OnInput
+    }
+    if props.OnKeyDown != "" {
+        attrs["onkeydown"] = props.OnKeyDown
+    }
+    if props.OnKeyUp != "" {
+        attrs["onkeyup"] = props.OnKeyUp
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
 }
 
 // Input renders a pure presentation input atom
-// This is the core atomic component - single purpose, no business logic
 templ Input(props InputProps) {
-	<input
-		type={ string(props.Type) }
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		if props.Name != "" {
-			name={ props.Name }
-		}
-		if props.Value != "" {
-			value={ props.Value }
-		}
-		if props.Placeholder != "" {
-			placeholder={ props.Placeholder }
-		}
-		if props.Required {
-			required
-		}
-		if props.Disabled {
-			disabled
-		}
-		if props.Readonly {
-			readonly
-		}
-		if props.AutoFocus {
-			autofocus
-		}
-		if props.MinLength > 0 {
-			minlength={ fmt.Sprint(props.MinLength) }
-		}
-		if props.MaxLength > 0 {
-			maxlength={ fmt.Sprint(props.MaxLength) }
-		}
-		if props.Min != "" {
-			min={ props.Min }
-		}
-		if props.Max != "" {
-			max={ props.Max }
-		}
-		if props.Step != "" {
-			step={ props.Step }
-		}
-		if props.Pattern != "" {
-			pattern={ props.Pattern }
-		}
-		if props.Autocomplete != "" {
-			autocomplete={ props.Autocomplete }
-		}
-		class={ inputClasses(props) }
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-		if props.HXTrigger != "" {
-			hx-trigger={ props.HXTrigger }
-		}
-		if props.AlpineModel != "" {
-			x-model={ props.AlpineModel }
-		}
-		if props.AlpineChange != "" {
-			x-on:change={ props.AlpineChange }
-		}
-		if props.AlpineBlur != "" {
-			x-on:blur={ props.AlpineBlur }
-		}
-		if props.AlpineFocus != "" {
-			x-on:focus={ props.AlpineFocus }
-		}
-		if props.AlpineInput != "" {
-			x-on:input={ props.AlpineInput }
-		}
-	/>
+    <input {buildInputAttributes(props)...} />
 }
-
-// Convenience components for common input types
-
-templ TextInput(props InputProps) {
-	@Input(InputProps{
-		Type:         InputTypeText,
-		Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
-		State:        props.State,
-		ClassName:    props.ClassName,
-		ID:           props.ID,
-		Name:         props.Name,
-		Value:        props.Value,
-		Placeholder:  props.Placeholder,
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		AutoFocus:    props.AutoFocus,
-		MinLength:    props.MinLength,
-		MaxLength:    props.MaxLength,
-		Autocomplete: props.Autocomplete,
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-		AlpineInput:  props.AlpineInput,
-	})
-}
-
-templ EmailInput(props InputProps) {
-	@Input(InputProps{
-		Type:         InputTypeEmail,
-		Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
-		State:        props.State,
-		ClassName:    props.ClassName,
-		ID:           props.ID,
-		Name:         props.Name,
-		Value:        props.Value,
-		Placeholder:  utils.IfElse(props.Placeholder != "", props.Placeholder, "Enter your email"),
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		AutoFocus:    props.AutoFocus,
-		Autocomplete: utils.IfElse(props.Autocomplete != "", props.Autocomplete, "email"),
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-		AlpineInput:  props.AlpineInput,
-	})
-}
-
-templ PasswordInput(props InputProps) {
-	@Input(InputProps{
-		Type:         InputTypePassword,
-		Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
-		State:        props.State,
-		ClassName:    props.ClassName,
-		ID:           props.ID,
-		Name:         props.Name,
-		Value:        props.Value,
-		Placeholder:  utils.IfElse(props.Placeholder != "", props.Placeholder, "Enter your password"),
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		AutoFocus:    props.AutoFocus,
-		MinLength:    props.MinLength,
-		MaxLength:    props.MaxLength,
-		Autocomplete: utils.IfElse(props.Autocomplete != "", props.Autocomplete, "current-password"),
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-		AlpineInput:  props.AlpineInput,
-	})
-}
-
-templ NumberInput(props InputProps) {
-	@Input(InputProps{
-		Type:         InputTypeNumber,
-		Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
-		State:        props.State,
-		ClassName:    props.ClassName,
-		ID:           props.ID,
-		Name:         props.Name,
-		Value:        props.Value,
-		Placeholder:  props.Placeholder,
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		AutoFocus:    props.AutoFocus,
-		Min:          props.Min,
-		Max:          props.Max,
-		Step:         utils.IfElse(props.Step != "", props.Step, "1"),
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-		AlpineInput:  props.AlpineInput,
-	})
-}
-
-templ SearchInput(props InputProps) {
-	@Input(InputProps{
-		Type:         InputTypeSearch,
-		Size:         utils.IfElse(props.Size != "", props.Size, InputSizeMD),
-		State:        props.State,
-		ClassName:    props.ClassName,
-		ID:           props.ID,
-		Name:         props.Name,
-		Value:        props.Value,
-		Placeholder:  utils.IfElse(props.Placeholder != "", props.Placeholder, "Search..."),
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		AutoFocus:    props.AutoFocus,
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    utils.IfElse(props.HXTrigger != "", props.HXTrigger, "keyup changed delay:500ms"),
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-		AlpineInput:  props.AlpineInput,
-	})
-}
-
-// Builder Pattern (functional options)
-type InputOption func(*InputProps)
-
-func NewInput(opts ...InputOption) InputProps {
-	props := InputProps{
-		Type:  InputTypeText,
-		Size:  InputSizeMD,
-		State: InputStateDefault,
-	}
-	for _, opt := range opts {
-		opt(&props)
-	}
-	return props
-}
-
-// Type options
-func WithInputType(inputType InputType) InputOption {
-	return func(p *InputProps) { p.Type = inputType }
-}
-
-func WithInputSize(size InputSize) InputOption {
-	return func(p *InputProps) { p.Size = size }
-}
-
-func WithInputState(state InputState) InputOption {
-	return func(p *InputProps) { p.State = state }
-}
-
-func WithInputValue(value string) InputOption {
-	return func(p *InputProps) { p.Value = value }
-}
-
-func WithInputPlaceholder(placeholder string) InputOption {
-	return func(p *InputProps) { p.Placeholder = placeholder }
-}
-
-func WithInputName(name string) InputOption {
-	return func(p *InputProps) { p.Name = name }
-}
-
-func WithInputID(id string) InputOption {
-	return func(p *InputProps) { p.ID = id }
-}
-
-func AsRequired() InputOption {
-	return func(p *InputProps) { p.Required = true }
-}
-
-func AsInputDisabled() InputOption {
-	return func(p *InputProps) { p.Disabled = true }
-}
-
-func AsReadonly() InputOption {
-	return func(p *InputProps) { p.Readonly = true }
-}
-
-func WithInputHXGet(url string) InputOption {
-	return func(p *InputProps) { p.HXGet = url }
-}
-
-func WithInputHXPost(url string) InputOption {
-	return func(p *InputProps) { p.HXPost = url }
-}
-
-func WithAlpineModel(model string) InputOption {
-	return func(p *InputProps) { p.AlpineModel = model }
-}
-
-func WithInputClass(class string) InputOption {
-	return func(p *InputProps) { p.ClassName = class }
-}
-
-// Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, validation, or form context
-// 2. Compiled Theme Classes: Uses "input", "input-error", etc. from compiled CSS
-// 3. Utils Integration: TwMerge for class conflicts, If/IfElse for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. State Management: Simple visual states (error, success, warning)
-// 6. Atomic Design Compliant: Single purpose, indivisible input component
-// 7. Ready for Molecules: Can be easily composed into FormField molecules

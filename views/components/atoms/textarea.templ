@@ -1,0 +1,222 @@
+package atoms
+
+import (
+    "strconv"
+    "github.com/niiniyare/ruun/pkg/utils"
+)
+
+// TextareaSize defines the size variants
+type TextareaSize string
+
+const (
+    TextareaSizeXS TextareaSize = "xs"
+    TextareaSizeSM TextareaSize = "sm"
+    TextareaSizeMD TextareaSize = "md"
+    TextareaSizeLG TextareaSize = "lg"
+    TextareaSizeXL TextareaSize = "xl"
+)
+
+// TextareaState defines the visual state variants
+type TextareaState string
+
+const (
+    TextareaStateDefault  TextareaState = "default"
+    TextareaStateError    TextareaState = "error"
+    TextareaStateSuccess  TextareaState = "success"
+    TextareaStateWarning  TextareaState = "warning"
+    TextareaStateDisabled TextareaState = "disabled"
+)
+
+// TextareaResize defines resize behavior
+type TextareaResize string
+
+const (
+    TextareaResizeNone       TextareaResize = "none"
+    TextareaResizeVertical   TextareaResize = "vertical"
+    TextareaResizeHorizontal TextareaResize = "horizontal"
+    TextareaResizeBoth       TextareaResize = "both"
+)
+
+// TextareaProps defines all properties for the Textarea atom
+type TextareaProps struct {
+    // Core HTML attributes
+    ID          string `json:"id"`
+    Name        string `json:"name"`
+    Value       string `json:"value"`
+    Placeholder string `json:"placeholder"`
+    
+    // Constraints and validation
+    Required     bool   `json:"required"`
+    Disabled     bool   `json:"disabled"`
+    Readonly     bool   `json:"readonly"`
+    AutoFocus    bool   `json:"autoFocus"`
+    AutoComplete string `json:"autoComplete"`
+    
+    // Textarea-specific constraints
+    MinLength int `json:"minLength"`
+    MaxLength int `json:"maxLength"`
+    Rows      int `json:"rows"`
+    Cols      int `json:"cols"`
+    Wrap      string `json:"wrap"` // "soft" | "hard" | "off"
+    
+    // Visual presentation (resolved externally)
+    Size      TextareaSize   `json:"size"`
+    State     TextareaState  `json:"state"`
+    Resize    TextareaResize `json:"resize"`
+    ClassName string         `json:"className"`
+    FullWidth bool           `json:"fullWidth"`
+    
+    // Event handlers (pre-resolved externally)
+    OnChange  string `json:"onChange"`
+    OnBlur    string `json:"onBlur"`
+    OnFocus   string `json:"onFocus"`
+    OnInput   string `json:"onInput"`
+    OnKeyDown string `json:"onKeyDown"`
+    OnKeyUp   string `json:"onKeyUp"`
+    OnScroll  string `json:"onScroll"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
+}
+
+// getTextareaClasses builds the CSS class string using design tokens
+func getTextareaClasses(props TextareaProps) string {
+    return utils.TwMerge(
+        // Base class with design token references
+        "textarea",
+        
+        // Size classes (map to design tokens)
+        "textarea-"+string(props.Size),
+        
+        // State classes (map to design tokens)
+        "textarea-"+string(props.State),
+        
+        // Resize classes
+        "textarea-resize-"+string(props.Resize),
+        
+        // Layout utilities
+        utils.If(props.FullWidth, "textarea-full-width"),
+        utils.If(props.Disabled, "textarea-disabled"),
+        utils.If(props.Readonly, "textarea-readonly"),
+        
+        // Custom classes
+        props.ClassName,
+    )
+}
+
+// buildTextareaAttributes creates all HTML attributes for the textarea
+func buildTextareaAttributes(props TextareaProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class":       getTextareaClasses(props),
+        "placeholder": props.Placeholder,
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    
+    // Boolean attributes
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.Readonly {
+        attrs["readonly"] = "readonly"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    
+    // Constraint attributes
+    if props.AutoComplete != "" {
+        attrs["autocomplete"] = props.AutoComplete
+    }
+    if props.MinLength > 0 {
+        attrs["minlength"] = strconv.Itoa(props.MinLength)
+    }
+    if props.MaxLength > 0 {
+        attrs["maxlength"] = strconv.Itoa(props.MaxLength)
+    }
+    if props.Rows > 0 {
+        attrs["rows"] = strconv.Itoa(props.Rows)
+    }
+    if props.Cols > 0 {
+        attrs["cols"] = strconv.Itoa(props.Cols)
+    }
+    if props.Wrap != "" {
+        attrs["wrap"] = props.Wrap
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnInput != "" {
+        attrs["oninput"] = props.OnInput
+    }
+    if props.OnKeyDown != "" {
+        attrs["onkeydown"] = props.OnKeyDown
+    }
+    if props.OnKeyUp != "" {
+        attrs["onkeyup"] = props.OnKeyUp
+    }
+    if props.OnScroll != "" {
+        attrs["onscroll"] = props.OnScroll
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
+}
+
+// Textarea renders a pure presentation textarea atom
+templ Textarea(props TextareaProps) {
+    <textarea {buildTextareaAttributes(props)...}>{ props.Value }</textarea>
+}

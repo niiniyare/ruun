@@ -9,29 +9,24 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"github.com/niiniyare/ruun/pkg/utils"
+	"strconv"
 )
 
-// ============================================================================
-// TYPE DEFINITIONS
-// ============================================================================
-
-// ButtonVariant defines the visual style variants for buttons
-// These map to compiled CSS classes in your design system (e.g., .btn-primary)
+// ButtonVariant defines the visual style variants
 type ButtonVariant string
 
 const (
-	ButtonPrimary     ButtonVariant = "primary"
-	ButtonSecondary   ButtonVariant = "secondary"
-	ButtonDestructive ButtonVariant = "destructive"
-	ButtonOutline     ButtonVariant = "outline"
-	ButtonGhost       ButtonVariant = "ghost"
-	ButtonLink        ButtonVariant = "link"
+	ButtonVariantPrimary     ButtonVariant = "primary"
+	ButtonVariantSecondary   ButtonVariant = "secondary"
+	ButtonVariantDestructive ButtonVariant = "destructive"
+	ButtonVariantOutline     ButtonVariant = "outline"
+	ButtonVariantGhost       ButtonVariant = "ghost"
+	ButtonVariantLink        ButtonVariant = "link"
+	ButtonVariantDefault     ButtonVariant = "default"
 )
 
-// ButtonSize defines the size variants for buttons
-// These map to compiled CSS classes in your design system (e.g., .btn-sm)
+// ButtonSize defines the size variants
 type ButtonSize string
 
 const (
@@ -42,199 +37,195 @@ const (
 	ButtonSizeXL ButtonSize = "xl"
 )
 
-// IconPosition defines where icons should appear relative to button text
-type IconPosition string
+// ButtonState defines the visual state variants
+type ButtonState string
 
 const (
-	IconLeft  IconPosition = "left"
-	IconRight IconPosition = "right"
-	IconOnly  IconPosition = "only"
+	ButtonStateDefault  ButtonState = "default"
+	ButtonStateDisabled ButtonState = "disabled"
+	ButtonStateLoading  ButtonState = "loading"
+	ButtonStateActive   ButtonState = "active"
+	ButtonStateHover    ButtonState = "hover"
 )
 
-// ============================================================================
-// COMPONENT PROPS
-// ============================================================================
-
-// ButtonProps defines the properties for the Button atom component
-// Following Atomic Design principles: pure presentation, no business logic
-//
-// Design Philosophy:
-// - Presentation-focused: All props relate to visual presentation or DOM attributes
-// - No business logic: No validation, data fetching, or application state
-// - Composable: Can be wrapped in molecules for more complex behaviors
-// - Theme-aware: Uses compiled CSS classes from design system
+// ButtonProps defines all properties for the Button atom
 type ButtonProps struct {
-	// ========================================================================
-	// PRESENTATION
-	// ========================================================================
+	// Core HTML attributes
+	ID   string `json:"id"`
+	Type string `json:"type"`
+	Name string `json:"name"`
+	Text string `json:"text"`
 
-	// Variant determines the visual style (primary, secondary, destructive, etc.)
-	// Maps to compiled CSS classes: .btn-{variant}
-	Variant ButtonVariant
+	// Form attributes
+	Value      string `json:"value"`
+	Disabled   bool   `json:"disabled"`
+	AutoFocus  bool   `json:"autoFocus"`
+	Form       string `json:"form"`
+	FormAction string `json:"formAction"`
+	FormMethod string `json:"formMethod"`
+	FormTarget string `json:"formTarget"`
 
-	// Size determines dimensions and padding
-	// Maps to compiled CSS classes: .btn-{size}
-	Size ButtonSize
+	// Visual presentation (resolved externally)
+	Variant   ButtonVariant `json:"variant"`
+	Size      ButtonSize    `json:"size"`
+	State     ButtonState   `json:"state"`
+	ClassName string        `json:"className"`
+	FullWidth bool          `json:"fullWidth"`
 
-	// ClassName allows additional custom CSS classes to be merged
-	// Use this for one-off styling needs or utility classes
-	// NOTE: Uses TwMerge to handle class conflicts intelligently
-	ClassName string
+	// Icon configuration
+	Icon      string `json:"icon"`
+	IconLeft  string `json:"iconLeft"`
+	IconRight string `json:"iconRight"`
+	Loading   bool   `json:"loading"`
 
-	// ========================================================================
-	// CONTENT (Simple presentation only, no complex data structures)
-	// ========================================================================
+	// Event handlers (pre-resolved externally)
+	OnClick    string `json:"onClick"`
+	OnFocus    string `json:"onFocus"`
+	OnBlur     string `json:"onBlur"`
+	OnMouseOut string `json:"onMouseOut"`
+	OnSubmit   string `json:"onSubmit"`
 
-	// Text is simple string content for the button
-	// If children are provided, Text is ignored
-	Text string
+	// ARIA accessibility attributes
+	AriaLabel       string `json:"ariaLabel"`
+	AriaDescribedBy string `json:"ariaDescribedBy"`
+	AriaPressed     string `json:"ariaPressed"`
+	AriaExpanded    string `json:"ariaExpanded"`
+	AriaHaspopup    string `json:"ariaHaspopup"`
+	AriaControls    string `json:"ariaControls"`
 
-	// Icon displays a single icon (for icon-only buttons)
-	// Used when no text or children are provided
-	Icon string
-
-	// IconLeft displays an icon on the left side of button content
-	// Cannot be used simultaneously with Icon (icon-only mode)
-	IconLeft string
-
-	// IconRight displays an icon on the right side of button content
-	// Cannot be used simultaneously with Icon (icon-only mode)
-	IconRight string
-
-	// TODO: Add IconPosition enum to replace separate IconLeft/IconRight props
-	// This would provide better API clarity:
-	//   Icon: "search", IconPosition: IconLeft
-	// vs current:
-	//   IconLeft: "search"
-
-	// ========================================================================
-	// BASIC HTML ATTRIBUTES
-	// ========================================================================
-
-	// ID sets the HTML id attribute
-	ID string
-
-	// Type sets the button type attribute (button, submit, reset)
-	// Defaults to "button" if not specified
-	Type string
-
-	// Name sets the HTML name attribute (useful for form buttons)
-	Name string
-
-	// Value sets the HTML value attribute (useful for form buttons)
-	Value string
-
-	// Disabled makes the button non-interactive
-	// Adds visual disabled state via CSS
-	Disabled bool
-
-	// Loading shows a loading spinner and disables interaction
-	// Takes precedence over icons when true
-	Loading bool
-
-	// ========================================================================
-	// INTERACTIVE ATTRIBUTES (HTMX/Alpine)
-	// ========================================================================
-
-	// HXPost sets the hx-post attribute for HTMX form submissions
-	HXPost string
-
-	// HXGet sets the hx-get attribute for HTMX GET requests
-	HXGet string
-
-	// HXTarget sets the hx-target attribute (where to swap response)
-	HXTarget string
-
-	// HXSwap sets the hx-swap strategy (innerHTML, outerHTML, etc.)
-	HXSwap string
-
-	// HXTrigger sets custom HTMX trigger conditions
-	HXTrigger string
-
-	// AlpineClick sets Alpine.js x-on:click handler
-	AlpineClick string
-
-	// TODO: Consider adding more HTMX attributes:
-	// - HXConfirm for confirmation dialogs
-	// - HXPushURL for URL management
-	// - HXSelect for partial content selection
-
-	// NOTE: For complex interactivity, consider wrapping in a molecule component
-	// that provides the necessary Alpine.js data context
+	// Additional HTML attributes
+	TabIndex   int               `json:"tabIndex"`
+	DataAttrs  map[string]string `json:"dataAttrs"`
+	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// ============================================================================
-// CORE BUTTON COMPONENT
-// ============================================================================
-
-// buttonClasses generates the complete CSS class string for a button
-//
-// Class Generation Strategy:
-// 1. Start with base semantic class from compiled theme (.btn)
-// 2. Add variant class (.btn-{variant})
-// 3. Add size class (.btn-{size})
-// 4. Add state classes (.btn-loading, .btn-disabled)
-// 5. Merge custom classes, resolving conflicts with TwMerge
-//
-// Example output: "btn btn-primary btn-md btn-loading custom-class"
-//
-// NOTE: This uses compiled CSS classes from your design system
-// FIXME: Consider caching class strings for frequently used combinations
-func buttonClasses(props ButtonProps) string {
+// getButtonClasses builds the CSS class string using design tokens
+func getButtonClasses(props ButtonProps) string {
 	return utils.TwMerge(
-		// Base button class from compiled theme (contains base styles)
-		"btn",
+		// Base class with design token references
+		"button",
 
-		// Variant classes from compiled theme
-		// Maps to .btn-primary, .btn-secondary, etc. in your CSS
-		fmt.Sprintf("btn-%s", props.Variant),
+		// Variant classes (map to design tokens)
+		"button-"+string(props.Variant),
 
-		// Size classes from compiled theme
-		// Maps to .btn-xs, .btn-sm, .btn-md, .btn-lg, .btn-xl in your CSS
-		fmt.Sprintf("btn-%s", props.Size),
+		// Size classes (map to design tokens)
+		"button-"+string(props.Size),
 
-		// State classes (loading state takes visual precedence)
-		// These should be defined in your compiled CSS
-		utils.If(props.Loading, "btn-loading"),
-		utils.If(props.Disabled, "btn-disabled"),
+		// State classes (map to design tokens)
+		"button-"+string(props.State),
 
-		// Custom classes (merged last to allow overrides)
-		// TwMerge intelligently resolves conflicts (e.g., multiple padding classes)
+		// Layout utilities
+		utils.If(props.FullWidth, "button-full-width"),
+		utils.If(props.Disabled, "button-disabled"),
+		utils.If(props.Loading, "button-loading"),
+
+		// Icon-specific classes
+		utils.If(props.Icon != "" && props.Text == "", "button-icon-only"),
+		utils.If(props.IconLeft != "", "button-has-icon-left"),
+		utils.If(props.IconRight != "", "button-has-icon-right"),
+
+		// Custom classes
 		props.ClassName,
 	)
 }
 
-// Button renders a pure presentation button atom component
-//
-// This is the core atomic component following these principles:
-// - Single purpose: render a styled, interactive button
-// - No business logic: no validation, no data fetching
-// - Composable: can be used standalone or wrapped in molecules
-// - Accessible: includes proper ARIA attributes
-//
-// Usage Examples:
-//
-//	Simple text button:
-//	  @Button(ButtonProps{Text: "Click me", Variant: ButtonPrimary})
-//
-//	Button with icon:
-//	  @Button(ButtonProps{Text: "Save", IconLeft: "save", Variant: ButtonPrimary})
-//
-//	Button with children (custom content):
-//	  @Button(ButtonProps{Variant: ButtonPrimary}) {
-//	    <span>Custom <strong>content</strong></span>
-//	  }
-//
-//	HTMX-enabled button:
-//	  @Button(ButtonProps{
-//	    Text: "Submit",
-//	    HXPost: "/api/submit",
-//	    HXTarget: "#result",
-//	  })
-//
-// NOTE: Children take precedence over Text prop
-// TODO: Consider splitting into ButtonBase primitive for better composition
-func Button(props ButtonProps, children ...templ.Component) templ.Component {
+// buildButtonAttributes creates all HTML attributes for the button
+func buildButtonAttributes(props ButtonProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"type":  utils.IfElse(props.Type != "", props.Type, "button"),
+		"class": getButtonClasses(props),
+	}
+
+	// Core HTML attributes
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Name != "" {
+		attrs["name"] = props.Name
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+
+	// Boolean attributes
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	if props.AutoFocus {
+		attrs["autofocus"] = "autofocus"
+	}
+
+	// Form attributes
+	if props.Form != "" {
+		attrs["form"] = props.Form
+	}
+	if props.FormAction != "" {
+		attrs["formaction"] = props.FormAction
+	}
+	if props.FormMethod != "" {
+		attrs["formmethod"] = props.FormMethod
+	}
+	if props.FormTarget != "" {
+		attrs["formtarget"] = props.FormTarget
+	}
+
+	// Event handlers
+	if props.OnClick != "" {
+		attrs["onclick"] = props.OnClick
+	}
+	if props.OnFocus != "" {
+		attrs["onfocus"] = props.OnFocus
+	}
+	if props.OnBlur != "" {
+		attrs["onblur"] = props.OnBlur
+	}
+	if props.OnMouseOut != "" {
+		attrs["onmouseout"] = props.OnMouseOut
+	}
+	if props.OnSubmit != "" {
+		attrs["onsubmit"] = props.OnSubmit
+	}
+
+	// ARIA attributes
+	if props.AriaLabel != "" {
+		attrs["aria-label"] = props.AriaLabel
+	}
+	if props.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.AriaDescribedBy
+	}
+	if props.AriaPressed != "" {
+		attrs["aria-pressed"] = props.AriaPressed
+	}
+	if props.AriaExpanded != "" {
+		attrs["aria-expanded"] = props.AriaExpanded
+	}
+	if props.AriaHaspopup != "" {
+		attrs["aria-haspopup"] = props.AriaHaspopup
+	}
+	if props.AriaControls != "" {
+		attrs["aria-controls"] = props.AriaControls
+	}
+
+	// Tab index
+	if props.TabIndex != 0 {
+		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+
+	// Merge custom attributes (allows override)
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// SimpleButton renders a simple button (backward compatibility)
+func SimpleButton(props ButtonProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -255,248 +246,132 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{buttonClasses(props)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+		templ_7745c5c3_Err = Button(ButtonProps{
+			Text:      props.Text,
+			Variant:   utils.IfElse(props.Variant != "", props.Variant, ButtonVariantDefault),
+			Size:      utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
+			Disabled:  props.Disabled,
+			ID:        props.ID,
+			OnClick:   props.OnClick,
+			ClassName: props.ClassName,
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		return nil
+	})
+}
+
+// Button renders a pure presentation button atom
+func Button(props ButtonProps) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<button")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.Type != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " type=\"")
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildButtonAttributes(props))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.IconLeft != "" && !props.Loading {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"button-icon-left\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = renderIcon(props.IconLeft).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Loading {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span class=\"button-loading-spinner\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = renderLoadingSpinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Icon != "" && props.Text == "" && !props.Loading {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"button-icon-only\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = renderIcon(props.Icon).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Text != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<span class=\"button-text\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Type)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 232, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 259, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " type=\"button\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.ID != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " id=\"")
+		if props.IconRight != "" && !props.Loading {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span class=\"button-icon-right\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 237, Col: 16}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			templ_7745c5c3_Err = renderIcon(props.IconRight).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Name != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " name=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 240, Col: 20}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Value != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 243, Col: 22}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Disabled {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " disabled")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.HXPost != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " hx-post=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 250, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXGet != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " hx-get=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 253, Col: 23}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXTarget != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " hx-target=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 256, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXSwap != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " hx-swap=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 259, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXTrigger != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " hx-trigger=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 262, Col: 31}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.AlpineClick != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " x-on:click=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineClick)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 265, Col: 33}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.Loading {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " aria-label=\"Loading...\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = buttonContent(props, children...).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -504,21 +379,8 @@ func Button(props ButtonProps, children ...templ.Component) templ.Component {
 	})
 }
 
-// ============================================================================
-// BUTTON CONTENT RENDERING
-// ============================================================================
-
-// buttonContent renders the internal content of the button
-//
-// Content Rendering Priority:
-// 1. Loading spinner (overrides everything when Loading=true)
-// 2. Left icon (if IconLeft is set)
-// 3. Main content (children > Text > Icon)
-// 4. Right icon (if IconRight is set)
-//
-// NOTE: This separation allows for easier testing and composition
-// TODO: Consider extracting icon rendering logic to separate helper
-func buttonContent(props ButtonProps, children ...templ.Component) templ.Component {
+// renderIcon renders an icon placeholder (to be replaced with actual Icon atom)
+func renderIcon(name string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -534,126 +396,47 @@ func buttonContent(props ButtonProps, children ...templ.Component) templ.Compone
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.Loading {
-			templ_7745c5c3_Err = LoadingSpinner(LoadingSpinnerProps{
-				Size: string(props.Size),
-				// NOTE: Uses compiled CSS class for theming
-				ClassName: "btn-spinner",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<span class=\"icon\" data-icon=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		if !props.Loading && props.IconLeft != "" {
-			templ_7745c5c3_Err = Icon(IconProps{
-				Name: props.IconLeft,
-				Size: mapButtonSizeToIconSize(props.Size),
-				// Uses compiled theme class for consistent spacing
-				ClassName: "btn-icon-left",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 274, Col: 39}
 		}
-		if !props.Loading && props.Icon != "" && len(children) == 0 && props.Text == "" {
-			templ_7745c5c3_Err = Icon(IconProps{
-				Name: props.Icon,
-				Size: mapButtonSizeToIconSize(props.Size),
-				// Uses compiled theme class for centered icon
-				ClassName: "btn-icon",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		if props.Text != "" && len(children) == 0 {
-			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 341, Col: 14}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		for _, child := range children {
-			templ_7745c5c3_Err = child.Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 275, Col: 14}
 		}
-		if !props.Loading && props.IconRight != "" {
-			templ_7745c5c3_Err = Icon(IconProps{
-				Name: props.IconRight,
-				Size: mapButtonSizeToIconSize(props.Size),
-				// Uses compiled theme class for consistent spacing
-				ClassName: "btn-icon-right",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		return nil
 	})
 }
 
-// ============================================================================
-// REUSABLE LOADING SPINNER PRIMITIVE
-// ============================================================================
-
-// LoadingSpinnerProps defines properties for the loading spinner
-// NOTE: This makes the spinner reusable across other components
-// TODO: Move to primitives.templ when implementing full refactoring strategy
-type LoadingSpinnerProps struct {
-	// Size determines spinner dimensions
-	// Accepts: "xs", "sm", "md", "lg", "xl" or custom CSS size value
-	Size string
-
-	// ClassName allows additional CSS classes
-	// Use for color variants, positioning, etc.
-	ClassName string
-
-	// AriaLabel provides custom accessibility label
-	// Defaults to "Loading..." if empty
-	AriaLabel string
-}
-
-// LoadingSpinner renders a reusable animated loading spinner
-//
-// This is a PRIMITIVE COMPONENT that can be used anywhere in your application,
-// not just in buttons. Examples:
-// - Form submission buttons
-// - Page loading overlays
-// - Data fetching indicators
-// - Inline content loading states
-//
-// Usage Examples:
-//
-//	Default spinner:
-//	  @LoadingSpinner(LoadingSpinnerProps{})
-//
-//	Custom sized spinner:
-//	  @LoadingSpinner(LoadingSpinnerProps{Size: "lg"})
-//
-//	Spinner with custom styling:
-//	  @LoadingSpinner(LoadingSpinnerProps{
-//	    Size: "md",
-//	    ClassName: "text-blue-500",
-//	  })
-//
-// NOTE: Uses SVG for maximum browser compatibility and crisp rendering
-// NOTE: Animation is handled by CSS (.spinner class with animation)
-// FIXME: Consider adding pause/resume animation support for reduced motion
-//
-// BACKWARD COMPATIBILITY: This replaces the old inline spinner
-// Old code using buttons will continue to work without changes
-func LoadingSpinner(props LoadingSpinnerProps) templ.Component {
+// renderLoadingSpinner renders a loading spinner
+func renderLoadingSpinner() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -669,530 +452,17 @@ func LoadingSpinner(props LoadingSpinnerProps) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var16 == nil {
-			templ_7745c5c3_Var16 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var17 = []any{utils.TwMerge(
-			"spinner",
-			utils.If(props.Size != "", fmt.Sprintf("spinner-%s", props.Size)),
-			props.ClassName,
-		)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var17...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<svg class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var17).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<span class=\"loading-spinner\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" class=\"animate-spin\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\" class=\"opacity-25\"></circle> <path fill=\"currentColor\" class=\"opacity-75\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg></span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
 }
-
-// ============================================================================
-// CONVENIENCE VARIANT COMPONENTS (BACKWARD COMPATIBLE)
-// ============================================================================
-// These provide simpler APIs for common button variants
-// They're still atomic components, just with preset defaults
-//
-// NOTE: All props except Variant are passed through, maintaining full flexibility
-// TODO: Consider deprecating these in favor of the builder pattern
-
-// PrimaryButton creates a button with primary variant preset
-// This is a convenience wrapper around the base Button component
-//
-// Usage:
-//
-//	@PrimaryButton(ButtonProps{Text: "Save"})
-//
-// BACKWARD COMPATIBLE: Existing code using PrimaryButton will continue to work
-func PrimaryButton(props ButtonProps, children ...templ.Component) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var19 == nil {
-			templ_7745c5c3_Var19 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Button(ButtonProps{
-			// Force primary variant
-			Variant: ButtonPrimary,
-
-			// Default to medium size if not specified
-			Size: utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-
-			// Default to button type if not specified
-			Type: utils.IfElse(props.Type != "", props.Type, "button"),
-
-			// Pass through all other props unchanged
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
-			Text:        props.Text,
-			Icon:        props.Icon,
-			IconLeft:    props.IconLeft,
-			IconRight:   props.IconRight,
-			ClassName:   props.ClassName,
-			ID:          props.ID,
-			Name:        props.Name,
-			Value:       props.Value,
-			HXPost:      props.HXPost,
-			HXGet:       props.HXGet,
-			HXTarget:    props.HXTarget,
-			HXSwap:      props.HXSwap,
-			HXTrigger:   props.HXTrigger,
-			AlpineClick: props.AlpineClick,
-		}, children...).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// SecondaryButton creates a button with secondary variant preset
-// See PrimaryButton for usage patterns
-// BACKWARD COMPATIBLE: Existing code will continue to work
-func SecondaryButton(props ButtonProps, children ...templ.Component) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var20 == nil {
-			templ_7745c5c3_Var20 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Button(ButtonProps{
-			Variant:     ButtonSecondary,
-			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-			Type:        utils.IfElse(props.Type != "", props.Type, "button"),
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
-			Text:        props.Text,
-			Icon:        props.Icon,
-			IconLeft:    props.IconLeft,
-			IconRight:   props.IconRight,
-			ClassName:   props.ClassName,
-			ID:          props.ID,
-			Name:        props.Name,
-			Value:       props.Value,
-			HXPost:      props.HXPost,
-			HXGet:       props.HXGet,
-			HXTarget:    props.HXTarget,
-			HXSwap:      props.HXSwap,
-			HXTrigger:   props.HXTrigger,
-			AlpineClick: props.AlpineClick,
-		}, children...).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// OutlineButton creates a button with outline variant preset
-// See PrimaryButton for usage patterns
-// BACKWARD COMPATIBLE: Existing code will continue to work
-func OutlineButton(props ButtonProps, children ...templ.Component) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var21 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var21 == nil {
-			templ_7745c5c3_Var21 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Button(ButtonProps{
-			Variant:     ButtonOutline,
-			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-			Type:        utils.IfElse(props.Type != "", props.Type, "button"),
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
-			Text:        props.Text,
-			Icon:        props.Icon,
-			IconLeft:    props.IconLeft,
-			IconRight:   props.IconRight,
-			ClassName:   props.ClassName,
-			ID:          props.ID,
-			Name:        props.Name,
-			Value:       props.Value,
-			HXPost:      props.HXPost,
-			HXGet:       props.HXGet,
-			HXTarget:    props.HXTarget,
-			HXSwap:      props.HXSwap,
-			HXTrigger:   props.HXTrigger,
-			AlpineClick: props.AlpineClick,
-		}, children...).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// DestructiveButton creates a button with destructive variant preset
-// Use for dangerous actions like delete, remove, etc.
-// See PrimaryButton for usage patterns
-// BACKWARD COMPATIBLE: Existing code will continue to work
-func DestructiveButton(props ButtonProps, children ...templ.Component) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var22 == nil {
-			templ_7745c5c3_Var22 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Button(ButtonProps{
-			Variant:     ButtonDestructive,
-			Size:        utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-			Type:        utils.IfElse(props.Type != "", props.Type, "button"),
-			Disabled:    props.Disabled,
-			Loading:     props.Loading,
-			Text:        props.Text,
-			Icon:        props.Icon,
-			IconLeft:    props.IconLeft,
-			IconRight:   props.IconRight,
-			ClassName:   props.ClassName,
-			ID:          props.ID,
-			Name:        props.Name,
-			Value:       props.Value,
-			HXPost:      props.HXPost,
-			HXGet:       props.HXGet,
-			HXTarget:    props.HXTarget,
-			HXSwap:      props.HXSwap,
-			HXTrigger:   props.HXTrigger,
-			AlpineClick: props.AlpineClick,
-		}, children...).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// ============================================================================
-// BUILDER PATTERN (FUNCTIONAL OPTIONS)
-// ============================================================================
-// Provides a fluent API for constructing ButtonProps
-// This is an alternative to struct literals for better discoverability
-//
-// Usage Example:
-//   props := NewButton(
-//     WithVariant(ButtonPrimary),
-//     WithText("Save"),
-//     WithIconLeft("save"),
-//     WithSize(ButtonLarge),
-//     AsSubmit(),
-//   )
-//   @Button(props)
-//
-// NOTE: This pattern is especially useful in Go code (handlers, helpers)
-// TODO: Consider adding validation in NewButton (e.g., warn about Icon + IconLeft)
-
-// ButtonOption is a functional option for configuring ButtonProps
-type ButtonOption func(*ButtonProps)
-
-// NewButton creates ButtonProps with sensible defaults and applies options
-//
-// Default values:
-// - Variant: ButtonPrimary
-// - Size: ButtonSizeMD
-// - Type: "button"
-//
-// BACKWARD COMPATIBLE: This is additive, doesn't break existing code
-func NewButton(opts ...ButtonOption) ButtonProps {
-	// Start with sensible defaults
-	props := ButtonProps{
-		Variant: ButtonPrimary,
-		Size:    ButtonSizeMD,
-		Type:    "button",
-	}
-
-	// Apply each option in order
-	for _, opt := range opts {
-		opt(&props)
-	}
-
-	return props
-}
-
-// ============================================================================
-// BUILDER PATTERN OPTIONS
-// ============================================================================
-// Each function returns a ButtonOption that modifies ButtonProps
-// NOTE: These are chainable and order-independent (except for conflicting options)
-
-// WithButtonVariant sets the button variant (primary, secondary, etc.)
-func WithButtonVariant(variant ButtonVariant) ButtonOption {
-	return func(p *ButtonProps) { p.Variant = variant }
-}
-
-// WithButtonSize sets the button size (xs, sm, md, lg, xl)
-func WithButtonSize(size ButtonSize) ButtonOption {
-	return func(p *ButtonProps) { p.Size = size }
-}
-
-// WithText sets the button text content
-// NOTE: Children in the template take precedence over this
-func WithButtonText(text string) ButtonOption {
-	return func(p *ButtonProps) { p.Text = text }
-}
-
-// WithIcon sets a single icon (for icon-only buttons)
-// NOTE: Don't use with WithIconLeft or WithIconRight
-func WithButtonIcon(icon string) ButtonOption {
-	return func(p *ButtonProps) { p.Icon = icon }
-}
-
-// WithIconLeft sets an icon on the left side of button content
-func WithButtonIconLeft(icon string) ButtonOption {
-	return func(p *ButtonProps) { p.IconLeft = icon }
-}
-
-// WithIconRight sets an icon on the right side of button content
-func WithButtonIconRight(icon string) ButtonOption {
-	return func(p *ButtonProps) { p.IconRight = icon }
-}
-
-// WithID sets the HTML id attribute
-func WithButtonID(id string) ButtonOption {
-	return func(p *ButtonProps) { p.ID = id }
-}
-
-// WithType sets the button type attribute
-// Common values: "button", "submit", "reset"
-func WithType(buttonType string) ButtonOption {
-	return func(p *ButtonProps) { p.Type = buttonType }
-}
-
-// WithName sets the HTML name attribute
-// Useful for form buttons that need to submit a value
-func WithName(name string) ButtonOption {
-	return func(p *ButtonProps) { p.Name = name }
-}
-
-// WithValue sets the HTML value attribute
-// Useful for form buttons that need to submit a value
-func WithValue(value string) ButtonOption {
-	return func(p *ButtonProps) { p.Value = value }
-}
-
-// WithClass adds custom CSS classes
-// NOTE: Uses TwMerge to intelligently resolve conflicts
-func WithButtonClass(class string) ButtonOption {
-	return func(p *ButtonProps) { p.ClassName = class }
-}
-
-// AsSubmit is a convenience option to set type="submit"
-// Equivalent to WithType("submit")
-func AsSubmit() ButtonOption {
-	return func(p *ButtonProps) { p.Type = "submit" }
-}
-
-// AsDisabled marks the button as disabled
-// Prevents interaction and applies disabled styling
-func AsDisabled() ButtonOption {
-	return func(p *ButtonProps) { p.Disabled = true }
-}
-
-// AsLoading marks the button as loading
-// Shows spinner and prevents interaction
-func AsLoading() ButtonOption {
-	return func(p *ButtonProps) { p.Loading = true }
-}
-
-// WithHXPost sets the hx-post attribute for HTMX
-// NOTE: Requires HTMX library to be loaded
-func WithButtonHXPost(url string) ButtonOption {
-	return func(p *ButtonProps) { p.HXPost = url }
-}
-
-// WithHXGet sets the hx-get attribute for HTMX
-// NOTE: Requires HTMX library to be loaded
-func WithButtonHXGet(url string) ButtonOption {
-	return func(p *ButtonProps) { p.HXGet = url }
-}
-
-// WithHXTarget sets where HTMX should swap the response
-// Common values: "#result", "this", "closest .container"
-func WithButtonHXTarget(target string) ButtonOption {
-	return func(p *ButtonProps) { p.HXTarget = target }
-}
-
-// WithHXSwap sets how HTMX should swap the response
-// Common values: "innerHTML", "outerHTML", "beforeend", "afterbegin"
-func WithButtonHXSwap(swap string) ButtonOption {
-	return func(p *ButtonProps) { p.HXSwap = swap }
-}
-
-// WithHXTrigger sets custom HTMX trigger conditions
-// Examples: "click", "click once", "click throttle:1s"
-func WithButtonHXTrigger(trigger string) ButtonOption {
-	return func(p *ButtonProps) { p.HXTrigger = trigger }
-}
-
-// WithAlpineClick sets Alpine.js click handler
-// NOTE: Requires Alpine.js library to be loaded
-// Example: "count++" where count is in Alpine data context
-func WithButtonAlpineClick(handler string) ButtonOption {
-	return func(p *ButtonProps) { p.AlpineClick = handler }
-}
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-// mapButtonSizeToIconSize maps button sizes to appropriate icon sizes
-// This ensures visual consistency between button and icon proportions
-//
-// NOTE: This is an internal helper, not exported
-// TODO: Consider making this configurable via theme tokens
-func mapButtonSizeToIconSize(size ButtonSize) IconSize {
-	switch size {
-	case ButtonSizeXS:
-		return IconSizeXS
-	case ButtonSizeSM:
-		return IconSizeSM
-	case ButtonSizeMD:
-		return IconSizeMD
-	case ButtonSizeLG:
-		return IconSizeLG
-	case ButtonSizeXL:
-		return IconSizeXL
-	default:
-		return IconSizeMD
-	}
-}
-
-// ============================================================================
-// DOCUMENTATION & MIGRATION NOTES
-// ============================================================================
-
-/*
-KEY IMPROVEMENTS IN THIS REFACTORED VERSION:
-
-1. BACKWARD COMPATIBILITY:
-   - All existing code using buttons will continue to work
-   - No breaking changes to public APIs
-   - Convenience components (PrimaryButton, etc.) preserved
-
-2. REUSABLE PRIMITIVES:
-   - LoadingSpinner extracted as standalone component
-   - Can be used anywhere in the application
-   - Consistent styling via compiled CSS classes
-
-3. DUAL DESIGN SYSTEM:
-   - Compiled CSS classes (.btn, .btn-primary, .btn-spinner)
-   - Tailwind utilities where appropriate (for custom styling)
-   - TwMerge handles conflicts intelligently
-
-4. ENHANCED BUILDER PATTERN:
-   - Added missing options (WithAlpineClick, AsSubmit, etc.)
-   - Fluent API for better discoverability
-   - Type-safe configuration
-
-5. COMPREHENSIVE DOCUMENTATION:
-   - Detailed comments on every component and function
-   - Usage examples throughout
-   - Clear migration path via TODO/NOTE/FIXME comments
-
-6. ACCESSIBILITY:
-   - Proper ARIA attributes
-   - Loading state announcements
-   - Semantic HTML
-
-MIGRATION PATH (NO IMMEDIATE CHANGES REQUIRED):
-
-Phase 1 (Current - Backward Compatible):
-✓ Extract LoadingSpinner as reusable component
-✓ Add builder pattern options
-✓ Maintain all existing APIs
-
-Phase 2 (Future - Refactoring Strategy):
-TODO: Extract ButtonBase primitive (per refactoring strategy)
-TODO: Implement attribute spreading pattern
-TODO: Add theme override support for multi-tenancy
-TODO: Create component factory pattern
-
-Phase 3 (Future - Advanced Features):
-TODO: Add animation/transition support
-TODO: Implement focus management
-TODO: Add keyboard navigation enhancements
-TODO: Support icon-only button accessibility
-
-BREAKING CHANGES: NONE
-All existing code will continue to work without modification.
-
-RECOMMENDED NEXT STEPS:
-1. Review TODO comments and prioritize based on needs
-2. Update compiled CSS to include all referenced classes
-3. Test LoadingSpinner in different contexts
-4. Consider extracting Icon component similarly
-5. Begin using builder pattern for new code
-*/
 
 var _ = templruntime.GeneratedTemplate

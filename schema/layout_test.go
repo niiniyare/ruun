@@ -238,14 +238,14 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 		Columns: 3,
 		Gap:     "md",
 	}
-	err := validGrid.ValidateLayout(schema)
+	err := validGrid.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test grid layout without columns (should pass - columns have defaults)
 	gridWithoutColumns := &Layout{
 		Type: "grid",
 		Gap:  "md",
 	}
-	err = gridWithoutColumns.ValidateLayout(schema)
+	err = gridWithoutColumns.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test valid tabs layout
 	validTabs := &Layout{
@@ -254,13 +254,13 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 			{ID: "tab1", Label: "Tab 1", Fields: []string{"field1"}},
 		},
 	}
-	err = validTabs.ValidateLayout(schema)
+	err = validTabs.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test tabs layout without tabs (should pass - validation only checks field references)
 	tabsWithoutTabs := &Layout{
 		Type: "tabs",
 	}
-	err = tabsWithoutTabs.ValidateLayout(schema)
+	err = tabsWithoutTabs.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test valid steps layout
 	validSteps := &Layout{
@@ -269,13 +269,13 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 			{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}},
 		},
 	}
-	err = validSteps.ValidateLayout(schema)
+	err = validSteps.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test steps layout without steps (should pass - validation only checks field references)
 	stepsWithoutSteps := &Layout{
 		Type: "steps",
 	}
-	err = stepsWithoutSteps.ValidateLayout(schema)
+	err = stepsWithoutSteps.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test valid sections layout
 	validSections := &Layout{
@@ -284,13 +284,13 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 			{ID: "section1", Title: "Section 1", Fields: []string{"field1"}},
 		},
 	}
-	err = validSections.ValidateLayout(schema)
+	err = validSections.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test sections layout without sections (should pass - validation only checks field references)
 	sectionsWithoutSections := &Layout{
 		Type: "sections",
 	}
-	err = sectionsWithoutSections.ValidateLayout(schema)
+	err = sectionsWithoutSections.ValidateLayout(schema.buildFieldMap())
 	require.NoError(suite.T(), err)
 	// Test layout with invalid field reference (should error)
 	layoutWithInvalidField := &Layout{
@@ -299,7 +299,7 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 			{ID: "section1", Title: "Section 1", Fields: []string{"nonexistent_field"}},
 		},
 	}
-	err = layoutWithInvalidField.ValidateLayout(schema)
+	err = layoutWithInvalidField.ValidateLayout(schema.buildFieldMap())
 	require.Error(suite.T(), err)
 	require.Contains(suite.T(), err.Error(), "references non-existent field")
 }

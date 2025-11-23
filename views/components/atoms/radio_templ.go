@@ -9,176 +9,200 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"strings"
+	"github.com/niiniyare/ruun/pkg/utils"
+	"strconv"
 )
 
 // RadioSize defines the size variants for radio buttons
 type RadioSize string
 
 const (
+	RadioSizeXS RadioSize = "xs"
 	RadioSizeSM RadioSize = "sm"
 	RadioSizeMD RadioSize = "md"
 	RadioSizeLG RadioSize = "lg"
+	RadioSizeXL RadioSize = "xl"
 )
 
 // RadioState defines the visual state of the radio button
 type RadioState string
 
 const (
-	RadioStateDefault RadioState = "default"
-	RadioStateError   RadioState = "error"
-	RadioStateSuccess RadioState = "success"
-	RadioStateWarning RadioState = "warning"
+	RadioStateDefault  RadioState = "default"
+	RadioStateError    RadioState = "error"
+	RadioStateSuccess  RadioState = "success"
+	RadioStateWarning  RadioState = "warning"
+	RadioStateDisabled RadioState = "disabled"
 )
 
-// RadioOption represents a single radio button option
-type RadioOption struct {
-	Value       string `json:"value"`
-	Label       string `json:"label"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
-	Icon        string `json:"icon"`
-}
-
-// RadioProps defines the properties for the RadioGroup component
+// RadioProps defines all properties for the Radio atom
 type RadioProps struct {
-	ID       string
-	Name     string
-	Value    string // Selected value
-	Options  []RadioOption
-	Size     RadioSize
-	State    RadioState
-	Required bool
-	Disabled bool
-	Readonly bool
-	Error    bool
-	Class    string
-	// Layout options
-	Inline  bool // Horizontal vs vertical layout
-	Columns int  // Number of columns for grid layout
-	// HTMX attributes
-	HXPost    string
-	HXGet     string
-	HXTarget  string
-	HXSwap    string
-	HXTrigger string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
+	// Core HTML attributes
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Value   string `json:"value"`
+	Label   string `json:"label"`
+	Checked bool   `json:"checked"`
+
+	// Constraints and validation
+	Required  bool `json:"required"`
+	Disabled  bool `json:"disabled"`
+	Readonly  bool `json:"readonly"`
+	AutoFocus bool `json:"autoFocus"`
+
+	// Visual presentation (resolved externally)
+	Size      RadioSize  `json:"size"`
+	State     RadioState `json:"state"`
+	ClassName string     `json:"className"`
+
+	// Event handlers (pre-resolved externally)
+	OnChange string `json:"onChange"`
+	OnBlur   string `json:"onBlur"`
+	OnFocus  string `json:"onFocus"`
+	OnClick  string `json:"onClick"`
+
+	// ARIA accessibility attributes
+	AriaLabel       string `json:"ariaLabel"`
+	AriaDescribedBy string `json:"ariaDescribedBy"`
+	AriaInvalid     string `json:"ariaInvalid"`
+	AriaRequired    string `json:"ariaRequired"`
+	AriaChecked     string `json:"ariaChecked"`
+
+	// Additional HTML attributes
+	TabIndex   int               `json:"tabIndex"`
+	DataAttrs  map[string]string `json:"dataAttrs"`
+	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// radioGroupClasses generates Tailwind CSS classes for the radio group container
-func radioGroupClasses(props RadioProps) string {
-	var classes []string
+// getRadioClasses builds the CSS class string using design tokens
+func getRadioClasses(props RadioProps) string {
+	return utils.TwMerge(
+		// Base class with design token references
+		"radio",
 
-	// Base container classes
-	classes = append(classes, "radio-group")
+		// Size classes (map to design tokens)
+		"radio-"+string(props.Size),
 
-	// Layout classes
-	if props.Inline {
-		classes = append(classes, "flex", "flex-wrap", "gap-4")
-	} else if props.Columns > 1 {
-		classes = append(classes, "grid", "gap-4")
-		switch props.Columns {
-		case 2:
-			classes = append(classes, "grid-cols-2")
-		case 3:
-			classes = append(classes, "grid-cols-3")
-		case 4:
-			classes = append(classes, "grid-cols-4")
-		default:
-			classes = append(classes, "grid-cols-2")
-		}
-	} else {
-		classes = append(classes, "space-y-3")
-	}
+		// State classes (map to design tokens)
+		"radio-"+string(props.State),
 
-	// State classes
-	if props.Disabled {
-		classes = append(classes, "opacity-50", "cursor-not-allowed")
-	}
+		// Layout utilities
+		utils.If(props.Disabled, "radio-disabled"),
+		utils.If(props.Readonly, "radio-readonly"),
+		utils.If(props.Checked, "radio-checked"),
 
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// radioOptionClasses generates Tailwind CSS classes for individual radio options
-func radioOptionClasses(props RadioProps, option RadioOption) string {
-	var classes []string
-
-	// Base classes for the option container
-	classes = append(classes,
-		"radio-option",
-		"flex",
-		"items-start",
-		"gap-3",
-		"p-3",
-		"rounded-lg",
-		"border",
-		"transition-colors",
-		"cursor-pointer",
-		"hover:bg-accent",
-		"focus-within:ring-2",
-		"focus-within:ring-ring",
-		"focus-within:ring-offset-2",
+		// Custom classes
+		props.ClassName,
 	)
-
-	// State-based styling
-	isSelected := props.Value == option.Value
-	if isSelected {
-		classes = append(classes,
-			"border-primary",
-			"bg-primary/5",
-		)
-	} else {
-		classes = append(classes,
-			"border-input",
-			"bg-background",
-		)
-	}
-
-	// Disabled state
-	if props.Disabled || option.Disabled {
-		classes = append(classes,
-			"opacity-50",
-			"cursor-not-allowed",
-			"hover:bg-background",
-		)
-	}
-
-	// Error state
-	if props.Error {
-		classes = append(classes, "border-destructive")
-	}
-
-	return strings.Join(classes, " ")
 }
 
-// radioInputClasses generates Tailwind CSS classes for the radio input
-func radioInputClasses() string {
-	return strings.Join([]string{
-		"h-4",
-		"w-4",
-		"rounded-full",
-		"border",
-		"border-primary",
-		"text-primary",
-		"focus:ring-2",
-		"focus:ring-ring",
-		"focus:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-	}, " ")
+// getRadioLabelClasses builds CSS for radio label
+func getRadioLabelClasses(props RadioProps) string {
+	return utils.TwMerge(
+		"radio-label",
+		utils.If(props.Disabled, "radio-label-disabled"),
+	)
 }
 
-// RadioGroup renders an accessible radio button group component
-func RadioGroup(props RadioProps) templ.Component {
+// buildRadioAttributes creates all HTML attributes for the radio
+func buildRadioAttributes(props RadioProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"type":  "radio",
+		"class": getRadioClasses(props),
+	}
+
+	// Core HTML attributes
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Name != "" {
+		attrs["name"] = props.Name
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+
+	// Boolean attributes
+	if props.Checked {
+		attrs["checked"] = "checked"
+	}
+	if props.Required {
+		attrs["required"] = "required"
+	}
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	if props.Readonly {
+		attrs["readonly"] = "readonly"
+	}
+	if props.AutoFocus {
+		attrs["autofocus"] = "autofocus"
+	}
+
+	// Event handlers
+	if props.OnChange != "" {
+		attrs["onchange"] = props.OnChange
+	}
+	if props.OnBlur != "" {
+		attrs["onblur"] = props.OnBlur
+	}
+	if props.OnFocus != "" {
+		attrs["onfocus"] = props.OnFocus
+	}
+	if props.OnClick != "" {
+		attrs["onclick"] = props.OnClick
+	}
+
+	// ARIA attributes
+	if props.AriaLabel != "" {
+		attrs["aria-label"] = props.AriaLabel
+	}
+	if props.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.AriaDescribedBy
+	}
+	if props.AriaInvalid != "" {
+		attrs["aria-invalid"] = props.AriaInvalid
+	}
+	if props.AriaRequired != "" {
+		attrs["aria-required"] = props.AriaRequired
+	}
+	if props.AriaChecked != "" {
+		attrs["aria-checked"] = props.AriaChecked
+	}
+
+	// Tab index
+	if props.TabIndex != 0 {
+		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+
+	// Merge custom attributes (allows override)
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// buildRadioLabelAttributes creates all HTML attributes for the label
+func buildRadioLabelAttributes(props RadioProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": getRadioLabelClasses(props),
+	}
+
+	if props.ID != "" {
+		attrs["for"] = props.ID
+	}
+
+	return attrs
+}
+
+// Radio renders a pure presentation radio atom
+func Radio(props RadioProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -199,550 +223,56 @@ func RadioGroup(props RadioProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{radioGroupClasses(props)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.ID != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " id=\"")
+		if props.Label != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<label")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-group")
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 177, Col: 27}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildRadioLabelAttributes(props))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "><input")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " role=\"radiogroup\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.Required {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " aria-required=\"true\"")
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildRadioAttributes(props))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		if props.Error {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " aria-invalid=\"true\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "> <span class=\"radio-label-text\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, ">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, option := range props.Options {
-			var templ_7745c5c3_Var5 = []any{radioOptionClasses(props, option)}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 201, Col: 56}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<label class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var5).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" for=\"")
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildRadioAttributes(props))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-" + option.Value)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 190, Col: 39}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 = []any{radioInputClasses()}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<input type=\"radio\" id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-" + option.Value)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 194, Col: 39}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" name=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 195, Col: 22}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 196, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if props.Value == option.Value {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.Required {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " required")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.Disabled || option.Disabled {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " disabled")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.Readonly {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " readonly")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var8).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if props.HXPost != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " hx-post=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXPost)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 211, Col: 28}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.HXGet != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " hx-get=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXGet)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 214, Col: 26}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.HXTarget != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " hx-target=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var15 string
-				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 217, Col: 32}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.HXSwap != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, " hx-swap=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var16 string
-				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 220, Col: 28}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.HXTrigger != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " hx-trigger=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var17 string
-				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTrigger)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 223, Col: 34}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.AlpineModel != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " x-model=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var18 string
-				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineModel)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 226, Col: 33}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.AlpineChange != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " x-on:change=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var19 string
-				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineChange)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 229, Col: 38}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.AlpineBlur != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, " x-on:blur=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var20 string
-				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineBlur)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 232, Col: 34}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			if props.AlpineFocus != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, " x-on:focus=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var21 string
-				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineFocus)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 235, Col: 36}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "><div class=\"flex-1 min-w-0\"><div class=\"flex items-center gap-2\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if option.Icon != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<span class=\"text-muted-foreground\"><!-- Icon would be rendered here --><span class=\"sr-only\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var22 string
-				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(option.Icon)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 243, Col: 43}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</span></span> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<span class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 247, Col: 21}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</span></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if option.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<p class=\"text-xs text-muted-foreground mt-1\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var24 string
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(option.Description)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 252, Col: 27}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</p>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</div></label>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
 		}
 		return nil
 	})
 }
 
-// RadioGroupInline renders radio buttons in a horizontal layout
-func RadioGroupInline(props RadioProps) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var25 == nil {
-			templ_7745c5c3_Var25 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = RadioGroup(RadioProps{
-			ID:           props.ID,
-			Name:         props.Name,
-			Value:        props.Value,
-			Options:      props.Options,
-			Required:     props.Required,
-			Disabled:     props.Disabled,
-			Readonly:     props.Readonly,
-			Error:        props.Error,
-			Size:         props.Size,
-			State:        props.State,
-			Class:        props.Class,
-			Inline:       true,
-			HXPost:       props.HXPost,
-			HXGet:        props.HXGet,
-			HXTarget:     props.HXTarget,
-			HXSwap:       props.HXSwap,
-			HXTrigger:    props.HXTrigger,
-			AlpineModel:  props.AlpineModel,
-			AlpineChange: props.AlpineChange,
-			AlpineBlur:   props.AlpineBlur,
-			AlpineFocus:  props.AlpineFocus,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// Builder Pattern (functional options)
-type RadioConfig func(*RadioProps)
-
-func NewRadioGroup(opts ...RadioConfig) RadioProps {
-	props := RadioProps{
-		Size:  RadioSizeMD,
-		State: RadioStateDefault,
-	}
-	for _, opt := range opts {
-		opt(&props)
-	}
-	return props
-}
-
-func WithRadioSize(size RadioSize) RadioConfig {
-	return func(p *RadioProps) { p.Size = size }
-}
-
-func WithRadioState(state RadioState) RadioConfig {
-	return func(p *RadioProps) { p.State = state }
-}
-
-func WithRadioName(name string) RadioConfig {
-	return func(p *RadioProps) { p.Name = name }
-}
-
-func WithRadioValue(value string) RadioConfig {
-	return func(p *RadioProps) { p.Value = value }
-}
-
-func WithRadioOptions(options []RadioOption) RadioConfig {
-	return func(p *RadioProps) { p.Options = options }
-}
-
-func WithRadioID(id string) RadioConfig {
-	return func(p *RadioProps) { p.ID = id }
-}
-
-func AsRadioRequired() RadioConfig {
-	return func(p *RadioProps) { p.Required = true }
-}
-
-func AsRadioDisabled() RadioConfig {
-	return func(p *RadioProps) { p.Disabled = true }
-}
-
-func AsRadioInline() RadioConfig {
-	return func(p *RadioProps) { p.Inline = true }
-}
-
-func WithRadioClass(class string) RadioConfig {
-	return func(p *RadioProps) { p.Class = class }
-}
-
-// Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, just visual rendering and state management
-// 2. Compiled Theme Classes: Uses "radio", "radio-error", etc. from compiled CSS
-// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. Visual State Management: Simple states (error, success, warning, default)
-// 6. Atomic Design Compliant: Single purpose, indivisible radio component
-// 7. Icon Integration: Uses Icon atom for consistent iconography
-// 8. Ready for Molecules: Can be easily composed into FormField molecules
-// 9. Size Variants: Supports sm, md, lg sizing through compiled theme classes
-// 10. Accessibility: Proper ARIA attributes and radiogroup semantics
 var _ = templruntime.GeneratedTemplate

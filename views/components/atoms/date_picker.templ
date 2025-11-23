@@ -1,575 +1,228 @@
 package atoms
 
 import (
-	"strings"
-	"time"
-	"fmt"
+	"strconv"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
 
-// DatePickerProps defines the properties for the DatePicker component
+// DatePickerVariant defines the visual style variants
+type DatePickerVariant string
+
+const (
+	DatePickerVariantDefault  DatePickerVariant = "default"
+	DatePickerVariantOutlined DatePickerVariant = "outlined"
+	DatePickerVariantFilled   DatePickerVariant = "filled"
+)
+
+// DatePickerSize defines the size variants
+type DatePickerSize string
+
+const (
+	DatePickerSizeXS DatePickerSize = "xs"
+	DatePickerSizeSM DatePickerSize = "sm"
+	DatePickerSizeMD DatePickerSize = "md"
+	DatePickerSizeLG DatePickerSize = "lg"
+	DatePickerSizeXL DatePickerSize = "xl"
+)
+
+// DatePickerState defines the visual state variants
+type DatePickerState string
+
+const (
+	DatePickerStateDefault  DatePickerState = "default"
+	DatePickerStateDisabled DatePickerState = "disabled"
+	DatePickerStateError    DatePickerState = "error"
+	DatePickerStateSuccess  DatePickerState = "success"
+	DatePickerStateReadonly DatePickerState = "readonly"
+)
+
+// DatePickerProps defines all properties for the DatePicker atom
 type DatePickerProps struct {
-	ID           string
-	Name         string
-	Value        string // Date in YYYY-MM-DD format
-	Placeholder  string
-	Min          string // Minimum date in YYYY-MM-DD format
-	Max          string // Maximum date in YYYY-MM-DD format
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	ShowCalendar bool // Whether to show a calendar popup
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
+	// Core attributes
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Value       string `json:"value"`
+	Placeholder string `json:"placeholder"`
+	
+	// Visual presentation (resolved externally)
+	Variant   DatePickerVariant `json:"variant"`
+	Size      DatePickerSize    `json:"size"`
+	State     DatePickerState   `json:"state"`
+	ClassName string            `json:"className"`
+	
+	// Date constraints
+	Min string `json:"min"`
+	Max string `json:"max"`
+	
+	// Form attributes
+	Required bool `json:"required"`
+	Disabled bool `json:"disabled"`
+	Readonly bool `json:"readonly"`
+	
+	// UI features
+	ShowCalendar bool   `json:"showCalendar"`
+	Format       string `json:"format"`
+	
+	// Event handlers (pre-resolved externally)
+	OnChange string `json:"onChange"`
+	OnSelect string `json:"onSelect"`
+	OnFocus  string `json:"onFocus"`
+	OnBlur   string `json:"onBlur"`
+	
+	// ARIA accessibility attributes
+	AriaLabel       string `json:"ariaLabel"`
+	AriaDescribedBy string `json:"ariaDescribedBy"`
+	AriaRequired    string `json:"ariaRequired"`
+	AriaInvalid     string `json:"ariaInvalid"`
+	
+	// Additional HTML attributes
+	TabIndex     int                   `json:"tabIndex"`
+	DataAttrs    map[string]string     `json:"dataAttrs"`
+	Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// DateRangePickerProps defines the properties for date range selection
-type DateRangePickerProps struct {
-	ID           string
-	Name         string
-	StartDate    string // Start date in YYYY-MM-DD format
-	EndDate      string // End date in YYYY-MM-DD format
-	Placeholder  string
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-}
-
-// TimePickerProps defines the properties for the TimePicker component
-type TimePickerProps struct {
-	ID           string
-	Name         string
-	Value        string // Time in HH:MM format
-	Placeholder  string
-	Min          string // Minimum time in HH:MM format
-	Max          string // Maximum time in HH:MM format
-	Step         int    // Step in minutes (default 15)
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	Format24     bool // Use 24-hour format vs 12-hour with AM/PM
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-}
-
-// DateTimePickerProps defines the properties for the DateTimePicker component
-type DateTimePickerProps struct {
-	ID           string
-	Name         string
-	Value        string // DateTime in YYYY-MM-DDTHH:MM format
-	Placeholder  string
-	Min          string // Minimum datetime
-	Max          string // Maximum datetime
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
-}
-
-// datePickerClasses generates Tailwind CSS classes for date picker
-func datePickerClasses(props DatePickerProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
+// getDatePickerClasses builds the CSS class string using design tokens
+func getDatePickerClasses(props DatePickerProps) string {
+	return utils.TwMerge(
+		// Base class with design token references
 		"date-picker",
-		"relative",
-		"w-full",
+		
+		// Variant classes (map to design tokens)
+		"date-picker-"+string(props.Variant),
+		
+		// Size classes (map to design tokens)
+		"date-picker-"+string(props.Size),
+		
+		// State classes (map to design tokens)
+		"date-picker-"+string(props.State),
+		
+		// Interactive utilities
+		utils.If(props.Disabled, "date-picker-disabled"),
+		utils.If(props.Readonly, "date-picker-readonly"),
+		utils.If(props.Required, "date-picker-required"),
+		utils.If(props.ShowCalendar, "date-picker-has-calendar"),
+		
+		// Custom classes
+		props.ClassName,
 	)
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
 }
 
-// dateInputClasses generates Tailwind CSS classes for date input
-func dateInputClasses(error bool) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"flex",
-		"w-full",
-		"rounded-md",
-		"border",
-		"border-input",
-		"bg-background",
-		"px-3",
-		"py-2",
-		"text-sm",
-		"ring-offset-background",
-		"file:border-0",
-		"file:bg-transparent",
-		"file:text-sm",
-		"file:font-medium",
-		"placeholder:text-muted-foreground",
-		"focus-visible:outline-none",
-		"focus-visible:ring-2",
-		"focus-visible:ring-ring",
-		"focus-visible:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-	)
-
-	// Error state
-	if error {
-		classes = append(classes, "border-destructive")
+// buildDatePickerAttributes creates all HTML attributes for the date picker
+func buildDatePickerAttributes(props DatePickerProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"type":  "date",
+		"class": getDatePickerClasses(props),
 	}
-
-	return strings.Join(classes, " ")
+	
+	// Core HTML attributes
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Name != "" {
+		attrs["name"] = props.Name
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+	if props.Placeholder != "" {
+		attrs["placeholder"] = props.Placeholder
+	}
+	
+	// Date constraints
+	if props.Min != "" {
+		attrs["min"] = props.Min
+	}
+	if props.Max != "" {
+		attrs["max"] = props.Max
+	}
+	
+	// Boolean attributes
+	if props.Required {
+		attrs["required"] = "required"
+	}
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	if props.Readonly {
+		attrs["readonly"] = "readonly"
+	}
+	
+	// Event handlers
+	if props.OnChange != "" {
+		attrs["onchange"] = props.OnChange
+	}
+	if props.OnFocus != "" {
+		attrs["onfocus"] = props.OnFocus
+	}
+	if props.OnBlur != "" {
+		attrs["onblur"] = props.OnBlur
+	}
+	
+	// ARIA attributes
+	if props.AriaLabel != "" {
+		attrs["aria-label"] = props.AriaLabel
+	}
+	if props.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.AriaDescribedBy
+	}
+	if props.AriaRequired != "" {
+		attrs["aria-required"] = props.AriaRequired
+	}
+	if props.AriaInvalid != "" {
+		attrs["aria-invalid"] = props.AriaInvalid
+	}
+	
+	// Tab index
+	if props.TabIndex != 0 {
+		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes (allows override)
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
 }
 
-// formatDateValue formats a date value for display
-func formatDateValue(value string) string {
-	if value == "" {
-		return ""
-	}
-	// Parse and reformat if needed
-	if t, err := time.Parse("2006-01-02", value); err == nil {
-		return t.Format("2006-01-02")
-	}
-	return value
-}
-
-// formatTimeValue formats a time value for display
-func formatTimeValue(value string) string {
-	if value == "" {
-		return ""
-	}
-	// Parse and reformat if needed
-	if t, err := time.Parse("15:04", value); err == nil {
-		return t.Format("15:04")
-	}
-	return value
-}
-
-// generateDatePickerAlpineData generates Alpine.js data for date picker
-func generateDatePickerAlpineData(props DatePickerProps) string {
-	return fmt.Sprintf(`{
-		showCalendar: false,
-		selectedDate: '%s',
-		today: new Date().toISOString().split('T')[0],
-		currentMonth: new Date(),
-		
-		init() {
-			if (this.selectedDate) {
-				this.currentMonth = new Date(this.selectedDate);
-			}
-		},
-		
-		toggleCalendar() {
-			if (!%t) {
-				this.showCalendar = !this.showCalendar;
-			}
-		},
-		
-		selectDate(date) {
-			this.selectedDate = date;
-			this.showCalendar = false;
-			this.%s = date;
-		},
-		
-		isToday(date) {
-			return date === this.today;
-		},
-		
-		isSelected(date) {
-			return date === this.selectedDate;
-		},
-		
-		previousMonth() {
-			this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
-		},
-		
-		nextMonth() {
-			this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
-		},
-		
-		getDaysInMonth() {
-			const year = this.currentMonth.getFullYear();
-			const month = this.currentMonth.getMonth();
-			const firstDay = new Date(year, month, 1);
-			const lastDay = new Date(year, month + 1, 0);
-			const days = [];
-			
-			// Add empty cells for days before first day of month
-			for (let i = 0; i < firstDay.getDay(); i++) {
-				days.push(null);
-			}
-			
-			// Add days of the month
-			for (let day = 1; day <= lastDay.getDate(); day++) {
-				days.push(new Date(year, month, day).toISOString().split('T')[0]);
-			}
-			
-			return days;
-		}
-	}`, 
-		formatDateValue(props.Value),
-		props.Disabled || props.Readonly,
-		strings.TrimPrefix(props.AlpineModel, "x-model="))
-}
-
-// DatePicker renders a date picker component
+// DatePicker renders a pure presentation date picker atom
 templ DatePicker(props DatePickerProps) {
-	<div
-		class={ datePickerClasses(props) }
-		if props.ID != "" {
-			id={ props.ID + "-container" }
-		}
+	<div class="date-picker-container">
+		<input {buildDatePickerAttributes(props)...} />
+		
+		// Calendar icon (if enabled)
 		if props.ShowCalendar {
-			x-data={ generateDatePickerAlpineData(props) }
-			@click.outside="showCalendar = false"
-			@keydown.escape="showCalendar = false"
+			<span class="date-picker-calendar-icon">
+				@renderDatePickerIcon("calendar")
+			</span>
 		}
-	>
-		<!-- Date input -->
-		<div class="relative">
-			<input
-				type="date"
-				if props.ID != "" {
-					id={ props.ID }
-				}
-				name={ props.Name }
-				value={ formatDateValue(props.Value) }
-				if props.Placeholder != "" {
-					placeholder={ props.Placeholder }
-				}
-				if props.Min != "" {
-					min={ props.Min }
-				}
-				if props.Max != "" {
-					max={ props.Max }
-				}
-				if props.Required {
-					required
-				}
-				if props.Disabled {
-					disabled
-				}
-				if props.Readonly {
-					readonly
-				}
-				class={ dateInputClasses(props.Error) }
-				if props.HXPost != "" {
-					hx-post={ props.HXPost }
-				}
-				if props.HXGet != "" {
-					hx-get={ props.HXGet }
-				}
-				if props.HXTarget != "" {
-					hx-target={ props.HXTarget }
-				}
-				if props.HXSwap != "" {
-					hx-swap={ props.HXSwap }
-				}
-				if props.HXTrigger != "" {
-					hx-trigger={ props.HXTrigger }
-				}
-				if props.AlpineModel != "" {
-					x-model={ props.AlpineModel }
-				}
-				if props.AlpineChange != "" {
-					x-on:change={ props.AlpineChange }
-				}
-				if props.AlpineBlur != "" {
-					x-on:blur={ props.AlpineBlur }
-				}
-				if props.AlpineFocus != "" {
-					x-on:focus={ props.AlpineFocus }
-				}
-			/>
-			
-			<!-- Calendar icon -->
-			if props.ShowCalendar {
-				<button
-					type="button"
-					@click="toggleCalendar()"
-					class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-					tabindex="-1"
-				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-						<line x1="16" y1="2" x2="16" y2="6"></line>
-						<line x1="8" y1="2" x2="8" y2="6"></line>
-						<line x1="3" y1="10" x2="21" y2="10"></line>
-					</svg>
+		
+		// Calendar popup placeholder
+		<div class="date-picker-calendar" data-calendar="popup">
+			<div class="date-picker-calendar-header">
+				<button type="button" class="date-picker-nav-button" data-nav="previous">
+					@renderDatePickerIcon("chevron-left")
 				</button>
-			}
-		</div>
-		
-		<!-- Calendar popup -->
-		if props.ShowCalendar {
-			<div
-				x-show="showCalendar"
-				x-transition
-				class="absolute z-50 mt-1 p-3 bg-popover border rounded-md shadow-md"
-			>
-				<!-- Calendar header -->
-				<div class="flex items-center justify-between mb-2">
-					<button type="button" @click="previousMonth()" class="p-1 hover:bg-accent rounded">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<polyline points="15,18 9,12 15,6"></polyline>
-						</svg>
-					</button>
-					<span class="font-medium" x-text="currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })"></span>
-					<button type="button" @click="nextMonth()" class="p-1 hover:bg-accent rounded">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<polyline points="9,18 15,12 9,6"></polyline>
-						</svg>
-					</button>
-				</div>
-				
-				<!-- Calendar grid -->
-				<div class="grid grid-cols-7 gap-1 text-center text-xs">
-					<!-- Day headers -->
-					<div class="p-1 font-medium text-muted-foreground">Su</div>
-					<div class="p-1 font-medium text-muted-foreground">Mo</div>
-					<div class="p-1 font-medium text-muted-foreground">Tu</div>
-					<div class="p-1 font-medium text-muted-foreground">We</div>
-					<div class="p-1 font-medium text-muted-foreground">Th</div>
-					<div class="p-1 font-medium text-muted-foreground">Fr</div>
-					<div class="p-1 font-medium text-muted-foreground">Sa</div>
-					
-					<!-- Calendar days -->
-					<template x-for="day in getDaysInMonth()">
-						<button
-							x-show="day !== null"
-							type="button"
-							@click="selectDate(day)"
-							x-text="day ? new Date(day).getDate() : ''"
-							class="p-1 w-6 h-6 text-xs rounded hover:bg-accent"
-							x-bind:class="{
-								'bg-primary text-primary-foreground': isSelected(day),
-								'bg-accent': isToday(day) && !isSelected(day)
-							}"
-						></button>
-					</template>
-				</div>
+				<span class="date-picker-month-year">Month Year</span>
+				<button type="button" class="date-picker-nav-button" data-nav="next">
+					@renderDatePickerIcon("chevron-right")
+				</button>
 			</div>
-		}
+			<div class="date-picker-calendar-grid">
+				// Calendar days would be populated here
+			</div>
+		</div>
 	</div>
 }
 
-// TimePicker renders a time picker component
-templ TimePicker(props TimePickerProps) {
-	<input
-		type="time"
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		name={ props.Name }
-		value={ formatTimeValue(props.Value) }
-		if props.Placeholder != "" {
-			placeholder={ props.Placeholder }
-		}
-		if props.Min != "" {
-			min={ props.Min }
-		}
-		if props.Max != "" {
-			max={ props.Max }
-		}
-		if props.Step > 0 {
-			step={ fmt.Sprintf("%d", props.Step * 60) }
-		}
-		if props.Required {
-			required
-		}
-		if props.Disabled {
-			disabled
-		}
-		if props.Readonly {
-			readonly
-		}
-		class={ dateInputClasses(props.Error) + " " + props.Class }
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-		if props.HXTrigger != "" {
-			hx-trigger={ props.HXTrigger }
-		}
-		if props.AlpineModel != "" {
-			x-model={ props.AlpineModel }
-		}
-		if props.AlpineChange != "" {
-			x-on:change={ props.AlpineChange }
-		}
-		if props.AlpineBlur != "" {
-			x-on:blur={ props.AlpineBlur }
-		}
-		if props.AlpineFocus != "" {
-			x-on:focus={ props.AlpineFocus }
-		}
-	/>
-}
-
-// DateTimePicker renders a datetime picker component
-templ DateTimePicker(props DateTimePickerProps) {
-	<input
-		type="datetime-local"
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		name={ props.Name }
-		value={ props.Value }
-		if props.Placeholder != "" {
-			placeholder={ props.Placeholder }
-		}
-		if props.Min != "" {
-			min={ props.Min }
-		}
-		if props.Max != "" {
-			max={ props.Max }
-		}
-		if props.Required {
-			required
-		}
-		if props.Disabled {
-			disabled
-		}
-		if props.Readonly {
-			readonly
-		}
-		class={ dateInputClasses(props.Error) + " " + props.Class }
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-		if props.HXTrigger != "" {
-			hx-trigger={ props.HXTrigger }
-		}
-		if props.AlpineModel != "" {
-			x-model={ props.AlpineModel }
-		}
-		if props.AlpineChange != "" {
-			x-on:change={ props.AlpineChange }
-		}
-		if props.AlpineBlur != "" {
-			x-on:blur={ props.AlpineBlur }
-		}
-		if props.AlpineFocus != "" {
-			x-on:focus={ props.AlpineFocus }
-		}
-	/>
-}
-
-// DateRangePicker renders a date range picker component
-templ DateRangePicker(props DateRangePickerProps) {
-	<div 
-		class="date-range-picker flex items-center gap-2 { props.Class }"
-		if props.ID != "" {
-			id={ props.ID + "-container" }
-		}
-	>
-		<!-- Start date -->
-		@DatePicker(DatePickerProps{
-			ID:           props.ID + "-start",
-			Name:         props.Name + "_start",
-			Value:        props.StartDate,
-			Placeholder:  "Start date",
-			Required:     props.Required,
-			Disabled:     props.Disabled,
-			Readonly:     props.Readonly,
-			Error:        props.Error,
-			HXPost:       props.HXPost,
-			HXGet:        props.HXGet,
-			HXTarget:     props.HXTarget,
-			HXSwap:       props.HXSwap,
-			HXTrigger:    props.HXTrigger,
-			AlpineModel:  props.AlpineModel + ".start",
-			AlpineChange: props.AlpineChange,
-			AlpineBlur:   props.AlpineBlur,
-			AlpineFocus:  props.AlpineFocus,
-		})
-		
-		<!-- Separator -->
-		<span class="text-muted-foreground">to</span>
-		
-		<!-- End date -->
-		@DatePicker(DatePickerProps{
-			ID:           props.ID + "-end",
-			Name:         props.Name + "_end",
-			Value:        props.EndDate,
-			Placeholder:  "End date",
-			Required:     props.Required,
-			Disabled:     props.Disabled,
-			Readonly:     props.Readonly,
-			Error:        props.Error,
-			HXPost:       props.HXPost,
-			HXGet:        props.HXGet,
-			HXTarget:     props.HXTarget,
-			HXSwap:       props.HXSwap,
-			HXTrigger:    props.HXTrigger,
-			AlpineModel:  props.AlpineModel + ".end",
-			AlpineChange: props.AlpineChange,
-			AlpineBlur:   props.AlpineBlur,
-			AlpineFocus:  props.AlpineFocus,
-		})
-	</div>
+// renderDatePickerIcon renders an icon placeholder (to be replaced with actual Icon atom)
+templ renderDatePickerIcon(name string) {
+	<span class="date-picker-icon" data-icon={ name }>
+		{ name }
+	</span>
 }

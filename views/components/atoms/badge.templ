@@ -1,1007 +1,230 @@
 package atoms
 
 import (
-	"encoding/json"
-	"fmt"
-	"strconv"
-	"strings"
+    "strconv"
+    "github.com/niiniyare/ruun/pkg/utils"
 )
 
-// BadgeVariant defines the visual style variants for badges
+// BadgeVariant defines the visual style variants
 type BadgeVariant string
 
 const (
-	BadgeDefault     BadgeVariant = "default"
-	BadgeSecondary   BadgeVariant = "secondary"
-	BadgeSuccess     BadgeVariant = "success"
-	BadgeWarning     BadgeVariant = "warning"
-	BadgeDestructive BadgeVariant = "destructive"
-	BadgeOutline     BadgeVariant = "outline"
+    BadgeVariantDefault     BadgeVariant = "default"
+    BadgeVariantSecondary   BadgeVariant = "secondary"
+    BadgeVariantSuccess     BadgeVariant = "success"
+    BadgeVariantWarning     BadgeVariant = "warning"
+    BadgeVariantDestructive BadgeVariant = "destructive"
+    BadgeVariantOutline     BadgeVariant = "outline"
 )
 
-// BadgeSize defines the size variants for badges
+// BadgeSize defines the size variants
 type BadgeSize string
 
 const (
-	BadgeSizeSM BadgeSize = "sm"
-	BadgeSizeMD BadgeSize = "md"
-	BadgeSizeLG BadgeSize = "lg"
+    BadgeSizeXS BadgeSize = "xs"
+    BadgeSizeSM BadgeSize = "sm"
+    BadgeSizeMD BadgeSize = "md"
+    BadgeSizeLG BadgeSize = "lg"
+    BadgeSizeXL BadgeSize = "xl"
 )
 
-// BadgeMode represents the badge display mode (for overlay badges)
-type BadgeMode string
+// BadgeState defines the visual state variants
+type BadgeState string
 
 const (
-	BadgeModeText   BadgeMode = "text"
-	BadgeModeDot    BadgeMode = "dot"
-	BadgeModeRibbon BadgeMode = "ribbon"
+    BadgeStateDefault  BadgeState = "default"
+    BadgeStateDisabled BadgeState = "disabled"
+    BadgeStateActive   BadgeState = "active"
+    BadgeStateHover    BadgeState = "hover"
 )
 
-// BadgePosition represents the corner position (for overlay badges)
-type BadgePosition string
-
-const (
-	BadgePositionTopRight    BadgePosition = "top-right"
-	BadgePositionTopLeft     BadgePosition = "top-left"
-	BadgePositionBottomRight BadgePosition = "bottom-right"
-	BadgePositionBottomLeft  BadgePosition = "bottom-left"
-)
-
-// BadgeProps defines the properties for the unified Badge component
+// BadgeProps defines all properties for the Badge atom
 type BadgeProps struct {
-	// Styling (follows badge.templ)
-	Variant   BadgeVariant
-	Size      BadgeSize
-	Class     string
-	ID        string
-	
-	// Content
-	Text      any // Text content (string or number) - for overlay badges
-	Icon      string      // Single icon (for icon-only badges)
-	IconLeft  string
-	IconRight string
-	
-	// Overlay/Position features (from badge.new.templ)
-	Mode          BadgeMode     // Badge mode: text, dot, ribbon (for overlays)
-	Position      BadgePosition // Corner position (for overlays)
-	Offset        []any // Position offset [x, y]
-	OverflowCount int           // Max count before showing "+"
-	
-	// Interactivity
-	Removable   bool
-	OnRemove    string // Alpine.js remove handler
-	Animation   bool   // Enable pulse animation
-	VisibleOn   string // Alpine.js condition for visibility
-	
-	// HTMX attributes
-	HXPost    string
-	HXGet     string
-	HXTarget  string
-	HXSwap    string
-	HXTrigger string
-	
-	// Alpine.js attributes
-	AlpineClick string
-	
-	// Custom styling
-	Style string // Custom inline styles
+    // Core attributes
+    ID   string `json:"id"`
+    Text string `json:"text"`
+    
+    // Visual presentation (resolved externally)
+    Variant   BadgeVariant `json:"variant"`
+    Size      BadgeSize    `json:"size"`
+    State     BadgeState   `json:"state"`
+    ClassName string       `json:"className"`
+    
+    // Icon configuration
+    Icon      string `json:"icon"`
+    IconLeft  string `json:"iconLeft"`
+    IconRight string `json:"iconRight"`
+    
+    // Interactive features
+    Removable bool   `json:"removable"`
+    Clickable bool   `json:"clickable"`
+    
+    // Event handlers (pre-resolved externally)
+    OnClick   string `json:"onClick"`
+    OnRemove  string `json:"onRemove"`
+    OnHover   string `json:"onHover"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaRole        string `json:"ariaRole"`
+    AriaPressed     string `json:"ariaPressed"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
+}
+
+// getBadgeClasses builds the CSS class string using design tokens
+func getBadgeClasses(props BadgeProps) string {
+    return utils.TwMerge(
+        // Base class with design token references
+        "badge",
+        
+        // Variant classes (map to design tokens)
+        "badge-"+string(props.Variant),
+        
+        // Size classes (map to design tokens)
+        "badge-"+string(props.Size),
+        
+        // State classes (map to design tokens)
+        "badge-"+string(props.State),
+        
+        // Interactive utilities
+        utils.If(props.Clickable, "badge-clickable"),
+        utils.If(props.Removable, "badge-removable"),
+        
+        // Icon-specific classes
+        utils.If(props.Icon != "" && props.Text == "", "badge-icon-only"),
+        utils.If(props.IconLeft != "", "badge-has-icon-left"),
+        utils.If(props.IconRight != "", "badge-has-icon-right"),
+        
+        // Custom classes
+        props.ClassName,
+    )
+}
+
+// buildBadgeAttributes creates all HTML attributes for the badge
+func buildBadgeAttributes(props BadgeProps) templ.Attributes {
+    element := "span"
+    if props.Clickable || props.OnClick != "" {
+        element = "button"
+    }
+    
+    attrs := templ.Attributes{
+        "class": getBadgeClasses(props),
+    }
+    
+    // Button-specific attributes
+    if element == "button" {
+        attrs["type"] = "button"
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    
+    // Event handlers
+    if props.OnClick != "" {
+        attrs["onclick"] = props.OnClick
+    }
+    if props.OnHover != "" {
+        attrs["onmouseover"] = props.OnHover
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaRole != "" {
+        attrs["role"] = props.AriaRole
+    }
+    if props.AriaPressed != "" {
+        attrs["aria-pressed"] = props.AriaPressed
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
+}
+
+// Badge renders a pure presentation badge atom
+templ Badge(props BadgeProps) {
+    if props.Clickable || props.OnClick != "" {
+        <button {buildBadgeAttributes(props)...}>
+            @renderBadgeContent(props)
+        </button>
+    } else {
+        <span {buildBadgeAttributes(props)...}>
+            @renderBadgeContent(props)
+        </span>
+    }
+}
+
+// renderBadgeContent renders the badge content
+templ renderBadgeContent(props BadgeProps) {
+    // Left icon
+    if props.IconLeft != "" {
+        <span class="badge-icon-left">
+            @renderBadgeIcon(props.IconLeft)
+        </span>
+    }
+    
+    // Icon-only mode
+    if props.Icon != "" && props.Text == "" {
+        <span class="badge-icon-only">
+            @renderBadgeIcon(props.Icon)
+        </span>
+    }
+    
+    // Badge text
+    if props.Text != "" {
+        <span class="badge-text">
+            { props.Text }
+        </span>
+    }
+    
+    // Right icon
+    if props.IconRight != "" {
+        <span class="badge-icon-right">
+            @renderBadgeIcon(props.IconRight)
+        </span>
+    }
+    
+    // Remove button
+    if props.Removable {
+        <button
+            type="button"
+            class="badge-remove-button"
+            data-onclick={ props.OnRemove }
+            aria-label="Remove"
+        >
+            @renderBadgeIcon("x")
+        </button>
+    }
+}
+
+// renderBadgeIcon renders an icon placeholder (to be replaced with actual Icon atom)
+templ renderBadgeIcon(name string) {
+    <span class="badge-icon" data-icon={ name }>
+        { name }
+    </span>
 }
-
-// GetText returns the display text with overflow handling
-func (p BadgeProps) GetText() string {
-	if p.Text == nil {
-		return ""
-	}
-
-	// Handle numeric overflow
-	if num, ok := p.Text.(int); ok {
-		if p.OverflowCount > 0 && num > p.OverflowCount {
-			return fmt.Sprintf("%d+", p.OverflowCount)
-		}
-		return strconv.Itoa(num)
-	}
-
-	if num, ok := p.Text.(float64); ok {
-		intNum := int(num)
-		if p.OverflowCount > 0 && intNum > p.OverflowCount {
-			return fmt.Sprintf("%d+", p.OverflowCount)
-		}
-		return strconv.Itoa(intNum)
-	}
-
-	return fmt.Sprint(p.Text)
-}
-
-// GetPositionClasses returns Tailwind classes for positioning (overlay mode)
-func (p BadgeProps) GetPositionClasses() string {
-	switch p.Position {
-	case BadgePositionTopRight:
-		return "top-0 right-0 -translate-y-1/2 translate-x-1/2"
-	case BadgePositionTopLeft:
-		return "top-0 left-0 -translate-y-1/2 -translate-x-1/2"
-	case BadgePositionBottomRight:
-		return "bottom-0 right-0 translate-y-1/2 translate-x-1/2"
-	case BadgePositionBottomLeft:
-		return "bottom-0 left-0 translate-y-1/2 -translate-x-1/2"
-	default:
-		return "top-0 right-0 -translate-y-1/2 translate-x-1/2"
-	}
-}
-
-// GetOffsetStyle returns CSS transform for offset positioning
-func (p BadgeProps) GetOffsetStyle() string {
-	if len(p.Offset) != 2 {
-		return ""
-	}
-
-	x := p.formatOffsetValue(p.Offset[0])
-	y := p.formatOffsetValue(p.Offset[1])
-
-	return fmt.Sprintf("transform: translate(%s, %s);", x, y)
-}
-
-func (p BadgeProps) formatOffsetValue(val any) string {
-	switch v := val.(type) {
-	case int:
-		return fmt.Sprintf("%dpx", v)
-	case float64:
-		return fmt.Sprintf("%dpx", int(v))
-	case string:
-		return v
-	default:
-		return "0"
-	}
-}
-
-// badgeClasses generates Tailwind CSS classes for the badge
-func badgeClasses(props BadgeProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"inline-flex",
-		"items-center",
-		"justify-center",
-		"rounded-full",
-		"border",
-		"font-semibold",
-		"transition-colors",
-		"focus:outline-none",
-		"focus:ring-2",
-		"focus:ring-ring",
-		"focus:ring-offset-2",
-	)
-
-	// Mode-specific classes (for overlay badges)
-	if props.Mode == BadgeModeDot {
-		classes = append(classes, "w-2", "h-2")
-	} else if props.Mode == BadgeModeRibbon {
-		classes = append(classes, "px-3", "py-1", "text-xs", "font-medium")
-	} else {
-		// Size classes (for normal badges)
-		switch props.Size {
-		case BadgeSizeSM:
-			classes = append(classes, "px-2", "py-0.5", "text-xs")
-		case BadgeSizeMD:
-			classes = append(classes, "px-2.5", "py-0.5", "text-xs")
-		case BadgeSizeLG:
-			classes = append(classes, "px-3", "py-1", "text-sm")
-		default:
-			classes = append(classes, "px-2.5", "py-0.5", "text-xs")
-		}
-		
-		// Add min-width for text badges
-		if props.Mode == BadgeModeText || props.Mode == "" {
-			classes = append(classes, "min-w-[20px]", "text-center")
-		}
-	}
-
-	// Variant classes (follows badge.templ styling)
-	switch props.Variant {
-	case BadgeDefault:
-		classes = append(classes, "border-transparent", "bg-primary", "text-primary-foreground", "hover:bg-primary/80")
-	case BadgeSecondary:
-		classes = append(classes, "border-transparent", "bg-secondary", "text-secondary-foreground", "hover:bg-secondary/80")
-	case BadgeSuccess:
-		classes = append(classes, "border-transparent", "bg-success", "text-success-foreground", "hover:bg-success/80")
-	case BadgeWarning:
-		classes = append(classes, "border-transparent", "bg-warning", "text-warning-foreground", "hover:bg-warning/80")
-	case BadgeDestructive:
-		classes = append(classes, "border-transparent", "bg-destructive", "text-destructive-foreground", "hover:bg-destructive/80")
-	case BadgeOutline:
-		classes = append(classes, "text-foreground")
-	default:
-		classes = append(classes, "border-transparent", "bg-primary", "text-primary-foreground", "hover:bg-primary/80")
-	}
-
-	// Animation classes
-	if props.Animation {
-		classes = append(classes, "animate-pulse")
-	}
-
-	// Interactive classes
-	if props.HXPost != "" || props.HXGet != "" || props.AlpineClick != "" {
-		classes = append(classes, "cursor-pointer")
-	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
-}
-
-// Badge renders a unified badge component
-templ Badge(props BadgeProps, children ...templ.Component) {
-	if props.HXPost != "" || props.HXGet != "" || props.AlpineClick != "" {
-		<button
-			if props.ID != "" {
-				id={ props.ID }
-			}
-			class={ badgeClasses(props) }
-			if props.VisibleOn != "" {
-				x-show={ props.VisibleOn }
-			}
-			style={ props.Style }
-			if props.HXPost != "" {
-				hx-post={ props.HXPost }
-			}
-			if props.HXGet != "" {
-				hx-get={ props.HXGet }
-			}
-			if props.HXTarget != "" {
-				hx-target={ props.HXTarget }
-			}
-			if props.HXSwap != "" {
-				hx-swap={ props.HXSwap }
-			}
-			if props.HXTrigger != "" {
-				hx-trigger={ props.HXTrigger }
-			}
-			if props.AlpineClick != "" {
-				x-on:click={ props.AlpineClick }
-			}
-		>
-			@badgeContent(props, children...)
-		</button>
-	} else {
-		<span
-			if props.ID != "" {
-				id={ props.ID }
-			}
-			class={ badgeClasses(props) }
-			if props.VisibleOn != "" {
-				x-show={ props.VisibleOn }
-			}
-			style={ props.Style }
-		>
-			@badgeContent(props, children...)
-		</span>
-	}
-}
-
-// badgeContent renders the internal content of the badge
-templ badgeContent(props BadgeProps, children ...templ.Component) {
-	// Don't show content for dot mode
-	if props.Mode == BadgeModeDot {
-		// Dot badges show nothing
-	} else {
-		// Left icon
-		if props.IconLeft != "" {
-			@Icon(IconProps{Name: props.IconLeft, Size: IconSizeXS, ClassName: "mr-1"})
-		}
-		
-		// Single icon (for icon-only badges)
-		if props.Icon != "" && len(children) == 0 && props.Text == nil {
-			@Icon(IconProps{Name: props.Icon, Size: IconSizeXS})
-		}
-		
-		// Text content (with overflow handling) - for overlay badges
-		if props.Text != nil {
-			{ props.GetText() }
-		}
-		
-		// Badge content (children)
-		for _, child := range children {
-			@child
-		}
-		
-		// Right icon
-		if props.IconRight != "" {
-			@Icon(IconProps{Name: props.IconRight, Size: IconSizeXS, ClassName: "ml-1"})
-		}
-		
-		// Remove button
-		if props.Removable {
-			<button
-				type="button"
-				class="ml-1 h-3 w-3 rounded-full outline-none ring-offset-background transition-colors hover:bg-secondary-foreground/20 focus:bg-secondary-foreground/20 focus:ring-2 focus:ring-ring focus:ring-offset-1"
-				if props.OnRemove != "" {
-					x-on:click={ props.OnRemove }
-				}
-				aria-label="Remove"
-			>
-				@Icon(IconProps{Name: "x", Size: IconSizeXS})
-			</button>
-		}
-	}
-}
-
-// BadgeWrapper wraps content with a positioned badge (for overlay/notification badges)
-templ BadgeWrapper(content templ.Component, badge BadgeProps) {
-	<div class="relative inline-block">
-		@content
-		<span
-			class={
-				"absolute",
-				badge.GetPositionClasses(),
-			}
-			if badge.GetOffsetStyle() != "" {
-				style={ badge.GetOffsetStyle() }
-			}
-		>
-			@Badge(badge)
-		</span>
-	</div>
-}
-
-// Convenience components for common badge variants
-
-templ DefaultBadge(props BadgeProps, children ...templ.Component) {
-	@Badge(BadgeProps{
-		Variant:     BadgeDefault,
-		Size:        props.Size,
-		Icon:        props.Icon,
-		IconLeft:    props.IconLeft,
-		IconRight:   props.IconRight,
-		Class:       props.Class,
-		ID:          props.ID,
-		Removable:   props.Removable,
-		OnRemove:    props.OnRemove,
-		HXPost:      props.HXPost,
-		HXGet:       props.HXGet,
-		HXTarget:    props.HXTarget,
-		HXSwap:      props.HXSwap,
-		HXTrigger:   props.HXTrigger,
-		AlpineClick: props.AlpineClick,
-		Text:        props.Text,
-		Mode:        props.Mode,
-		Position:    props.Position,
-		Offset:      props.Offset,
-		OverflowCount: props.OverflowCount,
-		Animation:   props.Animation,
-		VisibleOn:   props.VisibleOn,
-		Style:       props.Style,
-	}, children...)
-}
-
-templ SuccessBadge(props BadgeProps, children ...templ.Component) {
-	@Badge(BadgeProps{
-		Variant:     BadgeSuccess,
-		Size:        props.Size,
-		Icon:        props.Icon,
-		IconLeft:    props.IconLeft,
-		IconRight:   props.IconRight,
-		Class:       props.Class,
-		ID:          props.ID,
-		Removable:   props.Removable,
-		OnRemove:    props.OnRemove,
-		HXPost:      props.HXPost,
-		HXGet:       props.HXGet,
-		HXTarget:    props.HXTarget,
-		HXSwap:      props.HXSwap,
-		HXTrigger:   props.HXTrigger,
-		AlpineClick: props.AlpineClick,
-		Text:        props.Text,
-		Mode:        props.Mode,
-		Position:    props.Position,
-		Offset:      props.Offset,
-		OverflowCount: props.OverflowCount,
-		Animation:   props.Animation,
-		VisibleOn:   props.VisibleOn,
-		Style:       props.Style,
-	}, children...)
-}
-
-templ WarningBadge(props BadgeProps, children ...templ.Component) {
-	@Badge(BadgeProps{
-		Variant:     BadgeWarning,
-		Size:        props.Size,
-		Icon:        props.Icon,
-		IconLeft:    props.IconLeft,
-		IconRight:   props.IconRight,
-		Class:       props.Class,
-		ID:          props.ID,
-		Removable:   props.Removable,
-		OnRemove:    props.OnRemove,
-		HXPost:      props.HXPost,
-		HXGet:       props.HXGet,
-		HXTarget:    props.HXTarget,
-		HXSwap:      props.HXSwap,
-		HXTrigger:   props.HXTrigger,
-		AlpineClick: props.AlpineClick,
-		Text:        props.Text,
-		Mode:        props.Mode,
-		Position:    props.Position,
-		Offset:      props.Offset,
-		OverflowCount: props.OverflowCount,
-		Animation:   props.Animation,
-		VisibleOn:   props.VisibleOn,
-		Style:       props.Style,
-	}, children...)
-}
-
-templ DestructiveBadge(props BadgeProps, children ...templ.Component) {
-	@Badge(BadgeProps{
-		Variant:     BadgeDestructive,
-		Size:        props.Size,
-		Icon:        props.Icon,
-		IconLeft:    props.IconLeft,
-		IconRight:   props.IconRight,
-		Class:       props.Class,
-		ID:          props.ID,
-		Removable:   props.Removable,
-		OnRemove:    props.OnRemove,
-		HXPost:      props.HXPost,
-		HXGet:       props.HXGet,
-		HXTarget:    props.HXTarget,
-		HXSwap:      props.HXSwap,
-		HXTrigger:   props.HXTrigger,
-		AlpineClick: props.AlpineClick,
-		Text:        props.Text,
-		Mode:        props.Mode,
-		Position:    props.Position,
-		Offset:      props.Offset,
-		OverflowCount: props.OverflowCount,
-		Animation:   props.Animation,
-		VisibleOn:   props.VisibleOn,
-		Style:       props.Style,
-	}, children...)
-}
-
-// JSON Schema Support (from badge.new.templ)
-
-// BadgeSchema represents the JSON schema for Badge component
-type BadgeSchema struct {
-	Variant       string        `json:"variant,omitempty"`
-	Size          string        `json:"size,omitempty"`
-	Class         string        `json:"class,omitempty"`
-	Text          any   `json:"text,omitempty"`
-	Icon          string        `json:"icon,omitempty"`
-	IconLeft      string        `json:"iconLeft,omitempty"`
-	IconRight     string        `json:"iconRight,omitempty"`
-	Mode          string        `json:"mode,omitempty"`
-	Position      string        `json:"position,omitempty"`
-	Offset        []any `json:"offset,omitempty"`
-	OverflowCount int           `json:"overflowCount,omitempty"`
-	VisibleOn     string        `json:"visibleOn,omitempty"`
-	Animation     bool          `json:"animation,omitempty"`
-	Style         string        `json:"style,omitempty"`
-	Removable     bool          `json:"removable,omitempty"`
-}
-
-// ToProps converts BadgeSchema to BadgeProps
-func (s BadgeSchema) ToProps() BadgeProps {
-	props := BadgeProps{
-		Class:         s.Class,
-		Text:          s.Text,
-		Icon:          s.Icon,
-		IconLeft:      s.IconLeft,
-		IconRight:     s.IconRight,
-		Offset:        s.Offset,
-		OverflowCount: s.OverflowCount,
-		VisibleOn:     s.VisibleOn,
-		Animation:     s.Animation,
-		Style:         s.Style,
-		Removable:     s.Removable,
-	}
-
-	// Convert variant string to BadgeVariant
-	switch s.Variant {
-	case "default":
-		props.Variant = BadgeDefault
-	case "secondary":
-		props.Variant = BadgeSecondary
-	case "success":
-		props.Variant = BadgeSuccess
-	case "warning":
-		props.Variant = BadgeWarning
-	case "destructive":
-		props.Variant = BadgeDestructive
-	case "outline":
-		props.Variant = BadgeOutline
-	default:
-		props.Variant = BadgeDefault
-	}
-
-	// Convert size string to BadgeSize
-	switch s.Size {
-	case "sm":
-		props.Size = BadgeSizeSM
-	case "md":
-		props.Size = BadgeSizeMD
-	case "lg":
-		props.Size = BadgeSizeLG
-	default:
-		props.Size = BadgeSizeMD
-	}
-
-	// Convert mode string to BadgeMode
-	switch s.Mode {
-	case "text":
-		props.Mode = BadgeModeText
-	case "dot":
-		props.Mode = BadgeModeDot
-	case "ribbon":
-		props.Mode = BadgeModeRibbon
-	default:
-		props.Mode = BadgeModeText
-	}
-
-	// Convert position string to BadgePosition
-	switch s.Position {
-	case "top-right":
-		props.Position = BadgePositionTopRight
-	case "top-left":
-		props.Position = BadgePositionTopLeft
-	case "bottom-right":
-		props.Position = BadgePositionBottomRight
-	case "bottom-left":
-		props.Position = BadgePositionBottomLeft
-	default:
-		props.Position = BadgePositionTopRight
-	}
-
-	return props
-}
-
-// BadgeFromJSON creates a Badge component from JSON string
-func BadgeFromJSON(jsonStr string) (BadgeProps, error) {
-	var schema BadgeSchema
-	if err := json.Unmarshal([]byte(jsonStr), &schema); err != nil {
-		return BadgeProps{}, fmt.Errorf("failed to unmarshal badge JSON: %w", err)
-	}
-	return schema.ToProps(), nil
-}
-
-// Example JSON configurations
-const (
-	ExampleNotificationBadge = `{
-		"text": 5,
-		"mode": "text",
-		"position": "top-right",
-		"variant": "destructive",
-		"animation": true
-	}`
-
-	ExampleOverflowBadge = `{
-		"text": 150,
-		"mode": "text",
-		"position": "top-right",
-		"overflowCount": 99,
-		"variant": "default"
-	}`
-
-	ExampleStatusDot = `{
-		"mode": "dot",
-		"position": "bottom-right",
-		"variant": "success"
-	}`
-
-	ExampleDynamicBadge = `{
-		"text": 3,
-		"mode": "text",
-		"position": "top-right",
-		"visibleOn": "unreadCount > 0",
-		"variant": "destructive"
-	}`
-
-	ExampleCustomOffsetBadge = `{
-		"text": "NEW",
-		"mode": "text",
-		"position": "top-right",
-		"offset": [10, -5],
-		"variant": "success"
-	}`
-)
-
-// BadgeFrom renders a Badge from JSON schema at runtime
-templ BadgeFrom(schemaJSON string) {
-	if props, err := BadgeFromJSON(schemaJSON); err == nil {
-		@Badge(props)
-	} else {
-		<span class="text-red-500 text-xs">Invalid badge schema: { err.Error() }</span>
-	}
-}
-
-// Fluent API Builder Pattern
-
-// BadgeBuilder provides a fluent interface for building badges
-type BadgeBuilder struct {
-	props BadgeProps
-}
-
-// NewBadge creates a new badge builder with default values
-func NewBadge() *BadgeBuilder {
-	return &BadgeBuilder{
-		props: BadgeProps{
-			Variant: BadgeDefault,
-			Size:    BadgeSizeMD,
-		},
-	}
-}
-
-// Styling methods
-func (b *BadgeBuilder) Default() *BadgeBuilder {
-	b.props.Variant = BadgeDefault
-	return b
-}
-
-func (b *BadgeBuilder) Secondary() *BadgeBuilder {
-	b.props.Variant = BadgeSecondary
-	return b
-}
-
-func (b *BadgeBuilder) Success() *BadgeBuilder {
-	b.props.Variant = BadgeSuccess
-	return b
-}
-
-func (b *BadgeBuilder) Warning() *BadgeBuilder {
-	b.props.Variant = BadgeWarning
-	return b
-}
-
-func (b *BadgeBuilder) Destructive() *BadgeBuilder {
-	b.props.Variant = BadgeDestructive
-	return b
-}
-
-func (b *BadgeBuilder) Outline() *BadgeBuilder {
-	b.props.Variant = BadgeOutline
-	return b
-}
-
-func (b *BadgeBuilder) Small() *BadgeBuilder {
-	b.props.Size = BadgeSizeSM
-	return b
-}
-
-func (b *BadgeBuilder) Medium() *BadgeBuilder {
-	b.props.Size = BadgeSizeMD
-	return b
-}
-
-func (b *BadgeBuilder) Large() *BadgeBuilder {
-	b.props.Size = BadgeSizeLG
-	return b
-}
-
-// Content methods
-func (b *BadgeBuilder) WithText(text any) *BadgeBuilder {
-	b.props.Text = text
-	return b
-}
-
-func (b *BadgeBuilder) WithIcon(icon string) *BadgeBuilder {
-	b.props.Icon = icon
-	return b
-}
-
-func (b *BadgeBuilder) WithIconLeft(icon string) *BadgeBuilder {
-	b.props.IconLeft = icon
-	return b
-}
-
-func (b *BadgeBuilder) WithIconRight(icon string) *BadgeBuilder {
-	b.props.IconRight = icon
-	return b
-}
-
-func (b *BadgeBuilder) WithClass(class string) *BadgeBuilder {
-	b.props.Class = class
-	return b
-}
-
-func (b *BadgeBuilder) WithID(id string) *BadgeBuilder {
-	b.props.ID = id
-	return b
-}
-
-func (b *BadgeBuilder) WithStyle(style string) *BadgeBuilder {
-	b.props.Style = style
-	return b
-}
-
-// Overlay/Position methods
-func (b *BadgeBuilder) AsText() *BadgeBuilder {
-	b.props.Mode = BadgeModeText
-	return b
-}
-
-func (b *BadgeBuilder) AsDot() *BadgeBuilder {
-	b.props.Mode = BadgeModeDot
-	return b
-}
-
-func (b *BadgeBuilder) AsRibbon() *BadgeBuilder {
-	b.props.Mode = BadgeModeRibbon
-	return b
-}
-
-func (b *BadgeBuilder) TopRight() *BadgeBuilder {
-	b.props.Position = BadgePositionTopRight
-	return b
-}
-
-func (b *BadgeBuilder) TopLeft() *BadgeBuilder {
-	b.props.Position = BadgePositionTopLeft
-	return b
-}
-
-func (b *BadgeBuilder) BottomRight() *BadgeBuilder {
-	b.props.Position = BadgePositionBottomRight
-	return b
-}
-
-func (b *BadgeBuilder) BottomLeft() *BadgeBuilder {
-	b.props.Position = BadgePositionBottomLeft
-	return b
-}
-
-func (b *BadgeBuilder) WithOffset(x, y any) *BadgeBuilder {
-	b.props.Offset = []any{x, y}
-	return b
-}
-
-func (b *BadgeBuilder) WithOverflowCount(count int) *BadgeBuilder {
-	b.props.OverflowCount = count
-	return b
-}
-
-// Interactivity methods
-func (b *BadgeBuilder) Removable(onRemove string) *BadgeBuilder {
-	b.props.Removable = true
-	b.props.OnRemove = onRemove
-	return b
-}
-
-func (b *BadgeBuilder) Animated() *BadgeBuilder {
-	b.props.Animation = true
-	return b
-}
-
-func (b *BadgeBuilder) VisibleWhen(condition string) *BadgeBuilder {
-	b.props.VisibleOn = condition
-	return b
-}
-
-// HTMX methods
-func (b *BadgeBuilder) HXPost(url string) *BadgeBuilder {
-	b.props.HXPost = url
-	return b
-}
-
-func (b *BadgeBuilder) HXGet(url string) *BadgeBuilder {
-	b.props.HXGet = url
-	return b
-}
-
-func (b *BadgeBuilder) HXTarget(target string) *BadgeBuilder {
-	b.props.HXTarget = target
-	return b
-}
-
-func (b *BadgeBuilder) HXSwap(swap string) *BadgeBuilder {
-	b.props.HXSwap = swap
-	return b
-}
-
-func (b *BadgeBuilder) HXTrigger(trigger string) *BadgeBuilder {
-	b.props.HXTrigger = trigger
-	return b
-}
-
-// Alpine.js methods
-func (b *BadgeBuilder) OnClick(handler string) *BadgeBuilder {
-	b.props.AlpineClick = handler
-	return b
-}
-
-// Build returns the final BadgeProps
-func (b *BadgeBuilder) Build() BadgeProps {
-	return b.props
-}
-
-// Functional Options Pattern (alternative to fluent API)
-
-// BadgeOption is a function that modifies BadgeProps
-type BadgeOption func(*BadgeProps)
-
-// NewBadgeWithOptions creates a BadgeProps with functional options
-func NewBadgeWithOptions(opts ...BadgeOption) BadgeProps {
-	props := BadgeProps{
-		Variant: BadgeDefault,
-		Size:    BadgeSizeMD,
-	}
-	for _, opt := range opts {
-		opt(&props)
-	}
-	return props
-}
-
-// Variant options
-func WithBadgeVariant(variant BadgeVariant) BadgeOption {
-	return func(p *BadgeProps) { p.Variant = variant }
-}
-
-func WithDefault() BadgeOption {
-	return func(p *BadgeProps) { p.Variant = BadgeDefault }
-}
-
-func WithSecondary() BadgeOption {
-	return func(p *BadgeProps) { p.Variant = BadgeSecondary }
-}
-
-func WithSuccess() BadgeOption {
-	return func(p *BadgeProps) { p.Variant = BadgeSuccess }
-}
-
-func WithWarning() BadgeOption {
-	return func(p *BadgeProps) { p.Variant = BadgeWarning }
-}
-
-func WithDestructive() BadgeOption {
-	return func(p *BadgeProps) { p.Variant = BadgeDestructive }
-}
-
-func WithOutline() BadgeOption {
-	return func(p *BadgeProps) { p.Variant = BadgeOutline }
-}
-
-// Size options
-func WithBadgeSize(size BadgeSize) BadgeOption {
-	return func(p *BadgeProps) { p.Size = size }
-}
-
-func WithSmall() BadgeOption {
-	return func(p *BadgeProps) { p.Size = BadgeSizeSM }
-}
-
-func WithMedium() BadgeOption {
-	return func(p *BadgeProps) { p.Size = BadgeSizeMD }
-}
-
-func WithLarge() BadgeOption {
-	return func(p *BadgeProps) { p.Size = BadgeSizeLG }
-}
-
-// Content options
-func WithBadgeText(text any) BadgeOption {
-	return func(p *BadgeProps) { p.Text = text }
-}
-
-func WithBadgeIcon(icon string) BadgeOption {
-	return func(p *BadgeProps) { p.Icon = icon }
-}
-
-func WithBadgeIconLeft(icon string) BadgeOption {
-	return func(p *BadgeProps) { p.IconLeft = icon }
-}
-
-func WithBadgeIconRight(icon string) BadgeOption {
-	return func(p *BadgeProps) { p.IconRight = icon }
-}
-
-func WithBadgeClass(class string) BadgeOption {
-	return func(p *BadgeProps) { p.Class = class }
-}
-
-func WithBadgeID(id string) BadgeOption {
-	return func(p *BadgeProps) { p.ID = id }
-}
-
-func WithStyle(style string) BadgeOption {
-	return func(p *BadgeProps) { p.Style = style }
-}
-
-// Mode options
-func WithMode(mode BadgeMode) BadgeOption {
-	return func(p *BadgeProps) { p.Mode = mode }
-}
-
-func AsTextMode() BadgeOption {
-	return func(p *BadgeProps) { p.Mode = BadgeModeText }
-}
-
-func AsDotMode() BadgeOption {
-	return func(p *BadgeProps) { p.Mode = BadgeModeDot }
-}
-
-func AsRibbonMode() BadgeOption {
-	return func(p *BadgeProps) { p.Mode = BadgeModeRibbon }
-}
-
-// Position options
-func WithPosition(position BadgePosition) BadgeOption {
-	return func(p *BadgeProps) { p.Position = position }
-}
-
-func AtTopRight() BadgeOption {
-	return func(p *BadgeProps) { p.Position = BadgePositionTopRight }
-}
-
-func AtTopLeft() BadgeOption {
-	return func(p *BadgeProps) { p.Position = BadgePositionTopLeft }
-}
-
-func AtBottomRight() BadgeOption {
-	return func(p *BadgeProps) { p.Position = BadgePositionBottomRight }
-}
-
-func AtBottomLeft() BadgeOption {
-	return func(p *BadgeProps) { p.Position = BadgePositionBottomLeft }
-}
-
-func WithOffset(x, y any) BadgeOption {
-	return func(p *BadgeProps) { p.Offset = []any{x, y} }
-}
-
-func WithOverflowCount(count int) BadgeOption {
-	return func(p *BadgeProps) { p.OverflowCount = count }
-}
-
-// Interactivity options
-func AsRemovable(onRemove string) BadgeOption {
-	return func(p *BadgeProps) {
-		p.Removable = true
-		p.OnRemove = onRemove
-	}
-}
-
-func WithAnimation() BadgeOption {
-	return func(p *BadgeProps) { p.Animation = true }
-}
-
-func VisibleWhen(condition string) BadgeOption {
-	return func(p *BadgeProps) { p.VisibleOn = condition }
-}
-
-// HTMX options
-func WithBadgeHXPost(url string) BadgeOption {
-	return func(p *BadgeProps) { p.HXPost = url }
-}
-
-func WithBadgeHXGet(url string) BadgeOption {
-	return func(p *BadgeProps) { p.HXGet = url }
-}
-
-func WithBadgeHXTarget(target string) BadgeOption {
-	return func(p *BadgeProps) { p.HXTarget = target }
-}
-
-func WithBadgeHXSwap(swap string) BadgeOption {
-	return func(p *BadgeProps) { p.HXSwap = swap }
-}
-
-func WithBadgeHXTrigger(trigger string) BadgeOption {
-	return func(p *BadgeProps) { p.HXTrigger = trigger }
-}
-
-// Alpine.js options
-func WithBadgeAlpineClick(handler string) BadgeOption {
-	return func(p *BadgeProps) { p.AlpineClick = handler }
-}
-
-// Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, just visual rendering
-// 2. Compiled Theme Classes: Uses "badge", "badge-primary", etc. from compiled CSS
-// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. Multiple Patterns: Fluent API, Functional Options, and JSON Schema support
-// 6. Atomic Design Compliant: Single purpose, indivisible badge component
-// 7. Icon Integration: Uses Icon atom for consistent iconography
-// 8. Ready for Molecules: Can be easily composed into notification systems
-// 9. Overlay Support: Built-in positioning for notification badges
-// 10. Accessibility: Proper ARIA labels and semantic markup

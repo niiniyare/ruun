@@ -4,6 +4,7 @@ import (
 	"strings"
 	"strconv"
 	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
 
 // ErrorType defines different types of errors
@@ -77,9 +78,7 @@ type ErrorAction struct {
 	Variant     atoms.ButtonVariant `json:"variant"`
 	Action      string             `json:"action"` // "retry", "dismiss", "report", "custom"
 	URL         string             `json:"url"`
-	AlpineClick string             `json:"alpineClick"`
-	HXPost      string             `json:"hxPost"`
-	HXGet       string             `json:"hxGet"`
+	OnClick     string             `json:"onClick"`
 }
 
 // NotificationProps defines properties for notification toasts
@@ -230,7 +229,11 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 		// Auto-retry indicator
 		if props.AutoRetry && props.RetryCount < props.MaxRetries {
 			<div class="flex items-center gap-2 text-sm">
-				@atoms.LoadingSpinner(atoms.LoadingSpinnerProps{})
+				@atoms.Icon(atoms.IconProps{
+					Name: "loader",
+					Size: atoms.IconSizeSM,
+					ClassName: "animate-spin",
+				})
 				<span x-text="`Retrying... (${retryCount}/${maxRetries})`"></span>
 				<span x-text="`Next attempt in ${retryCountdown}s`"></span>
 			</div>
@@ -242,18 +245,13 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 				// Default recovery actions
 				if props.Recoverable {
 					@atoms.Button(atoms.ButtonProps{
-						Variant:     atoms.ButtonPrimary,
-						Size:        atoms.ButtonSizeSM,
-						Icon:        "refresh-cw",
-						Loading:     false,
-						AlpineClick: "retry()",
-					}) {
-						if props.RetryCount > 0 {
-							Retry Again
-						} else {
-							Retry
-						}
-					}
+						Text:     utils.IfElse(props.RetryCount > 0, "Retry Again", "Retry"),
+						Variant:  atoms.ButtonVariantPrimary,
+						Size:     atoms.ButtonSizeSM,
+						Icon:     "refresh-cw",
+						Loading:  false,
+						OnClick:  "retry()",
+					})
 				}
 
 				// Custom actions
@@ -264,13 +262,12 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 				// Report error action
 				if len(props.Errors) > 0 && props.Errors[0].HelpURL != "" {
 					@atoms.Button(atoms.ButtonProps{
-						Variant: atoms.ButtonOutline,
+						Text:    "Get Help",
+						Variant: atoms.ButtonVariantOutline,
 						Size:    atoms.ButtonSizeSM,
 						Icon:    "external-link",
-						AlpineClick: "window.open('" + props.Errors[0].HelpURL + "', '_blank')",
-					}) {
-						Get Help
-					}
+						OnClick: "window.open('" + props.Errors[0].HelpURL + "', '_blank')",
+					})
 				}
 			</div>
 		}
@@ -303,9 +300,7 @@ templ errorActionButton(action ErrorAction) {
 		Variant:     action.Variant,
 		Size:        atoms.ButtonSizeSM,
 		Icon:        action.Icon,
-		AlpineClick: getActionAlpineClick(action),
-		HXPost:      action.HXPost,
-		HXGet:       action.HXGet,
+		OnClick:     action.OnClick,
 	}) {
 		{ action.Text }
 	}
@@ -359,9 +354,7 @@ templ Notification(props NotificationProps) {
 							@atoms.Button(atoms.ButtonProps{
 								Variant:     action.Variant,
 								Size:        atoms.ButtonSizeXS,
-								AlpineClick: getActionAlpineClick(action),
-								HXPost:      action.HXPost,
-								HXGet:       action.HXGet,
+								OnClick:     action.OnClick,
 							}) {
 								{ action.Text }
 							}
@@ -443,17 +436,15 @@ templ GlobalErrorHandler() {
 				
 				<div class="flex items-center gap-2">
 					@atoms.Button(atoms.ButtonProps{
-						Variant:     atoms.ButtonPrimary,
-						AlpineClick: "window.location.reload()",
-					}) {
-						Reload Page
-					}
+						Text:    "Reload Page",
+						Variant: atoms.ButtonVariantPrimary,
+						OnClick: "window.location.reload()",
+					})
 					@atoms.Button(atoms.ButtonProps{
-						Variant:     atoms.ButtonOutline,
-						AlpineClick: "reportError(criticalError)",
-					}) {
-						Report Error
-					}
+						Text:    "Report Error", 
+						Variant: atoms.ButtonVariantOutline,
+						OnClick: "reportError(criticalError)",
+					})
 				</div>
 			</div>
 		</div>
@@ -632,18 +623,6 @@ func getNotificationContainerClasses(position string) string {
 	return strings.Join(classes, " ")
 }
 
-func getActionAlpineClick(action ErrorAction) string {
-	switch action.Action {
-	case "retry":
-		return "retry()"
-	case "dismiss":
-		return "dismiss()"
-	case "report":
-		return "reportError()"
-	default:
-		return action.AlpineClick
-	}
-}
 
 // getMessageClasses returns the classes for message paragraph based on whether title exists
 func getMessageClasses(hasTitle bool) string {
@@ -658,7 +637,7 @@ func getActionVariant(variant string) string {
 	if variant != "" {
 		return variant
 	}
-	return string(atoms.ButtonOutline)
+	return string(atoms.ButtonVariantOutline)
 }
 
 // getNotificationIcon returns the notification icon, preferring custom icon over type-based icon

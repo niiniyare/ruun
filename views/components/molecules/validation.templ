@@ -15,7 +15,17 @@ const (
 	ValidationInfo    ValidationMessageType = "info"
 )
 
-// Note: ValidationRule is defined in form.go to avoid conflicts
+// ValidationRule represents a validation rule
+type ValidationRule struct {
+	Name     string `json:"name"`
+	Required bool   `json:"required"`
+	Pattern  string `json:"pattern,omitempty"`
+	MinLength int   `json:"minLength,omitempty"`
+	MaxLength int   `json:"maxLength,omitempty"`
+	Min      int    `json:"min,omitempty"`
+	Max      int    `json:"max,omitempty"`
+	Message  string `json:"message,omitempty"`
+}
 
 // ValidationResult represents the result of validation
 type ValidationResult struct {

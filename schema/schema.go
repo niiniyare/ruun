@@ -390,3 +390,27 @@ func (s *Schema) ApplySchemaI18nLocalization(schemaI18n *SchemaI18n, locale stri
 	
 	return &localized, nil
 }
+
+// IsRTL checks if the schema should be rendered in right-to-left mode
+func (s *Schema) IsRTL(locale string) bool {
+	if s.I18n != nil && s.I18n.currentLocale != "" {
+		// Check if the current locale is RTL
+		rtlLanguages := map[string]bool{
+			"ar": true, // Arabic
+			"he": true, // Hebrew
+			"fa": true, // Persian/Farsi
+			"ur": true, // Urdu
+		}
+		return rtlLanguages[s.I18n.currentLocale] || rtlLanguages[locale]
+	}
+	return false
+}
+
+// buildFieldMap builds a map of field names to fields for quick lookup
+func (s *Schema) buildFieldMap() map[string]*Field {
+	fieldMap := make(map[string]*Field)
+	for i := range s.Fields {
+		fieldMap[s.Fields[i].Name] = &s.Fields[i]
+	}
+	return fieldMap
+}

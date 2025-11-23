@@ -1,438 +1,244 @@
 package atoms
 
 import (
-	"fmt"
-	"strings"
+	"strconv"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
 
-// TagVariant defines the visual style variants for tags
+// TagVariant defines the visual style variants
 type TagVariant string
 
 const (
-	TagDefault     TagVariant = "default"
-	TagSecondary   TagVariant = "secondary"
-	TagSuccess     TagVariant = "success"
-	TagWarning     TagVariant = "warning"
-	TagDestructive TagVariant = "destructive"
-	TagOutline     TagVariant = "outline"
+	TagVariantDefault     TagVariant = "default"
+	TagVariantSecondary   TagVariant = "secondary"
+	TagVariantSuccess     TagVariant = "success"
+	TagVariantWarning     TagVariant = "warning"
+	TagVariantDestructive TagVariant = "destructive"
+	TagVariantOutline     TagVariant = "outline"
 )
 
-// TagSize defines the size variants for tags
+// TagSize defines the size variants
 type TagSize string
 
 const (
+	TagSizeXS TagSize = "xs"
 	TagSizeSM TagSize = "sm"
 	TagSizeMD TagSize = "md"
 	TagSizeLG TagSize = "lg"
+	TagSizeXL TagSize = "xl"
 )
 
-// TagProps defines the properties for individual Tag components
+// TagState defines the visual state variants
+type TagState string
+
+const (
+	TagStateDefault  TagState = "default"
+	TagStateDisabled TagState = "disabled"
+	TagStateSelected TagState = "selected"
+	TagStateActive   TagState = "active"
+	TagStateHover    TagState = "hover"
+)
+
+// TagProps defines all properties for the Tag atom
 type TagProps struct {
-	Text        string
-	Value       string
-	Variant     TagVariant
-	Size        TagSize
-	Selected    bool
-	Removable   bool
-	Disabled    bool
-	Icon        string // Optional icon for the tag
-	Class       string
-	ID          string
-	// Events
-	OnClick     string // Alpine.js click handler
-	OnRemove    string // Alpine.js remove handler
-	// HTMX attributes
-	HXPost      string
-	HXGet       string
-	HXTarget    string
-	HXSwap      string
+	// Core attributes
+	ID   string `json:"id"`
+	Text string `json:"text"`
+	Value string `json:"value"`
+	
+	// Visual presentation (resolved externally)
+	Variant   TagVariant `json:"variant"`
+	Size      TagSize    `json:"size"`
+	State     TagState   `json:"state"`
+	ClassName string     `json:"className"`
+	
+	// Icon configuration
+	Icon      string `json:"icon"`
+	IconLeft  string `json:"iconLeft"`
+	IconRight string `json:"iconRight"`
+	
+	// Interactive features
+	Selected  bool `json:"selected"`
+	Removable bool `json:"removable"`
+	Clickable bool `json:"clickable"`
+	Disabled  bool `json:"disabled"`
+	
+	// Event handlers (pre-resolved externally)
+	OnClick  string `json:"onClick"`
+	OnRemove string `json:"onRemove"`
+	OnHover  string `json:"onHover"`
+	
+	// ARIA accessibility attributes
+	AriaLabel       string `json:"ariaLabel"`
+	AriaDescribedBy string `json:"ariaDescribedBy"`
+	AriaPressed     string `json:"ariaPressed"`
+	AriaSelected    string `json:"ariaSelected"`
+	
+	// Additional HTML attributes
+	TabIndex     int                   `json:"tabIndex"`
+	DataAttrs    map[string]string     `json:"dataAttrs"`
+	Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// TagsProps defines the properties for the Tags container component
-type TagsProps struct {
-	Tags        []TagProps
-	MaxTags     int
-	Variant     TagVariant
-	Size        TagSize
-	Editable    bool
-	Placeholder string
-	Class       string
-	ID          string
-	Name        string
-	// Alpine.js data and methods
-	AlpineData  string // x-data attribute
-	// Events
-	OnTagAdd    string // Alpine.js method for adding tags
-	OnTagRemove string // Alpine.js method for removing tags
-	// HTMX attributes for the container
-	HXPost      string
-	HXGet       string
-	HXTarget    string
-	HXSwap      string
-}
-
-// tagClasses generates Tailwind CSS classes for individual tags
-func tagClasses(props TagProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"inline-flex",
-		"items-center",
-		"gap-1",
-		"rounded-md",
-		"border",
-		"px-2",
-		"py-1",
-		"text-xs",
-		"font-medium",
-		"transition-colors",
-		"focus:outline-none",
-		"focus:ring-2",
-		"focus:ring-ring",
-		"focus:ring-offset-1",
+// getTagClasses builds the CSS class string using design tokens
+func getTagClasses(props TagProps) string {
+	return utils.TwMerge(
+		// Base class with design token references
+		"tag",
+		
+		// Variant classes (map to design tokens)
+		"tag-"+string(props.Variant),
+		
+		// Size classes (map to design tokens)
+		"tag-"+string(props.Size),
+		
+		// State classes (map to design tokens)
+		"tag-"+string(props.State),
+		
+		// Interactive utilities
+		utils.If(props.Clickable, "tag-clickable"),
+		utils.If(props.Removable, "tag-removable"),
+		utils.If(props.Selected, "tag-selected"),
+		utils.If(props.Disabled, "tag-disabled"),
+		
+		// Icon-specific classes
+		utils.If(props.Icon != "" && props.Text == "", "tag-icon-only"),
+		utils.If(props.IconLeft != "", "tag-has-icon-left"),
+		utils.If(props.IconRight != "", "tag-has-icon-right"),
+		
+		// Custom classes
+		props.ClassName,
 	)
+}
 
-	// State-based styling
-	if props.Selected {
-		classes = append(classes,
-			"border-primary",
-			"bg-primary",
-			"text-primary-foreground",
-		)
-	} else {
-		classes = append(classes,
-			"border-input",
-			"bg-background",
-			"text-foreground",
-			"hover:bg-accent",
-			"hover:text-accent-foreground",
-		)
+// buildTagAttributes creates all HTML attributes for the tag
+func buildTagAttributes(props TagProps) templ.Attributes {
+	element := "span"
+	if props.Clickable || props.OnClick != "" {
+		element = "button"
 	}
-
-	// Disabled state
+	
+	attrs := templ.Attributes{
+		"class": getTagClasses(props),
+	}
+	
+	// Button-specific attributes
+	if element == "button" {
+		attrs["type"] = "button"
+	}
+	
+	// Core HTML attributes
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+	
+	// Boolean attributes
 	if props.Disabled {
-		classes = append(classes, "opacity-50", "cursor-not-allowed")
-	} else if props.OnClick != "" || props.HXPost != "" || props.HXGet != "" {
-		classes = append(classes, "cursor-pointer")
+		attrs["disabled"] = "disabled"
 	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
+	
+	// Event handlers
+	if props.OnClick != "" {
+		attrs["onclick"] = props.OnClick
 	}
-
-	return strings.Join(classes, " ")
-}
-
-// generateTagSelectedClass creates the Alpine.js class binding for selectable tags
-func generateTagSelectedClass(value string) string {
-	return fmt.Sprintf("selectedTags.includes('%s') ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground'", value)
-}
-
-// generateTagClickHandler creates the Alpine.js click handler for selectable tags
-func generateTagClickHandler(value string) string {
-	return fmt.Sprintf("selectedTags.includes('%s') ? selectedTags = selectedTags.filter(t => t !== '%s') : selectedTags.push('%s')", value, value, value)
-}
-
-// generateAriaLabel creates the aria-label for remove buttons
-func generateAriaLabel(text string) string {
-	return fmt.Sprintf("Remove %s", text)
-}
-
-// tagsContainerClasses generates Tailwind CSS classes for the tags container
-func tagsContainerClasses(props TagsProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"flex",
-		"flex-wrap",
-		"gap-1",
-		"p-2",
-		"border",
-		"border-input",
-		"rounded-md",
-		"bg-background",
-		"min-h-[2.5rem]",
-		"focus-within:ring-2",
-		"focus-within:ring-ring",
-		"focus-within:ring-offset-2",
-	)
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
+	if props.OnHover != "" {
+		attrs["onmouseover"] = props.OnHover
 	}
-
-	return strings.Join(classes, " ")
+	
+	// ARIA attributes
+	if props.AriaLabel != "" {
+		attrs["aria-label"] = props.AriaLabel
+	}
+	if props.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.AriaDescribedBy
+	}
+	if props.AriaPressed != "" {
+		attrs["aria-pressed"] = props.AriaPressed
+	}
+	if props.AriaSelected != "" {
+		attrs["aria-selected"] = props.AriaSelected
+	}
+	
+	// Tab index
+	if props.TabIndex != 0 {
+		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes (allows override)
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
 }
 
-// Tag renders an individual tag component
+// Tag renders a pure presentation tag atom
 templ Tag(props TagProps) {
-	if props.OnClick != "" || props.HXPost != "" || props.HXGet != "" {
-		<button
-			type="button"
-			if props.ID != "" {
-				id={ props.ID }
-			}
-			if props.Value != "" {
-				value={ props.Value }
-			}
-			class={ tagClasses(props) }
-			if props.Disabled {
-				disabled
-			}
-			if props.OnClick != "" {
-				x-on:click={ props.OnClick }
-			}
-			if props.HXPost != "" {
-				hx-post={ props.HXPost }
-			}
-			if props.HXGet != "" {
-				hx-get={ props.HXGet }
-			}
-			if props.HXTarget != "" {
-				hx-target={ props.HXTarget }
-			}
-			if props.HXSwap != "" {
-				hx-swap={ props.HXSwap }
-			}
-		>
-			@tagContent(props)
+	if props.Clickable || props.OnClick != "" {
+		<button {buildTagAttributes(props)...}>
+			@renderTagContent(props)
 		</button>
 	} else {
-		<span
-			if props.ID != "" {
-				id={ props.ID }
-			}
-			class={ tagClasses(props) }
-		>
-			@tagContent(props)
+		<span {buildTagAttributes(props)...}>
+			@renderTagContent(props)
 		</span>
 	}
 }
 
-// tagContent renders the content of a tag
-templ tagContent(props TagProps) {
-	<span>{ props.Text }</span>
-	if props.Removable && !props.Disabled {
+// renderTagContent renders the tag content
+templ renderTagContent(props TagProps) {
+	// Left icon
+	if props.IconLeft != "" {
+		<span class="tag-icon-left">
+			@renderTagIcon(props.IconLeft)
+		</span>
+	}
+	
+	// Icon-only mode
+	if props.Icon != "" && props.Text == "" {
+		<span class="tag-icon-only">
+			@renderTagIcon(props.Icon)
+		</span>
+	}
+	
+	// Tag text
+	if props.Text != "" {
+		<span class="tag-text">
+			{ props.Text }
+		</span>
+	}
+	
+	// Right icon
+	if props.IconRight != "" {
+		<span class="tag-icon-right">
+			@renderTagIcon(props.IconRight)
+		</span>
+	}
+	
+	// Remove button
+	if props.Removable {
 		<button
 			type="button"
-			class="tag-remove-btn"
-			if props.OnRemove != "" {
-				x-on:click={ props.OnRemove }
-			}
-			aria-label={ generateAriaLabel(props.Text) }
+			class="tag-remove-button"
+			data-onclick={ props.OnRemove }
+			aria-label="Remove"
 		>
-			@Icon(IconProps{Name: "x", Size: IconSizeXS, ClassName: "tag-remove-icon"})
+			@renderTagIcon("x")
 		</button>
 	}
 }
 
-// Tags renders a container for multiple tags with optional editing capabilities
-templ Tags(props TagsProps) {
-	<div
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		class={ tagsContainerClasses(props) }
-		if props.AlpineData != "" {
-			x-data={ props.AlpineData }
-		} else if props.Editable {
-			x-data="{ 
-				tags: [],
-				newTag: '',
-				addTag() {
-					if (this.newTag.trim() && !this.tags.includes(this.newTag.trim())) {
-						this.tags.push(this.newTag.trim());
-						this.newTag = '';
-					}
-				},
-				removeTag(index) {
-					this.tags.splice(index, 1);
-				}
-				}
-			}"
-		}
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-	>
-		// Render existing tags
-		for _, tag := range props.Tags {
-			@Tag(tag)
-		}
-		
-		// Render Alpine.js dynamic tags (if editable)
-		if props.Editable {
-			<template x-for="(tag, index) in tags" x-key="index">
-				<span
-					class="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1 text-xs font-medium text-foreground"
-				>
-					<span x-text="tag"></span>
-					<button
-						type="button"
-						class="tag-remove-btn"
-						x-on:click="removeTag(index)"
-						aria-label="Remove tag"
-					>
-						@Icon(IconProps{Name: "x", Size: IconSizeXS, ClassName: "tag-remove-icon"})
-					</button>
-				</span>
-			</template>
-			
-			// Input for adding new tags
-			<input
-				type="text"
-				if props.Name != "" {
-					name={ props.Name + "_input" }
-				}
-				if props.Placeholder != "" {
-					placeholder={ props.Placeholder }
-				} else {
-					placeholder="Add tag..."
-				}
-				class="flex-1 min-w-[120px] border-0 bg-transparent text-xs placeholder:text-muted-foreground focus:outline-none"
-				x-model="newTag"
-				x-on:keydown.enter.prevent="addTag()"
-				x-on:keydown.comma.prevent="addTag()"
-			/>
-		}
-	</div>
+// renderTagIcon renders an icon placeholder (to be replaced with actual Icon atom)
+templ renderTagIcon(name string) {
+	<span class="tag-icon" data-icon={ name }>
+		{ name }
+	</span>
 }
-
-// EditableTags renders an editable tags component with Alpine.js functionality
-templ EditableTags(props TagsProps) {
-	@Tags(TagsProps{
-		Tags:        props.Tags,
-		MaxTags:     props.MaxTags,
-		Editable:    true,
-		Placeholder: props.Placeholder,
-		Class:       props.Class,
-		ID:          props.ID,
-		Name:        props.Name,
-		AlpineData:  props.AlpineData,
-		OnTagAdd:    props.OnTagAdd,
-		OnTagRemove: props.OnTagRemove,
-		HXPost:      props.HXPost,
-		HXGet:       props.HXGet,
-		HXTarget:    props.HXTarget,
-		HXSwap:      props.HXSwap,
-	})
-}
-
-// SelectableTags renders tags that can be selected/deselected
-templ SelectableTags(props TagsProps) {
-	<div
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		class={ "flex flex-wrap gap-1 " + props.Class }
-		if props.AlpineData != "" {
-			x-data={ props.AlpineData }
-		} else {
-			x-data="{ selectedTags: [] }"
-		}
-		if props.HXPost != "" {
-			hx-post={ props.HXPost }
-		}
-		if props.HXGet != "" {
-			hx-get={ props.HXGet }
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-	>
-		for _, tag := range props.Tags {
-			<button
-				type="button"
-				class="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
-				x-bind:class={ generateTagSelectedClass(tag.Value) }
-				x-on:click={ generateTagClickHandler(tag.Value) }
-				if tag.OnClick != "" {
-					x-on:click={ tag.OnClick }
-				}
-			>
-				{ tag.Text }
-			</button>
-		}
-	</div>
-}
-
-// Builder Pattern (functional options)
-type TagOption func(*TagProps)
-
-func NewTag(opts ...TagOption) TagProps {
-	props := TagProps{
-		Variant: TagDefault,
-		Size:    TagSizeMD,
-	}
-	for _, opt := range opts {
-		opt(&props)
-	}
-	return props
-}
-
-func WithTagVariant(variant TagVariant) TagOption {
-	return func(p *TagProps) { p.Variant = variant }
-}
-
-func WithTagSize(size TagSize) TagOption {
-	return func(p *TagProps) { p.Size = size }
-}
-
-func WithTagText(text string) TagOption {
-	return func(p *TagProps) { p.Text = text }
-}
-
-func WithTagValue(value string) TagOption {
-	return func(p *TagProps) { p.Value = value }
-}
-
-func WithTagIcon(icon string) TagOption {
-	return func(p *TagProps) { p.Icon = icon }
-}
-
-func AsTagSelected() TagOption {
-	return func(p *TagProps) { p.Selected = true }
-}
-
-func AsTagRemovable(onRemove string) TagOption {
-	return func(p *TagProps) {
-		p.Removable = true
-		p.OnRemove = onRemove
-	}
-}
-
-func AsTagDisabled() TagOption {
-	return func(p *TagProps) { p.Disabled = true }
-}
-
-func WithTagClass(class string) TagOption {
-	return func(p *TagProps) { p.Class = class }
-}
-
-// Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, just visual rendering and state management
-// 2. Compiled Theme Classes: Uses "tag", "tag-primary", etc. from compiled CSS
-// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. Variant System: Multiple tag styles (default, success, warning, etc.)
-// 6. Size System: Multiple tag sizes (sm, md, lg)
-// 7. Icon Integration: Uses Icon atom for consistent iconography
-// 8. Editable Support: Built-in Alpine.js integration for dynamic tags
-// 9. Selectable Support: Tag selection and multi-selection patterns
-// 10. Accessibility: Proper ARIA labels and semantic markup

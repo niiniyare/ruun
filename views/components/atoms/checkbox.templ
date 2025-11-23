@@ -1,464 +1,206 @@
 package atoms
 
 import (
-	"strings"
+    "strconv"
+    "github.com/niiniyare/ruun/pkg/utils"
 )
 
 // CheckboxSize defines the size variants for checkboxes
 type CheckboxSize string
 
 const (
-	CheckboxSizeSM CheckboxSize = "sm"
-	CheckboxSizeMD CheckboxSize = "md"
-	CheckboxSizeLG CheckboxSize = "lg"
+    CheckboxSizeXS CheckboxSize = "xs"
+    CheckboxSizeSM CheckboxSize = "sm"
+    CheckboxSizeMD CheckboxSize = "md"
+    CheckboxSizeLG CheckboxSize = "lg"
+    CheckboxSizeXL CheckboxSize = "xl"
 )
 
 // CheckboxState defines the visual state of the checkbox
 type CheckboxState string
 
 const (
-	CheckboxStateDefault CheckboxState = "default"
-	CheckboxStateError   CheckboxState = "error"
-	CheckboxStateSuccess CheckboxState = "success"
-	CheckboxStateWarning CheckboxState = "warning"
+    CheckboxStateDefault  CheckboxState = "default"
+    CheckboxStateError    CheckboxState = "error"
+    CheckboxStateSuccess  CheckboxState = "success"
+    CheckboxStateWarning  CheckboxState = "warning"
+    CheckboxStateDisabled CheckboxState = "disabled"
 )
 
-// CheckboxOption represents a single checkbox option for checkbox groups
-type CheckboxOption struct {
-	Value       string `json:"value"`
-	Label       string `json:"label"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
-	Checked     bool   `json:"checked"`
-	Icon        string `json:"icon"`
-}
-
-// CheckboxProps defines the properties for a single Checkbox component
+// CheckboxProps defines all properties for the Checkbox atom
 type CheckboxProps struct {
-	ID           string
-	Name         string
-	Value        string // Value when checked
-	Checked      bool
-	Label        string
-	Description  string
-	Icon         string // Optional icon for the checkbox
-	Size         CheckboxSize
-	State        CheckboxState
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
+    // Core HTML attributes
+    ID      string `json:"id"`
+    Name    string `json:"name"`
+    Value   string `json:"value"`
+    Label   string `json:"label"`
+    Checked bool   `json:"checked"`
+    
+    // Constraints and validation
+    Required  bool `json:"required"`
+    Disabled  bool `json:"disabled"`
+    Readonly  bool `json:"readonly"`
+    AutoFocus bool `json:"autoFocus"`
+    
+    // Visual presentation (resolved externally)
+    Size      CheckboxSize  `json:"size"`
+    State     CheckboxState `json:"state"`
+    ClassName string        `json:"className"`
+    
+    // Event handlers (pre-resolved externally)
+    OnChange string `json:"onChange"`
+    OnBlur   string `json:"onBlur"`
+    OnFocus  string `json:"onFocus"`
+    OnClick  string `json:"onClick"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    AriaChecked     string `json:"ariaChecked"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// CheckboxGroupProps defines the properties for a CheckboxGroup component
-type CheckboxGroupProps struct {
-	ID           string
-	Name         string
-	Values       []string // Array of selected values
-	Options      []CheckboxOption
-	Size         CheckboxSize
-	State        CheckboxState
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	// Layout options
-	Inline       bool // Horizontal vs vertical layout
-	Columns      int  // Number of columns for grid layout
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
+// getCheckboxClasses builds the CSS class string using design tokens
+func getCheckboxClasses(props CheckboxProps) string {
+    return utils.TwMerge(
+        // Base class with design token references
+        "checkbox",
+        
+        // Size classes (map to design tokens)
+        "checkbox-"+string(props.Size),
+        
+        // State classes (map to design tokens)
+        "checkbox-"+string(props.State),
+        
+        // Layout utilities
+        utils.If(props.Disabled, "checkbox-disabled"),
+        utils.If(props.Readonly, "checkbox-readonly"),
+        utils.If(props.Checked, "checkbox-checked"),
+        
+        // Custom classes
+        props.ClassName,
+    )
 }
 
-// checkboxClasses generates Tailwind CSS classes for a single checkbox
-func checkboxClasses(props CheckboxProps) string {
-	var classes []string
-
-	// Base checkbox classes
-	classes = append(classes,
-		"h-4",
-		"w-4",
-		"rounded",
-		"border",
-		"border-primary",
-		"text-primary",
-		"focus:ring-2",
-		"focus:ring-ring",
-		"focus:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-	)
-
-	// Error state
-	if props.Error {
-		classes = append(classes, "border-destructive")
-	}
-
-	return strings.Join(classes, " ")
+// getCheckboxLabelClasses builds CSS for checkbox label
+func getCheckboxLabelClasses(props CheckboxProps) string {
+    return utils.TwMerge(
+        "checkbox-label",
+        utils.If(props.Disabled, "checkbox-label-disabled"),
+    )
 }
 
-// checkboxContainerClasses generates Tailwind CSS classes for checkbox container
-func checkboxContainerClasses(props CheckboxProps) string {
-	var classes []string
-
-	// Base container classes
-	classes = append(classes,
-		"checkbox-container",
-		"flex",
-		"items-start",
-		"gap-3",
-		"p-3",
-		"rounded-lg",
-		"transition-colors",
-	)
-
-	// Interactive states
-	if !props.Disabled && !props.Readonly {
-		classes = append(classes,
-			"cursor-pointer",
-			"hover:bg-accent",
-			"focus-within:ring-2",
-			"focus-within:ring-ring",
-			"focus-within:ring-offset-2",
-		)
-	}
-
-	// Disabled state
-	if props.Disabled {
-		classes = append(classes, "opacity-50", "cursor-not-allowed")
-	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+// buildCheckboxAttributes creates all HTML attributes for the checkbox
+func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "type":  "checkbox",
+        "class": getCheckboxClasses(props),
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    if props.Value != "" {
+        attrs["value"] = props.Value
+    }
+    
+    // Boolean attributes
+    if props.Checked {
+        attrs["checked"] = "checked"
+    }
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.Readonly {
+        attrs["readonly"] = "readonly"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnClick != "" {
+        attrs["onclick"] = props.OnClick
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    if props.AriaChecked != "" {
+        attrs["aria-checked"] = props.AriaChecked
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
 }
 
-// checkboxGroupClasses generates Tailwind CSS classes for checkbox group container
-func checkboxGroupClasses(props CheckboxGroupProps) string {
-	var classes []string
-
-	// Base container classes
-	classes = append(classes, "checkbox-group")
-
-	// Layout classes
-	if props.Inline {
-		classes = append(classes, "flex", "flex-wrap", "gap-4")
-	} else if props.Columns > 1 {
-		classes = append(classes, "grid", "gap-4")
-		switch props.Columns {
-		case 2:
-			classes = append(classes, "grid-cols-2")
-		case 3:
-			classes = append(classes, "grid-cols-3")
-		case 4:
-			classes = append(classes, "grid-cols-4")
-		default:
-			classes = append(classes, "grid-cols-2")
-		}
-	} else {
-		classes = append(classes, "space-y-3")
-	}
-
-	// State classes
-	if props.Disabled {
-		classes = append(classes, "opacity-50", "cursor-not-allowed")
-	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+// buildCheckboxLabelAttributes creates all HTML attributes for the label
+func buildCheckboxLabelAttributes(props CheckboxProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class": getCheckboxLabelClasses(props),
+    }
+    
+    if props.ID != "" {
+        attrs["for"] = props.ID
+    }
+    
+    return attrs
 }
 
-// isCheckedInGroup checks if a value is selected in a checkbox group
-func isCheckedInGroup(values []string, value string) bool {
-	for _, v := range values {
-		if v == value {
-			return true
-		}
-	}
-	return false
-}
-
-// Checkbox renders a single checkbox component
+// Checkbox renders a pure presentation checkbox atom
 templ Checkbox(props CheckboxProps) {
-	<label
-		class={ checkboxContainerClasses(props) }
-		for={ props.ID }
-	>
-		<input
-			type="checkbox"
-			id={ props.ID }
-			name={ props.Name }
-			value={ props.Value }
-			if props.Checked {
-				checked
-			}
-			if props.Required {
-				required
-			}
-			if props.Disabled {
-				disabled
-			}
-			if props.Readonly {
-				readonly
-			}
-			class={ checkboxClasses(props) }
-			if props.HXPost != "" {
-				hx-post={ props.HXPost }
-			}
-			if props.HXGet != "" {
-				hx-get={ props.HXGet }
-			}
-			if props.HXTarget != "" {
-				hx-target={ props.HXTarget }
-			}
-			if props.HXSwap != "" {
-				hx-swap={ props.HXSwap }
-			}
-			if props.HXTrigger != "" {
-				hx-trigger={ props.HXTrigger }
-			}
-			if props.AlpineModel != "" {
-				x-model={ props.AlpineModel }
-			}
-			if props.AlpineChange != "" {
-				x-on:change={ props.AlpineChange }
-			}
-			if props.AlpineBlur != "" {
-				x-on:blur={ props.AlpineBlur }
-			}
-			if props.AlpineFocus != "" {
-				x-on:focus={ props.AlpineFocus }
-			}
-		/>
-		<div class="checkbox-content">
-			if props.Icon != "" {
-				@Icon(IconProps{Name: props.Icon, Size: "sm", ClassName: "checkbox-icon"})
-			}
-			if props.Label != "" {
-				<div class="checkbox-label">
-					{ props.Label }
-				</div>
-			}
-			if props.Description != "" {
-				<p class="checkbox-description">
-					{ props.Description }
-				</p>
-			}
-		</div>
-	</label>
+    if props.Label != "" {
+        <label {buildCheckboxLabelAttributes(props)...}>
+            <input {buildCheckboxAttributes(props)...} />
+            <span class="checkbox-label-text">{ props.Label }</span>
+        </label>
+    } else {
+        <input {buildCheckboxAttributes(props)...} />
+    }
 }
-
-// CheckboxGroup renders a group of checkboxes
-templ CheckboxGroup(props CheckboxGroupProps) {
-	<div
-		class={ checkboxGroupClasses(props) }
-		if props.ID != "" {
-			id={ props.ID + "-group" }
-		}
-		role="group"
-		if props.Required {
-			aria-required="true"
-		}
-		if props.Error {
-			aria-invalid="true"
-		}
-	>
-		for _, option := range props.Options {
-			<label
-				class={ checkboxContainerClasses(CheckboxProps{
-					Disabled: props.Disabled || option.Disabled,
-					Error:    props.Error,
-				}) }
-				for={ props.ID + "-" + option.Value }
-			>
-				<input
-					type="checkbox"
-					id={ props.ID + "-" + option.Value }
-					name={ props.Name }
-					value={ option.Value }
-					if isCheckedInGroup(props.Values, option.Value) || option.Checked {
-						checked
-					}
-					if props.Required {
-						required
-					}
-					if props.Disabled || option.Disabled {
-						disabled
-					}
-					if props.Readonly {
-						readonly
-					}
-					class={ checkboxClasses(CheckboxProps{
-						Error: props.Error,
-					}) }
-					if props.HXPost != "" {
-						hx-post={ props.HXPost }
-					}
-					if props.HXGet != "" {
-						hx-get={ props.HXGet }
-					}
-					if props.HXTarget != "" {
-						hx-target={ props.HXTarget }
-					}
-					if props.HXSwap != "" {
-						hx-swap={ props.HXSwap }
-					}
-					if props.HXTrigger != "" {
-						hx-trigger={ props.HXTrigger }
-					}
-					if props.AlpineModel != "" {
-						x-model={ props.AlpineModel }
-					}
-					if props.AlpineChange != "" {
-						x-on:change={ props.AlpineChange }
-					}
-					if props.AlpineBlur != "" {
-						x-on:blur={ props.AlpineBlur }
-					}
-					if props.AlpineFocus != "" {
-						x-on:focus={ props.AlpineFocus }
-					}
-				/>
-				<div class="flex-1 min-w-0">
-					<div class="flex items-center gap-2">
-						if option.Icon != "" {
-							<span class="text-muted-foreground">
-								<!-- Icon would be rendered here -->
-								<span class="sr-only">{ option.Icon }</span>
-							</span>
-						}
-						<span class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-							{ option.Label }
-						</span>
-					</div>
-					if option.Description != "" {
-						<p class="text-xs text-muted-foreground mt-1">
-							{ option.Description }
-						</p>
-					}
-				</div>
-			</label>
-		}
-	</div>
-}
-
-// CheckboxGroupInline renders checkboxes in a horizontal layout
-templ CheckboxGroupInline(props CheckboxGroupProps) {
-	@CheckboxGroup(CheckboxGroupProps{
-		ID:           props.ID,
-		Name:         props.Name,
-		Values:       props.Values,
-		Options:      props.Options,
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		Error:        props.Error,
-		Class:        props.Class,
-		Size:         props.Size,
-		State:        props.State,
-		Inline:       true,
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-	})
-}
-
-// Builder Pattern (functional options)
-type CheckboxConfig func(*CheckboxProps)
-
-func NewCheckbox(opts ...CheckboxConfig) CheckboxProps {
-	props := CheckboxProps{
-		Size:  CheckboxSizeMD,
-		State: CheckboxStateDefault,
-	}
-	for _, opt := range opts {
-		opt(&props)
-	}
-	return props
-}
-
-func WithCheckboxSize(size CheckboxSize) CheckboxConfig {
-	return func(p *CheckboxProps) { p.Size = size }
-}
-
-func WithCheckboxState(state CheckboxState) CheckboxConfig {
-	return func(p *CheckboxProps) { p.State = state }
-}
-
-func WithCheckboxLabel(label string) CheckboxConfig {
-	return func(p *CheckboxProps) { p.Label = label }
-}
-
-func WithCheckboxValue(value string) CheckboxConfig {
-	return func(p *CheckboxProps) { p.Value = value }
-}
-
-func WithCheckboxName(name string) CheckboxConfig {
-	return func(p *CheckboxProps) { p.Name = name }
-}
-
-func WithCheckboxID(id string) CheckboxConfig {
-	return func(p *CheckboxProps) { p.ID = id }
-}
-
-func AsCheckboxChecked() CheckboxConfig {
-	return func(p *CheckboxProps) { p.Checked = true }
-}
-
-func AsCheckboxRequired() CheckboxConfig {
-	return func(p *CheckboxProps) { p.Required = true }
-}
-
-func AsCheckboxDisabled() CheckboxConfig {
-	return func(p *CheckboxProps) { p.Disabled = true }
-}
-
-func WithCheckboxClass(class string) CheckboxConfig {
-	return func(p *CheckboxProps) { p.Class = class }
-}
-
-// Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, just visual rendering and state management
-// 2. Compiled Theme Classes: Uses "checkbox", "checkbox-error", etc. from compiled CSS
-// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. Visual State Management: Simple states (error, success, warning, default)
-// 6. Atomic Design Compliant: Single purpose, indivisible checkbox component
-// 7. Icon Integration: Uses Icon atom for consistent iconography
-// 8. Ready for Molecules: Can be easily composed into FormField molecules
-// 9. Size Variants: Supports sm, md, lg sizing through compiled theme classes
-// 10. Accessibility: Proper ARIA attributes for screen readers

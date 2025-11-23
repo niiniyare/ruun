@@ -13,56 +13,45 @@ import (
 	"strconv"
 )
 
-// InputType defines the HTML input type
-type InputType string
+// TextareaSize defines the size variants
+type TextareaSize string
 
 const (
-	InputText     InputType = "text"
-	InputEmail    InputType = "email"
-	InputPassword InputType = "password"
-	InputNumber   InputType = "number"
-	InputTel      InputType = "tel"
-	InputURL      InputType = "url"
-	InputSearch   InputType = "search"
-	InputFile     InputType = "file"
-	InputDate     InputType = "date"
-	InputTime     InputType = "time"
-	InputDatetime InputType = "datetime-local"
-	InputHidden   InputType = "hidden"
-	InputRange    InputType = "range"
-	InputColor    InputType = "color"
+	TextareaSizeXS TextareaSize = "xs"
+	TextareaSizeSM TextareaSize = "sm"
+	TextareaSizeMD TextareaSize = "md"
+	TextareaSizeLG TextareaSize = "lg"
+	TextareaSizeXL TextareaSize = "xl"
 )
 
-// InputSize defines the size variants
-type InputSize string
+// TextareaState defines the visual state variants
+type TextareaState string
 
 const (
-	InputSizeXS InputSize = "xs"
-	InputSizeSM InputSize = "sm"
-	InputSizeMD InputSize = "md"
-	InputSizeLG InputSize = "lg"
-	InputSizeXL InputSize = "xl"
+	TextareaStateDefault  TextareaState = "default"
+	TextareaStateError    TextareaState = "error"
+	TextareaStateSuccess  TextareaState = "success"
+	TextareaStateWarning  TextareaState = "warning"
+	TextareaStateDisabled TextareaState = "disabled"
 )
 
-// InputState defines the visual state variants
-type InputState string
+// TextareaResize defines resize behavior
+type TextareaResize string
 
 const (
-	InputStateDefault  InputState = "default"
-	InputStateError    InputState = "error"
-	InputStateSuccess  InputState = "success"
-	InputStateWarning  InputState = "warning"
-	InputStateDisabled InputState = "disabled"
+	TextareaResizeNone       TextareaResize = "none"
+	TextareaResizeVertical   TextareaResize = "vertical"
+	TextareaResizeHorizontal TextareaResize = "horizontal"
+	TextareaResizeBoth       TextareaResize = "both"
 )
 
-// InputProps defines all properties for the Input atom
-type InputProps struct {
+// TextareaProps defines all properties for the Textarea atom
+type TextareaProps struct {
 	// Core HTML attributes
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Type        InputType `json:"type"`
-	Value       string    `json:"value"`
-	Placeholder string    `json:"placeholder"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Value       string `json:"value"`
+	Placeholder string `json:"placeholder"`
 
 	// Constraints and validation
 	Required     bool   `json:"required"`
@@ -71,21 +60,19 @@ type InputProps struct {
 	AutoFocus    bool   `json:"autoFocus"`
 	AutoComplete string `json:"autoComplete"`
 
-	// Input-specific constraints
+	// Textarea-specific constraints
 	MinLength int    `json:"minLength"`
 	MaxLength int    `json:"maxLength"`
-	Min       string `json:"min"`
-	Max       string `json:"max"`
-	Step      string `json:"step"`
-	Pattern   string `json:"pattern"`
-	Accept    string `json:"accept"`   // For file inputs
-	Multiple  bool   `json:"multiple"` // For file inputs
+	Rows      int    `json:"rows"`
+	Cols      int    `json:"cols"`
+	Wrap      string `json:"wrap"` // "soft" | "hard" | "off"
 
 	// Visual presentation (resolved externally)
-	Size      InputSize  `json:"size"`
-	State     InputState `json:"state"`
-	ClassName string     `json:"className"`
-	FullWidth bool       `json:"fullWidth"`
+	Size      TextareaSize   `json:"size"`
+	State     TextareaState  `json:"state"`
+	Resize    TextareaResize `json:"resize"`
+	ClassName string         `json:"className"`
+	FullWidth bool           `json:"fullWidth"`
 
 	// Event handlers (pre-resolved externally)
 	OnChange  string `json:"onChange"`
@@ -94,6 +81,7 @@ type InputProps struct {
 	OnInput   string `json:"onInput"`
 	OnKeyDown string `json:"onKeyDown"`
 	OnKeyUp   string `json:"onKeyUp"`
+	OnScroll  string `json:"onScroll"`
 
 	// ARIA accessibility attributes
 	AriaLabel       string `json:"ariaLabel"`
@@ -107,34 +95,35 @@ type InputProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getInputClasses builds the CSS class string using design tokens
-func getInputClasses(props InputProps) string {
+// getTextareaClasses builds the CSS class string using design tokens
+func getTextareaClasses(props TextareaProps) string {
 	return utils.TwMerge(
 		// Base class with design token references
-		"input",
+		"textarea",
 
 		// Size classes (map to design tokens)
-		"input-"+string(props.Size),
+		"textarea-"+string(props.Size),
 
 		// State classes (map to design tokens)
-		"input-"+string(props.State),
+		"textarea-"+string(props.State),
+
+		// Resize classes
+		"textarea-resize-"+string(props.Resize),
 
 		// Layout utilities
-		utils.If(props.FullWidth, "input-full-width"),
-		utils.If(props.Disabled, "input-disabled"),
-		utils.If(props.Readonly, "input-readonly"),
+		utils.If(props.FullWidth, "textarea-full-width"),
+		utils.If(props.Disabled, "textarea-disabled"),
+		utils.If(props.Readonly, "textarea-readonly"),
 
 		// Custom classes
 		props.ClassName,
 	)
 }
 
-// buildInputAttributes creates all HTML attributes for the input
-func buildInputAttributes(props InputProps) templ.Attributes {
+// buildTextareaAttributes creates all HTML attributes for the textarea
+func buildTextareaAttributes(props TextareaProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type":        string(props.Type),
-		"class":       getInputClasses(props),
-		"value":       props.Value,
+		"class":       getTextareaClasses(props),
 		"placeholder": props.Placeholder,
 	}
 
@@ -159,9 +148,6 @@ func buildInputAttributes(props InputProps) templ.Attributes {
 	if props.AutoFocus {
 		attrs["autofocus"] = "autofocus"
 	}
-	if props.Multiple {
-		attrs["multiple"] = "multiple"
-	}
 
 	// Constraint attributes
 	if props.AutoComplete != "" {
@@ -173,20 +159,14 @@ func buildInputAttributes(props InputProps) templ.Attributes {
 	if props.MaxLength > 0 {
 		attrs["maxlength"] = strconv.Itoa(props.MaxLength)
 	}
-	if props.Min != "" {
-		attrs["min"] = props.Min
+	if props.Rows > 0 {
+		attrs["rows"] = strconv.Itoa(props.Rows)
 	}
-	if props.Max != "" {
-		attrs["max"] = props.Max
+	if props.Cols > 0 {
+		attrs["cols"] = strconv.Itoa(props.Cols)
 	}
-	if props.Step != "" {
-		attrs["step"] = props.Step
-	}
-	if props.Pattern != "" {
-		attrs["pattern"] = props.Pattern
-	}
-	if props.Accept != "" {
-		attrs["accept"] = props.Accept
+	if props.Wrap != "" {
+		attrs["wrap"] = props.Wrap
 	}
 
 	// Event handlers
@@ -207,6 +187,9 @@ func buildInputAttributes(props InputProps) templ.Attributes {
 	}
 	if props.OnKeyUp != "" {
 		attrs["onkeyup"] = props.OnKeyUp
+	}
+	if props.OnScroll != "" {
+		attrs["onscroll"] = props.OnScroll
 	}
 
 	// ARIA attributes
@@ -241,8 +224,8 @@ func buildInputAttributes(props InputProps) templ.Attributes {
 	return attrs
 }
 
-// Input renders a pure presentation input atom
-func Input(props InputProps) templ.Component {
+// Textarea renders a pure presentation textarea atom
+func Textarea(props TextareaProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -263,15 +246,28 @@ func Input(props InputProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<input")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<textarea")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildInputAttributes(props))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildTextareaAttributes(props))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/textarea.templ`, Line: 221, Col: 63}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</textarea>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

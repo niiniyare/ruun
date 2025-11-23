@@ -1,460 +1,260 @@
 package atoms
 
 import (
-	"strings"
-	"fmt"
+    "strconv"
+    "github.com/niiniyare/ruun/pkg/utils"
 )
 
-// SelectOption represents an option in a select dropdown
+// SelectSize defines the size variants
+type SelectSize string
+
+const (
+    SelectSizeXS SelectSize = "xs"
+    SelectSizeSM SelectSize = "sm"
+    SelectSizeMD SelectSize = "md"
+    SelectSizeLG SelectSize = "lg"
+    SelectSizeXL SelectSize = "xl"
+)
+
+// SelectState defines the visual state variants
+type SelectState string
+
+const (
+    SelectStateDefault  SelectState = "default"
+    SelectStateError    SelectState = "error"
+    SelectStateSuccess  SelectState = "success"
+    SelectStateWarning  SelectState = "warning"
+    SelectStateDisabled SelectState = "disabled"
+)
+
+// SelectOption represents an option within the select
 type SelectOption struct {
-	Value       string `json:"value"`
-	Label       string `json:"label"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
-	Selected    bool   `json:"selected"`
-	Icon        string `json:"icon"`
-	Group       string `json:"group"`
+    Value    string `json:"value"`
+    Label    string `json:"label"`
+    Selected bool   `json:"selected"`
+    Disabled bool   `json:"disabled"`
+    Group    string `json:"group"` // For optgroup
 }
 
-// SelectProps defines the properties for the Select component
+// SelectProps defines all properties for the Select atom
 type SelectProps struct {
-	ID           string
-	Name         string
-	Value        string   // Single selected value
-	Values       []string // Multiple selected values (for multi-select)
-	Options      []SelectOption
-	Placeholder  string
-	Multiple     bool
-	Searchable   bool
-	Clearable    bool
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	MaxHeight    string // Max height for dropdown
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
+    // Core HTML attributes
+    ID          string         `json:"id"`
+    Name        string         `json:"name"`
+    Value       string         `json:"value"`
+    Options     []SelectOption `json:"options"`
+    Placeholder string         `json:"placeholder"`
+    
+    // Constraints and validation
+    Required     bool   `json:"required"`
+    Disabled     bool   `json:"disabled"`
+    AutoFocus    bool   `json:"autoFocus"`
+    Multiple     bool   `json:"multiple"`
+    Size         int    `json:"htmlSize"` // HTML size attribute (distinct from design size)
+    
+    // Visual presentation (resolved externally)
+    DesignSize SelectSize  `json:"designSize"`
+    State      SelectState `json:"state"`
+    ClassName  string      `json:"className"`
+    FullWidth  bool        `json:"fullWidth"`
+    
+    // Event handlers (pre-resolved externally)
+    OnChange string `json:"onChange"`
+    OnBlur   string `json:"onBlur"`
+    OnFocus  string `json:"onFocus"`
+    OnClick  string `json:"onClick"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    AriaExpanded    string `json:"ariaExpanded"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// selectClasses generates Tailwind CSS classes for the select container
-func selectClasses(props SelectProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"select-container",
-		"relative",
-		"w-full",
-	)
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+// getSelectClasses builds the CSS class string using design tokens
+func getSelectClasses(props SelectProps) string {
+    return utils.TwMerge(
+        // Base class with design token references
+        "select",
+        
+        // Size classes (map to design tokens)
+        "select-"+string(props.DesignSize),
+        
+        // State classes (map to design tokens)
+        "select-"+string(props.State),
+        
+        // Layout utilities
+        utils.If(props.FullWidth, "select-full-width"),
+        utils.If(props.Disabled, "select-disabled"),
+        utils.If(props.Multiple, "select-multiple"),
+        
+        // Custom classes
+        props.ClassName,
+    )
 }
 
-// selectTriggerClasses generates Tailwind CSS classes for the select trigger
-func selectTriggerClasses(props SelectProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"flex",
-		"w-full",
-		"items-center",
-		"justify-between",
-		"rounded-md",
-		"border",
-		"border-input",
-		"bg-background",
-		"px-3",
-		"py-2",
-		"text-sm",
-		"ring-offset-background",
-		"placeholder:text-muted-foreground",
-		"focus:outline-none",
-		"focus:ring-2",
-		"focus:ring-ring",
-		"focus:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-	)
-
-	// Error state
-	if props.Error {
-		classes = append(classes, "border-destructive")
-	}
-
-	// Disabled state
-	if props.Disabled {
-		classes = append(classes, "cursor-not-allowed", "opacity-50")
-	} else {
-		classes = append(classes, "cursor-pointer")
-	}
-
-	return strings.Join(classes, " ")
+// buildSelectAttributes creates all HTML attributes for the select
+func buildSelectAttributes(props SelectProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class": getSelectClasses(props),
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    
+    // Boolean attributes
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    if props.Multiple {
+        attrs["multiple"] = "multiple"
+    }
+    
+    // Size attribute (HTML size, not design size)
+    if props.Size > 0 {
+        attrs["size"] = strconv.Itoa(props.Size)
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnClick != "" {
+        attrs["onclick"] = props.OnClick
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    if props.AriaExpanded != "" {
+        attrs["aria-expanded"] = props.AriaExpanded
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
 }
 
-// selectDropdownClasses generates Tailwind CSS classes for the dropdown
-func selectDropdownClasses(props SelectProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"absolute",
-		"z-50",
-		"min-w-[8rem]",
-		"overflow-hidden",
-		"rounded-md",
-		"border",
-		"bg-popover",
-		"p-1",
-		"text-popover-foreground",
-		"shadow-md",
-		"w-full",
-		"mt-1",
-	)
-
-	// Max height
-	if props.MaxHeight != "" {
-		classes = append(classes, "max-h-["+props.MaxHeight+"]")
-	} else {
-		classes = append(classes, "max-h-60")
-	}
-
-	classes = append(classes, "overflow-y-auto")
-
-	return strings.Join(classes, " ")
+// groupOptionsByGroup organizes options into groups for rendering
+func groupOptionsByGroup(options []SelectOption) map[string][]SelectOption {
+    grouped := make(map[string][]SelectOption)
+    
+    for _, option := range options {
+        group := option.Group
+        if group == "" {
+            group = "__ungrouped__"
+        }
+        grouped[group] = append(grouped[group], option)
+    }
+    
+    return grouped
 }
 
-// selectOptionClasses generates Tailwind CSS classes for dropdown options
-func selectOptionClasses(option SelectOption, isSelected bool) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes,
-		"relative",
-		"flex",
-		"w-full",
-		"cursor-default",
-		"select-none",
-		"items-center",
-		"rounded-sm",
-		"py-1.5",
-		"pl-8",
-		"pr-2",
-		"text-sm",
-		"outline-none",
-	)
-
-	// State classes
-	if isSelected {
-		classes = append(classes, "bg-accent", "text-accent-foreground")
-	} else {
-		classes = append(classes,
-			"hover:bg-accent",
-			"hover:text-accent-foreground",
-			"focus:bg-accent",
-			"focus:text-accent-foreground",
-		)
-	}
-
-	// Disabled state
-	if option.Disabled {
-		classes = append(classes, "pointer-events-none", "opacity-50")
-	}
-
-	return strings.Join(classes, " ")
+// hasGroups checks if any options have groups
+func hasGroups(options []SelectOption) bool {
+    for _, option := range options {
+        if option.Group != "" {
+            return true
+        }
+    }
+    return false
 }
 
-// isSelected checks if an option is selected (works for both single and multi-select)
-func isSelected(props SelectProps, value string) bool {
-	if props.Multiple {
-		for _, v := range props.Values {
-			if v == value {
-				return true
-			}
-		}
-		return false
-	}
-	return props.Value == value
+// renderOption renders a single option element
+templ renderOption(option SelectOption) {
+    <option 
+        value={ option.Value }
+        selected?={ option.Selected }
+        disabled?={ option.Disabled }
+    >
+        { option.Label }
+    </option>
 }
 
-// getDisplayValue returns the display value for the select trigger
-func getDisplayValue(props SelectProps) string {
-	if props.Multiple {
-		if len(props.Values) == 0 {
-			return props.Placeholder
-		} else if len(props.Values) == 1 {
-			for _, option := range props.Options {
-				if option.Value == props.Values[0] {
-					return option.Label
-				}
-			}
-		}
-		return fmt.Sprintf("%d items selected", len(props.Values))
-	} else {
-		if props.Value == "" {
-			return props.Placeholder
-		}
-		for _, option := range props.Options {
-			if option.Value == props.Value {
-				return option.Label
-			}
-		}
-	}
-	return props.Placeholder
+// renderOptGroup renders an optgroup with its options
+templ renderOptGroup(group string, options []SelectOption) {
+    <optgroup label={ group }>
+        for _, option := range options {
+            @renderOption(option)
+        }
+    </optgroup>
 }
 
-// generateAlpineData generates Alpine.js data object for the select component
-func generateAlpineData(props SelectProps) string {
-	return fmt.Sprintf(`{
-		open: false,
-		search: '',
-		selectedValues: %v,
-		multiple: %t,
-		searchable: %t,
-		toggle() {
-			if (!this.disabled) {
-				this.open = !this.open;
-			}
-		},
-		close() {
-			this.open = false;
-			this.search = '';
-		},
-		select(value) {
-			if (this.multiple) {
-				const index = this.selectedValues.indexOf(value);
-				if (index > -1) {
-					this.selectedValues.splice(index, 1);
-				} else {
-					this.selectedValues.push(value);
-				}
-			} else {
-				this.selectedValues = [value];
-				this.close();
-			}
-			this.updateModel();
-		},
-		clear() {
-			this.selectedValues = [];
-			this.updateModel();
-		},
-		updateModel() {
-			if (this.multiple) {
-				this.%s = this.selectedValues;
-			} else {
-				this.%s = this.selectedValues[0] || '';
-			}
-		},
-		isSelected(value) {
-			return this.selectedValues.includes(value);
-		},
-		filterOptions(options) {
-			if (!this.search) return options;
-			return options.filter(option => 
-				option.label.toLowerCase().includes(this.search.toLowerCase())
-			);
-		}
-	}`, 
-		formatValuesForAlpine(props), 
-		props.Multiple,
-		props.Searchable,
-		strings.TrimPrefix(props.AlpineModel, "x-model="),
-		strings.TrimPrefix(props.AlpineModel, "x-model="))
-}
-
-// formatValuesForAlpine formats the selected values for Alpine.js
-func formatValuesForAlpine(props SelectProps) string {
-	if props.Multiple {
-		values := make([]string, len(props.Values))
-		for i, v := range props.Values {
-			values[i] = fmt.Sprintf("'%s'", v)
-		}
-		return "[" + strings.Join(values, ",") + "]"
-	} else {
-		if props.Value != "" {
-			return fmt.Sprintf("['%s']", props.Value)
-		}
-		return "[]"
-	}
-}
-
-// Select renders an enhanced select component with multi-select and search capability
+// Select renders a pure presentation select atom
 templ Select(props SelectProps) {
-	<div
-		class={ selectClasses(props) }
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		x-data={ generateAlpineData(props) }
-		x-init="$watch('selectedValues', () => updateModel())"
-		@click.outside="close()"
-		@keydown.escape="close()"
-	>
-		<!-- Hidden input for form submission -->
-		if props.Multiple {
-			<input type="hidden" name={ props.Name } x-model="selectedValues.join(',')"/>
-		} else {
-			<input type="hidden" name={ props.Name } x-model="selectedValues[0] || ''"/>
-		}
-		
-		<!-- Select trigger -->
-		<div
-			class={ selectTriggerClasses(props) }
-			@click="toggle()"
-			@keydown.enter.prevent="toggle()"
-			@keydown.space.prevent="toggle()"
-			@keydown.arrow-down.prevent="open = true"
-			tabindex="0"
-			role="combobox"
-			aria-expanded="false"
-			x-bind:aria-expanded="open"
-			if props.Required {
-				aria-required="true"
-			}
-			if props.Error {
-				aria-invalid="true"
-			}
-		>
-			<span class="flex-1 text-left" x-text="selectedValues.length === 0 ? '{ props.Placeholder }' : (multiple && selectedValues.length > 1 ? selectedValues.length + ' items selected' : getOptionLabel(selectedValues[0]))">
-				{ getDisplayValue(props) }
-			</span>
-			
-			<!-- Clear button -->
-			if props.Clearable {
-				<button
-					type="button"
-					@click.stop="clear()"
-					x-show="selectedValues.length > 0"
-					class="flex items-center justify-center w-5 h-5 text-muted-foreground hover:text-foreground focus:outline-none"
-					aria-label="Clear selection"
-				>
-					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-					</svg>
-				</button>
-			}
-			
-			<!-- Dropdown arrow -->
-			<svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-			</svg>
-		</div>
-
-		<!-- Dropdown content -->
-		<div
-			class={ selectDropdownClasses(props) }
-			x-show="open"
-			x-transition
-			role="listbox"
-			if props.Multiple {
-				aria-multiselectable="true"
-			}
-		>
-			<!-- Search input -->
-			if props.Searchable {
-				<div class="p-1">
-					<input
-						type="text"
-						x-model="search"
-						placeholder="Search options..."
-						class="flex h-8 w-full rounded-sm border border-input bg-background px-2 py-1 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-						@keydown.enter.prevent
-						@keydown.space.stop
-					/>
-				</div>
-			}
-
-			<!-- Options list -->
-			<div class="p-1">
-				<!-- Template for options - would need to be rendered server-side with actual options -->
-				for _, option := range props.Options {
-					<div
-						class={ selectOptionClasses(option, isSelected(props, option.Value)) }
-						@click="select('{ option.Value }')"
-						@keydown.enter.prevent="select('{ option.Value }')"
-						@keydown.space.prevent="select('{ option.Value }')"
-						role="option"
-						x-bind:aria-selected="isSelected('{ option.Value }')"
-						tabindex="-1"
-						if option.Disabled {
-							aria-disabled="true"
-						}
-					>
-						<!-- Selection indicator -->
-						<span class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-							<svg 
-								class="h-4 w-4"
-								x-show="isSelected('{ option.Value }')"
-								fill="currentColor" 
-								viewBox="0 0 20 20"
-							>
-								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-							</svg>
-						</span>
-						
-						<!-- Option content -->
-						<div class="flex-1 min-w-0">
-							<div class="flex items-center gap-2">
-								if option.Icon != "" {
-									<span class="text-muted-foreground">
-										<span class="sr-only">{ option.Icon }</span>
-									</span>
-								}
-								<span class="truncate">{ option.Label }</span>
-							</div>
-							if option.Description != "" {
-								<p class="text-xs text-muted-foreground truncate">
-									{ option.Description }
-								</p>
-							}
-						</div>
-					</div>
-				}
-			</div>
-		</div>
-	</div>
-}
-
-// MultiSelect renders a multi-select component
-templ MultiSelect(props SelectProps) {
-	@Select(SelectProps{
-		ID:           props.ID,
-		Name:         props.Name,
-		Values:       props.Values,
-		Options:      props.Options,
-		Placeholder:  props.Placeholder,
-		Multiple:     true,
-		Searchable:   props.Searchable,
-		Clearable:    props.Clearable,
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		Error:        props.Error,
-		Class:        props.Class,
-		MaxHeight:    props.MaxHeight,
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-	})
+    <select {buildSelectAttributes(props)...}>
+        // Placeholder option
+        if props.Placeholder != "" && !props.Multiple {
+            <option value="" disabled selected?={ props.Value == "" }>
+                { props.Placeholder }
+            </option>
+        }
+        
+        // Render options with or without groups
+        if hasGroups(props.Options) {
+            // Render grouped options
+            for group, groupOptions := range groupOptionsByGroup(props.Options) {
+                if group == "__ungrouped__" {
+                    // Render ungrouped options directly
+                    for _, option := range groupOptions {
+                        @renderOption(option)
+                    }
+                } else {
+                    // Render as optgroup
+                    @renderOptGroup(group, groupOptions)
+                }
+            }
+        } else {
+            // Render all options directly
+            for _, option := range props.Options {
+                @renderOption(option)
+            }
+        }
+    </select>
 }

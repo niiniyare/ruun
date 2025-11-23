@@ -1,352 +1,206 @@
 package atoms
 
 import (
-	"strings"
+    "strconv"
+    "github.com/niiniyare/ruun/pkg/utils"
 )
 
 // RadioSize defines the size variants for radio buttons
 type RadioSize string
 
 const (
-	RadioSizeSM RadioSize = "sm"
-	RadioSizeMD RadioSize = "md"
-	RadioSizeLG RadioSize = "lg"
+    RadioSizeXS RadioSize = "xs"
+    RadioSizeSM RadioSize = "sm"
+    RadioSizeMD RadioSize = "md"
+    RadioSizeLG RadioSize = "lg"
+    RadioSizeXL RadioSize = "xl"
 )
 
 // RadioState defines the visual state of the radio button
 type RadioState string
 
 const (
-	RadioStateDefault RadioState = "default"
-	RadioStateError   RadioState = "error"
-	RadioStateSuccess RadioState = "success"
-	RadioStateWarning RadioState = "warning"
+    RadioStateDefault  RadioState = "default"
+    RadioStateError    RadioState = "error"
+    RadioStateSuccess  RadioState = "success"
+    RadioStateWarning  RadioState = "warning"
+    RadioStateDisabled RadioState = "disabled"
 )
 
-// RadioOption represents a single radio button option
-type RadioOption struct {
-	Value       string `json:"value"`
-	Label       string `json:"label"`
-	Description string `json:"description"`
-	Disabled    bool   `json:"disabled"`
-	Icon        string `json:"icon"`
-}
-
-// RadioProps defines the properties for the RadioGroup component
+// RadioProps defines all properties for the Radio atom
 type RadioProps struct {
-	ID           string
-	Name         string
-	Value        string // Selected value
-	Options      []RadioOption
-	Size         RadioSize
-	State        RadioState
-	Required     bool
-	Disabled     bool
-	Readonly     bool
-	Error        bool
-	Class        string
-	// Layout options
-	Inline       bool   // Horizontal vs vertical layout
-	Columns      int    // Number of columns for grid layout
-	// HTMX attributes
-	HXPost       string
-	HXGet        string
-	HXTarget     string
-	HXSwap       string
-	HXTrigger    string
-	// Alpine.js attributes
-	AlpineModel  string
-	AlpineChange string
-	AlpineBlur   string
-	AlpineFocus  string
+    // Core HTML attributes
+    ID      string `json:"id"`
+    Name    string `json:"name"`
+    Value   string `json:"value"`
+    Label   string `json:"label"`
+    Checked bool   `json:"checked"`
+    
+    // Constraints and validation
+    Required  bool `json:"required"`
+    Disabled  bool `json:"disabled"`
+    Readonly  bool `json:"readonly"`
+    AutoFocus bool `json:"autoFocus"`
+    
+    // Visual presentation (resolved externally)
+    Size      RadioSize  `json:"size"`
+    State     RadioState `json:"state"`
+    ClassName string     `json:"className"`
+    
+    // Event handlers (pre-resolved externally)
+    OnChange string `json:"onChange"`
+    OnBlur   string `json:"onBlur"`
+    OnFocus  string `json:"onFocus"`
+    OnClick  string `json:"onClick"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    AriaChecked     string `json:"ariaChecked"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// radioGroupClasses generates Tailwind CSS classes for the radio group container
-func radioGroupClasses(props RadioProps) string {
-	var classes []string
-
-	// Base container classes
-	classes = append(classes, "radio-group")
-
-	// Layout classes
-	if props.Inline {
-		classes = append(classes, "flex", "flex-wrap", "gap-4")
-	} else if props.Columns > 1 {
-		classes = append(classes, "grid", "gap-4")
-		switch props.Columns {
-		case 2:
-			classes = append(classes, "grid-cols-2")
-		case 3:
-			classes = append(classes, "grid-cols-3")
-		case 4:
-			classes = append(classes, "grid-cols-4")
-		default:
-			classes = append(classes, "grid-cols-2")
-		}
-	} else {
-		classes = append(classes, "space-y-3")
-	}
-
-	// State classes
-	if props.Disabled {
-		classes = append(classes, "opacity-50", "cursor-not-allowed")
-	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+// getRadioClasses builds the CSS class string using design tokens
+func getRadioClasses(props RadioProps) string {
+    return utils.TwMerge(
+        // Base class with design token references
+        "radio",
+        
+        // Size classes (map to design tokens)
+        "radio-"+string(props.Size),
+        
+        // State classes (map to design tokens)
+        "radio-"+string(props.State),
+        
+        // Layout utilities
+        utils.If(props.Disabled, "radio-disabled"),
+        utils.If(props.Readonly, "radio-readonly"),
+        utils.If(props.Checked, "radio-checked"),
+        
+        // Custom classes
+        props.ClassName,
+    )
 }
 
-// radioOptionClasses generates Tailwind CSS classes for individual radio options
-func radioOptionClasses(props RadioProps, option RadioOption) string {
-	var classes []string
-
-	// Base classes for the option container
-	classes = append(classes,
-		"radio-option",
-		"flex",
-		"items-start",
-		"gap-3",
-		"p-3",
-		"rounded-lg",
-		"border",
-		"transition-colors",
-		"cursor-pointer",
-		"hover:bg-accent",
-		"focus-within:ring-2",
-		"focus-within:ring-ring",
-		"focus-within:ring-offset-2",
-	)
-
-	// State-based styling
-	isSelected := props.Value == option.Value
-	if isSelected {
-		classes = append(classes,
-			"border-primary",
-			"bg-primary/5",
-		)
-	} else {
-		classes = append(classes,
-			"border-input",
-			"bg-background",
-		)
-	}
-
-	// Disabled state
-	if props.Disabled || option.Disabled {
-		classes = append(classes,
-			"opacity-50",
-			"cursor-not-allowed",
-			"hover:bg-background",
-		)
-	}
-
-	// Error state
-	if props.Error {
-		classes = append(classes, "border-destructive")
-	}
-
-	return strings.Join(classes, " ")
+// getRadioLabelClasses builds CSS for radio label
+func getRadioLabelClasses(props RadioProps) string {
+    return utils.TwMerge(
+        "radio-label",
+        utils.If(props.Disabled, "radio-label-disabled"),
+    )
 }
 
-// radioInputClasses generates Tailwind CSS classes for the radio input
-func radioInputClasses() string {
-	return strings.Join([]string{
-		"h-4",
-		"w-4",
-		"rounded-full",
-		"border",
-		"border-primary",
-		"text-primary",
-		"focus:ring-2",
-		"focus:ring-ring",
-		"focus:ring-offset-2",
-		"disabled:cursor-not-allowed",
-		"disabled:opacity-50",
-	}, " ")
+// buildRadioAttributes creates all HTML attributes for the radio
+func buildRadioAttributes(props RadioProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "type":  "radio",
+        "class": getRadioClasses(props),
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    if props.Value != "" {
+        attrs["value"] = props.Value
+    }
+    
+    // Boolean attributes
+    if props.Checked {
+        attrs["checked"] = "checked"
+    }
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.Readonly {
+        attrs["readonly"] = "readonly"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnClick != "" {
+        attrs["onclick"] = props.OnClick
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    if props.AriaChecked != "" {
+        attrs["aria-checked"] = props.AriaChecked
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
 }
 
-// RadioGroup renders an accessible radio button group component
-templ RadioGroup(props RadioProps) {
-	<div
-		class={ radioGroupClasses(props) }
-		if props.ID != "" {
-			id={ props.ID + "-group" }
-		}
-		role="radiogroup"
-		if props.Required {
-			aria-required="true"
-		}
-		if props.Error {
-			aria-invalid="true"
-		}
-	>
-		for _, option := range props.Options {
-			<label
-				class={ radioOptionClasses(props, option) }
-				for={ props.ID + "-" + option.Value }
-			>
-				<input
-					type="radio"
-					id={ props.ID + "-" + option.Value }
-					name={ props.Name }
-					value={ option.Value }
-					if props.Value == option.Value {
-						checked
-					}
-					if props.Required {
-						required
-					}
-					if props.Disabled || option.Disabled {
-						disabled
-					}
-					if props.Readonly {
-						readonly
-					}
-					class={ radioInputClasses() }
-					if props.HXPost != "" {
-						hx-post={ props.HXPost }
-					}
-					if props.HXGet != "" {
-						hx-get={ props.HXGet }
-					}
-					if props.HXTarget != "" {
-						hx-target={ props.HXTarget }
-					}
-					if props.HXSwap != "" {
-						hx-swap={ props.HXSwap }
-					}
-					if props.HXTrigger != "" {
-						hx-trigger={ props.HXTrigger }
-					}
-					if props.AlpineModel != "" {
-						x-model={ props.AlpineModel }
-					}
-					if props.AlpineChange != "" {
-						x-on:change={ props.AlpineChange }
-					}
-					if props.AlpineBlur != "" {
-						x-on:blur={ props.AlpineBlur }
-					}
-					if props.AlpineFocus != "" {
-						x-on:focus={ props.AlpineFocus }
-					}
-				/>
-				<div class="flex-1 min-w-0">
-					<div class="flex items-center gap-2">
-						if option.Icon != "" {
-							<span class="text-muted-foreground">
-								<!-- Icon would be rendered here -->
-								<span class="sr-only">{ option.Icon }</span>
-							</span>
-						}
-						<span class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-							{ option.Label }
-						</span>
-					</div>
-					if option.Description != "" {
-						<p class="text-xs text-muted-foreground mt-1">
-							{ option.Description }
-						</p>
-					}
-				</div>
-			</label>
-		}
-	</div>
+// buildRadioLabelAttributes creates all HTML attributes for the label
+func buildRadioLabelAttributes(props RadioProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class": getRadioLabelClasses(props),
+    }
+    
+    if props.ID != "" {
+        attrs["for"] = props.ID
+    }
+    
+    return attrs
 }
 
-// RadioGroupInline renders radio buttons in a horizontal layout
-templ RadioGroupInline(props RadioProps) {
-	@RadioGroup(RadioProps{
-		ID:           props.ID,
-		Name:         props.Name,
-		Value:        props.Value,
-		Options:      props.Options,
-		Required:     props.Required,
-		Disabled:     props.Disabled,
-		Readonly:     props.Readonly,
-		Error:        props.Error,
-		Size:         props.Size,
-		State:        props.State,
-		Class:    props.Class,
-		Inline:       true,
-		HXPost:       props.HXPost,
-		HXGet:        props.HXGet,
-		HXTarget:     props.HXTarget,
-		HXSwap:       props.HXSwap,
-		HXTrigger:    props.HXTrigger,
-		AlpineModel:  props.AlpineModel,
-		AlpineChange: props.AlpineChange,
-		AlpineBlur:   props.AlpineBlur,
-		AlpineFocus:  props.AlpineFocus,
-	})
+// Radio renders a pure presentation radio atom
+templ Radio(props RadioProps) {
+    if props.Label != "" {
+        <label {buildRadioLabelAttributes(props)...}>
+            <input {buildRadioAttributes(props)...} />
+            <span class="radio-label-text">{ props.Label }</span>
+        </label>
+    } else {
+        <input {buildRadioAttributes(props)...} />
+    }
 }
-
-// Builder Pattern (functional options)
-type RadioConfig func(*RadioProps)
-
-func NewRadioGroup(opts ...RadioConfig) RadioProps {
-	props := RadioProps{
-		Size:  RadioSizeMD,
-		State: RadioStateDefault,
-	}
-	for _, opt := range opts {
-		opt(&props)
-	}
-	return props
-}
-
-func WithRadioSize(size RadioSize) RadioConfig {
-	return func(p *RadioProps) { p.Size = size }
-}
-
-func WithRadioState(state RadioState) RadioConfig {
-	return func(p *RadioProps) { p.State = state }
-}
-
-func WithRadioName(name string) RadioConfig {
-	return func(p *RadioProps) { p.Name = name }
-}
-
-func WithRadioValue(value string) RadioConfig {
-	return func(p *RadioProps) { p.Value = value }
-}
-
-func WithRadioOptions(options []RadioOption) RadioConfig {
-	return func(p *RadioProps) { p.Options = options }
-}
-
-func WithRadioID(id string) RadioConfig {
-	return func(p *RadioProps) { p.ID = id }
-}
-
-func AsRadioRequired() RadioConfig {
-	return func(p *RadioProps) { p.Required = true }
-}
-
-func AsRadioDisabled() RadioConfig {
-	return func(p *RadioProps) { p.Disabled = true }
-}
-
-func AsRadioInline() RadioConfig {
-	return func(p *RadioProps) { p.Inline = true }
-}
-
-func WithRadioClass(class string) RadioConfig {
-	return func(p *RadioProps) { p.Class = class }
-}
-
-// Key Improvements in this refactored version:
-// 1. Pure Presentation: No business logic, just visual rendering and state management
-// 2. Compiled Theme Classes: Uses "radio", "radio-error", etc. from compiled CSS
-// 3. Utils Integration: TwMerge for class conflicts, If for conditionals
-// 4. Clean Props Interface: Focused on presentation concerns only
-// 5. Visual State Management: Simple states (error, success, warning, default)
-// 6. Atomic Design Compliant: Single purpose, indivisible radio component
-// 7. Icon Integration: Uses Icon atom for consistent iconography
-// 8. Ready for Molecules: Can be easily composed into FormField molecules
-// 9. Size Variants: Supports sm, md, lg sizing through compiled theme classes
-// 10. Accessibility: Proper ARIA attributes and radiogroup semantics
