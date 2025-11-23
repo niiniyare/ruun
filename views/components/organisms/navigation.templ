@@ -1,0 +1,667 @@
+package organisms
+
+import (
+	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+)
+
+// NavigationType defines the type of navigation
+type NavigationType string
+
+const (
+	NavigationSidebar    NavigationType = "sidebar"
+	NavigationTopbar     NavigationType = "topbar"
+	NavigationBreadcrumb NavigationType = "breadcrumb"
+	NavigationTabs       NavigationType = "tabs"
+	NavigationSteps      NavigationType = "steps"
+)
+
+// NavigationSize defines the size variants
+type NavigationSize string
+
+const (
+	NavigationSizeSM NavigationSize = "sm"
+	NavigationSizeMD NavigationSize = "md"
+	NavigationSizeLG NavigationSize = "lg"
+)
+
+// NavigationItem represents a single navigation item
+type NavigationItem struct {
+	// Core properties
+	ID          string `json:"id"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	Icon        string `json:"icon"`
+	Badge       string `json:"badge"`
+	
+	// States
+	Active   bool `json:"active"`
+	Disabled bool `json:"disabled"`
+	
+	// Permissions
+	Permissions []string `json:"permissions"`
+	Roles       []string `json:"roles"`
+	Condition   string   `json:"condition"`
+	
+	// Event handlers
+	OnClick    string `json:"onClick"`
+	HXGet      string `json:"hxGet"`
+	HXPost     string `json:"hxPost"`
+	HXTarget   string `json:"hxTarget"`
+	HXSwap     string `json:"hxSwap"`
+	HXTrigger  string `json:"hxTrigger"`
+	AlpineClick string `json:"alpineClick"`
+	
+	// Nested items
+	Items []NavigationItem `json:"items"`
+}
+
+// NavigationSearch defines search configuration
+type NavigationSearch struct {
+	Enabled     bool   `json:"enabled"`
+	Placeholder string `json:"placeholder"`
+	MinLength   int    `json:"minLength"`
+	Debounce    int    `json:"debounce"`
+	Query       string `json:"query"`
+	Loading     bool   `json:"loading"`
+	Visible     bool   `json:"visible"`
+}
+
+// NavigationMobileMenu defines mobile menu configuration
+type NavigationMobileMenu struct {
+	Enabled     bool   `json:"enabled"`
+	Position    string `json:"position"`
+	Overlay     bool   `json:"overlay"`
+	CloseButton bool   `json:"closeButton"`
+	Swipeable   bool   `json:"swipeable"`
+}
+
+// BreadcrumbItem represents a breadcrumb navigation item
+type BreadcrumbItem struct {
+	Text      string `json:"text"`
+	URL       string `json:"url"`
+	Clickable bool   `json:"clickable"`
+	Active    bool   `json:"active"`
+}
+
+// User represents the current user context
+type User struct {
+	ID          string   `json:"id"`
+	DisplayName string   `json:"displayName"`
+	Email       string   `json:"email"`
+	Avatar      string   `json:"avatar"`
+	Roles       []string `json:"roles"`
+	Permissions []string `json:"permissions"`
+}
+
+// AuthContext represents the authentication context
+type AuthContext struct {
+	User          *User `json:"user"`
+	Authenticated bool  `json:"authenticated"`
+	CSRF          string `json:"csrf"`
+}
+
+// NavigationProps defines all properties for the Navigation organism
+type NavigationProps struct {
+	// Core navigation properties
+	Type        NavigationType `json:"type"`
+	Size        NavigationSize `json:"size"`
+	Title       string         `json:"title"`
+	Logo        string         `json:"logo"`
+	Variant     string         `json:"variant"`
+	ClassName   string         `json:"className"`
+	
+	// Layout properties
+	Collapsible bool   `json:"collapsible"`
+	Width       string `json:"width"`
+	Position    string `json:"position"`
+	
+	// Navigation items
+	Items       []NavigationItem `json:"items"`
+	Breadcrumbs []BreadcrumbItem `json:"breadcrumbs"`
+	
+	// User interface
+	UserName   string           `json:"userName"`
+	UserAvatar string           `json:"userAvatar"`
+	UserMenu   []NavigationItem `json:"userMenu"`
+	
+	// Features
+	Search     NavigationSearch     `json:"search"`
+	MobileMenu NavigationMobileMenu `json:"mobileMenu"`
+	
+	// Authentication
+	AuthContext *AuthContext `json:"authContext"`
+	
+	// Tab-specific properties
+	TabVariant string `json:"tabVariant"`
+	
+	// Step-specific properties
+	CurrentStep int `json:"currentStep"`
+	TotalSteps  int `json:"totalSteps"`
+	
+	// Breadcrumb-specific properties
+	Separator string `json:"separator"`
+	
+	// Theme properties
+	ThemeID       string            `json:"themeId"`
+	DarkMode      bool              `json:"darkMode"`
+	TokenOverrides map[string]string `json:"tokenOverrides"`
+	
+	// ARIA accessibility
+	AriaLabel  string            `json:"ariaLabel"`
+	AriaLabels map[string]string `json:"ariaLabels"`
+}
+
+// getNavigationClasses builds the CSS class string for navigation
+func getNavigationClasses(props NavigationProps) string {
+	return utils.TwMerge(
+		"navigation",
+		fmt.Sprintf("navigation-%s", string(props.Type)),
+		fmt.Sprintf("navigation-%s", string(props.Size)),
+		utils.If(props.Variant != "", fmt.Sprintf("navigation-%s--%s", string(props.Type), props.Variant)),
+		utils.If(props.Collapsible, "navigation--collapsible"),
+		utils.If(props.Search.Enabled, "navigation--searchable"),
+		utils.If(props.MobileMenu.Enabled, "navigation--mobile"),
+		utils.If(props.DarkMode, "navigation--dark"),
+		props.ClassName,
+	)
+}
+
+// getNavigationItemClasses builds CSS classes for navigation items
+func getNavigationItemClasses(item NavigationItem) string {
+	return utils.TwMerge(
+		"nav-menu-item",
+		utils.If(item.Active, "nav-menu-item--active"),
+		utils.If(item.Disabled, "nav-menu-item--disabled"),
+		utils.If(len(item.Items) > 0, "nav-menu-item--has-children"),
+	)
+}
+
+// Navigation renders the main navigation organism
+templ Navigation(props NavigationProps) {
+	<nav 
+		class={ getNavigationClasses(props) }
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		x-data="{ 
+			sidebarCollapsed: false, 
+			mobileMenuOpen: false, 
+			searchOpen: false, 
+			searchQuery: '',
+			toggleSidebar() { this.sidebarCollapsed = !this.sidebarCollapsed },
+			toggleMobileMenu() { this.mobileMenuOpen = !this.mobileMenuOpen },
+			toggleSearch() { this.searchOpen = !this.searchOpen }
+		}"
+	>
+		switch props.Type {
+		case NavigationSidebar:
+			@navigationSidebar(props)
+		case NavigationTopbar:
+			@navigationTopbar(props)
+		case NavigationBreadcrumb:
+			@navigationBreadcrumb(props)
+		case NavigationTabs:
+			@navigationTabs(props)
+		case NavigationSteps:
+			@navigationSteps(props)
+		default:
+			@navigationSidebar(props)
+		}
+	</nav>
+}
+
+// navigationSidebar renders the sidebar navigation
+templ navigationSidebar(props NavigationProps) {
+	<div class="navigation-sidebar-container">
+		if props.Logo != "" || props.Title != "" {
+			<div class="navigation-header">
+				if props.Logo != "" {
+					<img src={ props.Logo } alt="Logo" class="navigation-logo" />
+				}
+				if props.Title != "" {
+					<span class="navigation-title">{ props.Title }</span>
+				}
+				if props.Collapsible {
+					@atoms.Button(atoms.ButtonProps{
+						Variant: atoms.ButtonVariantGhost,
+						Size:    atoms.ButtonSizeSM,
+						OnClick: "toggleSidebar()",
+						AriaLabel: "Toggle sidebar",
+					}) {
+						@atoms.Icon(atoms.IconProps{
+							Name: "menu",
+							Size: atoms.IconSizeSM,
+						})
+					}
+				}
+			</div>
+		}
+		
+		if props.Search.Enabled {
+			@navigationSearch(props.Search)
+		}
+		
+		<div class="navigation-menu">
+			for _, item := range props.Items {
+				@navigationMenuItem(item, 0)
+			}
+		</div>
+		
+		if props.AuthContext != nil && props.AuthContext.Authenticated {
+			@navigationUserSection(props)
+		}
+	</div>
+}
+
+// navigationTopbar renders the topbar navigation
+templ navigationTopbar(props NavigationProps) {
+	<div class="navigation-topbar-container">
+		<div class="navigation-topbar-left">
+			if props.Logo != "" {
+				<img src={ props.Logo } alt="Logo" class="navigation-logo" />
+			}
+			if props.Title != "" {
+				<span class="navigation-title">{ props.Title }</span>
+			}
+			
+			<div class="navigation-menu navigation-menu--horizontal">
+				for _, item := range props.Items {
+					@navigationMenuItem(item, 0)
+				}
+			</div>
+		</div>
+		
+		<div class="navigation-topbar-right">
+			if props.Search.Enabled {
+				@navigationSearch(props.Search)
+			}
+			
+			if props.AuthContext != nil && props.AuthContext.Authenticated {
+				@navigationUserMenu(props)
+			}
+			
+			if props.MobileMenu.Enabled {
+				@atoms.Button(atoms.ButtonProps{
+					Variant: atoms.ButtonVariantGhost,
+					Size:    atoms.ButtonSizeSM,
+					OnClick: "toggleMobileMenu()",
+					AriaLabel: "Toggle mobile menu",
+					ClassName: "navigation-mobile-toggle",
+				}) {
+					@atoms.Icon(atoms.IconProps{
+						Name: "menu",
+						Size: atoms.IconSizeSM,
+					})
+				}
+			}
+		</div>
+	</div>
+	
+	if props.MobileMenu.Enabled {
+		@navigationMobileMenu(props)
+	}
+}
+
+// navigationBreadcrumb renders breadcrumb navigation
+templ navigationBreadcrumb(props NavigationProps) {
+	<div class="navigation-breadcrumb-container">
+		for i, crumb := range props.Breadcrumbs {
+			if i > 0 {
+				<span class="breadcrumb-separator">{ utils.IfElse(props.Separator != "", props.Separator, "/") }</span>
+			}
+			
+			if crumb.Clickable && crumb.URL != "" {
+				<a href={ crumb.URL } class={ utils.TwMerge("breadcrumb-item", utils.If(crumb.Active, "breadcrumb-item--active")) }>
+					{ crumb.Text }
+				</a>
+			} else {
+				<span class={ utils.TwMerge("breadcrumb-item", utils.If(crumb.Active, "breadcrumb-item--active")) }>
+					{ crumb.Text }
+				</span>
+			}
+		}
+	</div>
+}
+
+// navigationTabs renders tab navigation
+templ navigationTabs(props NavigationProps) {
+	<div class={ utils.TwMerge("navigation-tabs-container", utils.If(props.TabVariant != "", fmt.Sprintf("navigation-tabs--%s", props.TabVariant))) }>
+		for _, item := range props.Items {
+			if item.URL != "" {
+				<a 
+					href={ item.URL } 
+					class={ utils.TwMerge("nav-tab-item", utils.If(item.Active, "nav-tab-item--active")) }
+				>
+					if item.Icon != "" {
+						@atoms.Icon(atoms.IconProps{
+							Name: item.Icon,
+							Size: atoms.IconSizeSM,
+							ClassName: "nav-tab-icon",
+						})
+					}
+					<span class="nav-tab-text">{ item.Text }</span>
+				</a>
+			} else {
+				<button 
+					class={ utils.TwMerge("nav-tab-item", utils.If(item.Active, "nav-tab-item--active")) }
+					if item.OnClick != "" {
+						x-on:click={ item.OnClick }
+					}
+					if item.AlpineClick != "" {
+						x-on:click={ item.AlpineClick }
+					}
+				>
+					if item.Icon != "" {
+						@atoms.Icon(atoms.IconProps{
+							Name: item.Icon,
+							Size: atoms.IconSizeSM,
+							ClassName: "nav-tab-icon",
+						})
+					}
+					<span class="nav-tab-text">{ item.Text }</span>
+				</button>
+			}
+		}
+	</div>
+}
+
+// navigationSteps renders step navigation
+templ navigationSteps(props NavigationProps) {
+	<div class="navigation-steps-container">
+		<div class="navigation-steps-progress">
+			<div 
+				class="navigation-steps-progress-bar" 
+				style={ fmt.Sprintf("width: %d%%", (props.CurrentStep * 100) / props.TotalSteps) }
+			></div>
+		</div>
+		
+		<div class="navigation-steps-items">
+			for i, item := range props.Items {
+				<div class={ utils.TwMerge(
+					"nav-step-item",
+					utils.If(i+1 <= props.CurrentStep, "nav-step-item--completed"),
+					utils.If(i+1 == props.CurrentStep, "nav-step-item--current"),
+				) }>
+					<div class="nav-step-indicator">
+						<span class="nav-step-number">{ fmt.Sprintf("%d", i+1) }</span>
+					</div>
+					<div class="nav-step-content">
+						<span class="nav-step-text">{ item.Text }</span>
+						if item.Description != "" {
+							<span class="nav-step-description">{ item.Description }</span>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// navigationMenuItem renders a single navigation menu item
+templ navigationMenuItem(item NavigationItem, depth int) {
+	<div class={ utils.TwMerge(getNavigationItemClasses(item), fmt.Sprintf("nav-menu-item--depth-%d", depth)) }>
+		if len(item.Items) > 0 {
+			<!-- Submenu item -->
+			<div 
+				class="nav-menu-item-trigger"
+				x-data="{ open: false }"
+				x-on:click="open = !open"
+			>
+				@navigationMenuItemContent(item)
+				@atoms.Icon(atoms.IconProps{
+					Name: "chevron-down",
+					Size: atoms.IconSizeXS,
+					ClassName: "nav-menu-item-chevron",
+				})
+			</div>
+			<div 
+				class="nav-menu-submenu"
+				x-show="open"
+				x-transition
+			>
+				for _, subItem := range item.Items {
+					@navigationMenuItem(subItem, depth+1)
+				}
+			</div>
+		} else if item.URL != "" {
+			<!-- Link item -->
+			<a 
+				href={ item.URL }
+				class="nav-menu-item-link"
+				if item.HXGet != "" {
+					hx-get={ item.HXGet }
+				}
+				if item.HXPost != "" {
+					hx-post={ item.HXPost }
+				}
+				if item.HXTarget != "" {
+					hx-target={ item.HXTarget }
+				}
+				if item.HXSwap != "" {
+					hx-swap={ item.HXSwap }
+				}
+				if item.HXTrigger != "" {
+					hx-trigger={ item.HXTrigger }
+				}
+			>
+				@navigationMenuItemContent(item)
+			</a>
+		} else {
+			<!-- Button item -->
+			<button 
+				class="nav-menu-item-button"
+				if item.OnClick != "" {
+					x-on:click={ item.OnClick }
+				}
+				if item.AlpineClick != "" {
+					x-on:click={ item.AlpineClick }
+				}
+				if item.HXPost != "" {
+					hx-post={ item.HXPost }
+				}
+				if item.HXGet != "" {
+					hx-get={ item.HXGet }
+				}
+				if item.HXTarget != "" {
+					hx-target={ item.HXTarget }
+				}
+				if item.HXSwap != "" {
+					hx-swap={ item.HXSwap }
+				}
+				if item.HXTrigger != "" {
+					hx-trigger={ item.HXTrigger }
+				}
+			>
+				@navigationMenuItemContent(item)
+			</button>
+		}
+	</div>
+}
+
+// navigationMenuItemContent renders the content of a menu item
+templ navigationMenuItemContent(item NavigationItem) {
+	if item.Icon != "" {
+		@atoms.Icon(atoms.IconProps{
+			Name: item.Icon,
+			Size: atoms.IconSizeSM,
+			ClassName: "nav-menu-item-icon",
+		})
+	}
+	
+	<span class="nav-menu-item-text">{ item.Text }</span>
+	
+	if item.Description != "" {
+		<span class="nav-menu-item-description">{ item.Description }</span>
+	}
+	
+	if item.Badge != "" {
+		@atoms.Badge(atoms.BadgeProps{
+			Text:    item.Badge,
+			Variant: atoms.BadgeVariantSecondary,
+			Size:    atoms.BadgeSizeXS,
+			ClassName: "nav-menu-item-badge",
+		})
+	}
+}
+
+// navigationSearch renders the search component
+templ navigationSearch(search NavigationSearch) {
+	<div class="navigation-search-container">
+		<div class="navigation-search-input-group">
+			<input
+				type="text"
+				class="navigation-search-input"
+				placeholder={ utils.IfElse(search.Placeholder != "", search.Placeholder, "Search...") }
+				x-model="searchQuery"
+				x-on:input.debounce.300ms="performSearch()"
+				x-on:keydown.slash.window.prevent="$refs.searchInput.focus()"
+				x-on:keydown.escape="searchOpen = false; searchQuery = ''"
+				x-ref="searchInput"
+			/>
+			@atoms.Icon(atoms.IconProps{
+				Name: "search",
+				Size: atoms.IconSizeSM,
+				ClassName: "navigation-search-icon",
+			})
+		</div>
+		
+		<div 
+			class="navigation-search-results"
+			x-show="searchQuery.length > 0"
+			x-transition
+		>
+			<!-- Search results would be populated here -->
+			<div class="navigation-search-empty">
+				<span>No results found</span>
+			</div>
+		</div>
+	</div>
+}
+
+// navigationUserSection renders the user section for sidebar
+templ navigationUserSection(props NavigationProps) {
+	<div class="navigation-user-section">
+		<div class="navigation-user-info">
+			if props.UserAvatar != "" {
+				<img src={ props.UserAvatar } alt="User avatar" class="navigation-user-avatar" />
+			} else {
+				@atoms.Icon(atoms.IconProps{
+					Name: "user",
+					Size: atoms.IconSizeMD,
+					ClassName: "navigation-user-avatar-icon",
+				})
+			}
+			
+			<div class="navigation-user-details">
+				<span class="navigation-user-name">{ props.UserName }</span>
+				if props.AuthContext != nil && props.AuthContext.User != nil {
+					<span class="navigation-user-email">{ props.AuthContext.User.Email }</span>
+				}
+			</div>
+		</div>
+		
+		if len(props.UserMenu) > 0 {
+			<div class="navigation-user-menu">
+				for _, item := range props.UserMenu {
+					@navigationMenuItem(item, 0)
+				}
+			</div>
+		}
+	</div>
+}
+
+// navigationUserMenu renders the user menu for topbar
+templ navigationUserMenu(props NavigationProps) {
+	<div class="navigation-user-menu-container" x-data="{ open: false }">
+		<button 
+			class="navigation-user-menu-trigger"
+			x-on:click="open = !open"
+			x-on:click.away="open = false"
+		>
+			if props.UserAvatar != "" {
+				<img src={ props.UserAvatar } alt="User avatar" class="navigation-user-avatar" />
+			} else {
+				@atoms.Icon(atoms.IconProps{
+					Name: "user",
+					Size: atoms.IconSizeSM,
+					ClassName: "navigation-user-avatar-icon",
+				})
+			}
+			<span class="navigation-user-name">{ props.UserName }</span>
+			@atoms.Icon(atoms.IconProps{
+				Name: "chevron-down",
+				Size: atoms.IconSizeXS,
+				ClassName: "navigation-user-menu-chevron",
+			})
+		</button>
+		
+		<div 
+			class="navigation-user-menu-dropdown"
+			x-show="open"
+			x-transition
+		>
+			for _, item := range props.UserMenu {
+				@molecules.MenuItem(molecules.MenuItemProps{
+					Type: molecules.MenuItemTypeLink,
+					Text: item.Text,
+					URL:  item.URL,
+					Icon: item.Icon,
+					OnClick: item.OnClick,
+					HXPost: item.HXPost,
+					HXGet: item.HXGet,
+					HXTarget: item.HXTarget,
+					HXSwap: item.HXSwap,
+					AlpineClick: item.AlpineClick,
+				})
+			}
+		</div>
+	</div>
+}
+
+// navigationMobileMenu renders the mobile menu
+templ navigationMobileMenu(props NavigationProps) {
+	<div 
+		class="navigation-mobile-menu"
+		x-show="mobileMenuOpen"
+		x-transition
+	>
+		if props.MobileMenu.Overlay {
+			<div 
+				class="navigation-mobile-overlay"
+				x-on:click="mobileMenuOpen = false"
+			></div>
+		}
+		
+		<div class="navigation-mobile-menu-content">
+			if props.MobileMenu.CloseButton {
+				<div class="navigation-mobile-header">
+					@atoms.Button(atoms.ButtonProps{
+						Variant: atoms.ButtonVariantGhost,
+						Size:    atoms.ButtonSizeSM,
+						OnClick: "mobileMenuOpen = false",
+						AriaLabel: "Close mobile menu",
+					}) {
+						@atoms.Icon(atoms.IconProps{
+							Name: "x",
+							Size: atoms.IconSizeSM,
+						})
+					}
+				</div>
+			}
+			
+			<div class="navigation-mobile-menu-items">
+				for _, item := range props.Items {
+					@navigationMenuItem(item, 0)
+				}
+			</div>
+			
+			if props.AuthContext != nil && props.AuthContext.Authenticated {
+				@navigationUserSection(props)
+			}
+		</div>
+	</div>
+}

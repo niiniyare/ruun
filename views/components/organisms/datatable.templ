@@ -1,0 +1,1092 @@
+package organisms
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+	"github.com/niiniyare/ruun/pkg/utils"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+)
+
+// Helper function for min calculation
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// DataTableVariant defines the visual style variants
+type DataTableVariant string
+
+const (
+	DataTableDefault  DataTableVariant = "default"
+	DataTableBordered DataTableVariant = "bordered"
+	DataTableStriped  DataTableVariant = "striped"
+	DataTableHover    DataTableVariant = "hover"
+	DataTableCompact  DataTableVariant = "compact"
+)
+
+// DataTableSize defines the size variants
+type DataTableSize string
+
+const (
+	DataTableSizeSM DataTableSize = "sm"
+	DataTableSizeMD DataTableSize = "md"
+	DataTableSizeLG DataTableSize = "lg"
+)
+
+// DataTableDensity defines the row density variants
+type DataTableDensity string
+
+const (
+	DataTableDensityComfortable DataTableDensity = "comfortable"
+	DataTableDensityCompact     DataTableDensity = "compact"
+	DataTableDensityCondensed   DataTableDensity = "condensed"
+)
+
+// ColumnType defines the type of column for rendering
+type ColumnType string
+
+const (
+	ColumnTypeText     ColumnType = "text"
+	ColumnTypeNumber   ColumnType = "number"
+	ColumnTypeDate     ColumnType = "date"
+	ColumnTypeBadge    ColumnType = "badge"
+	ColumnTypeProgress ColumnType = "progress"
+	ColumnTypeImage    ColumnType = "image"
+	ColumnTypeLink     ColumnType = "link"
+	ColumnTypeButton   ColumnType = "button"
+	ColumnTypeActions  ColumnType = "actions"
+)
+
+// ExportFormat defines supported export formats
+type ExportFormat string
+
+const (
+	ExportCSV   ExportFormat = "csv"
+	ExportExcel ExportFormat = "excel"
+	ExportPDF   ExportFormat = "pdf"
+)
+
+// DataTableColumn represents a table column configuration
+type DataTableColumn struct {
+	// Core properties
+	Key           string `json:"key"`
+	Title         string `json:"title"`
+	Type          ColumnType `json:"type"`
+	Width         string `json:"width"`
+	MinWidth      string `json:"minWidth"`
+	MaxWidth      string `json:"maxWidth"`
+	
+	// Features
+	Sortable      bool `json:"sortable"`
+	Searchable    bool `json:"searchable"`
+	Filterable    bool `json:"filterable"`
+	Resizable     bool `json:"resizable"`
+	Visible       bool `json:"visible"`
+	Clickable     bool `json:"clickable"`
+	
+	// Appearance
+	Align         string `json:"align"`
+	Format        string `json:"format"`
+	ClassName     string `json:"className"`
+	HeaderClass   string `json:"headerClass"`
+	CellClass     string `json:"cellClass"`
+	
+	// Type-specific configurations
+	BadgeMap      map[string]atoms.BadgeVariant `json:"badgeMap"`
+	CurrencyCode  string `json:"currencyCode"`
+	Precision     int    `json:"precision"`
+	DateFormat    string `json:"dateFormat"`
+	
+	// Actions for this column
+	ActionItems   []molecules.MenuItemProps `json:"actionItems"`
+	OnClick       string `json:"onClick"`
+}
+
+// DataTableRow represents a table row with data and metadata
+type DataTableRow struct {
+	// Core data
+	ID       string         `json:"id"`
+	Data     map[string]any `json:"data"`
+	
+	// State
+	Selected bool `json:"selected"`
+	Expanded bool `json:"expanded"`
+	Disabled bool `json:"disabled"`
+	
+	// Appearance
+	Class    string `json:"class"`
+	
+	// Row-specific actions
+	Actions  []molecules.MenuItemProps `json:"actions"`
+	
+	// Additional metadata
+	Meta     map[string]any `json:"meta"`
+}
+
+// DataTableSearch defines search configuration
+type DataTableSearch struct {
+	Enabled       bool     `json:"enabled"`
+	Placeholder   string   `json:"placeholder"`
+	Value         string   `json:"value"`
+	Columns       []string `json:"columns"`
+	CaseSensitive bool     `json:"caseSensitive"`
+	MinLength     int      `json:"minLength"`
+	Delay         int      `json:"delay"`
+	Highlight     bool     `json:"highlight"`
+	ServerSide    bool     `json:"serverSide"`
+	Advanced      bool     `json:"advanced"`
+}
+
+// DataTablePagination defines pagination configuration
+type DataTablePagination struct {
+	Enabled         bool  `json:"enabled"`
+	CurrentPage     int   `json:"currentPage"`
+	PageSize        int   `json:"pageSize"`
+	TotalPages      int   `json:"totalPages"`
+	TotalItems      int   `json:"totalItems"`
+	PageSizeOptions []int `json:"pageSizeOptions"`
+	ShowTotal       bool  `json:"showTotal"`
+	ShowPageSize    bool  `json:"showPageSize"`
+	ShowQuickJump   bool  `json:"showQuickJump"`
+	ServerSide      bool  `json:"serverSide"`
+	Compact         bool  `json:"compact"`
+}
+
+// DataTableAction defines table-level actions
+type DataTableAction struct {
+	ID          string              `json:"id"`
+	Text        string              `json:"text"`
+	Icon        string              `json:"icon"`
+	Variant     atoms.ButtonVariant `json:"variant"`
+	Size        atoms.ButtonSize    `json:"size"`
+	Position    string              `json:"position"`
+	OnClick     string              `json:"onClick"`
+	HXGet       string              `json:"hxGet"`
+	HXPost      string              `json:"hxPost"`
+	HXTarget    string              `json:"hxTarget"`
+	HXSwap      string              `json:"hxSwap"`
+	AlpineClick string              `json:"alpineClick"`
+	Condition   string              `json:"condition"`
+}
+
+// DataTableBulkAction defines bulk actions for selected rows
+type DataTableBulkAction struct {
+	ID          string              `json:"id"`
+	Text        string              `json:"text"`
+	Icon        string              `json:"icon"`
+	Variant     atoms.ButtonVariant `json:"variant"`
+	Destructive bool                `json:"destructive"`
+	Confirm     bool                `json:"confirm"`
+	OnClick     string              `json:"onClick"`
+}
+
+// DataTableExport defines export configuration
+type DataTableExport struct {
+	Enabled    bool           `json:"enabled"`
+	Formats    []ExportFormat `json:"formats"`
+	Filename   string         `json:"filename"`
+	AllData    bool           `json:"allData"`
+	ServerSide bool           `json:"serverSide"`
+}
+
+// DataTableFilter defines column-specific filters
+type DataTableFilter struct {
+	Column    string   `json:"column"`
+	Type      string   `json:"type"`
+	Value     string   `json:"value"`
+	Options   []string `json:"options"`
+	Multiple  bool     `json:"multiple"`
+	ServerSide bool    `json:"serverSide"`
+}
+
+// DataTableProps defines all properties for the DataTable organism
+type DataTableProps struct {
+	// Core configuration
+	ID          string           `json:"id"`
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	Variant     DataTableVariant `json:"variant"`
+	Size        DataTableSize    `json:"size"`
+	Density     DataTableDensity `json:"density"`
+	ClassName   string           `json:"className"`
+	
+	// Data
+	Columns     []DataTableColumn `json:"columns"`
+	Rows        []DataTableRow    `json:"rows"`
+	
+	// Features
+	Selectable  bool `json:"selectable"`
+	MultiSelect bool `json:"multiSelect"`
+	Sortable    bool `json:"sortable"`
+	Filterable  bool `json:"filterable"`
+	Resizable   bool `json:"resizable"`
+	Expandable  bool `json:"expandable"`
+	
+	// Search and filtering
+	Search      DataTableSearch   `json:"search"`
+	Filters     []DataTableFilter `json:"filters"`
+	
+	// Pagination
+	Pagination  DataTablePagination `json:"pagination"`
+	
+	// Actions
+	Actions     []DataTableAction     `json:"actions"`
+	BulkActions []DataTableBulkAction `json:"bulkActions"`
+	RowActions  []DataTableAction     `json:"rowActions"`
+	
+	// Export
+	Export      DataTableExport `json:"export"`
+	
+	// Performance
+	Virtualized bool `json:"virtualized"`
+	LazyLoad    bool `json:"lazyLoad"`
+	CacheData   bool `json:"cacheData"`
+	
+	// HTMX integration
+	HXGet       string `json:"hxGet"`
+	HXPost      string `json:"hxPost"`
+	HXTarget    string `json:"hxTarget"`
+	HXSwap      string `json:"hxSwap"`
+	
+	// Event handlers
+	OnRowClick  string `json:"onRowClick"`
+	OnSort      string `json:"onSort"`
+	OnFilter    string `json:"onFilter"`
+	OnSearch    string `json:"onSearch"`
+	
+	// Accessibility
+	AriaLabels  map[string]string `json:"ariaLabels"`
+	
+	// State persistence
+	StatePersist bool   `json:"statePersist"`
+	StateKey     string `json:"stateKey"`
+}
+
+// getDataTableClasses builds CSS classes for the datatable
+func getDataTableClasses(props DataTableProps) string {
+	return utils.TwMerge(
+		"datatable",
+		fmt.Sprintf("datatable-%s", string(props.Variant)),
+		fmt.Sprintf("datatable-%s", string(props.Size)),
+		fmt.Sprintf("datatable-%s", string(props.Density)),
+		utils.If(props.Selectable, "datatable--selectable"),
+		utils.If(props.Resizable, "datatable--resizable"),
+		utils.If(props.Virtualized, "datatable--virtualized"),
+		props.ClassName,
+	)
+}
+
+// getTableClasses builds CSS classes for the table element
+func getTableClasses(props DataTableProps) string {
+	return utils.TwMerge(
+		"datatable-table",
+		utils.If(props.Variant == DataTableStriped, "datatable-table--striped"),
+		utils.If(props.Variant == DataTableBordered, "datatable-table--bordered"),
+		utils.If(props.Variant == DataTableHover, "datatable-table--hover"),
+	)
+}
+
+// DataTable renders the main datatable organism
+templ DataTable(props DataTableProps) {
+	<div 
+		class={ getDataTableClasses(props) }
+		if props.ID != "" {
+			id={ props.ID }
+		}
+		if props.AriaLabels["table"] != "" {
+			aria-label={ props.AriaLabels["table"] }
+		}
+		x-data={ buildDataTableAlpineData(props) }
+	>
+		@dataTableHeader(props)
+		@dataTableToolbar(props)
+		@dataTableBulkActions(props)
+		
+		<div class="datatable-container">
+			@dataTableContent(props)
+		</div>
+		
+		if props.Pagination.Enabled {
+			@dataTablePagination(props.Pagination)
+		}
+		
+		@dataTableExportModal(props)
+	</div>
+}
+
+// dataTableHeader renders the table header with title and description
+templ dataTableHeader(props DataTableProps) {
+	if props.Title != "" || props.Description != "" || len(props.Actions) > 0 {
+		<div class="datatable-header">
+			<div class="datatable-header-content">
+				if props.Title != "" {
+					<h3 class="datatable-title">{ props.Title }</h3>
+				}
+				if props.Description != "" {
+					<p class="datatable-description">{ props.Description }</p>
+				}
+			</div>
+			
+			if len(props.Actions) > 0 {
+				<div class="datatable-header-actions">
+					for _, action := range props.Actions {
+						@dataTableAction(action)
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+// dataTableToolbar renders search, filters, and table controls
+templ dataTableToolbar(props DataTableProps) {
+	if props.Search.Enabled || len(props.Filters) > 0 || props.Export.Enabled {
+		<div class="datatable-toolbar">
+			<div class="datatable-toolbar-left">
+				if props.Search.Enabled {
+					@dataTableSearch(props.Search)
+				}
+				
+				if len(props.Filters) > 0 {
+					@dataTableFilters(props.Filters)
+				}
+			</div>
+			
+			<div class="datatable-toolbar-right">
+				if props.Export.Enabled {
+					@dataTableExportButton(props.Export)
+				}
+				
+				@dataTableViewOptions(props)
+			</div>
+		</div>
+	}
+}
+
+// dataTableSearch renders the search input
+templ dataTableSearch(search DataTableSearch) {
+	<div class="datatable-search">
+		<input
+			type="text"
+			class="datatable-search-input"
+			placeholder={ utils.IfElse(search.Placeholder != "", search.Placeholder, "Search...") }
+			value={ search.Value }
+			x-model="searchQuery"
+			if search.Delay > 0 {
+				x-on:input={ "debounce." + fmt.Sprintf("%dms", search.Delay) + ":performSearch()" }
+			} else {
+				x-on:input="performSearch()"
+			}
+		/>
+		@atoms.Icon(atoms.IconProps{
+			Name: "search",
+			Size: atoms.IconSizeSM,
+			ClassName: "datatable-search-icon",
+		})
+		
+		if search.Advanced {
+			@atoms.Button(atoms.ButtonProps{
+				Variant: atoms.ButtonVariantGhost,
+				Size:    atoms.ButtonSizeSM,
+				OnClick: "showAdvancedSearch = !showAdvancedSearch",
+				AriaLabel: "Toggle advanced search",
+			}) {
+				@atoms.Icon(atoms.IconProps{
+					Name: "filter",
+					Size: atoms.IconSizeSM,
+				})
+			}
+		}
+	</div>
+}
+
+// dataTableFilters renders column filters
+templ dataTableFilters(filters []DataTableFilter) {
+	<div class="datatable-filters">
+		for _, filter := range filters {
+			<div class="datatable-filter">
+				<select class="datatable-filter-select" x-model={ fmt.Sprintf("filters.%s", filter.Column) }>
+					<option value="">{ filter.Column }</option>
+					for _, option := range filter.Options {
+						<option value={ option }>{ option }</option>
+					}
+				</select>
+			</div>
+		}
+		
+		<button class="datatable-filter-clear" x-on:click="clearFilters()">
+			Clear filters
+		</button>
+	</div>
+}
+
+// dataTableBulkActions renders bulk actions for selected rows
+templ dataTableBulkActions(props DataTableProps) {
+	if len(props.BulkActions) > 0 {
+		<div 
+			class="datatable-bulk-actions"
+			x-show="selectedRows.length > 0"
+			x-transition
+		>
+			<div class="datatable-bulk-actions-content">
+				<span class="datatable-bulk-actions-count" x-text="`${selectedRows.length} items selected`"></span>
+				
+				<div class="datatable-bulk-actions-buttons">
+					for _, action := range props.BulkActions {
+						@dataTableBulkAction(action)
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// dataTableBulkAction renders a single bulk action button
+templ dataTableBulkAction(action DataTableBulkAction) {
+	@atoms.Button(atoms.ButtonProps{
+		Text:    action.Text,
+		Variant: action.Variant,
+		Size:    atoms.ButtonSizeSM,
+		OnClick: utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
+	}) {
+		if action.Icon != "" {
+			@atoms.Icon(atoms.IconProps{
+				Name: action.Icon,
+				Size: atoms.IconSizeXS,
+			})
+		}
+	}
+}
+
+// dataTableContent renders the main table content
+templ dataTableContent(props DataTableProps) {
+	if props.Virtualized {
+		@dataTableVirtualized(props)
+	} else {
+		@dataTableStandard(props)
+	}
+}
+
+// dataTableStandard renders the standard table
+templ dataTableStandard(props DataTableProps) {
+	<table class={ getTableClasses(props) }>
+		<thead class="datatable-thead">
+			@dataTableHeaderRow(props)
+		</thead>
+		<tbody class="datatable-tbody">
+			for _, row := range props.Rows {
+				@dataTableRow(row, props)
+			}
+		</tbody>
+		if props.Pagination.ShowTotal {
+			<tfoot class="datatable-tfoot">
+				<tr>
+					<td colspan={ strconv.Itoa(len(props.Columns)) } class="datatable-footer">
+						Total: { strconv.Itoa(props.Pagination.TotalItems) } items
+					</td>
+				</tr>
+			</tfoot>
+		}
+	</table>
+}
+
+// dataTableHeaderRow renders the table header row
+templ dataTableHeaderRow(props DataTableProps) {
+	<tr class="datatable-header-row">
+		if props.Selectable {
+			<th class="datatable-th datatable-th--checkbox">
+				if props.MultiSelect {
+					@atoms.Checkbox(atoms.CheckboxProps{
+						ID:       "select-all",
+						Name:     "select-all",
+						Size:     atoms.CheckboxSizeMD,
+						OnChange: "toggleAllRows()",
+						AriaLabel: "Select all rows",
+					})
+				}
+			</th>
+		}
+		
+		for _, column := range props.Columns {
+			@dataTableHeaderCell(column, props)
+		}
+		
+		if len(props.RowActions) > 0 {
+			<th class="datatable-th datatable-th--actions">Actions</th>
+		}
+	</tr>
+}
+
+// dataTableHeaderCell renders a table header cell
+templ dataTableHeaderCell(column DataTableColumn, props DataTableProps) {
+	<th 
+		class={ utils.TwMerge(
+			"datatable-th",
+			fmt.Sprintf("datatable-th--%s", column.Key),
+			utils.If(column.Sortable, "datatable-th--sortable"),
+			utils.If(column.Resizable, "datatable-th--resizable"),
+			column.HeaderClass,
+		) }
+		if column.Width != "" {
+			style={ fmt.Sprintf("width: %s", column.Width) }
+		}
+		if column.Sortable {
+			x-on:click={ fmt.Sprintf("sortColumn('%s')", column.Key) }
+		}
+	>
+		<div class="datatable-th-content">
+			<span class="datatable-th-text">{ column.Title }</span>
+			
+			if column.Sortable {
+				<div class="datatable-th-sort">
+					@atoms.Icon(atoms.IconProps{
+						Name: "chevron-up",
+						Size: atoms.IconSizeXS,
+						ClassName: "datatable-sort-icon datatable-sort-asc",
+					})
+					@atoms.Icon(atoms.IconProps{
+						Name: "chevron-down",
+						Size: atoms.IconSizeXS,
+						ClassName: "datatable-sort-icon datatable-sort-desc",
+					})
+				</div>
+			}
+			
+			if column.Filterable {
+				@atoms.Button(atoms.ButtonProps{
+					Variant: atoms.ButtonVariantGhost,
+					Size:    atoms.ButtonSizeSM,
+					OnClick: fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
+				}) {
+					@atoms.Icon(atoms.IconProps{
+						Name: "filter",
+						Size: atoms.IconSizeXS,
+					})
+				}
+			}
+		</div>
+		
+		if column.Resizable {
+			<div class="datatable-th-resizer" x-on:mousedown={ fmt.Sprintf("startResize('%s', $event)", column.Key) }></div>
+		}
+	</th>
+}
+
+// dataTableRow renders a table row
+templ dataTableRow(row DataTableRow, props DataTableProps) {
+	<tr 
+		class={ utils.TwMerge(
+			"datatable-tr",
+			utils.If(row.Selected, "datatable-tr--selected"),
+			utils.If(row.Disabled, "datatable-tr--disabled"),
+			row.Class,
+		) }
+		data-row-id={ row.ID }
+		if props.OnRowClick != "" {
+			x-on:click={ fmt.Sprintf("handleRowClick('%s', $event)", row.ID) }
+		}
+	>
+		if props.Selectable {
+			<td class="datatable-td datatable-td--checkbox">
+				@atoms.Checkbox(atoms.CheckboxProps{
+					ID:       fmt.Sprintf("select-%s", row.ID),
+					Name:     "row-select",
+					Value:    row.ID,
+					Checked:  row.Selected,
+					Size:     atoms.CheckboxSizeMD,
+					OnChange: fmt.Sprintf("toggleRow('%s')", row.ID),
+				})
+			</td>
+		}
+		
+		for _, column := range props.Columns {
+			@dataTableCell(row, column, props)
+		}
+		
+		if len(props.RowActions) > 0 || len(row.Actions) > 0 {
+			<td class="datatable-td datatable-td--actions">
+				@dataTableRowActions(row, props)
+			</td>
+		}
+	</tr>
+}
+
+// dataTableCell renders a table cell with appropriate content
+templ dataTableCell(row DataTableRow, column DataTableColumn, props DataTableProps) {
+	<td 
+		class={ utils.TwMerge(
+			"datatable-td",
+			fmt.Sprintf("datatable-td--%s", column.Key),
+			fmt.Sprintf("datatable-td--%s", string(column.Type)),
+			utils.If(column.Align != "", fmt.Sprintf("text-%s", column.Align)),
+			column.CellClass,
+		) }
+		if column.Clickable {
+			x-on:click={ fmt.Sprintf("handleCellClick('%s', '%s', $event)", row.ID, column.Key) }
+		}
+	>
+		@dataTableCellContent(row.Data[column.Key], column)
+	</td>
+}
+
+// dataTableCellContent renders cell content based on column type
+templ dataTableCellContent(value any, column DataTableColumn) {
+	switch column.Type {
+	case ColumnTypeBadge:
+		if strValue, ok := value.(string); ok {
+			if variant, exists := column.BadgeMap[strValue]; exists {
+				@atoms.Badge(atoms.BadgeProps{
+					Text:    strValue,
+					Variant: variant,
+					Size:    atoms.BadgeSizeSM,
+				})
+			} else {
+				@atoms.Badge(atoms.BadgeProps{
+					Text:    strValue,
+					Variant: atoms.BadgeVariantDefault,
+					Size:    atoms.BadgeSizeSM,
+				})
+			}
+		}
+	case ColumnTypeDate:
+		if timeValue, ok := value.(time.Time); ok {
+			<span class="datatable-cell-date">
+				{ utils.IfElse(column.DateFormat != "", timeValue.Format(column.DateFormat), timeValue.Format("2006-01-02")) }
+			</span>
+		} else if strValue, ok := value.(string); ok {
+			<span class="datatable-cell-date">{ strValue }</span>
+		}
+	case ColumnTypeNumber:
+		if floatValue, ok := value.(float64); ok {
+			<span class="datatable-cell-number">
+				{ fmt.Sprintf("%."+strconv.Itoa(column.Precision)+"f", floatValue) }
+			</span>
+		} else if intValue, ok := value.(int); ok {
+			<span class="datatable-cell-number">{ strconv.Itoa(intValue) }</span>
+		} else if strValue, ok := value.(string); ok {
+			<span class="datatable-cell-number">{ strValue }</span>
+		}
+	case ColumnTypeProgress:
+		if floatValue, ok := value.(float64); ok {
+			<div class="datatable-cell-progress">
+				<div class="datatable-progress-bar">
+					<div 
+						class="datatable-progress-fill" 
+						style={ fmt.Sprintf("width: %.1f%%", floatValue) }
+					></div>
+				</div>
+				<span class="datatable-progress-text">{ fmt.Sprintf("%.1f%%", floatValue) }</span>
+			</div>
+		}
+	case ColumnTypeLink:
+		if strValue, ok := value.(string); ok {
+			<a href={ strValue } class="datatable-cell-link">{ strValue }</a>
+		}
+	case ColumnTypeImage:
+		if strValue, ok := value.(string); ok {
+			<img src={ strValue } alt="Cell image" class="datatable-cell-image" />
+		}
+	default:
+		if strValue, ok := value.(string); ok {
+			<span class="datatable-cell-text">{ strValue }</span>
+		} else if value != nil {
+			<span class="datatable-cell-text">{ fmt.Sprintf("%v", value) }</span>
+		}
+	}
+}
+
+// dataTableRowActions renders actions for a specific row
+templ dataTableRowActions(row DataTableRow, props DataTableProps) {
+	<div class="datatable-row-actions" x-data="{ open: false }">
+		@atoms.Button(atoms.ButtonProps{
+			Variant: atoms.ButtonVariantGhost,
+			Size:    atoms.ButtonSizeSM,
+			OnClick: "open = !open",
+		}) {
+			@atoms.Icon(atoms.IconProps{
+				Name: "more-vertical",
+				Size: atoms.IconSizeXS,
+			})
+		}
+		
+		<div 
+			class="datatable-row-actions-dropdown"
+			x-show="open"
+			x-on:click.away="open = false"
+			x-transition
+		>
+			for _, action := range row.Actions {
+				@molecules.MenuItem(molecules.MenuItemProps{
+					Type: molecules.MenuItemTypeButton,
+					Text: action.Text,
+					Icon: action.Icon,
+					OnClick: action.OnClick,
+					HXGet: action.HXGet,
+					HXPost: action.HXPost,
+					HXTarget: action.HXTarget,
+					AlpineClick: action.AlpineClick,
+				})
+			}
+			
+			for _, action := range props.RowActions {
+				@molecules.MenuItem(molecules.MenuItemProps{
+					Type: molecules.MenuItemTypeButton,
+					Text: action.Text,
+					Icon: action.Icon,
+					OnClick: fmt.Sprintf("%s('%s')", action.OnClick, row.ID),
+				})
+			}
+		</div>
+	</div>
+}
+
+// dataTableVirtualized renders the virtualized table for large datasets
+templ dataTableVirtualized(props DataTableProps) {
+	<div class="datatable-virtual-container" x-ref="virtualContainer">
+		<div class="datatable-virtual-header">
+			<table class={ getTableClasses(props) }>
+				<thead>
+					@dataTableHeaderRow(props)
+				</thead>
+			</table>
+		</div>
+		
+		<div 
+			class="datatable-virtual-body" 
+			x-ref="virtualBody"
+			x-on:scroll="handleVirtualScroll()"
+		>
+			<div class="datatable-virtual-spacer-top" x-ref="spacerTop"></div>
+			
+			<table class={ getTableClasses(props) }>
+				<tbody>
+					<template x-for="row in visibleRows" :key="row.id">
+						@dataTableRow(DataTableRow{}, props)
+					</template>
+				</tbody>
+			</table>
+			
+			<div class="datatable-virtual-spacer-bottom" x-ref="spacerBottom"></div>
+		</div>
+	</div>
+}
+
+// dataTablePagination renders pagination controls
+templ dataTablePagination(pagination DataTablePagination) {
+	if pagination.Enabled {
+		<div class="datatable-pagination">
+			<div class="datatable-pagination-info">
+				if pagination.ShowTotal {
+					<span class="datatable-pagination-total">
+						{ fmt.Sprintf("Showing %d-%d of %d entries", 
+							(pagination.CurrentPage-1)*pagination.PageSize+1,
+							min(pagination.CurrentPage*pagination.PageSize, pagination.TotalItems),
+							pagination.TotalItems,
+						) }
+					</span>
+				}
+				
+				if pagination.ShowPageSize {
+					<select class="datatable-pagination-page-size" x-model="pageSize" x-on:change="changePageSize()">
+						for _, size := range pagination.PageSizeOptions {
+							<option value={ strconv.Itoa(size) }>{ strconv.Itoa(size) } per page</option>
+						}
+					</select>
+				}
+			</div>
+			
+			<div class="datatable-pagination-controls">
+				@atoms.Button(atoms.ButtonProps{
+					Variant: atoms.ButtonVariantOutline,
+					Size:    atoms.ButtonSizeSM,
+					OnClick: "previousPage()",
+					Disabled: pagination.CurrentPage <= 1,
+				}) {
+					@atoms.Icon(atoms.IconProps{
+						Name: "chevron-left",
+						Size: atoms.IconSizeXS,
+					})
+				}
+				
+				<div class="datatable-pagination-pages">
+					for i := 1; i <= pagination.TotalPages; i++ {
+						@atoms.Button(atoms.ButtonProps{
+							Text:    strconv.Itoa(i),
+							Variant: utils.IfElse(i == pagination.CurrentPage, atoms.ButtonVariantDefault, atoms.ButtonVariantGhost),
+							Size:    atoms.ButtonSizeSM,
+							OnClick: fmt.Sprintf("goToPage(%d)", i),
+						})
+					}
+				</div>
+				
+				@atoms.Button(atoms.ButtonProps{
+					Variant: atoms.ButtonVariantOutline,
+					Size:    atoms.ButtonSizeSM,
+					OnClick: "nextPage()",
+					Disabled: pagination.CurrentPage >= pagination.TotalPages,
+				}) {
+					@atoms.Icon(atoms.IconProps{
+						Name: "chevron-right",
+						Size: atoms.IconSizeXS,
+					})
+				}
+			</div>
+		</div>
+	}
+}
+
+// dataTableAction renders a single table action
+templ dataTableAction(action DataTableAction) {
+	@atoms.Button(atoms.ButtonProps{
+		ID:      action.ID,
+		Text:    action.Text,
+		Variant: action.Variant,
+		Size:    action.Size,
+		OnClick: action.OnClick,
+	}) {
+		if action.Icon != "" {
+			@atoms.Icon(atoms.IconProps{
+				Name: action.Icon,
+				Size: atoms.IconSizeXS,
+			})
+		}
+	}
+}
+
+// dataTableExportButton renders the export button
+templ dataTableExportButton(export DataTableExport) {
+	<div class="datatable-export" x-data="{ open: false }">
+		@atoms.Button(atoms.ButtonProps{
+			Variant: atoms.ButtonVariantOutline,
+			Size:    atoms.ButtonSizeSM,
+			OnClick: "open = !open",
+		}) {
+			@atoms.Icon(atoms.IconProps{
+				Name: "download",
+				Size: atoms.IconSizeXS,
+			})
+			Export
+		}
+		
+		<div 
+			class="datatable-export-dropdown"
+			x-show="open"
+			x-on:click.away="open = false"
+			x-transition
+		>
+			for _, format := range export.Formats {
+				@molecules.MenuItem(molecules.MenuItemProps{
+					Type: molecules.MenuItemTypeButton,
+					Text: strings.ToUpper(string(format)),
+					OnClick: fmt.Sprintf("exportData('%s')", format),
+				})
+			}
+		</div>
+	</div>
+}
+
+// dataTableViewOptions renders view options (density, etc.)
+templ dataTableViewOptions(props DataTableProps) {
+	<div class="datatable-view-options" x-data="{ open: false }">
+		@atoms.Button(atoms.ButtonProps{
+			Variant: atoms.ButtonVariantGhost,
+			Size:    atoms.ButtonSizeSM,
+			OnClick: "open = !open",
+			AriaLabel: "View options",
+		}) {
+			@atoms.Icon(atoms.IconProps{
+				Name: "settings",
+				Size: atoms.IconSizeXS,
+			})
+		}
+		
+		<div 
+			class="datatable-view-options-dropdown"
+			x-show="open"
+			x-on:click.away="open = false"
+			x-transition
+		>
+			<div class="datatable-view-options-section">
+				<span class="datatable-view-options-label">Density</span>
+				@molecules.MenuRadio(molecules.MenuItemProps{
+					Text:    "Comfortable",
+					Name:    "density",
+					Value:   "comfortable",
+					Checked: props.Density == DataTableDensityComfortable,
+				})
+				@molecules.MenuRadio(molecules.MenuItemProps{
+					Text:    "Compact",
+					Name:    "density",
+					Value:   "compact",
+					Checked: props.Density == DataTableDensityCompact,
+				})
+				@molecules.MenuRadio(molecules.MenuItemProps{
+					Text:    "Condensed",
+					Name:    "density",
+					Value:   "condensed",
+					Checked: props.Density == DataTableDensityCondensed,
+				})
+			</div>
+			
+			<div class="datatable-view-options-section">
+				<span class="datatable-view-options-label">Columns</span>
+				for _, column := range props.Columns {
+					@molecules.MenuCheckbox(molecules.MenuItemProps{
+						Text:    column.Title,
+						Name:    "columns",
+						Value:   column.Key,
+						Checked: column.Visible,
+					})
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// dataTableExportModal renders the export modal
+templ dataTableExportModal(props DataTableProps) {
+	if props.Export.Enabled {
+		<div 
+			class="datatable-export-modal"
+			x-show="showExportModal"
+			x-transition
+		>
+			<div class="datatable-export-modal-content">
+				<div class="datatable-export-modal-header">
+					<h3>Export Data</h3>
+					@atoms.Button(atoms.ButtonProps{
+						Variant: atoms.ButtonVariantGhost,
+						Size:    atoms.ButtonSizeSM,
+						OnClick: "showExportModal = false",
+					}) {
+						@atoms.Icon(atoms.IconProps{
+							Name: "x",
+							Size: atoms.IconSizeXS,
+						})
+					}
+				</div>
+				
+				<div class="datatable-export-modal-body">
+					<!-- Export options would go here -->
+				</div>
+				
+				<div class="datatable-export-modal-footer">
+					@atoms.Button(atoms.ButtonProps{
+						Text:    "Cancel",
+						Variant: atoms.ButtonVariantOutline,
+						OnClick: "showExportModal = false",
+					})
+					@atoms.Button(atoms.ButtonProps{
+						Text:    "Export",
+						Variant: atoms.ButtonVariantPrimary,
+						OnClick: "confirmExport()",
+					})
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// Helper function to build Alpine.js data for the datatable
+func buildDataTableAlpineData(props DataTableProps) string {
+	return fmt.Sprintf(`{
+		// Data
+		rows: %s,
+		filteredRows: [],
+		visibleRows: [],
+		
+		// State
+		selectedRows: [],
+		sortColumn: '',
+		sortDirection: 'asc',
+		searchQuery: '',
+		filters: {},
+		currentPage: %d,
+		pageSize: %d,
+		
+		// UI State
+		showAdvancedSearch: false,
+		showExportModal: false,
+		loading: false,
+		
+		// Virtual scrolling
+		virtualScrollTop: 0,
+		virtualItemHeight: 40,
+		
+		// Methods
+		init() {
+			this.filteredRows = [...this.rows];
+			this.updateVisibleRows();
+			%s
+		},
+		
+		performSearch() {
+			// Search implementation
+			console.log('Searching for:', this.searchQuery);
+		},
+		
+		sortColumn(column) {
+			if (this.sortColumn === column) {
+				this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+			} else {
+				this.sortColumn = column;
+				this.sortDirection = 'asc';
+			}
+			this.applySorting();
+		},
+		
+		applySorting() {
+			// Sorting implementation
+			console.log('Sorting by:', this.sortColumn, this.sortDirection);
+		},
+		
+		toggleRow(rowId) {
+			const index = this.selectedRows.indexOf(rowId);
+			if (index > -1) {
+				this.selectedRows.splice(index, 1);
+			} else {
+				this.selectedRows.push(rowId);
+			}
+		},
+		
+		toggleAllRows() {
+			if (this.selectedRows.length === this.filteredRows.length) {
+				this.selectedRows = [];
+			} else {
+				this.selectedRows = this.filteredRows.map(row => row.id);
+			}
+		},
+		
+		clearFilters() {
+			this.filters = {};
+			this.searchQuery = '';
+			this.performSearch();
+		},
+		
+		exportData(format) {
+			console.log('Exporting as:', format);
+			this.showExportModal = true;
+		},
+		
+		updateVisibleRows() {
+			// Update visible rows for pagination/virtualization
+		},
+		
+		%s
+	}`,
+		"props.rows", // This would be replaced with actual row data
+		props.Pagination.CurrentPage,
+		props.Pagination.PageSize,
+		utils.IfElse(props.StatePersist, "this.loadState();", ""),
+		utils.IfElse(props.Virtualized, `
+		handleVirtualScroll() {
+			// Virtual scrolling implementation
+		},
+		`, ""),
+	)
+}
