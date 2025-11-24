@@ -10,36 +10,27 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "strconv"
 
-// Note: DatePicker uses Basecoat form input styling with type="date"
-// Browser provides native date picker UI automatically
-
-// DatePickerProps defines all properties for the DatePicker atom using Basecoat input styling
-type DatePickerProps struct {
+// SwitchProps defines all properties for the Switch atom using Basecoat checkbox styling
+type SwitchProps struct {
 	// Core attributes
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Value       string `json:"value,omitempty"`       // ISO date format: YYYY-MM-DD
-	Placeholder string `json:"placeholder,omitempty"` // For browsers that don't support date inputs
-
-	// Date constraints
-	Min string `json:"min,omitempty"` // ISO date format: YYYY-MM-DD
-	Max string `json:"max,omitempty"` // ISO date format: YYYY-MM-DD
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Value   string `json:"value,omitempty"`
+	Checked bool   `json:"checked,omitempty"`
 
 	// Form attributes
 	Required bool `json:"required,omitempty"`
 	Disabled bool `json:"disabled,omitempty"`
-	Readonly bool `json:"readonly,omitempty"`
 
 	// Event handlers (pre-resolved externally)
 	OnChange string `json:"onChange,omitempty"`
 	OnFocus  string `json:"onFocus,omitempty"`
 	OnBlur   string `json:"onBlur,omitempty"`
 
-	// ARIA accessibility attributes
+	// ARIA accessibility
 	AriaLabel       string `json:"ariaLabel,omitempty"`
 	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
 	AriaRequired    string `json:"ariaRequired,omitempty"`
-	AriaInvalid     string `json:"ariaInvalid,omitempty"`
 
 	// Additional HTML attributes
 	TabIndex   int               `json:"tabIndex,omitempty"`
@@ -47,10 +38,11 @@ type DatePickerProps struct {
 	Attributes templ.Attributes  `json:"attributes,omitempty"`
 }
 
-// buildDateInputAttributes creates all HTML attributes for the date input
-func buildDateInputAttributes(props DatePickerProps) templ.Attributes {
+// buildSwitchAttributes creates all HTML attributes for the switch
+func buildSwitchAttributes(props SwitchProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type": "date",
+		"type": "checkbox",
+		"role": "switch", // This makes Basecoat style it as a switch
 	}
 
 	// Core HTML attributes
@@ -63,27 +55,16 @@ func buildDateInputAttributes(props DatePickerProps) templ.Attributes {
 	if props.Value != "" {
 		attrs["value"] = props.Value
 	}
-	if props.Placeholder != "" {
-		attrs["placeholder"] = props.Placeholder
-	}
-
-	// Date constraints
-	if props.Min != "" {
-		attrs["min"] = props.Min
-	}
-	if props.Max != "" {
-		attrs["max"] = props.Max
-	}
 
 	// Boolean attributes
+	if props.Checked {
+		attrs["checked"] = "checked"
+	}
 	if props.Required {
 		attrs["required"] = "required"
 	}
 	if props.Disabled {
 		attrs["disabled"] = "disabled"
-	}
-	if props.Readonly {
-		attrs["readonly"] = "readonly"
 	}
 
 	// Event handlers
@@ -107,9 +88,6 @@ func buildDateInputAttributes(props DatePickerProps) templ.Attributes {
 	if props.AriaRequired != "" {
 		attrs["aria-required"] = props.AriaRequired
 	}
-	if props.AriaInvalid != "" {
-		attrs["aria-invalid"] = props.AriaInvalid
-	}
 
 	// Tab index
 	if props.TabIndex != 0 {
@@ -121,7 +99,7 @@ func buildDateInputAttributes(props DatePickerProps) templ.Attributes {
 		attrs["data-"+key] = value
 	}
 
-	// Merge custom attributes (allows override)
+	// Merge custom attributes
 	for key, value := range props.Attributes {
 		attrs[key] = value
 	}
@@ -129,8 +107,8 @@ func buildDateInputAttributes(props DatePickerProps) templ.Attributes {
 	return attrs
 }
 
-// DatePicker renders a Basecoat date input (styled by .field context)
-func DatePicker(props DatePickerProps) templ.Component {
+// Switch renders a Basecoat switch (checkbox with role="switch")
+func Switch(props SwitchProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -155,7 +133,7 @@ func DatePicker(props DatePickerProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildDateInputAttributes(props))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildSwitchAttributes(props))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

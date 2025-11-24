@@ -8,171 +8,80 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// AutocompleteVariant defines the visual style variants
-type AutocompleteVariant string
-
-const (
-	AutocompleteVariantDefault  AutocompleteVariant = "default"
-	AutocompleteVariantOutlined AutocompleteVariant = "outlined"
-	AutocompleteVariantFilled   AutocompleteVariant = "filled"
-)
-
-// AutocompleteSize defines the size variants
-type AutocompleteSize string
-
-const (
-	AutocompleteSizeXS AutocompleteSize = "xs"
-	AutocompleteSizeSM AutocompleteSize = "sm"
-	AutocompleteSizeMD AutocompleteSize = "md"
-	AutocompleteSizeLG AutocompleteSize = "lg"
-	AutocompleteSizeXL AutocompleteSize = "xl"
-)
-
-// AutocompleteState defines the visual state variants
-type AutocompleteState string
-
-const (
-	AutocompleteStateDefault  AutocompleteState = "default"
-	AutocompleteStateDisabled AutocompleteState = "disabled"
-	AutocompleteStateError    AutocompleteState = "error"
-	AutocompleteStateSuccess  AutocompleteState = "success"
-	AutocompleteStateLoading  AutocompleteState = "loading"
-)
+// Note: Autocomplete uses Basecoat select component with combobox functionality
+// Basecoat select supports search/filtering out of the box
 
 // AutocompleteOption represents an option in the dropdown
 type AutocompleteOption struct {
-	Value       string `json:"value"`
-	Label       string `json:"label"`
-	Description string `json:"description"`
-	Icon        string `json:"icon"`
-	Disabled    bool   `json:"disabled"`
+	Value       string          `json:"value"`
+	Label       string          `json:"label"`
+	Description string          `json:"description,omitempty"`
+	Icon        templ.Component `json:"icon,omitempty"`
+	Disabled    bool            `json:"disabled,omitempty"`
 }
 
-// AutocompleteProps defines all properties for the Autocomplete atom
+// AutocompleteProps defines all properties for the Autocomplete component using Basecoat select
 type AutocompleteProps struct {
 	// Core attributes
 	ID          string `json:"id"`
 	Name        string `json:"name"`
-	Value       string `json:"value"`
-	Placeholder string `json:"placeholder"`
-
-	// Visual presentation (resolved externally)
-	Variant   AutocompleteVariant `json:"variant"`
-	Size      AutocompleteSize    `json:"size"`
-	State     AutocompleteState   `json:"state"`
-	ClassName string              `json:"className"`
+	Value       string `json:"value,omitempty"`
+	Placeholder string `json:"placeholder,omitempty"`
 
 	// Options and configuration
-	Options    []AutocompleteOption `json:"options"`
-	MinChars   int                  `json:"minChars"`
-	MaxResults int                  `json:"maxResults"`
-	SearchURL  string               `json:"searchURL"`
-	Debounce   int                  `json:"debounce"`
+	Options      []AutocompleteOption `json:"options"`
+	SearchURL    string               `json:"searchURL,omitempty"`    // For dynamic loading
+	MinChars     int                  `json:"minChars,omitempty"`     // Min chars before search
+	EmptyMessage string               `json:"emptyMessage,omitempty"` // No results message
 
 	// Form attributes
-	Required bool `json:"required"`
-	Disabled bool `json:"disabled"`
-	Readonly bool `json:"readonly"`
-
-	// UI features
-	ShowIcon      bool   `json:"showIcon"`
-	ShowClear     bool   `json:"showClear"`
-	FreeForm      bool   `json:"freeForm"`
-	LoadingText   string `json:"loadingText"`
-	NoResultsText string `json:"noResultsText"`
+	Required bool `json:"required,omitempty"`
+	Disabled bool `json:"disabled,omitempty"`
 
 	// Event handlers (pre-resolved externally)
-	OnChange string `json:"onChange"`
-	OnSelect string `json:"onSelect"`
-	OnFocus  string `json:"onFocus"`
-	OnBlur   string `json:"onBlur"`
+	OnChange string `json:"onChange,omitempty"`
+	OnSelect string `json:"onSelect,omitempty"`
+	OnFocus  string `json:"onFocus,omitempty"`
+	OnBlur   string `json:"onBlur,omitempty"`
 
 	// ARIA accessibility attributes
-	AriaLabel       string `json:"ariaLabel"`
-	AriaDescribedBy string `json:"ariaDescribedBy"`
-	AriaRequired    string `json:"ariaRequired"`
-	AriaInvalid     string `json:"ariaInvalid"`
+	AriaLabel       string `json:"ariaLabel,omitempty"`
+	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+	AriaRequired    string `json:"ariaRequired,omitempty"`
+	AriaInvalid     string `json:"ariaInvalid,omitempty"`
 
 	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	TabIndex   int               `json:"tabIndex,omitempty"`
+	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes  `json:"attributes,omitempty"`
 }
 
-// getAutocompleteClasses builds the CSS class string using design tokens
-func getAutocompleteClasses(props AutocompleteProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"autocomplete",
-
-		// Variant classes (map to design tokens)
-		"autocomplete-"+string(props.Variant),
-
-		// Size classes (map to design tokens)
-		"autocomplete-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"autocomplete-"+string(props.State),
-
-		// Interactive utilities
-		utils.If(props.Disabled, "autocomplete-disabled"),
-		utils.If(props.Readonly, "autocomplete-readonly"),
-		utils.If(props.Required, "autocomplete-required"),
-		utils.If(props.ShowIcon, "autocomplete-has-icon"),
-		utils.If(props.ShowClear, "autocomplete-has-clear"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// buildAutocompleteAttributes creates all HTML attributes for the autocomplete
-func buildAutocompleteAttributes(props AutocompleteProps) templ.Attributes {
+// buildTriggerAttributes creates trigger button attributes
+func buildTriggerAttributes(props AutocompleteProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type":  "text",
-		"class": getAutocompleteClasses(props),
+		"type":          "button",
+		"popovertarget": props.ID + "-popover",
+		"aria-haspopup": "listbox",
+		"aria-controls": props.ID + "-listbox",
+		"aria-expanded": "false",
 	}
 
-	// Core HTML attributes
+	// Core attributes
 	if props.ID != "" {
-		attrs["id"] = props.ID
-	}
-	if props.Name != "" {
-		attrs["name"] = props.Name
-	}
-	if props.Value != "" {
-		attrs["value"] = props.Value
-	}
-	if props.Placeholder != "" {
-		attrs["placeholder"] = props.Placeholder
+		attrs["id"] = props.ID + "-trigger"
 	}
 
-	// Boolean attributes
-	if props.Required {
-		attrs["required"] = "required"
-	}
+	// State attributes
 	if props.Disabled {
 		attrs["disabled"] = "disabled"
 	}
-	if props.Readonly {
-		attrs["readonly"] = "readonly"
+	if props.Required && props.AriaRequired == "" {
+		attrs["aria-required"] = "true"
 	}
-
-	// Autocomplete specific attributes
-	attrs["autocomplete"] = "off"
-	attrs["role"] = "combobox"
-	attrs["aria-expanded"] = "false"
-	attrs["aria-autocomplete"] = "list"
 
 	// Event handlers
-	if props.OnChange != "" {
-		attrs["onchange"] = props.OnChange
-	}
 	if props.OnFocus != "" {
 		attrs["onfocus"] = props.OnFocus
 	}
@@ -204,7 +113,7 @@ func buildAutocompleteAttributes(props AutocompleteProps) templ.Attributes {
 		attrs["data-"+key] = value
 	}
 
-	// Merge custom attributes (allows override)
+	// Merge custom attributes
 	for key, value := range props.Attributes {
 		attrs[key] = value
 	}
@@ -212,7 +121,50 @@ func buildAutocompleteAttributes(props AutocompleteProps) templ.Attributes {
 	return attrs
 }
 
-// Autocomplete renders a pure presentation autocomplete atom
+// buildSearchInputAttributes creates search input attributes
+func buildSearchInputAttributes(props AutocompleteProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"type":              "text",
+		"role":              "combobox",
+		"autocomplete":      "off",
+		"aria-autocomplete": "list",
+		"aria-controls":     props.ID + "-listbox",
+		"aria-expanded":     "false",
+	}
+
+	// Core attributes
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+	if props.Placeholder != "" {
+		attrs["placeholder"] = props.Placeholder
+	}
+
+	// State attributes
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	if props.Required {
+		attrs["required"] = "required"
+	}
+
+	// Event handlers
+	if props.OnChange != "" {
+		attrs["oninput"] = props.OnChange
+	}
+
+	// Search configuration
+	if props.MinChars > 0 {
+		attrs["data-min-chars"] = strconv.Itoa(props.MinChars)
+	}
+	if props.SearchURL != "" {
+		attrs["data-search-url"] = props.SearchURL
+	}
+
+	return attrs
+}
+
+// Autocomplete renders a Basecoat select component with combobox search functionality
 func Autocomplete(props AutocompleteProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -234,73 +186,214 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"autocomplete-container\"><input")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"select\" data-select-initialized=\"true\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildAutocompleteAttributes(props))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if len(props.Options) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"autocomplete-dropdown\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			for _, option := range props.Options {
-				templ_7745c5c3_Err = renderAutocompleteOption(option).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.LoadingText != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"autocomplete-loading\">")
+		if props.Name != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<input type=\"hidden\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(props.LoadingText != "", props.LoadingText, "Loading..."))
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 224, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 166, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.NoResultsText != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"autocomplete-no-results\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(props.NoResultsText != "", props.NoResultsText, "No results found"))
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 231, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 167, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if props.ID != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " id=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-input")
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 169, Col: 28}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<button")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildTriggerAttributes(props))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.Value != "" {
+			for _, option := range props.Options {
+				if option.Value == props.Value {
+					if option.Icon != nil {
+						templ_7745c5c3_Err = option.Icon.Render(ctx, templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var5 string
+					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 183, Col: 19}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
+		} else if props.Placeholder != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span class=\"text-muted-foreground\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 187, Col: 58}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"text-muted-foreground\">Select...</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</button><div popover class=\"popover\" id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-popover")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 197, Col: 28}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" data-side=\"bottom\" data-align=\"start\"><header>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = Icon(IconProps{Name: "search", Size: "sm"}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<input")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildSearchInputAttributes(props))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "></header><div role=\"listbox\" id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-listbox")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 210, Col: 29}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" aria-labelledby=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-trigger")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 211, Col: 42}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.EmptyMessage != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " data-empty=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.EmptyMessage)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 213, Col: 35}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, option := range props.Options {
+			templ_7745c5c3_Err = renderAutocompleteOption(option, props).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -308,8 +401,8 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 	})
 }
 
-// renderAutocompleteOption renders an option placeholder
-func renderAutocompleteOption(option AutocompleteOption) templ.Component {
+// renderAutocompleteOption renders a single option using Basecoat select patterns
+func renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -325,97 +418,100 @@ func renderAutocompleteOption(option AutocompleteOption) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"autocomplete-option\" data-value=\"")
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnSelect)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 239, Col: 59}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div role=\"option\" data-value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">")
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 228, Col: 26}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if option.Icon != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"autocomplete-option-icon\" data-icon=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(option.Icon)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 241, Col: 65}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(option.Icon)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 241, Col: 81}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if option.Disabled {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " aria-disabled=\"true\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"autocomplete-option-label\">")
+		if props.OnSelect != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, " onclick=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 templ.ComponentScript = props.OnSelect
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13.Call)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 244, Col: 56}
+		if option.Icon != nil {
+			templ_7745c5c3_Err = option.Icon.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<span class=\"flex-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> ")
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 241, Col: 16}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if option.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<span class=\"autocomplete-option-description\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<span class=\"text-muted-foreground text-sm block\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(option.Description)
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(option.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 247, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 243, Col: 73}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

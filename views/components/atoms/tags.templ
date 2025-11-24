@@ -1,67 +1,31 @@
 package atoms
 
-import (
-	"strconv"
-	"github.com/niiniyare/ruun/pkg/utils"
-)
+import "strconv"
 
-// TagVariant defines the visual style variants
-type TagVariant string
+// Note: Tags use Basecoat badge classes for styling
+// Available variants: primary, secondary, destructive, outline
+// State handled via data attributes and HTML attributes
 
-const (
-	TagVariantDefault     TagVariant = "default"
-	TagVariantSecondary   TagVariant = "secondary"
-	TagVariantSuccess     TagVariant = "success"
-	TagVariantWarning     TagVariant = "warning"
-	TagVariantDestructive TagVariant = "destructive"
-	TagVariantOutline     TagVariant = "outline"
-)
-
-// TagSize defines the size variants
-type TagSize string
-
-const (
-	TagSizeXS TagSize = "xs"
-	TagSizeSM TagSize = "sm"
-	TagSizeMD TagSize = "md"
-	TagSizeLG TagSize = "lg"
-	TagSizeXL TagSize = "xl"
-)
-
-// TagState defines the visual state variants
-type TagState string
-
-const (
-	TagStateDefault  TagState = "default"
-	TagStateDisabled TagState = "disabled"
-	TagStateSelected TagState = "selected"
-	TagStateActive   TagState = "active"
-	TagStateHover    TagState = "hover"
-)
-
-// TagProps defines all properties for the Tag atom
+// TagProps defines all properties for the Tag atom using Basecoat badge classes
 type TagProps struct {
 	// Core attributes
 	ID   string `json:"id"`
 	Text string `json:"text"`
 	Value string `json:"value"`
 	
-	// Visual presentation (resolved externally)
-	Variant   TagVariant `json:"variant"`
-	Size      TagSize    `json:"size"`
-	State     TagState   `json:"state"`
-	ClassName string     `json:"className"`
+	// Basecoat badge variants only
+	Variant string `json:"variant,omitempty"` // "primary", "secondary", "destructive", "outline"
 	
 	// Icon configuration
-	Icon      string `json:"icon"`
-	IconLeft  string `json:"iconLeft"`
-	IconRight string `json:"iconRight"`
+	Icon      templ.Component `json:"icon,omitempty"`
+	IconLeft  templ.Component `json:"iconLeft,omitempty"`
+	IconRight templ.Component `json:"iconRight,omitempty"`
 	
 	// Interactive features
-	Selected  bool `json:"selected"`
-	Removable bool `json:"removable"`
-	Clickable bool `json:"clickable"`
-	Disabled  bool `json:"disabled"`
+	Selected  bool `json:"selected,omitempty"`
+	Removable bool `json:"removable,omitempty"`
+	Clickable bool `json:"clickable,omitempty"`
+	Disabled  bool `json:"disabled,omitempty"`
 	
 	// Event handlers (pre-resolved externally)
 	OnClick  string `json:"onClick"`
@@ -80,51 +44,22 @@ type TagProps struct {
 	Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// getTagClasses builds the CSS class string using design tokens
-func getTagClasses(props TagProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"tag",
-		
-		// Variant classes (map to design tokens)
-		"tag-"+string(props.Variant),
-		
-		// Size classes (map to design tokens)
-		"tag-"+string(props.Size),
-		
-		// State classes (map to design tokens)
-		"tag-"+string(props.State),
-		
-		// Interactive utilities
-		utils.If(props.Clickable, "tag-clickable"),
-		utils.If(props.Removable, "tag-removable"),
-		utils.If(props.Selected, "tag-selected"),
-		utils.If(props.Disabled, "tag-disabled"),
-		
-		// Icon-specific classes
-		utils.If(props.Icon != "" && props.Text == "", "tag-icon-only"),
-		utils.If(props.IconLeft != "", "tag-has-icon-left"),
-		utils.If(props.IconRight != "", "tag-has-icon-right"),
-		
-		// Custom classes
-		props.ClassName,
-	)
+// getBadgeClass generates the Basecoat badge class
+func getBadgeClass(variant string) string {
+	class := "badge"
+	
+	// Add variant suffix if not primary/default
+	if variant != "" && variant != "primary" {
+		class = "badge-" + variant
+	}
+	
+	return class
 }
 
 // buildTagAttributes creates all HTML attributes for the tag
 func buildTagAttributes(props TagProps) templ.Attributes {
-	element := "span"
-	if props.Clickable || props.OnClick != "" {
-		element = "button"
-	}
-	
 	attrs := templ.Attributes{
-		"class": getTagClasses(props),
-	}
-	
-	// Button-specific attributes
-	if element == "button" {
-		attrs["type"] = "button"
+		"class": getBadgeClass(props.Variant),
 	}
 	
 	// Core HTML attributes
@@ -167,6 +102,11 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
 	}
 	
+	// State data attributes for Basecoat context
+	if props.Selected {
+		attrs["aria-pressed"] = "true"
+	}
+	
 	// Data attributes
 	for key, value := range props.DataAttrs {
 		attrs["data-"+key] = value
@@ -180,12 +120,12 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 	return attrs
 }
 
-// Tag renders a pure presentation tag atom
+// Tag renders a Basecoat badge atom
 templ Tag(props TagProps) {
 	if props.Clickable || props.OnClick != "" {
-		<button {buildTagAttributes(props)...}>
+		<a {buildTagAttributes(props)...} href="#">
 			@renderTagContent(props)
-		</button>
+		</a>
 	} else {
 		<span {buildTagAttributes(props)...}>
 			@renderTagContent(props)
@@ -193,52 +133,38 @@ templ Tag(props TagProps) {
 	}
 }
 
-// renderTagContent renders the tag content
+// renderTagContent renders the tag content using Basecoat badge patterns
 templ renderTagContent(props TagProps) {
-	// Left icon
-	if props.IconLeft != "" {
-		<span class="tag-icon-left">
-			@renderTagIcon(props.IconLeft)
-		</span>
+	// Left icon (Basecoat badges support SVG children)
+	if props.IconLeft != nil {
+		@props.IconLeft
 	}
 	
 	// Icon-only mode
-	if props.Icon != "" && props.Text == "" {
-		<span class="tag-icon-only">
-			@renderTagIcon(props.Icon)
-		</span>
+	if props.Icon != nil && props.Text == "" {
+		@props.Icon
 	}
 	
 	// Tag text
 	if props.Text != "" {
-		<span class="tag-text">
-			{ props.Text }
-		</span>
+		{ props.Text }
 	}
 	
 	// Right icon
-	if props.IconRight != "" {
-		<span class="tag-icon-right">
-			@renderTagIcon(props.IconRight)
-		</span>
+	if props.IconRight != nil {
+		@props.IconRight
 	}
 	
-	// Remove button
-	if props.Removable {
+	// Remove functionality (separate badge pattern)
+	if props.Removable && props.OnRemove != "" {
 		<button
 			type="button"
-			class="tag-remove-button"
-			data-onclick={ props.OnRemove }
-			aria-label="Remove"
+			class="btn-sm-icon-ghost"
+			onclick={ props.OnRemove }
+			aria-label="Remove tag"
 		>
-			@renderTagIcon("x")
+			@Icon(IconProps{Name: "x", Size: "sm"})
 		</button>
 	}
 }
 
-// renderTagIcon renders an icon placeholder (to be replaced with actual Icon atom)
-templ renderTagIcon(name string) {
-	<span class="tag-icon" data-icon={ name }>
-		{ name }
-	</span>
-}

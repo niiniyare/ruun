@@ -1,0 +1,9 @@
+/* Component Extensions Index
+ * Import all custom component CSS extensions that follow Basecoat conventions
+ * These provide components that Basecoat doesn't include natively
+ */
+
+@import './avatar.css';
+@import './progress.css';
+@import './skeleton.css';
+@import './empty-state.css';

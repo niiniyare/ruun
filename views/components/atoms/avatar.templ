@@ -1,0 +1,93 @@
+package atoms
+
+// AvatarProps defines all properties for the Avatar atom using custom CSS extension
+// Uses /static/css/components/avatar.css following Basecoat conventions
+type AvatarProps struct {
+	// Image properties
+	Src       string `json:"src"`
+	Alt       string `json:"alt"`
+	Initials  string `json:"initials,omitempty"`  // Fallback text when no image
+	
+	// Visual properties
+	Size   string `json:"size,omitempty"`   // "sm", "md", "lg", "xl" 
+	Shape  string `json:"shape,omitempty"`  // "circle", "square" (default: circle)
+	
+	// HTML attributes
+	ID string `json:"id,omitempty"`
+	
+	// Additional attributes
+	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes  `json:"attributes,omitempty"`
+}
+
+// getAvatarClass generates the avatar class using our CSS extension
+func getAvatarClass(size, shape string) string {
+	class := "avatar"
+	
+	// Add size suffix
+	if size != "" && size != "md" {
+		class = "avatar-" + size
+	}
+	
+	// Add shape modifier
+	if shape == "square" {
+		class += " avatar-square"
+	} else {
+		class += " avatar-circle"
+	}
+	
+	return class
+}
+
+// buildAvatarAttributes creates img attributes
+func buildAvatarAttributes(props AvatarProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": getAvatarClass(props.Size, props.Shape),
+		"alt":   props.Alt,
+	}
+	
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Src != "" {
+		attrs["src"] = props.Src
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
+// Avatar renders an avatar using custom CSS extension
+templ Avatar(props AvatarProps) {
+	if props.Src != "" {
+		<img {buildAvatarAttributes(props)...} />
+	} else if props.Initials != "" {
+		// Fallback to initials using avatar-fallback class
+		<div 
+			class={getAvatarClass(props.Size, props.Shape) + " avatar-fallback"}
+			if props.ID != "" {
+				id={props.ID}
+			}
+		>
+			{props.Initials}
+		</div>
+	} else {
+		// Empty avatar placeholder
+		<div 
+			class={getAvatarClass(props.Size, props.Shape)}
+			if props.ID != "" {
+				id={props.ID}
+			}
+		>
+		</div>
+	}
+}

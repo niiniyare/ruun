@@ -1,170 +1,79 @@
 package atoms
 
-import (
-	"strconv"
-	"github.com/niiniyare/ruun/pkg/utils"
-)
+import "strconv"
 
-// AutocompleteVariant defines the visual style variants
-type AutocompleteVariant string
-
-const (
-	AutocompleteVariantDefault  AutocompleteVariant = "default"
-	AutocompleteVariantOutlined AutocompleteVariant = "outlined"
-	AutocompleteVariantFilled   AutocompleteVariant = "filled"
-)
-
-// AutocompleteSize defines the size variants
-type AutocompleteSize string
-
-const (
-	AutocompleteSizeXS AutocompleteSize = "xs"
-	AutocompleteSizeSM AutocompleteSize = "sm"
-	AutocompleteSizeMD AutocompleteSize = "md"
-	AutocompleteSizeLG AutocompleteSize = "lg"
-	AutocompleteSizeXL AutocompleteSize = "xl"
-)
-
-// AutocompleteState defines the visual state variants
-type AutocompleteState string
-
-const (
-	AutocompleteStateDefault  AutocompleteState = "default"
-	AutocompleteStateDisabled AutocompleteState = "disabled"
-	AutocompleteStateError    AutocompleteState = "error"
-	AutocompleteStateSuccess  AutocompleteState = "success"
-	AutocompleteStateLoading  AutocompleteState = "loading"
-)
+// Note: Autocomplete uses Basecoat select component with combobox functionality
+// Basecoat select supports search/filtering out of the box
 
 // AutocompleteOption represents an option in the dropdown
 type AutocompleteOption struct {
-	Value       string `json:"value"`
-	Label       string `json:"label"`
-	Description string `json:"description"`
-	Icon        string `json:"icon"`
-	Disabled    bool   `json:"disabled"`
+	Value       string          `json:"value"`
+	Label       string          `json:"label"`
+	Description string          `json:"description,omitempty"`
+	Icon        templ.Component `json:"icon,omitempty"`
+	Disabled    bool            `json:"disabled,omitempty"`
 }
 
-// AutocompleteProps defines all properties for the Autocomplete atom
+// AutocompleteProps defines all properties for the Autocomplete component using Basecoat select
 type AutocompleteProps struct {
 	// Core attributes
 	ID          string `json:"id"`
 	Name        string `json:"name"`
-	Value       string `json:"value"`
-	Placeholder string `json:"placeholder"`
-	
-	// Visual presentation (resolved externally)
-	Variant   AutocompleteVariant `json:"variant"`
-	Size      AutocompleteSize    `json:"size"`
-	State     AutocompleteState   `json:"state"`
-	ClassName string              `json:"className"`
+	Value       string `json:"value,omitempty"`
+	Placeholder string `json:"placeholder,omitempty"`
 	
 	// Options and configuration
-	Options     []AutocompleteOption `json:"options"`
-	MinChars    int                  `json:"minChars"`
-	MaxResults  int                  `json:"maxResults"`
-	SearchURL   string               `json:"searchURL"`
-	Debounce    int                  `json:"debounce"`
+	Options       []AutocompleteOption `json:"options"`
+	SearchURL     string               `json:"searchURL,omitempty"`     // For dynamic loading
+	MinChars      int                  `json:"minChars,omitempty"`      // Min chars before search
+	EmptyMessage  string               `json:"emptyMessage,omitempty"`  // No results message
 	
 	// Form attributes
-	Required bool `json:"required"`
-	Disabled bool `json:"disabled"`
-	Readonly bool `json:"readonly"`
-	
-	// UI features
-	ShowIcon     bool   `json:"showIcon"`
-	ShowClear    bool   `json:"showClear"`
-	FreeForm     bool   `json:"freeForm"`
-	LoadingText  string `json:"loadingText"`
-	NoResultsText string `json:"noResultsText"`
+	Required bool `json:"required,omitempty"`
+	Disabled bool `json:"disabled,omitempty"`
 	
 	// Event handlers (pre-resolved externally)
-	OnChange string `json:"onChange"`
-	OnSelect string `json:"onSelect"`
-	OnFocus  string `json:"onFocus"`
-	OnBlur   string `json:"onBlur"`
+	OnChange string `json:"onChange,omitempty"`
+	OnSelect string `json:"onSelect,omitempty"`
+	OnFocus  string `json:"onFocus,omitempty"`
+	OnBlur   string `json:"onBlur,omitempty"`
 	
 	// ARIA accessibility attributes
-	AriaLabel       string `json:"ariaLabel"`
-	AriaDescribedBy string `json:"ariaDescribedBy"`
-	AriaRequired    string `json:"ariaRequired"`
-	AriaInvalid     string `json:"ariaInvalid"`
+	AriaLabel       string `json:"ariaLabel,omitempty"`
+	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+	AriaRequired    string `json:"ariaRequired,omitempty"`
+	AriaInvalid     string `json:"ariaInvalid,omitempty"`
 	
 	// Additional HTML attributes
-	TabIndex     int                   `json:"tabIndex"`
-	DataAttrs    map[string]string     `json:"dataAttrs"`
-	Attributes   templ.Attributes      `json:"attributes"`
+	TabIndex   int               `json:"tabIndex,omitempty"`
+	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes  `json:"attributes,omitempty"`
 }
 
-// getAutocompleteClasses builds the CSS class string using design tokens
-func getAutocompleteClasses(props AutocompleteProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"autocomplete",
-		
-		// Variant classes (map to design tokens)
-		"autocomplete-"+string(props.Variant),
-		
-		// Size classes (map to design tokens)
-		"autocomplete-"+string(props.Size),
-		
-		// State classes (map to design tokens)
-		"autocomplete-"+string(props.State),
-		
-		// Interactive utilities
-		utils.If(props.Disabled, "autocomplete-disabled"),
-		utils.If(props.Readonly, "autocomplete-readonly"),
-		utils.If(props.Required, "autocomplete-required"),
-		utils.If(props.ShowIcon, "autocomplete-has-icon"),
-		utils.If(props.ShowClear, "autocomplete-has-clear"),
-		
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// buildAutocompleteAttributes creates all HTML attributes for the autocomplete
-func buildAutocompleteAttributes(props AutocompleteProps) templ.Attributes {
+// buildTriggerAttributes creates trigger button attributes
+func buildTriggerAttributes(props AutocompleteProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type":  "text",
-		"class": getAutocompleteClasses(props),
+		"type":           "button",
+		"popovertarget":  props.ID + "-popover",
+		"aria-haspopup":  "listbox",
+		"aria-controls":  props.ID + "-listbox",
+		"aria-expanded":  "false",
 	}
 	
-	// Core HTML attributes
+	// Core attributes
 	if props.ID != "" {
-		attrs["id"] = props.ID
-	}
-	if props.Name != "" {
-		attrs["name"] = props.Name
-	}
-	if props.Value != "" {
-		attrs["value"] = props.Value
-	}
-	if props.Placeholder != "" {
-		attrs["placeholder"] = props.Placeholder
+		attrs["id"] = props.ID + "-trigger"
 	}
 	
-	// Boolean attributes
-	if props.Required {
-		attrs["required"] = "required"
-	}
+	// State attributes
 	if props.Disabled {
 		attrs["disabled"] = "disabled"
 	}
-	if props.Readonly {
-		attrs["readonly"] = "readonly"
+	if props.Required && props.AriaRequired == "" {
+		attrs["aria-required"] = "true"
 	}
-	
-	// Autocomplete specific attributes
-	attrs["autocomplete"] = "off"
-	attrs["role"] = "combobox"
-	attrs["aria-expanded"] = "false"
-	attrs["aria-autocomplete"] = "list"
 	
 	// Event handlers
-	if props.OnChange != "" {
-		attrs["onchange"] = props.OnChange
-	}
 	if props.OnFocus != "" {
 		attrs["onfocus"] = props.OnFocus
 	}
@@ -196,7 +105,7 @@ func buildAutocompleteAttributes(props AutocompleteProps) templ.Attributes {
 		attrs["data-"+key] = value
 	}
 	
-	// Merge custom attributes (allows override)
+	// Merge custom attributes
 	for key, value := range props.Attributes {
 		attrs[key] = value
 	}
@@ -204,47 +113,135 @@ func buildAutocompleteAttributes(props AutocompleteProps) templ.Attributes {
 	return attrs
 }
 
-// Autocomplete renders a pure presentation autocomplete atom
+// buildSearchInputAttributes creates search input attributes  
+func buildSearchInputAttributes(props AutocompleteProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"type":               "text",
+		"role":               "combobox",
+		"autocomplete":       "off",
+		"aria-autocomplete":  "list",
+		"aria-controls":      props.ID + "-listbox",
+		"aria-expanded":      "false",
+	}
+	
+	// Core attributes
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+	if props.Placeholder != "" {
+		attrs["placeholder"] = props.Placeholder
+	}
+	
+	// State attributes
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	if props.Required {
+		attrs["required"] = "required"
+	}
+	
+	// Event handlers  
+	if props.OnChange != "" {
+		attrs["oninput"] = props.OnChange
+	}
+	
+	// Search configuration
+	if props.MinChars > 0 {
+		attrs["data-min-chars"] = strconv.Itoa(props.MinChars)
+	}
+	if props.SearchURL != "" {
+		attrs["data-search-url"] = props.SearchURL
+	}
+	
+	return attrs
+}
+
+// Autocomplete renders a Basecoat select component with combobox search functionality
 templ Autocomplete(props AutocompleteProps) {
-	<div class="autocomplete-container">
-		<input {buildAutocompleteAttributes(props)...} />
+	<div class="select" data-select-initialized="true">
+		// Hidden input for form submission
+		if props.Name != "" {
+			<input 
+				type="hidden" 
+				name={props.Name} 
+				value={props.Value}
+				if props.ID != "" {
+					id={props.ID + "-input"}
+				}
+			/>
+		}
 		
-		// Options dropdown (placeholder)
-		if len(props.Options) > 0 {
-			<div class="autocomplete-dropdown">
+		// Trigger button (shows selected value)
+		<button {buildTriggerAttributes(props)...}>
+			if props.Value != "" {
+				// Find and display selected option
 				for _, option := range props.Options {
-					@renderAutocompleteOption(option)
+					if option.Value == props.Value {
+						if option.Icon != nil {
+							@option.Icon
+						}
+						{option.Label}
+					}
+				}
+			} else if props.Placeholder != "" {
+				<span class="text-muted-foreground">{props.Placeholder}</span>
+			} else {
+				<span class="text-muted-foreground">Select...</span>
+			}
+		</button>
+		
+		// Popover dropdown with search
+		<div 
+			popover 
+			class="popover" 
+			id={props.ID + "-popover"}
+			data-side="bottom"
+			data-align="start"
+		>
+			// Search header (for filtering)
+			<header>
+				@Icon(IconProps{Name: "search", Size: "sm"})
+				<input {buildSearchInputAttributes(props)...} />
+			</header>
+			
+			// Options listbox
+			<div 
+				role="listbox" 
+				id={props.ID + "-listbox"}
+				aria-labelledby={props.ID + "-trigger"}
+				if props.EmptyMessage != "" {
+					data-empty={props.EmptyMessage}
+				}
+			>
+				for _, option := range props.Options {
+					@renderAutocompleteOption(option, props)
 				}
 			</div>
-		}
-		
-		// Loading indicator
-		if props.LoadingText != "" {
-			<div class="autocomplete-loading">
-				{ utils.IfElse(props.LoadingText != "", props.LoadingText, "Loading...") }
-			</div>
-		}
-		
-		// No results message
-		if props.NoResultsText != "" {
-			<div class="autocomplete-no-results">
-				{ utils.IfElse(props.NoResultsText != "", props.NoResultsText, "No results found") }
-			</div>
-		}
+		</div>
 	</div>
 }
 
-// renderAutocompleteOption renders an option placeholder
-templ renderAutocompleteOption(option AutocompleteOption) {
-	<div class="autocomplete-option" data-value={ option.Value }>
-		if option.Icon != "" {
-			<span class="autocomplete-option-icon" data-icon={ option.Icon }>{ option.Icon }</span>
+// renderAutocompleteOption renders a single option using Basecoat select patterns
+templ renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps) {
+	<div 
+		role="option" 
+		data-value={option.Value}
+		if option.Disabled {
+			aria-disabled="true"
+		}
+		if props.OnSelect != "" {
+			onclick={props.OnSelect}
+		}
+	>
+		if option.Icon != nil {
+			@option.Icon
 		}
 		
-		<span class="autocomplete-option-label">{ option.Label }</span>
-		
-		if option.Description != "" {
-			<span class="autocomplete-option-description">{ option.Description }</span>
-		}
+		<span class="flex-1">
+			{option.Label}
+			if option.Description != "" {
+				<span class="text-muted-foreground text-sm block">{option.Description}</span>
+			}
+		</span>
 	</div>
 }

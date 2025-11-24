@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "strconv"
 
-// Note: Icon sizing handled via CSS classes like size-4, size-6, etc.
-// No custom size or state classes needed
+// Note: Icon sizing handled via Basecoat contextual styling
+// Icons inherit size from parent context or use data-size attribute
 
 // IconProps defines all properties for the Icon atom
 type IconProps struct {
@@ -19,8 +19,8 @@ type IconProps struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
 
-	// Visual presentation
-	ClassName string `json:"className"` // CSS classes like "size-4" for sizing
+	// Basecoat sizing (optional - inherits from context by default)
+	Size string `json:"size,omitempty"` // "sm", "md", "lg" (empty = inherit from context)
 
 	// SVG-specific attributes
 	Fill        string `json:"fill"`
@@ -44,18 +44,27 @@ type IconProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// Simple class handling - no custom icon classes needed
-func getIconClasses(props IconProps) string {
-	if props.ClassName != "" {
-		return props.ClassName
+// getIconAttributes builds SVG attributes with contextual sizing
+func getIconSize(size string) (string, string) {
+	switch size {
+	case "sm":
+		return "16", "16"
+	case "lg":
+		return "32", "32"
+	case "md", "":
+		return "24", "24"
+	default:
+		return "24", "24"
 	}
-	return "size-4" // Default size
 }
 
 // buildIconAttributes creates all HTML attributes for the icon
 func buildIconAttributes(props IconProps) templ.Attributes {
+	width, height := getIconSize(props.Size)
+
 	attrs := templ.Attributes{
-		"class":           getIconClasses(props),
+		"width":           width,
+		"height":          height,
 		"xmlns":           "http://www.w3.org/2000/svg",
 		"stroke-linecap":  "round",
 		"stroke-linejoin": "round",
@@ -116,6 +125,11 @@ func buildIconAttributes(props IconProps) templ.Attributes {
 	// Tab index
 	if props.TabIndex != 0 {
 		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+
+	// Size data attribute for Basecoat context
+	if props.Size != "" {
+		attrs["data-size"] = props.Size
 	}
 
 	// Data attributes

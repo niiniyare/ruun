@@ -8,68 +8,32 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// TagVariant defines the visual style variants
-type TagVariant string
+// Note: Tags use Basecoat badge classes for styling
+// Available variants: primary, secondary, destructive, outline
+// State handled via data attributes and HTML attributes
 
-const (
-	TagVariantDefault     TagVariant = "default"
-	TagVariantSecondary   TagVariant = "secondary"
-	TagVariantSuccess     TagVariant = "success"
-	TagVariantWarning     TagVariant = "warning"
-	TagVariantDestructive TagVariant = "destructive"
-	TagVariantOutline     TagVariant = "outline"
-)
-
-// TagSize defines the size variants
-type TagSize string
-
-const (
-	TagSizeXS TagSize = "xs"
-	TagSizeSM TagSize = "sm"
-	TagSizeMD TagSize = "md"
-	TagSizeLG TagSize = "lg"
-	TagSizeXL TagSize = "xl"
-)
-
-// TagState defines the visual state variants
-type TagState string
-
-const (
-	TagStateDefault  TagState = "default"
-	TagStateDisabled TagState = "disabled"
-	TagStateSelected TagState = "selected"
-	TagStateActive   TagState = "active"
-	TagStateHover    TagState = "hover"
-)
-
-// TagProps defines all properties for the Tag atom
+// TagProps defines all properties for the Tag atom using Basecoat badge classes
 type TagProps struct {
 	// Core attributes
 	ID    string `json:"id"`
 	Text  string `json:"text"`
 	Value string `json:"value"`
 
-	// Visual presentation (resolved externally)
-	Variant   TagVariant `json:"variant"`
-	Size      TagSize    `json:"size"`
-	State     TagState   `json:"state"`
-	ClassName string     `json:"className"`
+	// Basecoat badge variants only
+	Variant string `json:"variant,omitempty"` // "primary", "secondary", "destructive", "outline"
 
 	// Icon configuration
-	Icon      string `json:"icon"`
-	IconLeft  string `json:"iconLeft"`
-	IconRight string `json:"iconRight"`
+	Icon      templ.Component `json:"icon,omitempty"`
+	IconLeft  templ.Component `json:"iconLeft,omitempty"`
+	IconRight templ.Component `json:"iconRight,omitempty"`
 
 	// Interactive features
-	Selected  bool `json:"selected"`
-	Removable bool `json:"removable"`
-	Clickable bool `json:"clickable"`
-	Disabled  bool `json:"disabled"`
+	Selected  bool `json:"selected,omitempty"`
+	Removable bool `json:"removable,omitempty"`
+	Clickable bool `json:"clickable,omitempty"`
+	Disabled  bool `json:"disabled,omitempty"`
 
 	// Event handlers (pre-resolved externally)
 	OnClick  string `json:"onClick"`
@@ -88,51 +52,22 @@ type TagProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getTagClasses builds the CSS class string using design tokens
-func getTagClasses(props TagProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"tag",
+// getBadgeClass generates the Basecoat badge class
+func getBadgeClass(variant string) string {
+	class := "badge"
 
-		// Variant classes (map to design tokens)
-		"tag-"+string(props.Variant),
+	// Add variant suffix if not primary/default
+	if variant != "" && variant != "primary" {
+		class = "badge-" + variant
+	}
 
-		// Size classes (map to design tokens)
-		"tag-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"tag-"+string(props.State),
-
-		// Interactive utilities
-		utils.If(props.Clickable, "tag-clickable"),
-		utils.If(props.Removable, "tag-removable"),
-		utils.If(props.Selected, "tag-selected"),
-		utils.If(props.Disabled, "tag-disabled"),
-
-		// Icon-specific classes
-		utils.If(props.Icon != "" && props.Text == "", "tag-icon-only"),
-		utils.If(props.IconLeft != "", "tag-has-icon-left"),
-		utils.If(props.IconRight != "", "tag-has-icon-right"),
-
-		// Custom classes
-		props.ClassName,
-	)
+	return class
 }
 
 // buildTagAttributes creates all HTML attributes for the tag
 func buildTagAttributes(props TagProps) templ.Attributes {
-	element := "span"
-	if props.Clickable || props.OnClick != "" {
-		element = "button"
-	}
-
 	attrs := templ.Attributes{
-		"class": getTagClasses(props),
-	}
-
-	// Button-specific attributes
-	if element == "button" {
-		attrs["type"] = "button"
+		"class": getBadgeClass(props.Variant),
 	}
 
 	// Core HTML attributes
@@ -175,6 +110,11 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
 	}
 
+	// State data attributes for Basecoat context
+	if props.Selected {
+		attrs["aria-pressed"] = "true"
+	}
+
 	// Data attributes
 	for key, value := range props.DataAttrs {
 		attrs["data-"+key] = value
@@ -188,7 +128,7 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 	return attrs
 }
 
-// Tag renders a pure presentation tag atom
+// Tag renders a Basecoat badge atom
 func Tag(props TagProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -211,7 +151,7 @@ func Tag(props TagProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if props.Clickable || props.OnClick != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<button")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<a")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -219,7 +159,7 @@ func Tag(props TagProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " href=\"#\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -227,7 +167,7 @@ func Tag(props TagProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -257,7 +197,7 @@ func Tag(props TagProps) templ.Component {
 	})
 }
 
-// renderTagContent renders the tag content
+// renderTagContent renders the tag content using Basecoat badge patterns
 func renderTagContent(props TagProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -279,149 +219,61 @@ func renderTagContent(props TagProps) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.IconLeft != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"tag-icon-left\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = renderTagIcon(props.IconLeft).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span>")
+		if props.IconLeft != nil {
+			templ_7745c5c3_Err = props.IconLeft.Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Icon != "" && props.Text == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<span class=\"tag-icon-only\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = renderTagIcon(props.Icon).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span>")
+		if props.Icon != nil && props.Text == "" {
+			templ_7745c5c3_Err = props.Icon.Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if props.Text != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span class=\"tag-text\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 215, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 150, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span>")
+		}
+		if props.IconRight != nil {
+			templ_7745c5c3_Err = props.IconRight.Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.IconRight != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"tag-icon-right\">")
+		if props.Removable && props.OnRemove != "" {
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnRemove)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = renderTagIcon(props.IconRight).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<button type=\"button\" class=\"btn-sm-icon-ghost\" onclick=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span>")
+			var templ_7745c5c3_Var4 templ.ComponentScript = props.OnRemove
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		if props.Removable {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<button type=\"button\" class=\"tag-remove-button\" data-onclick=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" aria-label=\"Remove tag\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.OnRemove)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 231, Col: 32}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			templ_7745c5c3_Err = Icon(IconProps{Name: "x", Size: "sm"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" aria-label=\"Remove\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = renderTagIcon("x").Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		return nil
-	})
-}
-
-// renderTagIcon renders an icon placeholder (to be replaced with actual Icon atom)
-func renderTagIcon(name string) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"tag-icon\" data-icon=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 241, Col: 40}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 242, Col: 8}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
 		}
 		return nil
 	})
