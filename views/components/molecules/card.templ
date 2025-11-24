@@ -22,14 +22,25 @@ type CardProps struct {
 	ID        string `json:"id"`
 	AriaLabel string `json:"ariaLabel"`
 	
-	// Optional className for extensions (use sparingly)
-	ClassName string `json:"className"`
+	// Semantic variants (replaces ClassName)
+	Border   bool `json:"border"`   // Add border styling
+	Compact  bool `json:"compact"`  // Compact spacing
+	Elevated bool `json:"elevated"` // Elevated appearance
 }
 
 // Card renders a Basecoat card component with header, content, and footer
 templ Card(props CardProps) {
 	<div 
-		class={ getCardClass(props.ClassName) }
+		class="card"
+		if props.Border {
+			data-variant="border"
+		}
+		if props.Compact {
+			data-size="compact"
+		}
+		if props.Elevated {
+			data-elevation="elevated"
+		}
 		if props.ID != "" {
 			id={ props.ID }
 		}
@@ -78,13 +89,7 @@ templ Card(props CardProps) {
 	</div>
 }
 
-// getCardClass returns the appropriate CSS class for the card
-func getCardClass(className string) string {
-	if className != "" {
-		return "card " + className
-	}
-	return "card"
-}
+// getCardClass removed - now using static "card" class with data attributes
 
 // CardWithBorder creates a card with border styling
 templ CardWithBorder(props CardProps) {
@@ -97,7 +102,7 @@ templ CardWithBorder(props CardProps) {
 		HeaderAction: props.HeaderAction,
 		ID:           props.ID,
 		AriaLabel:    props.AriaLabel,
-		ClassName:    "border-t",
+		Border:       true,
 	})
 }
 
@@ -131,15 +136,17 @@ templ cardActions(actions []atoms.ButtonProps) {
 // ImageCard creates a card with an image in the content section
 templ ImageCard(props CardProps, imageSrc, imageAlt string) {
 	@Card(CardProps{
-		Title:       props.Title,
-		Description: props.Description,
-		Header:      props.Header,
-		Content:     cardImageContent(imageSrc, imageAlt, props.Content),
-		Footer:      props.Footer,
+		Title:        props.Title,
+		Description:  props.Description,
+		Header:       props.Header,
+		Content:      cardImageContent(imageSrc, imageAlt, props.Content),
+		Footer:       props.Footer,
 		HeaderAction: props.HeaderAction,
-		ID:          props.ID,
-		AriaLabel:   props.AriaLabel,
-		ClassName:   props.ClassName,
+		ID:           props.ID,
+		AriaLabel:    props.AriaLabel,
+		Border:       props.Border,
+		Compact:      props.Compact,
+		Elevated:     props.Elevated,
 	})
 }
 

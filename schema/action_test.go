@@ -148,8 +148,10 @@ func (suite *ActionTestSuite) TestActionApplyTheme() {
 	suite.Require().Nil(action.Theme) // Should remain nil
 	// Test applying valid theme
 	theme := &ActionTheme{
-		Colors:       map[string]string{"primary": "#007bff"},
-		BorderRadius: "8px",
+		BaseStyle: BaseStyle{
+			Colors:       map[string]string{"primary": "#007bff"},
+			BorderRadius: "8px",
+		},
 	}
 	action.ApplyTheme(theme)
 	suite.Require().NotNil(action.Theme) // Should be initialized
@@ -496,12 +498,14 @@ func (suite *ActionTestSuite) TestActionTheme() {
 		Type: ActionSubmit,
 		Text: "Themed Button",
 		Theme: &ActionTheme{
-			Colors: map[string]string{
-				"primary": "#007bff",
-				"hover":   "#0056b3",
+			BaseStyle: BaseStyle{
+				Colors: map[string]string{
+					"primary": "#007bff",
+					"hover":   "#0056b3",
+				},
+				BorderRadius: "8px",
+				CustomCSS:    "font-weight: bold;",
 			},
-			BorderRadius: "8px",
-			CustomCSS:    "font-weight: bold;",
 		},
 	}
 	// Test theme properties

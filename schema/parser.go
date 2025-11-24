@@ -705,8 +705,10 @@ func (p *Parser) migrateV1_0ToV1_1(schema *Schema) error {
 	if schema.Meta == nil {
 		now := time.Now()
 		schema.Meta = &Meta{
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseMetadata: BaseMetadata{
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
 		}
 	}
 	schema.Version = "1.1.0"

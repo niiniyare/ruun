@@ -231,7 +231,12 @@ templ renderTopbar(props PageLayoutProps) {
 
 // renderPageHeader renders the page header
 templ renderPageHeader(header *PageHeaderConfig) {
-	<header class={ "page-header border-b border-border " + header.Class }>
+	<header 
+		class="page-header border-b border-border"
+		if header.Class != "" {
+			data-custom={ header.Class }
+		}
+	>
 		<div class="container mx-auto px-6 py-6">
 			// Breadcrumbs
 			if len(header.Breadcrumbs) > 0 {
@@ -308,7 +313,12 @@ templ renderPageHeader(header *PageHeaderConfig) {
 
 // renderPageFooter renders the page footer
 templ renderPageFooter(footer *PageFooterConfig) {
-	<footer class={ "page-footer border-t border-border bg-background " + footer.Class }>
+	<footer 
+		class="page-footer border-t border-border bg-background"
+		if footer.Class != "" {
+			data-custom={ footer.Class }
+		}
+	>
 		<div class="container mx-auto px-6 py-6">
 			<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 				// Copyright and links

@@ -189,9 +189,11 @@ func (s *FileStorage) GetMetadata(ctx context.Context, id string) (*StorageMetad
 	}
 
 	return &StorageMetadata{
-		ID:        id,
-		Size:      info.Size(),
-		UpdatedAt: info.ModTime(),
+		ID:   id,
+		Size: info.Size(),
+		BaseMetadata: BaseMetadata{
+			UpdatedAt: info.ModTime(),
+		},
 	}, nil
 }
 

@@ -117,13 +117,11 @@ type StorageFilter struct {
 
 // StorageMetadata holds schema metadata
 type StorageMetadata struct {
-	ID          string
-	Version     string
-	Size        int64
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	AccessCount int64
-	LastAccess  time.Time
+	BaseMetadata        // Embedded base metadata
+	ID          string  // Storage identifier
+	Size        int64   // Size in bytes
+	AccessCount int64   // Number of accesses
+	LastAccess  time.Time // Last access timestamp
 }
 
 // NewRegistry creates a new schema registry

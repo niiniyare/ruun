@@ -49,10 +49,10 @@ type Translation struct {
 
 // TranslationMetadata holds translation file metadata
 type TranslationMetadata struct {
-	Version     string `json:"version"`
-	Author      string `json:"author"`
-	LastUpdated string `json:"lastUpdated"`
-	Description string `json:"description"`
+	BaseMetadata                     // Embedded base metadata
+	Author      string `json:"author"`      // Translation author
+	LastUpdated string `json:"lastUpdated"` // Last updated timestamp (string format for compatibility)
+	Description string `json:"description"` // Translation description
 }
 
 // TranslateParams holds parameters for translation

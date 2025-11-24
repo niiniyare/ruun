@@ -210,10 +210,16 @@ type Alpine struct {
 	XEffect     string `json:"xEffect,omitempty" validate:"js_function"`    // Side effects
 }
 
+// BaseMetadata contains core metadata fields shared across all metadata structures
+type BaseMetadata struct {
+	Version   string    `json:"version"`   // Version identifier
+	CreatedAt time.Time `json:"createdAt"` // Creation timestamp
+	UpdatedAt time.Time `json:"updatedAt"` // Last update timestamp
+}
+
 // Meta contains metadata and tracking information
 type Meta struct {
-	CreatedAt     time.Time        `json:"createdAt"`                                                  // Creation timestamp
-	UpdatedAt     time.Time        `json:"updatedAt"`                                                  // Last update timestamp
+	BaseMetadata                                                                                // Embedded base metadata
 	CreatedBy     string           `json:"createdBy,omitempty" validate:"uuid"`                        // Creator user ID
 	UpdatedBy     string           `json:"updatedBy,omitempty" validate:"uuid"`                        // Last updater user ID
 	Deprecated    bool             `json:"deprecated,omitempty"`                                       // Schema is deprecated

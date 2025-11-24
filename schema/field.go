@@ -903,7 +903,7 @@ func (v *fieldValueValidator) validateString(f *Field, value any) error {
 			if val.Messages != nil && val.Messages.Pattern != "" {
 				msg = val.Messages.Pattern
 			}
-			return v.createError(f, "pattern", msg)
+			return v.createError(f, "pattern", "%s", msg)
 		}
 	}
 

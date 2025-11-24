@@ -61,14 +61,16 @@ func (s *MemoryStorage) Set(ctx context.Context, id string, data []byte) error {
 
 	// Update metadata
 	if meta, ok := s.metadata[id]; ok {
-		meta.UpdatedAt = now
+		meta.BaseMetadata.UpdatedAt = now
 		meta.Size = int64(len(data))
 	} else {
 		s.metadata[id] = &StorageMetadata{
-			ID:        id,
-			Size:      int64(len(data)),
-			CreatedAt: now,
-			UpdatedAt: now,
+			ID:   id,
+			Size: int64(len(data)),
+			BaseMetadata: BaseMetadata{
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
 		}
 	}
 
@@ -173,10 +175,12 @@ func (s *MemoryStorage) SetBatch(ctx context.Context, items map[string][]byte) e
 	for id, data := range items {
 		s.schemas[id] = data
 		s.metadata[id] = &StorageMetadata{
-			ID:        id,
-			Size:      int64(len(data)),
-			CreatedAt: now,
-			UpdatedAt: now,
+			ID:   id,
+			Size: int64(len(data)),
+			BaseMetadata: BaseMetadata{
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
 		}
 	}
 

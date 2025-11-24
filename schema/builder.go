@@ -35,8 +35,10 @@ func NewSchemaBuilder(id string, schemaType Type, title string) *SchemaBuilder {
 			fieldIndex:  make(map[string]int),
 			actionIndex: make(map[string]int),
 			Meta: &Meta{
-				CreatedAt: now,
-				UpdatedAt: now,
+				BaseMetadata: BaseMetadata{
+					CreatedAt: now,
+					UpdatedAt: now,
+				},
 			},
 		},
 		mixins:            mixinRegistry,

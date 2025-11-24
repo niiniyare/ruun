@@ -288,8 +288,10 @@ func (r *MixinRegistry) registerBuiltInMixins() {
 			},
 		},
 		Meta: &Meta{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			BaseMetadata: BaseMetadata{
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 		},
 	}
 	r.registerBuiltIn(auditMixin)
@@ -359,8 +361,10 @@ func (r *MixinRegistry) registerBuiltInMixins() {
 			},
 		},
 		Meta: &Meta{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			BaseMetadata: BaseMetadata{
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 		},
 	}
 	r.registerBuiltIn(addressMixin)
@@ -411,8 +415,10 @@ func (r *MixinRegistry) registerBuiltInMixins() {
 			},
 		},
 		Meta: &Meta{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			BaseMetadata: BaseMetadata{
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 		},
 	}
 	r.registerBuiltIn(contactMixin)
@@ -456,8 +462,10 @@ func (r *MixinRegistry) registerBuiltInMixins() {
 			},
 		},
 		Meta: &Meta{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			BaseMetadata: BaseMetadata{
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 		},
 	}
 	r.registerBuiltIn(statusMixin)

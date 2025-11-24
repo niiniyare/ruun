@@ -37,11 +37,7 @@ type TabsProps struct {
 	
 	// Layout and styling
 	Orientation string `json:"orientation"` // "horizontal" | "vertical"
-	ClassName   string `json:"className"`
-	
-	// Tab list customization
-	TabListClassName string `json:"tabListClassName"`
-	FullWidth        bool   `json:"fullWidth"`
+	FullWidth   bool   `json:"fullWidth"`   // Full width tab list
 	
 	// Event handlers
 	OnTabChange string `json:"onTabChange"` // JavaScript function name
@@ -58,7 +54,7 @@ type TabsProps struct {
 // Tabs renders a Basecoat tabs component
 templ Tabs(props TabsProps) {
 	<div 
-		class={ getTabsClass(props.ClassName) }
+		class="tabs"
 		id={ props.ID }
 		if props.AriaLabel != "" {
 			aria-label={ props.AriaLabel }
@@ -68,7 +64,10 @@ templ Tabs(props TabsProps) {
 		<nav 
 			role="tablist"
 			aria-orientation={ getOrientation(props.Orientation) }
-			class={ getTabListClass(props.TabListClassName, props.FullWidth) }
+			class="tabs-list"
+		if props.FullWidth {
+			data-width="full"
+		}
 		>
 			for i, tab := range props.Items {
 				<button
@@ -148,28 +147,7 @@ templ Tabs(props TabsProps) {
 	@tabsScript(props.ID)
 }
 
-// getTabsClass returns the CSS class for the tabs container
-func getTabsClass(className string) string {
-	if className != "" {
-		return "tabs " + className
-	}
-	return "tabs"
-}
-
-// getTabListClass returns the CSS class for the tab list
-func getTabListClass(className string, fullWidth bool) string {
-	classes := ""
-	if fullWidth {
-		classes += "w-full"
-	}
-	if className != "" {
-		if classes != "" {
-			classes += " "
-		}
-		classes += className
-	}
-	return classes
-}
+// Removed getTabsClass and getTabListClass - now using static classes with data attributes
 
 // getOrientation returns the ARIA orientation value
 func getOrientation(orientation string) string {
@@ -252,10 +230,9 @@ templ SimpleTabs(id string, items []TabItem) {
 // FullWidthTabs creates tabs that span the full width
 templ FullWidthTabs(id string, items []TabItem) {
 	@Tabs(TabsProps{
-		ID:               id,
-		Items:            items,
-		FullWidth:        true,
-		TabListClassName: "grid w-full",
+		ID:        id,
+		Items:     items,
+		FullWidth: true,
 	})
 }
 
@@ -265,7 +242,6 @@ templ VerticalTabs(id string, items []TabItem) {
 		ID:          id,
 		Items:       items,
 		Orientation: "vertical",
-		ClassName:   "flex flex-row gap-4",
 	})
 }
 
@@ -302,13 +278,12 @@ templ CardTabs(id string, items []TabItem, title, description string) {
 	</div>
 }
 
-// NavigationTabs creates tabs that look like navigation
+// NavigationTabs creates tabs that look like navigation  
 templ NavigationTabs(id string, items []TabItem) {
 	@Tabs(TabsProps{
-		ID:               id,
-		Items:            items,
-		TabListClassName: "border-b border-border",
-		ClassName:        "w-full",
+		ID:        id,
+		Items:     items,
+		FullWidth: true,
 	})
 }
 

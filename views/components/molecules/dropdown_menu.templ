@@ -63,9 +63,8 @@ type DropdownMenuProps struct {
 	Side  string `json:"side"`  // "top", "bottom", "left", "right"
 	Align string `json:"align"` // "start", "center", "end"
 	
-	// Styling
-	MinWidth   string `json:"minWidth"`
-	ClassName  string `json:"className"`
+	// Styling - semantic width options
+	WidthSize  string `json:"widthSize"` // "sm", "md", "lg", "xl" or custom
 	
 	// ARIA
 	AriaLabel string `json:"ariaLabel"`
@@ -105,7 +104,7 @@ templ DropdownMenu(props DropdownMenuProps) {
 		<!-- Popover Content -->
 		<div 
 			popover
-			class={ getPopoverClass(props.MinWidth, props.ClassName) }
+			class={ getPopoverClass(props.WidthSize) }
 			id={ props.ID + "-popover" }
 			data-side={ props.Side }
 			data-align={ props.Align }
@@ -167,21 +166,16 @@ func getTriggerText(trigger, buttonText string) string {
 	return trigger
 }
 
-// getPopoverClass returns the CSS class for the popover
-func getPopoverClass(minWidth, className string) string {
-	classes := "popover"
-	
-	if minWidth != "" {
-		classes += " " + minWidth
-	} else {
-		classes += " min-w-56"
+// getPopoverClass returns the CSS class for the popover without concatenation
+func getPopoverClass(widthSize string) string {
+	// Static mapping of width sizes
+	switch widthSize {
+	case "sm": return "popover min-w-40"
+	case "md": return "popover min-w-56"
+	case "lg": return "popover min-w-72"
+	case "xl": return "popover min-w-96"
+	default: return "popover min-w-56" // default md
 	}
-	
-	if className != "" {
-		classes += " " + className
-	}
-	
-	return classes
 }
 
 // menuGroup renders a group of menu items
