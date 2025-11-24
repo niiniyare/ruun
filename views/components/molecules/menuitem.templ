@@ -1,8 +1,8 @@
 package molecules
 
 import (
+	"strings"
 	"fmt"
-	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 
@@ -39,14 +39,13 @@ type MenuItemProps struct {
 	Target      string       `json:"target,omitempty"` // For links: _blank, _self, etc.
 	ID          string       `json:"id,omitempty"`
 	Name        string       `json:"name,omitempty"`
-	ClassName   string       `json:"className,omitempty"`
 
 	// Visual elements
 	Icon         string                `json:"icon,omitempty"`
 	IconLeft     string                `json:"iconLeft,omitempty"`
 	IconRight    string                `json:"iconRight,omitempty"`
 	Badge        string                `json:"badge,omitempty"`
-	BadgeVariant atoms.BadgeVariant    `json:"badgeVariant,omitempty"`
+	BadgeVariant string               `json:"badgeVariant,omitempty"`
 
 	// States
 	Active      bool `json:"active,omitempty"`
@@ -75,72 +74,82 @@ type MenuItemProps struct {
 	OnSelect string `json:"onSelect,omitempty"`
 }
 
-// getMenuItemClasses returns compiled theme classes for menu items
+// getMenuItemClasses returns compiled Basecoat classes for menu items
 func getMenuItemClasses(props MenuItemProps) string {
 	if props.Type == MenuItemTypeDivider {
-		return utils.TwMerge(
-			"menu-item-divider",
-			props.ClassName,
-		)
+		return "menu-item-divider"
 	}
 
-	return utils.TwMerge(
-		"menu-item",
-		fmt.Sprintf("menu-item-%s", string(props.Type)),
-		fmt.Sprintf("menu-item-%s", utils.IfElse(string(props.Size) != "", string(props.Size), "md")),
-		utils.If(props.Active || props.Selected, "menu-item-active"),
-		utils.If(props.Disabled, "menu-item-disabled"),
-		utils.If(props.Destructive, "menu-item-destructive"),
-		props.ClassName,
-	)
+	// Build classes systematically
+	classes := []string{"menu-item"}
+	
+	// Type-specific classes
+	if props.Type != "" {
+		classes = append(classes, fmt.Sprintf("menu-item-%s", string(props.Type)))
+	}
+	
+	// Size classes (default to md)
+	size := string(props.Size)
+	if size == "" {
+		size = "md"
+	}
+	classes = append(classes, fmt.Sprintf("menu-item-%s", size))
+	
+	// State classes
+	if props.Active || props.Selected {
+		classes = append(classes, "menu-item-active")
+	}
+	if props.Disabled {
+		classes = append(classes, "menu-item-disabled")
+	}
+	if props.Destructive {
+		classes = append(classes, "menu-item-destructive")
+	}
+	
+	return strings.Join(classes, " ")
 }
 
-// getCheckboxIndicatorClasses returns compiled theme classes for checkbox indicator
+// getCheckboxIndicatorClasses returns compiled Basecoat classes for checkbox indicator
 func getCheckboxIndicatorClasses(checked bool) string {
-	return utils.TwMerge(
-		"menu-item-checkbox-indicator",
-		utils.If(checked, "menu-item-checkbox-checked"),
-	)
+	classes := []string{"menu-item-checkbox-indicator"}
+	if checked {
+		classes = append(classes, "menu-item-checkbox-checked")
+	}
+	return strings.Join(classes, " ")
 }
 
-// getRadioIndicatorClasses returns compiled theme classes for radio indicator
+// getRadioIndicatorClasses returns compiled Basecoat classes for radio indicator
 func getRadioIndicatorClasses(checked bool) string {
-	return utils.TwMerge(
-		"menu-item-radio-indicator",
-		utils.If(checked, "menu-item-radio-checked"),
-	)
+	classes := []string{"menu-item-radio-indicator"}
+	if checked {
+		classes = append(classes, "menu-item-radio-checked")
+	}
+	return strings.Join(classes, " ")
 }
 
 // buildBadgeProps creates badge props from menu item props
 func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
 	variant := props.BadgeVariant
 	if variant == "" {
-		variant = atoms.BadgeVariantSecondary
+		variant = "secondary"
 	}
 
 	return atoms.BadgeProps{
-		Variant:   variant,
-		Size:      atoms.BadgeSizeSM,
-		ClassName: "menu-item-badge",
+		Variant: variant,
+		Size:    "sm",
 	}
 }
 
 // buildIconProps creates icon props for menu item icons
 func buildIconProps(name string, position string) atoms.IconProps {
-	className := "menu-item-icon"
-	if position != "" {
-		className = fmt.Sprintf("menu-item-icon menu-item-icon-%s", position)
-	}
-
-	size := atoms.IconSizeSM
+	size := "sm"
 	if position == "submenu" {
-		size = atoms.IconSizeXS
+		size = "sm"  // Keep consistent size
 	}
 
 	return atoms.IconProps{
-		Name:      name,
-		Size:      size,
-		ClassName: className,
+		Name: name,
+		Size: size,
 	}
 }
 
@@ -366,7 +375,6 @@ templ MenuLink(props MenuItemProps) {
 		BadgeVariant: props.BadgeVariant,
 		Active:       props.Active,
 		Disabled:     props.Disabled,
-		ClassName:    props.ClassName,
 		ID:           props.ID,
 		HXGet:        props.HXGet,
 		HXPost:       props.HXPost,
@@ -391,7 +399,6 @@ templ MenuButton(props MenuItemProps) {
 		BadgeVariant: props.BadgeVariant,
 		Disabled:    props.Disabled,
 		Destructive: props.Destructive,
-		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Name:        props.Name,
 		HXPost:      props.HXPost,
@@ -413,7 +420,6 @@ templ MenuCheckbox(props MenuItemProps) {
 		Value:       props.Value,
 		Checked:     props.Checked,
 		Disabled:    props.Disabled,
-		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Name:        props.Name,
 		AlpineClick: props.AlpineClick,
@@ -430,7 +436,6 @@ templ MenuRadio(props MenuItemProps) {
 		Value:       props.Value,
 		Checked:     props.Checked,
 		Disabled:    props.Disabled,
-		ClassName:   props.ClassName,
 		ID:          props.ID,
 		Name:        props.Name,
 		AlpineClick: props.AlpineClick,
@@ -447,7 +452,6 @@ templ MenuSubmenu(props MenuItemProps) {
 		Icon:        props.Icon,
 		IconLeft:    props.IconLeft,
 		SubItems:    props.SubItems,
-		ClassName:   props.ClassName,
 		ID:          props.ID,
 		AlpineData:  props.AlpineData,
 	})

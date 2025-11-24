@@ -230,7 +230,7 @@ templ renderAutocompleteOption(option AutocompleteOption, props AutocompleteProp
 			aria-disabled="true"
 		}
 		if props.OnSelect != "" {
-			onclick={props.OnSelect}
+			onclick={templ.ComponentScript{Call: props.OnSelect}}
 		}
 	>
 		if option.Icon != nil {

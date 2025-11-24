@@ -52,8 +52,8 @@ type TagProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getBadgeClass generates the Basecoat badge class
-func getBadgeClass(variant string) string {
+// getTagBadgeClass generates the Basecoat badge class for tags
+func getTagBadgeClass(variant string) string {
 	class := "badge"
 
 	// Add variant suffix if not primary/default
@@ -67,7 +67,7 @@ func getBadgeClass(variant string) string {
 // buildTagAttributes creates all HTML attributes for the tag
 func buildTagAttributes(props TagProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class": getBadgeClass(props.Variant),
+		"class": getTagBadgeClass(props.Variant),
 	}
 
 	// Core HTML attributes
@@ -85,10 +85,10 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 
 	// Event handlers
 	if props.OnClick != "" {
-		attrs["onclick"] = props.OnClick
+		attrs["onclick"] = templ.ComponentScript{Call: props.OnClick}
 	}
 	if props.OnHover != "" {
-		attrs["onmouseover"] = props.OnHover
+		attrs["onmouseover"] = templ.ComponentScript{Call: props.OnHover}
 	}
 
 	// ARIA attributes
@@ -249,7 +249,7 @@ func renderTagContent(props TagProps) templ.Component {
 			}
 		}
 		if props.Removable && props.OnRemove != "" {
-			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnRemove)
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnRemove})
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -257,7 +257,7 @@ func renderTagContent(props TagProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.ComponentScript = props.OnRemove
+			var templ_7745c5c3_Var4 templ.ComponentScript = templ.ComponentScript{Call: props.OnRemove}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

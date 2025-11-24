@@ -44,7 +44,7 @@ templ Badge(props BadgeProps) {
             }
             if props.OnClick != "" {
                 href="#"
-                onclick={ props.OnClick }
+                onclick={ templ.ComponentScript{Call: props.OnClick} }
             }
             if props.AriaLabel != "" {
                 aria-label={ props.AriaLabel }

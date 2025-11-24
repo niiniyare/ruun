@@ -1,0 +1,121 @@
+/* Menu Components CSS Extension for Basecoat
+ * Provides menu and menu-item classes following Basecoat conventions
+ */
+
+@layer components {
+  .menu {
+    @apply bg-popover text-popover-foreground min-w-32 overflow-hidden rounded-md border p-1 shadow-md;
+  }
+
+  .menu-item {
+    @apply relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors;
+    @apply focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50;
+
+    &:hover {
+      @apply bg-accent text-accent-foreground;
+    }
+
+    &[aria-current='page'],
+    &.menu-item-active {
+      @apply bg-accent text-accent-foreground font-medium;
+    }
+
+    &[data-destructive='true'],
+    &.menu-item-destructive {
+      @apply text-destructive focus:bg-destructive focus:text-destructive-foreground;
+    }
+  }
+
+  .menu-item-divider {
+    @apply -mx-1 my-1 h-px bg-muted;
+  }
+
+  .menu-item-content {
+    @apply flex flex-1 flex-col gap-0.5;
+  }
+
+  .menu-item-text {
+    @apply text-sm font-medium;
+  }
+
+  .menu-item-description {
+    @apply text-xs text-muted-foreground;
+  }
+
+  .menu-item-icon {
+    @apply mr-2 h-4 w-4 shrink-0;
+  }
+
+  .menu-item-icon-right {
+    @apply ml-auto h-4 w-4 shrink-0;
+  }
+
+  .menu-item-badge {
+    @apply ml-auto;
+  }
+
+  /* Checkbox menu items */
+  .menu-item:has(.menu-item-checkbox-input) {
+    @apply relative pl-8;
+  }
+
+  .menu-item-checkbox-input {
+    @apply sr-only;
+  }
+
+  .menu-item-checkbox-indicator {
+    @apply absolute left-2 flex h-3.5 w-3.5 items-center justify-center;
+
+    &::after {
+      @apply content-[''] h-2 w-2 rounded-sm opacity-0 transition-opacity;
+    }
+
+    .menu-item-checkbox-input:checked + & {
+      &::after {
+        @apply opacity-100 bg-current;
+      }
+    }
+  }
+
+  /* Radio menu items */
+  .menu-item:has(.menu-item-radio-input) {
+    @apply relative pl-8;
+  }
+
+  .menu-item-radio-input {
+    @apply sr-only;
+  }
+
+  .menu-item-radio-indicator {
+    @apply absolute left-2 flex h-3.5 w-3.5 items-center justify-center;
+
+    &::after {
+      @apply content-[''] h-1.5 w-1.5 rounded-full opacity-0 transition-opacity;
+    }
+
+    .menu-item-radio-input:checked + & {
+      &::after {
+        @apply opacity-100 bg-current;
+      }
+    }
+  }
+
+  /* Submenu styling */
+  .menu-item-submenu-container {
+    @apply relative;
+  }
+
+  .menu-item-submenu-dropdown {
+    @apply absolute left-full top-0 ml-1 min-w-32;
+    @apply bg-popover text-popover-foreground overflow-hidden rounded-md border p-1 shadow-md z-50;
+  }
+
+  /* Size variants */
+  .menu-item-sm {
+    @apply px-1.5 py-1 text-xs;
+  }
+
+  .menu-item-lg {
+    @apply px-3 py-2 text-base;
+  }
+}

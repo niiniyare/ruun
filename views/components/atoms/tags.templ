@@ -44,8 +44,8 @@ type TagProps struct {
 	Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// getBadgeClass generates the Basecoat badge class
-func getBadgeClass(variant string) string {
+// getTagBadgeClass generates the Basecoat badge class for tags
+func getTagBadgeClass(variant string) string {
 	class := "badge"
 	
 	// Add variant suffix if not primary/default
@@ -59,7 +59,7 @@ func getBadgeClass(variant string) string {
 // buildTagAttributes creates all HTML attributes for the tag
 func buildTagAttributes(props TagProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class": getBadgeClass(props.Variant),
+		"class": getTagBadgeClass(props.Variant),
 	}
 	
 	// Core HTML attributes
@@ -77,10 +77,10 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 	
 	// Event handlers
 	if props.OnClick != "" {
-		attrs["onclick"] = props.OnClick
+		attrs["onclick"] = templ.ComponentScript{Call: props.OnClick}
 	}
 	if props.OnHover != "" {
-		attrs["onmouseover"] = props.OnHover
+		attrs["onmouseover"] = templ.ComponentScript{Call: props.OnHover}
 	}
 	
 	// ARIA attributes
@@ -160,7 +160,7 @@ templ renderTagContent(props TagProps) {
 		<button
 			type="button"
 			class="btn-sm-icon-ghost"
-			onclick={ props.OnRemove }
+			onclick={ templ.ComponentScript{Call: props.OnRemove} }
 			aria-label="Remove tag"
 		>
 			@Icon(IconProps{Name: "x", Size: "sm"})

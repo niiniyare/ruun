@@ -75,7 +75,7 @@ type ErrorBoundaryProps struct {
 type ErrorAction struct {
 	Text        string             `json:"text"`
 	Icon        string             `json:"icon"`
-	Variant     atoms.ButtonVariant `json:"variant"`
+	Variant     string              `json:"variant"`
 	Action      string             `json:"action"` // "retry", "dismiss", "report", "custom"
 	URL         string             `json:"url"`
 	OnClick     string             `json:"onClick"`
@@ -99,36 +99,9 @@ type NotificationProps struct {
 	OnAction     string        `json:"onAction"`
 }
 
-// errorBoundaryClasses generates classes for error boundaries
+// errorBoundaryClasses generates classes for error boundaries using Basecoat alert
 func errorBoundaryClasses(props ErrorBoundaryProps) string {
-	var classes []string
-
-	// Base classes
-	classes = append(classes, "rounded-lg", "border", "p-6", "space-y-4")
-
-	// Severity-based styling
-	if len(props.Errors) > 0 {
-		severity := getHighestSeverity(props.Errors)
-		switch severity {
-		case SeverityCritical:
-			classes = append(classes, "bg-destructive/10", "border-destructive", "text-destructive-foreground")
-		case SeverityHigh:
-			classes = append(classes, "bg-destructive/5", "border-destructive/50", "text-destructive-foreground")
-		case SeverityMedium:
-			classes = append(classes, "bg-warning/10", "border-warning", "text-warning-foreground")
-		case SeverityLow:
-			classes = append(classes, "bg-muted", "border-border", "text-muted-foreground")
-		}
-	} else {
-		classes = append(classes, "bg-destructive/10", "border-destructive")
-	}
-
-	// Custom classes
-	if props.Class != "" {
-		classes = append(classes, props.Class)
-	}
-
-	return strings.Join(classes, " ")
+	return "alert-destructive"
 }
 
 // ErrorBoundary renders a comprehensive error boundary component
@@ -154,9 +127,8 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 				// Error icon
 				<div class="shrink-0 mt-0.5">
 					@atoms.Icon(atoms.IconProps{
-						Name:  getErrorIcon(props.Errors),
-						Size:  atoms.IconSizeLG,
-						ClassName: getErrorIconColor(props.Errors),
+						Name: getErrorIcon(props.Errors),
+						Size: "lg",
 					})
 				</div>
 				
@@ -184,8 +156,8 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 					x-on:click="dismiss()"
 				>
 					@atoms.Icon(atoms.IconProps{
-						Name:  "x",
-						Size:  atoms.IconSizeSM,
+						Name: "x",
+						Size: "sm",
 					})
 				</button>
 			}
@@ -200,9 +172,8 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 				>
 					<span x-text="showDetails ? 'Hide Details' : 'Show Details (' + errors.length + ' errors)'"></span>
 					@atoms.Icon(atoms.IconProps{
-						Name:  "chevron-down",
-						Size:  atoms.IconSizeXS,
-						ClassName: "transition-transform x-bind:class=\"{'rotate-180': showDetails}\"",
+						Name: "chevron-down",
+						Size: "sm",
 					})
 				</button>
 				
@@ -229,11 +200,7 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 		// Auto-retry indicator
 		if props.AutoRetry && props.RetryCount < props.MaxRetries {
 			<div class="flex items-center gap-2 text-sm">
-				@atoms.Icon(atoms.IconProps{
-					Name: "loader",
-					Size: atoms.IconSizeSM,
-					ClassName: "animate-spin",
-				})
+				@atoms.Spinner(atoms.SpinnerProps{Size: "sm"})
 				<span x-text="`Retrying... (${retryCount}/${maxRetries})`"></span>
 				<span x-text="`Next attempt in ${retryCountdown}s`"></span>
 			</div>
@@ -244,14 +211,17 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 			<div class="flex items-center gap-2 pt-2">
 				// Default recovery actions
 				if props.Recoverable {
-					@atoms.Button(atoms.ButtonProps{
-						Text:     utils.IfElse(props.RetryCount > 0, "Retry Again", "Retry"),
-						Variant:  atoms.ButtonVariantPrimary,
-						Size:     atoms.ButtonSizeSM,
-						Icon:     "refresh-cw",
-						Loading:  false,
-						OnClick:  "retry()",
-					})
+					<button
+						class="btn-sm-primary"
+						x-on:click="retry()"
+					>
+						@atoms.Icon(atoms.IconProps{Name: "refresh-cw", Size: "sm"})
+						if props.RetryCount > 0 {
+							Retry Again
+						} else {
+							Retry
+						}
+					</button>
 				}
 
 				// Custom actions
@@ -261,13 +231,15 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 
 				// Report error action
 				if len(props.Errors) > 0 && props.Errors[0].HelpURL != "" {
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Get Help",
-						Variant: atoms.ButtonVariantOutline,
-						Size:    atoms.ButtonSizeSM,
-						Icon:    "external-link",
-						OnClick: "window.open('" + props.Errors[0].HelpURL + "', '_blank')",
-					})
+					<a
+						class="btn-sm-secondary"
+						href={ props.Errors[0].HelpURL }
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						@atoms.Icon(atoms.IconProps{Name: "external-link", Size: "sm"})
+						Get Help
+					</a>
 				}
 			</div>
 		}
@@ -278,9 +250,8 @@ templ ErrorBoundary(props ErrorBoundaryProps) {
 templ errorDetailItem(errorDetail ErrorDetail) {
 	<div class="flex items-start gap-2 p-3 bg-background/50 rounded border text-sm">
 		@atoms.Icon(atoms.IconProps{
-			Name:  getErrorTypeIcon(errorDetail.Type),
-			Size:  atoms.IconSizeXS,
-			ClassName: "mt-0.5 text-muted-foreground",
+			Name: getErrorTypeIcon(errorDetail.Type),
+			Size: "sm",
 		})
 		<div class="space-y-1">
 			<div class="font-medium">{ errorDetail.Message }</div>
@@ -294,16 +265,17 @@ templ errorDetailItem(errorDetail ErrorDetail) {
 	</div>
 }
 
-// errorActionButton renders an error action button
+// errorActionButton renders an error action button using Basecoat classes
 templ errorActionButton(action ErrorAction) {
-	@atoms.Button(atoms.ButtonProps{
-		Variant:     action.Variant,
-		Size:        atoms.ButtonSizeSM,
-		Icon:        action.Icon,
-		OnClick:     action.OnClick,
-	}) {
+	<button
+		class={ getActionButtonClass(action.Variant) }
+		onclick={ templ.ComponentScript{Call: action.OnClick} }
+	>
+		if action.Icon != "" {
+			@atoms.Icon(atoms.IconProps{Name: action.Icon, Size: "sm"})
+		}
 		{ action.Text }
-	}
+	</button>
 }
 
 // Notification renders toast-style notifications
@@ -329,9 +301,8 @@ templ Notification(props NotificationProps) {
 			if props.Icon != "" || props.Type != "" {
 				<div class="shrink-0 mt-0.5">
 					@atoms.Icon(atoms.IconProps{
-						Name:  getNotificationIcon(props.Icon, props.Type),
-						Size:  atoms.IconSizeSM,
-						ClassName: getNotificationIconColor(props.Type),
+						Name: getNotificationIcon(props.Icon, props.Type),
+						Size: "sm",
 					})
 				</div>
 			}
@@ -351,13 +322,12 @@ templ Notification(props NotificationProps) {
 				if len(props.Actions) > 0 {
 					<div class="flex items-center gap-2 mt-3">
 						for _, action := range props.Actions {
-							@atoms.Button(atoms.ButtonProps{
-								Variant:     action.Variant,
-								Size:        atoms.ButtonSizeXS,
-								OnClick:     action.OnClick,
-							}) {
+							<button
+								class={ getActionButtonClass(action.Variant) }
+								onclick={ templ.ComponentScript{Call: action.OnClick} }
+							>
 								{ action.Text }
-							}
+							</button>
 						}
 					</div>
 				}
@@ -370,8 +340,8 @@ templ Notification(props NotificationProps) {
 					x-on:click="dismiss()"
 				>
 					@atoms.Icon(atoms.IconProps{
-						Name:  "x",
-						Size:  atoms.IconSizeXS,
+						Name: "x",
+						Size: "sm",
 					})
 				</button>
 			}
@@ -422,9 +392,8 @@ templ GlobalErrorHandler() {
 			<div class="bg-background rounded-lg border max-w-md w-full p-6 space-y-4">
 				<div class="flex items-center gap-3">
 					@atoms.Icon(atoms.IconProps{
-						Name:  "alert-triangle",
-						Size:  atoms.IconSizeLG,
-						ClassName: "text-destructive",
+						Name: "alert-triangle",
+						Size: "lg",
 					})
 					<div>
 						<h2 class="text-lg font-semibold text-destructive">Critical Error</h2>
@@ -435,16 +404,18 @@ templ GlobalErrorHandler() {
 				<div class="text-sm" x-text="criticalError.message"></div>
 				
 				<div class="flex items-center gap-2">
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Reload Page",
-						Variant: atoms.ButtonVariantPrimary,
-						OnClick: "window.location.reload()",
-					})
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Report Error", 
-						Variant: atoms.ButtonVariantOutline,
-						OnClick: "reportError(criticalError)",
-					})
+					<button
+						class="btn-primary"
+						onclick="window.location.reload()"
+					>
+						Reload Page
+					</button>
+					<button
+						class="btn-outline"
+						onclick="reportError(criticalError)"
+					>
+						Report Error
+					</button>
 				</div>
 			</div>
 		</div>
@@ -452,6 +423,19 @@ templ GlobalErrorHandler() {
 }
 
 // Helper functions
+
+func getActionButtonClass(variant string) string {
+	switch variant {
+	case "primary":
+		return "btn-sm-primary"
+	case "secondary":
+		return "btn-sm-secondary"
+	case "destructive":
+		return "btn-sm-destructive"
+	default:
+		return "btn-sm-outline"
+	}
+}
 
 func getHighestSeverity(errors []ErrorDetail) ErrorSeverity {
 	if len(errors) == 0 {
@@ -632,13 +616,6 @@ func getMessageClasses(hasTitle bool) string {
 	return "text-sm"
 }
 
-// getActionVariant returns the button variant for an action
-func getActionVariant(variant string) string {
-	if variant != "" {
-		return variant
-	}
-	return string(atoms.ButtonVariantOutline)
-}
 
 // getNotificationIcon returns the notification icon, preferring custom icon over type-based icon
 func getNotificationIcon(customIcon string, notificationType ErrorType) string {

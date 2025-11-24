@@ -41,7 +41,7 @@ func main() {
 	}
 
 	// Ensure output directory exists
-	if err := os.MkdirAll(*outputDir, 0755); err != nil {
+	if err := os.MkdirAll(*outputDir, 0o755); err != nil {
 		log.Fatalf("Failed to create output directory: %v", err)
 	}
 
@@ -74,7 +74,7 @@ func compileThemes(api *ruun.ThemeAPI, outputDir string, minify, verbose bool) e
 
 		// Write CSS to file
 		outputPath := filepath.Join(outputDir, theme.ID+".css")
-		if err := os.WriteFile(outputPath, []byte(css), 0644); err != nil {
+		if err := os.WriteFile(outputPath, []byte(css), 0o644); err != nil {
 			return fmt.Errorf("failed to write CSS file %s: %w", outputPath, err)
 		}
 

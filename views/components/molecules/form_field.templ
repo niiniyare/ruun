@@ -145,16 +145,16 @@ templ renderInput(props FormFieldProps) {
                 readonly
             }
             if props.OnChange != "" {
-                onchange={props.OnChange}
+                onchange={templ.ComponentScript{Call: props.OnChange}}
             }
             if props.OnBlur != "" {
-                onblur={props.OnBlur}
+                onblur={templ.ComponentScript{Call: props.OnBlur}}
             }
             if props.OnFocus != "" {
-                onfocus={props.OnFocus}
+                onfocus={templ.ComponentScript{Call: props.OnFocus}}
             }
             if props.OnInput != "" {
-                oninput={props.OnInput}
+                oninput={templ.ComponentScript{Call: props.OnInput}}
             }
             if props.HasError {
                 aria-invalid="true"
@@ -172,13 +172,13 @@ templ renderInput(props FormFieldProps) {
                 disabled
             }
             if props.OnChange != "" {
-                onchange={props.OnChange}
+                onchange={templ.ComponentScript{Call: props.OnChange}}
             }
             if props.OnBlur != "" {
-                onblur={props.OnBlur}
+                onblur={templ.ComponentScript{Call: props.OnBlur}}
             }
             if props.OnFocus != "" {
-                onfocus={props.OnFocus}
+                onfocus={templ.ComponentScript{Call: props.OnFocus}}
             }
             if props.HasError {
                 aria-invalid="true"

@@ -423,7 +423,7 @@ func renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnSelect)
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnSelect})
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -455,7 +455,7 @@ func renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 templ.ComponentScript = props.OnSelect
+			var templ_7745c5c3_Var13 templ.ComponentScript = templ.ComponentScript{Call: props.OnSelect}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13.Call)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

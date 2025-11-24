@@ -295,7 +295,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		case FormFieldTextarea:
-			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnChange, props.OnBlur, props.OnFocus, props.OnInput)
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnChange}, templ.ComponentScript{Call: props.OnBlur}, templ.ComponentScript{Call: props.OnFocus}, templ.ComponentScript{Call: props.OnInput})
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -365,7 +365,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var11 templ.ComponentScript = props.OnChange
+				var templ_7745c5c3_Var11 templ.ComponentScript = templ.ComponentScript{Call: props.OnChange}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -380,7 +380,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var12 templ.ComponentScript = props.OnBlur
+				var templ_7745c5c3_Var12 templ.ComponentScript = templ.ComponentScript{Call: props.OnBlur}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -395,7 +395,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var13 templ.ComponentScript = props.OnFocus
+				var templ_7745c5c3_Var13 templ.ComponentScript = templ.ComponentScript{Call: props.OnFocus}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -410,7 +410,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var14 templ.ComponentScript = props.OnInput
+				var templ_7745c5c3_Var14 templ.ComponentScript = templ.ComponentScript{Call: props.OnInput}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -444,7 +444,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		case FormFieldSelect:
-			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnChange, props.OnBlur, props.OnFocus)
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnChange}, templ.ComponentScript{Call: props.OnBlur}, templ.ComponentScript{Call: props.OnFocus})
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -495,7 +495,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var18 templ.ComponentScript = props.OnChange
+				var templ_7745c5c3_Var18 templ.ComponentScript = templ.ComponentScript{Call: props.OnChange}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -510,7 +510,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var19 templ.ComponentScript = props.OnBlur
+				var templ_7745c5c3_Var19 templ.ComponentScript = templ.ComponentScript{Call: props.OnBlur}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -525,7 +525,7 @@ func renderInput(props FormFieldProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var20 templ.ComponentScript = props.OnFocus
+				var templ_7745c5c3_Var20 templ.ComponentScript = templ.ComponentScript{Call: props.OnFocus}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
