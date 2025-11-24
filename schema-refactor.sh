@@ -1,40 +1,41 @@
 #!/bin/bash
-# schema-refactor.sh
+set -e
 
-set -e # Exit on error
+echo "=== Phase 1.1: Create types_v2.go ==="
+# Run Claude CLI command for Step 1.1
+git add -A && git commit -m "feat(schema): add unified Behavior, Binding, Style types"
 
-echo "=== Phase 1.1: Merge GroupStyle into SectionStyle ==="
-claude "Merge GroupStyle into SectionStyle in schema package. 
-Replace all GroupStyle usages with SectionStyle, delete GroupStyle definition.
-Verify with go build."
+echo "=== Phase 1.2: Create events_unified.go ==="
+# Run Claude CLI command for Step 1.2
+git add -A && git commit -m "feat(schema): add unified Events type"
 
-git add -A && git commit -m "refactor(schema): merge GroupStyle into SectionStyle"
+echo "=== Phase 1.3: Create layout_unified.go ==="
+# Run Claude CLI command for Step 1.3
+git add -A && git commit -m "feat(schema): add unified LayoutBlock type"
 
-echo "=== Phase 1.2: Create BaseStyle ==="
-claude "Create BaseStyle struct with Colors, CustomCSS, BorderRadius fields.
-Refactor LayoutStyle, SectionStyle, TabStyle, StepStyle, ActionTheme to embed it.
-Run go build to verify."
+echo "=== Phase 1.4: Create interfaces.go ==="
+# Run Claude CLI command for Step 1.4
+git add -A && git commit -m "feat(schema): add public interfaces"
 
-git add -A && git commit -m "refactor(schema): extract BaseStyle for style composition"
+echo "=== Phase 2: Update core structs ==="
+# Run Claude CLI commands for Steps 2.1-2.4
+git add -A && git commit -m "refactor(schema): update Schema, Field, Action, Layout to use unified types"
 
-echo "=== Phase 2: Layout Component Base ==="
-claude "Create LayoutComponent base struct with ID, Title, Description, Fields, Order, Conditional.
-Refactor Section, Group, Tab, Step to embed it. Run tests."
+echo "=== Phase 3: Fix compilation ==="
+# Run Claude CLI command for Phase 3
+git add -A && git commit -m "fix(schema): resolve compilation errors after type unification"
 
-git add -A && git commit -m "refactor(schema): extract LayoutComponent base struct"
+echo "=== Phase 4: Update builders ==="
+# Run Claude CLI command for Phase 4
+git add -A && git commit -m "refactor(schema): update builders for unified types"
 
-echo "=== Phase 3: Inline RepeatableOperations ==="
-claude "Move RepeatableOperations methods to RepeatableField, delete RepeatableOperations struct.
-Run tests to verify."
+echo "=== Phase 5: Delete old types ==="
+# Run Claude CLI command for Phase 5
+git add -A && git commit -m "refactor(schema): remove deprecated HTMX/Alpine/Style types"
 
-git add -A && git commit -m "refactor(schema): inline RepeatableOperations into RepeatableField"
+echo "=== Phase 6: Final cleanup ==="
+# Run Claude CLI command for Phase 6
+git add -A && git commit -m "chore(schema): cleanup and consolidate files"
 
-echo "=== Phase 4: BaseMetadata ==="
-claude "Create BaseMetadata with Version, CreatedAt, UpdatedAt.
-Refactor Meta, StorageMetadata, TranslationMetadata to embed it. Run tests."
-
-git add -A && git commit -m "refactor(schema): extract BaseMetadata for metadata composition"
-
-echo "=== Final Verification ==="
+echo "✅ Refactoring complete!"
 go test ./schema/...
-echo "✅ All refactoring complete!"
