@@ -90,7 +90,7 @@ type Group struct {
 	Conditional *LayoutConditional `json:"conditional,omitempty"`
 
 	// Styling
-	Style *GroupStyle `json:"style,omitempty"`
+	Style *SectionStyle `json:"style,omitempty"`
 }
 
 // Tab represents a tab in tabbed interface
@@ -178,14 +178,6 @@ type SectionStyle struct {
 	CustomCSS    string            `json:"customCSS,omitempty"`
 }
 
-type GroupStyle struct {
-	Background   string            `json:"background,omitempty"`
-	Border       string            `json:"border,omitempty"`
-	Padding      string            `json:"padding,omitempty"`
-	BorderRadius string            `json:"borderRadius,omitempty"`
-	Colors       map[string]string `json:"colors,omitempty"`
-	CustomCSS    string            `json:"customCSS,omitempty"`
-}
 
 type TabStyle struct {
 	ActiveBackground   string            `json:"activeBackground,omitempty"`
@@ -1000,7 +992,7 @@ func (b *GroupBuilder) WithConditional(conditional *LayoutConditional) *GroupBui
 	return b
 }
 
-func (b *GroupBuilder) WithStyle(style *GroupStyle) *GroupBuilder {
+func (b *GroupBuilder) WithStyle(style *SectionStyle) *GroupBuilder {
 	b.group.Style = style
 	return b
 }
