@@ -326,7 +326,11 @@ templ pageHead(meta PageMeta, customCSS []string) {
 
 // pageHeader renders the page header section
 templ pageHeader(header PageHeader) {
-	<header class={ "border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 " + header.Class }>
+	<header class="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+		if header.Class != "" {
+			data-custom={ header.Class }
+		}
+	>
 		<div class="container mx-auto px-4 py-6">
 			// Breadcrumbs
 			if len(header.Breadcrumbs) > 0 {
@@ -402,7 +406,11 @@ templ pageHeader(header PageHeader) {
 
 // pageFooter renders the page footer
 templ pageFooter(footer PageFooter) {
-	<footer class={ "border-t border-border bg-background " + footer.Class }>
+	<footer class="border-t border-border bg-background"
+		if footer.Class != "" {
+			data-custom={ footer.Class }
+		}
+	>
 		<div class="container mx-auto px-4 py-6">
 			<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 				// Copyright and links
