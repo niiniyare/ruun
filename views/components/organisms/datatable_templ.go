@@ -98,17 +98,14 @@ type DataTableColumn struct {
 	Clickable  bool `json:"clickable"`
 
 	// Appearance
-	Align       string `json:"align"`
-	Format      string `json:"format"`
-	ClassName   string `json:"className"`
-	HeaderClass string `json:"headerClass"`
-	CellClass   string `json:"cellClass"`
+	Align  string `json:"align"`
+	Format string `json:"format"`
 
 	// Type-specific configurations
-	BadgeMap     map[string]atoms.BadgeVariant `json:"badgeMap"`
-	CurrencyCode string                        `json:"currencyCode"`
-	Precision    int                           `json:"precision"`
-	DateFormat   string                        `json:"dateFormat"`
+	BadgeMap     map[string]string `json:"badgeMap"`
+	CurrencyCode string            `json:"currencyCode"`
+	Precision    int               `json:"precision"`
+	DateFormat   string            `json:"dateFormat"`
 
 	// Actions for this column
 	ActionItems []molecules.MenuItemProps `json:"actionItems"`
@@ -167,30 +164,30 @@ type DataTablePagination struct {
 
 // DataTableAction defines table-level actions
 type DataTableAction struct {
-	ID          string              `json:"id"`
-	Text        string              `json:"text"`
-	Icon        string              `json:"icon"`
-	Variant     atoms.ButtonVariant `json:"variant"`
-	Size        atoms.ButtonSize    `json:"size"`
-	Position    string              `json:"position"`
-	OnClick     string              `json:"onClick"`
-	HXGet       string              `json:"hxGet"`
-	HXPost      string              `json:"hxPost"`
-	HXTarget    string              `json:"hxTarget"`
-	HXSwap      string              `json:"hxSwap"`
-	AlpineClick string              `json:"alpineClick"`
-	Condition   string              `json:"condition"`
+	ID          string `json:"id"`
+	Text        string `json:"text"`
+	Icon        string `json:"icon"`
+	Variant     string `json:"variant"`
+	Size        string `json:"size"`
+	Position    string `json:"position"`
+	OnClick     string `json:"onClick"`
+	HXGet       string `json:"hxGet"`
+	HXPost      string `json:"hxPost"`
+	HXTarget    string `json:"hxTarget"`
+	HXSwap      string `json:"hxSwap"`
+	AlpineClick string `json:"alpineClick"`
+	Condition   string `json:"condition"`
 }
 
 // DataTableBulkAction defines bulk actions for selected rows
 type DataTableBulkAction struct {
-	ID          string              `json:"id"`
-	Text        string              `json:"text"`
-	Icon        string              `json:"icon"`
-	Variant     atoms.ButtonVariant `json:"variant"`
-	Destructive bool                `json:"destructive"`
-	Confirm     bool                `json:"confirm"`
-	OnClick     string              `json:"onClick"`
+	ID          string `json:"id"`
+	Text        string `json:"text"`
+	Icon        string `json:"icon"`
+	Variant     string `json:"variant"`
+	Destructive bool   `json:"destructive"`
+	Confirm     bool   `json:"confirm"`
+	OnClick     string `json:"onClick"`
 }
 
 // DataTableExport defines export configuration
@@ -225,19 +222,18 @@ type DataTableProps struct {
 	Variant     DataTableVariant `json:"variant"`
 	Size        DataTableSize    `json:"size"`
 	Density     DataTableDensity `json:"density"`
-	ClassName   string           `json:"className"`
 
 	// Progressive Enhancement (nil = disabled)
-	Selection   *SelectionConfig   `json:"selection"`   // Row selection features
-	Sorting     *SortingConfig     `json:"sorting"`     // Sorting functionality
-	Filtering   *FilteringConfig   `json:"filtering"`   // Filtering and search
-	Pagination  *PaginationConfig  `json:"pagination"`  // Pagination features
-	Actions     *ActionsConfig     `json:"actions"`     // Table and row actions
-	Export      *ExportConfig      `json:"export"`      // Export functionality
-	Layout      *LayoutConfig      `json:"layout"`      // Responsive, resizing
-	Performance *PerformanceConfig `json:"performance"` // Virtualization, lazy loading
-	Storage     *StorageConfig     `json:"storage"`     // State persistence
-	Analytics   *AnalyticsConfig   `json:"analytics"`   // Usage tracking
+	Selection   *SelectionConfig          `json:"selection"`   // Row selection features
+	Sorting     *SortingConfig            `json:"sorting"`     // Sorting functionality
+	Filtering   *FilteringConfig          `json:"filtering"`   // Filtering and search
+	Pagination  *PaginationConfig         `json:"pagination"`  // Pagination features
+	Actions     *ActionsConfig            `json:"actions"`     // Table and row actions
+	Export      *ExportConfig             `json:"export"`      // Export functionality
+	Layout      *DataTableLayoutConfig    `json:"layout"`      // Responsive, resizing
+	Performance *PerformanceConfig        `json:"performance"` // Virtualization, lazy loading
+	Storage     *DataTableStorageConfig   `json:"storage"`     // State persistence
+	Analytics   *DataTableAnalyticsConfig `json:"analytics"`   // Usage tracking
 
 	// Accessibility
 	AriaLabels map[string]string `json:"ariaLabels"`
@@ -277,7 +273,10 @@ type FilteringConfig struct {
 // PaginationConfig defines pagination features
 type PaginationConfig struct {
 	Enabled         bool   `json:"enabled"`
+	CurrentPage     int    `json:"currentPage"`
 	PageSize        int    `json:"pageSize"`
+	TotalPages      int    `json:"totalPages"`
+	TotalItems      int    `json:"totalItems"`
 	PageSizeOptions []int  `json:"pageSizeOptions"`
 	ShowTotal       bool   `json:"showTotal"`
 	ShowPageSize    bool   `json:"showPageSize"`
@@ -308,7 +307,7 @@ type ExportConfig struct {
 }
 
 // LayoutConfig defines responsive and layout features
-type LayoutConfig struct {
+type DataTableLayoutConfig struct {
 	Responsive bool `json:"responsive"`
 	Resizable  bool `json:"resizable"`  // Column resizing
 	Expandable bool `json:"expandable"` // Row expansion
@@ -328,7 +327,7 @@ type PerformanceConfig struct {
 }
 
 // StorageConfig defines state persistence
-type StorageConfig struct {
+type DataTableStorageConfig struct {
 	Enabled       bool   `json:"enabled"`
 	Key           string `json:"key"`           // Storage key
 	Strategy      string `json:"strategy"`      // "local", "session"
@@ -339,7 +338,7 @@ type StorageConfig struct {
 }
 
 // AnalyticsConfig defines usage tracking for DataTable
-type AnalyticsConfig struct {
+type DataTableAnalyticsConfig struct {
 	Enabled        bool   `json:"enabled"`
 	TrackSort      bool   `json:"trackSort"`      // Track column sorting
 	TrackFilter    bool   `json:"trackFilter"`    // Track filtering usage
@@ -395,7 +394,7 @@ func hasStorage(props DataTableProps) bool {
 	return props.Storage != nil && props.Storage.Enabled
 }
 
-func hasAnalytics(props DataTableProps) bool {
+func hasDataTableAnalytics(props DataTableProps) bool {
 	return props.Analytics != nil && props.Analytics.Enabled
 }
 
@@ -459,7 +458,7 @@ func DataTable(props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 407, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 406, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -478,7 +477,7 @@ func DataTable(props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabels["table"])
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 410, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 409, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -496,7 +495,7 @@ func DataTable(props DataTableProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(buildDataTableAlpineData(props))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 412, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 411, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -543,7 +542,7 @@ func DataTable(props DataTableProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if hasPagination(props) {
-			templ_7745c5c3_Err = dataTablePagination(props).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = dataTablePagination(props.Pagination).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -562,7 +561,7 @@ func DataTable(props DataTableProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if hasAnalytics(props) {
+		if hasDataTableAnalytics(props) {
 			templ_7745c5c3_Err = dataTableAnalytics(props.Analytics).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -764,7 +763,7 @@ func dataTableHeader(props DataTableProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 603, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 602, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -783,7 +782,7 @@ func dataTableHeader(props DataTableProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 606, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 605, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -845,19 +844,19 @@ func dataTableToolbar(props DataTableProps) templ.Component {
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.Search.Enabled || len(props.Filters) > 0 || props.Export.Enabled {
+		if props.Filtering.Enabled || len(props.Filtering.Filters) > 0 || props.Export.Enabled {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"datatable-toolbar\"><div class=\"datatable-toolbar-left\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Search.Enabled {
-				templ_7745c5c3_Err = dataTableSearch(props.Search).Render(ctx, templ_7745c5c3_Buffer)
+			if props.Filtering.Enabled {
+				templ_7745c5c3_Err = dataTableSearch(props.Filtering).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			if len(props.Filters) > 0 {
-				templ_7745c5c3_Err = dataTableFilters(props.Filters).Render(ctx, templ_7745c5c3_Buffer)
+			if len(props.Filtering.Filters) > 0 {
+				templ_7745c5c3_Err = dataTableFilters(props.Filtering.Filters).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -914,7 +913,7 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(search.Placeholder != "", search.Placeholder, "Search..."))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 652, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 651, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -927,7 +926,7 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(search.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 653, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 652, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -945,7 +944,7 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("debounce." + fmt.Sprintf("%dms", search.Delay) + ":performSearch()")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 656, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 655, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -966,9 +965,8 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:      "search",
-			Size:      atoms.IconSizeSM,
-			ClassName: "datatable-search-icon",
+			Name: "search",
+			Size: atoms.IconSizeSM,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -996,8 +994,8 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:   atoms.ButtonVariantGhost,
-				Size:      atoms.ButtonSizeSM,
+				Variant:   stringGhost,
+				Size:      stringSM,
 				OnClick:   "showAdvancedSearch = !showAdvancedSearch",
 				AriaLabel: "Toggle advanced search",
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
@@ -1047,7 +1045,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("filters.%s", filter.Column))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 688, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 686, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -1060,7 +1058,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(filter.Column)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 689, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 687, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -1078,7 +1076,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(option)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 691, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 689, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -1091,7 +1089,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(option)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 691, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 689, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -1205,7 +1203,7 @@ func dataTableBulkAction(action DataTableBulkAction) templ.Component {
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 			Text:    action.Text,
 			Variant: action.Variant,
-			Size:    atoms.ButtonSizeSM,
+			Size:    stringSM,
 			OnClick: utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -1322,7 +1320,7 @@ func dataTableStandard(props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(props.Columns)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 764, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 762, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -1335,7 +1333,7 @@ func dataTableStandard(props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.Pagination.TotalItems))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 765, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 763, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -1456,7 +1454,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %s", column.Width))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 805, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 803, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -1475,7 +1473,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("sortColumn('%s')", column.Key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 808, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 806, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -1493,7 +1491,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(column.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 812, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 810, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -1509,17 +1507,15 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:      "chevron-up",
-				Size:      atoms.IconSizeXS,
-				ClassName: "datatable-sort-icon datatable-sort-asc",
+				Name: "chevron-up",
+				Size: atoms.IconSizeXS,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:      "chevron-down",
-				Size:      atoms.IconSizeXS,
-				ClassName: "datatable-sort-icon datatable-sort-desc",
+				Name: "chevron-down",
+				Size: atoms.IconSizeXS,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1552,8 +1548,8 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant: atoms.ButtonVariantGhost,
-				Size:    atoms.ButtonSizeSM,
+				Variant: stringGhost,
+				Size:    stringSM,
 				OnClick: fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var35), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -1572,7 +1568,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("startResize('%s', $event)", column.Key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 844, Col: 106}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 840, Col: 106}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
@@ -1620,7 +1616,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(row.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 853, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 849, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -1638,7 +1634,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("handleRowClick('%s', $event)", row.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 855, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 851, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -1736,7 +1732,7 @@ func dataTableCell(row DataTableRow, column DataTableColumn, props DataTableProp
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("handleCellClick('%s', '%s', $event)", row.ID, column.Key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 888, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 884, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
@@ -1800,7 +1796,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				} else {
 					templ_7745c5c3_Err = atoms.Badge(atoms.BadgeProps{
 						Text:    strValue,
-						Variant: atoms.BadgeVariantDefault,
+						Variant: stringDefault,
 						Size:    atoms.BadgeSizeSM,
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
@@ -1817,7 +1813,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var43 string
 				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(column.DateFormat != "", timeValue.Format(column.DateFormat), timeValue.Format("2006-01-02")))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 917, Col: 112}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 913, Col: 112}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 				if templ_7745c5c3_Err != nil {
@@ -1835,7 +1831,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var44 string
 				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 920, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 916, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 				if templ_7745c5c3_Err != nil {
@@ -1855,7 +1851,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var45 string
 				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%."+strconv.Itoa(column.Precision)+"f", floatValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 925, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 921, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 				if templ_7745c5c3_Err != nil {
@@ -1873,7 +1869,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var46 string
 				templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(intValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 928, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 924, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 				if templ_7745c5c3_Err != nil {
@@ -1891,7 +1887,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var47 string
 				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 930, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 926, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 				if templ_7745c5c3_Err != nil {
@@ -1911,7 +1907,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var48 string
 				templ_7745c5c3_Var48, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %.1f%%", floatValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 938, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 934, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 				if templ_7745c5c3_Err != nil {
@@ -1924,7 +1920,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var49 string
 				templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f%%", floatValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 941, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 937, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 				if templ_7745c5c3_Err != nil {
@@ -1944,7 +1940,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var50 templ.SafeURL
 				templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinURLErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 946, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 942, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 				if templ_7745c5c3_Err != nil {
@@ -1957,7 +1953,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var51 string
 				templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 946, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 942, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 				if templ_7745c5c3_Err != nil {
@@ -1977,7 +1973,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var52 string
 				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 950, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 946, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 				if templ_7745c5c3_Err != nil {
@@ -1997,7 +1993,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var53 string
 				templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 954, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 950, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 				if templ_7745c5c3_Err != nil {
@@ -2015,7 +2011,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var54 string
 				templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 956, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 952, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 				if templ_7745c5c3_Err != nil {
@@ -2079,8 +2075,8 @@ func dataTableRowActions(row DataTableRow, props DataTableProps) templ.Component
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant: atoms.ButtonVariantGhost,
-			Size:    atoms.ButtonSizeSM,
+			Variant: stringGhost,
+			Size:    stringSM,
 			OnClick: "open = !open",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var56), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -2215,7 +2211,7 @@ func dataTableVirtualized(props DataTableProps) templ.Component {
 }
 
 // dataTablePagination renders pagination controls
-func dataTablePagination(pagination DataTablePagination) templ.Component {
+func dataTablePagination(pagination *PaginationConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -2253,7 +2249,7 @@ func dataTablePagination(pagination DataTablePagination) templ.Component {
 					pagination.TotalItems,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1048, Col: 7}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1044, Col: 7}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 				if templ_7745c5c3_Err != nil {
@@ -2277,7 +2273,7 @@ func dataTablePagination(pagination DataTablePagination) templ.Component {
 					var templ_7745c5c3_Var64 string
 					templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(size))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1055, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1051, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 					if templ_7745c5c3_Err != nil {
@@ -2290,7 +2286,7 @@ func dataTablePagination(pagination DataTablePagination) templ.Component {
 					var templ_7745c5c3_Var65 string
 					templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(size))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1055, Col: 64}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1051, Col: 64}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 					if templ_7745c5c3_Err != nil {
@@ -2332,8 +2328,8 @@ func dataTablePagination(pagination DataTablePagination) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:  atoms.ButtonVariantOutline,
-				Size:     atoms.ButtonSizeSM,
+				Variant:  stringOutline,
+				Size:     stringSM,
 				OnClick:  "previousPage()",
 				Disabled: pagination.CurrentPage <= 1,
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var66), templ_7745c5c3_Buffer)
@@ -2347,8 +2343,8 @@ func dataTablePagination(pagination DataTablePagination) templ.Component {
 			for i := 1; i <= pagination.TotalPages; i++ {
 				templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 					Text:    strconv.Itoa(i),
-					Variant: utils.IfElse(i == pagination.CurrentPage, atoms.ButtonVariantDefault, atoms.ButtonVariantGhost),
-					Size:    atoms.ButtonSizeSM,
+					Variant: utils.IfElse(i == pagination.CurrentPage, stringDefault, stringGhost),
+					Size:    stringSM,
 					OnClick: fmt.Sprintf("goToPage(%d)", i),
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -2381,8 +2377,8 @@ func dataTablePagination(pagination DataTablePagination) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:  atoms.ButtonVariantOutline,
-				Size:     atoms.ButtonSizeSM,
+				Variant:  stringOutline,
+				Size:     stringSM,
 				OnClick:  "nextPage()",
 				Disabled: pagination.CurrentPage >= pagination.TotalPages,
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var67), templ_7745c5c3_Buffer)
@@ -2509,8 +2505,8 @@ func dataTableExportButton(export DataTableExport) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant: atoms.ButtonVariantOutline,
-			Size:    atoms.ButtonSizeSM,
+			Variant: stringOutline,
+			Size:    stringSM,
 			OnClick: "open = !open",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var71), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -2586,8 +2582,8 @@ func dataTableViewOptions(props DataTableProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant:   atoms.ButtonVariantGhost,
-			Size:      atoms.ButtonSizeSM,
+			Variant:   stringGhost,
+			Size:      stringSM,
 			OnClick:   "open = !open",
 			AriaLabel: "View options",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var73), templ_7745c5c3_Buffer)
@@ -2697,8 +2693,8 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant: atoms.ButtonVariantGhost,
-				Size:    atoms.ButtonSizeSM,
+				Variant: stringGhost,
+				Size:    stringSM,
 				OnClick: "showExportModal = false",
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var75), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -2710,7 +2706,7 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 			}
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 				Text:    "Cancel",
-				Variant: atoms.ButtonVariantOutline,
+				Variant: stringOutline,
 				OnClick: "showExportModal = false",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -2718,7 +2714,7 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 			}
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 				Text:    "Export",
-				Variant: atoms.ButtonVariantPrimary,
+				Variant: stringPrimary,
 				OnClick: "confirmExport()",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -2734,7 +2730,7 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 }
 
 // Helper function to build Alpine.js data for the datatable
-func buildDataTableAlpineData(props DataTableProps) string {
+func buildDataTableAlpineDataV2(props DataTableProps) string {
 	return fmt.Sprintf(`{
 		// Data
 		rows: %s,
@@ -2833,7 +2829,7 @@ func buildDataTableAlpineData(props DataTableProps) string {
 }
 
 // dataTableAnalytics renders analytics tracking components for DataTable
-func dataTableAnalytics(analytics *AnalyticsConfig) templ.Component {
+func dataTableAnalytics(analytics *DataTableAnalyticsConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -2884,7 +2880,7 @@ func dataTableJavaScript(props DataTableProps) templ.Component {
 			templ_7745c5c3_Var77 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 145, "<script type=\"module\">\n\t\t// Import the DataTable JavaScript library\n\t\timport { DataTable } from '/static/dist/datatable.js';\n\t\t\n\t\t// Wait for DOM to be ready\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t// Find the table element\n\t\t\tconst tableElement = document.querySelector('#{ props.ID } table');\n\t\t\tif (!tableElement) return;\n\t\t\t\n\t\t\t// Configure DataTable options from Go props\n\t\t\tconst config = {\n\t\t\t\t// Core configuration\n\t\t\t\tdata: {\n\t\t\t\t\tcolumns: [\n\t\t\t\t\t\t{ for i, column := range props.Columns }\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\tkey: '{ column.Key }',\n\t\t\t\t\t\t\t\ttitle: '{ column.Title }',\n\t\t\t\t\t\t\t\ttype: '{ string(column.Type) }',\n\t\t\t\t\t\t\t\tsortable: { fmt.Sprintf(\"%t\", column.Sortable) },\n\t\t\t\t\t\t\t\tsearchable: { fmt.Sprintf(\"%t\", column.Searchable) },\n\t\t\t\t\t\t\t\twidth: '{ column.Width }',\n\t\t\t\t\t\t\t\talign: '{ column.Align }'\n\t\t\t\t\t\t\t}{ if i < len(props.Columns)-1 },{ end }\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t],\n\t\t\t\t\trows: [\n\t\t\t\t\t\t{ for i, row := range props.Data }\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t{ for j, column := range props.Columns }\n\t\t\t\t\t\t\t\t\t'{ column.Key }': { if value, exists := row[column.Key]; exists }'{ fmt.Sprintf(\"%v\", value) }'{ else }''{ end }{ if j < len(props.Columns)-1 },{ end }\n\t\t\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t\t}{ if i < len(props.Data)-1 },{ end }\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\t// Feature configuration\n\t\t\t\tfeatures: {\n\t\t\t\t\t{ if hasSorting(props) }\n\t\t\t\t\t\tsorting: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\t{ if props.Sorting.MultiColumn }multiColumn: true,{ end }\n\t\t\t\t\t\t\t{ if props.Sorting.DefaultSort.Column != \"\" }\n\t\t\t\t\t\t\t\tdefaultSort: {\n\t\t\t\t\t\t\t\t\tcolumn: '{ props.Sorting.DefaultSort.Column }',\n\t\t\t\t\t\t\t\t\tdirection: '{ props.Sorting.DefaultSort.Direction }'\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasFiltering(props) }\n\t\t\t\t\t\tfiltering: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\t{ if props.Filtering.GlobalSearch }globalSearch: true,{ end }\n\t\t\t\t\t\t\t{ if props.Filtering.ColumnFilters }columnFilters: true,{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasPagination(props) }\n\t\t\t\t\t\tpagination: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\tpageSize: { props.Pagination.PageSize },\n\t\t\t\t\t\t\t{ if props.Pagination.ShowPageSize }showPageSize: true,{ end }\n\t\t\t\t\t\t\t{ if props.Pagination.ShowInfo }showInfo: true,{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasSelection(props) }\n\t\t\t\t\t\tselection: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\t{ if props.Selection.Multiple }multiple: true,{ end }\n\t\t\t\t\t\t\t{ if props.Selection.ShowSelectAll }showSelectAll: true,{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasExport(props) }\n\t\t\t\t\t\texport: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\tformats: [\n\t\t\t\t\t\t\t\t{ for i, format := range props.Export.Formats }\n\t\t\t\t\t\t\t\t\t'{ string(format) }'{ if i < len(props.Export.Formats)-1 },{ end }\n\t\t\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t\t]\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasPerformance(props) && props.Performance.VirtualScrolling }\n\t\t\t\t\t\tvirtualScrolling: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\trowHeight: { props.Performance.RowHeight },\n\t\t\t\t\t\t\toverscan: { props.Performance.Overscan }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\t// Integration with Alpine.js\n\t\t\t\t{ if props.Alpine != nil }\n\t\t\t\t\talpine: {\n\t\t\t\t\t\tdata: '{ props.Alpine.DataName }',\n\t\t\t\t\t\t{ if props.Alpine.SelectionCallback != \"\" }\n\t\t\t\t\t\t\tonSelectionChange: '{ props.Alpine.SelectionCallback }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.Alpine.SortCallback != \"\" }\n\t\t\t\t\t\t\tonSortChange: '{ props.Alpine.SortCallback }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.Alpine.FilterCallback != \"\" }\n\t\t\t\t\t\t\tonFilterChange: '{ props.Alpine.FilterCallback }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t},\n\t\t\t\t{ end }\n\t\t\t\t\n\t\t\t\t// HTMX integration\n\t\t\t\t{ if props.HTMX != nil }\n\t\t\t\t\thtmx: {\n\t\t\t\t\t\t{ if props.HTMX.SortEndpoint != \"\" }\n\t\t\t\t\t\t\tsortEndpoint: '{ props.HTMX.SortEndpoint }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.FilterEndpoint != \"\" }\n\t\t\t\t\t\t\tfilterEndpoint: '{ props.HTMX.FilterEndpoint }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.PaginationEndpoint != \"\" }\n\t\t\t\t\t\t\tpaginationEndpoint: '{ props.HTMX.PaginationEndpoint }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.Target != \"\" }\n\t\t\t\t\t\t\ttarget: '{ props.HTMX.Target }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.Swap != \"\" }\n\t\t\t\t\t\t\tswap: '{ props.HTMX.Swap }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t},\n\t\t\t\t{ end }\n\t\t\t};\n\t\t\t\n\t\t\t// Initialize the DataTable\n\t\t\tconst dataTable = new DataTable(tableElement, config);\n\t\t\t\n\t\t\t// Store reference for external access\n\t\t\ttableElement.dataTable = dataTable;\n\t\t\t\n\t\t\t// Emit initialization event for analytics\n\t\t\t{ if hasAnalytics(props) }\n\t\t\t\tdocument.dispatchEvent(new CustomEvent('table-initialized', {\n\t\t\t\t\tdetail: {\n\t\t\t\t\t\tid: '{ props.ID }',\n\t\t\t\t\t\trowCount: { len(props.Data) },\n\t\t\t\t\t\tcolumnCount: { len(props.Columns) },\n\t\t\t\t\t\tfeatures: Object.keys(config.features || {})\n\t\t\t\t\t}\n\t\t\t\t}));\n\t\t\t{ end }\n\t\t\t\n\t\t\t// Handle window resize for responsive behavior\n\t\t\t{ if props.Layout != nil && props.Layout.Responsive }\n\t\t\t\tlet resizeTimeout;\n\t\t\t\twindow.addEventListener('resize', function() {\n\t\t\t\t\tclearTimeout(resizeTimeout);\n\t\t\t\t\tresizeTimeout = setTimeout(function() {\n\t\t\t\t\t\tdataTable.handleResize();\n\t\t\t\t\t}, 250);\n\t\t\t\t});\n\t\t\t{ end }\n\t\t\t\n\t\t\t// Initial load completion\n\t\t\tdataTable.on('ready', function() {\n\t\t\t\t// Remove loading state if present\n\t\t\t\tconst loadingEl = document.querySelector('#{ props.ID } .datatable-loading');\n\t\t\t\tif (loadingEl) {\n\t\t\t\t\tloadingEl.style.display = 'none';\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Show table content\n\t\t\t\tconst tableContainer = document.querySelector('#{ props.ID } .datatable-container');\n\t\t\t\tif (tableContainer) {\n\t\t\t\t\ttableContainer.style.opacity = '1';\n\t\t\t\t}\n\t\t\t});\n\t\t\t\n\t\t\t// Error handling\n\t\t\tdataTable.on('error', function(error) {\n\t\t\t\tconsole.error('DataTable error:', error);\n\t\t\t\t\n\t\t\t\t// Show error message\n\t\t\t\tconst errorEl = document.querySelector('#{ props.ID } .datatable-error');\n\t\t\t\tif (errorEl) {\n\t\t\t\t\terrorEl.textContent = error.message || 'An error occurred';\n\t\t\t\t\terrorEl.style.display = 'block';\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Emit error event for analytics\n\t\t\t\t{ if hasAnalytics(props) }\n\t\t\t\t\tdocument.dispatchEvent(new CustomEvent('table-error', {\n\t\t\t\t\t\tdetail: {\n\t\t\t\t\t\t\tid: '{ props.ID }',\n\t\t\t\t\t\t\terror: error.message,\n\t\t\t\t\t\t\ttimestamp: new Date().toISOString()\n\t\t\t\t\t\t}\n\t\t\t\t\t}));\n\t\t\t\t{ end }\n\t\t\t});\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 145, "<script type=\"module\">\n\t\t// Import the DataTable JavaScript library\n\t\timport { DataTable } from '/static/dist/datatable.js';\n\t\t\n\t\t// Wait for DOM to be ready\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t// Find the table element\n\t\t\tconst tableElement = document.querySelector('#{ props.ID } table');\n\t\t\tif (!tableElement) return;\n\t\t\t\n\t\t\t// Configure DataTable options from Go props\n\t\t\tconst config = {\n\t\t\t\t// Core configuration\n\t\t\t\tdata: {\n\t\t\t\t\tcolumns: [\n\t\t\t\t\t\t{ for i, column := range props.Columns }\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\tkey: '{ column.Key }',\n\t\t\t\t\t\t\t\ttitle: '{ column.Title }',\n\t\t\t\t\t\t\t\ttype: '{ string(column.Type) }',\n\t\t\t\t\t\t\t\tsortable: { fmt.Sprintf(\"%t\", column.Sortable) },\n\t\t\t\t\t\t\t\tsearchable: { fmt.Sprintf(\"%t\", column.Searchable) },\n\t\t\t\t\t\t\t\twidth: '{ column.Width }',\n\t\t\t\t\t\t\t\talign: '{ column.Align }'\n\t\t\t\t\t\t\t}{ if i < len(props.Columns)-1 },{ end }\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t],\n\t\t\t\t\trows: [\n\t\t\t\t\t\t{ for i, row := range props.Data }\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t{ for j, column := range props.Columns }\n\t\t\t\t\t\t\t\t\t'{ column.Key }': { if value, exists := row[column.Key]; exists }'{ fmt.Sprintf(\"%v\", value) }'{ else }''{ end }{ if j < len(props.Columns)-1 },{ end }\n\t\t\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t\t}{ if i < len(props.Data)-1 },{ end }\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\t// Feature configuration\n\t\t\t\tfeatures: {\n\t\t\t\t\t{ if hasSorting(props) }\n\t\t\t\t\t\tsorting: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\t{ if props.Sorting.MultiColumn }multiColumn: true,{ end }\n\t\t\t\t\t\t\t{ if props.Sorting.DefaultSort.Column != \"\" }\n\t\t\t\t\t\t\t\tdefaultSort: {\n\t\t\t\t\t\t\t\t\tcolumn: '{ props.Sorting.DefaultSort.Column }',\n\t\t\t\t\t\t\t\t\tdirection: '{ props.Sorting.DefaultSort.Direction }'\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasFiltering(props) }\n\t\t\t\t\t\tfiltering: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\t{ if props.Filtering.GlobalSearch }globalSearch: true,{ end }\n\t\t\t\t\t\t\t{ if props.Filtering.ColumnFilters }columnFilters: true,{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasPagination(props) }\n\t\t\t\t\t\tpagination: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\tpageSize: { props.Pagination.PageSize },\n\t\t\t\t\t\t\t{ if props.Pagination.ShowPageSize }showPageSize: true,{ end }\n\t\t\t\t\t\t\t{ if props.Pagination.ShowInfo }showInfo: true,{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasSelection(props) }\n\t\t\t\t\t\tselection: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\t{ if props.Selection.Multiple }multiple: true,{ end }\n\t\t\t\t\t\t\t{ if props.Selection.ShowSelectAll }showSelectAll: true,{ end }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasExport(props) }\n\t\t\t\t\t\texport: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\tformats: [\n\t\t\t\t\t\t\t\t{ for i, format := range props.Export.Formats }\n\t\t\t\t\t\t\t\t\t'{ string(format) }'{ if i < len(props.Export.Formats)-1 },{ end }\n\t\t\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t\t]\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t\t\n\t\t\t\t\t{ if hasPerformance(props) && props.Performance.VirtualScrolling }\n\t\t\t\t\t\tvirtualScrolling: {\n\t\t\t\t\t\t\tenabled: true,\n\t\t\t\t\t\t\trowHeight: { props.Performance.RowHeight },\n\t\t\t\t\t\t\toverscan: { props.Performance.Overscan }\n\t\t\t\t\t\t},\n\t\t\t\t\t{ end }\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\t// Integration with Alpine.js\n\t\t\t\t{ if props.Alpine != nil }\n\t\t\t\t\talpine: {\n\t\t\t\t\t\tdata: '{ props.Alpine.DataName }',\n\t\t\t\t\t\t{ if props.Alpine.SelectionCallback != \"\" }\n\t\t\t\t\t\t\tonSelectionChange: '{ props.Alpine.SelectionCallback }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.Alpine.SortCallback != \"\" }\n\t\t\t\t\t\t\tonSortChange: '{ props.Alpine.SortCallback }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.Alpine.FilterCallback != \"\" }\n\t\t\t\t\t\t\tonFilterChange: '{ props.Alpine.FilterCallback }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t},\n\t\t\t\t{ end }\n\t\t\t\t\n\t\t\t\t// HTMX integration\n\t\t\t\t{ if props.HTMX != nil }\n\t\t\t\t\thtmx: {\n\t\t\t\t\t\t{ if props.HTMX.SortEndpoint != \"\" }\n\t\t\t\t\t\t\tsortEndpoint: '{ props.HTMX.SortEndpoint }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.FilterEndpoint != \"\" }\n\t\t\t\t\t\t\tfilterEndpoint: '{ props.HTMX.FilterEndpoint }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.PaginationEndpoint != \"\" }\n\t\t\t\t\t\t\tpaginationEndpoint: '{ props.HTMX.PaginationEndpoint }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.Target != \"\" }\n\t\t\t\t\t\t\ttarget: '{ props.HTMX.Target }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t\t{ if props.HTMX.Swap != \"\" }\n\t\t\t\t\t\t\tswap: '{ props.HTMX.Swap }',\n\t\t\t\t\t\t{ end }\n\t\t\t\t\t},\n\t\t\t\t{ end }\n\t\t\t};\n\t\t\t\n\t\t\t// Initialize the DataTable\n\t\t\tconst dataTable = new DataTable(tableElement, config);\n\t\t\t\n\t\t\t// Store reference for external access\n\t\t\ttableElement.dataTable = dataTable;\n\t\t\t\n\t\t\t// Emit initialization event for analytics\n\t\t\t{ if hasDataTableAnalytics(props) }\n\t\t\t\tdocument.dispatchEvent(new CustomEvent('table-initialized', {\n\t\t\t\t\tdetail: {\n\t\t\t\t\t\tid: '{ props.ID }',\n\t\t\t\t\t\trowCount: { len(props.Data) },\n\t\t\t\t\t\tcolumnCount: { len(props.Columns) },\n\t\t\t\t\t\tfeatures: Object.keys(config.features || {})\n\t\t\t\t\t}\n\t\t\t\t}));\n\t\t\t{ end }\n\t\t\t\n\t\t\t// Handle window resize for responsive behavior\n\t\t\t{ if props.Layout != nil && props.Layout.Responsive }\n\t\t\t\tlet resizeTimeout;\n\t\t\t\twindow.addEventListener('resize', function() {\n\t\t\t\t\tclearTimeout(resizeTimeout);\n\t\t\t\t\tresizeTimeout = setTimeout(function() {\n\t\t\t\t\t\tdataTable.handleResize();\n\t\t\t\t\t}, 250);\n\t\t\t\t});\n\t\t\t{ end }\n\t\t\t\n\t\t\t// Initial load completion\n\t\t\tdataTable.on('ready', function() {\n\t\t\t\t// Remove loading state if present\n\t\t\t\tconst loadingEl = document.querySelector('#{ props.ID } .datatable-loading');\n\t\t\t\tif (loadingEl) {\n\t\t\t\t\tloadingEl.style.display = 'none';\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Show table content\n\t\t\t\tconst tableContainer = document.querySelector('#{ props.ID } .datatable-container');\n\t\t\t\tif (tableContainer) {\n\t\t\t\t\ttableContainer.style.opacity = '1';\n\t\t\t\t}\n\t\t\t});\n\t\t\t\n\t\t\t// Error handling\n\t\t\tdataTable.on('error', function(error) {\n\t\t\t\tconsole.error('DataTable error:', error);\n\t\t\t\t\n\t\t\t\t// Show error message\n\t\t\t\tconst errorEl = document.querySelector('#{ props.ID } .datatable-error');\n\t\t\t\tif (errorEl) {\n\t\t\t\t\terrorEl.textContent = error.message || 'An error occurred';\n\t\t\t\t\terrorEl.style.display = 'block';\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Emit error event for analytics\n\t\t\t\t{ if hasDataTableAnalytics(props) }\n\t\t\t\t\tdocument.dispatchEvent(new CustomEvent('table-error', {\n\t\t\t\t\t\tdetail: {\n\t\t\t\t\t\t\tid: '{ props.ID }',\n\t\t\t\t\t\t\terror: error.message,\n\t\t\t\t\t\t\ttimestamp: new Date().toISOString()\n\t\t\t\t\t\t}\n\t\t\t\t\t}));\n\t\t\t\t{ end }\n\t\t\t});\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

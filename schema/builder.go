@@ -267,19 +267,17 @@ func (b *SchemaBuilder) WithI18n(defaultLocale string, supported ...string) *Sch
 // Framework Integration
 
 func (b *SchemaBuilder) WithHTMX(post, target string) *SchemaBuilder {
-	b.schema.HTMX = &HTMX{
-		Enabled: true,
-		Post:    post,
-		Target:  target,
-		Swap:    "innerHTML",
+	b.schema.Behavior = &Behavior{
+		Post:   post,
+		Target: target,
+		Swap:   "innerHTML",
 	}
 	return b
 }
 
 func (b *SchemaBuilder) WithAlpine(xData string) *SchemaBuilder {
-	b.schema.Alpine = &Alpine{
-		Enabled: true,
-		XData:   xData,
+	b.schema.Binding = &Binding{
+		Data: xData,
 	}
 	return b
 }

@@ -9,6 +9,53 @@ import (
 	"github.com/niiniyare/ruun/pkg/condition"
 )
 
+// BlockType defines the type of layout block
+type BlockType string
+
+const (
+	BlockTypeSection BlockType = "section"
+	BlockTypeGroup   BlockType = "group"
+	BlockTypeTab     BlockType = "tab"
+	BlockTypeStep    BlockType = "step"
+)
+
+// LayoutBlock represents any layout component (Section, Group, Tab, Step)
+type LayoutBlock struct {
+	Type BlockType `json:"type"`
+	ID   string    `json:"id"`
+
+	// Common fields across all block types
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Icon        string `json:"icon,omitempty"`
+	Fields      []string `json:"fields"`
+	Order       int      `json:"order,omitempty"`
+
+	// Conditional visibility
+	Conditional *LayoutConditional `json:"conditional,omitempty"`
+
+	// Common styling
+	Style *Style `json:"style,omitempty"`
+
+	// Type-specific fields (union style)
+	// Section-specific
+	Collapsible bool `json:"collapsible,omitempty"`
+	Collapsed   bool `json:"collapsed,omitempty"`
+	Columns     int  `json:"columns,omitempty"`
+
+	// Group-specific
+	Label  string `json:"label,omitempty"`
+	Border bool   `json:"border,omitempty"`
+
+	// Tab-specific
+	Badge    string `json:"badge,omitempty"`
+	Disabled bool   `json:"disabled,omitempty"`
+
+	// Step-specific
+	Skippable  bool `json:"skippable,omitempty"`
+	Validation bool `json:"validation,omitempty"`
+}
+
 // Layout defines the visual structure of form elements
 type Layout struct {
 	Type LayoutType `json:"type"`
@@ -19,7 +66,10 @@ type Layout struct {
 	Direction string `json:"direction,omitempty"`
 	Wrap      bool   `json:"wrap,omitempty"`
 
-	// Layout Components
+	// Layout Components - new unified approach
+	Blocks []LayoutBlock `json:"blocks,omitempty"`
+
+	// Legacy Layout Components (deprecated, kept for migration)
 	Sections []Section `json:"sections,omitempty"`
 	Groups   []Group   `json:"groups,omitempty"`
 	Tabs     []Tab     `json:"tabs,omitempty"`
@@ -29,7 +79,7 @@ type Layout struct {
 	Breakpoints *Breakpoints `json:"breakpoints,omitempty"`
 
 	// Styling
-	Style *LayoutStyle `json:"style,omitempty"`
+	Style *Style `json:"style,omitempty"`
 
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
@@ -47,95 +97,18 @@ const (
 	LayoutGroups   LayoutType = "groups"
 )
 
+// Type aliases for backward compatibility
 // Section represents a logical grouping of fields
-type Section struct {
-	ID          string `json:"id"`
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-
-	// Content
-	Fields []string `json:"fields"`
-
-	// Behavior
-	Collapsible bool `json:"collapsible,omitempty"`
-	Collapsed   bool `json:"collapsed,omitempty"`
-
-	// Layout
-	Columns int `json:"columns,omitempty"`
-	Order   int `json:"order,omitempty"`
-
-	// Conditional
-	Conditional *LayoutConditional `json:"conditional,omitempty"`
-
-	// Styling
-	Style *SectionStyle `json:"style,omitempty"`
-}
+type Section = LayoutBlock
 
 // Group represents a visual grouping (like a fieldset)
-type Group struct {
-	ID          string `json:"id"`
-	Label       string `json:"label,omitempty"`
-	Description string `json:"description,omitempty"`
-
-	// Content
-	Fields []string `json:"fields"`
-
-	// Behavior
-	Border  bool `json:"border,omitempty"`
-	Columns int  `json:"columns,omitempty"`
-	Order   int  `json:"order,omitempty"`
-
-	// Conditional
-	Conditional *LayoutConditional `json:"conditional,omitempty"`
-
-	// Styling
-	Style *SectionStyle `json:"style,omitempty"`
-}
+type Group = LayoutBlock
 
 // Tab represents a tab in tabbed interface
-type Tab struct {
-	ID          string `json:"id"`
-	Label       string `json:"label"`
-	Icon        string `json:"icon,omitempty"`
-	Description string `json:"description,omitempty"`
-	Badge       string `json:"badge,omitempty"`
-
-	// Content
-	Fields []string `json:"fields"`
-
-	// State
-	Disabled bool `json:"disabled,omitempty"`
-	Order    int  `json:"order,omitempty"`
-
-	// Conditional
-	Conditional *LayoutConditional `json:"conditional,omitempty"`
-
-	// Styling
-	Style *TabStyle `json:"style,omitempty"`
-}
+type Tab = LayoutBlock
 
 // Step represents a step in multi-step wizard
-type Step struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-
-	// Content
-	Fields []string `json:"fields"`
-
-	// Behavior
-	Order      int  `json:"order"`
-	Skippable  bool `json:"skippable,omitempty"`
-	Validation bool `json:"validation,omitempty"`
-
-	// Conditional
-	Conditional *LayoutConditional `json:"conditional,omitempty"`
-
-	// Styling
-	Style *StepStyle `json:"style,omitempty"`
-}
+type Step = LayoutBlock
 
 // LayoutConditional defines conditional visibility for layout components
 type LayoutConditional struct {
@@ -169,36 +142,30 @@ type BaseStyle struct {
 	CustomCSS    string            `json:"customCSS,omitempty"`
 }
 
-type LayoutStyle struct {
-	BaseStyle
-	Classes string            `json:"classes,omitempty"`
-	Spacing map[string]string `json:"spacing,omitempty"`
-}
 
-type SectionStyle struct {
+// Style unified style for all layout blocks
+type Style struct {
 	BaseStyle
 	Background string `json:"background,omitempty"`
 	Border     string `json:"border,omitempty"`
 	Padding    string `json:"padding,omitempty"`
-}
 
-
-type TabStyle struct {
-	BaseStyle
+	// Tab-specific styling
 	ActiveBackground   string `json:"activeBackground,omitempty"`
 	InactiveBackground string `json:"inactiveBackground,omitempty"`
 	ActiveColor        string `json:"activeColor,omitempty"`
 	InactiveColor      string `json:"inactiveColor,omitempty"`
 	BorderColor        string `json:"borderColor,omitempty"`
-}
 
-type StepStyle struct {
-	BaseStyle
-	ActiveColor    string `json:"activeColor,omitempty"`
+	// Step-specific styling
 	CompletedColor string `json:"completedColor,omitempty"`
-	InactiveColor  string `json:"inactiveColor,omitempty"`
 	ConnectorColor string `json:"connectorColor,omitempty"`
 }
+
+// Legacy style types for backward compatibility
+type SectionStyle = Style
+type TabStyle = Style
+type StepStyle = Style
 
 // Core Methods
 
@@ -870,7 +837,7 @@ func (b *LayoutBuilder) WithBreakpoints(breakpoints *Breakpoints) *LayoutBuilder
 	return b
 }
 
-func (b *LayoutBuilder) WithStyle(style *LayoutStyle) *LayoutBuilder {
+func (b *LayoutBuilder) WithStyle(style *Style) *LayoutBuilder {
 	b.layout.Style = style
 	return b
 }

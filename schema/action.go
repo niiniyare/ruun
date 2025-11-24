@@ -3,7 +3,6 @@ package schema
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/niiniyare/ruun/pkg/condition"
 )
@@ -26,35 +25,38 @@ type Action struct {
 	Disabled bool `json:"disabled,omitempty"`
 	Hidden   bool `json:"hidden,omitempty"`
 
-	// Behavior
-	Config      *ActionConfig      `json:"config,omitempty"`
+	// Unified Configuration
+	Behavior     []string         `json:"behavior,omitempty"`
+	Binding      []string         `json:"binding,omitempty"`
+	Conditional  []string         `json:"conditional,omitempty"`
+	Style        []string         `json:"style,omitempty"`
+	Permissions  []string         `json:"permissions,omitempty"`
+	Config       map[string]any   `json:"config,omitempty"`
+	
+	// New fields for compatibility 
+	Theme        *ActionTheme       `json:"theme,omitempty"`
+	ActionConfig *ActionConfig      `json:"action_config,omitempty"`
+
+	// Legacy Support
 	Confirm     *ActionConfirm     `json:"confirm,omitempty"`
-	Conditional *ActionConditional `json:"conditional,omitempty"`
-	Permissions *ActionPermissions `json:"permissions,omitempty"`
-
-	// Framework Integration
-	HTMX   *ActionHTMX   `json:"htmx,omitempty"`
-	Alpine *ActionAlpine `json:"alpine,omitempty"`
-
-	// Theming
-	Theme *ActionTheme `json:"theme,omitempty"`
 
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
 }
 
-// ActionType defines the type of action
-type ActionType string
+// Missing type definitions for compatibility
 
-const (
-	ActionSubmit ActionType = "submit"
-	ActionReset  ActionType = "reset"
-	ActionButton ActionType = "button"
-	ActionLink   ActionType = "link"
-	ActionCustom ActionType = "custom"
-)
+// ActionTheme defines theme overrides for this action
+type ActionTheme struct {
+	Colors       map[string]string `json:"colors,omitempty"`
+	Spacing      map[string]string `json:"spacing,omitempty"`
+	BorderRadius string            `json:"borderRadius,omitempty"`
+	FontSize     string            `json:"fontSize,omitempty"`
+	FontWeight   string            `json:"fontWeight,omitempty"`
+	CustomCSS    string            `json:"customCSS,omitempty"`
+}
 
-// ActionConfig holds action configuration
+// ActionConfig holds action-specific configuration  
 type ActionConfig struct {
 	URL             string            `json:"url,omitempty"`
 	Target          string            `json:"target,omitempty"`
@@ -69,6 +71,30 @@ type ActionConfig struct {
 	RedirectURL     string            `json:"redirectUrl,omitempty"`
 }
 
+
+
+
+// ActionPermissions controls who can see/use the action  
+type ActionPermissions struct {
+	View     []string `json:"view,omitempty"`
+	Execute  []string `json:"execute,omitempty"`
+	Required []string `json:"required,omitempty"`
+}
+
+
+
+// ActionType defines the type of action
+type ActionType string
+
+const (
+	ActionSubmit ActionType = "submit"
+	ActionReset  ActionType = "reset"
+	ActionButton ActionType = "button"
+	ActionLink   ActionType = "link"
+	ActionCustom ActionType = "custom"
+)
+
+
 // ActionConfirm defines confirmation dialog
 type ActionConfirm struct {
 	Enabled bool   `json:"enabled"`
@@ -80,45 +106,10 @@ type ActionConfirm struct {
 	Icon    string `json:"icon,omitempty"`
 }
 
-// ActionConditional defines conditional visibility
-type ActionConditional struct {
-	Show    *condition.ConditionGroup `json:"show,omitempty"`
-	Hide    *condition.ConditionGroup `json:"hide,omitempty"`
-	Enable  *condition.ConditionGroup `json:"enable,omitempty"`
-	Disable *condition.ConditionGroup `json:"disable,omitempty"`
-}
 
-// ActionPermissions controls action access
-type ActionPermissions struct {
-	View     []string `json:"view,omitempty"`
-	Execute  []string `json:"execute,omitempty"`
-	Required []string `json:"required,omitempty"`
-}
 
-// ActionHTMX defines HTMX behavior
-type ActionHTMX struct {
-	Method    string            `json:"method,omitempty"`
-	URL       string            `json:"url,omitempty"`
-	Target    string            `json:"target,omitempty"`
-	Swap      string            `json:"swap,omitempty"`
-	Trigger   string            `json:"trigger,omitempty"`
-	Indicator string            `json:"indicator,omitempty"`
-	Headers   map[string]string `json:"headers,omitempty"`
-}
 
-// ActionAlpine defines Alpine.js bindings
-type ActionAlpine struct {
-	XOn   string `json:"xOn,omitempty"`
-	XBind string `json:"xBind,omitempty"`
-	XShow string `json:"xShow,omitempty"`
-}
 
-// ActionTheme defines action-specific theming
-type ActionTheme struct {
-	BaseStyle
-	FontSize string `json:"fontSize,omitempty"`
-	Padding  string `json:"padding,omitempty"`
-}
 
 // Core Methods
 
@@ -144,36 +135,15 @@ func (a *Action) IsVisible(ctx context.Context, data map[string]any) (bool, erro
 		return false, nil
 	}
 
-	if a.Conditional == nil {
+	if len(a.Conditional) == 0 {
 		return true, nil
 	}
 
-	// Check Hide condition first
-	if a.Conditional.Hide != nil {
-		if a.evaluator == nil {
-			return true, nil
-		}
-		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-		hide, err := a.evaluator.Evaluate(ctx, a.Conditional.Hide, evalCtx)
-		if err != nil {
-			return false, fmt.Errorf("evaluate hide condition: %w", err)
-		}
-		if hide {
+	// Check conditional expressions
+	for _, cond := range a.Conditional {
+		if cond == "hidden" {
 			return false, nil
 		}
-	}
-
-	// Check Show condition
-	if a.Conditional.Show != nil {
-		if a.evaluator == nil {
-			return true, nil
-		}
-		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-		show, err := a.evaluator.Evaluate(ctx, a.Conditional.Show, evalCtx)
-		if err != nil {
-			return false, fmt.Errorf("evaluate show condition: %w", err)
-		}
-		return show, nil
 	}
 
 	return true, nil
@@ -185,36 +155,15 @@ func (a *Action) IsEnabled(ctx context.Context, data map[string]any) (bool, erro
 		return false, nil
 	}
 
-	if a.Conditional == nil {
+	if len(a.Conditional) == 0 {
 		return true, nil
 	}
 
-	// Check Disable condition first
-	if a.Conditional.Disable != nil {
-		if a.evaluator == nil {
-			return true, nil
-		}
-		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-		disable, err := a.evaluator.Evaluate(ctx, a.Conditional.Disable, evalCtx)
-		if err != nil {
-			return false, fmt.Errorf("evaluate disable condition: %w", err)
-		}
-		if disable {
+	// Check conditional expressions
+	for _, cond := range a.Conditional {
+		if cond == "disabled" {
 			return false, nil
 		}
-	}
-
-	// Check Enable condition
-	if a.Conditional.Enable != nil {
-		if a.evaluator == nil {
-			return true, nil
-		}
-		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-		enable, err := a.evaluator.Evaluate(ctx, a.Conditional.Enable, evalCtx)
-		if err != nil {
-			return false, fmt.Errorf("evaluate enable condition: %w", err)
-		}
-		return enable, nil
 	}
 
 	return true, nil
@@ -222,12 +171,12 @@ func (a *Action) IsEnabled(ctx context.Context, data map[string]any) (bool, erro
 
 // CanView checks if user can view action
 func (a *Action) CanView(userRoles []string) bool {
-	if a.Permissions == nil || len(a.Permissions.View) == 0 {
+	if len(a.Permissions) == 0 {
 		return true
 	}
 
 	for _, role := range userRoles {
-		for _, required := range a.Permissions.View {
+		for _, required := range a.Permissions {
 			if role == required {
 				return true
 			}
@@ -238,12 +187,12 @@ func (a *Action) CanView(userRoles []string) bool {
 
 // CanExecute checks if user can execute action
 func (a *Action) CanExecute(userRoles []string) bool {
-	if a.Permissions == nil || len(a.Permissions.Execute) == 0 {
+	if len(a.Permissions) == 0 {
 		return true
 	}
 
 	for _, role := range userRoles {
-		for _, required := range a.Permissions.Execute {
+		for _, required := range a.Permissions {
 			if role == required {
 				return true
 			}
@@ -254,11 +203,11 @@ func (a *Action) CanExecute(userRoles []string) bool {
 
 // HasPermission checks if action requires permission
 func (a *Action) HasPermission(permission string) bool {
-	if a.Permissions == nil {
+	if len(a.Permissions) == 0 {
 		return false
 	}
 
-	for _, perm := range a.Permissions.Required {
+	for _, perm := range a.Permissions {
 		if perm == permission {
 			return true
 		}
@@ -297,19 +246,20 @@ func (a *Action) IsCustomAction() bool {
 
 // GetURL returns action URL
 func (a *Action) GetURL() string {
-	if a.Type == ActionLink && a.Config != nil {
-		return a.Config.URL
-	}
-	if a.HTMX != nil {
-		return a.HTMX.URL
+	if a.Type == ActionLink || a.Config != nil {
+		if url, ok := a.Config["url"].(string); ok {
+			return url
+		}
 	}
 	return ""
 }
 
 // GetHTTPMethod returns HTTP method
 func (a *Action) GetHTTPMethod() string {
-	if a.HTMX != nil && a.HTMX.Method != "" {
-		return a.HTMX.Method
+	if a.Config != nil {
+		if method, ok := a.Config["method"].(string); ok && method != "" {
+			return method
+		}
 	}
 	if a.Type == ActionSubmit {
 		return "POST"
@@ -319,26 +269,40 @@ func (a *Action) GetHTTPMethod() string {
 
 // ShouldDebounce checks if action should be debounced
 func (a *Action) ShouldDebounce() bool {
-	return a.Config != nil && a.Config.Debounce > 0
+	if a.Config != nil {
+		if debounce, ok := a.Config["debounce"].(int); ok && debounce > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 // GetDebounceDelay returns debounce delay
 func (a *Action) GetDebounceDelay() int {
 	if a.Config != nil {
-		return a.Config.Debounce
+		if debounce, ok := a.Config["debounce"].(int); ok {
+			return debounce
+		}
 	}
 	return 0
 }
 
 // ShouldThrottle checks if action should be throttled
 func (a *Action) ShouldThrottle() bool {
-	return a.Config != nil && a.Config.Throttle > 0
+	if a.Config != nil {
+		if throttle, ok := a.Config["throttle"].(int); ok && throttle > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 // GetThrottleDelay returns throttle delay
 func (a *Action) GetThrottleDelay() int {
 	if a.Config != nil {
-		return a.Config.Throttle
+		if throttle, ok := a.Config["throttle"].(int); ok {
+			return throttle
+		}
 	}
 	return 0
 }
@@ -363,10 +327,7 @@ func (a *Action) HasConfirmation() bool {
 
 // RequiresPermission checks if the action requires a specific permission
 func (a *Action) RequiresPermission(permission string) bool {
-	if a.Permissions == nil {
-		return false
-	}
-	for _, perm := range a.Permissions.Required {
+	for _, perm := range a.Permissions {
 		if perm == permission {
 			return true
 		}
@@ -374,34 +335,16 @@ func (a *Action) RequiresPermission(permission string) bool {
 	return false
 }
 
-// ApplyTheme applies a theme to the action
-func (a *Action) ApplyTheme(theme *ActionTheme) {
-	a.Theme = theme
-}
 
-// GetConfig returns the action config, initializing it if nil
-func (a *Action) GetConfig() *ActionConfig {
+// GetConfigMap returns the action config map, initializing it if nil
+func (a *Action) GetConfigMap() map[string]any {
 	if a.Config == nil {
-		a.Config = &ActionConfig{}
+		a.Config = make(map[string]any)
 	}
 	return a.Config
 }
 
-// GetHTMXConfig returns the HTMX config, initializing it if nil
-func (a *Action) GetHTMXConfig() *ActionHTMX {
-	if a.HTMX == nil {
-		a.HTMX = &ActionHTMX{}
-	}
-	return a.HTMX
-}
 
-// GetAlpineConfig returns the Alpine config, initializing it if nil
-func (a *Action) GetAlpineConfig() *ActionAlpine {
-	if a.Alpine == nil {
-		a.Alpine = &ActionAlpine{}
-	}
-	return a.Alpine
-}
 
 // GetVariantClass returns CSS class based on variant
 func (a *Action) GetVariantClass() string {
@@ -483,7 +426,10 @@ func (v *actionValidator) Validate(ctx context.Context, a *Action) error {
 
 	// Validate link actions have URL
 	if a.Type == ActionLink {
-		if a.Config == nil || a.Config.URL == "" {
+		if a.Config == nil {
+			collector.AddValidationError(a.ID, "missing_url",
+				"link action requires URL")
+		} else if url, ok := a.Config["url"].(string); !ok || url == "" {
 			collector.AddValidationError(a.ID, "missing_url",
 				"link action requires URL")
 		}
@@ -491,7 +437,10 @@ func (v *actionValidator) Validate(ctx context.Context, a *Action) error {
 
 	// Validate custom actions have handler
 	if a.Type == ActionCustom {
-		if a.Config == nil || a.Config.Handler == "" {
+		if a.Config == nil {
+			collector.AddValidationError(a.ID, "missing_handler",
+				"custom action requires handler")
+		} else if handler, ok := a.Config["handler"].(string); !ok || handler == "" {
 			collector.AddValidationError(a.ID, "missing_handler",
 				"custom action requires handler")
 		}
@@ -552,7 +501,7 @@ func (b *ActionBuilder) Hidden() *ActionBuilder {
 	return b
 }
 
-func (b *ActionBuilder) WithConfig(config *ActionConfig) *ActionBuilder {
+func (b *ActionBuilder) WithConfig(config map[string]any) *ActionBuilder {
 	b.action.Config = config
 	return b
 }
@@ -566,30 +515,22 @@ func (b *ActionBuilder) WithConfirmation(message, title string) *ActionBuilder {
 	return b
 }
 
-func (b *ActionBuilder) WithConditional(conditional *ActionConditional) *ActionBuilder {
+func (b *ActionBuilder) WithConditional(conditional []string) *ActionBuilder {
 	b.action.Conditional = conditional
 	return b
 }
 
-func (b *ActionBuilder) WithCondition(condition *condition.ConditionGroup) *ActionBuilder {
-	b.action.Conditional = &ActionConditional{Show: condition}
+func (b *ActionBuilder) WithCondition(condition []string) *ActionBuilder {
+	b.action.Conditional = condition
 	return b
 }
 
-func (b *ActionBuilder) WithPermissions(permissions *ActionPermissions) *ActionBuilder {
+func (b *ActionBuilder) WithPermissions(permissions []string) *ActionBuilder {
 	b.action.Permissions = permissions
 	return b
 }
 
-func (b *ActionBuilder) WithHTMX(htmx *ActionHTMX) *ActionBuilder {
-	b.action.HTMX = htmx
-	return b
-}
 
-func (b *ActionBuilder) WithAlpine(alpine *ActionAlpine) *ActionBuilder {
-	b.action.Alpine = alpine
-	return b
-}
 
 func (b *ActionBuilder) WithEvaluator(evaluator *condition.Evaluator) *ActionBuilder {
 	b.evaluator = evaluator
@@ -630,7 +571,7 @@ func NewDeleteAction(id, text string) *ActionBuilder {
 // NewLinkAction creates a link action
 func NewLinkAction(id, text, url string) *ActionBuilder {
 	return NewAction(id, ActionLink, text).
-		WithConfig(&ActionConfig{
-			URL: url,
+		WithConfig(map[string]any{
+			"url": url,
 		})
 }

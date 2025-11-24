@@ -28,23 +28,74 @@ type AvatarProps struct {
 	Attributes templ.Attributes  `json:"attributes,omitempty"`
 }
 
-// getAvatarClass generates the avatar class using our CSS extension
+// getAvatarClass returns avatar class without dynamic building
 func getAvatarClass(size, shape string) string {
-	class := "avatar"
-
-	// Add size suffix
-	if size != "" && size != "md" {
-		class = "avatar-" + size
+	// Complete static approach
+	switch size {
+	case "sm":
+		switch shape {
+		case "square":
+			return "avatar-sm avatar-square"
+		default:
+			return "avatar-sm avatar-circle"
+		}
+	case "lg":
+		switch shape {
+		case "square":
+			return "avatar-lg avatar-square"
+		default:
+			return "avatar-lg avatar-circle"
+		}
+	case "xl":
+		switch shape {
+		case "square":
+			return "avatar-xl avatar-square"
+		default:
+			return "avatar-xl avatar-circle"
+		}
+	default: // md or empty
+		switch shape {
+		case "square":
+			return "avatar avatar-square"
+		default:
+			return "avatar avatar-circle"
+		}
 	}
+}
 
-	// Add shape modifier
-	if shape == "square" {
-		class += " avatar-square"
-	} else {
-		class += " avatar-circle"
+// getAvatarClassWithFallback returns avatar class with fallback modifier
+func getAvatarClassWithFallback(size, shape string) string {
+	// Complete static approach for fallback
+	switch size {
+	case "sm":
+		switch shape {
+		case "square":
+			return "avatar-sm avatar-square avatar-fallback"
+		default:
+			return "avatar-sm avatar-circle avatar-fallback"
+		}
+	case "lg":
+		switch shape {
+		case "square":
+			return "avatar-lg avatar-square avatar-fallback"
+		default:
+			return "avatar-lg avatar-circle avatar-fallback"
+		}
+	case "xl":
+		switch shape {
+		case "square":
+			return "avatar-xl avatar-square avatar-fallback"
+		default:
+			return "avatar-xl avatar-circle avatar-fallback"
+		}
+	default: // md or empty
+		switch shape {
+		case "square":
+			return "avatar avatar-square avatar-fallback"
+		default:
+			return "avatar avatar-circle avatar-fallback"
+		}
 	}
-
-	return class
 }
 
 // buildAvatarAttributes creates img attributes
@@ -114,7 +165,7 @@ func Avatar(props AvatarProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var2 = []any{getAvatarClass(props.Size, props.Shape) + " avatar-fallback"}
+			var templ_7745c5c3_Var2 = []any{getAvatarClassWithFallback(props.Size, props.Shape)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -144,7 +195,7 @@ func Avatar(props AvatarProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 78, Col: 16}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 113, Col: 16}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -162,7 +213,7 @@ func Avatar(props AvatarProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Initials)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 81, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 116, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -207,7 +258,7 @@ func Avatar(props AvatarProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 88, Col: 16}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 123, Col: 16}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {

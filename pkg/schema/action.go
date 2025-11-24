@@ -30,8 +30,6 @@ type Action struct {
 	Condition   *condition.ConditionGroup `json:"condition,omitempty"`   // Advanced conditions
 	Permissions *ActionPermissions        `json:"permissions,omitempty"` // Access control
 	// Framework integration
-	HTMX   *ActionHTMX   `json:"htmx,omitempty"`   // HTMX configuration
-	Alpine *ActionAlpine `json:"alpine,omitempty"` // Alpine.js configuration
 	// Theme
 	Theme *ActionTheme `json:"theme,omitempty"` // Action-specific theming
 	// Internal (not serialized)
@@ -82,31 +80,7 @@ type ActionPermissions struct {
 	Required []string `json:"required,omitempty"` // Required permissions
 }
 
-// ActionHTMX defines HTMX behavior for the action
-type ActionHTMX struct {
-	Method    string            `json:"method,omitempty" validate:"oneof=GET POST PUT PATCH DELETE"`
-	URL       string            `json:"url,omitempty" validate:"url"`
-	Target    string            `json:"target,omitempty" validate:"css_selector"` // Where to put response
-	Swap      string            `json:"swap,omitempty" validate:"oneof=innerHTML outerHTML beforebegin afterbegin beforeend afterend delete none"`
-	Trigger   string            `json:"trigger,omitempty"`   // HTMX trigger specification
-	Indicator string            `json:"indicator,omitempty"` // Loading indicator selector
-	Confirm   string            `json:"confirm,omitempty"`   // Confirmation prompt
-	Headers   map[string]string `json:"headers,omitempty"`   // Request headers
-	Vals      string            `json:"vals,omitempty"`      // Additional values to include
-	Include   string            `json:"include,omitempty"`   // Elements to include
-	PushURL   string            `json:"pushUrl,omitempty"`   // URL to push to history
-	Select    string            `json:"select,omitempty"`    // CSS selector for response content
-	Sync      string            `json:"sync,omitempty"`      // Sync specification
-}
 
-// ActionAlpine defines Alpine.js bindings for the action
-type ActionAlpine struct {
-	XOn   string `json:"xOn,omitempty" validate:"js_object"`       // Event handlers
-	XBind string `json:"xBind,omitempty" validate:"js_object"`     // Attribute bindings
-	XShow string `json:"xShow,omitempty" validate:"js_expression"` // Show/hide condition
-	XIf   string `json:"xIf,omitempty" validate:"js_expression"`   // Conditional render
-	XText string `json:"xText,omitempty" validate:"js_expression"` // Text content
-}
 
 // ActionTheme defines theme overrides for this action
 type ActionTheme struct {
@@ -330,21 +304,6 @@ func (a *Action) SetHidden(hidden bool) {
 	a.Hidden = hidden
 }
 
-// GetHTMXConfig returns HTMX configuration with fallback
-func (a *Action) GetHTMXConfig() *ActionHTMX {
-	if a.HTMX == nil {
-		a.HTMX = &ActionHTMX{}
-	}
-	return a.HTMX
-}
-
-// GetAlpineConfig returns Alpine configuration with fallback
-func (a *Action) GetAlpineConfig() *ActionAlpine {
-	if a.Alpine == nil {
-		a.Alpine = &ActionAlpine{}
-	}
-	return a.Alpine
-}
 
 // IsSubmitAction checks if this is a submit action
 func (a *Action) IsSubmitAction() bool {
@@ -371,17 +330,11 @@ func (a *Action) GetURL() string {
 	if a.Type == ActionLink && a.Config != nil {
 		return a.Config.URL
 	}
-	if a.HTMX != nil {
-		return a.HTMX.URL
-	}
 	return ""
 }
 
 // GetHTTPMethod returns the HTTP method for HTMX actions
 func (a *Action) GetHTTPMethod() string {
-	if a.HTMX != nil && a.HTMX.Method != "" {
-		return a.HTMX.Method
-	}
 	if a.Type == ActionSubmit {
 		return "POST"
 	}

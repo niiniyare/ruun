@@ -70,16 +70,21 @@ type SearchBoxProps struct {
 	OnClear  string `json:"onClear,omitempty"`  // JavaScript function for clear
 }
 
-// getSearchBoxClasses returns compiled Basecoat classes for the search box
+// getSearchBoxClasses returns static Basecoat classes for the search box
 func getSearchBoxClasses(props SearchBoxProps) string {
 	classes := []string{"search-box"}
 
-	// Size variant
-	size := string(props.Size)
-	if size == "" {
-		size = "md"
+	// Size variant - static switch instead of fmt.Sprintf
+	switch string(props.Size) {
+	case "sm":
+		classes = append(classes, "search-box-sm")
+	case "lg":
+		classes = append(classes, "search-box-lg")
+	case "xl":
+		classes = append(classes, "search-box-xl")
+	default: // md or empty
+		classes = append(classes, "search-box-md")
 	}
-	classes = append(classes, fmt.Sprintf("search-box-%s", size))
 
 	// State classes
 	if props.Loading {
@@ -167,7 +172,7 @@ func SearchBox(props SearchBoxProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getSearchBoxAlpineData(props))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 119, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/searchbox.templ`, Line: 124, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

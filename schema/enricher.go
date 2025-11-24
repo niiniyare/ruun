@@ -462,21 +462,14 @@ func (e *DefaultEnricher) applyTenantCustomization(field *Field, customization *
 
 // enrichAction enriches an action with user permission checks
 func (e *DefaultEnricher) enrichAction(ctx context.Context, action *Action, user User) {
-	if action.Permissions == nil {
+	if len(action.Permissions) == 0 {
 		return
 	}
 
-	// Check view permissions
-	if len(action.Permissions.View) > 0 {
-		canView := e.hasAnyPermission(user, action.Permissions.View)
-		action.Hidden = !canView
-	}
-
-	// Check execute permissions
-	if len(action.Permissions.Execute) > 0 {
-		canExecute := e.hasAnyPermission(user, action.Permissions.Execute)
-		action.Disabled = !canExecute
-	}
+	// Check permissions - unified approach
+	canExecute := e.hasAnyPermission(user, action.Permissions)
+	action.Disabled = !canExecute
+	action.Hidden = !canExecute
 }
 
 // buildDataContext creates a basic data context for enrichment

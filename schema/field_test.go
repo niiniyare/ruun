@@ -809,21 +809,20 @@ func (s *FieldTestSuite) TestGetHelpLocalized() {
 }
 
 // ==================== Typed Config Tests ====================
-func (s *FieldTestSuite) TestGetTextConfig() {
+func (s *FieldTestSuite) TestTextConfig() {
 	s.field.Type = FieldText
 	s.field.Config = map[string]any{
 		"maxLength":    100,
 		"autocomplete": "username",
 		"prefix":       "@",
 	}
-	cfg, err := s.field.GetTextConfig()
-	s.Require().NoError(err)
-	s.Require().Equal(100, cfg.MaxLength)
-	s.Require().Equal("username", cfg.Autocomplete)
-	s.Require().Equal("@", cfg.Prefix)
+	cfg := s.field.TextConfig()
+	s.Require().Equal(100, cfg["maxLength"])
+	s.Require().Equal("username", cfg["autocomplete"])
+	s.Require().Equal("@", cfg["prefix"])
 }
 
-func (s *FieldTestSuite) TestGetSelectConfig() {
+func (s *FieldTestSuite) TestSelectConfig() {
 	s.field.Type = FieldSelect
 	s.field.Config = map[string]any{
 		"searchable":  true,
@@ -831,30 +830,28 @@ func (s *FieldTestSuite) TestGetSelectConfig() {
 		"placeholder": "Select option",
 		"createable":  false,
 	}
-	cfg, err := s.field.GetSelectConfig()
-	s.Require().NoError(err)
-	s.Require().True(cfg.Searchable)
-	s.Require().True(cfg.Clearable)
-	s.Require().Equal("Select option", cfg.Placeholder)
-	s.Require().False(cfg.Createable)
+	cfg := s.field.SelectConfig()
+	s.Require().True(cfg["searchable"].(bool))
+	s.Require().True(cfg["clearable"].(bool))
+	s.Require().Equal("Select option", cfg["placeholder"])
+	s.Require().False(cfg["createable"].(bool))
 }
 
-func (s *FieldTestSuite) TestGetFileConfig() {
+func (s *FieldTestSuite) TestFileConfig() {
 	s.field.Type = FieldFile
 	s.field.Config = map[string]any{
-		"maxSize":    10485760,
+		"maxSize":    int64(10485760),
 		"accept":     []any{".pdf", ".doc"},
 		"multiple":   true,
 		"autoUpload": false,
 	}
-	cfg, err := s.field.GetFileConfig()
-	s.Require().NoError(err)
-	s.Require().Equal(int64(10485760), cfg.MaxSize)
-	s.Require().True(cfg.Multiple)
-	s.Require().False(cfg.AutoUpload)
+	cfg := s.field.FileConfig()
+	s.Require().Equal(int64(10485760), cfg["maxSize"])
+	s.Require().True(cfg["multiple"].(bool))
+	s.Require().False(cfg["autoUpload"].(bool))
 }
 
-func (s *FieldTestSuite) TestGetRelationConfig() {
+func (s *FieldTestSuite) TestRelationConfig() {
 	s.field.Type = FieldRelation
 	s.field.Config = map[string]any{
 		"targetSchema": "customers",
@@ -863,12 +860,11 @@ func (s *FieldTestSuite) TestGetRelationConfig() {
 		"valueField":   "id",
 		"createNew":    true,
 	}
-	cfg, err := s.field.GetRelationConfig()
-	s.Require().NoError(err)
-	s.Require().Equal("customers", cfg.TargetSchema)
-	s.Require().Equal("name", cfg.DisplayField)
-	s.Require().Equal("id", cfg.ValueField)
-	s.Require().True(cfg.CreateNew)
+	cfg := s.field.RelationConfig()
+	s.Require().Equal("customers", cfg["targetSchema"])
+	s.Require().Equal("name", cfg["displayField"])
+	s.Require().Equal("id", cfg["valueField"])
+	s.Require().True(cfg["createNew"].(bool))
 }
 
 // ==================== Field Validation Tests ====================
@@ -1039,44 +1035,40 @@ func (s *FieldTestSuite) TestFieldApplyTransform() {
 }
 
 func (s *FieldTestSuite) TestFieldConfigGetters() {
-	// Test GetTextConfig with proper return values
+	// Test TextConfig with proper return values
 	s.field.Type = FieldText
 	s.field.Config = map[string]any{
 		"maxLength":   100,
 		"minLength":   5,
 		"placeholder": "Enter text",
 	}
-	textConfig, err := s.field.GetTextConfig()
-	s.Require().NoError(err)
+	textConfig := s.field.TextConfig()
 	s.Require().NotNil(textConfig)
-	// Test GetSelectConfig with proper return values
+	// Test SelectConfig with proper return values
 	s.field.Type = FieldSelect
 	s.field.Config = map[string]any{
 		"searchable": true,
 		"clearable":  false,
 	}
-	selectConfig, err := s.field.GetSelectConfig()
-	s.Require().NoError(err)
+	selectConfig := s.field.SelectConfig()
 	s.Require().NotNil(selectConfig)
-	// Test GetFileConfig with proper return values
+	// Test FileConfig with proper return values
 	s.field.Type = FieldFile
 	s.field.Config = map[string]any{
 		"maxSize":  1024000,
 		"accept":   []string{".pdf", ".doc"},
 		"multiple": true,
 	}
-	fileConfig, err := s.field.GetFileConfig()
-	s.Require().NoError(err)
+	fileConfig := s.field.FileConfig()
 	s.Require().NotNil(fileConfig)
-	// Test GetRelationConfig with proper return values
+	// Test RelationConfig with proper return values
 	s.field.Type = FieldRelation
 	s.field.Config = map[string]any{
 		"entity":       "users",
 		"displayField": "name",
 		"valueField":   "id",
 	}
-	relationConfig, err := s.field.GetRelationConfig()
-	s.Require().NoError(err)
+	relationConfig := s.field.RelationConfig()
 	s.Require().NotNil(relationConfig)
 }
 

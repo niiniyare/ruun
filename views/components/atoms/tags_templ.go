@@ -52,16 +52,19 @@ type TagProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getTagBadgeClass generates the Basecoat badge class for tags
+// getTagBadgeClass returns the Basecoat badge class without dynamic building
 func getTagBadgeClass(variant string) string {
-	class := "badge"
-
-	// Add variant suffix if not primary/default
-	if variant != "" && variant != "primary" {
-		class = "badge-" + variant
+	// Static switch - same logic as Badge atom
+	switch variant {
+	case "secondary":
+		return "badge-secondary"
+	case "destructive":
+		return "badge-destructive"
+	case "outline":
+		return "badge-outline"
+	default:
+		return "badge" // primary/empty
 	}
-
-	return class
 }
 
 // buildTagAttributes creates all HTML attributes for the tag
@@ -235,7 +238,7 @@ func renderTagContent(props TagProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 150, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 149, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

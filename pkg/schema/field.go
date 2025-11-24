@@ -52,9 +52,6 @@ type Field struct {
 	Dependencies []string          `json:"dependencies,omitempty" validate:"dive,fieldname"` // Depends on these fields
 	// Internationalization
 	I18n *FieldI18n `json:"i18n,omitempty"` // Translations
-	// Framework integration
-	HTMX   *FieldHTMX   `json:"htmx,omitempty"`   // HTMX attributes
-	Alpine *FieldAlpine `json:"alpine,omitempty"` // Alpine.js bindings
 	// Security
 	Security *FieldSecurity `json:"security,omitempty"` // Security settings
 	// Enrichment fields (for runtime permission/role checking)
@@ -488,34 +485,7 @@ type FieldI18n struct {
 	LoadPath         string            `json:"loadPath,omitempty"` // Path to translation files
 }
 
-// FieldHTMX defines HTMX behavior for this field
-type FieldHTMX struct {
-	Enabled     bool   `json:"enabled"`                                     // Enable Alpine.js
-	XData       string `json:"xData,omitempty" validate:"js_object"`        // Component data
-	XInit       string `json:"xInit,omitempty" validate:"js_function"`      // Initialization
-	XShow       string `json:"xShow,omitempty" validate:"js_expression"`    // Show/hide
-	XIf         string `json:"xIf,omitempty" validate:"js_expression"`      // Conditional
-	XModel      string `json:"xModel,omitempty" validate:"js_variable"`     // Two-way binding
-	XBind       string `json:"xBind,omitempty" validate:"js_object"`        // Attribute bindings
-	XOn         string `json:"xOn,omitempty" validate:"js_object"`          // Event handlers
-	XText       string `json:"xText,omitempty" validate:"js_expression"`    // Text content
-	XHTML       string `json:"xHtml,omitempty" validate:"js_expression"`    // HTML content
-	XRef        string `json:"xRef,omitempty" validate:"js_variable"`       // Reference
-	XCloak      bool   `json:"xCloak,omitempty"`                            // Cloak until ready
-	XTransition string `json:"xTransition,omitempty"`                       // Transition effect
-	XTeleport   string `json:"xTeleport,omitempty" validate:"css_selector"` // Teleport target
-	XFor        string `json:"xFor,omitempty" validate:"js_expression"`     // Loop directive
-	XEffect     string `json:"xEffect,omitempty" validate:"js_function"`    // Side effects
-}
 
-// FieldAlpine defines Alpine.js bindings
-type FieldAlpine struct {
-	XModel string `json:"xModel,omitempty" validate:"js_variable"`  // Two-way binding
-	XBind  string `json:"xBind,omitempty" validate:"js_object"`     // Attribute bindings
-	XOn    string `json:"xOn,omitempty" validate:"js_object"`       // Event handlers
-	XShow  string `json:"xShow,omitempty" validate:"js_expression"` // Show/hide
-	XIf    string `json:"xIf,omitempty" validate:"js_expression"`   // Conditional render
-}
 
 // FieldSecurity defines security settings
 type FieldSecurity struct {

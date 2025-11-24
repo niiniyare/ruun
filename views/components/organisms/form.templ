@@ -39,8 +39,8 @@ type FormProps struct {
 	Advanced    *AdvancedConfig    `json:"advanced,omitempty"`
 	Validation  *ValidationConfig  `json:"validation,omitempty"`
 	AutoSave    *AutoSaveConfig    `json:"autoSave,omitempty"`
-	Storage     *StorageConfig     `json:"storage,omitempty"`
-	Progress    *ProgressConfig    `json:"progress,omitempty"`
+	Storage     *FormStorageConfig     `json:"storage,omitempty"`
+	Progress    *FormProgressConfig    `json:"progress,omitempty"`
 	Dependencies *DependencyConfig `json:"dependencies,omitempty"`
 	Debug       *DebugConfig       `json:"debug,omitempty"`
 
@@ -48,7 +48,7 @@ type FormProps struct {
 	HTMX *HTMXConfig `json:"htmx,omitempty"`
 
 	// THEMING - Optional customization
-	Theme *ThemeConfig `json:"theme,omitempty"`
+	Theme *FormThemeConfig `json:"theme,omitempty"`
 }
 
 // Field - Enhanced to support both simple and complex scenarios
@@ -127,7 +127,7 @@ type AutoSaveConfig struct {
 }
 
 // StorageConfig - Client-side persistence
-type StorageConfig struct {
+type FormStorageConfig struct {
 	Strategy      StorageStrategy `json:"strategy,omitempty"`      // Default: none
 	Key           string          `json:"key,omitempty"`
 	TTL           int             `json:"ttl,omitempty"`           // seconds
@@ -136,7 +136,7 @@ type StorageConfig struct {
 }
 
 // ProgressConfig - Multi-step forms
-type ProgressConfig struct {
+type FormProgressConfig struct {
 	ShowProgress bool `json:"showProgress"`
 	CurrentStep  int  `json:"currentStep,omitempty"`
 	TotalSteps   int  `json:"totalSteps"`
@@ -164,7 +164,7 @@ type HTMXConfig struct {
 }
 
 // ThemeConfig - Styling overrides
-type ThemeConfig struct {
+type FormThemeConfig struct {
 	ID             string            `json:"id,omitempty"`
 	DarkMode       bool              `json:"darkMode,omitempty"`
 	TokenOverrides map[string]string `json:"tokenOverrides,omitempty"`
@@ -360,7 +360,7 @@ templ formHeader(props FormProps) {
 }
 
 // Progress component using atoms
-templ formProgress(config *ProgressConfig) {
+templ formProgress(config *FormProgressConfig) {
 	<div class="form-progress" role="region" aria-label="Form progress">
 		<div 
 			class="form-progress-bar" 

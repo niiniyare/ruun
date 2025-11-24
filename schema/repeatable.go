@@ -429,59 +429,6 @@ func (rf *RepeatableField) CalculateAggregates(items []map[string]any, aggregate
 	return calculator.Calculate(items, aggregates)
 }
 
-// RepeatableOperations provides operations for managing repeatable field items
-// Deprecated: Use RepeatableField methods directly instead
-type RepeatableOperations struct {
-	field *RepeatableField
-}
-
-// NewRepeatableOperations creates operations manager
-// Deprecated: Use RepeatableField methods directly instead
-func NewRepeatableOperations(field *RepeatableField) *RepeatableOperations {
-	return &RepeatableOperations{field: field}
-}
-
-// AddItem adds a new item to the collection
-// Deprecated: Use RepeatableField.AddItem directly instead
-func (ro *RepeatableOperations) AddItem(ctx context.Context, items []map[string]any, item map[string]any) ([]map[string]any, error) {
-	return ro.field.AddItem(ctx, items, item)
-}
-
-// RemoveItem removes an item at the given index
-// Deprecated: Use RepeatableField.RemoveItem directly instead
-func (ro *RepeatableOperations) RemoveItem(ctx context.Context, items []map[string]any, index int) ([]map[string]any, error) {
-	return ro.field.RemoveItem(ctx, items, index)
-}
-
-// UpdateItem updates an item at the given index
-// Deprecated: Use RepeatableField.UpdateItem directly instead
-func (ro *RepeatableOperations) UpdateItem(ctx context.Context, items []map[string]any, index int, item map[string]any) ([]map[string]any, error) {
-	return ro.field.UpdateItem(ctx, items, index, item)
-}
-
-// MoveItem moves an item from one index to another
-// Deprecated: Use RepeatableField.MoveItem directly instead
-func (ro *RepeatableOperations) MoveItem(items []map[string]any, fromIndex, toIndex int) ([]map[string]any, error) {
-	return ro.field.MoveItem(items, fromIndex, toIndex)
-}
-
-// DuplicateItem duplicates an item at the given index
-// Deprecated: Use RepeatableField.DuplicateItem directly instead
-func (ro *RepeatableOperations) DuplicateItem(items []map[string]any, index int) ([]map[string]any, error) {
-	return ro.field.DuplicateItem(items, index)
-}
-
-// ClearItems removes all items
-// Deprecated: Use RepeatableField.ClearItems directly instead
-func (ro *RepeatableOperations) ClearItems() ([]map[string]any, error) {
-	return ro.field.ClearItems()
-}
-
-// CalculateAggregates calculates aggregate values
-// Deprecated: Use RepeatableField.CalculateAggregates directly instead
-func (ro *RepeatableOperations) CalculateAggregates(items []map[string]any, aggregates map[string]Aggregate) (map[string]any, error) {
-	return ro.field.CalculateAggregates(items, aggregates)
-}
 
 // aggregateCalculator calculates aggregate values
 type aggregateCalculator struct{}

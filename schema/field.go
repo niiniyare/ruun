@@ -47,7 +47,7 @@ type Field struct {
 
 	// Layout & Styling
 	Layout *FieldLayout   `json:"layout,omitempty"`
-	Style  *FieldStyle    `json:"style,omitempty"`
+	Style  *Style    `json:"style,omitempty"`
 	Config map[string]any `json:"config,omitempty"`
 
 	// Permissions
@@ -55,8 +55,8 @@ type Field struct {
 	RequireRoles      []string `json:"requireRoles,omitempty"`
 
 	// Framework Integration
-	HTMX   *FieldHTMX   `json:"htmx,omitempty"`
-	Alpine *FieldAlpine `json:"alpine,omitempty"`
+	Behavior *Behavior `json:"behavior,omitempty"`
+	Binding  *Binding  `json:"binding,omitempty"`
 
 	// Internationalization
 	I18n *FieldI18n `json:"i18n,omitempty"`
@@ -266,13 +266,6 @@ type FieldLayout struct {
 	Order   int    `json:"order,omitempty"`
 }
 
-// FieldStyle defines styling
-type FieldStyle struct {
-	Classes        string `json:"classes,omitempty"`
-	LabelClass     string `json:"labelClass,omitempty"`
-	InputClass     string `json:"inputClass,omitempty"`
-	ContainerClass string `json:"containerClass,omitempty"`
-}
 
 // FieldOption represents a selectable option
 type FieldOption struct {
@@ -311,23 +304,6 @@ type FieldI18n struct {
 	Tooltip     map[string]string `json:"tooltip,omitempty"`
 }
 
-// FieldHTMX defines HTMX behavior
-type FieldHTMX struct {
-	Trigger   string            `json:"trigger,omitempty"`
-	Target    string            `json:"target,omitempty"`
-	Swap      string            `json:"swap,omitempty"`
-	URL       string            `json:"url,omitempty"`
-	Headers   map[string]string `json:"headers,omitempty"`
-	Indicator string            `json:"indicator,omitempty"`
-}
-
-// FieldAlpine defines Alpine.js bindings
-type FieldAlpine struct {
-	XModel string `json:"xModel,omitempty"`
-	XBind  string `json:"xBind,omitempty"`
-	XOn    string `json:"xOn,omitempty"`
-	XShow  string `json:"xShow,omitempty"`
-}
 
 // Core Methods
 
@@ -626,156 +602,76 @@ func (f *Field) GetHelp() string {
 	return f.Help
 }
 
-// TextConfig represents text field configuration
-type TextConfig struct {
-	MaxLength    int    `json:"maxLength,omitempty"`
-	MinLength    int    `json:"minLength,omitempty"`
-	Autocomplete string `json:"autocomplete,omitempty"`
-	Prefix       string `json:"prefix,omitempty"`
-	Suffix       string `json:"suffix,omitempty"`
-}
-
-// GetTextConfig returns text-specific configuration
-func (f *Field) GetTextConfig() (*TextConfig, error) {
+// TextConfig returns text-specific configuration
+func (f *Field) TextConfig() map[string]any {
 	if f.Config == nil {
-		return &TextConfig{}, nil
+		return make(map[string]any)
 	}
 	
-	config := &TextConfig{}
-	if maxLen, ok := f.Config["maxLength"].(int); ok {
-		config.MaxLength = maxLen
-	}
-	if minLen, ok := f.Config["minLength"].(int); ok {
-		config.MinLength = minLen
-	}
-	if autocomplete, ok := f.Config["autocomplete"].(string); ok {
-		config.Autocomplete = autocomplete
-	}
-	if prefix, ok := f.Config["prefix"].(string); ok {
-		config.Prefix = prefix
-	}
-	if suffix, ok := f.Config["suffix"].(string); ok {
-		config.Suffix = suffix
+	config := make(map[string]any)
+	textFields := []string{"maxLength", "minLength", "autocomplete", "prefix", "suffix"}
+	
+	for _, field := range textFields {
+		if val, ok := f.Config[field]; ok {
+			config[field] = val
+		}
 	}
 	
-	return config, nil
+	return config
 }
 
-// SelectConfig represents select field configuration
-type SelectConfig struct {
-	Multiple      bool   `json:"multiple,omitempty"`
-	Searchable    bool   `json:"searchable,omitempty"`
-	Clearable     bool   `json:"clearable,omitempty"`
-	Createable    bool   `json:"createable,omitempty"`
-	MaxSelections int    `json:"maxSelections,omitempty"`
-	Placeholder   string `json:"placeholder,omitempty"`
-}
-
-// GetSelectConfig returns select-specific configuration
-func (f *Field) GetSelectConfig() (*SelectConfig, error) {
+// SelectConfig returns select-specific configuration
+func (f *Field) SelectConfig() map[string]any {
 	if f.Config == nil {
-		return &SelectConfig{}, nil
+		return make(map[string]any)
 	}
 	
-	config := &SelectConfig{}
-	if multiple, ok := f.Config["multiple"].(bool); ok {
-		config.Multiple = multiple
-	}
-	if searchable, ok := f.Config["searchable"].(bool); ok {
-		config.Searchable = searchable
-	}
-	if clearable, ok := f.Config["clearable"].(bool); ok {
-		config.Clearable = clearable
-	}
-	if createable, ok := f.Config["createable"].(bool); ok {
-		config.Createable = createable
-	}
-	if maxSel, ok := f.Config["maxSelections"].(int); ok {
-		config.MaxSelections = maxSel
-	}
-	if placeholder, ok := f.Config["placeholder"].(string); ok {
-		config.Placeholder = placeholder
+	config := make(map[string]any)
+	selectFields := []string{"multiple", "searchable", "clearable", "createable", "maxSelections", "placeholder"}
+	
+	for _, field := range selectFields {
+		if val, ok := f.Config[field]; ok {
+			config[field] = val
+		}
 	}
 	
-	return config, nil
+	return config
 }
 
-// FileConfig represents file field configuration
-type FileConfig struct {
-	Accept      string `json:"accept,omitempty"`
-	MaxSize     int64  `json:"maxSize,omitempty"`
-	Multiple    bool   `json:"multiple,omitempty"`
-	PreviewMode string `json:"previewMode,omitempty"`
-	AutoUpload  bool   `json:"autoUpload,omitempty"`
-}
-
-// GetFileConfig returns file-specific configuration
-func (f *Field) GetFileConfig() (*FileConfig, error) {
+// FileConfig returns file-specific configuration
+func (f *Field) FileConfig() map[string]any {
 	if f.Config == nil {
-		return &FileConfig{}, nil
+		return make(map[string]any)
 	}
 	
-	config := &FileConfig{}
-	if accept, ok := f.Config["accept"].(string); ok {
-		config.Accept = accept
-	}
-	if maxSize, ok := f.Config["maxSize"].(int64); ok {
-		config.MaxSize = maxSize
-	}
-	if multiple, ok := f.Config["multiple"].(bool); ok {
-		config.Multiple = multiple
-	}
-	if previewMode, ok := f.Config["previewMode"].(string); ok {
-		config.PreviewMode = previewMode
-	}
-	if autoUpload, ok := f.Config["autoUpload"].(bool); ok {
-		config.AutoUpload = autoUpload
+	config := make(map[string]any)
+	fileFields := []string{"accept", "maxSize", "multiple", "previewMode", "autoUpload"}
+	
+	for _, field := range fileFields {
+		if val, ok := f.Config[field]; ok {
+			config[field] = val
+		}
 	}
 	
-	return config, nil
+	return config
 }
 
-// RelationConfig represents relation field configuration
-type RelationConfig struct {
-	Entity       string `json:"entity,omitempty"`
-	DisplayField string `json:"displayField,omitempty"`
-	ValueField   string `json:"valueField,omitempty"`
-	SearchField  string `json:"searchField,omitempty"`
-	TargetSchema string `json:"targetSchema,omitempty"`
-	Multiple     bool   `json:"multiple,omitempty"`
-	CreateNew    bool   `json:"createNew,omitempty"`
-}
-
-// GetRelationConfig returns relation-specific configuration
-func (f *Field) GetRelationConfig() (*RelationConfig, error) {
+// RelationConfig returns relation-specific configuration
+func (f *Field) RelationConfig() map[string]any {
 	if f.Config == nil {
-		return &RelationConfig{}, nil
+		return make(map[string]any)
 	}
 	
-	config := &RelationConfig{}
-	if entity, ok := f.Config["entity"].(string); ok {
-		config.Entity = entity
-	}
-	if displayField, ok := f.Config["displayField"].(string); ok {
-		config.DisplayField = displayField
-	}
-	if valueField, ok := f.Config["valueField"].(string); ok {
-		config.ValueField = valueField
-	}
-	if searchField, ok := f.Config["searchField"].(string); ok {
-		config.SearchField = searchField
-	}
-	if targetSchema, ok := f.Config["targetSchema"].(string); ok {
-		config.TargetSchema = targetSchema
-	}
-	if multiple, ok := f.Config["multiple"].(bool); ok {
-		config.Multiple = multiple
-	}
-	if createNew, ok := f.Config["createNew"].(bool); ok {
-		config.CreateNew = createNew
+	config := make(map[string]any)
+	relationFields := []string{"entity", "displayField", "valueField", "searchField", "targetSchema", "multiple", "createNew"}
+	
+	for _, field := range relationFields {
+		if val, ok := f.Config[field]; ok {
+			config[field] = val
+		}
 	}
 	
-	return config, nil
+	return config
 }
 
 // fieldValidator validates field configuration
@@ -1123,7 +1019,7 @@ func (b *FieldBuilder) WithLayout(layout *FieldLayout) *FieldBuilder {
 	return b
 }
 
-func (b *FieldBuilder) WithStyle(style *FieldStyle) *FieldBuilder {
+func (b *FieldBuilder) WithStyle(style *Style) *FieldBuilder {
 	b.field.Style = style
 	return b
 }

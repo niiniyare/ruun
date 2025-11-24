@@ -30,16 +30,19 @@ type BadgeProps struct {
 	AriaPressed     string `json:"ariaPressed,omitempty"`
 }
 
-// getBadgeClass builds the Basecoat class
+// getBadgeClass returns the Basecoat class without dynamic building
 func getBadgeClass(variant string) string {
-	class := "badge"
-
-	// Add variant suffix if not primary/default
-	if variant != "" && variant != "primary" {
-		class = class + "-" + variant
+	// Static switch - no string concatenation
+	switch variant {
+	case "secondary":
+		return "badge-secondary"
+	case "destructive":
+		return "badge-destructive"
+	case "outline":
+		return "badge-outline"
+	default:
+		return "badge" // primary/empty
 	}
-
-	return class
 }
 
 // Badge renders a Basecoat badge atom
@@ -99,7 +102,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 43, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 42, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -133,7 +136,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 50, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 49, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -152,7 +155,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaDescribedBy)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 53, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 52, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -171,7 +174,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaPressed)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 56, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 55, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -196,7 +199,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 63, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 62, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -238,7 +241,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 70, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 69, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -257,7 +260,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 73, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 72, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -276,7 +279,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaDescribedBy)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 76, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 75, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -301,7 +304,7 @@ func Badge(props BadgeProps) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 83, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/badge.templ`, Line: 82, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {

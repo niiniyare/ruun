@@ -43,8 +43,8 @@ type Schema struct {
 	I18n       *I18nManager `json:"i18n,omitempty"`
 
 	// Framework Integration
-	HTMX   *HTMX   `json:"htmx,omitempty"`
-	Alpine *Alpine `json:"alpine,omitempty"`
+	Behavior *Behavior `json:"htmx,omitempty"`   // Backward compatibility with 'htmx' json tag
+	Binding  *Binding  `json:"alpine,omitempty"` // Backward compatibility with 'alpine' json tag
 
 	// Metadata
 	Meta     *Meta    `json:"meta,omitempty"`

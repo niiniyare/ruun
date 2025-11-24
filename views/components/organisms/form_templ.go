@@ -31,7 +31,6 @@ type FormProps struct {
 	Description string     `json:"description,omitempty"`
 	Layout      FormLayout `json:"layout,omitempty"` // Default: vertical
 	Size        FormSize   `json:"size,omitempty"`   // Default: md
-	ClassName   string     `json:"className,omitempty"`
 	ReadOnly    bool       `json:"readOnly,omitempty"`
 
 	// SECTIONING - Group related fields
@@ -45,19 +44,19 @@ type FormProps struct {
 	Actions []Action `json:"actions,omitempty"`
 
 	// PROGRESSIVE ENHANCEMENT - Nil = disabled
-	Advanced     *AdvancedConfig   `json:"advanced,omitempty"`
-	Validation   *ValidationConfig `json:"validation,omitempty"`
-	AutoSave     *AutoSaveConfig   `json:"autoSave,omitempty"`
-	Storage      *StorageConfig    `json:"storage,omitempty"`
-	Progress     *ProgressConfig   `json:"progress,omitempty"`
-	Dependencies *DependencyConfig `json:"dependencies,omitempty"`
-	Debug        *DebugConfig      `json:"debug,omitempty"`
+	Advanced     *AdvancedConfig     `json:"advanced,omitempty"`
+	Validation   *ValidationConfig   `json:"validation,omitempty"`
+	AutoSave     *AutoSaveConfig     `json:"autoSave,omitempty"`
+	Storage      *FormStorageConfig  `json:"storage,omitempty"`
+	Progress     *FormProgressConfig `json:"progress,omitempty"`
+	Dependencies *DependencyConfig   `json:"dependencies,omitempty"`
+	Debug        *DebugConfig        `json:"debug,omitempty"`
 
 	// HTMX - Optional server integration
 	HTMX *HTMXConfig `json:"htmx,omitempty"`
 
 	// THEMING - Optional customization
-	Theme *ThemeConfig `json:"theme,omitempty"`
+	Theme *FormThemeConfig `json:"theme,omitempty"`
 }
 
 // Field - Enhanced to support both simple and complex scenarios
@@ -136,7 +135,7 @@ type AutoSaveConfig struct {
 }
 
 // StorageConfig - Client-side persistence
-type StorageConfig struct {
+type FormStorageConfig struct {
 	Strategy       StorageStrategy `json:"strategy,omitempty"` // Default: none
 	Key            string          `json:"key,omitempty"`
 	TTL            int             `json:"ttl,omitempty"` // seconds
@@ -145,7 +144,7 @@ type StorageConfig struct {
 }
 
 // ProgressConfig - Multi-step forms
-type ProgressConfig struct {
+type FormProgressConfig struct {
 	ShowProgress bool `json:"showProgress"`
 	CurrentStep  int  `json:"currentStep,omitempty"`
 	TotalSteps   int  `json:"totalSteps"`
@@ -173,7 +172,7 @@ type HTMXConfig struct {
 }
 
 // ThemeConfig - Styling overrides
-type ThemeConfig struct {
+type FormThemeConfig struct {
 	ID             string            `json:"id,omitempty"`
 	DarkMode       bool              `json:"darkMode,omitempty"`
 	TokenOverrides map[string]string `json:"tokenOverrides,omitempty"`
@@ -476,7 +475,7 @@ func formHeader(props FormProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 355, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 354, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -495,7 +494,7 @@ func formHeader(props FormProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 358, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 357, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -515,7 +514,7 @@ func formHeader(props FormProps) templ.Component {
 }
 
 // Progress component using atoms
-func formProgress(config *ProgressConfig) templ.Component {
+func formProgress(config *FormProgressConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -543,7 +542,7 @@ func formProgress(config *ProgressConfig) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", config.CurrentStep))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 369, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 368, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -556,7 +555,7 @@ func formProgress(config *ProgressConfig) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", config.TotalSteps))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 371, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 370, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -569,7 +568,7 @@ func formProgress(config *ProgressConfig) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Step %d of %d", config.CurrentStep, config.TotalSteps))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 378, Col: 105}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 377, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -707,7 +706,7 @@ func formSection(section Section, state formState) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(section.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 421, Col: 52}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 420, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -760,7 +759,7 @@ func formSection(section Section, state formState) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(section.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 437, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 436, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -779,7 +778,7 @@ func formSection(section Section, state formState) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(section.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 441, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 440, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -924,7 +923,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s-%s-feedback", state.id, field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 474, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 473, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -937,7 +936,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("errors.%s", field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 478, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 477, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -962,7 +961,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("errors.%s", field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 486, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 485, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -975,7 +974,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("validating.%s", field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 490, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 489, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -1147,7 +1146,7 @@ func formAction(action Action, state formState) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(action.Conditional)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 533, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 532, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {

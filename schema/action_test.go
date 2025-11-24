@@ -73,9 +73,7 @@ func (suite *ActionTestSuite) TestActionRequiresPermission() {
 	// Without permissions
 	suite.Require().False(action.RequiresPermission("delete"))
 	// With permissions but not the required one
-	action.Permissions = &ActionPermissions{
-		Required: []string{"read", "write"},
-	}
+	action.Permissions = []string{"read", "write"}
 	suite.Require().False(action.RequiresPermission("delete"))
 	// With the required permission
 	suite.Require().True(action.RequiresPermission("read"))
@@ -88,15 +86,11 @@ func (suite *ActionTestSuite) TestActionCanView() {
 	canView := action.CanView(userPerms)
 	suite.Require().True(canView)
 	// With permissions that user has
-	action.Permissions = &ActionPermissions{
-		View: []string{"read"},
-	}
+	action.Permissions = []string{"read"}
 	canView = action.CanView(userPerms)
 	suite.Require().True(canView)
 	// With permissions that user doesn't have
-	action.Permissions = &ActionPermissions{
-		View: []string{"admin"},
-	}
+	action.Permissions = []string{"admin"}
 	canView = action.CanView(userPerms)
 	suite.Require().False(canView)
 }
@@ -107,15 +101,11 @@ func (suite *ActionTestSuite) TestActionCanExecute() {
 	canExecute := action.CanExecute(userPerms)
 	suite.Require().True(canExecute)
 	// With permissions that user has
-	action.Permissions = &ActionPermissions{
-		Execute: []string{"write"},
-	}
+	action.Permissions = []string{"write"}
 	canExecute = action.CanExecute(userPerms)
 	suite.Require().True(canExecute)
 	// With permissions that user doesn't have
-	action.Permissions = &ActionPermissions{
-		Execute: []string{"admin"},
-	}
+	action.Permissions = []string{"admin"}
 	canExecute = action.CanExecute(userPerms)
 	suite.Require().False(canExecute)
 }
@@ -126,9 +116,9 @@ func (suite *ActionTestSuite) TestActionClone() {
 		Text:     "Submit",
 		Icon:     "save",
 		Disabled: true,
-		Config: &ActionConfig{
-			URL:     "/test",
-			Handler: "testHandler",
+		Config: map[string]any{
+			"url":     "/test",
+			"handler": "testHandler",
 		},
 	}
 	clone := original.Clone()
@@ -137,38 +127,31 @@ func (suite *ActionTestSuite) TestActionClone() {
 	suite.Require().Equal(original.Text, clone.Text)
 	suite.Require().Equal(original.Icon, clone.Icon)
 	suite.Require().Equal(original.Disabled, clone.Disabled)
-	suite.Require().Equal(original.Config.URL, clone.Config.URL)
+	suite.Require().Equal(original.Config["url"], clone.Config["url"])
 	// Test clone works (Action.Clone may not do deep copy for Config)
 	suite.Require().NotNil(clone.Config)
 }
 func (suite *ActionTestSuite) TestActionApplyTheme() {
 	action := &Action{ID: "test", Type: ActionSubmit}
-	// Test applying nil theme
-	action.ApplyTheme(nil)
-	suite.Require().Nil(action.Theme) // Should remain nil
-	// Test applying valid theme
-	theme := &ActionTheme{
-		BaseStyle: BaseStyle{
-			Colors:       map[string]string{"primary": "#007bff"},
-			BorderRadius: "8px",
-		},
-	}
-	action.ApplyTheme(theme)
-	suite.Require().NotNil(action.Theme) // Should be initialized
+	// Test with theme styles in unified approach
+	action.Style = []string{"primary", "rounded"}
+	suite.Require().Len(action.Style, 2)
+	suite.Require().Contains(action.Style, "primary")
+	suite.Require().Contains(action.Style, "rounded")
 }
 func (suite *ActionTestSuite) TestActionGetConfig() {
 	action := &Action{ID: "test"}
 	// Without config
-	cfg := action.GetConfig()
+	cfg := action.GetConfigMap()
 	suite.Require().NotNil(cfg)
 	// With config
-	action.Config = &ActionConfig{
-		URL:      "/api/test",
-		Debounce: 5000,
+	action.Config = map[string]any{
+		"url":      "/api/test",
+		"debounce": 5000,
 	}
-	cfg = action.GetConfig()
-	suite.Require().Equal("/api/test", cfg.URL)
-	suite.Require().Equal(5000, cfg.Debounce)
+	cfg = action.GetConfigMap()
+	suite.Require().Equal("/api/test", cfg["url"])
+	suite.Require().Equal(5000, cfg["debounce"])
 }
 func (suite *ActionTestSuite) TestActionSetters() {
 	action := &Action{ID: "test"}
@@ -188,31 +171,19 @@ func (suite *ActionTestSuite) TestActionSetters() {
 	action.SetHidden(false)
 	suite.Require().False(action.Hidden)
 }
-func (suite *ActionTestSuite) TestActionGetHTMXConfig() {
+func (suite *ActionTestSuite) TestActionUnifiedConfig() {
 	action := &Action{ID: "test"}
-	// Without HTMX config
-	cfg := action.GetHTMXConfig()
-	suite.Require().NotNil(cfg)
-	// With HTMX config
-	action.HTMX = &ActionHTMX{
-		Method: "POST",
-		URL:    "/api/submit",
-	}
-	cfg = action.GetHTMXConfig()
-	suite.Require().Equal("POST", cfg.Method)
-	suite.Require().Equal("/api/submit", cfg.URL)
-}
-func (suite *ActionTestSuite) TestActionGetAlpineConfig() {
-	action := &Action{ID: "test"}
-	// Without Alpine config
-	cfg := action.GetAlpineConfig()
-	suite.Require().NotNil(cfg)
-	// With Alpine config
-	action.Alpine = &ActionAlpine{
-		XOn: "click: handleClick()",
-	}
-	cfg = action.GetAlpineConfig()
-	suite.Require().Equal("click: handleClick()", cfg.XOn)
+	// Test unified behavior configuration
+	action.Behavior = []string{"debounce", "throttle"}
+	suite.Require().Len(action.Behavior, 2)
+	suite.Require().Contains(action.Behavior, "debounce")
+	suite.Require().Contains(action.Behavior, "throttle")
+	
+	// Test unified binding configuration
+	action.Binding = []string{"click", "submit"}
+	suite.Require().Len(action.Binding, 2)
+	suite.Require().Contains(action.Binding, "click")
+	suite.Require().Contains(action.Binding, "submit")
 }
 
 // Helper method to create a mock condition evaluator
@@ -462,19 +433,7 @@ func (suite *ActionTestSuite) TestActionWithConditions() {
 		ID:   "conditional-action",
 		Type: ActionButton,
 		Text: "Conditional Button",
-		Conditional: &ActionConditional{
-			Show: &condition.ConditionGroup{
-				Conjunction: condition.ConjunctionAnd,
-				Children: []any{&condition.ConditionRule{
-					Left: condition.Expression{
-						Type:  condition.ValueTypeField,
-						Field: "user_role",
-					},
-					Op:    condition.OpEqual,
-					Right: "admin",
-				}},
-			},
-		},
+		Conditional: []string{"user_role=admin"},
 	}
 	// Test with permissions instead of data
 	canView := action.CanView([]string{"admin"})
@@ -498,14 +457,12 @@ func (suite *ActionTestSuite) TestActionTheme() {
 		Type: ActionSubmit,
 		Text: "Themed Button",
 		Theme: &ActionTheme{
-			BaseStyle: BaseStyle{
-				Colors: map[string]string{
-					"primary": "#007bff",
-					"hover":   "#0056b3",
-				},
-				BorderRadius: "8px",
-				CustomCSS:    "font-weight: bold;",
+			Colors: map[string]string{
+				"primary": "#007bff",
+				"hover":   "#0056b3",
 			},
+			BorderRadius: "8px",
+			CustomCSS:    "font-weight: bold;",
 		},
 	}
 	// Test theme properties

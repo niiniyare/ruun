@@ -125,16 +125,15 @@ type NavigationProps struct {
 	Logo        string         `json:"logo"`
 	Size        NavigationSize `json:"size"`
 	Variant     string         `json:"variant"`
-	ClassName   string         `json:"className"`
 
 	// Progressive Enhancement (nil = disabled)
-	Layout    *LayoutConfig    `json:"layout"`    // Collapsible, responsive behavior
-	Search    *SearchConfig    `json:"search"`    // Search functionality
-	User      *UserConfig      `json:"user"`      // User authentication/profile
-	Mobile    *MobileConfig    `json:"mobile"`    // Mobile-specific features
-	Progress  *ProgressConfig  `json:"progress"`  // Multi-step/wizard navigation
-	Theme     *ThemeConfig     `json:"theme"`     // Theme and styling
-	Analytics *AnalyticsConfig `json:"analytics"` // Usage tracking
+	Layout    *NavigationLayoutConfig    `json:"layout"`    // Collapsible, responsive behavior
+	Search    *SearchConfig              `json:"search"`    // Search functionality
+	User      *UserConfig                `json:"user"`      // User authentication/profile
+	Mobile    *MobileConfig              `json:"mobile"`    // Mobile-specific features
+	Progress  *NavigationProgressConfig  `json:"progress"`  // Multi-step/wizard navigation
+	Theme     *NavigationThemeConfig     `json:"theme"`     // Theme and styling
+	Analytics *NavigationAnalyticsConfig `json:"analytics"` // Usage tracking
 
 	// Type-specific data (auto-populated based on Type)
 	Breadcrumbs []BreadcrumbItem `json:"breadcrumbs"` // For NavigationBreadcrumb
@@ -145,7 +144,7 @@ type NavigationProps struct {
 }
 
 // LayoutConfig defines layout and positioning options
-type LayoutConfig struct {
+type NavigationLayoutConfig struct {
 	Collapsible bool   `json:"collapsible"`
 	Position    string `json:"position"` // "fixed", "sticky", "relative"
 	Width       string `json:"width"`
@@ -186,7 +185,7 @@ type MobileConfig struct {
 }
 
 // ProgressConfig defines progress tracking for multi-step navigation
-type ProgressConfig struct {
+type NavigationProgressConfig struct {
 	ShowProgress bool   `json:"showProgress"`
 	CurrentStep  int    `json:"currentStep"`
 	TotalSteps   int    `json:"totalSteps"`
@@ -194,7 +193,7 @@ type ProgressConfig struct {
 }
 
 // ThemeConfig defines theme and styling options
-type ThemeConfig struct {
+type NavigationThemeConfig struct {
 	ID             string            `json:"id"`
 	DarkMode       bool              `json:"darkMode"`
 	TokenOverrides map[string]string `json:"tokenOverrides"`
@@ -202,7 +201,7 @@ type ThemeConfig struct {
 }
 
 // AnalyticsConfig defines usage tracking
-type AnalyticsConfig struct {
+type NavigationAnalyticsConfig struct {
 	Enabled     bool   `json:"enabled"`
 	TrackClicks bool   `json:"trackClicks"`
 	TrackSearch bool   `json:"trackSearch"`
@@ -251,7 +250,7 @@ func hasTheme(props NavigationProps) bool {
 	return props.Theme != nil
 }
 
-func hasAnalytics(props NavigationProps) bool {
+func hasNavigationAnalytics(props NavigationProps) bool {
 	return props.Analytics != nil && props.Analytics.Enabled
 }
 
@@ -313,7 +312,7 @@ func Navigation(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 261, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 260, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -332,7 +331,7 @@ func Navigation(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 264, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 263, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -350,7 +349,7 @@ func Navigation(props NavigationProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(buildNavigationAlpineData(props))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 266, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 265, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -396,7 +395,7 @@ func Navigation(props NavigationProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if hasAnalytics(props) {
+		if hasNavigationAnalytics(props) {
 			templ_7745c5c3_Err = navigationAnalytics(props.Analytics).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -521,7 +520,7 @@ func navigationSidebar(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Logo)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 369, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 368, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -540,7 +539,7 @@ func navigationSidebar(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 372, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 371, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -559,7 +558,7 @@ func navigationSidebar(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 375, Col: 61}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 374, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -732,7 +731,7 @@ func navigationTopbar(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.Logo)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 440, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 439, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -751,7 +750,7 @@ func navigationTopbar(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 443, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 442, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -878,7 +877,7 @@ func navigationBreadcrumb(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(props.Progress != nil && props.Progress.Separator != "", props.Progress.Separator, "/"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 493, Col: 141}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 492, Col: 141}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -901,7 +900,7 @@ func navigationBreadcrumb(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var19 templ.SafeURL
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(crumb.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 498, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 497, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -914,7 +913,7 @@ func navigationBreadcrumb(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", crumb.Active))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 500, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 499, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -927,7 +926,7 @@ func navigationBreadcrumb(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(crumb.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 502, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 501, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -945,7 +944,7 @@ func navigationBreadcrumb(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", crumb.Active))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 507, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 506, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -958,7 +957,7 @@ func navigationBreadcrumb(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(crumb.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 509, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 508, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -1013,7 +1012,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var25 templ.SafeURL
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(item.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 522, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 521, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -1026,7 +1025,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", item.Active))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 524, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 523, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -1053,7 +1052,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(item.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 533, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 532, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -1071,7 +1070,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", item.Active))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 538, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 537, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -1089,7 +1088,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 					var templ_7745c5c3_Var29 string
 					templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(item.OnClick)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 540, Col: 31}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 539, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 					if templ_7745c5c3_Err != nil {
@@ -1108,7 +1107,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 					var templ_7745c5c3_Var30 string
 					templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(item.AlpineClick)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 543, Col: 35}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 542, Col: 35}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 					if templ_7745c5c3_Err != nil {
@@ -1140,7 +1139,7 @@ func navigationTabs(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var31 string
 				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(item.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 553, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 552, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 				if templ_7745c5c3_Err != nil {
@@ -1194,7 +1193,7 @@ func navigationSteps(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %d%%", (props.Progress.CurrentStep*100)/props.Progress.TotalSteps))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 568, Col: 103}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 567, Col: 103}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -1217,7 +1216,7 @@ func navigationSteps(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var34 string
 			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", hasProgress(props) && i+1 <= props.Progress.CurrentStep))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 577, Col: 96}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 576, Col: 96}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 			if templ_7745c5c3_Err != nil {
@@ -1230,7 +1229,7 @@ func navigationSteps(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var35 string
 			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", hasProgress(props) && i+1 == props.Progress.CurrentStep))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 578, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 577, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
@@ -1243,7 +1242,7 @@ func navigationSteps(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i+1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 581, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 580, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
@@ -1256,7 +1255,7 @@ func navigationSteps(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var37 string
 			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(item.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 584, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 583, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 			if templ_7745c5c3_Err != nil {
@@ -1274,7 +1273,7 @@ func navigationSteps(props NavigationProps) templ.Component {
 				var templ_7745c5c3_Var38 string
 				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(item.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 586, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 585, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 				if templ_7745c5c3_Err != nil {
@@ -1345,7 +1344,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 		var templ_7745c5c3_Var42 string
 		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", depth))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 599, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 598, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 		if templ_7745c5c3_Err != nil {
@@ -1358,7 +1357,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 		var templ_7745c5c3_Var43 string
 		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", item.Active))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 600, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 599, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 		if templ_7745c5c3_Err != nil {
@@ -1371,7 +1370,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 		var templ_7745c5c3_Var44 string
 		templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", item.Disabled))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 601, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 600, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 		if templ_7745c5c3_Err != nil {
@@ -1384,7 +1383,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", len(item.Items) > 0))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 602, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 601, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -1433,7 +1432,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 			var templ_7745c5c3_Var46 templ.SafeURL
 			templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinURLErrs(item.URL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 630, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 629, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 			if templ_7745c5c3_Err != nil {
@@ -1451,7 +1450,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var47 string
 				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 633, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 632, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 				if templ_7745c5c3_Err != nil {
@@ -1470,7 +1469,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var48 string
 				templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXPost)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 636, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 635, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 				if templ_7745c5c3_Err != nil {
@@ -1489,7 +1488,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var49 string
 				templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 639, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 638, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 				if templ_7745c5c3_Err != nil {
@@ -1508,7 +1507,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var50 string
 				templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 642, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 641, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 				if templ_7745c5c3_Err != nil {
@@ -1527,7 +1526,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var51 string
 				templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 645, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 644, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 				if templ_7745c5c3_Err != nil {
@@ -1563,7 +1562,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var52 string
 				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(item.OnClick)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 655, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 654, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 				if templ_7745c5c3_Err != nil {
@@ -1582,7 +1581,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var53 string
 				templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(item.AlpineClick)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 658, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 657, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 				if templ_7745c5c3_Err != nil {
@@ -1601,7 +1600,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var54 string
 				templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXPost)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 661, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 660, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 				if templ_7745c5c3_Err != nil {
@@ -1620,7 +1619,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var55 string
 				templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 664, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 663, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 				if templ_7745c5c3_Err != nil {
@@ -1639,7 +1638,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var56 string
 				templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 667, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 666, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 				if templ_7745c5c3_Err != nil {
@@ -1658,7 +1657,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var57 string
 				templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 670, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 669, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 				if templ_7745c5c3_Err != nil {
@@ -1677,7 +1676,7 @@ func navigationMenuItem(item NavigationItem, depth int) templ.Component {
 				var templ_7745c5c3_Var58 string
 				templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(item.HXTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 673, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 672, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 				if templ_7745c5c3_Err != nil {
@@ -1748,7 +1747,7 @@ func navigationMenuItemContent(item NavigationItem) templ.Component {
 		var templ_7745c5c3_Var60 string
 		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(item.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 692, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 691, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
@@ -1766,7 +1765,7 @@ func navigationMenuItemContent(item NavigationItem) templ.Component {
 			var templ_7745c5c3_Var61 string
 			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(item.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 695, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 694, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 			if templ_7745c5c3_Err != nil {
@@ -1821,7 +1820,7 @@ func navigationSearch(search *SearchConfig) templ.Component {
 		var templ_7745c5c3_Var63 string
 		templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(search.Placeholder != "", search.Placeholder, "Search..."))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 715, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 714, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 		if templ_7745c5c3_Err != nil {
@@ -1839,7 +1838,7 @@ func navigationSearch(search *SearchConfig) templ.Component {
 			var templ_7745c5c3_Var64 string
 			templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", search.MinLength))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 722, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 721, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 			if templ_7745c5c3_Err != nil {
@@ -1869,7 +1868,7 @@ func navigationSearch(search *SearchConfig) templ.Component {
 		var templ_7745c5c3_Var65 string
 		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("searchQuery.length >= %d", utils.IfElse(search.MinLength > 0, search.MinLength, 1)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 734, Col: 108}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 733, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 		if templ_7745c5c3_Err != nil {
@@ -1887,7 +1886,7 @@ func navigationSearch(search *SearchConfig) templ.Component {
 			var templ_7745c5c3_Var66 string
 			templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(search.URL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 740, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 739, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 			if templ_7745c5c3_Err != nil {
@@ -1945,7 +1944,7 @@ func navigationUserSection(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var68 string
 			templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(props.User.Avatar)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 764, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 763, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 			if templ_7745c5c3_Err != nil {
@@ -1972,7 +1971,7 @@ func navigationUserSection(props NavigationProps) templ.Component {
 		var templ_7745c5c3_Var69 string
 		templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(props.User.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 774, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 773, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 		if templ_7745c5c3_Err != nil {
@@ -1990,7 +1989,7 @@ func navigationUserSection(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var70 string
 			templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(props.User.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 776, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 775, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 			if templ_7745c5c3_Err != nil {
@@ -2073,7 +2072,7 @@ func navigationUserMenu(props NavigationProps) templ.Component {
 			var templ_7745c5c3_Var72 string
 			templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(props.User.Avatar)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 808, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 807, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 			if templ_7745c5c3_Err != nil {
@@ -2100,7 +2099,7 @@ func navigationUserMenu(props NavigationProps) templ.Component {
 		var templ_7745c5c3_Var73 string
 		templ_7745c5c3_Var73, templ_7745c5c3_Err = templ.JoinStringErrs(props.User.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 816, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/navigation.templ`, Line: 815, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var73))
 		if templ_7745c5c3_Err != nil {
@@ -2252,7 +2251,7 @@ func navigationMobileMenu(props NavigationProps) templ.Component {
 }
 
 // navigationAnalytics renders analytics tracking components
-func navigationAnalytics(analytics *AnalyticsConfig) templ.Component {
+func navigationAnalytics(analytics *NavigationAnalyticsConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

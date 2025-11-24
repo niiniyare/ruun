@@ -119,13 +119,13 @@ type NavigationProps struct {
 	Variant     string         `json:"variant"`
 	
 	// Progressive Enhancement (nil = disabled)
-	Layout     *LayoutConfig     `json:"layout"`     // Collapsible, responsive behavior
+	Layout     *NavigationLayoutConfig     `json:"layout"`     // Collapsible, responsive behavior
 	Search     *SearchConfig     `json:"search"`     // Search functionality
 	User       *UserConfig       `json:"user"`       // User authentication/profile
 	Mobile     *MobileConfig     `json:"mobile"`     // Mobile-specific features
-	Progress   *ProgressConfig   `json:"progress"`   // Multi-step/wizard navigation
-	Theme      *ThemeConfig      `json:"theme"`      // Theme and styling
-	Analytics  *AnalyticsConfig  `json:"analytics"`  // Usage tracking
+	Progress   *NavigationProgressConfig   `json:"progress"`   // Multi-step/wizard navigation
+	Theme      *NavigationThemeConfig      `json:"theme"`      // Theme and styling
+	Analytics  *NavigationAnalyticsConfig  `json:"analytics"`  // Usage tracking
 	
 	// Type-specific data (auto-populated based on Type)
 	Breadcrumbs []BreadcrumbItem `json:"breadcrumbs"` // For NavigationBreadcrumb
@@ -136,7 +136,7 @@ type NavigationProps struct {
 }
 
 // LayoutConfig defines layout and positioning options
-type LayoutConfig struct {
+type NavigationLayoutConfig struct {
 	Collapsible bool   `json:"collapsible"`
 	Position    string `json:"position"` // "fixed", "sticky", "relative"
 	Width       string `json:"width"`
@@ -177,7 +177,7 @@ type MobileConfig struct {
 }
 
 // ProgressConfig defines progress tracking for multi-step navigation
-type ProgressConfig struct {
+type NavigationProgressConfig struct {
 	ShowProgress bool `json:"showProgress"`
 	CurrentStep  int  `json:"currentStep"`
 	TotalSteps   int  `json:"totalSteps"`
@@ -185,7 +185,7 @@ type ProgressConfig struct {
 }
 
 // ThemeConfig defines theme and styling options
-type ThemeConfig struct {
+type NavigationThemeConfig struct {
 	ID             string            `json:"id"`
 	DarkMode       bool              `json:"darkMode"`
 	TokenOverrides map[string]string `json:"tokenOverrides"`
@@ -193,7 +193,7 @@ type ThemeConfig struct {
 }
 
 // AnalyticsConfig defines usage tracking
-type AnalyticsConfig struct {
+type NavigationAnalyticsConfig struct {
 	Enabled       bool   `json:"enabled"`
 	TrackClicks   bool   `json:"trackClicks"`
 	TrackSearch   bool   `json:"trackSearch"`
@@ -242,7 +242,7 @@ func hasTheme(props NavigationProps) bool {
 	return props.Theme != nil
 }
 
-func hasAnalytics(props NavigationProps) bool {
+func hasNavigationAnalytics(props NavigationProps) bool {
 	return props.Analytics != nil && props.Analytics.Enabled
 }
 
@@ -280,7 +280,7 @@ templ Navigation(props NavigationProps) {
 		}
 		
 		<!-- Progressive Enhancement: Analytics -->
-		if hasAnalytics(props) {
+		if hasNavigationAnalytics(props) {
 			@navigationAnalytics(props.Analytics)
 		}
 	</nav>
@@ -888,7 +888,7 @@ templ navigationMobileMenu(props NavigationProps) {
 }
 
 // navigationAnalytics renders analytics tracking components
-templ navigationAnalytics(analytics *AnalyticsConfig) {
+templ navigationAnalytics(analytics *NavigationAnalyticsConfig) {
 	<script>
 		// Navigation analytics tracking
 		if (typeof gtag !== 'undefined' || typeof analytics !== 'undefined') {

@@ -28,21 +28,47 @@ type ProgressProps struct {
 	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
 }
 
-// getProgressClass generates the progress class using our CSS extension
+// getProgressClass returns progress class without any dynamic building
 func getProgressClass(size, variant string) string {
-	class := "progress"
-
-	// Add size suffix
-	if size != "" && size != "md" {
-		class = "progress-" + size
+	// Complete static approach - no concatenation at all
+	switch size {
+	case "sm":
+		switch variant {
+		case "secondary":
+			return "progress-sm progress-secondary"
+		case "destructive":
+			return "progress-sm progress-destructive"
+		default:
+			return "progress-sm"
+		}
+	case "lg":
+		switch variant {
+		case "secondary":
+			return "progress-lg progress-secondary"
+		case "destructive":
+			return "progress-lg progress-destructive"
+		default:
+			return "progress-lg"
+		}
+	case "xl":
+		switch variant {
+		case "secondary":
+			return "progress-xl progress-secondary"
+		case "destructive":
+			return "progress-xl progress-destructive"
+		default:
+			return "progress-xl"
+		}
+	default: // md or empty
+		switch variant {
+		case "secondary":
+			return "progress progress-secondary"
+		case "destructive":
+			return "progress progress-destructive"
+		default:
+			return "progress"
+		}
 	}
-
-	// Add variant modifier
-	if variant != "" && variant != "primary" {
-		class += " progress-" + variant
-	}
-
-	return class
 }
 
 // calculateProgressPercentage calculates the progress percentage
@@ -113,7 +139,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 61, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 75, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -131,7 +157,7 @@ func Progress(props ProgressProps) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.Value))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 64, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 78, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -149,7 +175,7 @@ func Progress(props ProgressProps) templ.Component {
 			return "100"
 		}())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 71, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 85, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -167,7 +193,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 73, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 87, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -186,7 +212,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabelledBy)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 76, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 90, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -205,7 +231,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaDescribedBy)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 79, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 93, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -223,7 +249,7 @@ func Progress(props ProgressProps) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + calculateProgressPercentage(props.Value, props.Max))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 84, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 98, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {

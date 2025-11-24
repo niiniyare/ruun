@@ -92,12 +92,9 @@ type DataTableColumn struct {
 	// Appearance
 	Align         string `json:"align"`
 	Format        string `json:"format"`
-	ClassName     string `json:"className"`
-	HeaderClass   string `json:"headerClass"`
-	CellClass     string `json:"cellClass"`
 	
 	// Type-specific configurations
-	BadgeMap      map[string]atoms.BadgeVariant `json:"badgeMap"`
+	BadgeMap      map[string]string `json:"badgeMap"`
 	CurrencyCode  string `json:"currencyCode"`
 	Precision     int    `json:"precision"`
 	DateFormat    string `json:"dateFormat"`
@@ -162,8 +159,8 @@ type DataTableAction struct {
 	ID          string              `json:"id"`
 	Text        string              `json:"text"`
 	Icon        string              `json:"icon"`
-	Variant     atoms.ButtonVariant `json:"variant"`
-	Size        atoms.ButtonSize    `json:"size"`
+	Variant     string `json:"variant"`
+	Size        string    `json:"size"`
 	Position    string              `json:"position"`
 	OnClick     string              `json:"onClick"`
 	HXGet       string              `json:"hxGet"`
@@ -179,7 +176,7 @@ type DataTableBulkAction struct {
 	ID          string              `json:"id"`
 	Text        string              `json:"text"`
 	Icon        string              `json:"icon"`
-	Variant     atoms.ButtonVariant `json:"variant"`
+	Variant     string `json:"variant"`
 	Destructive bool                `json:"destructive"`
 	Confirm     bool                `json:"confirm"`
 	OnClick     string              `json:"onClick"`
@@ -217,7 +214,6 @@ type DataTableProps struct {
 	Variant     DataTableVariant `json:"variant"`
 	Size        DataTableSize    `json:"size"`
 	Density     DataTableDensity `json:"density"`
-	ClassName   string           `json:"className"`
 	
 	// Progressive Enhancement (nil = disabled)
 	Selection  *SelectionConfig  `json:"selection"`  // Row selection features
@@ -226,10 +222,10 @@ type DataTableProps struct {
 	Pagination *PaginationConfig `json:"pagination"` // Pagination features
 	Actions    *ActionsConfig    `json:"actions"`    // Table and row actions
 	Export     *ExportConfig     `json:"export"`     // Export functionality
-	Layout     *LayoutConfig     `json:"layout"`     // Responsive, resizing
+	Layout     *DataTableLayoutConfig     `json:"layout"`     // Responsive, resizing
 	Performance *PerformanceConfig `json:"performance"` // Virtualization, lazy loading
-	Storage    *StorageConfig    `json:"storage"`    // State persistence
-	Analytics  *AnalyticsConfig  `json:"analytics"`  // Usage tracking
+	Storage    *DataTableStorageConfig    `json:"storage"`    // State persistence
+	Analytics  *DataTableAnalyticsConfig  `json:"analytics"`  // Usage tracking
 	
 	// Accessibility
 	AriaLabels  map[string]string `json:"ariaLabels"`
@@ -269,7 +265,10 @@ type FilteringConfig struct {
 // PaginationConfig defines pagination features
 type PaginationConfig struct {
 	Enabled         bool  `json:"enabled"`
+	CurrentPage     int   `json:"currentPage"`
 	PageSize        int   `json:"pageSize"`
+	TotalPages      int   `json:"totalPages"`
+	TotalItems      int   `json:"totalItems"`
 	PageSizeOptions []int `json:"pageSizeOptions"`
 	ShowTotal       bool  `json:"showTotal"`
 	ShowPageSize    bool  `json:"showPageSize"`
@@ -300,7 +299,7 @@ type ExportConfig struct {
 }
 
 // LayoutConfig defines responsive and layout features
-type LayoutConfig struct {
+type DataTableLayoutConfig struct {
 	Responsive  bool   `json:"responsive"`
 	Resizable   bool   `json:"resizable"`   // Column resizing
 	Expandable  bool   `json:"expandable"`  // Row expansion
@@ -320,7 +319,7 @@ type PerformanceConfig struct {
 }
 
 // StorageConfig defines state persistence
-type StorageConfig struct {
+type DataTableStorageConfig struct {
 	Enabled       bool   `json:"enabled"`
 	Key           string `json:"key"`           // Storage key
 	Strategy      string `json:"strategy"`      // "local", "session"
@@ -331,7 +330,7 @@ type StorageConfig struct {
 }
 
 // AnalyticsConfig defines usage tracking for DataTable
-type AnalyticsConfig struct {
+type DataTableAnalyticsConfig struct {
 	Enabled        bool   `json:"enabled"`
 	TrackSort      bool   `json:"trackSort"`      // Track column sorting
 	TrackFilter    bool   `json:"trackFilter"`    // Track filtering usage
@@ -387,7 +386,7 @@ func hasStorage(props DataTableProps) bool {
 	return props.Storage != nil && props.Storage.Enabled
 }
 
-func hasAnalytics(props DataTableProps) bool {
+func hasDataTableAnalytics(props DataTableProps) bool {
 	return props.Analytics != nil && props.Analytics.Enabled
 }
 
@@ -431,7 +430,7 @@ templ DataTable(props DataTableProps) {
 		
 		<!-- Progressive Enhancement: Pagination -->
 		if hasPagination(props) {
-			@dataTablePagination(props)
+			@dataTablePagination(props.Pagination)
 		}
 		
 		<!-- Progressive Enhancement: Export Modal -->
@@ -440,7 +439,7 @@ templ DataTable(props DataTableProps) {
 		}
 		
 		<!-- Progressive Enhancement: Analytics -->
-		if hasAnalytics(props) {
+		if hasDataTableAnalytics(props) {
 			@dataTableAnalytics(props.Analytics)
 		}
 		
@@ -620,15 +619,15 @@ templ dataTableHeader(props DataTableProps) {
 
 // dataTableToolbar renders search, filters, and table controls
 templ dataTableToolbar(props DataTableProps) {
-	if props.Search.Enabled || len(props.Filters) > 0 || props.Export.Enabled {
+	if props.Filtering.Enabled || len(props.Filtering.Filters) > 0 || props.Export.Enabled {
 		<div class="datatable-toolbar">
 			<div class="datatable-toolbar-left">
-				if props.Search.Enabled {
-					@dataTableSearch(props.Search)
+				if props.Filtering.Enabled {
+					@dataTableSearch(props.Filtering)
 				}
 				
-				if len(props.Filters) > 0 {
-					@dataTableFilters(props.Filters)
+				if len(props.Filtering.Filters) > 0 {
+					@dataTableFilters(props.Filtering.Filters)
 				}
 			</div>
 			
@@ -644,16 +643,16 @@ templ dataTableToolbar(props DataTableProps) {
 }
 
 // dataTableSearch renders the search input
-templ dataTableSearch(search DataTableSearch) {
+templ dataTableSearch(filtering *FilteringConfig) {
 	<div class="datatable-search">
 		<input
 			type="text"
 			class="datatable-search-input"
-			placeholder={ utils.IfElse(search.Placeholder != "", search.Placeholder, "Search...") }
-			value={ search.Value }
+			placeholder={ utils.IfElse(filtering.Search.Placeholder != "", filtering.Search.Placeholder, "Search...") }
+			value={ filtering.Search.Value }
 			x-model="searchQuery"
-			if search.Delay > 0 {
-				x-on:input={ "debounce." + fmt.Sprintf("%dms", search.Delay) + ":performSearch()" }
+			if filtering.Search.Delay > 0 {
+				x-on:input={ "debounce." + fmt.Sprintf("%dms", filtering.Search.Delay) + ":performSearch()" }
 			} else {
 				x-on:input="performSearch()"
 			}
@@ -661,13 +660,12 @@ templ dataTableSearch(search DataTableSearch) {
 		@atoms.Icon(atoms.IconProps{
 			Name: "search",
 			Size: atoms.IconSizeSM,
-			ClassName: "datatable-search-icon",
 		})
 		
-		if search.Advanced {
+		if filtering.Search.Advanced {
 			@atoms.Button(atoms.ButtonProps{
-				Variant: atoms.ButtonVariantGhost,
-				Size:    atoms.ButtonSizeSM,
+				Variant: "ghost",
+				Size:    "sm",
 				OnClick: "showAdvancedSearch = !showAdvancedSearch",
 				AriaLabel: "Toggle advanced search",
 			}) {
@@ -702,7 +700,7 @@ templ dataTableFilters(filters []DataTableFilter) {
 
 // dataTableBulkActions renders bulk actions for selected rows
 templ dataTableBulkActions(props DataTableProps) {
-	if len(props.BulkActions) > 0 {
+	if props.Actions != nil && len(props.Actions.BulkActions) > 0 {
 		<div 
 			class="datatable-bulk-actions"
 			x-show="selectedRows.length > 0"
@@ -712,7 +710,7 @@ templ dataTableBulkActions(props DataTableProps) {
 				<span class="datatable-bulk-actions-count" x-text="`${selectedRows.length} items selected`"></span>
 				
 				<div class="datatable-bulk-actions-buttons">
-					for _, action := range props.BulkActions {
+					for _, action := range props.Actions.BulkActions {
 						@dataTableBulkAction(action)
 					}
 				</div>
@@ -726,7 +724,7 @@ templ dataTableBulkAction(action DataTableBulkAction) {
 	@atoms.Button(atoms.ButtonProps{
 		Text:    action.Text,
 		Variant: action.Variant,
-		Size:    atoms.ButtonSizeSM,
+		Size:    "sm",
 		OnClick: utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
 	}) {
 		if action.Icon != "" {
@@ -816,20 +814,18 @@ templ dataTableHeaderCell(column DataTableColumn, props DataTableProps) {
 					@atoms.Icon(atoms.IconProps{
 						Name: "chevron-up",
 						Size: atoms.IconSizeXS,
-						ClassName: "datatable-sort-icon datatable-sort-asc",
-					})
+						})
 					@atoms.Icon(atoms.IconProps{
 						Name: "chevron-down",
 						Size: atoms.IconSizeXS,
-						ClassName: "datatable-sort-icon datatable-sort-desc",
-					})
+						})
 				</div>
 			}
 			
 			if column.Filterable {
 				@atoms.Button(atoms.ButtonProps{
-					Variant: atoms.ButtonVariantGhost,
-					Size:    atoms.ButtonSizeSM,
+					Variant: "ghost",
+					Size:    "sm",
 					OnClick: fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
 				}) {
 					@atoms.Icon(atoms.IconProps{
@@ -906,7 +902,7 @@ templ dataTableCellContent(value any, column DataTableColumn) {
 			} else {
 				@atoms.Badge(atoms.BadgeProps{
 					Text:    strValue,
-					Variant: atoms.BadgeVariantDefault,
+					Variant: "primary",
 					Size:    atoms.BadgeSizeSM,
 				})
 			}
@@ -962,8 +958,8 @@ templ dataTableCellContent(value any, column DataTableColumn) {
 templ dataTableRowActions(row DataTableRow, props DataTableProps) {
 	<div class="datatable-row-actions" x-data="{ open: false }">
 		@atoms.Button(atoms.ButtonProps{
-			Variant: atoms.ButtonVariantGhost,
-			Size:    atoms.ButtonSizeSM,
+			Variant: "ghost",
+			Size:    "sm",
 			OnClick: "open = !open",
 		}) {
 			@atoms.Icon(atoms.IconProps{
@@ -1035,7 +1031,7 @@ templ dataTableVirtualized(props DataTableProps) {
 }
 
 // dataTablePagination renders pagination controls
-templ dataTablePagination(pagination DataTablePagination) {
+templ dataTablePagination(pagination *PaginationConfig) {
 	if pagination.Enabled {
 		<div class="datatable-pagination">
 			<div class="datatable-pagination-info">
@@ -1060,8 +1056,8 @@ templ dataTablePagination(pagination DataTablePagination) {
 			
 			<div class="datatable-pagination-controls">
 				@atoms.Button(atoms.ButtonProps{
-					Variant: atoms.ButtonVariantOutline,
-					Size:    atoms.ButtonSizeSM,
+					Variant: "outline",
+					Size:    "sm",
 					OnClick: "previousPage()",
 					Disabled: pagination.CurrentPage <= 1,
 				}) {
@@ -1075,16 +1071,16 @@ templ dataTablePagination(pagination DataTablePagination) {
 					for i := 1; i <= pagination.TotalPages; i++ {
 						@atoms.Button(atoms.ButtonProps{
 							Text:    strconv.Itoa(i),
-							Variant: utils.IfElse(i == pagination.CurrentPage, atoms.ButtonVariantDefault, atoms.ButtonVariantGhost),
-							Size:    atoms.ButtonSizeSM,
+							Variant: utils.IfElse(i == pagination.CurrentPage, "primary", "ghost"),
+							Size:    "sm",
 							OnClick: fmt.Sprintf("goToPage(%d)", i),
 						})
 					}
 				</div>
 				
 				@atoms.Button(atoms.ButtonProps{
-					Variant: atoms.ButtonVariantOutline,
-					Size:    atoms.ButtonSizeSM,
+					Variant: "outline",
+					Size:    "sm",
 					OnClick: "nextPage()",
 					Disabled: pagination.CurrentPage >= pagination.TotalPages,
 				}) {
@@ -1117,11 +1113,11 @@ templ dataTableAction(action DataTableAction) {
 }
 
 // dataTableExportButton renders the export button
-templ dataTableExportButton(export DataTableExport) {
+templ dataTableExportButton(export *ExportConfig) {
 	<div class="datatable-export" x-data="{ open: false }">
 		@atoms.Button(atoms.ButtonProps{
-			Variant: atoms.ButtonVariantOutline,
-			Size:    atoms.ButtonSizeSM,
+			Variant: "outline",
+			Size:    "sm",
 			OnClick: "open = !open",
 		}) {
 			@atoms.Icon(atoms.IconProps{
@@ -1152,8 +1148,8 @@ templ dataTableExportButton(export DataTableExport) {
 templ dataTableViewOptions(props DataTableProps) {
 	<div class="datatable-view-options" x-data="{ open: false }">
 		@atoms.Button(atoms.ButtonProps{
-			Variant: atoms.ButtonVariantGhost,
-			Size:    atoms.ButtonSizeSM,
+			Variant: "ghost",
+			Size:    "sm",
 			OnClick: "open = !open",
 			AriaLabel: "View options",
 		}) {
@@ -1218,8 +1214,8 @@ templ dataTableExportModal(props DataTableProps) {
 				<div class="datatable-export-modal-header">
 					<h3>Export Data</h3>
 					@atoms.Button(atoms.ButtonProps{
-						Variant: atoms.ButtonVariantGhost,
-						Size:    atoms.ButtonSizeSM,
+						Variant: "ghost",
+						Size:    "sm",
 						OnClick: "showExportModal = false",
 					}) {
 						@atoms.Icon(atoms.IconProps{
@@ -1236,12 +1232,12 @@ templ dataTableExportModal(props DataTableProps) {
 				<div class="datatable-export-modal-footer">
 					@atoms.Button(atoms.ButtonProps{
 						Text:    "Cancel",
-						Variant: atoms.ButtonVariantOutline,
+						Variant: "outline",
 						OnClick: "showExportModal = false",
 					})
 					@atoms.Button(atoms.ButtonProps{
 						Text:    "Export",
-						Variant: atoms.ButtonVariantPrimary,
+						Variant: stringPrimary,
 						OnClick: "confirmExport()",
 					})
 				</div>
@@ -1251,7 +1247,7 @@ templ dataTableExportModal(props DataTableProps) {
 }
 
 // Helper function to build Alpine.js data for the datatable
-func buildDataTableAlpineData(props DataTableProps) string {
+func buildDataTableAlpineDataV2(props DataTableProps) string {
 	return fmt.Sprintf(`{
 		// Data
 		rows: %s,
@@ -1350,7 +1346,7 @@ func buildDataTableAlpineData(props DataTableProps) string {
 }
 
 // dataTableAnalytics renders analytics tracking components for DataTable
-templ dataTableAnalytics(analytics *AnalyticsConfig) {
+templ dataTableAnalytics(analytics *DataTableAnalyticsConfig) {
 	<script>
 		// DataTable analytics tracking
 		if (typeof gtag !== 'undefined' || typeof analytics !== 'undefined') {
@@ -1583,7 +1579,7 @@ templ dataTableJavaScript(props DataTableProps) {
 			tableElement.dataTable = dataTable;
 			
 			// Emit initialization event for analytics
-			{ if hasAnalytics(props) }
+			{ if hasDataTableAnalytics(props) }
 				document.dispatchEvent(new CustomEvent('table-initialized', {
 					detail: {
 						id: '{ props.ID }',
@@ -1632,7 +1628,7 @@ templ dataTableJavaScript(props DataTableProps) {
 				}
 				
 				// Emit error event for analytics
-				{ if hasAnalytics(props) }
+				{ if hasDataTableAnalytics(props) }
 					document.dispatchEvent(new CustomEvent('table-error', {
 						detail: {
 							id: '{ props.ID }',

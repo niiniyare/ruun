@@ -43,28 +43,107 @@ type ButtonProps struct {
 	AriaControls    string `json:"ariaControls,omitempty"`
 }
 
-// getButtonClass generates the correct single Basecoat class
-// Basecoat uses combined classes like "btn-sm-outline" not "btn btn-sm btn-outline"
+// getButtonClass returns the correct single Basecoat class
+// Uses static lookup to avoid any dynamic class building
 func getButtonClass(variant, size string, iconOnly bool) string {
-	// Start with base
-	class := "btn"
-
-	// Add size modifier if specified
-	if size != "" {
-		class = "btn-" + size
-	}
-
-	// Add icon modifier if icon-only
+	// Static switch-based approach - no string concatenation
 	if iconOnly {
-		class = class + "-icon"
+		switch size {
+		case "sm":
+			switch variant {
+			case "secondary":
+				return "btn-sm-icon-secondary"
+			case "outline":
+				return "btn-sm-icon-outline"
+			case "ghost":
+				return "btn-sm-icon-ghost"
+			case "link":
+				return "btn-sm-icon-link"
+			case "destructive":
+				return "btn-sm-icon-destructive"
+			default:
+				return "btn-sm-icon" // primary or empty
+			}
+		case "lg":
+			switch variant {
+			case "secondary":
+				return "btn-lg-icon-secondary"
+			case "outline":
+				return "btn-lg-icon-outline"
+			case "ghost":
+				return "btn-lg-icon-ghost"
+			case "link":
+				return "btn-lg-icon-link"
+			case "destructive":
+				return "btn-lg-icon-destructive"
+			default:
+				return "btn-lg-icon" // primary or empty
+			}
+		default: // no size or empty
+			switch variant {
+			case "secondary":
+				return "btn-icon-secondary"
+			case "outline":
+				return "btn-icon-outline"
+			case "ghost":
+				return "btn-icon-ghost"
+			case "link":
+				return "btn-icon-link"
+			case "destructive":
+				return "btn-icon-destructive"
+			default:
+				return "btn-icon" // primary or empty
+			}
+		}
+	} else {
+		switch size {
+		case "sm":
+			switch variant {
+			case "secondary":
+				return "btn-sm-secondary"
+			case "outline":
+				return "btn-sm-outline"
+			case "ghost":
+				return "btn-sm-ghost"
+			case "link":
+				return "btn-sm-link"
+			case "destructive":
+				return "btn-sm-destructive"
+			default:
+				return "btn-sm" // primary or empty
+			}
+		case "lg":
+			switch variant {
+			case "secondary":
+				return "btn-lg-secondary"
+			case "outline":
+				return "btn-lg-outline"
+			case "ghost":
+				return "btn-lg-ghost"
+			case "link":
+				return "btn-lg-link"
+			case "destructive":
+				return "btn-lg-destructive"
+			default:
+				return "btn-lg" // primary or empty
+			}
+		default: // no size or empty
+			switch variant {
+			case "secondary":
+				return "btn-secondary"
+			case "outline":
+				return "btn-outline"
+			case "ghost":
+				return "btn-ghost"
+			case "link":
+				return "btn-link"
+			case "destructive":
+				return "btn-destructive"
+			default:
+				return "btn" // primary or empty
+			}
+		}
 	}
-
-	// Add variant suffix (except for primary which is the default)
-	if variant != "" && variant != "primary" {
-		class = class + "-" + variant
-	}
-
-	return class
 }
 
 // Button renders a Basecoat button atom
@@ -123,7 +202,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Type)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 67, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 110, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -147,7 +226,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 72, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 115, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -166,7 +245,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 75, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 118, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -185,7 +264,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 78, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 121, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -204,7 +283,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Form)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 81, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 124, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -223,7 +302,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.FormAction)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 84, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 127, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -242,7 +321,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.FormMethod)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 87, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 130, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -261,7 +340,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.FormTarget)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 90, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 133, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -301,7 +380,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 99, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 142, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -320,7 +399,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaDescribedBy)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 102, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 145, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -339,7 +418,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaPressed)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 105, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 148, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -358,7 +437,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaExpanded)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 108, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 151, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -377,7 +456,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaHaspopup)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 111, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 154, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -396,7 +475,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaControls)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 114, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 157, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -421,7 +500,7 @@ func Button(props ButtonProps) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 121, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/button.templ`, Line: 164, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
