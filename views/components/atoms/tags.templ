@@ -44,16 +44,15 @@ type TagProps struct {
 	Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// getTagBadgeClass generates the Basecoat badge class for tags
+// getTagBadgeClass returns the Basecoat badge class without dynamic building
 func getTagBadgeClass(variant string) string {
-	class := "badge"
-	
-	// Add variant suffix if not primary/default
-	if variant != "" && variant != "primary" {
-		class = "badge-" + variant
+	// Static switch - same logic as Badge atom
+	switch variant {
+	case "secondary": return "badge-secondary"
+	case "destructive": return "badge-destructive"  
+	case "outline": return "badge-outline"
+	default: return "badge" // primary/empty
 	}
-	
-	return class
 }
 
 // buildTagAttributes creates all HTML attributes for the tag

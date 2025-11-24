@@ -35,28 +35,71 @@ type ButtonProps struct {
     AriaControls    string `json:"ariaControls,omitempty"`
 }
 
-// getButtonClass generates the correct single Basecoat class
-// Basecoat uses combined classes like "btn-sm-outline" not "btn btn-sm btn-outline"
+// getButtonClass returns the correct single Basecoat class  
+// Uses static lookup to avoid any dynamic class building
 func getButtonClass(variant, size string, iconOnly bool) string {
-    // Start with base
-    class := "btn"
-    
-    // Add size modifier if specified
-    if size != "" {
-        class = "btn-" + size
-    }
-    
-    // Add icon modifier if icon-only
+    // Static switch-based approach - no string concatenation
     if iconOnly {
-        class = class + "-icon"
+        switch size {
+        case "sm":
+            switch variant {
+            case "secondary": return "btn-sm-icon-secondary" 
+            case "outline": return "btn-sm-icon-outline"
+            case "ghost": return "btn-sm-icon-ghost"
+            case "link": return "btn-sm-icon-link" 
+            case "destructive": return "btn-sm-icon-destructive"
+            default: return "btn-sm-icon" // primary or empty
+            }
+        case "lg":
+            switch variant {
+            case "secondary": return "btn-lg-icon-secondary"
+            case "outline": return "btn-lg-icon-outline"
+            case "ghost": return "btn-lg-icon-ghost"
+            case "link": return "btn-lg-icon-link"
+            case "destructive": return "btn-lg-icon-destructive" 
+            default: return "btn-lg-icon" // primary or empty
+            }
+        default: // no size or empty
+            switch variant {
+            case "secondary": return "btn-icon-secondary"
+            case "outline": return "btn-icon-outline"
+            case "ghost": return "btn-icon-ghost"
+            case "link": return "btn-icon-link"
+            case "destructive": return "btn-icon-destructive"
+            default: return "btn-icon" // primary or empty
+            }
+        }
+    } else {
+        switch size {
+        case "sm":
+            switch variant {
+            case "secondary": return "btn-sm-secondary"
+            case "outline": return "btn-sm-outline"
+            case "ghost": return "btn-sm-ghost"
+            case "link": return "btn-sm-link"
+            case "destructive": return "btn-sm-destructive"
+            default: return "btn-sm" // primary or empty
+            }
+        case "lg":
+            switch variant {
+            case "secondary": return "btn-lg-secondary"
+            case "outline": return "btn-lg-outline" 
+            case "ghost": return "btn-lg-ghost"
+            case "link": return "btn-lg-link"
+            case "destructive": return "btn-lg-destructive"
+            default: return "btn-lg" // primary or empty
+            }
+        default: // no size or empty
+            switch variant {
+            case "secondary": return "btn-secondary"
+            case "outline": return "btn-outline"
+            case "ghost": return "btn-ghost"
+            case "link": return "btn-link"
+            case "destructive": return "btn-destructive"
+            default: return "btn" // primary or empty  
+            }
+        }
     }
-    
-    // Add variant suffix (except for primary which is the default)
-    if variant != "" && variant != "primary" {
-        class = class + "-" + variant
-    }
-    
-    return class
 }
 
 // Button renders a Basecoat button atom

@@ -20,21 +20,35 @@ type ProgressProps struct {
 	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
 }
 
-// getProgressClass generates the progress class using our CSS extension
+// getProgressClass returns progress class without any dynamic building
 func getProgressClass(size, variant string) string {
-	class := "progress"
-	
-	// Add size suffix
-	if size != "" && size != "md" {
-		class = "progress-" + size
+	// Complete static approach - no concatenation at all
+	switch size {
+	case "sm":
+		switch variant {
+		case "secondary": return "progress-sm progress-secondary"
+		case "destructive": return "progress-sm progress-destructive"
+		default: return "progress-sm"
+		}
+	case "lg":
+		switch variant {
+		case "secondary": return "progress-lg progress-secondary"
+		case "destructive": return "progress-lg progress-destructive" 
+		default: return "progress-lg"
+		}
+	case "xl":
+		switch variant {
+		case "secondary": return "progress-xl progress-secondary"
+		case "destructive": return "progress-xl progress-destructive"
+		default: return "progress-xl"
+		}
+	default: // md or empty
+		switch variant {
+		case "secondary": return "progress progress-secondary"
+		case "destructive": return "progress progress-destructive"
+		default: return "progress"
+		}
 	}
-	
-	// Add variant modifier
-	if variant != "" && variant != "primary" {
-		class += " progress-" + variant
-	}
-	
-	return class
 }
 
 // calculateProgressPercentage calculates the progress percentage

@@ -247,16 +247,16 @@ func (suite *BuilderExtendedTestSuite) TestHelperFunctions() {
 	require.Equal(suite.T(), "1rem", gridLayout.Gap)
 	// Test NewTabLayout
 	tabs := []Tab{
-		{ID: "tab1", Label: "Tab 1", Fields: []string{"field1"}},
-		{ID: "tab2", Label: "Tab 2", Fields: []string{"field2"}},
+		{LayoutComponent: LayoutComponent{ID: "tab1", Fields: []string{"field1"}}, Label: "Tab 1"},
+		{LayoutComponent: LayoutComponent{ID: "tab2", Fields: []string{"field2"}}, Label: "Tab 2"},
 	}
 	tabLayout := NewTabLayout(tabs)
 	require.Equal(suite.T(), LayoutTabs, tabLayout.Type)
 	require.Len(suite.T(), tabLayout.Tabs, 2)
 	// Test NewStepLayout
 	steps := []Step{
-		{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}},
-		{ID: "step2", Title: "Step 2", Order: 2, Fields: []string{"field2"}},
+		{LayoutComponent: LayoutComponent{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}}},
+		{LayoutComponent: LayoutComponent{ID: "step2", Title: "Step 2", Order: 2, Fields: []string{"field2"}}},
 	}
 	stepLayout := NewStepLayout(steps)
 	require.Equal(suite.T(), LayoutSteps, stepLayout.Type)

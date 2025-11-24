@@ -147,12 +147,16 @@ func (suite *ActionTestSuite) TestActionApplyTheme() {
 	action.ApplyTheme(nil)
 	suite.Require().Nil(action.Theme) // Should remain nil
 	// Test applying valid theme
-	theme := &Theme{
+	testTheme := &Theme{
 		ID:     "test-theme-id",
 		Name:   "test-theme",
-		Tokens: GetDefaultTokens(),
+		Tokens: map[string]interface{}{
+			"colors": map[string]string{
+				"primary": "#3b82f6",
+			},
+		},
 	}
-	action.ApplyTheme(theme)
+	action.ApplyTheme(testTheme)
 	suite.Require().NotNil(action.Theme) // Should be initialized
 }
 func (suite *ActionTestSuite) TestActionGetConfig() {

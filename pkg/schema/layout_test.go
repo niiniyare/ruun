@@ -24,9 +24,9 @@ func (suite *LayoutTestSuite) TestLayoutUtilityMethods() {
 	layout := &Layout{
 		Type: LayoutSteps,
 		Steps: []Step{
-			{ID: "step1", Title: "First Step", Order: 1},
-			{ID: "step3", Title: "Third Step", Order: 3},
-			{ID: "step2", Title: "Second Step", Order: 2},
+			{LayoutComponent: LayoutComponent{ID: "step1", Title: "First Step", Order: 1}},
+			{LayoutComponent: LayoutComponent{ID: "step3", Title: "Third Step", Order: 3}},
+			{LayoutComponent: LayoutComponent{ID: "step2", Title: "Second Step", Order: 2}},
 		},
 	}
 	// Test layout type checking using constants
@@ -73,7 +73,7 @@ func (suite *LayoutTestSuite) TestLayoutTypeChecking() {
 	// Test HasTabs
 	tabLayout := &Layout{
 		Type: "tabs",
-		Tabs: []Tab{{ID: "tab1", Label: "Tab 1", Fields: []string{"field1"}}},
+		Tabs: []Tab{{LayoutComponent: LayoutComponent{ID: "tab1", Fields: []string{"field1"}}, Label: "Tab 1"}},
 	}
 	require.Len(suite.T(), tabLayout.Tabs, 1)
 	gridLayout := &Layout{Type: "grid"}
@@ -81,14 +81,14 @@ func (suite *LayoutTestSuite) TestLayoutTypeChecking() {
 	// Test HasSteps
 	stepLayout := &Layout{
 		Type:  "steps",
-		Steps: []Step{{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}}},
+		Steps: []Step{{LayoutComponent: LayoutComponent{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}}}},
 	}
 	require.Len(suite.T(), stepLayout.Steps, 1)
 	require.Empty(suite.T(), gridLayout.Steps)
 	// Test HasSections
 	sectionLayout := &Layout{
 		Type:     "sections",
-		Sections: []Section{{ID: "section1", Title: "Section 1", Fields: []string{"field1"}}},
+		Sections: []Section{{LayoutComponent: LayoutComponent{ID: "section1", Title: "Section 1", Fields: []string{"field1"}}}},
 	}
 	require.True(suite.T(), sectionLayout.HasSections())
 	require.False(suite.T(), gridLayout.HasSections())
@@ -100,14 +100,18 @@ func (suite *LayoutTestSuite) TestFieldsForSection() {
 		Type: "sections",
 		Sections: []Section{
 			{
-				ID:     "section1",
-				Title:  "Personal Info",
-				Fields: []string{"name", "email", "phone"},
+				LayoutComponent: LayoutComponent{
+					ID:     "section1",
+					Title:  "Personal Info",
+					Fields: []string{"name", "email", "phone"},
+				},
 			},
 			{
-				ID:     "section2",
-				Title:  "Address",
-				Fields: []string{"street", "city", "zip"},
+				LayoutComponent: LayoutComponent{
+					ID:     "section2",
+					Title:  "Address",
+					Fields: []string{"street", "city", "zip"},
+				},
 			},
 		},
 	}
@@ -126,14 +130,18 @@ func (suite *LayoutTestSuite) TestFieldsForTab() {
 		Type: "tabs",
 		Tabs: []Tab{
 			{
-				ID:     "tab1",
+				LayoutComponent: LayoutComponent{
+					ID:     "tab1",
+					Fields: []string{"name", "email"},
+				},
 				Label:  "Basic Info",
-				Fields: []string{"name", "email"},
 			},
 			{
-				ID:     "tab2",
+				LayoutComponent: LayoutComponent{
+					ID:     "tab2",
+					Fields: []string{"phone", "address"},
+				},
 				Label:  "Contact",
-				Fields: []string{"phone", "address"},
 			},
 		},
 	}
@@ -152,16 +160,20 @@ func (suite *LayoutTestSuite) TestFieldsForStep() {
 		Type: "steps",
 		Steps: []Step{
 			{
-				ID:     "step1",
-				Title:  "Step 1",
-				Order:  1,
-				Fields: []string{"name", "email"},
+				LayoutComponent: LayoutComponent{
+					ID:     "step1",
+					Title:  "Step 1",
+					Order:  1,
+					Fields: []string{"name", "email"},
+				},
 			},
 			{
-				ID:     "step2",
-				Title:  "Step 2",
-				Order:  2,
-				Fields: []string{"phone", "address"},
+				LayoutComponent: LayoutComponent{
+					ID:     "step2",
+					Title:  "Step 2",
+					Order:  2,
+					Fields: []string{"phone", "address"},
+				},
 			},
 		},
 	}
@@ -180,22 +192,28 @@ func (suite *LayoutTestSuite) TestOrderedSteps() {
 		Type: "steps",
 		Steps: []Step{
 			{
-				ID:     "step3",
-				Title:  "Step 3",
-				Order:  3,
-				Fields: []string{"review"},
+				LayoutComponent: LayoutComponent{
+					ID:     "step3",
+					Title:  "Step 3",
+					Order:  3,
+					Fields: []string{"review"},
+				},
 			},
 			{
-				ID:     "step1",
-				Title:  "Step 1",
-				Order:  1,
-				Fields: []string{"name"},
+				LayoutComponent: LayoutComponent{
+					ID:     "step1",
+					Title:  "Step 1",
+					Order:  1,
+					Fields: []string{"name"},
+				},
 			},
 			{
-				ID:     "step2",
-				Title:  "Step 2",
-				Order:  2,
-				Fields: []string{"email"},
+				LayoutComponent: LayoutComponent{
+					ID:     "step2",
+					Title:  "Step 2",
+					Order:  2,
+					Fields: []string{"email"},
+				},
 			},
 		},
 	}
@@ -251,7 +269,7 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 	validTabs := &Layout{
 		Type: "tabs",
 		Tabs: []Tab{
-			{ID: "tab1", Label: "Tab 1", Fields: []string{"field1"}},
+			{LayoutComponent: LayoutComponent{ID: "tab1", Fields: []string{"field1"}}, Label: "Tab 1"},
 		},
 	}
 	err = validTabs.ValidateLayout(schema)
@@ -266,7 +284,7 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 	validSteps := &Layout{
 		Type: "steps",
 		Steps: []Step{
-			{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}},
+			{LayoutComponent: LayoutComponent{ID: "step1", Title: "Step 1", Order: 1, Fields: []string{"field1"}}},
 		},
 	}
 	err = validSteps.ValidateLayout(schema)
@@ -281,7 +299,7 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 	validSections := &Layout{
 		Type: "sections",
 		Sections: []Section{
-			{ID: "section1", Title: "Section 1", Fields: []string{"field1"}},
+			{LayoutComponent: LayoutComponent{ID: "section1", Title: "Section 1", Fields: []string{"field1"}}},
 		},
 	}
 	err = validSections.ValidateLayout(schema)
@@ -296,7 +314,7 @@ func (suite *LayoutTestSuite) TestLayoutValidation() {
 	layoutWithInvalidField := &Layout{
 		Type: "sections",
 		Sections: []Section{
-			{ID: "section1", Title: "Section 1", Fields: []string{"nonexistent_field"}},
+			{LayoutComponent: LayoutComponent{ID: "section1", Title: "Section 1", Fields: []string{"nonexistent_field"}}},
 		},
 	}
 	err = layoutWithInvalidField.ValidateLayout(schema)

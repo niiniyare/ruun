@@ -42,68 +42,54 @@ const (
 	LayoutGroups   LayoutType = "groups"   // Field grouping
 )
 
-// Section represents a logical grouping of fields with a title
-type Section struct {
+// LayoutComponent is the base struct for all layout components
+type LayoutComponent struct {
 	ID          string                    `json:"id" validate:"required"`
 	Title       string                    `json:"title,omitempty"`
 	Description string                    `json:"description,omitempty"`
-	Icon        string                    `json:"icon,omitempty" validate:"icon_name"`
 	Fields      []string                  `json:"fields" validate:"required,dive,fieldname"` // Field names
-	Collapsible bool                      `json:"collapsible,omitempty"`                     // Can be collapsed
-	Collapsed   bool                      `json:"collapsed,omitempty"`                       // Initially collapsed
-	Columns     int                       `json:"columns,omitempty" validate:"min=1,max=12"` // Section columns
 	Order       int                       `json:"order,omitempty"`                           // Display order
 	Conditional *Conditional              `json:"conditional,omitempty"`                     // Show/hide conditions (legacy)
 	Condition   *condition.ConditionGroup `json:"condition,omitempty"`                       // Advanced conditions
 	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
-	Theme       *SectionTheme             `json:"theme,omitempty"`                           // Section-specific theme
+}
+
+// Section represents a logical grouping of fields with a title
+type Section struct {
+	LayoutComponent
+	Icon        string        `json:"icon,omitempty" validate:"icon_name"`
+	Collapsible bool          `json:"collapsible,omitempty"`                     // Can be collapsed
+	Collapsed   bool          `json:"collapsed,omitempty"`                       // Initially collapsed
+	Columns     int           `json:"columns,omitempty" validate:"min=1,max=12"` // Section columns
+	Theme       *SectionTheme `json:"theme,omitempty"`                           // Section-specific theme
 }
 
 // Group represents a visual grouping of fields (like a fieldset)
 type Group struct {
-	ID          string                    `json:"id" validate:"required"`
-	Label       string                    `json:"label,omitempty"`
-	Description string                    `json:"description,omitempty"`
-	Fields      []string                  `json:"fields" validate:"required,dive,fieldname"` // Field names
-	Border      bool                      `json:"border,omitempty"`                          // Show border
-	Columns     int                       `json:"columns,omitempty" validate:"min=1,max=12"` // Group columns
-	Order       int                       `json:"order,omitempty"`                           // Display order
-	Conditional *Conditional              `json:"conditional,omitempty"`                     // Show/hide conditions (legacy)
-	Condition   *condition.ConditionGroup `json:"condition,omitempty"`                       // Advanced conditions
-	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
-	Theme       *GroupTheme               `json:"theme,omitempty"`                           // Group-specific theme
+	LayoutComponent
+	Label   string      `json:"label,omitempty"`
+	Border  bool        `json:"border,omitempty"`                          // Show border
+	Columns int         `json:"columns,omitempty" validate:"min=1,max=12"` // Group columns
+	Theme   *GroupTheme `json:"theme,omitempty"`                           // Group-specific theme
 }
 
 // Tab represents a tab in a tabbed interface
 type Tab struct {
-	ID          string                    `json:"id" validate:"required"`
-	Label       string                    `json:"label" validate:"required"`
-	Icon        string                    `json:"icon,omitempty" validate:"icon_name"`
-	Description string                    `json:"description,omitempty"`
-	Fields      []string                  `json:"fields" validate:"required,dive,fieldname"` // Field names in tab
-	Badge       string                    `json:"badge,omitempty"`                           // Badge text
-	Disabled    bool                      `json:"disabled,omitempty"`                        // Tab disabled
-	Order       int                       `json:"order,omitempty"`                           // Tab order
-	Conditional *Conditional              `json:"conditional,omitempty"`                     // Show/hide conditions (legacy)
-	Condition   *condition.ConditionGroup `json:"condition,omitempty"`                       // Advanced conditions
-	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
-	Theme       *TabTheme                 `json:"theme,omitempty"`                           // Tab-specific theme
+	LayoutComponent
+	Label    string    `json:"label" validate:"required"`
+	Icon     string    `json:"icon,omitempty" validate:"icon_name"`
+	Badge    string    `json:"badge,omitempty"`   // Badge text
+	Disabled bool      `json:"disabled,omitempty"` // Tab disabled
+	Theme    *TabTheme `json:"theme,omitempty"`    // Tab-specific theme
 }
 
 // Step represents a step in a multi-step wizard
 type Step struct {
-	ID          string                    `json:"id" validate:"required"`
-	Title       string                    `json:"title" validate:"required"`
-	Description string                    `json:"description,omitempty"`
-	Icon        string                    `json:"icon,omitempty" validate:"icon_name"`
-	Fields      []string                  `json:"fields" validate:"required,dive,fieldname"` // Fields in this step
-	Order       int                       `json:"order" validate:"min=0"`                    // Step number
-	Skippable   bool                      `json:"skippable,omitempty"`                       // Can skip this step
-	Validation  bool                      `json:"validation,omitempty"`                      // Validate before next
-	Conditional *Conditional              `json:"conditional,omitempty"`                     // Show/hide conditions (legacy)
-	Condition   *condition.ConditionGroup `json:"condition,omitempty"`                       // Advanced conditions
-	Style       *Style                    `json:"style,omitempty"`                           // Custom styling
-	Theme       *StepTheme                `json:"theme,omitempty"`                           // Step-specific theme
+	LayoutComponent
+	Icon       string     `json:"icon,omitempty" validate:"icon_name"`
+	Skippable  bool       `json:"skippable,omitempty"`  // Can skip this step
+	Validation bool       `json:"validation,omitempty"` // Validate before next
+	Theme      *StepTheme `json:"theme,omitempty"`      // Step-specific theme
 }
 
 // Breakpoints defines responsive behavior at different screen sizes

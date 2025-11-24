@@ -20,26 +20,77 @@ type SkeletonProps struct {
 	Attributes templ.Attributes  `json:"attributes,omitempty"`
 }
 
-// getSkeletonClass generates the skeleton class using our CSS extension
+// getSkeletonClass returns skeleton class without dynamic building
 func getSkeletonClass(shape, size, variant string) string {
-	class := "skeleton"
-	
-	// Add shape modifier
-	if shape != "" {
-		class = "skeleton-" + shape
+	// Complete static approach
+	switch shape {
+	case "text":
+		switch size {
+		case "sm":
+			switch variant {
+			case "wave": return "skeleton-text skeleton-sm skeleton-wave"
+			default: return "skeleton-text skeleton-sm"
+			}
+		case "lg":
+			switch variant {
+			case "wave": return "skeleton-text skeleton-lg skeleton-wave"
+			default: return "skeleton-text skeleton-lg"
+			}
+		case "xl":
+			switch variant {
+			case "wave": return "skeleton-text skeleton-xl skeleton-wave"
+			default: return "skeleton-text skeleton-xl"
+			}
+		default: // md or empty
+			switch variant {
+			case "wave": return "skeleton-text skeleton-wave"
+			default: return "skeleton-text"
+			}
+		}
+	case "heading":
+		switch variant {
+		case "wave": return "skeleton-heading skeleton-wave"
+		default: return "skeleton-heading"
+		}
+	case "avatar":
+		switch variant {
+		case "wave": return "skeleton-avatar skeleton-wave"
+		default: return "skeleton-avatar"
+		}
+	case "button":
+		switch variant {
+		case "wave": return "skeleton-button skeleton-wave"
+		default: return "skeleton-button"
+		}
+	case "card":
+		switch variant {
+		case "wave": return "skeleton-card skeleton-wave"
+		default: return "skeleton-card"
+		}
+	default: // no shape specified
+		switch size {
+		case "sm":
+			switch variant {
+			case "wave": return "skeleton skeleton-sm skeleton-wave"
+			default: return "skeleton skeleton-sm"
+			}
+		case "lg":
+			switch variant {
+			case "wave": return "skeleton skeleton-lg skeleton-wave"
+			default: return "skeleton skeleton-lg"
+			}
+		case "xl":
+			switch variant {
+			case "wave": return "skeleton skeleton-xl skeleton-wave"
+			default: return "skeleton skeleton-xl"
+			}
+		default: // md or empty
+			switch variant {
+			case "wave": return "skeleton skeleton-wave"
+			default: return "skeleton"
+			}
+		}
 	}
-	
-	// Add size modifier (only if no shape or if shape is generic)
-	if size != "" && (shape == "" || shape == "text") {
-		class += " skeleton-" + size
-	}
-	
-	// Add animation variant
-	if variant == "wave" {
-		class += " skeleton-wave"
-	}
-	
-	return class
 }
 
 // buildSkeletonAttributes creates div attributes

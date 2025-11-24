@@ -22,16 +22,15 @@ type BadgeProps struct {
     AriaPressed     string `json:"ariaPressed,omitempty"`
 }
 
-// getBadgeClass builds the Basecoat class
+// getBadgeClass returns the Basecoat class without dynamic building
 func getBadgeClass(variant string) string {
-    class := "badge"
-    
-    // Add variant suffix if not primary/default
-    if variant != "" && variant != "primary" {
-        class = class + "-" + variant
+    // Static switch - no string concatenation
+    switch variant {
+    case "secondary": return "badge-secondary"
+    case "destructive": return "badge-destructive"  
+    case "outline": return "badge-outline"
+    default: return "badge" // primary/empty
     }
-    
-    return class
 }
 
 // Badge renders a Basecoat badge atom
