@@ -2,7 +2,6 @@ package molecules
 
 import (
     "github.com/niiniyare/ruun/views/components/atoms"
-    "github.com/niiniyare/ruun/pkg/utils"
 )
 
 // FormFieldType defines the input type
@@ -46,15 +45,10 @@ type FormFieldProps struct {
     Disabled    bool
     Readonly    bool
     HasError    bool
+    Horizontal  bool  // Use horizontal layout
     
     // Validation (pre-computed externally) 
     Errors      []string
-    
-    // Styling (pre-resolved externally)
-    ClassName   string
-    LabelClass  string
-    InputClass  string
-    ErrorClass  string
     
     // Event handlers (pre-resolved HTML attributes)
     OnChange    string
@@ -63,58 +57,55 @@ type FormFieldProps struct {
     OnInput     string
 }
 
-// getFieldClass builds CSS class string
-func getFieldClass(props FormFieldProps) string {
-    return utils.TwMerge(
-        "form-field",
-        utils.If(props.Required, "form-field-required"),
-        utils.If(props.Disabled, "form-field-disabled"),
-        utils.If(props.HasError, "form-field-error"),
-        props.ClassName,
-    )
-}
-
-// FormField renders a form field molecule with label, input, and validation
+// FormField renders a Basecoat .field molecule with label, input, and validation
 templ FormField(props FormFieldProps) {
-    <div class={getFieldClass(props)}>
-        // Label
+    <div 
+        class="field"
+        if props.HasError {
+            data-invalid="true"
+        }
+        if props.Horizontal {
+            data-orientation="horizontal"
+        }
+    >
+        // Label (Basecoat styles labels inside .field automatically)
         if props.Label != "" {
-            @atoms.Label(atoms.LabelProps{
-                For:       props.ID,
-                Text:      props.Label,
-                Required:  props.Required,
-                Size:      atoms.LabelSizeMD,
-                State:     utils.IfElse(props.Disabled, atoms.LabelStateDisabled, atoms.LabelStateDefault),
-                ClassName: props.LabelClass,
-            })
+            <label for={props.ID}>
+                {props.Label}
+                if props.Required {
+                    <span aria-label="required">*</span>
+                }
+            </label>
         }
         
-        // Input based on type
-        <div class="form-field-input">
-            @renderInput(props)
-        </div>
+        // Input (Basecoat styles inputs inside .field automatically)
+        @renderInput(props)
         
-        // Help text
-        if props.HelpText != "" {
-            <div class="form-field-help">
-                {props.HelpText}
-            </div>
-        }
-        
-        // Error messages
-        if len(props.Errors) > 0 {
-            <div class={utils.TwMerge("form-field-errors", props.ErrorClass)}>
-                for _, error := range props.Errors {
-                    <div class="form-field-error-message">
-                        {error}
+        // Help text and errors in section (Basecoat .field pattern)
+        if props.HelpText != "" || len(props.Errors) > 0 {
+            <section>
+                if props.HelpText != "" && len(props.Errors) == 0 {
+                    <p>{props.HelpText}</p>
+                }
+                if len(props.Errors) > 0 {
+                    <div role="alert">
+                        if len(props.Errors) == 1 {
+                            <p>{props.Errors[0]}</p>
+                        } else {
+                            <ul>
+                                for _, error := range props.Errors {
+                                    <li>{error}</li>
+                                }
+                            </ul>
+                        }
                     </div>
                 }
-            </div>
+            </section>
         }
     </div>
 }
 
-// renderInput renders the appropriate input based on type
+// renderInput renders the appropriate input based on type (Basecoat contextual styling)
 templ renderInput(props FormFieldProps) {
     switch props.Type {
     case FormFieldText, FormFieldEmail, FormFieldPassword, FormFieldNumber:
@@ -127,85 +118,152 @@ templ renderInput(props FormFieldProps) {
             Required:    props.Required,
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
-            ClassName:   props.InputClass,
             OnChange:    props.OnChange,
             OnBlur:      props.OnBlur,
             OnFocus:     props.OnFocus,
             OnInput:     props.OnInput,
+            AriaInvalid: func() string {
+                if props.HasError {
+                    return "true"
+                }
+                return ""
+            }(),
         })
         
     case FormFieldTextarea:
-        @atoms.Textarea(atoms.TextareaProps{
-            ID:          props.ID,
-            Name:        props.Name,
-            Value:       props.Value,
-            Placeholder: props.Placeholder,
-            Required:    props.Required,
-            Disabled:    props.Disabled,
-            Readonly:    props.Readonly,
-            ClassName:   props.InputClass,
-            OnChange:    props.OnChange,
-            OnBlur:      props.OnBlur,
-            OnFocus:     props.OnFocus,
-            OnInput:     props.OnInput,
-        })
+        <textarea
+            id={props.ID}
+            name={props.Name}
+            placeholder={props.Placeholder}
+            if props.Required {
+                required
+            }
+            if props.Disabled {
+                disabled
+            }
+            if props.Readonly {
+                readonly
+            }
+            if props.OnChange != "" {
+                onchange={props.OnChange}
+            }
+            if props.OnBlur != "" {
+                onblur={props.OnBlur}
+            }
+            if props.OnFocus != "" {
+                onfocus={props.OnFocus}
+            }
+            if props.OnInput != "" {
+                oninput={props.OnInput}
+            }
+            if props.HasError {
+                aria-invalid="true"
+            }
+        >{props.Value}</textarea>
         
     case FormFieldSelect:
-        @atoms.Select(atoms.SelectProps{
-            ID:        props.ID,
-            Name:      props.Name,
-            Value:     props.Value,
-            Options:   convertToSelectOptions(props.Options),
-            Required:  props.Required,
-            Disabled:  props.Disabled,
-            ClassName: props.InputClass,
-            OnChange:  props.OnChange,
-            OnBlur:    props.OnBlur,
-            OnFocus:   props.OnFocus,
-        })
+        <select
+            id={props.ID}
+            name={props.Name}
+            if props.Required {
+                required
+            }
+            if props.Disabled {
+                disabled
+            }
+            if props.OnChange != "" {
+                onchange={props.OnChange}
+            }
+            if props.OnBlur != "" {
+                onblur={props.OnBlur}
+            }
+            if props.OnFocus != "" {
+                onfocus={props.OnFocus}
+            }
+            if props.HasError {
+                aria-invalid="true"
+            }
+        >
+            for _, option := range props.Options {
+                <option 
+                    value={option.Value}
+                    if option.Selected {
+                        selected
+                    }
+                    if option.Disabled {
+                        disabled
+                    }
+                >
+                    {option.Label}
+                </option>
+            }
+        </select>
         
     case FormFieldCheckbox:
         if len(props.Options) > 0 {
             for _, option := range props.Options {
-                @atoms.Checkbox(atoms.CheckboxProps{
-                    ID:       props.ID + "-" + option.Value,
-                    Name:     props.Name,
-                    Value:    option.Value,
-                    Label:    option.Label,
-                    Checked:  option.Selected,
-                    Disabled: props.Disabled || option.Disabled,
-                    Size:     atoms.CheckboxSizeMD,
-                    State:    utils.IfElse(props.Disabled || option.Disabled, atoms.CheckboxStateDisabled, utils.IfElse(props.HasError, atoms.CheckboxStateError, atoms.CheckboxStateDefault)),
-                    OnChange: props.OnChange,
-                })
+                <input
+                    type="checkbox"
+                    id={props.ID + "-" + option.Value}
+                    name={props.Name}
+                    value={option.Value}
+                    if option.Selected {
+                        checked
+                    }
+                    if props.Disabled || option.Disabled {
+                        disabled
+                    }
+                    if props.OnChange != "" {
+                        onchange={props.OnChange}
+                    }
+                    if props.HasError {
+                        aria-invalid="true"
+                    }
+                />
+                <label for={props.ID + "-" + option.Value}>{option.Label}</label>
             }
         } else {
-            @atoms.Checkbox(atoms.CheckboxProps{
-                ID:       props.ID,
-                Name:     props.Name,
-                Value:    props.Value,
-                Label:    props.Label,
-                Checked:  props.Value == "true",
-                Disabled: props.Disabled,
-                Size:     atoms.CheckboxSizeMD,
-                State:    utils.IfElse(props.Disabled, atoms.CheckboxStateDisabled, utils.IfElse(props.HasError, atoms.CheckboxStateError, atoms.CheckboxStateDefault)),
-                OnChange: props.OnChange,
-            })
+            <input
+                type="checkbox"
+                id={props.ID}
+                name={props.Name}
+                value={props.Value}
+                if props.Value == "true" {
+                    checked
+                }
+                if props.Disabled {
+                    disabled
+                }
+                if props.OnChange != "" {
+                    onchange={props.OnChange}
+                }
+                if props.HasError {
+                    aria-invalid="true"
+                }
+            />
         }
         
     case FormFieldRadio:
         for _, option := range props.Options {
-            @atoms.Radio(atoms.RadioProps{
-                ID:       props.ID + "-" + option.Value,
-                Name:     props.Name,
-                Value:    option.Value,
-                Label:    option.Label,
-                Checked:  option.Selected,
-                Disabled: props.Disabled || option.Disabled,
-                Size:     atoms.RadioSizeMD,
-                State:    utils.IfElse(props.Disabled || option.Disabled, atoms.RadioStateDisabled, utils.IfElse(props.HasError, atoms.RadioStateError, atoms.RadioStateDefault)),
-                OnChange: props.OnChange,
-            })
+            <input
+                type="radio"
+                id={props.ID + "-" + option.Value}
+                name={props.Name}
+                value={option.Value}
+                if option.Selected {
+                    checked
+                }
+                if props.Disabled || option.Disabled {
+                    disabled
+                }
+                if props.OnChange != "" {
+                    onchange={props.OnChange}
+                }
+                if props.HasError {
+                    aria-invalid="true"
+                }
+            />
+            <label for={props.ID + "-" + option.Value}>{option.Label}</label>
         }
         
     default:
@@ -218,25 +276,16 @@ templ renderInput(props FormFieldProps) {
             Required:    props.Required,
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
-            ClassName:   props.InputClass,
             OnChange:    props.OnChange,
             OnBlur:      props.OnBlur,
             OnFocus:     props.OnFocus,
             OnInput:     props.OnInput,
+            AriaInvalid: func() string {
+                if props.HasError {
+                    return "true"
+                }
+                return ""
+            }(),
         })
     }
-}
-
-// convertToSelectOptions converts FormField options to Select atom options
-func convertToSelectOptions(options []FormFieldOption) []atoms.SelectOption {
-    selectOptions := make([]atoms.SelectOption, len(options))
-    for i, option := range options {
-        selectOptions[i] = atoms.SelectOption{
-            Value:    option.Value,
-            Label:    option.Label,
-            Selected: option.Selected,
-            Disabled: option.Disabled,
-        }
-    }
-    return selectOptions
 }

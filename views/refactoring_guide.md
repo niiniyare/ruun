@@ -498,6 +498,98 @@ As you work through this refactoring, use this framework:
 - Create custom classes prematurely
 - Skip accessibility
 
+---
+
+## Common AI Mistakes (Learn from FormField Refactoring)
+
+When refactoring components, AI assistants often make these mistakes. **Avoid them**:
+
+### ❌ Mistake 1: Re-implementing CSS that Basecoat provides
+**Bad**: Adding custom classes when Basecoat already handles it
+```go
+// WRONG - trying to build classes that Basecoat provides
+func getFieldClass(props FormFieldProps) string {
+    classes := []string{"field"}
+    if props.HasError {
+        classes = append(classes, "text-destructive") // Basecoat handles this!
+    }
+    return utils.TwMerge(classes...)
+}
+```
+**Good**: Trust Basecoat's contextual styling
+```go
+// CORRECT - let Basecoat handle everything
+<div class="field" data-invalid="true">
+    // Basecoat automatically styles error states
+</div>
+```
+
+### ❌ Mistake 2: Keeping ClassName props
+**Bad**: Allowing custom class injection
+```go
+type FormFieldProps struct {
+    ClassName   string  // ❌ Don't do this
+    LabelClass  string  // ❌ Don't do this  
+    InputClass  string  // ❌ Don't do this
+}
+```
+**Good**: Remove ALL className props
+```go
+type FormFieldProps struct {
+    // Only semantic props, no styling props
+    Required bool
+    HasError bool
+    Horizontal bool  // Use data attributes instead
+}
+```
+
+### ❌ Mistake 3: Not trusting the framework
+**Bad**: Thinking you need to add classes for basic functionality
+```go
+// WRONG - second-guessing Basecoat
+if props.HasError {
+    classes = append(classes, "text-destructive border-destructive")
+}
+```
+**Good**: If it's in basecoat.css, it works automatically
+```html
+<!-- CORRECT - data-invalid triggers all error styling -->
+<div class="field" data-invalid="true">
+    <!-- Basecoat handles text-destructive, border-destructive, etc. -->
+</div>
+```
+
+### ❌ Mistake 4: Not checking the CSS first
+**Bad**: Assuming you need custom logic
+```go
+// WRONG - building complex class logic
+func getOrientationClass(horizontal bool) string {
+    if horizontal {
+        return "flex-row items-center"  // Basecoat has this!
+    }
+    return "flex-col"
+}
+```
+**Good**: Check basecoat.css line 721 first
+```css
+/* In basecoat.css - it's already there! */
+.field[data-orientation='horizontal'] {
+    @apply flex-row items-center [&>label]:flex-auto;
+}
+```
+```go
+// CORRECT - just use the data attribute
+<div class="field" data-orientation="horizontal">
+```
+
+### ✅ The Right Approach
+
+1. **Read basecoat.css FIRST** - before writing any code
+2. **Use data attributes** - that's how Basecoat handles states  
+3. **Remove ALL className props** - they're not needed
+4. **Trust the framework** - if Basecoat provides it, use it as-is
+5. **Keep props semantic** - `HasError bool`, not `ErrorClass string`
+
 ### 3. When You Find a Gap:
 
 **Evaluate**:
