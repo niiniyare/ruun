@@ -1,0 +1,326 @@
+package molecules
+
+import (
+	"fmt"
+	"github.com/niiniyare/ruun/views/components/atoms"
+)
+
+// DropdownMenuItemType defines the type of dropdown menu item (different from generic MenuItem)
+type DropdownMenuItemType string
+
+const (
+	DropdownMenuItemDefault  DropdownMenuItemType = "menuitem"
+	DropdownMenuItemCheckbox DropdownMenuItemType = "menuitemcheckbox"
+	DropdownMenuItemRadio    DropdownMenuItemType = "menuitemradio"
+)
+
+// DropdownMenuItem represents a single dropdown menu item
+type DropdownMenuItem struct {
+	// Core properties
+	Text        string       `json:"text"`
+	Icon        string       `json:"icon"`
+	Type        DropdownMenuItemType `json:"type"`
+	
+	// Actions
+	OnClick  string `json:"onClick"`
+	HxPost   string `json:"hxPost"`
+	HxGet    string `json:"hxGet"`
+	HxTarget string `json:"hxTarget"`
+	HxSwap   string `json:"hxSwap"`
+	
+	// States
+	Disabled bool `json:"disabled"`
+	Checked  bool `json:"checked"`  // For checkbox/radio items
+	
+	// Keyboard shortcut
+	Shortcut string `json:"shortcut"`
+	
+	// ARIA
+	AriaLabel string `json:"ariaLabel"`
+}
+
+// DropdownMenuGroup represents a group of dropdown menu items
+type DropdownMenuGroup struct {
+	Heading string             `json:"heading"`
+	Items   []DropdownMenuItem `json:"items"`
+}
+
+// DropdownMenuProps defines properties for the DropdownMenu molecule
+type DropdownMenuProps struct {
+	// Core properties
+	ID      string `json:"id"`
+	Trigger string `json:"trigger"`
+	
+	// Trigger customization
+	TriggerComponent templ.Component `json:"triggerComponent"` // Custom trigger
+	TriggerButton    atoms.ButtonProps `json:"triggerButton"` // Button props for trigger
+	
+	// Content
+	Items  []DropdownMenuItem  `json:"items"`
+	Groups []DropdownMenuGroup `json:"groups"`
+	
+	// Popover positioning
+	Side  string `json:"side"`  // "top", "bottom", "left", "right"
+	Align string `json:"align"` // "start", "center", "end"
+	
+	// Styling
+	MinWidth   string `json:"minWidth"`
+	ClassName  string `json:"className"`
+	
+	// ARIA
+	AriaLabel string `json:"ariaLabel"`
+}
+
+// DropdownMenu renders a Basecoat dropdown menu component
+templ DropdownMenu(props DropdownMenuProps) {
+	<div class="dropdown-menu" data-dropdown-menu-initialized="false">
+		<!-- Trigger Button -->
+		if props.TriggerComponent != nil {
+			@props.TriggerComponent
+		} else {
+			<button 
+				type="button"
+				class={ getTriggerButtonClass(props.TriggerButton) }
+				popovertarget={ props.ID + "-popover" }
+				aria-haspopup="menu"
+				aria-controls={ props.ID + "-menu" }
+				aria-expanded="false"
+				id={ props.ID + "-trigger" }
+				if props.AriaLabel != "" {
+					aria-label={ props.AriaLabel }
+				}
+			>
+				if props.TriggerButton.Text != "" {
+					{ getTriggerText(props.Trigger, props.TriggerButton.Text) }
+				} else {
+					{ props.Trigger }
+				}
+				@atoms.Icon(atoms.IconProps{
+					Name: "chevron-down",
+					Size: "xs",
+				})
+			</button>
+		}
+		
+		<!-- Popover Content -->
+		<div 
+			popover
+			class={ getPopoverClass(props.MinWidth, props.ClassName) }
+			id={ props.ID + "-popover" }
+			data-side={ props.Side }
+			data-align={ props.Align }
+		>
+			<div 
+				role="menu"
+				id={ props.ID + "-menu" }
+				aria-labelledby={ props.ID + "-trigger" }
+			>
+				<!-- Render Groups -->
+				if len(props.Groups) > 0 {
+					for i, group := range props.Groups {
+						@menuGroup(group, props.ID + fmt.Sprintf("-group-%d", i))
+						if i < len(props.Groups)-1 {
+							<hr role="separator" />
+						}
+					}
+				}
+				
+				<!-- Render Individual Items -->
+				if len(props.Items) > 0 {
+					if len(props.Groups) > 0 {
+						<hr role="separator" />
+					}
+					for _, item := range props.Items {
+						@menuItem(item)
+					}
+				}
+			</div>
+		</div>
+	</div>
+	
+	<!-- JavaScript Initialization -->
+	@dropdownMenuScript(props.ID)
+}
+
+// getTriggerButtonClass returns the CSS class for the trigger button
+func getTriggerButtonClass(buttonProps atoms.ButtonProps) string {
+	if buttonProps.Variant != "" {
+		switch buttonProps.Variant {
+		case "outline":
+			return "btn-outline"
+		case "ghost":
+			return "btn-ghost"
+		case "secondary":
+			return "btn-secondary"
+		default:
+			return "btn"
+		}
+	}
+	return "btn-outline" // Default to outline
+}
+
+// getTriggerText returns the appropriate trigger text
+func getTriggerText(trigger, buttonText string) string {
+	if buttonText != "" {
+		return buttonText
+	}
+	return trigger
+}
+
+// getPopoverClass returns the CSS class for the popover
+func getPopoverClass(minWidth, className string) string {
+	classes := "popover"
+	
+	if minWidth != "" {
+		classes += " " + minWidth
+	} else {
+		classes += " min-w-56"
+	}
+	
+	if className != "" {
+		classes += " " + className
+	}
+	
+	return classes
+}
+
+// menuGroup renders a group of menu items
+templ menuGroup(group DropdownMenuGroup, groupID string) {
+	<div role="group" aria-labelledby={ groupID }>
+		if group.Heading != "" {
+			<div role="heading" id={ groupID }>{ group.Heading }</div>
+		}
+		for _, item := range group.Items {
+			@menuItem(item)
+		}
+	</div>
+}
+
+// menuItem renders a single menu item
+templ menuItem(item DropdownMenuItem) {
+	<div
+		role={ string(item.Type) }
+		if item.Type == DropdownMenuItemCheckbox || item.Type == DropdownMenuItemRadio {
+			aria-checked={ fmt.Sprintf("%t", item.Checked) }
+			class="group"
+		}
+		if item.Disabled {
+			aria-disabled="true"
+		}
+		if item.AriaLabel != "" {
+			aria-label={ item.AriaLabel }
+		}
+		if item.OnClick != "" {
+			x-on:click={ item.OnClick }
+		}
+		if item.HxPost != "" {
+			hx-post={ item.HxPost }
+		}
+		if item.HxGet != "" {
+			hx-get={ item.HxGet }
+		}
+		if item.HxTarget != "" {
+			hx-target={ item.HxTarget }
+		}
+		if item.HxSwap != "" {
+			hx-swap={ item.HxSwap }
+		}
+	>
+		<!-- Checkbox/Radio indicator -->
+		if item.Type == DropdownMenuItemCheckbox {
+			@atoms.Icon(atoms.IconProps{
+				Name: "check",
+				Size: "sm",
+				AriaHidden: "true",
+			})
+		}
+		
+		if item.Type == DropdownMenuItemRadio {
+			<div class="size-4 flex items-center justify-center">
+				<div 
+					class="size-2 rounded-full bg-foreground invisible group-aria-checked:visible"
+					aria-hidden="true"
+				></div>
+			</div>
+		}
+		
+		<!-- Icon -->
+		if item.Icon != "" {
+			@atoms.Icon(atoms.IconProps{
+				Name: item.Icon,
+				Size: "sm",
+			})
+		}
+		
+		<!-- Text -->
+		{ item.Text }
+		
+		<!-- Keyboard Shortcut -->
+		if item.Shortcut != "" {
+			<span class="text-muted-foreground ml-auto text-xs tracking-widest">{ item.Shortcut }</span>
+		}
+	</div>
+}
+
+// dropdownMenuScript initializes the dropdown menu JavaScript
+templ dropdownMenuScript(id string) {
+	<script type="module">
+		// Import Basecoat dropdown menu JavaScript
+		import('/static/dist/basecoat/dropdown-menu.js').then(module => {
+			const DropdownMenu = module.DropdownMenu || module.default;
+			
+			// Initialize the dropdown menu
+			const dropdownElement = document.querySelector('#{ id }-trigger').closest('.dropdown-menu');
+			if (dropdownElement && DropdownMenu) {
+				new DropdownMenu(dropdownElement);
+			}
+		}).catch(error => {
+			console.warn('Could not load dropdown menu JavaScript:', error);
+		});
+	</script>
+}
+
+// Simple dropdown menu helpers
+templ SimpleDropdownMenu(id, trigger string, items []DropdownMenuItem) {
+	@DropdownMenu(DropdownMenuProps{
+		ID:      id,
+		Trigger: trigger,
+		Items:   items,
+	})
+}
+
+templ UserDropdownMenu(id, userName string) {
+	@DropdownMenu(DropdownMenuProps{
+		ID:      id,
+		Trigger: userName,
+		TriggerButton: atoms.ButtonProps{
+			Text:    userName,
+			Variant: "ghost",
+		},
+		Groups: []DropdownMenuGroup{
+			{
+				Heading: "Account",
+				Items: []DropdownMenuItem{
+					{Text: "Profile", Icon: "user", OnClick: "navigateToProfile()"},
+					{Text: "Settings", Icon: "settings", OnClick: "navigateToSettings()"},
+					{Text: "Billing", Icon: "credit-card", OnClick: "navigateToBilling()"},
+				},
+			},
+		},
+		Items: []DropdownMenuItem{
+			{Text: "Sign out", Icon: "log-out", OnClick: "signOut()"},
+		},
+	})
+}
+
+templ ActionsDropdownMenu(id string, actions []DropdownMenuItem) {
+	@DropdownMenu(DropdownMenuProps{
+		ID:      id,
+		Trigger: "Actions",
+		TriggerButton: atoms.ButtonProps{
+			Text:    "Actions",
+			Variant: "ghost",
+		},
+		Items: actions,
+	})
+}

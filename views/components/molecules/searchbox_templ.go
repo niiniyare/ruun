@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/niiniyare/ruun/views/components/atoms"
-	"strconv"
+	"strings"
 )
 
 // SearchBoxSize defines the size variants for the search box
@@ -42,7 +42,6 @@ type SearchBoxProps struct {
 	Placeholder string        `json:"placeholder,omitempty"`
 	Size        SearchBoxSize `json:"size,omitempty"`
 	Disabled    bool          `json:"disabled,omitempty"`
-	ClassName   string        `json:"className,omitempty"`
 
 	// Search behavior
 	Suggestions   []SearchSuggestion `json:"suggestions,omitempty"`
@@ -71,52 +70,53 @@ type SearchBoxProps struct {
 	OnClear  string `json:"onClear,omitempty"`  // JavaScript function for clear
 }
 
-// getSearchBoxClasses returns compiled theme classes for the search box
+// getSearchBoxClasses returns compiled Basecoat classes for the search box
 func getSearchBoxClasses(props SearchBoxProps) string {
-	return utils.TwMerge(
-		"search-box",
-		fmt.Sprintf("search-box-%s", utils.IfElse(string(props.Size) != "", string(props.Size), "md")),
-		utils.If(props.Loading, "search-box-loading"),
-		utils.If(props.Disabled, "search-box-disabled"),
-		props.ClassName,
-	)
+	classes := []string{"search-box"}
+
+	// Size variant
+	size := string(props.Size)
+	if size == "" {
+		size = "md"
+	}
+	classes = append(classes, fmt.Sprintf("search-box-%s", size))
+
+	// State classes
+	if props.Loading {
+		classes = append(classes, "search-box-loading")
+	}
+	if props.Disabled {
+		classes = append(classes, "search-box-disabled")
+	}
+
+	return strings.Join(classes, " ")
 }
 
-// getSuggestionsClasses returns compiled theme classes for the suggestions dropdown
+// getSuggestionsClasses returns compiled Basecoat classes for the suggestions dropdown
 func getSuggestionsClasses() string {
-	return utils.TwMerge(
-		"search-suggestions",
-		"search-suggestions-dropdown",
-	)
+	return "search-suggestions search-suggestions-dropdown"
 }
 
-// getSuggestionItemClasses returns compiled theme classes for suggestion items
+// getSuggestionItemClasses returns compiled Basecoat classes for suggestion items
 func getSuggestionItemClasses() string {
-	return utils.TwMerge(
-		"search-suggestion-item",
-	)
+	return "search-suggestion-item"
 }
 
 // buildSearchInputProps creates input props for the search input
 func buildSearchInputProps(props SearchBoxProps) atoms.InputProps {
-	// Convert size
-	inputSize := atoms.InputSizeMD
-	switch props.Size {
-	case SearchBoxSizeSM:
-		inputSize = atoms.InputSizeSM
-	case SearchBoxSizeLG:
-		inputSize = atoms.InputSizeLG
+	// Set default placeholder
+	placeholder := props.Placeholder
+	if placeholder == "" {
+		placeholder = "Search..."
 	}
 
 	return atoms.InputProps{
 		ID:          props.ID,
 		Name:        props.Name,
-		Type:        "search",
+		Type:        atoms.InputSearch,
 		Value:       props.Value,
-		Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Search..."),
-		Size:        inputSize,
+		Placeholder: placeholder,
 		Disabled:    props.Disabled,
-		ClassName:   "search-box-input",
 	}
 }
 
@@ -187,9 +187,8 @@ func SearchBox(props SearchBoxProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:      "x",
-				Size:      atoms.IconSizeSM,
-				ClassName: "search-box-clear-icon",
+				Name: "x",
+				Size: "sm",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -205,9 +204,8 @@ func SearchBox(props SearchBoxProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:      "loader",
-				Size:      atoms.IconSizeSM,
-				ClassName: "search-box-loading-icon",
+				Name: "loader",
+				Size: "sm",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -266,9 +264,8 @@ func SearchBox(props SearchBoxProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:      "",
-			Size:      atoms.IconSizeSM,
-			ClassName: "search-suggestion-icon-img",
+			Name: "",
+			Size: "sm",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -300,9 +297,8 @@ func SearchBox(props SearchBoxProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-			Name:      "",
-			Size:      atoms.IconSizeSM,
-			ClassName: "search-suggestion-icon-img",
+			Name: "",
+			Size: "sm",
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -317,13 +313,45 @@ func SearchBox(props SearchBoxProps) templ.Component {
 
 // getSearchBoxAlpineData generates the Alpine.js data for the search box
 func getSearchBoxAlpineData(props SearchBoxProps) string {
-	minChars := utils.IfElse(props.MinChars > 0, props.MinChars, 2)
-	debounce := utils.IfElse(props.Debounce > 0, props.Debounce, 300)
+	minChars := props.MinChars
+	if minChars <= 0 {
+		minChars = 2
+	}
+	debounce := props.Debounce
+	if debounce <= 0 {
+		debounce = 300
+	}
 
 	// Convert suggestions to JSON-safe format
 	staticSuggestions := "[]"
 	if len(props.Suggestions) > 0 {
 		staticSuggestions = formatSuggestionsForJS(props.Suggestions)
+	}
+
+	// Prepare conditional values
+	onSearch := ""
+	if props.OnSearch != "" {
+		onSearch = props.OnSearch
+	}
+
+	clearOrSelect := "this.searchQuery = suggestion.label;"
+	if props.ClearOnSelect {
+		clearOrSelect = "this.searchQuery = '';"
+	}
+
+	onSelect := ""
+	if props.OnSelect != "" {
+		onSelect = props.OnSelect
+	}
+
+	hxSwap := "innerHTML"
+	if props.HXSwap != "" {
+		hxSwap = props.HXSwap
+	}
+
+	onClear := ""
+	if props.OnClear != "" {
+		onClear = props.OnClear
 	}
 
 	return fmt.Sprintf(`{
@@ -422,17 +450,17 @@ func getSearchBoxAlpineData(props SearchBoxProps) string {
 		minChars,
 		debounce,
 		props.OnSearch != "",
-		utils.IfElse(props.OnSearch != "", props.OnSearch, ""),
+		onSearch,
 		staticSuggestions,
 		staticSuggestions,
-		utils.IfElse(props.ClearOnSelect, "this.searchQuery = '';", "this.searchQuery = suggestion.label;"),
+		clearOrSelect,
 		props.OnSelect != "",
-		utils.IfElse(props.OnSelect != "", props.OnSelect, ""),
+		onSelect,
 		props.HXTarget,
 		props.HXTarget,
-		utils.IfElse(props.HXSwap != "", props.HXSwap, "innerHTML"),
+		hxSwap,
 		props.OnClear != "",
-		utils.IfElse(props.OnClear != "", props.OnClear, ""),
+		onClear,
 	)
 }
 
@@ -467,95 +495,7 @@ func formatSuggestionsForJS(suggestions []SearchSuggestion) string {
 	return result
 }
 
-// QuickSearchBox renders a simplified search box for quick searches
-func QuickSearchBox(props SearchBoxProps) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = SearchBox(SearchBoxProps{
-			ID:          utils.IfElse(props.ID != "", props.ID, "quick-search"),
-			Name:        utils.IfElse(props.Name != "", props.Name, "q"),
-			Size:        utils.IfElse(props.Size != "", props.Size, SearchBoxSizeSM),
-			Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Quick search..."),
-			MinChars:    utils.IfElse(props.MinChars > 0, props.MinChars, 1),
-			Debounce:    utils.IfElse(props.Debounce > 0, props.Debounce, 200),
-			Value:       props.Value,
-			ClassName:   utils.TwMerge("quick-search", props.ClassName),
-			HXGet:       props.HXGet,
-			HXTarget:    props.HXTarget,
-			HXSwap:      props.HXSwap,
-			OnSearch:    props.OnSearch,
-			OnSelect:    props.OnSelect,
-			OnClear:     props.OnClear,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// GlobalSearchBox renders a search box for global/site-wide search
-func GlobalSearchBox(props SearchBoxProps) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var12 == nil {
-			templ_7745c5c3_Var12 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = SearchBox(SearchBoxProps{
-			ID:          utils.IfElse(props.ID != "", props.ID, "global-search"),
-			Name:        utils.IfElse(props.Name != "", props.Name, "search"),
-			Size:        utils.IfElse(props.Size != "", props.Size, SearchBoxSizeMD),
-			Placeholder: utils.IfElse(props.Placeholder != "", props.Placeholder, "Search everything..."),
-			MinChars:    utils.IfElse(props.MinChars > 0, props.MinChars, 3),
-			Debounce:    utils.IfElse(props.Debounce > 0, props.Debounce, 300),
-			Value:       props.Value,
-			ClassName:   utils.TwMerge("global-search", props.ClassName),
-			Suggestions: props.Suggestions,
-			HXGet:       utils.IfElse(props.HXGet != "", props.HXGet, "/search"),
-			HXTarget:    utils.IfElse(props.HXTarget != "", props.HXTarget, "#search-results"),
-			HXSwap:      utils.IfElse(props.HXSwap != "", props.HXSwap, "innerHTML"),
-			OnSearch:    props.OnSearch,
-			OnSelect:    props.OnSelect,
-			OnClear:     props.OnClear,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
+// Note: QuickSearchBox and GlobalSearchBox helper functions have been removed
+// as they relied on utils.IfElse and ClassName props that are no longer supported.
+// Use SearchBox directly with appropriate props instead.
 var _ = templruntime.GeneratedTemplate

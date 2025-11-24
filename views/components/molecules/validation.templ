@@ -152,12 +152,12 @@ templ validationMessage(message ValidationMessage) {
 		@atoms.Alert(atoms.AlertProps{
 			Variant:     "destructive",
 			Title:       message.Message,
-			Icon:        getValidationIcon(message.Type),
+			Icon:        atoms.Icon(getValidationIcon(message.Type)),
 		})
 	} else {
 		@atoms.Alert(atoms.AlertProps{
 			Title:       message.Message,
-			Icon:        getValidationIcon(message.Type),
+			Icon:        atoms.Icon(getValidationIcon(message.Type)),
 		})
 	}
 }

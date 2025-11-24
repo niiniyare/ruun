@@ -321,7 +321,7 @@ func validationMessage(message ValidationMessage) templ.Component {
 			templ_7745c5c3_Err = atoms.Alert(atoms.AlertProps{
 				Variant: "destructive",
 				Title:   message.Message,
-				Icon:    getValidationIcon(message.Type),
+				Icon:    atoms.Icon(getValidationIcon(message.Type)),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -329,7 +329,7 @@ func validationMessage(message ValidationMessage) templ.Component {
 		} else {
 			templ_7745c5c3_Err = atoms.Alert(atoms.AlertProps{
 				Title: message.Message,
-				Icon:  getValidationIcon(message.Type),
+				Icon:  atoms.Icon(getValidationIcon(message.Type)),
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

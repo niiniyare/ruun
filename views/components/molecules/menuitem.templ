@@ -136,7 +136,7 @@ func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
 
 	return atoms.BadgeProps{
 		Variant: variant,
-		Size:    "sm",
+		Text:    props.Badge,
 	}
 }
 
@@ -342,9 +342,7 @@ templ menuItemContent(props MenuItemProps) {
 	
 	// Badge
 	if props.Badge != "" {
-		@atoms.Badge(buildBadgeProps(props)) {
-			{ props.Badge }
-		}
+		@atoms.Badge(buildBadgeProps(props))
 	}
 	
 	// Right icon

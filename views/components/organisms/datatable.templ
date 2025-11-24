@@ -341,22 +341,17 @@ type AnalyticsConfig struct {
 }
 
 // getDataTableClasses builds CSS classes for the datatable
+// Uses minimal classes with Basecoat styling  
 func getDataTableClasses(props DataTableProps) string {
-	return utils.TwMerge(
-		"datatable",
-		utils.If(props.Variant != "", fmt.Sprintf("datatable-%s", string(props.Variant))),
-		utils.If(props.Size != "", fmt.Sprintf("datatable-%s", string(props.Size))),
-		utils.If(props.Density != "", fmt.Sprintf("datatable-%s", string(props.Density))),
-		utils.If(props.Selection != nil && props.Selection.Enabled, "datatable-selectable"),
-		utils.If(props.Layout != nil && props.Layout.Resizable, "datatable-resizable"),
-		utils.If(props.Performance != nil && props.Performance.Virtualized, "datatable-virtualized"),
-		utils.If(props.Layout != nil && props.Layout.Responsive, "datatable-responsive"),
-		utils.If(props.Layout != nil && props.Layout.Striped, "datatable-striped"),
-		utils.If(props.Layout != nil && props.Layout.Bordered, "datatable-bordered"),
-		utils.If(props.Layout != nil && props.Layout.Hover, "datatable-hover"),
-		utils.If(props.Layout != nil && props.Layout.Compact, "datatable-compact"),
-		props.ClassName,
-	)
+	// Base wrapper class for the table container
+	class := "overflow-x-auto"
+	
+	// Add responsive wrapper if needed
+	if props.Layout != nil && props.Layout.Responsive {
+		class += " w-full"
+	}
+	
+	return class
 }
 
 // Feature detection functions for progressive enhancement
@@ -397,13 +392,11 @@ func hasAnalytics(props DataTableProps) bool {
 }
 
 // getTableClasses builds CSS classes for the table element
+// Uses Basecoat .table class instead of custom classes
 func getTableClasses(props DataTableProps) string {
-	return utils.TwMerge(
-		"datatable-table",
-		utils.If(props.Variant == DataTableStriped, "datatable-table-striped"),
-		utils.If(props.Variant == DataTableBordered, "datatable-table-bordered"),
-		utils.If(props.Variant == DataTableHover, "datatable-table-hover"),
-	)
+	// Basecoat provides .table class with all necessary styling
+	// Variants are handled via CSS instead of multiple classes
+	return "table"
 }
 
 // DataTable renders the main datatable organism using progressive enhancement
@@ -450,6 +443,9 @@ templ DataTable(props DataTableProps) {
 		if hasAnalytics(props) {
 			@dataTableAnalytics(props.Analytics)
 		}
+		
+		<!-- JavaScript Integration -->
+		@dataTableJavaScript(props)
 	</div>
 }
 
@@ -804,13 +800,7 @@ templ dataTableHeaderRow(props DataTableProps) {
 // dataTableHeaderCell renders a table header cell
 templ dataTableHeaderCell(column DataTableColumn, props DataTableProps) {
 	<th 
-		class={ utils.TwMerge(
-			"datatable-th",
-			fmt.Sprintf("datatable-th-%s", column.Key),
-			utils.If(column.Sortable, "datatable-th-sortable"),
-			utils.If(column.Resizable, "datatable-th-resizable"),
-			column.HeaderClass,
-		) }
+		class="datatable-th"
 		if column.Width != "" {
 			style={ fmt.Sprintf("width: %s", column.Width) }
 		}
@@ -859,12 +849,7 @@ templ dataTableHeaderCell(column DataTableColumn, props DataTableProps) {
 // dataTableRow renders a table row
 templ dataTableRow(row DataTableRow, props DataTableProps) {
 	<tr 
-		class={ utils.TwMerge(
-			"datatable-tr",
-			utils.If(row.Selected, "datatable-tr-selected"),
-			utils.If(row.Disabled, "datatable-tr-disabled"),
-			row.Class,
-		) }
+		class="datatable-tr"
 		data-row-id={ row.ID }
 		if props.OnRowClick != "" {
 			x-on:click={ fmt.Sprintf("handleRowClick('%s', $event)", row.ID) }
@@ -898,13 +883,7 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 // dataTableCell renders a table cell with appropriate content
 templ dataTableCell(row DataTableRow, column DataTableColumn, props DataTableProps) {
 	<td 
-		class={ utils.TwMerge(
-			"datatable-td",
-			fmt.Sprintf("datatable-td-%s", column.Key),
-			fmt.Sprintf("datatable-td-%s", string(column.Type)),
-			utils.If(column.Align != "", fmt.Sprintf("text-%s", column.Align)),
-			column.CellClass,
-		) }
+		class="datatable-td"
 		if column.Clickable {
 			x-on:click={ fmt.Sprintf("handleCellClick('%s', '%s', $event)", row.ID, column.Key) }
 		}
@@ -1456,5 +1435,213 @@ templ dataTableAnalytics(analytics *AnalyticsConfig) {
 				});
 			}
 		}
+	</script>
+}
+
+// dataTableJavaScript integrates the JavaScript DataTable library with the Go templ component
+templ dataTableJavaScript(props DataTableProps) {
+	<script type="module">
+		// Import the DataTable JavaScript library
+		import { DataTable } from '/static/dist/datatable.js';
+		
+		// Wait for DOM to be ready
+		document.addEventListener('DOMContentLoaded', function() {
+			// Find the table element
+			const tableElement = document.querySelector('#{ props.ID } table');
+			if (!tableElement) return;
+			
+			// Configure DataTable options from Go props
+			const config = {
+				// Core configuration
+				data: {
+					columns: [
+						{ for i, column := range props.Columns }
+							{
+								key: '{ column.Key }',
+								title: '{ column.Title }',
+								type: '{ string(column.Type) }',
+								sortable: { fmt.Sprintf("%t", column.Sortable) },
+								searchable: { fmt.Sprintf("%t", column.Searchable) },
+								width: '{ column.Width }',
+								align: '{ column.Align }'
+							}{ if i < len(props.Columns)-1 },{ end }
+						{ end }
+					],
+					rows: [
+						{ for i, row := range props.Data }
+							{
+								{ for j, column := range props.Columns }
+									'{ column.Key }': { if value, exists := row[column.Key]; exists }'{ fmt.Sprintf("%v", value) }'{ else }''{ end }{ if j < len(props.Columns)-1 },{ end }
+								{ end }
+							}{ if i < len(props.Data)-1 },{ end }
+						{ end }
+					]
+				},
+				
+				// Feature configuration
+				features: {
+					{ if hasSorting(props) }
+						sorting: {
+							enabled: true,
+							{ if props.Sorting.MultiColumn }multiColumn: true,{ end }
+							{ if props.Sorting.DefaultSort.Column != "" }
+								defaultSort: {
+									column: '{ props.Sorting.DefaultSort.Column }',
+									direction: '{ props.Sorting.DefaultSort.Direction }'
+								}
+							{ end }
+						},
+					{ end }
+					
+					{ if hasFiltering(props) }
+						filtering: {
+							enabled: true,
+							{ if props.Filtering.GlobalSearch }globalSearch: true,{ end }
+							{ if props.Filtering.ColumnFilters }columnFilters: true,{ end }
+						},
+					{ end }
+					
+					{ if hasPagination(props) }
+						pagination: {
+							enabled: true,
+							pageSize: { props.Pagination.PageSize },
+							{ if props.Pagination.ShowPageSize }showPageSize: true,{ end }
+							{ if props.Pagination.ShowInfo }showInfo: true,{ end }
+						},
+					{ end }
+					
+					{ if hasSelection(props) }
+						selection: {
+							enabled: true,
+							{ if props.Selection.Multiple }multiple: true,{ end }
+							{ if props.Selection.ShowSelectAll }showSelectAll: true,{ end }
+						},
+					{ end }
+					
+					{ if hasExport(props) }
+						export: {
+							enabled: true,
+							formats: [
+								{ for i, format := range props.Export.Formats }
+									'{ string(format) }'{ if i < len(props.Export.Formats)-1 },{ end }
+								{ end }
+							]
+						},
+					{ end }
+					
+					{ if hasPerformance(props) && props.Performance.VirtualScrolling }
+						virtualScrolling: {
+							enabled: true,
+							rowHeight: { props.Performance.RowHeight },
+							overscan: { props.Performance.Overscan }
+						},
+					{ end }
+				},
+				
+				// Integration with Alpine.js
+				{ if props.Alpine != nil }
+					alpine: {
+						data: '{ props.Alpine.DataName }',
+						{ if props.Alpine.SelectionCallback != "" }
+							onSelectionChange: '{ props.Alpine.SelectionCallback }',
+						{ end }
+						{ if props.Alpine.SortCallback != "" }
+							onSortChange: '{ props.Alpine.SortCallback }',
+						{ end }
+						{ if props.Alpine.FilterCallback != "" }
+							onFilterChange: '{ props.Alpine.FilterCallback }',
+						{ end }
+					},
+				{ end }
+				
+				// HTMX integration
+				{ if props.HTMX != nil }
+					htmx: {
+						{ if props.HTMX.SortEndpoint != "" }
+							sortEndpoint: '{ props.HTMX.SortEndpoint }',
+						{ end }
+						{ if props.HTMX.FilterEndpoint != "" }
+							filterEndpoint: '{ props.HTMX.FilterEndpoint }',
+						{ end }
+						{ if props.HTMX.PaginationEndpoint != "" }
+							paginationEndpoint: '{ props.HTMX.PaginationEndpoint }',
+						{ end }
+						{ if props.HTMX.Target != "" }
+							target: '{ props.HTMX.Target }',
+						{ end }
+						{ if props.HTMX.Swap != "" }
+							swap: '{ props.HTMX.Swap }',
+						{ end }
+					},
+				{ end }
+			};
+			
+			// Initialize the DataTable
+			const dataTable = new DataTable(tableElement, config);
+			
+			// Store reference for external access
+			tableElement.dataTable = dataTable;
+			
+			// Emit initialization event for analytics
+			{ if hasAnalytics(props) }
+				document.dispatchEvent(new CustomEvent('table-initialized', {
+					detail: {
+						id: '{ props.ID }',
+						rowCount: { len(props.Data) },
+						columnCount: { len(props.Columns) },
+						features: Object.keys(config.features || {})
+					}
+				}));
+			{ end }
+			
+			// Handle window resize for responsive behavior
+			{ if props.Layout != nil && props.Layout.Responsive }
+				let resizeTimeout;
+				window.addEventListener('resize', function() {
+					clearTimeout(resizeTimeout);
+					resizeTimeout = setTimeout(function() {
+						dataTable.handleResize();
+					}, 250);
+				});
+			{ end }
+			
+			// Initial load completion
+			dataTable.on('ready', function() {
+				// Remove loading state if present
+				const loadingEl = document.querySelector('#{ props.ID } .datatable-loading');
+				if (loadingEl) {
+					loadingEl.style.display = 'none';
+				}
+				
+				// Show table content
+				const tableContainer = document.querySelector('#{ props.ID } .datatable-container');
+				if (tableContainer) {
+					tableContainer.style.opacity = '1';
+				}
+			});
+			
+			// Error handling
+			dataTable.on('error', function(error) {
+				console.error('DataTable error:', error);
+				
+				// Show error message
+				const errorEl = document.querySelector('#{ props.ID } .datatable-error');
+				if (errorEl) {
+					errorEl.textContent = error.message || 'An error occurred';
+					errorEl.style.display = 'block';
+				}
+				
+				// Emit error event for analytics
+				{ if hasAnalytics(props) }
+					document.dispatchEvent(new CustomEvent('table-error', {
+						detail: {
+							id: '{ props.ID }',
+							error: error.message,
+							timestamp: new Date().toISOString()
+						}
+					}));
+				{ end }
+			});
+		});
 	</script>
 }

@@ -202,20 +202,24 @@ type AnalyticsConfig struct {
 	EventPrefix   string `json:"eventPrefix"`
 }
 
-// getNavigationClasses builds the CSS class string for navigation
+// getNavigationClasses builds the CSS class string for navigation using Basecoat patterns
 func getNavigationClasses(props NavigationProps) string {
-	return utils.TwMerge(
-		"navigation",
-		fmt.Sprintf("navigation-%s", string(props.Type)),
-		utils.If(props.Size != "", fmt.Sprintf("navigation-%s", string(props.Size))),
-		utils.If(props.Variant != "", fmt.Sprintf("navigation-%s-%s", string(props.Type), props.Variant)),
-		utils.If(props.Layout != nil && props.Layout.Collapsible, "navigation-collapsible"),
-		utils.If(props.Search != nil && props.Search.Enabled, "navigation-searchable"),
-		utils.If(props.Mobile != nil && props.Mobile.Enabled, "navigation-mobile"),
-		utils.If(props.Theme != nil && props.Theme.DarkMode, "navigation-dark"),
-		utils.If(props.Layout != nil && props.Layout.Compact, "navigation-compact"),
-		props.ClassName,
-	)
+	// Use appropriate Basecoat class based on navigation type
+	switch props.Type {
+	case NavigationSidebar:
+		return "sidebar"
+	case NavigationTopbar:
+		// For topbar navigation, use basic nav styling or create custom extension
+		return "nav-topbar"
+	case NavigationBreadcrumb:
+		return "breadcrumb"
+	case NavigationTabs:
+		return "tabs"
+	case NavigationSteps:
+		return "nav-steps"
+	default:
+		return "sidebar"
+	}
 }
 
 // Feature detection functions for progressive enhancement
@@ -243,14 +247,10 @@ func hasAnalytics(props NavigationProps) bool {
 	return props.Analytics != nil && props.Analytics.Enabled
 }
 
-// getNavigationItemClasses builds CSS classes for navigation items
+// getNavigationItemClasses builds CSS classes for navigation items using Basecoat patterns
 func getNavigationItemClasses(item NavigationItem) string {
-	return utils.TwMerge(
-		"nav-menu-item",
-		utils.If(item.Active, "nav-menu-item-active"),
-		utils.If(item.Disabled, "nav-menu-item-disabled"),
-		utils.If(len(item.Items) > 0, "nav-menu-item-has-children"),
-	)
+	// Use simple base class, let Basecoat handle states via data attributes
+	return "nav-menu-item"
 }
 
 // Navigation renders the main navigation organism using progressive enhancement
@@ -494,11 +494,18 @@ templ navigationBreadcrumb(props NavigationProps) {
 			}
 			
 			if crumb.Clickable && crumb.URL != "" {
-				<a href={ crumb.URL } class={ utils.TwMerge("breadcrumb-item", utils.If(crumb.Active, "breadcrumb-item-active")) }>
+				<a 
+					href={ crumb.URL } 
+					class="breadcrumb-item"
+					data-active={ fmt.Sprintf("%t", crumb.Active) }
+				>
 					{ crumb.Text }
 				</a>
 			} else {
-				<span class={ utils.TwMerge("breadcrumb-item", utils.If(crumb.Active, "breadcrumb-item-active")) }>
+				<span 
+					class="breadcrumb-item"
+					data-active={ fmt.Sprintf("%t", crumb.Active) }
+				>
 					{ crumb.Text }
 				</span>
 			}
@@ -508,12 +515,13 @@ templ navigationBreadcrumb(props NavigationProps) {
 
 // navigationTabs renders tab navigation
 templ navigationTabs(props NavigationProps) {
-	<div class={ utils.TwMerge("navigation-tabs-container", utils.If(props.TabVariant != "", fmt.Sprintf("navigation-tabs-%s", props.TabVariant))) }>
+	<div class="tabs">
 		for _, item := range props.Items {
 			if item.URL != "" {
 				<a 
 					href={ item.URL } 
-					class={ utils.TwMerge("nav-tab-item", utils.If(item.Active, "nav-tab-item-active")) }
+					class="nav-tab-item"
+					data-active={ fmt.Sprintf("%t", item.Active) }
 				>
 					if item.Icon != "" {
 						@atoms.Icon(atoms.IconProps{
@@ -526,7 +534,8 @@ templ navigationTabs(props NavigationProps) {
 				</a>
 			} else {
 				<button 
-					class={ utils.TwMerge("nav-tab-item", utils.If(item.Active, "nav-tab-item-active")) }
+					class="nav-tab-item"
+					data-active={ fmt.Sprintf("%t", item.Active) }
 					if item.OnClick != "" {
 						x-on:click={ item.OnClick }
 					}
@@ -563,11 +572,11 @@ templ navigationSteps(props NavigationProps) {
 		
 		<div class="navigation-steps-items">
 			for i, item := range props.Items {
-				<div class={ utils.TwMerge(
-					"nav-step-item",
-					utils.If(hasProgress(props) && i+1 <= props.Progress.CurrentStep, "nav-step-item-completed"),
-					utils.If(hasProgress(props) && i+1 == props.Progress.CurrentStep, "nav-step-item-current"),
-				) }>
+				<div 
+					class="nav-step-item"
+					data-completed={ fmt.Sprintf("%t", hasProgress(props) && i+1 <= props.Progress.CurrentStep) }
+					data-current={ fmt.Sprintf("%t", hasProgress(props) && i+1 == props.Progress.CurrentStep) }
+				>
 					<div class="nav-step-indicator">
 						<span class="nav-step-number">{ fmt.Sprintf("%d", i+1) }</span>
 					</div>
@@ -585,7 +594,13 @@ templ navigationSteps(props NavigationProps) {
 
 // navigationMenuItem renders a single navigation menu item
 templ navigationMenuItem(item NavigationItem, depth int) {
-	<div class={ utils.TwMerge(getNavigationItemClasses(item), fmt.Sprintf("nav-menu-item-depth-%d", depth)) }>
+	<div 
+		class={ getNavigationItemClasses(item) }
+		data-depth={ fmt.Sprintf("%d", depth) }
+		data-active={ fmt.Sprintf("%t", item.Active) }
+		data-disabled={ fmt.Sprintf("%t", item.Disabled) }
+		data-has-children={ fmt.Sprintf("%t", len(item.Items) > 0) }
+	>
 		if len(item.Items) > 0 {
 			<!-- Submenu item -->
 			<div 

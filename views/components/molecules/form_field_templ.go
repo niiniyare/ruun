@@ -600,7 +600,7 @@ func renderInput(props FormFieldProps) templ.Component {
 		case FormFieldCheckbox:
 			if len(props.Options) > 0 {
 				for _, option := range props.Options {
-					templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnChange)
+					templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnChange})
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -664,7 +664,7 @@ func renderInput(props FormFieldProps) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var26 templ.ComponentScript = props.OnChange
+						var templ_7745c5c3_Var26 templ.ComponentScript = templ.ComponentScript{Call: props.OnChange}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26.Call)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -712,7 +712,7 @@ func renderInput(props FormFieldProps) templ.Component {
 					}
 				}
 			} else {
-				templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnChange)
+				templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnChange})
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -776,7 +776,7 @@ func renderInput(props FormFieldProps) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var32 templ.ComponentScript = props.OnChange
+					var templ_7745c5c3_Var32 templ.ComponentScript = templ.ComponentScript{Call: props.OnChange}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var32.Call)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -799,7 +799,7 @@ func renderInput(props FormFieldProps) templ.Component {
 			}
 		case FormFieldRadio:
 			for _, option := range props.Options {
-				templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, props.OnChange)
+				templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: props.OnChange})
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -863,7 +863,7 @@ func renderInput(props FormFieldProps) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var36 templ.ComponentScript = props.OnChange
+					var templ_7745c5c3_Var36 templ.ComponentScript = templ.ComponentScript{Call: props.OnChange}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36.Call)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

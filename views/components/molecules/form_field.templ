@@ -214,7 +214,7 @@ templ renderInput(props FormFieldProps) {
                         disabled
                     }
                     if props.OnChange != "" {
-                        onchange={props.OnChange}
+                        onchange={templ.ComponentScript{Call: props.OnChange}}
                     }
                     if props.HasError {
                         aria-invalid="true"
@@ -235,7 +235,7 @@ templ renderInput(props FormFieldProps) {
                     disabled
                 }
                 if props.OnChange != "" {
-                    onchange={props.OnChange}
+                    onchange={templ.ComponentScript{Call: props.OnChange}}
                 }
                 if props.HasError {
                     aria-invalid="true"
@@ -257,7 +257,7 @@ templ renderInput(props FormFieldProps) {
                     disabled
                 }
                 if props.OnChange != "" {
-                    onchange={props.OnChange}
+                    onchange={templ.ComponentScript{Call: props.OnChange}}
                 }
                 if props.HasError {
                     aria-invalid="true"
