@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS Debug</title>
+    
+    <!-- Load in correct order -->
+    <link rel="stylesheet" href="/static/css/themes/default.css">
+    <link rel="stylesheet" href="/static/css/base.css">
+    
+    <style>
+        .debug-box {
+            padding: 1rem;
+            margin: 1rem;
+            border: 2px solid;
+        }
+        
+        .test-variables {
+            background: oklch(var(--background));
+            color: oklch(var(--foreground));
+            border-color: oklch(var(--border));
+        }
+        
+        .test-primary {
+            background: oklch(var(--primary));
+            color: oklch(var(--primary-foreground));
+        }
+    </style>
+</head>
+<body>
+    <h1>CSS Variable Loading Test</h1>
+    
+    <div class="debug-box test-variables">
+        <h2>Background/Foreground Test</h2>
+        <p>If you can read this clearly, variables are loading!</p>
+        <p>Computed --background: <span id="bg-value"></span></p>
+        <p>Computed --foreground: <span id="fg-value"></span></p>
+    </div>
+    
+    <div class="debug-box test-primary">
+        <h2>Primary Color Test</h2>
+        <p>This should have a dark background with white text</p>
+        <p>Computed --primary: <span id="primary-value"></span></p>
+    </div>
+    
+    <button class="btn">Base Button (should be styled)</button>
+    <button class="btn-primary">Primary Button</button>
+    <button class="btn-secondary">Secondary Button</button>
+    
+    <script>
+        // Debug: Print computed CSS variables
+        const root = document.documentElement;
+        const styles = getComputedStyle(root);
+        
+        document.getElementById('bg-value').textContent = 
+            styles.getPropertyValue('--background') || 'NOT FOUND!';
+        document.getElementById('fg-value').textContent = 
+            styles.getPropertyValue('--foreground') || 'NOT FOUND!';
+        document.getElementById('primary-value').textContent = 
+            styles.getPropertyValue('--primary') || 'NOT FOUND!';
+        
+        // Also log to console
+        console.log('CSS Variables Check:');
+        console.log('--background:', styles.getPropertyValue('--background'));
+        console.log('--foreground:', styles.getPropertyValue('--foreground'));
+        console.log('--primary:', styles.getPropertyValue('--primary'));
+        console.log('--secondary:', styles.getPropertyValue('--secondary'));
+    </script>
+</body>
+</html>

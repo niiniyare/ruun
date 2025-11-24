@@ -334,8 +334,8 @@ describe('VirtualScrollPlugin', () => {
       paginatedPlugin.attachToContainer(mockContainer);
 
       const state = paginatedPlugin.getState();
-      // Should work with paginated data (first page)
-      expect(state.totalHeight).toBe(50 * 48);
+      // Should work with paginated data - total height should be based on all data (1000 rows)
+      expect(state.totalHeight).toBe(1000 * 48);
     });
   });
 

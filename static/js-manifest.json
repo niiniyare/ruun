@@ -1,0 +1,65 @@
+{
+  "components": {
+    "datatable": {
+      "minified": "/static/dist/datatable.min.js",
+      "unminified": "/static/dist/datatable.js",
+      "version": "1.0.0",
+      "type": "bundle"
+    },
+    "basecoat": {
+      "minified": "/static/dist/basecoat/basecoat.min.js",
+      "unminified": "/static/dist/basecoat/basecoat.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "dropdown-menu": {
+      "minified": "/static/dist/basecoat/dropdown-menu.min.js",
+      "unminified": "/static/dist/basecoat/dropdown-menu.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "popover": {
+      "minified": "/static/dist/basecoat/popover.min.js",
+      "unminified": "/static/dist/basecoat/popover.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "select": {
+      "minified": "/static/dist/basecoat/select.min.js",
+      "unminified": "/static/dist/basecoat/select.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "sidebar": {
+      "minified": "/static/dist/basecoat/sidebar.min.js",
+      "unminified": "/static/dist/basecoat/sidebar.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "tabs": {
+      "minified": "/static/dist/basecoat/tabs.min.js",
+      "unminified": "/static/dist/basecoat/tabs.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "toast": {
+      "minified": "/static/dist/basecoat/toast.min.js",
+      "unminified": "/static/dist/basecoat/toast.js",
+      "version": "1.0.0",
+      "type": "component"
+    },
+    "command": {
+      "minified": "/static/dist/basecoat/command.min.js",
+      "unminified": "/static/dist/basecoat/command.js",
+      "version": "1.0.0",
+      "type": "component"
+    }
+  },
+  "css": {
+    "base": {
+      "minified": "/static/dist/css/base.min.css",
+      "unminified": "/static/dist/css/base.css",
+      "version": "1.0.0"
+    }
+  }
+}

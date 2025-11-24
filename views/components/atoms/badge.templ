@@ -1,230 +1,87 @@
 package atoms
 
-import (
-    "strconv"
-    "github.com/niiniyare/ruun/pkg/utils"
-)
-
-// BadgeVariant defines the visual style variants
-type BadgeVariant string
-
-const (
-    BadgeVariantDefault     BadgeVariant = "default"
-    BadgeVariantSecondary   BadgeVariant = "secondary"
-    BadgeVariantSuccess     BadgeVariant = "success"
-    BadgeVariantWarning     BadgeVariant = "warning"
-    BadgeVariantDestructive BadgeVariant = "destructive"
-    BadgeVariantOutline     BadgeVariant = "outline"
-)
-
-// BadgeSize defines the size variants
-type BadgeSize string
-
-const (
-    BadgeSizeXS BadgeSize = "xs"
-    BadgeSizeSM BadgeSize = "sm"
-    BadgeSizeMD BadgeSize = "md"
-    BadgeSizeLG BadgeSize = "lg"
-    BadgeSizeXL BadgeSize = "xl"
-)
-
-// BadgeState defines the visual state variants
-type BadgeState string
-
-const (
-    BadgeStateDefault  BadgeState = "default"
-    BadgeStateDisabled BadgeState = "disabled"
-    BadgeStateActive   BadgeState = "active"
-    BadgeStateHover    BadgeState = "hover"
-)
-
-// BadgeProps defines all properties for the Badge atom
+// BadgeProps defines all properties for the Badge atom using Basecoat classes
 type BadgeProps struct {
-    // Core attributes
-    ID   string `json:"id"`
+    // Content
     Text string `json:"text"`
+    Icon templ.Component `json:"icon,omitempty"`
     
-    // Visual presentation (resolved externally)
-    Variant   BadgeVariant `json:"variant"`
-    Size      BadgeSize    `json:"size"`
-    State     BadgeState   `json:"state"`
-    ClassName string       `json:"className"`
+    // Basecoat variants
+    Variant string `json:"variant,omitempty"` // "primary", "secondary", "destructive", "outline"
     
-    // Icon configuration
-    Icon      string `json:"icon"`
-    IconLeft  string `json:"iconLeft"`
-    IconRight string `json:"iconRight"`
+    // HTML attributes
+    ID string `json:"id,omitempty"`
     
     // Interactive features
-    Removable bool   `json:"removable"`
-    Clickable bool   `json:"clickable"`
+    Clickable bool   `json:"clickable,omitempty"`
+    OnClick   string `json:"onClick,omitempty"`
     
-    // Event handlers (pre-resolved externally)
-    OnClick   string `json:"onClick"`
-    OnRemove  string `json:"onRemove"`
-    OnHover   string `json:"onHover"`
-    
-    // ARIA accessibility attributes
-    AriaLabel       string `json:"ariaLabel"`
-    AriaDescribedBy string `json:"ariaDescribedBy"`
-    AriaRole        string `json:"ariaRole"`
-    AriaPressed     string `json:"ariaPressed"`
-    
-    // Additional HTML attributes
-    TabIndex     int                   `json:"tabIndex"`
-    DataAttrs    map[string]string     `json:"dataAttrs"`
-    Attributes   templ.Attributes      `json:"attributes"`
+    // ARIA accessibility
+    AriaLabel       string `json:"ariaLabel,omitempty"`
+    AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+    AriaPressed     string `json:"ariaPressed,omitempty"`
 }
 
-// getBadgeClasses builds the CSS class string using design tokens
-func getBadgeClasses(props BadgeProps) string {
-    return utils.TwMerge(
-        // Base class with design token references
-        "badge",
-        
-        // Variant classes (map to design tokens)
-        "badge-"+string(props.Variant),
-        
-        // Size classes (map to design tokens)
-        "badge-"+string(props.Size),
-        
-        // State classes (map to design tokens)
-        "badge-"+string(props.State),
-        
-        // Interactive utilities
-        utils.If(props.Clickable, "badge-clickable"),
-        utils.If(props.Removable, "badge-removable"),
-        
-        // Icon-specific classes
-        utils.If(props.Icon != "" && props.Text == "", "badge-icon-only"),
-        utils.If(props.IconLeft != "", "badge-has-icon-left"),
-        utils.If(props.IconRight != "", "badge-has-icon-right"),
-        
-        // Custom classes
-        props.ClassName,
-    )
+// getBadgeClass builds the Basecoat class
+func getBadgeClass(variant string) string {
+    class := "badge"
+    
+    // Add variant suffix if not primary/default
+    if variant != "" && variant != "primary" {
+        class = class + "-" + variant
+    }
+    
+    return class
 }
 
-// buildBadgeAttributes creates all HTML attributes for the badge
-func buildBadgeAttributes(props BadgeProps) templ.Attributes {
-    element := "span"
-    if props.Clickable || props.OnClick != "" {
-        element = "button"
-    }
-    
-    attrs := templ.Attributes{
-        "class": getBadgeClasses(props),
-    }
-    
-    // Button-specific attributes
-    if element == "button" {
-        attrs["type"] = "button"
-    }
-    
-    // Core HTML attributes
-    if props.ID != "" {
-        attrs["id"] = props.ID
-    }
-    
-    // Event handlers
-    if props.OnClick != "" {
-        attrs["onclick"] = props.OnClick
-    }
-    if props.OnHover != "" {
-        attrs["onmouseover"] = props.OnHover
-    }
-    
-    // ARIA attributes
-    if props.AriaLabel != "" {
-        attrs["aria-label"] = props.AriaLabel
-    }
-    if props.AriaDescribedBy != "" {
-        attrs["aria-describedby"] = props.AriaDescribedBy
-    }
-    if props.AriaRole != "" {
-        attrs["role"] = props.AriaRole
-    }
-    if props.AriaPressed != "" {
-        attrs["aria-pressed"] = props.AriaPressed
-    }
-    
-    // Tab index
-    if props.TabIndex != 0 {
-        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
-    }
-    
-    // Data attributes
-    for key, value := range props.DataAttrs {
-        attrs["data-"+key] = value
-    }
-    
-    // Merge custom attributes (allows override)
-    for key, value := range props.Attributes {
-        attrs[key] = value
-    }
-    
-    return attrs
-}
-
-// Badge renders a pure presentation badge atom
+// Badge renders a Basecoat badge atom
 templ Badge(props BadgeProps) {
     if props.Clickable || props.OnClick != "" {
-        <button {buildBadgeAttributes(props)...}>
-            @renderBadgeContent(props)
-        </button>
-    } else {
-        <span {buildBadgeAttributes(props)...}>
-            @renderBadgeContent(props)
-        </span>
-    }
-}
-
-// renderBadgeContent renders the badge content
-templ renderBadgeContent(props BadgeProps) {
-    // Left icon
-    if props.IconLeft != "" {
-        <span class="badge-icon-left">
-            @renderBadgeIcon(props.IconLeft)
-        </span>
-    }
-    
-    // Icon-only mode
-    if props.Icon != "" && props.Text == "" {
-        <span class="badge-icon-only">
-            @renderBadgeIcon(props.Icon)
-        </span>
-    }
-    
-    // Badge text
-    if props.Text != "" {
-        <span class="badge-text">
-            { props.Text }
-        </span>
-    }
-    
-    // Right icon
-    if props.IconRight != "" {
-        <span class="badge-icon-right">
-            @renderBadgeIcon(props.IconRight)
-        </span>
-    }
-    
-    // Remove button
-    if props.Removable {
-        <button
-            type="button"
-            class="badge-remove-button"
-            data-onclick={ props.OnRemove }
-            aria-label="Remove"
+        <a
+            class={ getBadgeClass(props.Variant) }
+            if props.ID != "" {
+                id={ props.ID }
+            }
+            if props.OnClick != "" {
+                href="#"
+                onclick={ props.OnClick }
+            }
+            if props.AriaLabel != "" {
+                aria-label={ props.AriaLabel }
+            }
+            if props.AriaDescribedBy != "" {
+                aria-describedby={ props.AriaDescribedBy }
+            }
+            if props.AriaPressed != "" {
+                aria-pressed={ props.AriaPressed }
+            }
         >
-            @renderBadgeIcon("x")
-        </button>
+            if props.Icon != nil {
+                @props.Icon
+            }
+            if props.Text != "" {
+                { props.Text }
+            }
+        </a>
+    } else {
+        <span
+            class={ getBadgeClass(props.Variant) }
+            if props.ID != "" {
+                id={ props.ID }
+            }
+            if props.AriaLabel != "" {
+                aria-label={ props.AriaLabel }
+            }
+            if props.AriaDescribedBy != "" {
+                aria-describedby={ props.AriaDescribedBy }
+            }
+        >
+            if props.Icon != nil {
+                @props.Icon
+            }
+            if props.Text != "" {
+                { props.Text }
+            }
+        </span>
     }
-}
-
-// renderBadgeIcon renders an icon placeholder (to be replaced with actual Icon atom)
-templ renderBadgeIcon(name string) {
-    <span class="badge-icon" data-icon={ name }>
-        { name }
-    </span>
 }

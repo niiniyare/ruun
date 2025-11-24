@@ -1,17 +1,12 @@
-# Enhanced Navigation Organism
+# Navigation Organism
 
 The Navigation organism provides a comprehensive, enterprise-grade navigation system with authentication integration, role-based access control, and advanced features like search, notifications, and responsive design.
 
 ## Architecture Overview
 
-The Enhanced Navigation organism follows the same architectural principles as the Form and DataTable organisms:
+The Navigation organism follows the same architectural principles as the Form and DataTable organisms:
 
 - **Main Template** (`navigation.templ`): Core navigation rendering with multiple layout types
-- **Business Logic** (`navigation_logic.go`): Auth integration, permission handling, and navigation state management  
-- **Schema Configuration** (`navigation_schema.go`): Schema-driven navigation structure and configuration
-- **Enhanced Components** (`navigation_enhanced_components.templ`): Specialized components for advanced features
-- **Examples** (`navigation_examples.go`): Comprehensive usage examples and patterns
-
 ## Key Features
 
 ### 🔐 Authentication & Authorization

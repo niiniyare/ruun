@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
 
+// Setup DOM environment mocks
 beforeEach(() => {
   // Reset all mocks before each test
   vi.clearAllMocks();
@@ -16,6 +17,30 @@ beforeEach(() => {
   // Restore console methods
   console.error = originalConsoleError;
   console.warn = originalConsoleWarn;
+  
+  // Setup localStorage mock
+  const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+    length: 0,
+    key: vi.fn(),
+  };
+  
+  // Mock window.localStorage
+  Object.defineProperty(global, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+  });
+  
+  // Ensure window exists for jsdom
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+  }
 });
 
 // Mock performance if not available

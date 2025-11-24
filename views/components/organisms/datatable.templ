@@ -204,10 +204,14 @@ type DataTableFilter struct {
 	ServerSide bool    `json:"serverSide"`
 }
 
-// DataTableProps defines all properties for the DataTable organism
+// DataTableProps defines all properties for the DataTable organism using progressive enhancement
 type DataTableProps struct {
-	// Core configuration
-	ID          string           `json:"id"`
+	// Core properties (always required)
+	ID      string              `json:"id"`
+	Columns []DataTableColumn   `json:"columns"`
+	Rows    []DataTableRow      `json:"rows"`
+	
+	// Basic Enhancement (optional)
 	Title       string           `json:"title"`
 	Description string           `json:"description"`
 	Variant     DataTableVariant `json:"variant"`
@@ -215,83 +219,194 @@ type DataTableProps struct {
 	Density     DataTableDensity `json:"density"`
 	ClassName   string           `json:"className"`
 	
-	// Data
-	Columns     []DataTableColumn `json:"columns"`
-	Rows        []DataTableRow    `json:"rows"`
-	
-	// Features
-	Selectable  bool `json:"selectable"`
-	MultiSelect bool `json:"multiSelect"`
-	Sortable    bool `json:"sortable"`
-	Filterable  bool `json:"filterable"`
-	Resizable   bool `json:"resizable"`
-	Expandable  bool `json:"expandable"`
-	
-	// Search and filtering
-	Search      DataTableSearch   `json:"search"`
-	Filters     []DataTableFilter `json:"filters"`
-	
-	// Pagination
-	Pagination  DataTablePagination `json:"pagination"`
-	
-	// Actions
-	Actions     []DataTableAction     `json:"actions"`
-	BulkActions []DataTableBulkAction `json:"bulkActions"`
-	RowActions  []DataTableAction     `json:"rowActions"`
-	
-	// Export
-	Export      DataTableExport `json:"export"`
-	
-	// Performance
-	Virtualized bool `json:"virtualized"`
-	LazyLoad    bool `json:"lazyLoad"`
-	CacheData   bool `json:"cacheData"`
-	
-	// HTMX integration
-	HXGet       string `json:"hxGet"`
-	HXPost      string `json:"hxPost"`
-	HXTarget    string `json:"hxTarget"`
-	HXSwap      string `json:"hxSwap"`
-	
-	// Event handlers
-	OnRowClick  string `json:"onRowClick"`
-	OnSort      string `json:"onSort"`
-	OnFilter    string `json:"onFilter"`
-	OnSearch    string `json:"onSearch"`
+	// Progressive Enhancement (nil = disabled)
+	Selection  *SelectionConfig  `json:"selection"`  // Row selection features
+	Sorting    *SortingConfig    `json:"sorting"`    // Sorting functionality
+	Filtering  *FilteringConfig  `json:"filtering"`  // Filtering and search
+	Pagination *PaginationConfig `json:"pagination"` // Pagination features
+	Actions    *ActionsConfig    `json:"actions"`    // Table and row actions
+	Export     *ExportConfig     `json:"export"`     // Export functionality
+	Layout     *LayoutConfig     `json:"layout"`     // Responsive, resizing
+	Performance *PerformanceConfig `json:"performance"` // Virtualization, lazy loading
+	Storage    *StorageConfig    `json:"storage"`    // State persistence
+	Analytics  *AnalyticsConfig  `json:"analytics"`  // Usage tracking
 	
 	// Accessibility
 	AriaLabels  map[string]string `json:"ariaLabels"`
-	
-	// State persistence
-	StatePersist bool   `json:"statePersist"`
-	StateKey     string `json:"stateKey"`
+}
+
+// SelectionConfig defines row selection features
+type SelectionConfig struct {
+	Enabled     bool `json:"enabled"`
+	MultiSelect bool `json:"multiSelect"`
+	Checkbox    bool `json:"checkbox"`    // Show selection checkboxes
+	RowClick    bool `json:"rowClick"`    // Select on row click
+	Sticky      bool `json:"sticky"`     // Persist selection across pages
+	Limit       int  `json:"limit"`      // Max selection limit
+}
+
+// SortingConfig defines sorting functionality
+type SortingConfig struct {
+	Enabled     bool     `json:"enabled"`
+	MultiColumn bool     `json:"multiColumn"`
+	DefaultSort string   `json:"defaultSort"`     // "column:asc" format
+	ServerSide  bool     `json:"serverSide"`
+	URL         string   `json:"url"`             // Server-side sorting endpoint
+	Columns     []string `json:"columns"`         // Sortable columns (if not all)
+}
+
+// FilteringConfig defines filtering and search functionality
+type FilteringConfig struct {
+	Enabled       bool                `json:"enabled"`
+	Search        *SearchConfig       `json:"search"`        // Global search
+	ColumnFilters bool                `json:"columnFilters"` // Per-column filtering
+	Filters       []DataTableFilter   `json:"filters"`       // Active filters
+	Advanced      bool                `json:"advanced"`      // Advanced filter UI
+	ServerSide    bool                `json:"serverSide"`
+	URL           string              `json:"url"`           // Server-side filtering endpoint
+}
+
+// PaginationConfig defines pagination features
+type PaginationConfig struct {
+	Enabled         bool  `json:"enabled"`
+	PageSize        int   `json:"pageSize"`
+	PageSizeOptions []int `json:"pageSizeOptions"`
+	ShowTotal       bool  `json:"showTotal"`
+	ShowPageSize    bool  `json:"showPageSize"`
+	ShowQuickJump   bool  `json:"showQuickJump"`
+	ServerSide      bool  `json:"serverSide"`
+	URL             string `json:"url"`    // Server-side pagination endpoint
+	Compact         bool  `json:"compact"`
+}
+
+// ActionsConfig defines table and row actions
+type ActionsConfig struct {
+	Enabled     bool                    `json:"enabled"`
+	TableActions []DataTableAction      `json:"tableActions"`  // Header actions
+	RowActions  []DataTableAction       `json:"rowActions"`    // Per-row actions
+	BulkActions []DataTableBulkAction   `json:"bulkActions"`   // Bulk/selection actions
+	Position    string                  `json:"position"`      // "top", "bottom", "both"
+	Sticky      bool                    `json:"sticky"`        // Sticky action buttons
+}
+
+// ExportConfig defines export functionality
+type ExportConfig struct {
+	Enabled    bool           `json:"enabled"`
+	Formats    []ExportFormat `json:"formats"`
+	Filename   string         `json:"filename"`
+	AllData    bool           `json:"allData"`     // Export all data vs current page
+	ServerSide bool           `json:"serverSide"`
+	URL        string         `json:"url"`         // Server-side export endpoint
+}
+
+// LayoutConfig defines responsive and layout features
+type LayoutConfig struct {
+	Responsive  bool   `json:"responsive"`
+	Resizable   bool   `json:"resizable"`   // Column resizing
+	Expandable  bool   `json:"expandable"`  // Row expansion
+	Sticky      bool   `json:"sticky"`      // Sticky headers
+	Bordered    bool   `json:"bordered"`
+	Striped     bool   `json:"striped"`
+	Hover       bool   `json:"hover"`
+	Compact     bool   `json:"compact"`
+}
+
+// PerformanceConfig defines performance optimization features
+type PerformanceConfig struct {
+	Virtualized bool `json:"virtualized"` // Virtual scrolling
+	LazyLoad    bool `json:"lazyLoad"`    // Lazy load rows
+	CacheData   bool `json:"cacheData"`   // Cache data client-side
+	Debounce    int  `json:"debounce"`    // Debounce delay for search/filter
+}
+
+// StorageConfig defines state persistence
+type StorageConfig struct {
+	Enabled       bool   `json:"enabled"`
+	Key           string `json:"key"`           // Storage key
+	Strategy      string `json:"strategy"`      // "local", "session"
+	PersistSort   bool   `json:"persistSort"`   // Persist sort state
+	PersistFilter bool   `json:"persistFilter"` // Persist filter state
+	PersistPage   bool   `json:"persistPage"`   // Persist pagination state
+	TTL           int    `json:"ttl"`           // Time to live (seconds)
+}
+
+// AnalyticsConfig defines usage tracking for DataTable
+type AnalyticsConfig struct {
+	Enabled        bool   `json:"enabled"`
+	TrackSort      bool   `json:"trackSort"`      // Track column sorting
+	TrackFilter    bool   `json:"trackFilter"`    // Track filtering usage
+	TrackExport    bool   `json:"trackExport"`    // Track export usage
+	TrackSelection bool   `json:"trackSelection"` // Track row selection
+	EventPrefix    string `json:"eventPrefix"`
 }
 
 // getDataTableClasses builds CSS classes for the datatable
 func getDataTableClasses(props DataTableProps) string {
 	return utils.TwMerge(
 		"datatable",
-		fmt.Sprintf("datatable-%s", string(props.Variant)),
-		fmt.Sprintf("datatable-%s", string(props.Size)),
-		fmt.Sprintf("datatable-%s", string(props.Density)),
-		utils.If(props.Selectable, "datatable--selectable"),
-		utils.If(props.Resizable, "datatable--resizable"),
-		utils.If(props.Virtualized, "datatable--virtualized"),
+		utils.If(props.Variant != "", fmt.Sprintf("datatable-%s", string(props.Variant))),
+		utils.If(props.Size != "", fmt.Sprintf("datatable-%s", string(props.Size))),
+		utils.If(props.Density != "", fmt.Sprintf("datatable-%s", string(props.Density))),
+		utils.If(props.Selection != nil && props.Selection.Enabled, "datatable-selectable"),
+		utils.If(props.Layout != nil && props.Layout.Resizable, "datatable-resizable"),
+		utils.If(props.Performance != nil && props.Performance.Virtualized, "datatable-virtualized"),
+		utils.If(props.Layout != nil && props.Layout.Responsive, "datatable-responsive"),
+		utils.If(props.Layout != nil && props.Layout.Striped, "datatable-striped"),
+		utils.If(props.Layout != nil && props.Layout.Bordered, "datatable-bordered"),
+		utils.If(props.Layout != nil && props.Layout.Hover, "datatable-hover"),
+		utils.If(props.Layout != nil && props.Layout.Compact, "datatable-compact"),
 		props.ClassName,
 	)
+}
+
+// Feature detection functions for progressive enhancement
+func hasSelection(props DataTableProps) bool {
+	return props.Selection != nil && props.Selection.Enabled
+}
+
+func hasSorting(props DataTableProps) bool {
+	return props.Sorting != nil && props.Sorting.Enabled
+}
+
+func hasFiltering(props DataTableProps) bool {
+	return props.Filtering != nil && props.Filtering.Enabled
+}
+
+func hasPagination(props DataTableProps) bool {
+	return props.Pagination != nil && props.Pagination.Enabled
+}
+
+func hasActions(props DataTableProps) bool {
+	return props.Actions != nil && props.Actions.Enabled
+}
+
+func hasExport(props DataTableProps) bool {
+	return props.Export != nil && props.Export.Enabled
+}
+
+func hasPerformance(props DataTableProps) bool {
+	return props.Performance != nil
+}
+
+func hasStorage(props DataTableProps) bool {
+	return props.Storage != nil && props.Storage.Enabled
+}
+
+func hasAnalytics(props DataTableProps) bool {
+	return props.Analytics != nil && props.Analytics.Enabled
 }
 
 // getTableClasses builds CSS classes for the table element
 func getTableClasses(props DataTableProps) string {
 	return utils.TwMerge(
 		"datatable-table",
-		utils.If(props.Variant == DataTableStriped, "datatable-table--striped"),
-		utils.If(props.Variant == DataTableBordered, "datatable-table--bordered"),
-		utils.If(props.Variant == DataTableHover, "datatable-table--hover"),
+		utils.If(props.Variant == DataTableStriped, "datatable-table-striped"),
+		utils.If(props.Variant == DataTableBordered, "datatable-table-bordered"),
+		utils.If(props.Variant == DataTableHover, "datatable-table-hover"),
 	)
 }
 
-// DataTable renders the main datatable organism
+// DataTable renders the main datatable organism using progressive enhancement
 templ DataTable(props DataTableProps) {
 	<div 
 		class={ getDataTableClasses(props) }
@@ -303,25 +418,189 @@ templ DataTable(props DataTableProps) {
 		}
 		x-data={ buildDataTableAlpineData(props) }
 	>
+		<!-- Header Section -->
 		@dataTableHeader(props)
-		@dataTableToolbar(props)
-		@dataTableBulkActions(props)
 		
+		<!-- Progressive Enhancement: Toolbar -->
+		if hasFiltering(props) || hasExport(props) || hasActions(props) {
+			@dataTableToolbar(props)
+		}
+		
+		<!-- Progressive Enhancement: Bulk Actions -->
+		if hasSelection(props) && hasActions(props) {
+			@dataTableBulkActions(props)
+		}
+		
+		<!-- Core Table Content -->
 		<div class="datatable-container">
 			@dataTableContent(props)
 		</div>
 		
-		if props.Pagination.Enabled {
-			@dataTablePagination(props.Pagination)
+		<!-- Progressive Enhancement: Pagination -->
+		if hasPagination(props) {
+			@dataTablePagination(props)
 		}
 		
-		@dataTableExportModal(props)
+		<!-- Progressive Enhancement: Export Modal -->
+		if hasExport(props) {
+			@dataTableExportModal(props)
+		}
+		
+		<!-- Progressive Enhancement: Analytics -->
+		if hasAnalytics(props) {
+			@dataTableAnalytics(props.Analytics)
+		}
 	</div>
+}
+
+// buildDataTableAlpineData creates the Alpine.js data object based on enabled features
+func buildDataTableAlpineData(props DataTableProps) string {
+	data := `{ 
+		// Core state
+		loading: false,
+		error: null`
+	
+	// Progressive Enhancement: Selection
+	if hasSelection(props) {
+		data += `, 
+		selectedRows: [],
+		selectAll: false`
+	}
+	
+	// Progressive Enhancement: Sorting
+	if hasSorting(props) {
+		defaultSort := `null`
+		if props.Sorting.DefaultSort != "" {
+			defaultSort = `"` + props.Sorting.DefaultSort + `"`
+		}
+		data += fmt.Sprintf(`, 
+		sortColumn: %s,
+		sortDirection: 'asc'`, defaultSort)
+	}
+	
+	// Progressive Enhancement: Filtering
+	if hasFiltering(props) {
+		data += `, 
+		searchQuery: '',
+		activeFilters: {},
+		showAdvancedFilters: false`
+	}
+	
+	// Progressive Enhancement: Pagination
+	if hasPagination(props) {
+		data += fmt.Sprintf(`, 
+		currentPage: 1,
+		pageSize: %d,
+		totalPages: 1,
+		totalItems: %d`, 
+			utils.IfElse(props.Pagination.PageSize > 0, props.Pagination.PageSize, 10),
+			len(props.Rows))
+	}
+	
+	// Progressive Enhancement: Export
+	if hasExport(props) {
+		data += `, 
+		showExportModal: false,
+		exportFormat: 'csv',
+		exporting: false`
+	}
+	
+	// Core methods
+	data += `, 
+		// Core table methods
+		refreshTable() { 
+			this.loading = true; 
+			// Trigger refresh logic
+			setTimeout(() => this.loading = false, 1000);
+		}`
+	
+	// Progressive Enhancement: Selection methods
+	if hasSelection(props) {
+		data += `, 
+		// Selection methods
+		toggleRowSelection(rowId) {
+			const index = this.selectedRows.indexOf(rowId);
+			if (index > -1) {
+				this.selectedRows.splice(index, 1);
+			} else {
+				this.selectedRows.push(rowId);
+			}
+			this.selectAll = this.selectedRows.length === this.getVisibleRows().length;
+		},
+		toggleSelectAll() {
+			if (this.selectAll) {
+				this.selectedRows = [];
+			} else {
+				this.selectedRows = this.getVisibleRows().map(row => row.id);
+			}
+			this.selectAll = !this.selectAll;
+		},
+		getVisibleRows() {
+			return $refs.tableBody?.querySelectorAll('tr[data-row-id]') || [];
+		}`
+	}
+	
+	// Progressive Enhancement: Sorting methods
+	if hasSorting(props) {
+		data += `, 
+		// Sorting methods
+		sortBy(column) {
+			if (this.sortColumn === column) {
+				this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+			} else {
+				this.sortColumn = column;
+				this.sortDirection = 'asc';
+			}
+			this.performSort();
+		},
+		performSort() {
+			// Trigger sort logic (client or server-side)
+			console.log('Sorting by:', this.sortColumn, this.sortDirection);
+		}`
+	}
+	
+	// Progressive Enhancement: Filtering methods
+	if hasFiltering(props) {
+		data += `, 
+		// Filtering methods
+		performSearch() {
+			// Trigger search logic
+			console.log('Searching:', this.searchQuery);
+		},
+		clearFilters() {
+			this.searchQuery = '';
+			this.activeFilters = {};
+			this.performSearch();
+		}`
+	}
+	
+	// Progressive Enhancement: Export methods
+	if hasExport(props) {
+		data += `, 
+		// Export methods
+		showExport() {
+			this.showExportModal = true;
+		},
+		hideExport() {
+			this.showExportModal = false;
+		},
+		performExport() {
+			this.exporting = true;
+			// Trigger export logic
+			setTimeout(() => {
+				this.exporting = false;
+				this.showExportModal = false;
+			}, 2000);
+		}`
+	}
+	
+	data += " }"
+	return data
 }
 
 // dataTableHeader renders the table header with title and description
 templ dataTableHeader(props DataTableProps) {
-	if props.Title != "" || props.Description != "" || len(props.Actions) > 0 {
+	if props.Title != "" || props.Description != "" || hasActions(props) {
 		<div class="datatable-header">
 			<div class="datatable-header-content">
 				if props.Title != "" {
@@ -332,9 +611,9 @@ templ dataTableHeader(props DataTableProps) {
 				}
 			</div>
 			
-			if len(props.Actions) > 0 {
+			if hasActions(props) && len(props.Actions.TableActions) > 0 {
 				<div class="datatable-header-actions">
-					for _, action := range props.Actions {
+					for _, action := range props.Actions.TableActions {
 						@dataTableAction(action)
 					}
 				</div>
@@ -499,7 +778,7 @@ templ dataTableStandard(props DataTableProps) {
 templ dataTableHeaderRow(props DataTableProps) {
 	<tr class="datatable-header-row">
 		if props.Selectable {
-			<th class="datatable-th datatable-th--checkbox">
+			<th class="datatable-th datatable-th-checkbox">
 				if props.MultiSelect {
 					@atoms.Checkbox(atoms.CheckboxProps{
 						ID:       "select-all",
@@ -517,7 +796,7 @@ templ dataTableHeaderRow(props DataTableProps) {
 		}
 		
 		if len(props.RowActions) > 0 {
-			<th class="datatable-th datatable-th--actions">Actions</th>
+			<th class="datatable-th datatable-th-actions">Actions</th>
 		}
 	</tr>
 }
@@ -527,9 +806,9 @@ templ dataTableHeaderCell(column DataTableColumn, props DataTableProps) {
 	<th 
 		class={ utils.TwMerge(
 			"datatable-th",
-			fmt.Sprintf("datatable-th--%s", column.Key),
-			utils.If(column.Sortable, "datatable-th--sortable"),
-			utils.If(column.Resizable, "datatable-th--resizable"),
+			fmt.Sprintf("datatable-th-%s", column.Key),
+			utils.If(column.Sortable, "datatable-th-sortable"),
+			utils.If(column.Resizable, "datatable-th-resizable"),
 			column.HeaderClass,
 		) }
 		if column.Width != "" {
@@ -582,8 +861,8 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 	<tr 
 		class={ utils.TwMerge(
 			"datatable-tr",
-			utils.If(row.Selected, "datatable-tr--selected"),
-			utils.If(row.Disabled, "datatable-tr--disabled"),
+			utils.If(row.Selected, "datatable-tr-selected"),
+			utils.If(row.Disabled, "datatable-tr-disabled"),
 			row.Class,
 		) }
 		data-row-id={ row.ID }
@@ -592,7 +871,7 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 		}
 	>
 		if props.Selectable {
-			<td class="datatable-td datatable-td--checkbox">
+			<td class="datatable-td datatable-td-checkbox">
 				@atoms.Checkbox(atoms.CheckboxProps{
 					ID:       fmt.Sprintf("select-%s", row.ID),
 					Name:     "row-select",
@@ -609,7 +888,7 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 		}
 		
 		if len(props.RowActions) > 0 || len(row.Actions) > 0 {
-			<td class="datatable-td datatable-td--actions">
+			<td class="datatable-td datatable-td-actions">
 				@dataTableRowActions(row, props)
 			</td>
 		}
@@ -621,8 +900,8 @@ templ dataTableCell(row DataTableRow, column DataTableColumn, props DataTablePro
 	<td 
 		class={ utils.TwMerge(
 			"datatable-td",
-			fmt.Sprintf("datatable-td--%s", column.Key),
-			fmt.Sprintf("datatable-td--%s", string(column.Type)),
+			fmt.Sprintf("datatable-td-%s", column.Key),
+			fmt.Sprintf("datatable-td-%s", string(column.Type)),
 			utils.If(column.Align != "", fmt.Sprintf("text-%s", column.Align)),
 			column.CellClass,
 		) }
@@ -1089,4 +1368,93 @@ func buildDataTableAlpineData(props DataTableProps) string {
 		},
 		`, ""),
 	)
+}
+
+// dataTableAnalytics renders analytics tracking components for DataTable
+templ dataTableAnalytics(analytics *AnalyticsConfig) {
+	<script>
+		// DataTable analytics tracking
+		if (typeof gtag !== 'undefined' || typeof analytics !== 'undefined') {
+			// Track sorting actions
+			if ({ fmt.Sprintf("%t", analytics.TrackSort) }) {
+				document.addEventListener('table-sorted', function(e) {
+					const eventName = '{ analytics.EventPrefix }datatable_sort';
+					const eventData = {
+						column: e.detail.column,
+						direction: e.detail.direction,
+						timestamp: new Date().toISOString()
+					};
+					
+					if (typeof gtag !== 'undefined') {
+						gtag('event', eventName, eventData);
+					}
+					
+					if (typeof analytics !== 'undefined') {
+						analytics.track(eventName, eventData);
+					}
+				});
+			}
+			
+			// Track filtering actions
+			if ({ fmt.Sprintf("%t", analytics.TrackFilter) }) {
+				document.addEventListener('table-filtered', function(e) {
+					const eventName = '{ analytics.EventPrefix }datatable_filter';
+					const eventData = {
+						filter_type: e.detail.type,
+						filter_value: e.detail.value,
+						results_count: e.detail.results || 0,
+						timestamp: new Date().toISOString()
+					};
+					
+					if (typeof gtag !== 'undefined') {
+						gtag('event', eventName, eventData);
+					}
+					
+					if (typeof analytics !== 'undefined') {
+						analytics.track(eventName, eventData);
+					}
+				});
+			}
+			
+			// Track export actions
+			if ({ fmt.Sprintf("%t", analytics.TrackExport) }) {
+				document.addEventListener('table-exported', function(e) {
+					const eventName = '{ analytics.EventPrefix }datatable_export';
+					const eventData = {
+						format: e.detail.format,
+						row_count: e.detail.rowCount || 0,
+						timestamp: new Date().toISOString()
+					};
+					
+					if (typeof gtag !== 'undefined') {
+						gtag('event', eventName, eventData);
+					}
+					
+					if (typeof analytics !== 'undefined') {
+						analytics.track(eventName, eventData);
+					}
+				});
+			}
+			
+			// Track selection actions
+			if ({ fmt.Sprintf("%t", analytics.TrackSelection) }) {
+				document.addEventListener('table-selection-changed', function(e) {
+					const eventName = '{ analytics.EventPrefix }datatable_selection';
+					const eventData = {
+						selection_type: e.detail.type, // 'single', 'multiple', 'all'
+						selected_count: e.detail.count,
+						timestamp: new Date().toISOString()
+					};
+					
+					if (typeof gtag !== 'undefined') {
+						gtag('event', eventName, eventData);
+					}
+					
+					if (typeof analytics !== 'undefined') {
+						analytics.track(eventName, eventData);
+					}
+				});
+			}
+		}
+	</script>
 }

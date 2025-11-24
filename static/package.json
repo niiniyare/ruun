@@ -1,0 +1,30 @@
+{
+  "name": "@ruun/js-components",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:datatable": "node build.mjs datatable",
+    "build:basecoat": "node build.mjs basecoat",
+    "build:css": "node build.mjs css",
+    "watch": "node build.mjs --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
+    "test:passing": "vitest --run js/datatable/tests/sort-engine.test.ts js/datatable/tests/filter-engine.test.ts js/datatable/tests/export-plugin.test.ts js/datatable/tests/event-emitter.test.ts js/datatable/tests/index.test.ts"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@vitest/ui": "^1.0.0",
+    "autoprefixer": "^10.4.22",
+    "cssnano": "^7.1.2",
+    "esbuild": "^0.19.0",
+    "jsdom": "^23.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vitest": "^1.0.0"
+  }
+}

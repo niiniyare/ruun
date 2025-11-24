@@ -27,14 +27,31 @@ const localStorageMock = (() => {
   };
 })();
 
+// Mock console methods to catch warnings
+const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
 describe('StateManager', () => {
   let stateManager: StateManager;
 
   beforeEach(() => {
+    // Ensure window exists (jsdom should provide this)
+    if (typeof window === 'undefined') {
+      global.window = {} as any;
+    }
+    
     // Mock window.localStorage
     Object.defineProperty(window, 'localStorage', {
       value: localStorageMock,
       writable: true,
+      configurable: true,
+    });
+
+    // Also set on global for environments without window
+    Object.defineProperty(global, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+      configurable: true,
     });
 
     // Clear the mock store
@@ -46,6 +63,8 @@ describe('StateManager', () => {
 
   afterEach(() => {
     localStorageMock.clear();
+    consoleWarnSpy.mockClear();
+    consoleErrorSpy.mockClear();
     vi.clearAllMocks();
   });
 

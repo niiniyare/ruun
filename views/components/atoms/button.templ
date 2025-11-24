@@ -1,287 +1,124 @@
 package atoms
 
-import (
-    "strconv"
-    "github.com/niiniyare/ruun/pkg/utils"
-)
-
-// ButtonVariant defines the visual style variants
-type ButtonVariant string
-
-const (
-    ButtonVariantPrimary     ButtonVariant = "primary"
-    ButtonVariantSecondary   ButtonVariant = "secondary"
-    ButtonVariantDestructive ButtonVariant = "destructive"
-    ButtonVariantOutline     ButtonVariant = "outline"
-    ButtonVariantGhost       ButtonVariant = "ghost"
-    ButtonVariantLink        ButtonVariant = "link"
-    ButtonVariantDefault     ButtonVariant = "default"
-)
-
-// ButtonSize defines the size variants
-type ButtonSize string
-
-const (
-    ButtonSizeXS ButtonSize = "xs"
-    ButtonSizeSM ButtonSize = "sm"
-    ButtonSizeMD ButtonSize = "md"
-    ButtonSizeLG ButtonSize = "lg"
-    ButtonSizeXL ButtonSize = "xl"
-)
-
-// ButtonState defines the visual state variants
-type ButtonState string
-
-const (
-    ButtonStateDefault  ButtonState = "default"
-    ButtonStateDisabled ButtonState = "disabled"
-    ButtonStateLoading  ButtonState = "loading"
-    ButtonStateActive   ButtonState = "active"
-    ButtonStateHover    ButtonState = "hover"
-)
-
-// ButtonProps defines all properties for the Button atom
+// ButtonProps defines all properties for the Button atom using Basecoat classes
 type ButtonProps struct {
-    // Core HTML attributes
-    ID   string `json:"id"`
-    Type string `json:"type"`
-    Name string `json:"name"`
+    // Content
     Text string `json:"text"`
+    Icon templ.Component `json:"icon,omitempty"`
+    
+    // Basecoat variants
+    Variant string `json:"variant,omitempty"` // "primary", "secondary", "outline", "ghost", "link", "destructive"
+    Size    string `json:"size,omitempty"`    // "sm", "lg" (empty = default)
+    
+    // HTML attributes
+    ID       string `json:"id,omitempty"`
+    Type     string `json:"type,omitempty"`     // "button", "submit", "reset"
+    Name     string `json:"name,omitempty"`
+    Value    string `json:"value,omitempty"`
+    Disabled bool   `json:"disabled,omitempty"`
     
     // Form attributes
-    Value       string `json:"value"`
-    Disabled    bool   `json:"disabled"`
-    AutoFocus   bool   `json:"autoFocus"`
-    Form        string `json:"form"`
-    FormAction  string `json:"formAction"`
-    FormMethod  string `json:"formMethod"`
-    FormTarget  string `json:"formTarget"`
-    
-    // Visual presentation (resolved externally)
-    Variant   ButtonVariant `json:"variant"`
-    Size      ButtonSize    `json:"size"`
-    State     ButtonState   `json:"state"`
-    ClassName string        `json:"className"`
-    FullWidth bool          `json:"fullWidth"`
-    
-    // Icon configuration
-    Icon      string `json:"icon"`
-    IconLeft  string `json:"iconLeft"`
-    IconRight string `json:"iconRight"`
-    Loading   bool   `json:"loading"`
-    
-    // Event handlers (pre-resolved externally)
-    OnClick    string `json:"onClick"`
-    OnFocus    string `json:"onFocus"`
-    OnBlur     string `json:"onBlur"`
-    OnMouseOut string `json:"onMouseOut"`
-    OnSubmit   string `json:"onSubmit"`
-    
-    // ARIA accessibility attributes
-    AriaLabel       string `json:"ariaLabel"`
-    AriaDescribedBy string `json:"ariaDescribedBy"`
-    AriaPressed     string `json:"ariaPressed"`
-    AriaExpanded    string `json:"ariaExpanded"`
-    AriaHaspopup    string `json:"ariaHaspopup"`
-    AriaControls    string `json:"ariaControls"`
-    
-    // Additional HTML attributes
-    TabIndex     int                   `json:"tabIndex"`
-    DataAttrs    map[string]string     `json:"dataAttrs"`
-    Attributes   templ.Attributes      `json:"attributes"`
-}
-
-// getButtonClasses builds the CSS class string using design tokens
-func getButtonClasses(props ButtonProps) string {
-    return utils.TwMerge(
-        // Base class with design token references
-        "button",
-        
-        // Variant classes (map to design tokens)
-        "button-"+string(props.Variant),
-        
-        // Size classes (map to design tokens)
-        "button-"+string(props.Size),
-        
-        // State classes (map to design tokens)
-        "button-"+string(props.State),
-        
-        // Layout utilities
-        utils.If(props.FullWidth, "button-full-width"),
-        utils.If(props.Disabled, "button-disabled"),
-        utils.If(props.Loading, "button-loading"),
-        
-        // Icon-specific classes
-        utils.If(props.Icon != "" && props.Text == "", "button-icon-only"),
-        utils.If(props.IconLeft != "", "button-has-icon-left"),
-        utils.If(props.IconRight != "", "button-has-icon-right"),
-        
-        // Custom classes
-        props.ClassName,
-    )
-}
-
-// buildButtonAttributes creates all HTML attributes for the button
-func buildButtonAttributes(props ButtonProps) templ.Attributes {
-    attrs := templ.Attributes{
-        "type":  utils.IfElse(props.Type != "", props.Type, "button"),
-        "class": getButtonClasses(props),
-    }
-    
-    // Core HTML attributes
-    if props.ID != "" {
-        attrs["id"] = props.ID
-    }
-    if props.Name != "" {
-        attrs["name"] = props.Name
-    }
-    if props.Value != "" {
-        attrs["value"] = props.Value
-    }
-    
-    // Boolean attributes
-    if props.Disabled {
-        attrs["disabled"] = "disabled"
-    }
-    if props.AutoFocus {
-        attrs["autofocus"] = "autofocus"
-    }
-    
-    // Form attributes
-    if props.Form != "" {
-        attrs["form"] = props.Form
-    }
-    if props.FormAction != "" {
-        attrs["formaction"] = props.FormAction
-    }
-    if props.FormMethod != "" {
-        attrs["formmethod"] = props.FormMethod
-    }
-    if props.FormTarget != "" {
-        attrs["formtarget"] = props.FormTarget
-    }
+    Form       string `json:"form,omitempty"`
+    FormAction string `json:"formAction,omitempty"`
+    FormMethod string `json:"formMethod,omitempty"`
+    FormTarget string `json:"formTarget,omitempty"`
     
     // Event handlers
-    if props.OnClick != "" {
-        attrs["onclick"] = props.OnClick
-    }
-    if props.OnFocus != "" {
-        attrs["onfocus"] = props.OnFocus
-    }
-    if props.OnBlur != "" {
-        attrs["onblur"] = props.OnBlur
-    }
-    if props.OnMouseOut != "" {
-        attrs["onmouseout"] = props.OnMouseOut
-    }
-    if props.OnSubmit != "" {
-        attrs["onsubmit"] = props.OnSubmit
-    }
+    OnClick string `json:"onClick,omitempty"`
     
-    // ARIA attributes
-    if props.AriaLabel != "" {
-        attrs["aria-label"] = props.AriaLabel
-    }
-    if props.AriaDescribedBy != "" {
-        attrs["aria-describedby"] = props.AriaDescribedBy
-    }
-    if props.AriaPressed != "" {
-        attrs["aria-pressed"] = props.AriaPressed
-    }
-    if props.AriaExpanded != "" {
-        attrs["aria-expanded"] = props.AriaExpanded
-    }
-    if props.AriaHaspopup != "" {
-        attrs["aria-haspopup"] = props.AriaHaspopup
-    }
-    if props.AriaControls != "" {
-        attrs["aria-controls"] = props.AriaControls
-    }
-    
-    // Tab index
-    if props.TabIndex != 0 {
-        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
-    }
-    
-    // Data attributes
-    for key, value := range props.DataAttrs {
-        attrs["data-"+key] = value
-    }
-    
-    // Merge custom attributes (allows override)
-    for key, value := range props.Attributes {
-        attrs[key] = value
-    }
-    
-    return attrs
+    // ARIA accessibility
+    AriaLabel       string `json:"ariaLabel,omitempty"`
+    AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+    AriaPressed     string `json:"ariaPressed,omitempty"`
+    AriaExpanded    string `json:"ariaExpanded,omitempty"`
+    AriaHaspopup    string `json:"ariaHaspopup,omitempty"`
+    AriaControls    string `json:"ariaControls,omitempty"`
 }
 
-// SimpleButton renders a simple button (backward compatibility)
-templ SimpleButton(props ButtonProps) {
-    @Button(ButtonProps{
-        Text:     props.Text,
-        Variant:  utils.IfElse(props.Variant != "", props.Variant, ButtonVariantDefault),
-        Size:     utils.IfElse(props.Size != "", props.Size, ButtonSizeMD),
-        Disabled: props.Disabled,
-        ID:       props.ID,
-        OnClick:  props.OnClick,
-        ClassName: props.ClassName,
-    })
+// getButtonClass generates the correct single Basecoat class
+// Basecoat uses combined classes like "btn-sm-outline" not "btn btn-sm btn-outline"
+func getButtonClass(variant, size string, iconOnly bool) string {
+    // Start with base
+    class := "btn"
+    
+    // Add size modifier if specified
+    if size != "" {
+        class = "btn-" + size
+    }
+    
+    // Add icon modifier if icon-only
+    if iconOnly {
+        class = class + "-icon"
+    }
+    
+    // Add variant suffix (except for primary which is the default)
+    if variant != "" && variant != "primary" {
+        class = class + "-" + variant
+    }
+    
+    return class
 }
 
-// Button renders a pure presentation button atom
+// Button renders a Basecoat button atom
 templ Button(props ButtonProps) {
-    <button {buildButtonAttributes(props)...}>
-        // Left icon
-        if props.IconLeft != "" && !props.Loading {
-            <span class="button-icon-left">
-                @renderIcon(props.IconLeft)
-            </span>
+    <button
+        class={ getButtonClass(props.Variant, props.Size, props.Icon != nil && props.Text == "") }
+        if props.Type != "" {
+            type={ props.Type }
+        } else {
+            type="button"
         }
-        
-        // Loading spinner
-        if props.Loading {
-            <span class="button-loading-spinner">
-                @renderLoadingSpinner()
-            </span>
+        if props.ID != "" {
+            id={ props.ID }
         }
-        
-        // Icon-only mode
-        if props.Icon != "" && props.Text == "" && !props.Loading {
-            <span class="button-icon-only">
-                @renderIcon(props.Icon)
-            </span>
+        if props.Name != "" {
+            name={ props.Name }
         }
-        
-        // Button text
+        if props.Value != "" {
+            value={ props.Value }
+        }
+        if props.Form != "" {
+            form={ props.Form }
+        }
+        if props.FormAction != "" {
+            formaction={ props.FormAction }
+        }
+        if props.FormMethod != "" {
+            formmethod={ props.FormMethod }
+        }
+        if props.FormTarget != "" {
+            formtarget={ props.FormTarget }
+        }
+        if props.Disabled {
+            disabled
+        }
+        if props.OnClick != "" {
+            onclick={ props.OnClick }
+        }
+        if props.AriaLabel != "" {
+            aria-label={ props.AriaLabel }
+        }
+        if props.AriaDescribedBy != "" {
+            aria-describedby={ props.AriaDescribedBy }
+        }
+        if props.AriaPressed != "" {
+            aria-pressed={ props.AriaPressed }
+        }
+        if props.AriaExpanded != "" {
+            aria-expanded={ props.AriaExpanded }
+        }
+        if props.AriaHaspopup != "" {
+            aria-haspopup={ props.AriaHaspopup }
+        }
+        if props.AriaControls != "" {
+            aria-controls={ props.AriaControls }
+        }
+    >
+        if props.Icon != nil {
+            @props.Icon
+        }
         if props.Text != "" {
-            <span class="button-text">
-                { props.Text }
-            </span>
-        }
-        
-        // Right icon
-        if props.IconRight != "" && !props.Loading {
-            <span class="button-icon-right">
-                @renderIcon(props.IconRight)
-            </span>
+            { props.Text }
         }
     </button>
-}
-
-// renderIcon renders an icon placeholder (to be replaced with actual Icon atom)
-templ renderIcon(name string) {
-    <span class="icon" data-icon={ name }>
-        { name }
-    </span>
-}
-
-// renderLoadingSpinner renders a loading spinner
-templ renderLoadingSpinner() {
-    <span class="loading-spinner" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" class="animate-spin">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle>
-            <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-    </span>
 }
