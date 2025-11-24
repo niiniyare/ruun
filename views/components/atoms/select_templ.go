@@ -8,32 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// SelectSize defines the size variants
-type SelectSize string
-
-const (
-	SelectSizeXS SelectSize = "xs"
-	SelectSizeSM SelectSize = "sm"
-	SelectSizeMD SelectSize = "md"
-	SelectSizeLG SelectSize = "lg"
-	SelectSizeXL SelectSize = "xl"
-)
-
-// SelectState defines the visual state variants
-type SelectState string
-
-const (
-	SelectStateDefault  SelectState = "default"
-	SelectStateError    SelectState = "error"
-	SelectStateSuccess  SelectState = "success"
-	SelectStateWarning  SelectState = "warning"
-	SelectStateDisabled SelectState = "disabled"
-)
+// Note: Basecoat handles select styling via .field wrapper or select.select class
+// No size or state classes needed - styling is contextual
 
 // SelectOption represents an option within the select
 type SelectOption struct {
@@ -60,11 +38,8 @@ type SelectProps struct {
 	Multiple  bool `json:"multiple"`
 	Size      int  `json:"htmlSize"` // HTML size attribute (distinct from design size)
 
-	// Visual presentation (resolved externally)
-	DesignSize SelectSize  `json:"designSize"`
-	State      SelectState `json:"state"`
-	ClassName  string      `json:"className"`
-	FullWidth  bool        `json:"fullWidth"`
+	// Note: Visual styling handled by Basecoat .field context
+	// No visual props needed
 
 	// Event handlers (pre-resolved externally)
 	OnChange string `json:"onChange"`
@@ -85,32 +60,13 @@ type SelectProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getSelectClasses builds the CSS class string using design tokens
-func getSelectClasses(props SelectProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"select",
-
-		// Size classes (map to design tokens)
-		"select-"+string(props.DesignSize),
-
-		// State classes (map to design tokens)
-		"select-"+string(props.State),
-
-		// Layout utilities
-		utils.If(props.FullWidth, "select-full-width"),
-		utils.If(props.Disabled, "select-disabled"),
-		utils.If(props.Multiple, "select-multiple"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
+// Basecoat handles select styling contextually via .field wrapper
+// Or use select.select class for standalone selects
 
 // buildSelectAttributes creates all HTML attributes for the select
 func buildSelectAttributes(props SelectProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class": getSelectClasses(props),
+		"class": "select", // Use Basecoat's select class
 	}
 
 	// Core HTML attributes
@@ -243,7 +199,7 @@ func renderOption(option SelectOption) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 212, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 168, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -272,7 +228,7 @@ func renderOption(option SelectOption) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 216, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 172, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -315,7 +271,7 @@ func renderOptGroup(group string, options []SelectOption) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(group)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 222, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 178, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -391,7 +347,7 @@ func Select(props SelectProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 235, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 191, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

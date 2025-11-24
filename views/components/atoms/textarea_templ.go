@@ -8,42 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// TextareaSize defines the size variants
-type TextareaSize string
-
-const (
-	TextareaSizeXS TextareaSize = "xs"
-	TextareaSizeSM TextareaSize = "sm"
-	TextareaSizeMD TextareaSize = "md"
-	TextareaSizeLG TextareaSize = "lg"
-	TextareaSizeXL TextareaSize = "xl"
-)
-
-// TextareaState defines the visual state variants
-type TextareaState string
-
-const (
-	TextareaStateDefault  TextareaState = "default"
-	TextareaStateError    TextareaState = "error"
-	TextareaStateSuccess  TextareaState = "success"
-	TextareaStateWarning  TextareaState = "warning"
-	TextareaStateDisabled TextareaState = "disabled"
-)
-
-// TextareaResize defines resize behavior
-type TextareaResize string
-
-const (
-	TextareaResizeNone       TextareaResize = "none"
-	TextareaResizeVertical   TextareaResize = "vertical"
-	TextareaResizeHorizontal TextareaResize = "horizontal"
-	TextareaResizeBoth       TextareaResize = "both"
-)
+// Note: Basecoat handles textarea styling via .textarea class
+// Resize behavior is handled via CSS or style attributes
 
 // TextareaProps defines all properties for the Textarea atom
 type TextareaProps struct {
@@ -67,12 +35,8 @@ type TextareaProps struct {
 	Cols      int    `json:"cols"`
 	Wrap      string `json:"wrap"` // "soft" | "hard" | "off"
 
-	// Visual presentation (resolved externally)
-	Size      TextareaSize   `json:"size"`
-	State     TextareaState  `json:"state"`
-	Resize    TextareaResize `json:"resize"`
-	ClassName string         `json:"className"`
-	FullWidth bool           `json:"fullWidth"`
+	// Note: Visual styling handled by Basecoat .textarea class
+	// No visual props needed
 
 	// Event handlers (pre-resolved externally)
 	OnChange  string `json:"onChange"`
@@ -95,35 +59,13 @@ type TextareaProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getTextareaClasses builds the CSS class string using design tokens
-func getTextareaClasses(props TextareaProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"textarea",
-
-		// Size classes (map to design tokens)
-		"textarea-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"textarea-"+string(props.State),
-
-		// Resize classes
-		"textarea-resize-"+string(props.Resize),
-
-		// Layout utilities
-		utils.If(props.FullWidth, "textarea-full-width"),
-		utils.If(props.Disabled, "textarea-disabled"),
-		utils.If(props.Readonly, "textarea-readonly"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
+// Basecoat handles textarea styling via .textarea class
+// No class generation needed
 
 // buildTextareaAttributes creates all HTML attributes for the textarea
 func buildTextareaAttributes(props TextareaProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class":       getTextareaClasses(props),
+		"class":       "textarea", // Use Basecoat's textarea class
 		"placeholder": props.Placeholder,
 	}
 
@@ -261,7 +203,7 @@ func Textarea(props TextareaProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/textarea.templ`, Line: 221, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/textarea.templ`, Line: 163, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

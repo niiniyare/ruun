@@ -8,32 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// RadioSize defines the size variants for radio buttons
-type RadioSize string
-
-const (
-	RadioSizeXS RadioSize = "xs"
-	RadioSizeSM RadioSize = "sm"
-	RadioSizeMD RadioSize = "md"
-	RadioSizeLG RadioSize = "lg"
-	RadioSizeXL RadioSize = "xl"
-)
-
-// RadioState defines the visual state of the radio button
-type RadioState string
-
-const (
-	RadioStateDefault  RadioState = "default"
-	RadioStateError    RadioState = "error"
-	RadioStateSuccess  RadioState = "success"
-	RadioStateWarning  RadioState = "warning"
-	RadioStateDisabled RadioState = "disabled"
-)
+// Note: Basecoat handles radio styling via .field wrapper context
+// No size or state classes needed - styling is contextual
 
 // RadioProps defines all properties for the Radio atom
 type RadioProps struct {
@@ -50,10 +28,8 @@ type RadioProps struct {
 	Readonly  bool `json:"readonly"`
 	AutoFocus bool `json:"autoFocus"`
 
-	// Visual presentation (resolved externally)
-	Size      RadioSize  `json:"size"`
-	State     RadioState `json:"state"`
-	ClassName string     `json:"className"`
+	// Note: Visual styling handled by Basecoat .field context
+	// No visual props needed
 
 	// Event handlers (pre-resolved externally)
 	OnChange string `json:"onChange"`
@@ -74,41 +50,13 @@ type RadioProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getRadioClasses builds the CSS class string using design tokens
-func getRadioClasses(props RadioProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"radio",
-
-		// Size classes (map to design tokens)
-		"radio-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"radio-"+string(props.State),
-
-		// Layout utilities
-		utils.If(props.Disabled, "radio-disabled"),
-		utils.If(props.Readonly, "radio-readonly"),
-		utils.If(props.Checked, "radio-checked"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// getRadioLabelClasses builds CSS for radio label
-func getRadioLabelClasses(props RadioProps) string {
-	return utils.TwMerge(
-		"radio-label",
-		utils.If(props.Disabled, "radio-label-disabled"),
-	)
-}
+// Basecoat handles radio styling contextually via .field wrapper
+// No class generation needed - type="radio" determines styling
 
 // buildRadioAttributes creates all HTML attributes for the radio
 func buildRadioAttributes(props RadioProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type":  "radio",
-		"class": getRadioClasses(props),
+		"type": "radio",
 	}
 
 	// Core HTML attributes
@@ -188,11 +136,9 @@ func buildRadioAttributes(props RadioProps) templ.Attributes {
 	return attrs
 }
 
-// buildRadioLabelAttributes creates all HTML attributes for the label
+// buildRadioLabelAttributes creates label attributes (no classes needed)
 func buildRadioLabelAttributes(props RadioProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getRadioLabelClasses(props),
-	}
+	attrs := templ.Attributes{}
 
 	if props.ID != "" {
 		attrs["for"] = props.ID
@@ -240,20 +186,20 @@ func Radio(props RadioProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "> <span class=\"radio-label-text\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 201, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/radio.templ`, Line: 147, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></label>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

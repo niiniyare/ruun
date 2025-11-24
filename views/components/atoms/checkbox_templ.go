@@ -8,32 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// CheckboxSize defines the size variants for checkboxes
-type CheckboxSize string
-
-const (
-	CheckboxSizeXS CheckboxSize = "xs"
-	CheckboxSizeSM CheckboxSize = "sm"
-	CheckboxSizeMD CheckboxSize = "md"
-	CheckboxSizeLG CheckboxSize = "lg"
-	CheckboxSizeXL CheckboxSize = "xl"
-)
-
-// CheckboxState defines the visual state of the checkbox
-type CheckboxState string
-
-const (
-	CheckboxStateDefault  CheckboxState = "default"
-	CheckboxStateError    CheckboxState = "error"
-	CheckboxStateSuccess  CheckboxState = "success"
-	CheckboxStateWarning  CheckboxState = "warning"
-	CheckboxStateDisabled CheckboxState = "disabled"
-)
+// Note: Basecoat handles checkbox styling via .field wrapper context
+// No size or state classes needed - styling is contextual
 
 // CheckboxProps defines all properties for the Checkbox atom
 type CheckboxProps struct {
@@ -50,10 +28,8 @@ type CheckboxProps struct {
 	Readonly  bool `json:"readonly"`
 	AutoFocus bool `json:"autoFocus"`
 
-	// Visual presentation (resolved externally)
-	Size      CheckboxSize  `json:"size"`
-	State     CheckboxState `json:"state"`
-	ClassName string        `json:"className"`
+	// Note: Visual styling handled by Basecoat .field context
+	// No visual props needed
 
 	// Event handlers (pre-resolved externally)
 	OnChange string `json:"onChange"`
@@ -74,41 +50,13 @@ type CheckboxProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getCheckboxClasses builds the CSS class string using design tokens
-func getCheckboxClasses(props CheckboxProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"checkbox",
-
-		// Size classes (map to design tokens)
-		"checkbox-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"checkbox-"+string(props.State),
-
-		// Layout utilities
-		utils.If(props.Disabled, "checkbox-disabled"),
-		utils.If(props.Readonly, "checkbox-readonly"),
-		utils.If(props.Checked, "checkbox-checked"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// getCheckboxLabelClasses builds CSS for checkbox label
-func getCheckboxLabelClasses(props CheckboxProps) string {
-	return utils.TwMerge(
-		"checkbox-label",
-		utils.If(props.Disabled, "checkbox-label-disabled"),
-	)
-}
+// Basecoat handles checkbox styling contextually via .field wrapper
+// No class generation needed - type="checkbox" determines styling
 
 // buildCheckboxAttributes creates all HTML attributes for the checkbox
 func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type":  "checkbox",
-		"class": getCheckboxClasses(props),
+		"type": "checkbox",
 	}
 
 	// Core HTML attributes
@@ -188,11 +136,9 @@ func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 	return attrs
 }
 
-// buildCheckboxLabelAttributes creates all HTML attributes for the label
+// buildCheckboxLabelAttributes creates label attributes (no classes needed)
 func buildCheckboxLabelAttributes(props CheckboxProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getCheckboxLabelClasses(props),
-	}
+	attrs := templ.Attributes{}
 
 	if props.ID != "" {
 		attrs["for"] = props.ID
@@ -240,20 +186,20 @@ func Checkbox(props CheckboxProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "> <span class=\"checkbox-label-text\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 201, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 147, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></label>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

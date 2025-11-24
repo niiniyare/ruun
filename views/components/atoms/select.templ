@@ -1,31 +1,9 @@
 package atoms
 
-import (
-    "strconv"
-    "github.com/niiniyare/ruun/pkg/utils"
-)
+import "strconv"
 
-// SelectSize defines the size variants
-type SelectSize string
-
-const (
-    SelectSizeXS SelectSize = "xs"
-    SelectSizeSM SelectSize = "sm"
-    SelectSizeMD SelectSize = "md"
-    SelectSizeLG SelectSize = "lg"
-    SelectSizeXL SelectSize = "xl"
-)
-
-// SelectState defines the visual state variants
-type SelectState string
-
-const (
-    SelectStateDefault  SelectState = "default"
-    SelectStateError    SelectState = "error"
-    SelectStateSuccess  SelectState = "success"
-    SelectStateWarning  SelectState = "warning"
-    SelectStateDisabled SelectState = "disabled"
-)
+// Note: Basecoat handles select styling via .field wrapper or select.select class
+// No size or state classes needed - styling is contextual
 
 // SelectOption represents an option within the select
 type SelectOption struct {
@@ -52,11 +30,8 @@ type SelectProps struct {
     Multiple     bool   `json:"multiple"`
     Size         int    `json:"htmlSize"` // HTML size attribute (distinct from design size)
     
-    // Visual presentation (resolved externally)
-    DesignSize SelectSize  `json:"designSize"`
-    State      SelectState `json:"state"`
-    ClassName  string      `json:"className"`
-    FullWidth  bool        `json:"fullWidth"`
+    // Note: Visual styling handled by Basecoat .field context
+    // No visual props needed
     
     // Event handlers (pre-resolved externally)
     OnChange string `json:"onChange"`
@@ -77,32 +52,13 @@ type SelectProps struct {
     Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// getSelectClasses builds the CSS class string using design tokens
-func getSelectClasses(props SelectProps) string {
-    return utils.TwMerge(
-        // Base class with design token references
-        "select",
-        
-        // Size classes (map to design tokens)
-        "select-"+string(props.DesignSize),
-        
-        // State classes (map to design tokens)
-        "select-"+string(props.State),
-        
-        // Layout utilities
-        utils.If(props.FullWidth, "select-full-width"),
-        utils.If(props.Disabled, "select-disabled"),
-        utils.If(props.Multiple, "select-multiple"),
-        
-        // Custom classes
-        props.ClassName,
-    )
-}
+// Basecoat handles select styling contextually via .field wrapper
+// Or use select.select class for standalone selects
 
 // buildSelectAttributes creates all HTML attributes for the select
 func buildSelectAttributes(props SelectProps) templ.Attributes {
     attrs := templ.Attributes{
-        "class": getSelectClasses(props),
+        "class": "select", // Use Basecoat's select class
     }
     
     // Core HTML attributes

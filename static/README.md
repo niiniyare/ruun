@@ -1,15 +1,16 @@
 # JS Components Build System
 
-Unified TypeScript and JavaScript build system for UI components with CSS processing.
+Unified TypeScript, JavaScript, and CSS build system for UI components with Tailwind CSS integration.
 
 ## Overview
 
 This build system:
 - Compiles the `datatable` TypeScript project into both minified and unminified bundles
 - Processes `basecoat` JavaScript components individually with both versions
-- Processes CSS files with minification and debug versions
+- **Processes CSS files with Tailwind CSS v4 integration and minification**
+- **Includes Basecoat CSS component library with theme support**
 - Outputs files that UI components can easily reference
-- Works well in Termux environment using esbuild
+- Works well in Termux environment using esbuild and Tailwind CLI
 - Includes sourcemaps for debugging
 
 ## Directory Structure
@@ -25,8 +26,8 @@ static/
 │       ├── popover.js
 │       └── ...
 ├── css/                    # CSS source files
-│   ├── base.css
-│   └── ...
+│   ├── base.css             # Main entry point (imports Tailwind + basecoat)
+│   └── basecoat.css         # Component library (buttons, cards, etc.)
 ├── dist/                   # Build output
 │   ├── datatable.js        # Unminified bundle (debug)
 │   ├── datatable.js.map    # Source map
@@ -39,11 +40,12 @@ static/
 │   │   ├── dropdown-menu.min.js
 │   │   └── ...
 │   └── css/                # Processed CSS files
-│       ├── base.css        # Unminified (debug)
-│       ├── base.min.css    # Minified (production)
-│       └── ...
-├── package.json            # Build dependencies
-├── build.mjs               # Build script
+│       ├── base.css        # Unminified (Tailwind + Basecoat)
+│       └── base.min.css    # Minified (Tailwind + Basecoat)
+├── package.json            # Build dependencies (includes Tailwind CSS v4)
+├── build.mjs               # Build script (esbuild + Tailwind CLI)
+├── tailwind.config.js      # Tailwind CSS configuration
+├── postcss.config.js       # PostCSS configuration
 ├── js-manifest.json        # Component path mapping
 └── js-helpers.go           # Go helpers for templ components
 ```
@@ -177,8 +179,8 @@ templ BaseLayout() {
 - **Sourcemaps**: `.js.map` files for debugging
 
 ### CSS:
-- **Minified**: `component.min.css` - Production ready
-- **Unminified**: `component.css` - Debug friendly with comments
+- **Minified**: `component.min.css` - Production ready (Tailwind + Basecoat processed)
+- **Unminified**: `component.css` - Debug friendly (Tailwind + Basecoat with formatting)
 
 ## Available Helper Functions
 
@@ -206,13 +208,48 @@ static.GetBaseCSSDebug()                   // base.css
 static.GetCSSPathDebug("component-name")   // component.css
 ```
 
+## CSS Architecture
+
+### Tailwind CSS Integration
+- **Version**: v4.1.17 with PostCSS plugin
+- **Configuration**: `tailwind.config.js` with custom color tokens
+- **Processing**: Tailwind CLI integration in build pipeline
+- **Imports**: `@import "tailwindcss"` in `base.css`
+
+### Basecoat Component Library
+- **Components**: Button, Badge, Alert, Card, Input, etc.
+- **Theming**: CSS custom properties for color/spacing tokens
+- **Structure**: Atomic design principles (atoms, molecules, organisms)
+- **Integration**: Imported into `base.css` and processed with Tailwind
+
+### Build Process
+1. `base.css` imports both Tailwind CSS and Basecoat CSS
+2. Tailwind CLI processes the file with configuration
+3. Output includes all utilities + component styles
+4. Both minified and unminified versions generated
+
 ## Customization
 
+### Build Configuration
 Edit `build.mjs` to:
 - Add new component directories
 - Change build settings (minification, sourcemaps, etc.)
 - Add preprocessing steps
 - Modify output structure
-- Add new CSS processing rules
+- Customize CSS processing pipeline
+
+### Tailwind Configuration
+Edit `tailwind.config.js` to:
+- Add custom color tokens to match your design system
+- Configure content scanning paths for purging
+- Add custom utilities or components
+- Modify spacing, typography, and other design tokens
+
+### Basecoat Customization
+Edit `css/basecoat.css` to:
+- Modify component styles
+- Add new component variants
+- Update CSS custom properties for theming
+- Customize responsive breakpoints
 
 The manifest file `js-manifest.json` automatically maps component names to their built file paths with both minified and unminified versions.

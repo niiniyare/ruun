@@ -1,9 +1,6 @@
 package atoms
 
-import (
-    "strconv"
-    "github.com/niiniyare/ruun/pkg/utils"
-)
+import "strconv"
 
 // InputType defines the HTML input type
 type InputType string
@@ -25,27 +22,8 @@ const (
     InputColor    InputType = "color"
 )
 
-// InputSize defines the size variants
-type InputSize string
-
-const (
-    InputSizeXS InputSize = "xs"
-    InputSizeSM InputSize = "sm"
-    InputSizeMD InputSize = "md"
-    InputSizeLG InputSize = "lg"
-    InputSizeXL InputSize = "xl"
-)
-
-// InputState defines the visual state variants
-type InputState string
-
-const (
-    InputStateDefault InputState = "default"
-    InputStateError   InputState = "error"
-    InputStateSuccess InputState = "success"
-    InputStateWarning InputState = "warning"
-    InputStateDisabled InputState = "disabled"
-)
+// Note: Basecoat handles input styling via .field wrapper context
+// No size or state classes needed - styling is contextual
 
 // InputProps defines all properties for the Input atom
 type InputProps struct {
@@ -73,11 +51,8 @@ type InputProps struct {
     Accept      string `json:"accept"` // For file inputs
     Multiple    bool   `json:"multiple"` // For file inputs
     
-    // Visual presentation (resolved externally)
-    Size        InputSize  `json:"size"`
-    State       InputState `json:"state"`
-    ClassName   string     `json:"className"`
-    FullWidth   bool       `json:"fullWidth"`
+    // Note: Visual styling handled by Basecoat .field context
+    // No visual props needed
     
     // Event handlers (pre-resolved externally)
     OnChange    string `json:"onChange"`
@@ -99,33 +74,13 @@ type InputProps struct {
     Attributes   templ.Attributes      `json:"attributes"`
 }
 
-// getInputClasses builds the CSS class string using design tokens
-func getInputClasses(props InputProps) string {
-    return utils.TwMerge(
-        // Base class with design token references
-        "input",
-        
-        // Size classes (map to design tokens)
-        "input-"+string(props.Size),
-        
-        // State classes (map to design tokens)
-        "input-"+string(props.State),
-        
-        // Layout utilities
-        utils.If(props.FullWidth, "input-full-width"),
-        utils.If(props.Disabled, "input-disabled"),
-        utils.If(props.Readonly, "input-readonly"),
-        
-        // Custom classes
-        props.ClassName,
-    )
-}
+// Basecoat handles input styling contextually via .field wrapper
+// No class generation needed - type attribute determines styling
 
 // buildInputAttributes creates all HTML attributes for the input
 func buildInputAttributes(props InputProps) templ.Attributes {
     attrs := templ.Attributes{
         "type":        string(props.Type),
-        "class":       getInputClasses(props),
         "value":       props.Value,
         "placeholder": props.Placeholder,
     }

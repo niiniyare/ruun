@@ -8,32 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// IconSize defines the size variants for icons
-type IconSize string
-
-const (
-	IconSizeXS IconSize = "xs"
-	IconSizeSM IconSize = "sm"
-	IconSizeMD IconSize = "md"
-	IconSizeLG IconSize = "lg"
-	IconSizeXL IconSize = "xl"
-)
-
-// IconState defines the visual state variants
-type IconState string
-
-const (
-	IconStateDefault  IconState = "default"
-	IconStateDisabled IconState = "disabled"
-	IconStateActive   IconState = "active"
-	IconStateHover    IconState = "hover"
-	IconStateError    IconState = "error"
-)
+// Note: Icon sizing handled via CSS classes like size-4, size-6, etc.
+// No custom size or state classes needed
 
 // IconProps defines all properties for the Icon atom
 type IconProps struct {
@@ -41,11 +19,8 @@ type IconProps struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
 
-	// Visual presentation (resolved externally)
-	Size      IconSize  `json:"size"`
-	State     IconState `json:"state"`
-	ClassName string    `json:"className"`
-	Color     string    `json:"color"`
+	// Visual presentation
+	ClassName string `json:"className"` // CSS classes like "size-4" for sizing
 
 	// SVG-specific attributes
 	Fill        string `json:"fill"`
@@ -69,24 +44,12 @@ type IconProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getIconClasses builds the CSS class string using design tokens
+// Simple class handling - no custom icon classes needed
 func getIconClasses(props IconProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"icon",
-
-		// Size classes (map to design tokens)
-		"icon-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"icon-"+string(props.State),
-
-		// Color utilities
-		utils.If(props.Color != "", props.Color),
-
-		// Custom classes
-		props.ClassName,
-	)
+	if props.ClassName != "" {
+		return props.ClassName
+	}
+	return "size-4" // Default size
 }
 
 // buildIconAttributes creates all HTML attributes for the icon
@@ -94,12 +57,33 @@ func buildIconAttributes(props IconProps) templ.Attributes {
 	attrs := templ.Attributes{
 		"class":           getIconClasses(props),
 		"xmlns":           "http://www.w3.org/2000/svg",
-		"viewBox":         utils.IfElse(props.ViewBox != "", props.ViewBox, "0 0 24 24"),
-		"fill":            utils.IfElse(props.Fill != "", props.Fill, "none"),
-		"stroke":          utils.IfElse(props.Stroke != "", props.Stroke, "currentColor"),
-		"stroke-width":    utils.IfElse(props.StrokeWidth != "", props.StrokeWidth, "2"),
 		"stroke-linecap":  "round",
 		"stroke-linejoin": "round",
+	}
+
+	// Set defaults or use provided values
+	if props.ViewBox != "" {
+		attrs["viewBox"] = props.ViewBox
+	} else {
+		attrs["viewBox"] = "0 0 24 24"
+	}
+
+	if props.Fill != "" {
+		attrs["fill"] = props.Fill
+	} else {
+		attrs["fill"] = "none"
+	}
+
+	if props.Stroke != "" {
+		attrs["stroke"] = props.Stroke
+	} else {
+		attrs["stroke"] = "currentColor"
+	}
+
+	if props.StrokeWidth != "" {
+		attrs["stroke-width"] = props.StrokeWidth
+	} else {
+		attrs["stroke-width"] = "2"
 	}
 
 	// Title attribute

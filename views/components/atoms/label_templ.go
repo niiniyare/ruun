@@ -8,32 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"strconv"
-)
+import "strconv"
 
-// LabelSize defines the size variants for labels
-type LabelSize string
-
-const (
-	LabelSizeXS LabelSize = "xs"
-	LabelSizeSM LabelSize = "sm"
-	LabelSizeMD LabelSize = "md"
-	LabelSizeLG LabelSize = "lg"
-	LabelSizeXL LabelSize = "xl"
-)
-
-// LabelState defines the visual state variants
-type LabelState string
-
-const (
-	LabelStateDefault  LabelState = "default"
-	LabelStateDisabled LabelState = "disabled"
-	LabelStateError    LabelState = "error"
-	LabelStateSuccess  LabelState = "success"
-	LabelStateWarning  LabelState = "warning"
-)
+// Note: Basecoat handles label styling via .field wrapper context
+// No size or state classes needed - styling is contextual
 
 // LabelProps defines all properties for the Label atom
 type LabelProps struct {
@@ -41,21 +19,17 @@ type LabelProps struct {
 	For  string `json:"for"`  // Associates with input via id
 	Text string `json:"text"` // Label text content
 
-	// Visual presentation (resolved externally)
-	Size      LabelSize  `json:"size"`
-	State     LabelState `json:"state"`
-	ClassName string     `json:"className"`
+	// Note: Visual styling handled by Basecoat .field context
+	// No visual props needed
 
 	// Form semantics
 	Required bool `json:"required"` // Shows required indicator
 	Disabled bool `json:"disabled"` // Visual disabled state
 	Optional bool `json:"optional"` // Shows optional indicator
 
-	// Required indicator customization
-	RequiredText      string `json:"requiredText"`      // Custom required text (default "*")
-	RequiredClassName string `json:"requiredClassName"` // Custom required indicator styling
-	OptionalText      string `json:"optionalText"`      // Custom optional text (default "(optional)")
-	OptionalClassName string `json:"optionalClassName"` // Custom optional indicator styling
+	// Simple indicator customization
+	RequiredText string `json:"requiredText"` // Custom required text (default "*")
+	OptionalText string `json:"optionalText"` // Custom optional text (default "(optional)")
 
 	// Event handlers (pre-resolved externally)
 	OnClick string `json:"onClick"`
@@ -71,49 +45,12 @@ type LabelProps struct {
 	Attributes templ.Attributes  `json:"attributes"`
 }
 
-// getLabelClasses builds the CSS class string using design tokens
-func getLabelClasses(props LabelProps) string {
-	return utils.TwMerge(
-		// Base class with design token references
-		"label",
-
-		// Size classes (map to design tokens)
-		"label-"+string(props.Size),
-
-		// State classes (map to design tokens)
-		"label-"+string(props.State),
-
-		// Semantic classes
-		utils.If(props.Required, "label-required"),
-		utils.If(props.Optional, "label-optional"),
-		utils.If(props.Disabled, "label-disabled"),
-
-		// Custom classes
-		props.ClassName,
-	)
-}
-
-// getRequiredIndicatorClasses builds CSS for required indicator
-func getRequiredIndicatorClasses(props LabelProps) string {
-	return utils.TwMerge(
-		"label-required-indicator",
-		props.RequiredClassName,
-	)
-}
-
-// getOptionalIndicatorClasses builds CSS for optional indicator
-func getOptionalIndicatorClasses(props LabelProps) string {
-	return utils.TwMerge(
-		"label-optional-indicator",
-		props.OptionalClassName,
-	)
-}
+// Basecoat handles label styling contextually via .field wrapper
+// No class generation needed
 
 // buildLabelAttributes creates all HTML attributes for the label
 func buildLabelAttributes(props LabelProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getLabelClasses(props),
-	}
+	attrs := templ.Attributes{}
 
 	// Core HTML attributes
 	if props.For != "" {
@@ -184,98 +121,72 @@ func Label(props LabelProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "><span class=\"label-text\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 153, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 89, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		if props.Required {
-			var templ_7745c5c3_Var3 = []any{getRequiredIndicatorClasses(props)}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if props.RequiredText != "" {
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.RequiredText)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 95, Col: 39}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "*")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var3).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(props.RequiredText != "", props.RequiredText, "*"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 159, Col: 80}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if props.Optional {
-			var templ_7745c5c3_Var6 = []any{getOptionalIndicatorClasses(props)}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if props.OptionalText != "" {
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.OptionalText)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 106, Col: 39}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "(optional)")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var6).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(props.OptionalText != "", props.OptionalText, "(optional)"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 166, Col: 89}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</label>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</label>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
