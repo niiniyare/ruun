@@ -115,11 +115,9 @@ type ActionAlpine struct {
 
 // ActionTheme defines action-specific theming
 type ActionTheme struct {
-	Colors       map[string]string `json:"colors,omitempty"`
-	BorderRadius string            `json:"borderRadius,omitempty"`
-	FontSize     string            `json:"fontSize,omitempty"`
-	Padding      string            `json:"padding,omitempty"`
-	CustomCSS    string            `json:"customCss,omitempty"`
+	BaseStyle
+	FontSize string `json:"fontSize,omitempty"`
+	Padding  string `json:"padding,omitempty"`
 }
 
 // Core Methods

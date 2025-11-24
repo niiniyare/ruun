@@ -161,41 +161,43 @@ type BreakpointConfig struct {
 }
 
 // Style Types
-type LayoutStyle struct {
-	Classes      string            `json:"classes,omitempty"`
+
+// BaseStyle contains common styling fields shared across style structs
+type BaseStyle struct {
 	Colors       map[string]string `json:"colors,omitempty"`
-	Spacing      map[string]string `json:"spacing,omitempty"`
 	BorderRadius string            `json:"borderRadius,omitempty"`
 	CustomCSS    string            `json:"customCSS,omitempty"`
 }
 
+type LayoutStyle struct {
+	BaseStyle
+	Classes string            `json:"classes,omitempty"`
+	Spacing map[string]string `json:"spacing,omitempty"`
+}
+
 type SectionStyle struct {
-	Background   string            `json:"background,omitempty"`
-	Border       string            `json:"border,omitempty"`
-	Padding      string            `json:"padding,omitempty"`
-	BorderRadius string            `json:"borderRadius,omitempty"`
-	Colors       map[string]string `json:"colors,omitempty"`
-	CustomCSS    string            `json:"customCSS,omitempty"`
+	BaseStyle
+	Background string `json:"background,omitempty"`
+	Border     string `json:"border,omitempty"`
+	Padding    string `json:"padding,omitempty"`
 }
 
 
 type TabStyle struct {
-	ActiveBackground   string            `json:"activeBackground,omitempty"`
-	InactiveBackground string            `json:"inactiveBackground,omitempty"`
-	ActiveColor        string            `json:"activeColor,omitempty"`
-	InactiveColor      string            `json:"inactiveColor,omitempty"`
-	BorderColor        string            `json:"borderColor,omitempty"`
-	Colors             map[string]string `json:"colors,omitempty"`
-	CustomCSS          string            `json:"customCSS,omitempty"`
+	BaseStyle
+	ActiveBackground   string `json:"activeBackground,omitempty"`
+	InactiveBackground string `json:"inactiveBackground,omitempty"`
+	ActiveColor        string `json:"activeColor,omitempty"`
+	InactiveColor      string `json:"inactiveColor,omitempty"`
+	BorderColor        string `json:"borderColor,omitempty"`
 }
 
 type StepStyle struct {
-	ActiveColor    string            `json:"activeColor,omitempty"`
-	CompletedColor string            `json:"completedColor,omitempty"`
-	InactiveColor  string            `json:"inactiveColor,omitempty"`
-	ConnectorColor string            `json:"connectorColor,omitempty"`
-	Colors         map[string]string `json:"colors,omitempty"`
-	CustomCSS      string            `json:"customCSS,omitempty"`
+	BaseStyle
+	ActiveColor    string `json:"activeColor,omitempty"`
+	CompletedColor string `json:"completedColor,omitempty"`
+	InactiveColor  string `json:"inactiveColor,omitempty"`
+	ConnectorColor string `json:"connectorColor,omitempty"`
 }
 
 // Core Methods

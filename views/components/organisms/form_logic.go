@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/niiniyare/ruun/pkg/utils"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
 )
@@ -417,7 +416,7 @@ func buildFormClasses(state formState) string {
 		classes = append(classes, props.ClassName)
 	}
 	
-	return utils.TwMerge(classes...)
+	return strings.Join(classes, " ")
 }
 
 func buildSectionClasses(section Section) string {
@@ -436,7 +435,7 @@ func buildSectionClasses(section Section) string {
 		classes = append(classes, fmt.Sprintf("form-section--%s", section.Layout))
 	}
 	
-	return utils.TwMerge(classes...)
+	return strings.Join(classes, " ")
 }
 
 func buildFieldsContainerClasses(props FormProps) string {
@@ -447,7 +446,7 @@ func buildFieldsContainerClasses(props FormProps) string {
 		classes = append(classes, "form-fields--grid")
 	}
 	
-	return utils.TwMerge(classes...)
+	return strings.Join(classes, " ")
 }
 
 func buildActionsClasses(position string) string {
@@ -457,7 +456,7 @@ func buildActionsClasses(position string) string {
 		classes = append(classes, fmt.Sprintf("form-actions--%s", position))
 	}
 	
-	return utils.TwMerge(classes...)
+	return strings.Join(classes, " ")
 }
 
 // ============================================================================
@@ -517,7 +516,11 @@ func mergeButtonProps(custom, defaults atoms.ButtonProps) atoms.ButtonProps {
 		merged.OnClick = custom.OnClick
 	}
 	if custom.ClassName != "" {
-		merged.ClassName = utils.TwMerge(defaults.ClassName, custom.ClassName)
+		if defaults.ClassName != "" {
+			merged.ClassName = defaults.ClassName + " " + custom.ClassName
+		} else {
+			merged.ClassName = custom.ClassName
+		}
 	}
 	if custom.Disabled {
 		merged.Disabled = custom.Disabled
