@@ -208,12 +208,12 @@ func (s *SchemaTestSuite) TestSchemaEnterpriseFeatures() {
 }
 func (s *SchemaTestSuite) TestSchemaFrontendIntegration() {
 	// Test HTMX
-	s.schema.HTMX = &HTMX{
+	s.schema.Behavior = &Behavior{
 		Enabled: true,
 		Boost:   true,
 	}
-	require.True(s.T(), s.schema.HTMX.Enabled)
-	require.True(s.T(), s.schema.HTMX.Boost)
+	require.True(s.T(), s.schema.Behavior.Enabled)
+	require.True(s.T(), s.schema.Behavior.Boost)
 	// Test Binding
 	s.schema.Binding = &Binding{
 		Data: "{ open: false }",
@@ -760,46 +760,42 @@ func (s *SchemaTestSuite) TestI18nEnterpriseFeatures() {
 	s.Require().Equal("en-US", nilI18n.GetLocale()) // Should return default
 }
 
-// Test HTMX enterprise features
-func (s *SchemaTestSuite) TestHTMXEnterpriseFeatures() {
-	htmx := &HTMX{
+// Test Behavior enterprise features (formerly HTMX)
+func (s *SchemaTestSuite) TestBehaviorEnterpriseFeatures() {
+	behavior := &Behavior{
 		Enabled: true,
-		Get:     "/api/get",
-		Post:    "/api/post",
-		Put:     "/api/put",
-		Patch:   "/api/patch",
-		Delete:  "/api/delete",
+		Method:  "GET",
+		URL:     "/api/get",
 		Target:  "#content",
-		Swap:    "innerHTML",
-		Trigger: "click",
+		Swap:    SwapInnerHTML,
+		Trigger: &Trigger{Event: "click"},
 		Boost:   true,
 	}
-	// Test HTMX enabled
-	s.Require().True(htmx.IsHTMXEnabled())
+	// Test Behavior enabled
+	s.Require().True(behavior.Enabled)
 	// Test HTTP method determination
-	htmxPost := &HTMX{Post: "/api/submit"}
-	s.Require().Equal("POST", htmxPost.GetHTTPMethod())
-	s.Require().Equal("/api/submit", htmxPost.GetURL())
-	htmxPut := &HTMX{Put: "/api/update"}
-	s.Require().Equal("PUT", htmxPut.GetHTTPMethod())
-	s.Require().Equal("/api/update", htmxPut.GetURL())
-	htmxPatch := &HTMX{Patch: "/api/patch"}
-	s.Require().Equal("PATCH", htmxPatch.GetHTTPMethod())
-	s.Require().Equal("/api/patch", htmxPatch.GetURL())
-	htmxDelete := &HTMX{Delete: "/api/remove"}
-	s.Require().Equal("DELETE", htmxDelete.GetHTTPMethod())
-	s.Require().Equal("/api/remove", htmxDelete.GetURL())
-	htmxGet := &HTMX{Get: "/api/fetch"}
-	s.Require().Equal("GET", htmxGet.GetHTTPMethod())
-	s.Require().Equal("/api/fetch", htmxGet.GetURL())
-	// Test disabled HTMX
-	disabledHTMX := &HTMX{Enabled: false}
-	s.Require().False(disabledHTMX.IsHTMXEnabled())
-	// Test nil HTMX
-	var nilHTMX *HTMX
-	s.Require().False(nilHTMX.IsHTMXEnabled())
-	s.Require().Equal("GET", nilHTMX.GetHTTPMethod()) // Should return default
-	s.Require().Equal("", nilHTMX.GetURL())
+	behaviorPost := &Behavior{Method: "POST", URL: "/api/submit"}
+	s.Require().Equal("POST", behaviorPost.GetHTTPMethod())
+	s.Require().Equal("/api/submit", behaviorPost.URL)
+	behaviorPut := &Behavior{Method: "PUT", URL: "/api/update"}
+	s.Require().Equal("PUT", behaviorPut.GetHTTPMethod())
+	s.Require().Equal("/api/update", behaviorPut.URL)
+	behaviorPatch := &Behavior{Method: "PATCH", URL: "/api/patch"}
+	s.Require().Equal("PATCH", behaviorPatch.GetHTTPMethod())
+	s.Require().Equal("/api/patch", behaviorPatch.URL)
+	behaviorDelete := &Behavior{Method: "DELETE", URL: "/api/remove"}
+	s.Require().Equal("DELETE", behaviorDelete.GetHTTPMethod())
+	s.Require().Equal("/api/remove", behaviorDelete.URL)
+	behaviorGet := &Behavior{Method: "GET", URL: "/api/fetch"}
+	s.Require().Equal("GET", behaviorGet.GetHTTPMethod())
+	s.Require().Equal("/api/fetch", behaviorGet.URL)
+	// Test disabled Behavior
+	disabledBehavior := &Behavior{Enabled: false}
+	s.Require().False(disabledBehavior.Enabled)
+	// Test nil Behavior
+	var nilBehavior *Behavior
+	s.Require().Equal("GET", nilBehavior.GetHTTPMethod()) // Should return default
+	s.Require().Equal("", nilBehavior.URL)
 }
 
 // Test Binding reactive features

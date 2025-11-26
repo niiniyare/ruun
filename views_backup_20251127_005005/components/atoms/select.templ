@@ -1,0 +1,216 @@
+package atoms
+
+import "strconv"
+
+// Note: Basecoat handles select styling via .field wrapper or select.select class
+// No size or state classes needed - styling is contextual
+
+// SelectOption represents an option within the select
+type SelectOption struct {
+    Value    string `json:"value"`
+    Label    string `json:"label"`
+    Selected bool   `json:"selected"`
+    Disabled bool   `json:"disabled"`
+    Group    string `json:"group"` // For optgroup
+}
+
+// SelectProps defines all properties for the Select atom
+type SelectProps struct {
+    // Core HTML attributes
+    ID          string         `json:"id"`
+    Name        string         `json:"name"`
+    Value       string         `json:"value"`
+    Options     []SelectOption `json:"options"`
+    Placeholder string         `json:"placeholder"`
+    
+    // Constraints and validation
+    Required     bool   `json:"required"`
+    Disabled     bool   `json:"disabled"`
+    AutoFocus    bool   `json:"autoFocus"`
+    Multiple     bool   `json:"multiple"`
+    Size         int    `json:"htmlSize"` // HTML size attribute (distinct from design size)
+    
+    // Note: Visual styling handled by Basecoat .field context
+    // No visual props needed
+    
+    // Event handlers (pre-resolved externally)
+    OnChange string `json:"onChange"`
+    OnBlur   string `json:"onBlur"`
+    OnFocus  string `json:"onFocus"`
+    OnClick  string `json:"onClick"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    AriaExpanded    string `json:"ariaExpanded"`
+    
+    // Additional HTML attributes
+    TabIndex     int                   `json:"tabIndex"`
+    DataAttrs    map[string]string     `json:"dataAttrs"`
+    Attributes   templ.Attributes      `json:"attributes"`
+}
+
+// Basecoat handles select styling contextually via .field wrapper
+// Or use select.select class for standalone selects
+
+// buildSelectAttributes creates all HTML attributes for the select
+func buildSelectAttributes(props SelectProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class": "select", // Use Basecoat's select class
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    
+    // Boolean attributes
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    if props.Multiple {
+        attrs["multiple"] = "multiple"
+    }
+    
+    // Size attribute (HTML size, not design size)
+    if props.Size > 0 {
+        attrs["size"] = strconv.Itoa(props.Size)
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnClick != "" {
+        attrs["onclick"] = props.OnClick
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    if props.AriaExpanded != "" {
+        attrs["aria-expanded"] = props.AriaExpanded
+    }
+    
+    // Tab index
+    if props.TabIndex != 0 {
+        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+    }
+    
+    // Data attributes
+    for key, value := range props.DataAttrs {
+        attrs["data-"+key] = value
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attributes {
+        attrs[key] = value
+    }
+    
+    return attrs
+}
+
+// groupOptionsByGroup organizes options into groups for rendering
+func groupOptionsByGroup(options []SelectOption) map[string][]SelectOption {
+    grouped := make(map[string][]SelectOption)
+    
+    for _, option := range options {
+        group := option.Group
+        if group == "" {
+            group = "__ungrouped__"
+        }
+        grouped[group] = append(grouped[group], option)
+    }
+    
+    return grouped
+}
+
+// hasGroups checks if any options have groups
+func hasGroups(options []SelectOption) bool {
+    for _, option := range options {
+        if option.Group != "" {
+            return true
+        }
+    }
+    return false
+}
+
+// renderOption renders a single option element
+templ renderOption(option SelectOption) {
+    <option 
+        value={ option.Value }
+        selected?={ option.Selected }
+        disabled?={ option.Disabled }
+    >
+        { option.Label }
+    </option>
+}
+
+// renderOptGroup renders an optgroup with its options
+templ renderOptGroup(group string, options []SelectOption) {
+    <optgroup label={ group }>
+        for _, option := range options {
+            @renderOption(option)
+        }
+    </optgroup>
+}
+
+// Select renders a pure presentation select atom
+templ Select(props SelectProps) {
+    <select {buildSelectAttributes(props)...}>
+        // Placeholder option
+        if props.Placeholder != "" && !props.Multiple {
+            <option value="" disabled selected?={ props.Value == "" }>
+                { props.Placeholder }
+            </option>
+        }
+        
+        // Render options with or without groups
+        if hasGroups(props.Options) {
+            // Render grouped options
+            for group, groupOptions := range groupOptionsByGroup(props.Options) {
+                if group == "__ungrouped__" {
+                    // Render ungrouped options directly
+                    for _, option := range groupOptions {
+                        @renderOption(option)
+                    }
+                } else {
+                    // Render as optgroup
+                    @renderOptGroup(group, groupOptions)
+                }
+            }
+        } else {
+            // Render all options directly
+            for _, option := range props.Options {
+                @renderOption(option)
+            }
+        }
+    </select>
+}

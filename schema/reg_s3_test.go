@@ -108,33 +108,38 @@ func TestNewS3Storage(t *testing.T) {
 	}{
 		{
 			name: "valid config with client and bucket",
-			config: S3Config{
-				Client:    &s3.Client{},
-				Bucket:    "test-bucket",
-				KeyPrefix: "schemas/",
-			},
+			config: func() S3Config {
+				var config S3Config
+				config.SetS3Config(&s3.Client{}, "test-bucket", "schemas/")
+				return config
+			}(),
 			wantErr: false,
 		},
 		{
 			name: "valid config with default prefix",
-			config: S3Config{
-				Client: &s3.Client{},
-				Bucket: "test-bucket",
-			},
+			config: func() S3Config {
+				var config S3Config
+				config.SetS3Config(&s3.Client{}, "test-bucket", "")
+				return config
+			}(),
 			wantErr: false,
 		},
 		{
 			name: "invalid config without client",
-			config: S3Config{
-				Bucket: "test-bucket",
-			},
+			config: func() S3Config {
+				var config S3Config
+				config.SetS3Config(nil, "test-bucket", "")
+				return config
+			}(),
 			wantErr: true,
 		},
 		{
 			name: "invalid config without bucket",
-			config: S3Config{
-				Client: &s3.Client{},
-			},
+			config: func() S3Config {
+				var config S3Config
+				config.SetS3Config(&s3.Client{}, "", "")
+				return config
+			}(),
 			wantErr: true,
 		},
 	}
@@ -155,7 +160,7 @@ func TestNewS3Storage(t *testing.T) {
 				t.Error("NewS3Storage() returned nil storage")
 				return
 			}
-			expectedPrefix := tt.config.KeyPrefix
+			_, _, expectedPrefix := tt.config.GetS3Config()
 			if expectedPrefix == "" {
 				expectedPrefix = "schemas/"
 			}
@@ -165,8 +170,9 @@ func TestNewS3Storage(t *testing.T) {
 			if storage.GetKeyPrefix() != expectedPrefix {
 				t.Errorf("NewS3Storage() prefix = %v, want %v", storage.GetKeyPrefix(), expectedPrefix)
 			}
-			if storage.GetBucket() != tt.config.Bucket {
-				t.Errorf("NewS3Storage() bucket = %v, want %v", storage.GetBucket(), tt.config.Bucket)
+			_, expectedBucket, _ := tt.config.GetS3Config()
+			if storage.GetBucket() != expectedBucket {
+				t.Errorf("NewS3Storage() bucket = %v, want %v", storage.GetBucket(), expectedBucket)
 			}
 		})
 	}
@@ -426,11 +432,11 @@ func TestS3Storage_Configuration(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config := S3Config{
-				Client:    &s3.Client{}, // Mock client
-				Bucket:    "test-bucket",
-				KeyPrefix: tt.inputPrefix,
-			}
+			config := func() S3Config {
+				var c S3Config
+				c.SetS3Config(&s3.Client{}, "test-bucket", tt.inputPrefix)
+				return c
+			}()
 			storage, err := NewS3Storage(config)
 			if err != nil {
 				t.Errorf("NewS3Storage() error = %v", err)

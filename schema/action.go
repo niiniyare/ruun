@@ -48,9 +48,7 @@ type Action struct {
 // Missing type definitions for compatibility
 
 
-// ActionHTMX is a type alias for backward compatibility
-// Use Behavior instead for new code
-type ActionHTMX = Behavior
+// ActionHTMX type has been removed - use Behavior instead
 
 // ActionTheme defines theme overrides for this action
 

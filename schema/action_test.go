@@ -178,10 +178,12 @@ func (suite *ActionTestSuite) TestActionSetters() {
 func (suite *ActionTestSuite) TestActionUnifiedConfig() {
 	action := &Action{ID: "test"}
 	// Test unified behavior configuration
-	action.Behavior = []string{"debounce", "throttle"}
-	suite.Require().Len(action.Behavior, 2)
-	suite.Require().Contains(action.Behavior, "debounce")
-	suite.Require().Contains(action.Behavior, "throttle")
+	action.Behavior = &Behavior{
+		Debounce: 300,
+		Throttle: 1000,
+	}
+	suite.Require().True(action.Behavior.IsDebounced())
+	suite.Require().True(action.Behavior.IsThrottled())
 	
 	// Test unified binding configuration
 	action.Binding = []string{"click", "submit"}
@@ -576,12 +578,12 @@ func (suite *ActionTestSuite) TestActionURLMethods() {
 		},
 	}
 	suite.Require().Equal("https://example.com", linkAction.GetURL())
-	// Test GetURL with HTMX config
+	// Test GetURL with Behavior config
 	htmxAction := &Action{
 		ID:   "htmx",
 		Type: ActionButton,
 		Text: "HTMX Button",
-		HTMX: &ActionHTMX{
+		Behavior: &Behavior{
 			URL: "/api/endpoint",
 		},
 	}
@@ -593,22 +595,22 @@ func (suite *ActionTestSuite) TestActionURLMethods() {
 
 // Test action HTTP method
 func (suite *ActionTestSuite) TestActionHTTPMethod() {
-	// Test GetHTTPMethod with HTMX config
+	// Test GetHTTPMethod with Behavior config
 	htmxAction := &Action{
 		ID:   "htmx",
 		Type: ActionButton,
 		Text: "HTMX Button",
-		HTMX: &ActionHTMX{
+		Behavior: &Behavior{
 			Method: "POST",
 		},
 	}
 	suite.Require().Equal("POST", htmxAction.GetHTTPMethod())
-	// Test GetHTTPMethod with only HTMX method
+	// Test GetHTTPMethod with only Behavior method
 	onlyHTMXAction := &Action{
 		ID:   "only-htmx",
 		Type: ActionButton,
 		Text: "Only HTMX Button",
-		HTMX: &ActionHTMX{
+		Behavior: &Behavior{
 			Method: "PUT",
 		},
 	}

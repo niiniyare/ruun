@@ -12,6 +12,18 @@ You are refactoring Go templ components from a utility-class approach to use Bas
 
 **Your Goal**: Transform components to use Basecoat's semantic classes while maintaining functionality and improving code quality.
 
+## Basecoat CSS Summary
+
+Basecoat provides semantic component classes that replace utility-first approaches. Key features:
+
+- **Single Combined Classes**: Components use single classes like `btn-sm-primary` instead of multiple utilities
+- **Data Attributes**: States handled via `data-*` attributes (e.g., `data-invalid="true"`)
+- **CSS Custom Properties**: Theme variables in OKLCH color space
+- **Progressive Enhancement**: Works without JS, enhanced with optional JS modules
+- **Full Component Library**: Buttons, forms, navigation, layouts, and more
+
+See `./views/basecoat-analysis.md` for complete class reference.
+
 ---
 
 ## Phase 1: Discovery & Analysis ✅ COMPLETED - CORRECTED STATUS

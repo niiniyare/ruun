@@ -22,25 +22,30 @@ func TestNewRedisStorage(t *testing.T) {
 	}{
 		{
 			name: "valid config with client",
-			config: RedisConfig{
-				Client: client,
-				Prefix: "test:",
-				TTL:    time.Hour,
-			},
+			config: func() RedisConfig {
+				config, _ := NewRedisStorageConfig(client).Build()
+				config.SetRedisConfig(client, "test:", time.Hour)
+				return *config
+			}(),
 			wantErr: false,
 		},
 		{
 			name: "valid config with default prefix",
-			config: RedisConfig{
-				Client: client,
-			},
+			config: func() RedisConfig {
+				config, _ := NewRedisStorageConfig(client).Build()
+				return *config
+			}(),
 			wantErr: false,
 		},
 		{
 			name: "invalid config without client",
-			config: RedisConfig{
-				Prefix: "test:",
-			},
+			config: func() RedisConfig {
+				config := &UnifiedStorageConfig{
+					Type: StorageBackendRedis,
+				}
+				config.SetRedisConfig(nil, "test:", 0)
+				return *config
+			}(),
 			wantErr: true,
 		},
 	}
@@ -61,25 +66,25 @@ func TestNewRedisStorage(t *testing.T) {
 				t.Error("NewRedisStorage() returned nil storage")
 				return
 			}
-			expectedPrefix := tt.config.Prefix
+			_, expectedPrefix, _ := tt.config.GetRedisConfig()
 			if expectedPrefix == "" {
 				expectedPrefix = "schema:"
 			}
 			if storage.GetPrefix() != expectedPrefix {
 				t.Errorf("NewRedisStorage() prefix = %v, want %v", storage.GetPrefix(), expectedPrefix)
 			}
-			if storage.GetTTL() != tt.config.TTL {
-				t.Errorf("NewRedisStorage() TTL = %v, want %v", storage.GetTTL(), tt.config.TTL)
+			_, _, expectedTTL := tt.config.GetRedisConfig()
+			if storage.GetTTL() != expectedTTL {
+				t.Errorf("NewRedisStorage() TTL = %v, want %v", storage.GetTTL(), expectedTTL)
 			}
 		})
 	}
 }
 func TestRedisStorage_SetAndGet(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -173,10 +178,9 @@ func TestRedisStorage_SetAndGet(t *testing.T) {
 }
 func TestRedisStorage_Delete(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -230,10 +234,9 @@ func TestRedisStorage_Delete(t *testing.T) {
 }
 func TestRedisStorage_List(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -279,10 +282,9 @@ func TestRedisStorage_List(t *testing.T) {
 }
 func TestRedisStorage_Exists(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -321,11 +323,9 @@ func TestRedisStorage_Exists(t *testing.T) {
 func TestRedisStorage_TTL(t *testing.T) {
 	client, mock := redismock.NewClientMock()
 	ttl := time.Hour
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-		TTL:    ttl,
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", ttl)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -344,11 +344,9 @@ func TestRedisStorage_TTL(t *testing.T) {
 }
 func TestRedisStorage_Stats(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-		TTL:    time.Hour,
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", time.Hour)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -395,10 +393,9 @@ func TestRedisStorage_BatchOperations(t *testing.T) {
 }
 func TestRedisStorage_Ping(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -416,10 +413,9 @@ func TestRedisStorage_Ping(t *testing.T) {
 }
 func TestRedisStorage_FlushAll(t *testing.T) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "test:",
-	})
+	config, _ := NewRedisStorageConfig(client).Build()
+	config.SetRedisConfig(client, "test:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		t.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -439,10 +435,9 @@ func TestRedisStorage_FlushAll(t *testing.T) {
 }
 func BenchmarkRedisStorage_Set(b *testing.B) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "bench:",
-	})
+	config := &UnifiedStorageConfig{}
+	config.SetRedisConfig(client, "bench:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		b.Fatalf("Failed to create Redis storage: %v", err)
 	}
@@ -463,10 +458,9 @@ func BenchmarkRedisStorage_Set(b *testing.B) {
 }
 func BenchmarkRedisStorage_Get(b *testing.B) {
 	client, mock := redismock.NewClientMock()
-	storage, err := NewRedisStorage(RedisConfig{
-		Client: client,
-		Prefix: "bench:",
-	})
+	config := &UnifiedStorageConfig{}
+	config.SetRedisConfig(client, "bench:", 0)
+	storage, err := NewRedisStorage(*config)
 	if err != nil {
 		b.Fatalf("Failed to create Redis storage: %v", err)
 	}
