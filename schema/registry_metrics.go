@@ -6,18 +6,7 @@ import (
 	"time"
 )
 
-// RegistryMetrics tracks registry performance
-type RegistryMetrics struct {
-	schemaCount int64
-	cacheHits   int64
-	cacheMisses int64
-	operations  map[string]*operationMetrics
-}
 
-type operationMetrics struct {
-	count    int64
-	duration int64 // nanoseconds
-}
 
 // NewRegistryMetrics creates metrics
 func NewRegistryMetrics() *RegistryMetrics {

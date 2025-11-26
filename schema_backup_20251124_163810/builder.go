@@ -268,13 +268,22 @@ func (b *SchemaBuilder) WithI18n(defaultLocale string, supported ...string) *Sch
 
 func (b *SchemaBuilder) WithHTMX(post, target string) *SchemaBuilder {
 	b.schema.Behavior = &Behavior{
-		Post:   post,
+		Method: "POST",
+		URL:    post,
 		Target: target,
-		Swap:   "innerHTML",
+		Swap:   SwapInnerHTML,
 	}
 	return b
 }
 
+// WithBinding adds reactive binding configuration to the schema
+func (b *SchemaBuilder) WithBinding(binding *Binding) *SchemaBuilder {
+	b.schema.Binding = binding
+	return b
+}
+
+// WithAlpine is deprecated. Use WithBinding instead.
+// Kept for backward compatibility
 func (b *SchemaBuilder) WithAlpine(xData string) *SchemaBuilder {
 	b.schema.Binding = &Binding{
 		Data: xData,

@@ -63,20 +63,21 @@ type DataValidator struct {
 	businessRulesEngine BusinessRulesEngine // Optional business rules engine
 }
 
-// ValidationResult contains the results of validation
-type ValidationResult struct {
-	Valid  bool                `json:"valid"`
-	Errors map[string][]string `json:"errors"` // field -> error messages
-	Data   map[string]any      `json:"data"`   // validated/cleaned data
-}
-
-// ValidationError represents a field validation error
-type ValidationError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
-	Code    string `json:"code"`
-}
-
+// // ValidationResult contains the results of validation
+//
+//	type ValidationResult struct {
+//		Valid  bool                `json:"valid"`
+//		Errors map[string][]string `json:"errors"` // field -> error messages
+//		Data   map[string]any      `json:"data"`   // validated/cleaned data
+//	}
+//
+// // ValidationError represents a field validation error
+//
+//	type ValidationError struct {
+//		Field   string `json:"field"`
+//		Message string `json:"message"`
+//		Code    string `json:"code"`
+//	}
 func (e ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Field, e.Message)
 }
@@ -110,20 +111,20 @@ func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data m
 	if schema == nil {
 		return fmt.Errorf("schema cannot be nil")
 	}
-	
+
 	collector := NewErrorCollector()
-	
+
 	// Validate each field's data
 	for _, field := range schema.Fields {
 		value, exists := data[field.Name]
-		
+
 		// Check required fields
 		if field.Required && (!exists || isEmpty(value)) {
-			collector.AddValidationError(field.Name, "required", 
+			collector.AddValidationError(field.Name, "required",
 				fmt.Sprintf("%s is required", field.Label))
 			continue
 		}
-		
+
 		// Validate field value if exists
 		if exists && !isEmpty(value) {
 			if err := field.ValidateValue(ctx, value); err != nil {
@@ -135,7 +136,7 @@ func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data m
 			}
 		}
 	}
-	
+
 	if collector.HasErrors() {
 		return collector.Errors()
 	}
@@ -145,10 +146,12 @@ func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data m
 // ValidateDataDetailed validates form data against a schema and returns detailed results
 func (v *DataValidator) ValidateDataDetailed(ctx context.Context, schema SchemaInterface, data map[string]any) (*ValidationResult, error) {
 	result := &ValidationResult{
-		Valid:  true,
-		Errors: make(map[string][]string),
-		Data:   make(map[string]any),
+		Valid:    false,
+		Warnings: []string{},
+		Errors:   map[string][]string{},
+		Data:     data,
 	}
+
 	// Validate each field
 	for _, field := range schema.GetFields() {
 		value, exists := data[field.GetName()]
@@ -683,7 +686,9 @@ func (v *DataValidator) validateMultiSelect(field FieldInterface, value any) []s
 	if len(options) > 0 {
 		validValues := make(map[string]bool)
 		for _, option := range options {
-			validValues[option.Value] = true
+			if strValue, ok := option.Value.(string); ok {
+				validValues[strValue] = true
+			}
 		}
 		for _, val := range values {
 			if !validValues[val] {

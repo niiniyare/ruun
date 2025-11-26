@@ -58,17 +58,30 @@ type Schema struct {
 	evaluator   *condition.Evaluator `json:"-"`
 }
 
-// Type defines what kind of UI element this schema represents
-type Type string
+// NewSchema creates a new schema with basic properties
+func NewSchema(id string, schemaType Type, title string) *Schema {
+	return &Schema{
+		ID:          id,
+		Type:        schemaType,
+		Title:       title,
+		Version:     "1.0.0",
+		Fields:      []Field{},
+		Actions:     []Action{},
+		evaluator:   &condition.Evaluator{},
+		fieldIndex:  make(map[string]int),
+		actionIndex: make(map[string]int),
+	}
+}
 
-const (
-	TypeForm      Type = "form"      // Complete form with fields and submission
-	TypeComponent Type = "component" // Reusable UI component
-	TypeLayout    Type = "layout"    // Layout container only
-	TypeWorkflow  Type = "workflow"  // Multi-step workflow
-	TypeTheme     Type = "theme"     // Theme/styling configuration
-	TypePage      Type = "page"      // Full page layout
-)
+// AddField adds a field to the schema
+func (s *Schema) AddField(field Field) {
+	s.Fields = append(s.Fields, field)
+	if s.fieldIndex == nil {
+		s.fieldIndex = make(map[string]int)
+	}
+	s.fieldIndex[field.Name] = len(s.Fields) - 1
+}
+
 
 // )
 // SchemaInfo provides read-only access to schema metadata

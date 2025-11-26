@@ -498,19 +498,13 @@ func (suite *EnricherTestSuite) TestEnrichActions() {
 				ID:   "admin-action",
 				Type: ActionButton,
 				Text: "Admin Action",
-				Permissions: &ActionPermissions{
-					View:    []string{"admin"},
-					Execute: []string{"admin"},
-				},
+				Permissions: []string{"admin"},
 			},
 			{
 				ID:   "user-action",
 				Type: ActionButton,
 				Text: "User Action",
-				Permissions: &ActionPermissions{
-					View:    []string{"read"},
-					Execute: []string{"write"},
-				},
+				Permissions: []string{"read", "write"},
 			},
 		},
 	}
@@ -548,10 +542,7 @@ func (suite *EnricherTestSuite) TestEnrichActionsViewOnly() {
 				ID:   "readonly-action",
 				Type: ActionButton,
 				Text: "Read-Only Action",
-				Permissions: &ActionPermissions{
-					View:    []string{"read"},
-					Execute: []string{"write"}, // Requires write to execute
-				},
+				Permissions: []string{"read", "write"},
 			},
 		},
 	}
@@ -929,8 +920,8 @@ func (suite *EnricherTestSuite) TestComprehensiveEnrichment() {
 		},
 		Actions: []Action{
 			{ID: "submit", Type: ActionSubmit, Text: "Submit"},
-			{ID: "delete", Type: ActionButton, Text: "Delete", Permissions: &ActionPermissions{Execute: []string{"admin"}}},
-			{ID: "approve", Type: ActionButton, Text: "Approve", Permissions: &ActionPermissions{View: []string{"manager"}, Execute: []string{"manager"}}},
+			{ID: "delete", Type: ActionButton, Text: "Delete", Permissions: []string{"admin"}},
+			{ID: "approve", Type: ActionButton, Text: "Approve", Permissions: []string{"manager"}},
 		},
 	}
 

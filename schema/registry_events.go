@@ -2,29 +2,10 @@ package schema
 
 import (
 	"sync"
-	"time"
 )
 
-// RegistryEventType defines event types
-type RegistryEventType string
 
-const (
-	EventSchemaRegistered RegistryEventType = "schema.registered"
-	EventSchemaUpdated    RegistryEventType = "schema.updated"
-	EventSchemaDeleted    RegistryEventType = "schema.deleted"
-	EventSchemaAccessed   RegistryEventType = "schema.accessed"
-)
 
-// RegistryEvent represents a registry event
-type RegistryEvent struct {
-	Type      RegistryEventType
-	SchemaID  string
-	Timestamp time.Time
-	Data      map[string]any
-}
-
-// RegistryEventHandler handles registry events
-type RegistryEventHandler func(*RegistryEvent)
 
 // RegistryEventBus manages event subscriptions
 type RegistryEventBus struct {

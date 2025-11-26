@@ -20,4 +20,25 @@ type Behavior struct {
 	Select    string            `json:"select,omitempty"`
 }
 
+type Trigger struct {
+	Event   string `json:"event,omitempty"`
+	Target  string `json:"target,omitempty"`
+	Filter  string `json:"filter,omitempty"`
+	Delay   int    `json:"delay,omitempty"`
+	Once    bool   `json:"once,omitempty"`
+	Changed bool   `json:"changed,omitempty"`
+	From    string `json:"from,omitempty"`
+}
 
+type SwapStrategy string
+
+const (
+	SwapInnerHTML   SwapStrategy = "innerHTML"
+	SwapOuterHTML   SwapStrategy = "outerHTML"
+	SwapBeforeBegin SwapStrategy = "beforebegin"
+	SwapAfterBegin  SwapStrategy = "afterbegin"
+	SwapBeforeEnd   SwapStrategy = "beforeend"
+	SwapAfterEnd    SwapStrategy = "afterend"
+	SwapDelete      SwapStrategy = "delete"
+	SwapNone        SwapStrategy = "none"
+)

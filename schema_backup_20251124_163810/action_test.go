@@ -567,8 +567,8 @@ func (suite *ActionTestSuite) TestActionURLMethods() {
 		ID:   "link",
 		Type: ActionLink,
 		Text: "Link",
-		Config: &ActionConfig{
-			URL: "https://example.com",
+		Config: map[string]any{
+			"url": "https://example.com",
 		},
 	}
 	suite.Require().Equal("https://example.com", linkAction.GetURL())
@@ -624,8 +624,8 @@ func (suite *ActionTestSuite) TestActionDebounceThrottle() {
 		ID:   "debounce",
 		Type: ActionButton,
 		Text: "Debounce Button",
-		Config: &ActionConfig{
-			Debounce: 500,
+		Config: map[string]any{
+			"debounce": 500,
 		},
 	}
 	suite.Require().True(debounceAction.ShouldDebounce())
@@ -639,8 +639,8 @@ func (suite *ActionTestSuite) TestActionDebounceThrottle() {
 		ID:   "throttle",
 		Type: ActionButton,
 		Text: "Throttle Button",
-		Config: &ActionConfig{
-			Throttle: 1000,
+		Config: map[string]any{
+			"throttle": 1000,
 		},
 	}
 	suite.Require().True(throttleAction.ShouldThrottle())
@@ -664,23 +664,16 @@ func (suite *ActionTestSuite) TestActionBuilder() {
 		WithIcon("save", "left")
 	suite.Require().NotNil(finalBuilder)
 	// Test WithConfig
-	config := &ActionConfig{URL: "https://example.com"}
+	config := map[string]any{"url": "https://example.com"}
 	builder.WithConfig(config)
 	// Test WithConfirmation (check the method signature)
 	builder.WithConfirmation("Are you sure?", "Delete")
 	// Test WithPermissions
-	perms := &ActionPermissions{
-		View:    []string{"admin"},
-		Execute: []string{"admin", "manager"},
-	}
+	perms := []string{"admin", "manager"}
 	builder.WithPermissions(perms)
 	// Test WithCondition
-	conditionGroup := &condition.ConditionGroup{
-		ID:          "test-condition",
-		Conjunction: condition.ConjunctionAnd,
-		Children:    []any{},
-	}
-	builder.WithCondition(conditionGroup)
+	conditions := []string{"user.role=admin", "user.active=true"}
+	builder.WithCondition(conditions)
 	// Test WithEvaluator
 	evaluator := suite.createMockConditionEvaluator()
 	builder.WithEvaluator(evaluator)

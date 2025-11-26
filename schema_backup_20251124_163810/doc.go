@@ -77,11 +77,11 @@ Enable HTMX for form submission and dynamic updates:
 		Target:  "#main-content",
 		Swap:    "innerHTML",
 	}
-## Alpine.js
-Add reactive behavior with Alpine.js:
-	nodels.Alpine = &nodels.Alpine{
-		Enabled: true,
-		XData:   `{count: 0, total: 0}`,
+## Reactive Binding
+Add reactive behavior with universal binding:
+	nodels.Binding = &nodels.Binding{
+		Data: `{count: 0, total: 0}`,
+		Show: "count > 0",
 	}
 # Enterprise Features
 ## Security

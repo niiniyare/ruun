@@ -210,28 +210,7 @@ type FieldValidation struct {
 }
 
 // DataSource defines where to fetch dynamic options
-type DataSource struct {
-	Type      string            `json:"type" validate:"oneof=api static computed"` // Source type
-	URL       string            `json:"url,omitempty" validate:"url"`              // API endpoint
-	Method    string            `json:"method,omitempty" validate:"oneof=GET POST"`
-	Headers   map[string]string `json:"headers,omitempty"`   // Request headers
-	Params    map[string]string `json:"params,omitempty"`    // Query parameters
-	CacheTTL  int               `json:"cacheTTL,omitempty"`  // Cache duration in seconds
-	Static    []FieldOption     `json:"static,omitempty"`    // Static options
-	Computed  string            `json:"computed,omitempty"`  // JS function for computed options
-	Transform string            `json:"transform,omitempty"` // Transform response data
-}
 
-// ValidationMessages holds custom error messages
-type ValidationMessages struct {
-	Required  string `json:"required,omitempty"`
-	MinLength string `json:"minLength,omitempty"`
-	MaxLength string `json:"maxLength,omitempty"`
-	Pattern   string `json:"pattern,omitempty"`
-	Min       string `json:"min,omitempty"`
-	Max       string `json:"max,omitempty"`
-	Custom    string `json:"custom,omitempty"`
-}
 
 // FieldTransform defines value transformation
 type FieldTransform struct {
@@ -239,15 +218,6 @@ type FieldTransform struct {
 	Params map[string]any `json:"params,omitempty"`
 }
 
-type TransformType string
-
-const (
-	TransformUpperCase  TransformType = "uppercase"
-	TransformLowerCase  TransformType = "lowercase"
-	TransformTrim       TransformType = "trim"
-	TransformCapitalize TransformType = "capitalize"
-	TransformSlugify    TransformType = "slugify"
-)
 
 // FieldConditional defines conditional behavior
 type FieldConditional struct {
@@ -267,16 +237,6 @@ type FieldLayout struct {
 }
 
 
-// FieldOption represents a selectable option
-type FieldOption struct {
-	Value       string        `json:"value"`
-	Label       string        `json:"label"`
-	Description string        `json:"description,omitempty"`
-	Icon        string        `json:"icon,omitempty"`
-	Disabled    bool          `json:"disabled,omitempty"`
-	Group       string        `json:"group,omitempty"`
-	Children    []FieldOption `json:"children,omitempty"`
-}
 
 // FieldRuntime holds runtime state from enricher
 type FieldRuntime struct {

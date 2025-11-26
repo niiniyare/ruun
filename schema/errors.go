@@ -62,20 +62,6 @@ type SchemaError interface {
 	WithDetail(key string, value any) SchemaError
 }
 
-// ErrorType categorizes errors for better handling
-type ErrorType string
-
-const (
-	ErrorTypeValidation ErrorType = "validation"
-	ErrorTypeNotFound   ErrorType = "not_found"
-	ErrorTypeConflict   ErrorType = "conflict"
-	ErrorTypePermission ErrorType = "permission"
-	ErrorTypeDataSource ErrorType = "data_source"
-	ErrorTypeRender     ErrorType = "render"
-	ErrorTypeWorkflow   ErrorType = "workflow"
-	ErrorTypeTenant     ErrorType = "tenant"
-	ErrorTypeInternal   ErrorType = "internal"
-)
 
 // BaseError implements the SchemaError interface
 type BaseError struct {

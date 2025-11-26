@@ -9,11 +9,7 @@ import (
 	"github.com/niiniyare/ruun/pkg/condition"
 )
 
-// ValidatorFunc represents a custom validation function
-type ValidatorFunc func(ctx context.Context, value any, params map[string]any) error
 
-// AsyncValidatorFunc represents an async validation function with debouncing
-type AsyncValidatorFunc func(ctx context.Context, value any, params map[string]any) error
 
 // ValidationRegistry manages custom validators and provides extensible validation
 type ValidationRegistry struct {
@@ -34,11 +30,6 @@ type AsyncValidator struct {
 	cleanup  context.CancelFunc
 }
 
-// CacheEntry represents a cached validation result
-type CacheEntry struct {
-	Result    error
-	ExpiresAt time.Time
-}
 
 // CrossFieldValidator validates multiple fields together using condition engine
 type CrossFieldValidator struct {

@@ -47,13 +47,6 @@ type Action struct {
 
 // Missing type definitions for compatibility
 
-// ActionHTMX defines legacy HTMX configuration for backward compatibility
-type ActionHTMX struct {
-	Method string `json:"method,omitempty"` // HTTP method
-	URL    string `json:"url,omitempty"`    // Target URL
-	Target string `json:"target,omitempty"` // CSS selector for response target
-	Swap   string `json:"swap,omitempty"`   // Swap strategy
-}
 
 // MigrateToBehavior converts legacy ActionHTMX to new Behavior format
 func (h *ActionHTMX) MigrateToBehavior() *Behavior {
@@ -76,64 +69,16 @@ func (h *ActionHTMX) MigrateToBehavior() *Behavior {
 }
 
 // ActionTheme defines theme overrides for this action
-type ActionTheme struct {
-	Colors       map[string]string `json:"colors,omitempty"`
-	Spacing      map[string]string `json:"spacing,omitempty"`
-	BorderRadius string            `json:"borderRadius,omitempty"`
-	FontSize     string            `json:"fontSize,omitempty"`
-	FontWeight   string            `json:"fontWeight,omitempty"`
-	CustomCSS    string            `json:"customCSS,omitempty"`
-}
-
-// ActionConfig holds action-specific configuration  
-type ActionConfig struct {
-	URL             string            `json:"url,omitempty"`
-	Target          string            `json:"target,omitempty"`
-	Handler         string            `json:"handler,omitempty"`
-	Params          map[string]string `json:"params,omitempty"`
-	Debounce        int               `json:"debounce,omitempty"`
-	Throttle        int               `json:"throttle,omitempty"`
-	PreventDefault  bool              `json:"preventDefault,omitempty"`
-	StopPropagation bool              `json:"stopPropagation,omitempty"`
-	SuccessMessage  string            `json:"successMessage,omitempty"`
-	ErrorMessage    string            `json:"errorMessage,omitempty"`
-	RedirectURL     string            `json:"redirectUrl,omitempty"`
-}
 
 
 
 
-// ActionPermissions controls who can see/use the action  
-type ActionPermissions struct {
-	View     []string `json:"view,omitempty"`
-	Execute  []string `json:"execute,omitempty"`
-	Required []string `json:"required,omitempty"`
-}
 
 
 
-// ActionType defines the type of action
-type ActionType string
-
-const (
-	ActionSubmit ActionType = "submit"
-	ActionReset  ActionType = "reset"
-	ActionButton ActionType = "button"
-	ActionLink   ActionType = "link"
-	ActionCustom ActionType = "custom"
-)
 
 
-// ActionConfirm defines confirmation dialog
-type ActionConfirm struct {
-	Enabled bool   `json:"enabled"`
-	Title   string `json:"title,omitempty"`
-	Message string `json:"message"`
-	Confirm string `json:"confirm,omitempty"`
-	Cancel  string `json:"cancel,omitempty"`
-	Variant string `json:"variant,omitempty"`
-	Icon    string `json:"icon,omitempty"`
-}
+
 
 
 

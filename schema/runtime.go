@@ -8,12 +8,6 @@ import (
 	"time"
 )
 
-// Renderer converts schema to HTML/templates
-type Renderer interface {
-	Render(ctx context.Context, schema *Schema, data map[string]any) (string, error)
-	RenderField(ctx context.Context, field *Field, value any) (string, error)
-}
-
 // Runtime executes schema with state management
 type Runtime struct {
 	schema   *Schema
@@ -36,14 +30,6 @@ type Runtime struct {
 }
 
 // RuntimeConfig configures runtime behavior
-type RuntimeConfig struct {
-	ValidateOnChange bool
-	ValidateOnBlur   bool
-	ValidateOnSubmit bool
-	EnableDebounce   bool
-	DebounceDelay    time.Duration
-	EnableTracking   bool
-}
 
 // DefaultRuntimeConfig returns default configuration
 func DefaultRuntimeConfig() *RuntimeConfig {
@@ -392,9 +378,12 @@ func (r *Runtime) validateField(ctx context.Context, fieldName string) error {
 
 	value, _ := r.state.GetValue(fieldName)
 
-	if err := r.validator.ValidateField(ctx, field, value); err != nil {
-		r.state.SetErrors(fieldName, []string{err.Error()})
-		return err
+	result := r.validator.ValidateField(ctx, *field, value)
+	if !result.IsValid() {
+		if fieldErrors, ok := result.Errors[fieldName]; ok {
+			r.state.SetErrors(fieldName, fieldErrors)
+		}
+		return fmt.Errorf("validation failed for field %s", fieldName)
 	}
 
 	return nil
@@ -402,12 +391,12 @@ func (r *Runtime) validateField(ctx context.Context, fieldName string) error {
 
 // validateAll validates all fields
 func (r *Runtime) validateAll(ctx context.Context) error {
-	if err := r.validator.ValidateSchema(ctx, r.schema); err != nil {
-		return err
-	}
-
 	data := r.state.GetAllValues()
-	return r.validator.ValidateData(ctx, r.schema, data)
+	result := r.validator.ValidateSchema(ctx, *r.schema, data)
+	if !result.IsValid() {
+		return fmt.Errorf("schema validation failed")
+	}
+	return nil
 }
 
 // applyConditionals applies conditional logic

@@ -8,10 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// EnrichOption is a functional option for enrichment configuration
-type EnrichOption func(*EnrichConfig)
-
-// EnrichConfig holds configuration for schema enrichment operations
+// EnrichConfig defines enrichment configuration
 type EnrichConfig struct {
 	User           uuid.UUID
 	Environment    string
@@ -21,6 +18,10 @@ type EnrichConfig struct {
 	SkipValidation bool
 	Extensions     map[string]any
 }
+
+// EnrichOption is a functional option for enrichment configuration
+type EnrichOption func(*EnrichConfig)
+
 
 // User represents a user in the system for enrichment purposes
 type User interface {
@@ -33,25 +34,6 @@ type User interface {
 	GetPreferredLocale() string
 }
 
-// TenantOverride represents tenant-specific customizations for a field
-type TenantOverride struct {
-	FieldName    string `json:"field_name"`
-	Label        string `json:"label,omitempty"`
-	Required     *bool  `json:"required,omitempty"`
-	Hidden       *bool  `json:"hidden,omitempty"`
-	DefaultValue any    `json:"default_value,omitempty"`
-	Placeholder  string `json:"placeholder,omitempty"`
-	Help         string `json:"help,omitempty"`
-}
-
-// TenantCustomization holds all tenant-specific overrides for a schema
-type TenantCustomization struct {
-	SchemaID  string                    `json:"schema_id"`
-	TenantID  string                    `json:"tenant_id"`
-	Overrides map[string]TenantOverride `json:"overrides"`
-	CreatedAt time.Time                 `json:"created_at"`
-	UpdatedAt time.Time                 `json:"updated_at"`
-}
 
 // TenantProvider interface for retrieving tenant customizations
 type TenantProvider interface {

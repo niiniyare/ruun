@@ -22,34 +22,6 @@ type Registry struct {
 	mu sync.RWMutex
 }
 
-// RegistryConfig configures registry behavior
-type RegistryConfig struct {
-	// Storage
-	EnableStorage bool
-	StorageType   string // "memory", "file", "database", "s3"
-
-	// Caching
-	EnableMemoryCache  bool
-	MemoryCacheTTL     time.Duration
-	MaxMemoryCacheSize int
-
-	EnableDistributedCache bool
-	DistributedCacheTTL    time.Duration
-
-	// Validation
-	ValidateOnStore bool
-	ValidateOnLoad  bool
-
-	// Versioning
-	EnableVersioning bool
-	MaxVersions      int
-
-	// Events
-	EnableEvents bool
-
-	// Metrics
-	EnableMetrics bool
-}
 
 // DefaultRegistryConfig returns default configuration
 func DefaultRegistryConfig() *RegistryConfig {
@@ -106,23 +78,7 @@ type CacheBackend interface {
 }
 
 // StorageFilter defines filtering criteria
-type StorageFilter struct {
-	Type     string
-	Category string
-	Module   string
-	Tags     []string
-	Limit    int
-	Offset   int
-}
 
-// StorageMetadata holds schema metadata
-type StorageMetadata struct {
-	BaseMetadata        // Embedded base metadata
-	ID          string  // Storage identifier
-	Size        int64   // Size in bytes
-	AccessCount int64   // Number of accesses
-	LastAccess  time.Time // Last access timestamp
-}
 
 // NewRegistry creates a new schema registry
 func NewRegistry(config *RegistryConfig) (*Registry, error) {

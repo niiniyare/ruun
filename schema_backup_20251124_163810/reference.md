@@ -109,8 +109,17 @@ field.HTMX = &models.FieldHTMX{
 }
 ```
 
-### Alpine.js Integration
+### Reactive Binding Integration
 ```go
+// Modern approach using Binding
+binding := &Binding{
+    Data: `{ count: 0, increment() { this.count++ } }`,
+    Show: "count > 0",
+    On: map[string]string{"click": "increment()"},
+}
+builder.WithBinding(binding)
+
+// Legacy Alpine.js integration (deprecated)
 builder.WithAlpine(`{
     count: 0,
     increment() { this.count++ }

@@ -46,23 +46,8 @@ type TableModeConfig struct {
 }
 
 // Aggregate defines column aggregation
-type Aggregate struct {
-	Type   AggregateType `json:"type"`
-	Field  string        `json:"field"`
-	Label  string        `json:"label,omitempty"`
-	Format string        `json:"format,omitempty"`
-}
 
 // AggregateType defines aggregation functions
-type AggregateType string
-
-const (
-	AggregateSum   AggregateType = "sum"
-	AggregateAvg   AggregateType = "avg"
-	AggregateCount AggregateType = "count"
-	AggregateMin   AggregateType = "min"
-	AggregateMax   AggregateType = "max"
-)
 
 // Core Methods
 

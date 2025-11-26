@@ -472,7 +472,15 @@ builder.WithRateLimit(10, 60) // 10 requests per 60 seconds
 // HTMX Integration
 builder.WithHTMX("/api/forms/submit", "#form-results")
 
-// Alpine.js Integration
+// Reactive Binding Integration (modern approach)
+binding := &Binding{
+    Data: "{ loading: false, submit() { this.loading = true } }",
+    Show: "!loading",
+    On: map[string]string{"submit": "submit()"},
+}
+builder.WithBinding(binding)
+
+// Legacy Alpine.js Integration (deprecated)
 builder.WithAlpine("{ loading: false, submit() { this.loading = true } }")
 ```
 

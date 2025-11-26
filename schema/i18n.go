@@ -28,40 +28,16 @@ type I18nManager struct {
 	messages map[string]map[string]string
 }
 
-// I18nConfig configures the i18n system
-type I18nConfig struct {
-	DefaultLocale    string   // Default language (e.g., "en")
-	FallbackLocale   string   // Fallback language (e.g., "en")
-	SupportedLocales []string // Supported languages
-	TranslationsPath string   // Path to translation files
-	FilePattern      string   // File pattern (e.g., "{locale}.json")
-	EnableCache      bool     // Enable translation caching
-	EnablePlurals    bool     // Enable pluralization
-}
 
 // Translation holds translations for a single locale
 type Translation struct {
 	Locale       string                 `json:"locale"`
-	Translations map[string]interface{} `json:"translations"`
+	Translations map[string]any `json:"translations"`
 	metadata     *TranslationMetadata
 	mu           sync.RWMutex
 }
 
-// TranslationMetadata holds translation file metadata
-type TranslationMetadata struct {
-	BaseMetadata                     // Embedded base metadata
-	Author      string `json:"author"`      // Translation author
-	LastUpdated string `json:"lastUpdated"` // Last updated timestamp (string format for compatibility)
-	Description string `json:"description"` // Translation description
-}
 
-// TranslateParams holds parameters for translation
-type TranslateParams struct {
-	Key          string         // Translation key (e.g., "common.welcome")
-	Params       map[string]any // Parameters for interpolation
-	Count        *int           // Count for pluralization
-	DefaultValue string         // Default value if translation not found
-}
 
 // NewI18nManager creates a new i18n manager
 func NewI18nManager(config *I18nConfig) *I18nManager {
@@ -163,7 +139,7 @@ func (m *I18nManager) LoadFromFS(fsys fs.FS, pattern string) error {
 }
 
 // LoadFromMap loads translations from a map
-func (m *I18nManager) LoadFromMap(locale string, translations map[string]interface{}) error {
+func (m *I18nManager) LoadFromMap(locale string, translations map[string]any) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -312,6 +288,17 @@ func (m *I18nManager) SetLocale(locale string) {
 	m.currentLocale = locale
 }
 
+// GetLocale returns the current active locale
+func (m *I18nManager) GetLocale() string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	
+	if m.currentLocale != "" {
+		return m.currentLocale
+	}
+	return m.config.DefaultLocale
+}
+
 // LoadDefaultTranslations loads default translations for supported locales
 func (m *I18nManager) LoadDefaultTranslations() error {
 	m.mu.Lock()
@@ -321,25 +308,25 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 	for _, locale := range m.config.SupportedLocales {
 		if _, exists := m.translations[locale]; !exists {
 			// Create basic default translations
-			translations := map[string]interface{}{
-				"common": map[string]interface{}{
+			translations := map[string]any{
+				"common": map[string]any{
 					"save":   "Save",
 					"cancel": "Cancel",
 					"ok":     "OK",
 				},
-				"validation": map[string]interface{}{
+				"validation": map[string]any{
 					"required":       "{{.field}} is required",
 					"min_length":     "{{.field}} must be at least {{.min}} characters",
 					"invalid_email":  "Please enter a valid email address",
 					"invalid_range":  "{{.field}} must be between {{.min}} and {{.max}}",
 				},
-				"actions": map[string]interface{}{
+				"actions": map[string]any{
 					"save":   "Save",
 					"cancel": "Cancel",
 					"submit": "Submit",
 					"delete": "Delete",
 				},
-				"messages": map[string]interface{}{
+				"messages": map[string]any{
 					"save_success": "Changes saved successfully",
 					"save_error":   "Failed to save changes",
 					"loading":      "Loading...",
@@ -348,25 +335,25 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 			
 			// Add Spanish translations
 			if locale == "es" {
-				translations = map[string]interface{}{
-					"common": map[string]interface{}{
+				translations = map[string]any{
+					"common": map[string]any{
 						"save":   "Guardar",
 						"cancel": "Cancelar",
 						"ok":     "OK",
 					},
-					"validation": map[string]interface{}{
+					"validation": map[string]any{
 						"required":       "{{.field}} es requerido",
 						"min_length":     "{{.field}} debe tener al menos {{.min}} caracteres",
 						"invalid_email":  "Por favor ingresa una dirección de correo válida",
 						"invalid_range":  "{{.field}} debe estar entre {{.min}} y {{.max}}",
 					},
-					"actions": map[string]interface{}{
+					"actions": map[string]any{
 						"save":   "Guardar",
 						"cancel": "Cancelar",
 						"submit": "Enviar",
 						"delete": "Eliminar",
 					},
-					"messages": map[string]interface{}{
+					"messages": map[string]any{
 						"save_success": "Cambios guardados exitosamente",
 						"save_error":   "Error al guardar cambios",
 						"loading":      "Cargando...",
@@ -486,13 +473,13 @@ func (t *Translation) Get(key string) string {
 }
 
 // getValueByPath gets value from nested map using dot notation
-func (t *Translation) getValueByPath(data map[string]interface{}, path string) string {
+func (t *Translation) getValueByPath(data map[string]any, path string) string {
 	parts := strings.Split(path, ".")
 
-	var current interface{} = data
+	var current any = data
 	for _, part := range parts {
 		switch v := current.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			current = v[part]
 		default:
 			return ""
@@ -507,7 +494,7 @@ func (t *Translation) getValueByPath(data map[string]interface{}, path string) s
 	switch v := current.(type) {
 	case string:
 		return v
-	case map[string]interface{}:
+	case map[string]any:
 		// If it's still a map, try to get default value
 		if def, ok := v["_default"].(string); ok {
 			return def
@@ -527,7 +514,7 @@ func (t *Translation) Set(key, value string) {
 }
 
 // setValueByPath sets value in nested map using dot notation
-func (t *Translation) setValueByPath(data map[string]interface{}, path, value string) {
+func (t *Translation) setValueByPath(data map[string]any, path, value string) {
 	parts := strings.Split(path, ".")
 
 	current := data
@@ -535,10 +522,10 @@ func (t *Translation) setValueByPath(data map[string]interface{}, path, value st
 		part := parts[i]
 
 		if _, ok := current[part]; !ok {
-			current[part] = make(map[string]interface{})
+			current[part] = make(map[string]any)
 		}
 
-		if next, ok := current[part].(map[string]interface{}); ok {
+		if next, ok := current[part].(map[string]any); ok {
 			current = next
 		} else {
 			return // Path is invalid
@@ -846,7 +833,7 @@ func (l *I18nLoader) LoadLocale(locale string) (map[string]string, error) {
 		return nil, fmt.Errorf("read file: %w", err)
 	}
 
-	var translations map[string]interface{}
+	var translations map[string]any
 	if err := json.Unmarshal(data, &translations); err != nil {
 		return nil, fmt.Errorf("unmarshal json: %w", err)
 	}
@@ -863,14 +850,14 @@ func (l *I18nLoader) LoadLocale(locale string) (map[string]string, error) {
 }
 
 // flattenJSON flattens a nested JSON structure
-func flattenJSON(data map[string]interface{}) map[string]string {
+func flattenJSON(data map[string]any) map[string]string {
 	result := make(map[string]string)
 	flattenJSONHelper(data, "", result)
 	return result
 }
 
 // flattenJSONHelper recursively flattens JSON
-func flattenJSONHelper(data map[string]interface{}, prefix string, result map[string]string) {
+func flattenJSONHelper(data map[string]any, prefix string, result map[string]string) {
 	for key, value := range data {
 		fullKey := key
 		if prefix != "" {
@@ -880,7 +867,7 @@ func flattenJSONHelper(data map[string]interface{}, prefix string, result map[st
 		switch v := value.(type) {
 		case string:
 			result[fullKey] = v
-		case map[string]interface{}:
+		case map[string]any:
 			flattenJSONHelper(v, fullKey, result)
 		default:
 			result[fullKey] = fmt.Sprintf("%v", v)

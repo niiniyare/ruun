@@ -6,6 +6,30 @@ Complete rewrite of the schema package with 2,400+ lines of new code, 195+ new m
 
 ---
 
+## [2.1.0] - 2024
+
+### 🔄 Binding System Refactor
+
+#### Major Changes
+- **NEW**: Created unified `Binding` type (`schema/binding.go`) for reactive state management
+- **REMOVED**: Deprecated complex Alpine.js-specific binding types
+- **REMOVED**: `Alpine`, `ActionAlpine`, `FieldAlpine` types from `types.go`
+- **REMOVED**: Unused `TransitionConfig` type
+
+#### API Changes
+- **NEW**: `WithBinding(binding *Binding)` method for schema builder
+- **DEPRECATED**: `WithAlpine(xData string)` method (kept for backward compatibility)
+- **NEW**: `Binding` helper methods: `HasModel()`, `HasVisibility()`
+
+#### Features
+- Framework-agnostic reactive binding system
+- Support for model binding, visibility control, event handling
+- Dynamic content, styling, and DOM manipulation
+- List rendering and component lifecycle support
+- Backward compatible JSON serialization with `alpine` tag
+
+---
+
 ## [2.0.0] - 2024
 
 ### 🎉 Major Features

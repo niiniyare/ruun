@@ -47,32 +47,6 @@ type Parser struct {
 }
 
 // ParserConfig configures parser behavior
-type ParserConfig struct {
-	// Validation
-	ValidateOnParse   bool          // Validate schema after parsing
-	StrictMode        bool          // Fail on unknown fields
-	MaxDepth          int           // Maximum nesting depth
-	MaxSize           int64         // Maximum input size in bytes
-	ValidationTimeout time.Duration // Timeout for validation
-
-	// Performance
-	EnableCache      bool          // Enable schema caching
-	CacheTTL         time.Duration // Cache entry lifetime
-	MaxCacheSize     int           // Maximum cached schemas
-	EnableStreaming  bool          // Enable streaming for large schemas
-	StreamBufferSize int           // Buffer size for streaming
-
-	// Features
-	EnableVersionCheck  bool // Check schema version compatibility
-	EnableMigration     bool // Auto-migrate old schema versions
-	EnableCustomParsers bool // Allow custom format parsers
-	EnableMetrics       bool // Collect parsing metrics
-
-	// Security
-	SanitizeInput      bool // Sanitize input before parsing
-	DisallowExtensions bool // Disallow non-standard extensions
-	ValidateReferences bool // Validate field/action references
-}
 
 // DefaultParserConfig returns production-ready default configuration
 func DefaultParserConfig() *ParserConfig {
@@ -418,12 +392,6 @@ func (p *Parser) ParseBatch(ctx context.Context, data [][]byte) []*ParseResult {
 	return results
 }
 
-// ParseResult holds the result of a batch parse operation
-type ParseResult struct {
-	Schema *Schema
-	Error  error
-	Index  int
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Validation and Post-Processing
@@ -536,12 +504,6 @@ func (p *Parser) validateReferences(schema *Schema) error {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Format represents the schema format
-type Format string
-
-const (
-	FormatJSON Format = "json"
-	FormatYAML Format = "yaml"
-)
 
 // detectFormat auto-detects the input format
 func (p *Parser) detectFormat(data []byte) (Format, error) {
@@ -569,7 +531,7 @@ func (p *Parser) detectFormat(data []byte) (Format, error) {
 	}
 
 	// Try YAML
-	var ym interface{}
+	var ym any
 	if err := yaml.Unmarshal(data, &ym); err == nil {
 		return FormatYAML, nil
 	}
@@ -607,7 +569,7 @@ func (p *Parser) parseYAML(ctx context.Context, data []byte) (*Schema, error) {
 	}
 
 	// Parse YAML to generic structure
-	var yamlData interface{}
+	var yamlData any
 	if err := yaml.Unmarshal(data, &yamlData); err != nil {
 		return nil, p.wrapYAMLError(err)
 	}
@@ -917,18 +879,6 @@ func (p *Parser) ClearCache() {
 // Metrics and Statistics
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ParserStats tracks parser performance metrics
-type ParserStats struct {
-	TotalParses     int64
-	SuccessfulParse int64
-	FailedParses    int64
-	CacheHits       int64
-	CacheMisses     int64
-	TotalBytes      int64
-	AverageDuration time.Duration
-
-	mu sync.RWMutex
-}
 
 func newParserStats() *ParserStats {
 	return &ParserStats{}
@@ -997,11 +947,6 @@ func (p *Parser) wrapYAMLError(err error) error {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ParseError represents a parsing error
-type ParseError struct {
-	Code    string
-	Message string
-	Details map[string]any
-}
 
 func (e *ParseError) Error() string {
 	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
