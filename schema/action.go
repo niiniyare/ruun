@@ -29,12 +29,11 @@ type Action struct {
 	Behavior     []string         `json:"behavior,omitempty"`
 	Binding      []string         `json:"binding,omitempty"`
 	Conditional  []string         `json:"conditional,omitempty"`
-	Style        []string         `json:"style,omitempty"`
 	Permissions  []string         `json:"permissions,omitempty"`
 	Config       map[string]any   `json:"config,omitempty"`
 	
-	// New fields for compatibility 
-	Theme        *ActionTheme       `json:"theme,omitempty"`
+	// Unified styling (replaces old Style []string and ActionTheme)
+	Style        *Style             `json:"style,omitempty"`
 	ActionConfig *ActionConfig      `json:"action_config,omitempty"`
 
 	// Legacy Support

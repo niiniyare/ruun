@@ -133,11 +133,15 @@ func (suite *ActionTestSuite) TestActionClone() {
 }
 func (suite *ActionTestSuite) TestActionApplyTheme() {
 	action := &Action{ID: "test", Type: ActionSubmit}
-	// Test with theme styles in unified approach
-	action.Style = []string{"primary", "rounded"}
-	suite.Require().Len(action.Style, 2)
-	suite.Require().Contains(action.Style, "primary")
-	suite.Require().Contains(action.Style, "rounded")
+	// Test with unified Style approach
+	action.Style = &Style{
+		Classes:      "primary rounded",
+		Background:   "blue",
+		BorderRadius: "8px",
+	}
+	suite.Require().NotNil(action.Style)
+	suite.Require().Equal("primary rounded", action.Style.Classes)
+	suite.Require().Equal("blue", action.Style.Background)
 }
 func (suite *ActionTestSuite) TestActionGetConfig() {
 	action := &Action{ID: "test"}
@@ -450,13 +454,13 @@ func (suite *ActionTestSuite) TestActionWithConditions() {
 	suite.Require().True(canExecute) // Should return true since no permissions are set
 }
 
-// Test action theme application
-func (suite *ActionTestSuite) TestActionTheme() {
+// Test action unified style
+func (suite *ActionTestSuite) TestActionStyle() {
 	action := Action{
-		ID:   "themed-action",
+		ID:   "styled-action",
 		Type: ActionSubmit,
-		Text: "Themed Button",
-		Theme: &ActionTheme{
+		Text: "Styled Button",
+		Style: &Style{
 			Colors: map[string]string{
 				"primary": "#007bff",
 				"hover":   "#0056b3",
@@ -465,15 +469,15 @@ func (suite *ActionTestSuite) TestActionTheme() {
 			CustomCSS:    "font-weight: bold;",
 		},
 	}
-	// Test theme properties
-	suite.Require().NotNil(action.Theme)
-	suite.Require().Equal("#007bff", action.Theme.Colors["primary"])
-	suite.Require().Equal("8px", action.Theme.BorderRadius)
-	suite.Require().Equal("font-weight: bold;", action.Theme.CustomCSS)
-	// Test theme modification if method exists
-	if action.Theme != nil {
-		action.Theme.Colors["primary"] = "#28a745"
-		suite.Require().Equal("#28a745", action.Theme.Colors["primary"])
+	// Test style properties
+	suite.Require().NotNil(action.Style)
+	suite.Require().Equal("#007bff", action.Style.Colors["primary"])
+	suite.Require().Equal("8px", action.Style.BorderRadius)
+	suite.Require().Equal("font-weight: bold;", action.Style.CustomCSS)
+	// Test style modification
+	if action.Style != nil {
+		action.Style.Colors["primary"] = "#28a745"
+		suite.Require().Equal("#28a745", action.Style.Colors["primary"])
 	}
 }
 

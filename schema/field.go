@@ -180,34 +180,8 @@ const (
 	FieldTableRepeater FieldType = "table_repeater" // Table-style repeatable fields
 )
 
-// FieldValidation defines validation rules
-type FieldValidation struct {
-	// String validation
-	MinLength *int   `json:"minLength,omitempty"`
-	MaxLength *int   `json:"maxLength,omitempty"`
-	Pattern   string `json:"pattern,omitempty"`
-	Format    string `json:"format,omitempty"`
-
-	// Number validation
-	Min      *float64 `json:"min,omitempty"`
-	Max      *float64 `json:"max,omitempty"`
-	Step     *float64 `json:"step,omitempty"`
-	Integer  bool     `json:"integer,omitempty"`
-	Positive bool     `json:"positive,omitempty"`
-
-	// Array validation
-	MinItems *int `json:"minItems,omitempty"`
-	MaxItems *int `json:"maxItems,omitempty"`
-	Unique   bool `json:"unique,omitempty"`
-
-	// File validation
-	MaxSize     int64    `json:"maxSize,omitempty"`
-	AllowedMIME []string `json:"allowedMime,omitempty"`
-
-	// Custom
-	Custom   string              `json:"custom,omitempty"`
-	Messages *ValidationMessages `json:"messages,omitempty"`
-}
+// FieldValidation is now an alias to UnifiedValidation (defined in validation.go)
+// This provides backward compatibility while using the unified validation system
 
 // DataSource defines where to fetch dynamic options
 

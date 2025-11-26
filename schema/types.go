@@ -241,13 +241,9 @@ type ValidationRule struct {
 	CustomFunc string         `json:"customFunc,omitempty"`
 }
 
-// Validation defines cross-field validation rules and configuration
-type Validation struct {
-	Rules      []ValidationRule `json:"rules" validate:"dive"`
-	Mode       string           `json:"mode,omitempty" validate:"oneof=onChange onBlur onSubmit"`
-	Async      bool             `json:"async,omitempty"`
-	DebounceMS int              `json:"debounceMs,omitempty"`
-}
+// Validation is now an alias to UnifiedValidation (defined in validation.go)
+// This provides backward compatibility while using the unified validation system
+// Note: The original Validation type has been superseded by UnifiedValidation
 
 // Note: ValidatorFunc and AsyncValidatorFunc moved to interface.go
 
@@ -416,22 +412,9 @@ type Tenant struct {
 	Validation bool     `json:"validation,omitempty"`
 }
 
-// RegistryConfig defines registry configuration
-type RegistryConfig struct {
-	EnableStorage          bool
-	StorageType            string
-	EnableMemoryCache      bool
-	MemoryCacheTTL         time.Duration
-	MaxMemoryCacheSize     int
-	EnableDistributedCache bool
-	DistributedCacheTTL    time.Duration
-	ValidateOnStore        bool
-	ValidateOnLoad         bool
-	EnableVersioning       bool
-	MaxVersions            int
-	EnableEvents           bool
-	EnableMetrics          bool
-}
+// RegistryConfig is now an alias to LegacyRegistryConfig (defined in storage_config.go)
+// This provides backward compatibility while providing a migration path to UnifiedStorageConfig
+// Note: Use UnifiedStorageConfig for new code
 
 // StorageFilter represents storage filtering options
 type StorageFilter struct {
@@ -666,15 +649,9 @@ type ActionHTMX struct {
 	Swap   string `json:"swap,omitempty"`
 }
 
-// ActionTheme represents action-specific theme configuration
-type ActionTheme struct {
-	Colors       map[string]string `json:"colors,omitempty"`
-	Spacing      map[string]string `json:"spacing,omitempty"`
-	BorderRadius string            `json:"borderRadius,omitempty"`
-	FontSize     string            `json:"fontSize,omitempty"`
-	FontWeight   string            `json:"fontWeight,omitempty"`
-	CustomCSS    string            `json:"customCSS,omitempty"`
-}
+// ActionTheme is deprecated - use the unified Style type from style.go instead
+// This is kept for backward compatibility but will be removed in future versions
+type ActionTheme = Style
 
 // ActionConfig represents action configuration
 type ActionConfig struct {

@@ -1,6 +1,9 @@
 package schema
 
-import "github.com/niiniyare/ruun/pkg/condition"
+import (
+	"fmt"
+	"github.com/niiniyare/ruun/pkg/condition"
+)
 
 // Conditional defines visibility and state conditions for any component.
 // Used by Field, Action, Layout, LayoutBlock, Section, Tab, Step, etc.
@@ -39,12 +42,15 @@ func (c *Conditional) HasStateConditions() bool {
 
 // ConditionalBuilder for fluent construction
 type ConditionalBuilder struct {
-	cond Conditional
+	cond   Conditional
+	*BuilderMixin
 }
 
 // NewConditional creates a new ConditionalBuilder
 func NewConditional() *ConditionalBuilder {
-	return &ConditionalBuilder{}
+	return &ConditionalBuilder{
+		BuilderMixin: NewBuilderMixin(),
+	}
 }
 
 // ShowWhen sets the show condition
@@ -84,6 +90,48 @@ func (b *ConditionalBuilder) ValidateWhen(cg *condition.ConditionGroup) *Conditi
 }
 
 // Build returns the constructed Conditional
-func (b *ConditionalBuilder) Build() *Conditional {
-	return &b.cond
+func (b *ConditionalBuilder) Build() (*Conditional, error) {
+	// Use the unified builder validation
+	if err := b.CheckBuild("Conditional"); err != nil {
+		return nil, err
+	}
+	
+	// Validate that at least one condition is set
+	if b.cond.IsEmpty() {
+		b.Context.AddError(fmt.Errorf("conditional must have at least one condition set"))
+		return nil, b.Context.CombinedError()
+	}
+	
+	return &b.cond, nil
+}
+
+// MustBuild builds and panics on error (for backward compatibility)
+func (b *ConditionalBuilder) MustBuild() *Conditional {
+	result, err := b.Build()
+	if err != nil {
+		panic(fmt.Sprintf("ConditionalBuilder.MustBuild() failed: %v", err))
+	}
+	return result
+}
+
+// HasErrors implements BaseBuilder interface
+func (b *ConditionalBuilder) HasErrors() bool {
+	return b.Context.HasErrors()
+}
+
+// GetErrors implements BaseBuilder interface  
+func (b *ConditionalBuilder) GetErrors() []error {
+	return b.Context.GetErrors()
+}
+
+// AddError implements BaseBuilder interface
+func (b *ConditionalBuilder) AddError(err error) BaseBuilder[Conditional] {
+	b.Context.AddError(err)
+	return b
+}
+
+// ClearErrors implements BaseBuilder interface
+func (b *ConditionalBuilder) ClearErrors() BaseBuilder[Conditional] {
+	b.Context.ClearErrors()
+	return b
 }

@@ -19,32 +19,36 @@ type S3Storage struct {
 	keyPrefix string
 }
 
-// S3Config configures S3 storage
-type S3Config struct {
-	Client    *s3.Client // AWS S3 client
-	Bucket    string     // S3 bucket name
-	KeyPrefix string     // Optional key prefix for schemas (default: "schemas/")
-}
+// S3Config is now an alias to UnifiedStorageConfig (defined in storage_config.go)
+// This provides backward compatibility while using the unified storage configuration system
 
 // NewS3Storage creates a new S3 storage backend
 func NewS3Storage(config S3Config) (*S3Storage, error) {
-	if config.Client == nil {
+	// Extract S3-specific configuration using unified config methods
+	client, bucket, keyPrefix := config.GetS3Config()
+	
+	if client == nil {
 		return nil, fmt.Errorf("S3 client is required")
 	}
-	if config.Bucket == "" {
+	if bucket == "" {
 		return nil, fmt.Errorf("S3 bucket name is required")
 	}
-	if config.KeyPrefix == "" {
-		config.KeyPrefix = "schemas/"
+	
+	// Type assert to S3 client
+	s3Client, ok := client.(*s3.Client)
+	if !ok {
+		return nil, fmt.Errorf("invalid S3 client type")
 	}
+	
 	// Ensure prefix ends with /
-	if !strings.HasSuffix(config.KeyPrefix, "/") {
-		config.KeyPrefix += "/"
+	if !strings.HasSuffix(keyPrefix, "/") {
+		keyPrefix += "/"
 	}
+	
 	return &S3Storage{
-		client:    config.Client,
-		bucket:    config.Bucket,
-		keyPrefix: config.KeyPrefix,
+		client:    s3Client,
+		bucket:    bucket,
+		keyPrefix: keyPrefix,
 	}, nil
 }
 

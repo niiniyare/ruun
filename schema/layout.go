@@ -128,36 +128,10 @@ type BreakpointConfig struct {
 	ShowFields []string `json:"showFields,omitempty"`
 }
 
-// Style Types
-
-// BaseStyle contains common styling fields shared across style structs
-type BaseStyle struct {
-	Colors       map[string]string `json:"colors,omitempty"`
-	BorderRadius string            `json:"borderRadius,omitempty"`
-	CustomCSS    string            `json:"customCSS,omitempty"`
-}
-
-
-// Style unified style for all layout blocks
-type Style struct {
-	BaseStyle
-	Background string `json:"background,omitempty"`
-	Border     string `json:"border,omitempty"`
-	Padding    string `json:"padding,omitempty"`
-
-	// Tab-specific styling
-	ActiveBackground   string `json:"activeBackground,omitempty"`
-	InactiveBackground string `json:"inactiveBackground,omitempty"`
-	ActiveColor        string `json:"activeColor,omitempty"`
-	InactiveColor      string `json:"inactiveColor,omitempty"`
-	BorderColor        string `json:"borderColor,omitempty"`
-
-	// Step-specific styling
-	CompletedColor string `json:"completedColor,omitempty"`
-	ConnectorColor string `json:"connectorColor,omitempty"`
-}
-
-// Legacy style types for backward compatibility
+// Legacy style type aliases for backward compatibility
+// These now point to the unified Style type from style.go
+type BaseStyle = Style
+type LayoutStyle = Style
 type SectionStyle = Style
 type TabStyle = Style
 type StepStyle = Style

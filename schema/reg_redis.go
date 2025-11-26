@@ -16,25 +16,28 @@ type RedisStorage struct {
 	ttl    time.Duration
 }
 
-// RedisConfig configures Redis storage
-type RedisConfig struct {
-	Client redis.Cmdable // Redis client interface
-	Prefix string        // Key prefix for schemas (default: "schema:")
-	TTL    time.Duration // Optional TTL for cached schemas
-}
+// RedisConfig is now an alias to UnifiedStorageConfig (defined in storage_config.go)
+// This provides backward compatibility while using the unified storage configuration system
 
 // NewRedisStorage creates a new Redis storage backend
 func NewRedisStorage(config RedisConfig) (*RedisStorage, error) {
-	if config.Client == nil {
+	// Extract Redis-specific configuration using unified config methods
+	client, prefix, ttl := config.GetRedisConfig()
+	
+	if client == nil {
 		return nil, fmt.Errorf("redis client is required")
 	}
-	if config.Prefix == "" {
-		config.Prefix = "schema:"
+	
+	// Type assert to Redis client interface
+	redisClient, ok := client.(redis.Cmdable)
+	if !ok {
+		return nil, fmt.Errorf("invalid Redis client type")
 	}
+	
 	return &RedisStorage{
-		client: config.Client,
-		prefix: config.Prefix,
-		ttl:    config.TTL,
+		client: redisClient,
+		prefix: prefix,
+		ttl:    ttl,
 	}, nil
 }
 
