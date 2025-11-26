@@ -1,0 +1,78 @@
+#!/bin/bash
+# Pre-commit hook for Basecoat compliance
+# Prevents commits that violate Basecoat patterns
+
+echo "🔒 Running pre-commit Basecoat compliance check..."
+
+# Only check files being committed
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(go|templ)$')
+
+if [ -z "$staged_files" ]; then
+    echo "✅ No Go/templ files in commit, skipping Basecoat check"
+    exit 0
+fi
+
+echo "📁 Checking staged files:"
+echo "$staged_files" | sed 's/^/   /'
+echo ""
+
+# Run the Basecoat linter on staged files only
+temp_dir=$(mktemp -d)
+trap "rm -rf $temp_dir" EXIT
+
+# Copy staged files to temp directory for checking
+for file in $staged_files; do
+    if [ -f "$file" ]; then
+        mkdir -p "$temp_dir/$(dirname "$file")"
+        cp "$file" "$temp_dir/$file"
+    fi
+done
+
+# Run compliance check in temp directory
+cd "$temp_dir"
+
+# Quick inline compliance check for staged files
+violations=0
+
+echo "🔍 Checking staged files for Basecoat violations..."
+
+# Check for utils.TwMerge
+if grep -l "utils\.TwMerge" $staged_files 2>/dev/null; then
+    echo "❌ VIOLATION: Found utils.TwMerge in staged files"
+    violations=$((violations + 1))
+fi
+
+# Check for ClassName props
+if grep -l "ClassName.*string" $staged_files 2>/dev/null; then
+    echo "❌ VIOLATION: Found ClassName props in staged files"
+    violations=$((violations + 1))
+fi
+
+# Check for dynamic class patterns
+if grep -lE '(fmt\.Sprintf.*class|class.*\+)' $staged_files 2>/dev/null; then
+    echo "❌ VIOLATION: Found dynamic class building in staged files"
+    violations=$((violations + 1))
+fi
+
+# Check for string variants
+if grep -lE 'Variant.*:.*"' $staged_files 2>/dev/null; then
+    echo "❌ VIOLATION: Found string variants instead of enums in staged files"
+    violations=$((violations + 1))
+fi
+
+if [ $violations -eq 0 ]; then
+    echo "✅ All staged files pass Basecoat compliance"
+    exit 0
+else
+    echo ""
+    echo "🚫 COMMIT BLOCKED: Basecoat violations found"
+    echo ""
+    echo "🔧 Fix violations before committing:"
+    echo "   1. Run: ./scripts/lint-basecoat.sh"
+    echo "   2. See: docs/migration-guide.md"
+    echo "   3. Use: docs/component-examples.md for reference"
+    echo ""
+    echo "💡 To bypass this check (not recommended):"
+    echo "   git commit --no-verify"
+    exit 1
+fi
