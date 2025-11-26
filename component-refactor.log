@@ -10,3 +10,7 @@
 [0;34m[INFO][0m Creating demo server...
 [0;32m[SUCCESS][0m Created: ./views/demo/server.go
 [0;32m[SUCCESS][0m Task T0.1 completed
+[0;35m[TASK][0m Executing T0.2: Create demo page template (demo.templ)
+[0;34m[INFO][0m Creating demo page template...
+[0;32m[SUCCESS][0m Created: ./views/demo/demo.templ
+[0;32m[SUCCESS][0m Task T0.2 completed
