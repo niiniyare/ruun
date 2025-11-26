@@ -1,0 +1,128 @@
+package atoms
+
+// AvatarProps defines all properties for the Avatar atom using custom CSS extension
+// Uses /static/css/components/avatar.css following Basecoat conventions
+type AvatarProps struct {
+	// Image properties
+	Src       string `json:"src"`
+	Alt       string `json:"alt"`
+	Initials  string `json:"initials,omitempty"`  // Fallback text when no image
+	
+	// Visual properties
+	Size   string `json:"size,omitempty"`   // "sm", "md", "lg", "xl" 
+	Shape  string `json:"shape,omitempty"`  // "circle", "square" (default: circle)
+	
+	// HTML attributes
+	ID string `json:"id,omitempty"`
+	
+	// Additional attributes
+	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes  `json:"attributes,omitempty"`
+}
+
+// getAvatarClass returns avatar class without dynamic building
+func getAvatarClass(size, shape string) string {
+	// Complete static approach
+	switch size {
+	case "sm":
+		switch shape {
+		case "square": return "avatar-sm avatar-square"
+		default: return "avatar-sm avatar-circle"
+		}
+	case "lg":
+		switch shape {
+		case "square": return "avatar-lg avatar-square"
+		default: return "avatar-lg avatar-circle"
+		}
+	case "xl":
+		switch shape {
+		case "square": return "avatar-xl avatar-square"
+		default: return "avatar-xl avatar-circle"
+		}
+	default: // md or empty
+		switch shape {
+		case "square": return "avatar avatar-square"
+		default: return "avatar avatar-circle"
+		}
+	}
+}
+
+// getAvatarClassWithFallback returns avatar class with fallback modifier
+func getAvatarClassWithFallback(size, shape string) string {
+	// Complete static approach for fallback
+	switch size {
+	case "sm":
+		switch shape {
+		case "square": return "avatar-sm avatar-square avatar-fallback"
+		default: return "avatar-sm avatar-circle avatar-fallback"
+		}
+	case "lg":
+		switch shape {
+		case "square": return "avatar-lg avatar-square avatar-fallback"
+		default: return "avatar-lg avatar-circle avatar-fallback"
+		}
+	case "xl":
+		switch shape {
+		case "square": return "avatar-xl avatar-square avatar-fallback"
+		default: return "avatar-xl avatar-circle avatar-fallback"
+		}
+	default: // md or empty
+		switch shape {
+		case "square": return "avatar avatar-square avatar-fallback"
+		default: return "avatar avatar-circle avatar-fallback"
+		}
+	}
+}
+
+// buildAvatarAttributes creates img attributes
+func buildAvatarAttributes(props AvatarProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": getAvatarClass(props.Size, props.Shape),
+		"alt":   props.Alt,
+	}
+	
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Src != "" {
+		attrs["src"] = props.Src
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
+// Avatar renders an avatar using custom CSS extension
+templ Avatar(props AvatarProps) {
+	if props.Src != "" {
+		<img {buildAvatarAttributes(props)...} />
+	} else if props.Initials != "" {
+		// Fallback to initials using avatar-fallback class
+		<div 
+			class={getAvatarClassWithFallback(props.Size, props.Shape)}
+			if props.ID != "" {
+				id={props.ID}
+			}
+		>
+			{props.Initials}
+		</div>
+	} else {
+		// Empty avatar placeholder
+		<div 
+			class={getAvatarClass(props.Size, props.Shape)}
+			if props.ID != "" {
+				id={props.ID}
+			}
+		>
+		</div>
+	}
+}

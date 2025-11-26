@@ -1,0 +1,169 @@
+package atoms
+
+import "strconv"
+
+// Note: Tags use Basecoat badge classes for styling
+// Available variants: primary, secondary, destructive, outline
+// State handled via data attributes and HTML attributes
+
+// TagProps defines all properties for the Tag atom using Basecoat badge classes
+type TagProps struct {
+	// Core attributes
+	ID   string `json:"id"`
+	Text string `json:"text"`
+	Value string `json:"value"`
+	
+	// Basecoat badge variants only
+	Variant string `json:"variant,omitempty"` // "primary", "secondary", "destructive", "outline"
+	
+	// Icon configuration
+	Icon      templ.Component `json:"icon,omitempty"`
+	IconLeft  templ.Component `json:"iconLeft,omitempty"`
+	IconRight templ.Component `json:"iconRight,omitempty"`
+	
+	// Interactive features
+	Selected  bool `json:"selected,omitempty"`
+	Removable bool `json:"removable,omitempty"`
+	Clickable bool `json:"clickable,omitempty"`
+	Disabled  bool `json:"disabled,omitempty"`
+	
+	// Event handlers (pre-resolved externally)
+	OnClick  string `json:"onClick"`
+	OnRemove string `json:"onRemove"`
+	OnHover  string `json:"onHover"`
+	
+	// ARIA accessibility attributes
+	AriaLabel       string `json:"ariaLabel"`
+	AriaDescribedBy string `json:"ariaDescribedBy"`
+	AriaPressed     string `json:"ariaPressed"`
+	AriaSelected    string `json:"ariaSelected"`
+	
+	// Additional HTML attributes
+	TabIndex     int                   `json:"tabIndex"`
+	DataAttrs    map[string]string     `json:"dataAttrs"`
+	Attributes   templ.Attributes      `json:"attributes"`
+}
+
+// getTagBadgeClass returns the Basecoat badge class without dynamic building
+func getTagBadgeClass(variant string) string {
+	// Static switch - same logic as Badge atom
+	switch variant {
+	case "secondary": return "badge-secondary"
+	case "destructive": return "badge-destructive"  
+	case "outline": return "badge-outline"
+	default: return "badge" // primary/empty
+	}
+}
+
+// buildTagAttributes creates all HTML attributes for the tag
+func buildTagAttributes(props TagProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": getTagBadgeClass(props.Variant),
+	}
+	
+	// Core HTML attributes
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+	
+	// Boolean attributes
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	
+	// Event handlers
+	if props.OnClick != "" {
+		attrs["onclick"] = templ.ComponentScript{Call: props.OnClick}
+	}
+	if props.OnHover != "" {
+		attrs["onmouseover"] = templ.ComponentScript{Call: props.OnHover}
+	}
+	
+	// ARIA attributes
+	if props.AriaLabel != "" {
+		attrs["aria-label"] = props.AriaLabel
+	}
+	if props.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.AriaDescribedBy
+	}
+	if props.AriaPressed != "" {
+		attrs["aria-pressed"] = props.AriaPressed
+	}
+	if props.AriaSelected != "" {
+		attrs["aria-selected"] = props.AriaSelected
+	}
+	
+	// Tab index
+	if props.TabIndex != 0 {
+		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+	
+	// State data attributes for Basecoat context
+	if props.Selected {
+		attrs["aria-pressed"] = "true"
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes (allows override)
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
+// Tag renders a Basecoat badge atom
+templ Tag(props TagProps) {
+	if props.Clickable || props.OnClick != "" {
+		<a {buildTagAttributes(props)...} href="#">
+			@renderTagContent(props)
+		</a>
+	} else {
+		<span {buildTagAttributes(props)...}>
+			@renderTagContent(props)
+		</span>
+	}
+}
+
+// renderTagContent renders the tag content using Basecoat badge patterns
+templ renderTagContent(props TagProps) {
+	// Left icon (Basecoat badges support SVG children)
+	if props.IconLeft != nil {
+		@props.IconLeft
+	}
+	
+	// Icon-only mode
+	if props.Icon != nil && props.Text == "" {
+		@props.Icon
+	}
+	
+	// Tag text
+	if props.Text != "" {
+		{ props.Text }
+	}
+	
+	// Right icon
+	if props.IconRight != nil {
+		@props.IconRight
+	}
+	
+	// Remove functionality (separate badge pattern)
+	if props.Removable && props.OnRemove != "" {
+		<button
+			type="button"
+			class="btn-sm-icon-ghost"
+			onclick={ templ.ComponentScript{Call: props.OnRemove} }
+			aria-label="Remove tag"
+		>
+			@Icon(IconProps{Name: "x", Size: "sm"})
+		</button>
+	}
+}
+

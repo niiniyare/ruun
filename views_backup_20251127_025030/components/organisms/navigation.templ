@@ -1,0 +1,942 @@
+package organisms
+
+import (
+	"fmt"
+	"github.com/niiniyare/ruun/pkg/utils"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+)
+
+// NavigationType defines the type of navigation
+type NavigationType string
+
+const (
+	NavigationSidebar    NavigationType = "sidebar"
+	NavigationTopbar     NavigationType = "topbar"
+	NavigationBreadcrumb NavigationType = "breadcrumb"
+	NavigationTabs       NavigationType = "tabs"
+	NavigationSteps      NavigationType = "steps"
+)
+
+// NavigationSize defines the size variants
+type NavigationSize string
+
+const (
+	NavigationSizeSM NavigationSize = "sm"
+	NavigationSizeMD NavigationSize = "md"
+	NavigationSizeLG NavigationSize = "lg"
+)
+
+// NavigationItem represents a single navigation item
+type NavigationItem struct {
+	// Core properties
+	ID          string `json:"id"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	Icon        string `json:"icon"`
+	Badge       string `json:"badge"`
+	
+	// States
+	Active   bool `json:"active"`
+	Disabled bool `json:"disabled"`
+	
+	// Permissions
+	Permissions []string `json:"permissions"`
+	Roles       []string `json:"roles"`
+	Condition   string   `json:"condition"`
+	
+	// Event handlers
+	OnClick    string `json:"onClick"`
+	HXGet      string `json:"hxGet"`
+	HXPost     string `json:"hxPost"`
+	HXTarget   string `json:"hxTarget"`
+	HXSwap     string `json:"hxSwap"`
+	HXTrigger  string `json:"hxTrigger"`
+	AlpineClick string `json:"alpineClick"`
+	
+	// Nested items
+	Items []NavigationItem `json:"items"`
+}
+
+// NavigationSearch defines search configuration
+type NavigationSearch struct {
+	Enabled     bool   `json:"enabled"`
+	Placeholder string `json:"placeholder"`
+	MinLength   int    `json:"minLength"`
+	Debounce    int    `json:"debounce"`
+	Query       string `json:"query"`
+	Loading     bool   `json:"loading"`
+	Visible     bool   `json:"visible"`
+}
+
+// NavigationMobileMenu defines mobile menu configuration
+type NavigationMobileMenu struct {
+	Enabled     bool   `json:"enabled"`
+	Position    string `json:"position"`
+	Overlay     bool   `json:"overlay"`
+	CloseButton bool   `json:"closeButton"`
+	Swipeable   bool   `json:"swipeable"`
+}
+
+// BreadcrumbItem represents a breadcrumb navigation item
+type BreadcrumbItem struct {
+	Text      string `json:"text"`
+	URL       string `json:"url"`
+	Clickable bool   `json:"clickable"`
+	Active    bool   `json:"active"`
+}
+
+// User represents the current user context
+type User struct {
+	ID          string   `json:"id"`
+	DisplayName string   `json:"displayName"`
+	Email       string   `json:"email"`
+	Avatar      string   `json:"avatar"`
+	Roles       []string `json:"roles"`
+	Permissions []string `json:"permissions"`
+}
+
+// AuthContext represents the authentication context
+type AuthContext struct {
+	User          *User `json:"user"`
+	Authenticated bool  `json:"authenticated"`
+	CSRF          string `json:"csrf"`
+}
+
+// NavigationProps defines all properties for the Navigation organism using progressive enhancement
+type NavigationProps struct {
+	// Core properties (always required)
+	ID    string             `json:"id"`
+	Type  NavigationType     `json:"type"`
+	Items []NavigationItem   `json:"items"`
+	
+	// Basic Enhancement (optional)
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	Logo        string         `json:"logo"`
+	Size        NavigationSize `json:"size"`
+	Variant     string         `json:"variant"`
+	
+	// Progressive Enhancement (nil = disabled)
+	Layout     *NavigationLayoutConfig     `json:"layout"`     // Collapsible, responsive behavior
+	Search     *SearchConfig     `json:"search"`     // Search functionality
+	User       *UserConfig       `json:"user"`       // User authentication/profile
+	Mobile     *MobileConfig     `json:"mobile"`     // Mobile-specific features
+	Progress   *NavigationProgressConfig   `json:"progress"`   // Multi-step/wizard navigation
+	Theme      *NavigationThemeConfig      `json:"theme"`      // Theme and styling
+	Analytics  *NavigationAnalyticsConfig  `json:"analytics"`  // Usage tracking
+	
+	// Type-specific data (auto-populated based on Type)
+	Breadcrumbs []BreadcrumbItem `json:"breadcrumbs"` // For NavigationBreadcrumb
+	
+	// ARIA accessibility
+	AriaLabel  string            `json:"ariaLabel"`
+	AriaLabels map[string]string `json:"ariaLabels"`
+}
+
+// LayoutConfig defines layout and positioning options
+type NavigationLayoutConfig struct {
+	Collapsible bool   `json:"collapsible"`
+	Position    string `json:"position"` // "fixed", "sticky", "relative"
+	Width       string `json:"width"`
+	Responsive  bool   `json:"responsive"`
+	Compact     bool   `json:"compact"`
+}
+
+// SearchConfig defines search functionality
+type SearchConfig struct {
+	Enabled     bool   `json:"enabled"`
+	Placeholder string `json:"placeholder"`
+	MinLength   int    `json:"minLength"`
+	Debounce    int    `json:"debounce"`
+	URL         string `json:"url"`        // Server-side search endpoint
+	Highlight   bool   `json:"highlight"`  // Highlight search results
+	Shortcut    string `json:"shortcut"`   // Keyboard shortcut (default: "/")
+}
+
+// UserConfig defines user authentication and profile features
+type UserConfig struct {
+	Enabled     bool             `json:"enabled"`
+	Name        string           `json:"name"`
+	Email       string           `json:"email"`
+	Avatar      string           `json:"avatar"`
+	Menu        []NavigationItem `json:"menu"`
+	AuthContext *AuthContext     `json:"authContext"`
+	ShowStatus  bool             `json:"showStatus"` // Online/offline status
+}
+
+// MobileConfig defines mobile-specific features
+type MobileConfig struct {
+	Enabled     bool   `json:"enabled"`
+	Breakpoint  string `json:"breakpoint"`  // CSS breakpoint
+	Overlay     bool   `json:"overlay"`
+	Swipeable   bool   `json:"swipeable"`
+	CloseButton bool   `json:"closeButton"`
+	Position    string `json:"position"`    // "left", "right", "top", "bottom"
+}
+
+// ProgressConfig defines progress tracking for multi-step navigation
+type NavigationProgressConfig struct {
+	ShowProgress bool `json:"showProgress"`
+	CurrentStep  int  `json:"currentStep"`
+	TotalSteps   int  `json:"totalSteps"`
+	Separator    string `json:"separator"` // For breadcrumb separator
+}
+
+// ThemeConfig defines theme and styling options
+type NavigationThemeConfig struct {
+	ID             string            `json:"id"`
+	DarkMode       bool              `json:"darkMode"`
+	TokenOverrides map[string]string `json:"tokenOverrides"`
+	AutoDetect     bool              `json:"autoDetect"` // Auto-detect system theme
+}
+
+// AnalyticsConfig defines usage tracking
+type NavigationAnalyticsConfig struct {
+	Enabled       bool   `json:"enabled"`
+	TrackClicks   bool   `json:"trackClicks"`
+	TrackSearch   bool   `json:"trackSearch"`
+	TrackTiming   bool   `json:"trackTiming"`
+	EventPrefix   string `json:"eventPrefix"`
+}
+
+// getNavigationClasses builds the CSS class string for navigation using Basecoat patterns
+func getNavigationClasses(props NavigationProps) string {
+	// Use appropriate Basecoat class based on navigation type
+	switch props.Type {
+	case NavigationSidebar:
+		return "sidebar"
+	case NavigationTopbar:
+		// For topbar navigation, use basic nav styling or create custom extension
+		return "nav-topbar"
+	case NavigationBreadcrumb:
+		return "breadcrumb"
+	case NavigationTabs:
+		return "tabs"
+	case NavigationSteps:
+		return "nav-steps"
+	default:
+		return "sidebar"
+	}
+}
+
+// Feature detection functions for progressive enhancement
+func hasSearch(props NavigationProps) bool {
+	return props.Search != nil && props.Search.Enabled
+}
+
+func hasUser(props NavigationProps) bool {
+	return props.User != nil && props.User.Enabled
+}
+
+func hasMobile(props NavigationProps) bool {
+	return props.Mobile != nil && props.Mobile.Enabled
+}
+
+func hasProgress(props NavigationProps) bool {
+	return props.Progress != nil && props.Progress.TotalSteps > 1
+}
+
+func hasTheme(props NavigationProps) bool {
+	return props.Theme != nil
+}
+
+func hasNavigationAnalytics(props NavigationProps) bool {
+	return props.Analytics != nil && props.Analytics.Enabled
+}
+
+// getNavigationItemClasses builds CSS classes for navigation items using Basecoat patterns
+func getNavigationItemClasses(item NavigationItem) string {
+	// Use simple base class, let Basecoat handle states via data attributes
+	return "nav-menu-item"
+}
+
+// Navigation renders the main navigation organism using progressive enhancement
+templ Navigation(props NavigationProps) {
+	<nav 
+		class={ getNavigationClasses(props) }
+		if props.ID != "" {
+			id={ props.ID }
+		}
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		x-data={ buildNavigationAlpineData(props) }
+	>
+		switch props.Type {
+		case NavigationSidebar:
+			@navigationSidebar(props)
+		case NavigationTopbar:
+			@navigationTopbar(props)
+		case NavigationBreadcrumb:
+			@navigationBreadcrumb(props)
+		case NavigationTabs:
+			@navigationTabs(props)
+		case NavigationSteps:
+			@navigationSteps(props)
+		default:
+			@navigationSidebar(props)
+		}
+		
+		<!-- Progressive Enhancement: Analytics -->
+		if hasNavigationAnalytics(props) {
+			@navigationAnalytics(props.Analytics)
+		}
+	</nav>
+}
+
+// buildNavigationAlpineData creates the Alpine.js data object based on enabled features
+func buildNavigationAlpineData(props NavigationProps) string {
+	data := `{ 
+		// Core state
+		sidebarCollapsed: false, 
+		mobileMenuOpen: false`
+	
+	// Progressive Enhancement: Search
+	if hasSearch(props) {
+		data += `, 
+		searchOpen: false, 
+		searchQuery: ''`
+	}
+	
+	// Progressive Enhancement: Theme
+	if hasTheme(props) {
+		darkMode := "false"
+		if props.Theme.DarkMode {
+			darkMode = "true"
+		}
+		data += fmt.Sprintf(`, 
+		darkMode: %s`, darkMode)
+	}
+	
+	// Progressive Enhancement: Progress
+	if hasProgress(props) {
+		data += fmt.Sprintf(`, 
+		currentStep: %d, 
+		totalSteps: %d`, props.Progress.CurrentStep, props.Progress.TotalSteps)
+	}
+	
+	// Core methods
+	data += `, 
+		toggleSidebar() { this.sidebarCollapsed = !this.sidebarCollapsed }, 
+		toggleMobileMenu() { this.mobileMenuOpen = !this.mobileMenuOpen }`
+	
+	// Progressive Enhancement: Search methods
+	if hasSearch(props) {
+		data += `, 
+		toggleSearch() { this.searchOpen = !this.searchOpen },
+		performSearch() { 
+			if (this.searchQuery.length >= ` + fmt.Sprintf("%d", utils.IfElse(props.Search.MinLength > 0, props.Search.MinLength, 2)) + `) {
+				// Trigger search
+				console.log('Searching:', this.searchQuery);
+			}
+		}`
+	}
+	
+	// Progressive Enhancement: Theme methods
+	if hasTheme(props) {
+		data += `, 
+		toggleTheme() { 
+			this.darkMode = !this.darkMode; 
+			document.documentElement.classList.toggle('dark', this.darkMode);
+		}`
+	}
+	
+	// Progressive Enhancement: Progress methods
+	if hasProgress(props) {
+		data += `, 
+		nextStep() { 
+			if (this.currentStep < this.totalSteps) this.currentStep++; 
+		}, 
+		prevStep() { 
+			if (this.currentStep > 1) this.currentStep--; 
+		}`
+	}
+	
+	data += " }"
+	return data
+}
+
+// navigationSidebar renders the sidebar navigation
+templ navigationSidebar(props NavigationProps) {
+	<div class="navigation-sidebar-container">
+		<!-- Header Section -->
+		if props.Logo != "" || props.Title != "" {
+			<div class="navigation-header">
+				if props.Logo != "" {
+					<img src={ props.Logo } alt="Logo" class="navigation-logo" />
+				}
+				if props.Title != "" {
+					<span class="navigation-title">{ props.Title }</span>
+				}
+				if props.Description != "" {
+					<span class="navigation-description">{ props.Description }</span>
+				}
+				
+				<!-- Progressive Enhancement: Collapsible -->
+				if props.Layout != nil && props.Layout.Collapsible {
+					@atoms.Button(atoms.ButtonProps{
+						Variant: atoms.ButtonVariantGhost,
+						Size:    atoms.ButtonSizeSM,
+						OnClick: "toggleSidebar()",
+						AriaLabel: "Toggle sidebar",
+					}) {
+						@atoms.Icon(atoms.IconProps{
+							Name: "menu",
+							Size: atoms.IconSizeSM,
+						})
+					}
+				}
+				
+				<!-- Progressive Enhancement: Theme Toggle -->
+				if hasTheme(props) && props.Theme.AutoDetect {
+					@atoms.Button(atoms.ButtonProps{
+						Variant: atoms.ButtonVariantGhost,
+						Size:    atoms.ButtonSizeSM,
+						OnClick: "toggleTheme()",
+						AriaLabel: "Toggle theme",
+					}) {
+						@atoms.Icon(atoms.IconProps{
+							Name: "sun",
+							Size: atoms.IconSizeSM,
+							ClassName: "dark:hidden",
+						})
+						@atoms.Icon(atoms.IconProps{
+							Name: "moon", 
+							Size: atoms.IconSizeSM,
+							ClassName: "hidden dark:inline",
+						})
+					}
+				}
+			</div>
+		}
+		
+		<!-- Progressive Enhancement: Search -->
+		if hasSearch(props) {
+			@navigationSearch(props.Search)
+		}
+		
+		<!-- Core Navigation Menu -->
+		<div class="navigation-menu">
+			for _, item := range props.Items {
+				@navigationMenuItem(item, 0)
+			}
+		</div>
+		
+		<!-- Progressive Enhancement: User Section -->
+		if hasUser(props) {
+			@navigationUserSection(props)
+		}
+	</div>
+}
+
+// navigationTopbar renders the topbar navigation
+templ navigationTopbar(props NavigationProps) {
+	<div class="navigation-topbar-container">
+		<div class="navigation-topbar-left">
+			if props.Logo != "" {
+				<img src={ props.Logo } alt="Logo" class="navigation-logo" />
+			}
+			if props.Title != "" {
+				<span class="navigation-title">{ props.Title }</span>
+			}
+			
+			<div class="navigation-menu navigation-menu-horizontal">
+				for _, item := range props.Items {
+					@navigationMenuItem(item, 0)
+				}
+			</div>
+		</div>
+		
+		<div class="navigation-topbar-right">
+			<!-- Progressive Enhancement: Search -->
+			if hasSearch(props) {
+				@navigationSearch(props.Search)
+			}
+			
+			<!-- Progressive Enhancement: User Menu -->
+			if hasUser(props) {
+				@navigationUserMenu(props)
+			}
+			
+			<!-- Progressive Enhancement: Mobile Menu -->
+			if hasMobile(props) {
+				@atoms.Button(atoms.ButtonProps{
+					Variant: atoms.ButtonVariantGhost,
+					Size:    atoms.ButtonSizeSM,
+					OnClick: "toggleMobileMenu()",
+					AriaLabel: "Toggle mobile menu",
+					ClassName: "navigation-mobile-toggle",
+				}) {
+					@atoms.Icon(atoms.IconProps{
+						Name: "menu",
+						Size: atoms.IconSizeSM,
+					})
+				}
+			}
+		</div>
+	</div>
+	
+	<!-- Progressive Enhancement: Mobile Menu -->
+	if hasMobile(props) {
+		@navigationMobileMenu(props)
+	}
+}
+
+// navigationBreadcrumb renders breadcrumb navigation
+templ navigationBreadcrumb(props NavigationProps) {
+	<div class="navigation-breadcrumb-container">
+		for i, crumb := range props.Breadcrumbs {
+			if i > 0 {
+				<span class="breadcrumb-separator">{ utils.IfElse(props.Progress != nil && props.Progress.Separator != "", props.Progress.Separator, "/") }</span>
+			}
+			
+			if crumb.Clickable && crumb.URL != "" {
+				<a 
+					href={ crumb.URL } 
+					class="breadcrumb-item"
+					data-active={ fmt.Sprintf("%t", crumb.Active) }
+				>
+					{ crumb.Text }
+				</a>
+			} else {
+				<span 
+					class="breadcrumb-item"
+					data-active={ fmt.Sprintf("%t", crumb.Active) }
+				>
+					{ crumb.Text }
+				</span>
+			}
+		}
+	</div>
+}
+
+// navigationTabs renders tab navigation
+templ navigationTabs(props NavigationProps) {
+	<div class="tabs">
+		for _, item := range props.Items {
+			if item.URL != "" {
+				<a 
+					href={ item.URL } 
+					class="nav-tab-item"
+					data-active={ fmt.Sprintf("%t", item.Active) }
+				>
+					if item.Icon != "" {
+						@atoms.Icon(atoms.IconProps{
+							Name: item.Icon,
+							Size: atoms.IconSizeSM,
+							ClassName: "nav-tab-icon",
+						})
+					}
+					<span class="nav-tab-text">{ item.Text }</span>
+				</a>
+			} else {
+				<button 
+					class="nav-tab-item"
+					data-active={ fmt.Sprintf("%t", item.Active) }
+					if item.OnClick != "" {
+						x-on:click={ item.OnClick }
+					}
+					if item.AlpineClick != "" {
+						x-on:click={ item.AlpineClick }
+					}
+				>
+					if item.Icon != "" {
+						@atoms.Icon(atoms.IconProps{
+							Name: item.Icon,
+							Size: atoms.IconSizeSM,
+							ClassName: "nav-tab-icon",
+						})
+					}
+					<span class="nav-tab-text">{ item.Text }</span>
+				</button>
+			}
+		}
+	</div>
+}
+
+// navigationSteps renders step navigation
+templ navigationSteps(props NavigationProps) {
+	<div class="navigation-steps-container">
+		<!-- Progressive Enhancement: Progress Bar -->
+		if hasProgress(props) && props.Progress.ShowProgress {
+			<div class="navigation-steps-progress">
+				<div 
+					class="navigation-steps-progress-bar" 
+					style={ fmt.Sprintf("width: %d%%", (props.Progress.CurrentStep * 100) / props.Progress.TotalSteps) }
+				></div>
+			</div>
+		}
+		
+		<div class="navigation-steps-items">
+			for i, item := range props.Items {
+				<div 
+					class="nav-step-item"
+					data-completed={ fmt.Sprintf("%t", hasProgress(props) && i+1 <= props.Progress.CurrentStep) }
+					data-current={ fmt.Sprintf("%t", hasProgress(props) && i+1 == props.Progress.CurrentStep) }
+				>
+					<div class="nav-step-indicator">
+						<span class="nav-step-number">{ fmt.Sprintf("%d", i+1) }</span>
+					</div>
+					<div class="nav-step-content">
+						<span class="nav-step-text">{ item.Text }</span>
+						if item.Description != "" {
+							<span class="nav-step-description">{ item.Description }</span>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// navigationMenuItem renders a single navigation menu item
+templ navigationMenuItem(item NavigationItem, depth int) {
+	<div 
+		class={ getNavigationItemClasses(item) }
+		data-depth={ fmt.Sprintf("%d", depth) }
+		data-active={ fmt.Sprintf("%t", item.Active) }
+		data-disabled={ fmt.Sprintf("%t", item.Disabled) }
+		data-has-children={ fmt.Sprintf("%t", len(item.Items) > 0) }
+	>
+		if len(item.Items) > 0 {
+			<!-- Submenu item -->
+			<div 
+				class="nav-menu-item-trigger"
+				x-data="{ open: false }"
+				x-on:click="open = !open"
+			>
+				@navigationMenuItemContent(item)
+				@atoms.Icon(atoms.IconProps{
+					Name: "chevron-down",
+					Size: atoms.IconSizeXS,
+					ClassName: "nav-menu-item-chevron",
+				})
+			</div>
+			<div 
+				class="nav-menu-submenu"
+				x-show="open"
+				x-transition
+			>
+				for _, subItem := range item.Items {
+					@navigationMenuItem(subItem, depth+1)
+				}
+			</div>
+		} else if item.URL != "" {
+			<!-- Link item -->
+			<a 
+				href={ item.URL }
+				class="nav-menu-item-link"
+				if item.HXGet != "" {
+					hx-get={ item.HXGet }
+				}
+				if item.HXPost != "" {
+					hx-post={ item.HXPost }
+				}
+				if item.HXTarget != "" {
+					hx-target={ item.HXTarget }
+				}
+				if item.HXSwap != "" {
+					hx-swap={ item.HXSwap }
+				}
+				if item.HXTrigger != "" {
+					hx-trigger={ item.HXTrigger }
+				}
+			>
+				@navigationMenuItemContent(item)
+			</a>
+		} else {
+			<!-- Button item -->
+			<button 
+				class="nav-menu-item-button"
+				if item.OnClick != "" {
+					x-on:click={ item.OnClick }
+				}
+				if item.AlpineClick != "" {
+					x-on:click={ item.AlpineClick }
+				}
+				if item.HXPost != "" {
+					hx-post={ item.HXPost }
+				}
+				if item.HXGet != "" {
+					hx-get={ item.HXGet }
+				}
+				if item.HXTarget != "" {
+					hx-target={ item.HXTarget }
+				}
+				if item.HXSwap != "" {
+					hx-swap={ item.HXSwap }
+				}
+				if item.HXTrigger != "" {
+					hx-trigger={ item.HXTrigger }
+				}
+			>
+				@navigationMenuItemContent(item)
+			</button>
+		}
+	</div>
+}
+
+// navigationMenuItemContent renders the content of a menu item
+templ navigationMenuItemContent(item NavigationItem) {
+	if item.Icon != "" {
+		@atoms.Icon(atoms.IconProps{
+			Name: item.Icon,
+			Size: atoms.IconSizeSM,
+			ClassName: "nav-menu-item-icon",
+		})
+	}
+	
+	<span class="nav-menu-item-text">{ item.Text }</span>
+	
+	if item.Description != "" {
+		<span class="nav-menu-item-description">{ item.Description }</span>
+	}
+	
+	if item.Badge != "" {
+		@atoms.Badge(atoms.BadgeProps{
+			Text:    item.Badge,
+			Variant: atoms.BadgeVariantSecondary,
+			Size:    atoms.BadgeSizeXS,
+			ClassName: "nav-menu-item-badge",
+		})
+	}
+}
+
+// navigationSearch renders the search component
+templ navigationSearch(search *SearchConfig) {
+	<div class="navigation-search-container">
+		<div class="navigation-search-input-group">
+			<input
+				type="text"
+				class="navigation-search-input"
+				placeholder={ utils.IfElse(search.Placeholder != "", search.Placeholder, "Search...") }
+				x-model="searchQuery"
+				x-on:input.debounce.300ms="performSearch()"
+				x-on:keydown.slash.window.prevent="$refs.searchInput.focus()"
+				x-on:keydown.escape="searchOpen = false; searchQuery = ''"
+				x-ref="searchInput"
+				if search.MinLength > 0 {
+					minlength={ fmt.Sprintf("%d", search.MinLength) }
+				}
+			/>
+			@atoms.Icon(atoms.IconProps{
+				Name: "search",
+				Size: atoms.IconSizeSM,
+				ClassName: "navigation-search-icon",
+			})
+		</div>
+		
+		<div 
+			class="navigation-search-results"
+			x-show={ fmt.Sprintf("searchQuery.length >= %d", utils.IfElse(search.MinLength > 0, search.MinLength, 1)) }
+			x-transition
+		>
+			if search.URL != "" {
+				<!-- Server-side search results -->
+				<div 
+					hx-get={ search.URL }
+					hx-trigger="search-changed from:body"
+					hx-vals="js:{query: searchQuery}"
+					class="navigation-search-results-content"
+				>
+					<div class="navigation-search-loading">
+						<span>Searching...</span>
+					</div>
+				</div>
+			} else {
+				<!-- Client-side search placeholder -->
+				<div class="navigation-search-empty">
+					<span>No results found</span>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// navigationUserSection renders the user section for sidebar
+templ navigationUserSection(props NavigationProps) {
+	<div class="navigation-user-section">
+		<div class="navigation-user-info">
+			if props.User.Avatar != "" {
+				<img src={ props.User.Avatar } alt="User avatar" class="navigation-user-avatar" />
+			} else {
+				@atoms.Icon(atoms.IconProps{
+					Name: "user",
+					Size: atoms.IconSizeMD,
+					ClassName: "navigation-user-avatar-icon",
+				})
+			}
+			
+			<div class="navigation-user-details">
+				<span class="navigation-user-name">{ props.User.Name }</span>
+				if props.User.Email != "" {
+					<span class="navigation-user-email">{ props.User.Email }</span>
+				}
+				
+				<!-- Progressive Enhancement: Online Status -->
+				if props.User.ShowStatus {
+					<div class="navigation-user-status" x-data="{ online: navigator.onLine }" x-on:online.window="online = true" x-on:offline.window="online = false">
+						<span x-show="online" class="status-indicator online">Online</span>
+						<span x-show="!online" class="status-indicator offline">Offline</span>
+					</div>
+				}
+			</div>
+		</div>
+		
+		if len(props.User.Menu) > 0 {
+			<div class="navigation-user-menu">
+				for _, item := range props.User.Menu {
+					@navigationMenuItem(item, 0)
+				}
+			</div>
+		}
+	</div>
+}
+
+// navigationUserMenu renders the user menu for topbar
+templ navigationUserMenu(props NavigationProps) {
+	<div class="navigation-user-menu-container" x-data="{ open: false }">
+		<button 
+			class="navigation-user-menu-trigger"
+			x-on:click="open = !open"
+			x-on:click.away="open = false"
+		>
+			if props.User.Avatar != "" {
+				<img src={ props.User.Avatar } alt="User avatar" class="navigation-user-avatar" />
+			} else {
+				@atoms.Icon(atoms.IconProps{
+					Name: "user",
+					Size: atoms.IconSizeSM,
+					ClassName: "navigation-user-avatar-icon",
+				})
+			}
+			<span class="navigation-user-name">{ props.User.Name }</span>
+			@atoms.Icon(atoms.IconProps{
+				Name: "chevron-down",
+				Size: atoms.IconSizeXS,
+				ClassName: "navigation-user-menu-chevron",
+			})
+		</button>
+		
+		<div 
+			class="navigation-user-menu-dropdown"
+			x-show="open"
+			x-transition
+		>
+			for _, item := range props.User.Menu {
+				@molecules.MenuItem(molecules.MenuItemProps{
+					Type: molecules.MenuItemTypeLink,
+					Text: item.Text,
+					URL:  item.URL,
+					Icon: item.Icon,
+					OnClick: item.OnClick,
+					HXPost: item.HXPost,
+					HXGet: item.HXGet,
+					HXTarget: item.HXTarget,
+					HXSwap: item.HXSwap,
+					AlpineClick: item.AlpineClick,
+				})
+			}
+		</div>
+	</div>
+}
+
+// navigationMobileMenu renders the mobile menu
+templ navigationMobileMenu(props NavigationProps) {
+	<div 
+		class="navigation-mobile-menu"
+		x-show="mobileMenuOpen"
+		x-transition
+	>
+		if props.Mobile.Overlay {
+			<div 
+				class="navigation-mobile-overlay"
+				x-on:click="mobileMenuOpen = false"
+			></div>
+		}
+		
+		<div class="navigation-mobile-menu-content">
+			if props.Mobile.CloseButton {
+				<div class="navigation-mobile-header">
+					@atoms.Button(atoms.ButtonProps{
+						Variant: atoms.ButtonVariantGhost,
+						Size:    atoms.ButtonSizeSM,
+						OnClick: "mobileMenuOpen = false",
+						AriaLabel: "Close mobile menu",
+					}) {
+						@atoms.Icon(atoms.IconProps{
+							Name: "x",
+							Size: atoms.IconSizeSM,
+						})
+					}
+				</div>
+			}
+			
+			<div class="navigation-mobile-menu-items">
+				for _, item := range props.Items {
+					@navigationMenuItem(item, 0)
+				}
+			</div>
+			
+			if hasUser(props) {
+				@navigationUserSection(props)
+			}
+		</div>
+	</div>
+}
+
+// navigationAnalytics renders analytics tracking components
+templ navigationAnalytics(analytics *NavigationAnalyticsConfig) {
+	<script>
+		// Navigation analytics tracking
+		if (typeof gtag !== 'undefined' || typeof analytics !== 'undefined') {
+			// Track navigation clicks
+			if ({ fmt.Sprintf("%t", analytics.TrackClicks) }) {
+				document.addEventListener('click', function(e) {
+					const navItem = e.target.closest('.nav-menu-item, .nav-tab-item, .breadcrumb-item');
+					if (navItem) {
+						const eventName = '{ analytics.EventPrefix }navigation_click';
+						const eventData = {
+							item_type: navItem.classList.contains('nav-menu-item') ? 'menu' : 
+									  navItem.classList.contains('nav-tab-item') ? 'tab' : 'breadcrumb',
+							item_text: navItem.textContent.trim(),
+							timestamp: new Date().toISOString()
+						};
+						
+						// Google Analytics 4
+						if (typeof gtag !== 'undefined') {
+							gtag('event', eventName, eventData);
+						}
+						
+						// Segment or other analytics
+						if (typeof analytics !== 'undefined') {
+							analytics.track(eventName, eventData);
+						}
+					}
+				});
+			}
+			
+			// Track search usage
+			if ({ fmt.Sprintf("%t", analytics.TrackSearch) }) {
+				document.addEventListener('search-performed', function(e) {
+					const eventName = '{ analytics.EventPrefix }navigation_search';
+					const eventData = {
+						query: e.detail.query,
+						results_count: e.detail.results || 0,
+						timestamp: new Date().toISOString()
+					};
+					
+					if (typeof gtag !== 'undefined') {
+						gtag('event', eventName, eventData);
+					}
+					
+					if (typeof analytics !== 'undefined') {
+						analytics.track(eventName, eventData);
+					}
+				});
+			}
+		}
+	</script>
+}

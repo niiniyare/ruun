@@ -1,0 +1,134 @@
+package atoms
+
+// SkeletonProps defines all properties for the Skeleton atom using custom CSS extension
+// Uses /static/css/components/skeleton.css following Basecoat conventions
+type SkeletonProps struct {
+	// Core properties
+	ID string `json:"id,omitempty"`
+	
+	// Visual properties
+	Shape   string `json:"shape,omitempty"`   // "text", "heading", "avatar", "button", "card"
+	Size    string `json:"size,omitempty"`    // "sm", "md", "lg", "xl"
+	Variant string `json:"variant,omitempty"` // "", "wave"
+	
+	// Custom dimensions (when not using predefined shapes)
+	Width  string `json:"width,omitempty"`
+	Height string `json:"height,omitempty"`
+	
+	// Additional attributes
+	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes  `json:"attributes,omitempty"`
+}
+
+// getSkeletonClass returns skeleton class without dynamic building
+func getSkeletonClass(shape, size, variant string) string {
+	// Complete static approach
+	switch shape {
+	case "text":
+		switch size {
+		case "sm":
+			switch variant {
+			case "wave": return "skeleton-text skeleton-sm skeleton-wave"
+			default: return "skeleton-text skeleton-sm"
+			}
+		case "lg":
+			switch variant {
+			case "wave": return "skeleton-text skeleton-lg skeleton-wave"
+			default: return "skeleton-text skeleton-lg"
+			}
+		case "xl":
+			switch variant {
+			case "wave": return "skeleton-text skeleton-xl skeleton-wave"
+			default: return "skeleton-text skeleton-xl"
+			}
+		default: // md or empty
+			switch variant {
+			case "wave": return "skeleton-text skeleton-wave"
+			default: return "skeleton-text"
+			}
+		}
+	case "heading":
+		switch variant {
+		case "wave": return "skeleton-heading skeleton-wave"
+		default: return "skeleton-heading"
+		}
+	case "avatar":
+		switch variant {
+		case "wave": return "skeleton-avatar skeleton-wave"
+		default: return "skeleton-avatar"
+		}
+	case "button":
+		switch variant {
+		case "wave": return "skeleton-button skeleton-wave"
+		default: return "skeleton-button"
+		}
+	case "card":
+		switch variant {
+		case "wave": return "skeleton-card skeleton-wave"
+		default: return "skeleton-card"
+		}
+	default: // no shape specified
+		switch size {
+		case "sm":
+			switch variant {
+			case "wave": return "skeleton skeleton-sm skeleton-wave"
+			default: return "skeleton skeleton-sm"
+			}
+		case "lg":
+			switch variant {
+			case "wave": return "skeleton skeleton-lg skeleton-wave"
+			default: return "skeleton skeleton-lg"
+			}
+		case "xl":
+			switch variant {
+			case "wave": return "skeleton skeleton-xl skeleton-wave"
+			default: return "skeleton skeleton-xl"
+			}
+		default: // md or empty
+			switch variant {
+			case "wave": return "skeleton skeleton-wave"
+			default: return "skeleton"
+			}
+		}
+	}
+}
+
+// buildSkeletonAttributes creates div attributes
+func buildSkeletonAttributes(props SkeletonProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": getSkeletonClass(props.Shape, props.Size, props.Variant),
+	}
+	
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	
+	// Custom dimensions
+	if props.Width != "" || props.Height != "" {
+		style := ""
+		if props.Width != "" {
+			style += "width: " + props.Width + ";"
+		}
+		if props.Height != "" {
+			style += "height: " + props.Height + ";"
+		}
+		attrs["style"] = style
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
+// Skeleton renders a loading skeleton using custom CSS extension
+templ Skeleton(props SkeletonProps) {
+	<div {buildSkeletonAttributes(props)...}></div>
+}
