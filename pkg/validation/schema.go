@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/niiniyare/ruun/pkg/schema"
+	"github.com/niiniyare/ruun/schema"
 )
 
 // SchemaValidator validates form schemas, themes, and configurations

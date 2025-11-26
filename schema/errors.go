@@ -15,13 +15,13 @@ var (
 	ErrInvalidSchemaID    = NewValidationError("schema_id", "schema ID is required and must be valid")
 	ErrInvalidSchemaType  = NewValidationError("schema_type", "schema type is required and must be valid")
 	ErrInvalidSchemaTitle = NewValidationError("schema_title", "schema title is required")
-	ErrSchemaNotFound     = NewNotFoundError("schema", "schema not found")
+	ErrSchemaNotFound     = NewNotFoundError("schema", "")
 	ErrSchemaDuplicate    = NewConflictError("schema", "schema already exists")
 	// Field validation errors
 	ErrInvalidFieldName  = NewValidationError("field_name", "field name is required and must be valid")
 	ErrInvalidFieldType  = NewValidationError("field_type", "field type is required and must be valid")
 	ErrInvalidFieldLabel = NewValidationError("field_label", "field label is required")
-	ErrFieldNotFound     = NewNotFoundError("field", "field not found")
+	ErrFieldNotFound     = NewNotFoundError("field", "")
 	ErrFieldDuplicate    = NewConflictError("field", "field name already exists")
 	// Validation specific errors
 	ErrValidationFailed    = NewValidationError("validation", "validation failed")
@@ -29,23 +29,23 @@ var (
 	ErrInvalidValue        = NewValidationError("invalid_value", "field value is invalid")
 	ErrAsyncValidationFail = NewValidationError("async_validation", "async validation failed")
 	// Permission and security errors
-	ErrPermissionDenied = NewPermissionError("access_denied", "permission denied")
-	ErrUnauthorized     = NewPermissionError("unauthorized", "user not authorized")
-	ErrForbidden        = NewPermissionError("forbidden", "action forbidden")
+	ErrPermissionDenied = NewPermissionCodeError("access_denied", "permission denied")
+	ErrUnauthorized     = NewPermissionCodeError("unauthorized", "user not authorized")
+	ErrForbidden        = NewPermissionCodeError("forbidden", "action forbidden")
 	// Data source errors
 	ErrDataSourceFailed   = NewDataSourceError("data_source_failed", "data source request failed")
 	ErrDataSourceTimeout  = NewDataSourceError("data_source_timeout", "data source request timeout")
-	ErrDataSourceNotFound = NewNotFoundError("data_source", "data source not found")
+	ErrDataSourceNotFound = NewNotFoundError("data_source", "")
 	// Rendering errors
 	ErrRenderingFailed  = NewRenderError("rendering_failed", "template rendering failed")
-	ErrTemplateNotFound = NewNotFoundError("template", "template not found")
+	ErrTemplateNotFound = NewNotFoundError("template", "")
 	// Workflow errors
 	ErrWorkflowFailed   = NewWorkflowError("workflow_failed", "workflow execution failed")
 	ErrApprovalRequired = NewWorkflowError("approval_required", "approval required")
-	ErrWorkflowNotFound = NewNotFoundError("workflow", "workflow not found")
+	ErrWorkflowNotFound = NewNotFoundError("workflow", "")
 	// Multi-tenancy errors
 	ErrTenantMismatch = NewTenantError("tenant_mismatch", "tenant mismatch")
-	ErrTenantNotFound = NewNotFoundError("tenant", "tenant not found")
+	ErrTenantNotFound = NewNotFoundError("tenant", "")
 	// General errors
 	ErrInternalError  = NewInternalError("internal_error", "internal server error")
 	ErrInvalidRequest = NewValidationError("invalid_request", "invalid request")
@@ -99,15 +99,47 @@ func (e *BaseError) WithDetail(key string, value any) SchemaError {
 }
 
 // Specific error constructors
-func NewValidationError(code, message string) SchemaError {
+func NewValidationError(field, message string) SchemaError {
+	return &BaseError{
+		code:    "VALIDATION_ERROR",
+		message: message,
+		errType: ErrorTypeValidation,
+		field:   field,
+		details: make(map[string]any),
+	}
+}
+
+func NewFieldError(field, code, message string) SchemaError {
 	return &BaseError{
 		code:    code,
 		message: message,
 		errType: ErrorTypeValidation,
+		field:   field,
 		details: make(map[string]any),
 	}
 }
-func NewNotFoundError(resource, message string) SchemaError {
+
+func NewPermissionError(message string) SchemaError {
+	return &BaseError{
+		code:    "PERMISSION_DENIED",
+		message: message,
+		errType: ErrorTypePermission,
+		details: make(map[string]any),
+	}
+}
+
+func NewNotFoundError(resource, id string) SchemaError {
+	return &BaseError{
+		code:    "NOT_FOUND",
+		message: fmt.Sprintf("%s not found: %s", resource, id),
+		errType: ErrorTypeNotFound,
+		details: map[string]any{
+			"resource": resource,
+			"id":       id,
+		},
+	}
+}
+func NewResourceNotFoundError(resource, message string) SchemaError {
 	return &BaseError{
 		code:    fmt.Sprintf("%s_not_found", resource),
 		message: message,
@@ -127,7 +159,7 @@ func NewConflictError(resource, message string) SchemaError {
 		},
 	}
 }
-func NewPermissionError(code, message string) SchemaError {
+func NewPermissionCodeError(code, message string) SchemaError {
 	return &BaseError{
 		code:    code,
 		message: message,

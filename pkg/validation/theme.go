@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/niiniyare/ruun/pkg/schema"
+	"github.com/niiniyare/ruun/schema"
 )
 
 // ThemeValidator validates theme definitions and consistency

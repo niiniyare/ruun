@@ -15,16 +15,12 @@ type ComponentGalleryProps struct {
 
 // ComponentGallery renders a comprehensive showcase of all Basecoat-compliant components
 templ ComponentGallery(props ComponentGalleryProps) {
-	@templates.DashboardLayout(templates.PageLayoutProps{
-		Meta: templates.PageMeta{
-			Title: "Component Gallery - Basecoat Design System",
-			Description: "Comprehensive showcase of all refactored Basecoat-compliant components",
-		},
-		Header: templates.PageHeader{
-			Title: "Component Gallery",
-			Description: "🏆 100% Basecoat Compliant Components",
-		},
-	}) {
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Component Gallery</title>
+	</head>
+	<body>
 		<div class="component-gallery">
 			<!-- Introduction -->
 			<div class="gallery-intro">
@@ -88,22 +84,7 @@ templ ComponentGallery(props ComponentGalleryProps) {
 
 					<div class="code-example">
 						<h4>Implementation</h4>
-						<pre><code>// Static class mapping - zero runtime overhead
-func getButtonClass(variant, size string, iconOnly bool) string {
-    switch size {
-    case "sm":
-        switch variant {
-        case "primary": return "btn-sm-primary"    // ✅ Static
-        case "secondary": return "btn-sm-secondary"
-        default: return "btn-sm"
-        }
-    default:
-        switch variant {
-        case "primary": return "btn-primary"       // ✅ Static  
-        default: return "btn"
-        }
-    }
-}</code></pre>
+						<p>Static class mapping example with zero runtime overhead</p>
 					</div>
 				</div>
 
@@ -585,74 +566,33 @@ func getButtonClass(variant, size string, iconOnly bool) string {
 					<div class="quality-card">
 						<h3>✅ Progressive Enhancement</h3>
 						<p>Optional complexity via nil-pointer pattern for enterprise features</p>
-						<code>AutoSave: &AutoSaveConfig{...}  // ✅ Optional</code>
+						<code>AutoSave: &amp;AutoSaveConfig  // ✅ Optional</code>
 					</div>
 				</div>
 			</section>
 		</div>
-	}
+	</body>
+	</html>
 }
 
 // Tab content components for demo
 templ tabOverviewContent() {
 	<div class="tab-content">
 		<h4>Component Overview</h4>
-		<p>This gallery showcases all refactored components following Basecoat CSS patterns.</p>
-		<ul>
-			<li>🎯 Perfect Basecoat compliance</li>
-			<li>⚡ Zero runtime overhead</li>
-			<li>🔧 Type-safe component APIs</li>
-			<li>📱 Progressive enhancement</li>
-		</ul>
+		<p>This gallery showcases refactored components.</p>
 	</div>
 }
 
 templ tabCodeContent() {
 	<div class="tab-content">
 		<h4>Implementation Details</h4>
-		<pre><code>// Static class mapping example
-func getButtonClass(variant, size string) string {
-    switch size {
-    case "lg":
-        switch variant {
-        case "primary": return "btn-lg-primary"
-        default: return "btn-lg"
-        }
-    default:
-        return "btn"
-    }
-}</code></pre>
+		<p>Static class mapping example</p>
 	</div>
 }
 
 templ tabPropsContent() {
 	<div class="tab-content">
 		<h4>Component Props</h4>
-		<table class="props-table">
-			<thead>
-				<tr>
-					<th>Prop</th>
-					<th>Type</th>
-					<th>Description</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Variant</td>
-					<td>ButtonVariant</td>
-					<td>Visual style variant</td>
-				</tr>
-				<tr>
-					<td>Size</td>
-					<td>ButtonSize</td>
-					<td>Size variant</td>
-				</tr>
-				<tr>
-					<td>Disabled</td>
-					<td>bool</td>
-					<td>Disabled state</td>
-				</tr>
-			</tbody>
-		</table>
+		<p>Component properties documentation</p>
 	</div>
 }
