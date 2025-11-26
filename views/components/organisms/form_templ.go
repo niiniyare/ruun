@@ -475,7 +475,7 @@ func formHeader(props FormProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 354, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 354, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -494,7 +494,7 @@ func formHeader(props FormProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 357, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 357, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -542,7 +542,7 @@ func formProgress(config *FormProgressConfig) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", config.CurrentStep))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 368, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 368, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -555,7 +555,7 @@ func formProgress(config *FormProgressConfig) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", config.TotalSteps))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 370, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 370, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -568,7 +568,7 @@ func formProgress(config *FormProgressConfig) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Step %d of %d", config.CurrentStep, config.TotalSteps))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 377, Col: 105}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 377, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -706,7 +706,7 @@ func formSection(section Section, state formState) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(section.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 420, Col: 52}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 420, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -759,7 +759,7 @@ func formSection(section Section, state formState) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(section.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 436, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 436, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -778,7 +778,7 @@ func formSection(section Section, state formState) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(section.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 440, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 440, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -854,7 +854,7 @@ func formFields(fields []Field, state formState) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var17).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -923,7 +923,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s-%s-feedback", state.id, field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 473, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 473, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -936,7 +936,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("errors.%s", field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 477, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 477, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -961,7 +961,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("errors.%s", field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 485, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 485, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -974,7 +974,7 @@ func formField(field Field, state formState) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("validating.%s", field.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 489, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 489, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -1041,7 +1041,7 @@ func formActions(state formState) templ.Component {
 					var templ_7745c5c3_Var26 string
 					templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var25).String())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 1, Col: 0}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 1, Col: 0}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 					if templ_7745c5c3_Err != nil {
@@ -1080,7 +1080,7 @@ func formActions(state formState) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var27).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -1146,7 +1146,7 @@ func formAction(action Action, state formState) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(action.Conditional)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/form.templ`, Line: 532, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/form.templ`, Line: 532, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {

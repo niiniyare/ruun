@@ -198,7 +198,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 166, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 166, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -211,7 +211,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 167, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 167, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -229,7 +229,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-input")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 169, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 169, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -273,7 +273,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 183, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 183, Col: 19}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -289,7 +289,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 187, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 187, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-popover")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 197, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 197, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -341,7 +341,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-listbox")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 210, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 210, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -354,7 +354,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID + "-trigger")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 211, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 211, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -372,7 +372,7 @@ func Autocomplete(props AutocompleteProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.EmptyMessage)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 213, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 213, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -434,7 +434,7 @@ func renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 228, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 228, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -482,7 +482,7 @@ func renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 241, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 241, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -500,7 +500,7 @@ func renderAutocompleteOption(option AutocompleteOption, props AutocompleteProps
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(option.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/autocomplete.templ`, Line: 243, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/autocomplete.templ`, Line: 243, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {

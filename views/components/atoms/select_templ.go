@@ -199,7 +199,7 @@ func renderOption(option SelectOption) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/select.templ`, Line: 168, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 168, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -228,7 +228,7 @@ func renderOption(option SelectOption) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/select.templ`, Line: 172, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 172, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -271,7 +271,7 @@ func renderOptGroup(group string, options []SelectOption) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(group)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/select.templ`, Line: 178, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 178, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -347,7 +347,7 @@ func Select(props SelectProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/select.templ`, Line: 191, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 191, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

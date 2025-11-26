@@ -88,7 +88,7 @@ func Tabs(props TabsProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 58, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 58, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -106,7 +106,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 60, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 60, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -124,7 +124,7 @@ func Tabs(props TabsProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getOrientation(props.Orientation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 66, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 66, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -156,7 +156,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTabID(props.ID, tab.ID, i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 75, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 75, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -169,7 +169,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getPanelID(props.ID, tab.ID, i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 76, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 76, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -182,7 +182,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", isActiveTab(tab, i, props.ActiveTab, props.ActiveIndex)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 77, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 77, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -195,7 +195,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTabIndex(tab, i, props.ActiveTab, props.ActiveIndex))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 78, Col: 71}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 78, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func Tabs(props TabsProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tab.AriaLabel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 84, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 84, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -253,7 +253,7 @@ func Tabs(props TabsProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.HxGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 90, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 90, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -266,7 +266,7 @@ func Tabs(props TabsProps) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tab:%s", tab.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 91, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 91, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -284,7 +284,7 @@ func Tabs(props TabsProps) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.HxTarget)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 93, Col: 33}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 93, Col: 33}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -303,7 +303,7 @@ func Tabs(props TabsProps) templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.HxSwap)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 96, Col: 29}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 96, Col: 29}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -335,7 +335,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(tab.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 109, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 109, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -379,7 +379,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(getPanelID(props.ID, tab.ID, i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 131, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 131, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -392,7 +392,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTabID(props.ID, tab.ID, i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 132, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 132, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -405,7 +405,7 @@ func Tabs(props TabsProps) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%t", isActiveTab(tab, i, props.ActiveTab, props.ActiveIndex)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 134, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 134, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -708,7 +708,7 @@ func CardTabs(id string, items []TabItem, title, description string) templ.Compo
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 265, Col: 16}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 265, Col: 16}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -727,7 +727,7 @@ func CardTabs(id string, items []TabItem, title, description string) templ.Compo
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/organisms/tabs.templ`, Line: 268, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/tabs.templ`, Line: 268, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
