@@ -405,7 +405,4 @@ func (r *Runtime) applyConditionals(ctx context.Context) error {
 	return nil
 }
 
-// ConditionalEngine interface for conditional logic
-type ConditionalEngine interface {
-	Evaluate(ctx context.Context, schema *Schema, data map[string]any) error
-}
+// Note: ConditionalEngine interface moved to interface.go

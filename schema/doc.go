@@ -110,19 +110,10 @@ Add reactive behavior with universal binding:
 	}
 # Extensibility
 Implement interfaces to extend functionality:
-	type SchemaValidator interface {
-		ValidateSchema(ctx context.Context, schema *Schema) error
-		ValidateData(ctx context.Context, schema *Schema, data map[string]any) error
-	}
-	type SchemaRenderer interface {
-		Render(ctx context.Context, schema *Schema, data map[string]any) (string, error)
-		RenderField(ctx context.Context, field *Field, value any) (string, error)
-	}
-	type SchemaRegistry interface {
-		Register(ctx context.Context, schema *Schema) error
-		Get(ctx context.Context, id string) (*Schema, error)
-		List(ctx context.Context, filter map[string]any) ([]*Schema, error)
-	}
+	// See interface.go for complete interface definitions including:
+	// - Validator: ValidateSchema, ValidateData, ValidateField
+	// - Renderer: Render, RenderField, Format  
+	// - Registry: Register, Get, List, Delete, Exists
 # Error Handling
 The package provides typed errors for better error handling:
 	schema, err := builder.Build()

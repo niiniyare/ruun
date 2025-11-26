@@ -911,15 +911,7 @@ func floatPtr(f float64) *float64 {
 	return &f
 }
 
-// RepeatableFieldInfo provides read-only information about repeatable field
-type RepeatableFieldInfo interface {
-	GetName() string
-	GetMinItems() int
-	GetMaxItems() int
-	GetTemplate() []Field
-	CanAddItem(currentCount int) bool
-	CanRemoveItem(currentCount int) bool
-}
+// Note: RepeatableFieldInfo interface moved to interface.go
 
 // Implement interface
 func (rf *RepeatableField) GetName() string {

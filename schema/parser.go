@@ -693,17 +693,7 @@ func (p *Parser) migrateV1_1ToV1_2(schema *Schema) error {
 // Plugin System
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ParserPlugin allows custom format parsers
-type ParserPlugin interface {
-	// Name returns the plugin name
-	Name() string
-
-	// CanParse checks if this plugin can parse the data
-	CanParse(data []byte) bool
-
-	// Parse parses the data into a schema
-	Parse(ctx context.Context, data []byte) (*Schema, error)
-}
+// Note: ParserPlugin interface moved to interface.go
 
 // RegisterPlugin registers a custom parser plugin
 //

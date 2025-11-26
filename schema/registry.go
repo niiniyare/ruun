@@ -42,40 +42,7 @@ func DefaultRegistryConfig() *RegistryConfig {
 	}
 }
 
-// StorageBackend defines storage operations
-type StorageBackend interface {
-	// Basic CRUD
-	Get(ctx context.Context, id string) ([]byte, error)
-	Set(ctx context.Context, id string, data []byte) error
-	Delete(ctx context.Context, id string) error
-	Exists(ctx context.Context, id string) (bool, error)
-
-	// Listing
-	List(ctx context.Context, filter *StorageFilter) ([]string, error)
-
-	// Versioning
-	GetVersion(ctx context.Context, id, version string) ([]byte, error)
-	ListVersions(ctx context.Context, id string) ([]string, error)
-
-	// Batch operations
-	GetBatch(ctx context.Context, ids []string) (map[string][]byte, error)
-	SetBatch(ctx context.Context, items map[string][]byte) error
-
-	// Metadata
-	GetMetadata(ctx context.Context, id string) (*StorageMetadata, error)
-
-	// Health
-	Health(ctx context.Context) error
-}
-
-// CacheBackend defines caching operations
-type CacheBackend interface {
-	Get(ctx context.Context, key string) ([]byte, error)
-	Set(ctx context.Context, key string, value []byte, ttl time.Duration) error
-	Delete(ctx context.Context, key string) error
-	Clear(ctx context.Context) error
-	Health(ctx context.Context) error
-}
+// Note: StorageBackend and CacheBackend interfaces moved to interface.go
 
 // StorageFilter defines filtering criteria
 

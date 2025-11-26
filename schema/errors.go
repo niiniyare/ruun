@@ -51,16 +51,7 @@ var (
 	ErrInvalidRequest = NewValidationError("invalid_request", "invalid request")
 )
 
-// SchemaError is the base interface for all schema-related errors
-type SchemaError interface {
-	error
-	Code() string
-	Type() ErrorType
-	Field() string
-	Details() map[string]any
-	WithField(field string) SchemaError
-	WithDetail(key string, value any) SchemaError
-}
+// Note: SchemaError interface moved to interface.go
 
 
 // BaseError implements the SchemaError interface

@@ -23,45 +23,7 @@ type EnrichConfig struct {
 type EnrichOption func(*EnrichConfig)
 
 
-// User represents a user in the system for enrichment purposes
-type User interface {
-	GetID() string
-	GetTenantID() string
-	GetPermissions() []string
-	GetRoles() []string
-	HasPermission(permission string) bool
-	HasRole(role string) bool
-	GetPreferredLocale() string
-}
-
-
-// TenantProvider interface for retrieving tenant customizations
-type TenantProvider interface {
-	GetCustomization(ctx context.Context, schemaID, tenantID string) (*TenantCustomization, error)
-}
-
-// Logger interface for structured logging in the enricher
-type Logger interface {
-	Warn(ctx context.Context, msg string, fields map[string]any)
-	Error(ctx context.Context, msg string, fields map[string]any)
-	Debug(ctx context.Context, msg string, fields map[string]any)
-}
-
-// Enricher interface defines the contract for schema enrichment
-type Enricher interface {
-	// Enrich enriches a schema with runtime data based on user context
-	// Returns a new enriched schema instance, leaving the original unchanged
-	Enrich(ctx context.Context, schema *Schema, user User) (*Schema, error)
-
-	// EnrichField enriches a single field with runtime data
-	EnrichField(ctx context.Context, field *Field, user User, data map[string]any) error
-
-	// EnrichWithLocale enriches a schema with localization support
-	EnrichWithLocale(ctx context.Context, schema *Schema, user User, locale string) (*Schema, error)
-
-	// SetTenantProvider sets the tenant customization provider
-	SetTenantProvider(provider TenantProvider)
-}
+// Note: User, TenantProvider, Logger, and Enricher interfaces moved to interface.go
 
 // DefaultEnricher is the production-ready implementation of the Enricher interface
 type DefaultEnricher struct {

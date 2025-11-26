@@ -23,19 +23,20 @@ func (f *MockField) GetRequired() bool               { return f.required }
 func (f *MockField) GetValidation() *FieldValidation { return f.validation }
 func (f *MockField) GetOptions() []FieldOption       { return f.options }
 func (f *MockField) GetConfig() map[string]any       { return f.config }
+func (f *MockField) GetRuntime() *FieldRuntime       { return nil }
 
 type MockSchema struct {
 	id         string
 	schemaType string
 	title      string
-	fields     []FieldInterface
+	fields     []FieldAccessor
 	validation any
 }
 
 func (s *MockSchema) GetID() string               { return s.id }
 func (s *MockSchema) GetType() string             { return s.schemaType }
 func (s *MockSchema) GetTitle() string            { return s.title }
-func (s *MockSchema) GetFields() []FieldInterface { return s.fields }
+func (s *MockSchema) GetFields() []FieldAccessor { return s.fields }
 func (s *MockSchema) GetValidation() any          { return s.validation }
 func TestNewValidationRegistry(t *testing.T) {
 	registry := NewValidationRegistry()

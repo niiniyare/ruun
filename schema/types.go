@@ -249,11 +249,7 @@ type Validation struct {
 	DebounceMS int              `json:"debounceMs,omitempty"`
 }
 
-// ValidatorFunc represents a validation function
-type ValidatorFunc func(ctx context.Context, value any, params map[string]any) error
-
-// AsyncValidatorFunc represents an async validation function
-type AsyncValidatorFunc func(ctx context.Context, value any, params map[string]any) error
+// Note: ValidatorFunc and AsyncValidatorFunc moved to interface.go
 
 // CacheEntry represents a validation cache entry
 type CacheEntry struct {
@@ -808,7 +804,7 @@ type Event struct {
 }
 
 // EventHandler processes events
-type EventHandler func(ctx context.Context, event Event) error
+// Note: EventHandler moved to interface.go
 
 // BehaviorMetadata describes a behavior's capabilities
 type BehaviorMetadata struct {
