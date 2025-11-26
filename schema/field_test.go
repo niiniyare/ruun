@@ -529,7 +529,7 @@ func (s *FieldTestSuite) TestTypeDefaultValues() {
 // ==================== Conditional Logic Tests ====================
 func (s *FieldTestSuite) TestIsVisibleSimpleFormat() {
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &FieldConditional{
+	s.field.Conditional = &Conditional{
 		Show: &condition.ConditionGroup{
 			Conjunction: condition.ConjunctionAnd,
 			Children: []any{
@@ -557,7 +557,7 @@ func (s *FieldTestSuite) TestIsVisibleSimpleFormat() {
 
 func (s *FieldTestSuite) TestIsVisibleHideCondition() {
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &FieldConditional{
+	s.field.Conditional = &Conditional{
 		Hide: &condition.ConditionGroup{
 			Conjunction: condition.ConjunctionAnd,
 			Children: []any{
@@ -587,7 +587,7 @@ func (s *FieldTestSuite) TestIsVisibleAdvancedFormat() {
 	s.field.SetEvaluator(s.evaluator)
 	builder := condition.NewBuilder(condition.ConjunctionAnd)
 	builder.AddRule("status", condition.OpEqual, "active")
-	s.field.Conditional = &FieldConditional{
+	s.field.Conditional = &Conditional{
 		Show: builder.Build(),
 	}
 	data := map[string]any{"status": "active"}
@@ -599,7 +599,7 @@ func (s *FieldTestSuite) TestIsVisibleAdvancedFormat() {
 func (s *FieldTestSuite) TestIsRequiredConditional() {
 	s.field.Required = false // Set to false so conditional controls requirement
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &FieldConditional{
+	s.field.Conditional = &Conditional{
 		Required: &condition.ConditionGroup{
 			Conjunction: condition.ConjunctionAnd,
 			Children: []any{
@@ -627,7 +627,7 @@ func (s *FieldTestSuite) TestIsRequiredConditional() {
 
 func (s *FieldTestSuite) TestIsDisabledConditional() {
 	s.field.SetEvaluator(s.evaluator)
-	s.field.Conditional = &FieldConditional{
+	s.field.Conditional = &Conditional{
 		Disabled: &condition.ConditionGroup{
 			Conjunction: condition.ConjunctionOr,
 			Children: []any{
@@ -663,7 +663,7 @@ func (s *FieldTestSuite) TestIsDisabledConditional() {
 }
 
 func (s *FieldTestSuite) TestIsVisibleWithoutEvaluator() {
-	s.field.Conditional = &FieldConditional{
+	s.field.Conditional = &Conditional{
 		Show: &condition.ConditionGroup{
 			Conjunction: condition.ConjunctionAnd,
 			Children: []any{

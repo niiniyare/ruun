@@ -392,7 +392,7 @@ func (s *BuilderTestSuite) TestConditionalFields() {
 			Type:     FieldText,
 			Label:    "Company Name",
 			Required: true,
-			Conditional: &FieldConditional{
+			Conditional: &Conditional{
 				Show: fixtures.visibilityCondition("account_type", "business"),
 			},
 		}

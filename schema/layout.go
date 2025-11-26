@@ -32,7 +32,7 @@ type LayoutBlock struct {
 	Order       int      `json:"order,omitempty"`
 
 	// Conditional visibility
-	Conditional *LayoutConditional `json:"conditional,omitempty"`
+	Conditional *Conditional `json:"conditional,omitempty"`
 
 	// Common styling
 	Style *Style `json:"style,omitempty"`
@@ -110,11 +110,6 @@ type Tab = LayoutBlock
 // Step represents a step in multi-step wizard
 type Step = LayoutBlock
 
-// LayoutConditional defines conditional visibility for layout components
-type LayoutConditional struct {
-	Show *condition.ConditionGroup `json:"show,omitempty"`
-	Hide *condition.ConditionGroup `json:"hide,omitempty"`
-}
 
 // Breakpoints defines responsive behavior
 type Breakpoints struct {
@@ -477,7 +472,7 @@ func (l *Layout) isGroupVisible(ctx context.Context, group *Group, data map[stri
 	return l.evaluateConditional(ctx, group.Conditional, data)
 }
 
-func (l *Layout) evaluateConditional(ctx context.Context, conditional *LayoutConditional, data map[string]any) (bool, error) {
+func (l *Layout) evaluateConditional(ctx context.Context, conditional *Conditional, data map[string]any) (bool, error) {
 	if l.evaluator == nil {
 		return true, nil
 	}
@@ -902,7 +897,7 @@ func (b *SectionBuilder) WithOrder(order int) *SectionBuilder {
 	return b
 }
 
-func (b *SectionBuilder) WithConditional(conditional *LayoutConditional) *SectionBuilder {
+func (b *SectionBuilder) WithConditional(conditional *Conditional) *SectionBuilder {
 	b.section.Conditional = conditional
 	return b
 }
@@ -956,7 +951,7 @@ func (b *GroupBuilder) WithOrder(order int) *GroupBuilder {
 	return b
 }
 
-func (b *GroupBuilder) WithConditional(conditional *LayoutConditional) *GroupBuilder {
+func (b *GroupBuilder) WithConditional(conditional *Conditional) *GroupBuilder {
 	b.group.Conditional = conditional
 	return b
 }
@@ -1015,7 +1010,7 @@ func (b *TabBuilder) WithOrder(order int) *TabBuilder {
 	return b
 }
 
-func (b *TabBuilder) WithConditional(conditional *LayoutConditional) *TabBuilder {
+func (b *TabBuilder) WithConditional(conditional *Conditional) *TabBuilder {
 	b.tab.Conditional = conditional
 	return b
 }
@@ -1070,7 +1065,7 @@ func (b *StepBuilder) WithValidation(validate bool) *StepBuilder {
 	return b
 }
 
-func (b *StepBuilder) WithConditional(conditional *LayoutConditional) *StepBuilder {
+func (b *StepBuilder) WithConditional(conditional *Conditional) *StepBuilder {
 	b.step.Conditional = conditional
 	return b
 }

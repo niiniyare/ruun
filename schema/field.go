@@ -41,7 +41,7 @@ type Field struct {
 	// Behavior
 	Validation   *FieldValidation  `json:"validation,omitempty"`
 	Transform    *FieldTransform   `json:"transform,omitempty"`
-	Conditional  *FieldConditional `json:"conditional,omitempty"`
+	Conditional  *Conditional `json:"conditional,omitempty"`
 	DataSource   *DataSource       `json:"dataSource,omitempty"`
 	Dependencies []string          `json:"dependencies,omitempty"`
 
@@ -219,13 +219,6 @@ type FieldTransform struct {
 }
 
 
-// FieldConditional defines conditional behavior
-type FieldConditional struct {
-	Show     *condition.ConditionGroup `json:"show,omitempty"`
-	Hide     *condition.ConditionGroup `json:"hide,omitempty"`
-	Required *condition.ConditionGroup `json:"required,omitempty"`
-	Disabled *condition.ConditionGroup `json:"disabled,omitempty"`
-}
 
 // FieldLayout controls positioning
 type FieldLayout struct {
@@ -959,7 +952,7 @@ func (b *FieldBuilder) WithTransform(transform *FieldTransform) *FieldBuilder {
 	return b
 }
 
-func (b *FieldBuilder) WithConditional(conditional *FieldConditional) *FieldBuilder {
+func (b *FieldBuilder) WithConditional(conditional *Conditional) *FieldBuilder {
 	b.field.Conditional = conditional
 	return b
 }
