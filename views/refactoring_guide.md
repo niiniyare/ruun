@@ -22,7 +22,11 @@ Basecoat provides semantic component classes that replace utility-first approach
 - **Progressive Enhancement**: Works without JS, enhanced with optional JS modules
 - **Full Component Library**: Buttons, forms, navigation, layouts, and more
 
-See `./views/basecoat-analysis.md` for complete class reference.
+### Reference Documents
+
+- **`./views/basecoat-analysis.md`** - Complete technical analysis of all CSS classes
+- **`./views/basecoat-component-examples.md`** - Practical copy-paste examples
+- **`./views/basecoat-quick-reference.md`** - Quick lookup for common patterns
 
 ---
 

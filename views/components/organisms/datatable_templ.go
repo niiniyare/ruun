@@ -885,7 +885,7 @@ func dataTableToolbar(props DataTableProps) templ.Component {
 }
 
 // dataTableSearch renders the search input
-func dataTableSearch(search DataTableSearch) templ.Component {
+func dataTableSearch(filtering *FilteringConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -911,9 +911,9 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(search.Placeholder != "", search.Placeholder, "Search..."))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(filtering.Search.Placeholder != "", filtering.Search.Placeholder, "Search..."))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 651, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 651, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -924,9 +924,9 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(search.Value)
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(filtering.Search.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 652, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 652, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -936,15 +936,15 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if search.Delay > 0 {
+		if filtering.Search.Delay > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " x-on:input=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("debounce." + fmt.Sprintf("%dms", search.Delay) + ":performSearch()")
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("debounce." + fmt.Sprintf("%dms", filtering.Search.Delay) + ":performSearch()")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 655, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 655, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -971,7 +971,7 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if search.Advanced {
+		if filtering.Search.Advanced {
 			templ_7745c5c3_Var15 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -994,8 +994,8 @@ func dataTableSearch(search DataTableSearch) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:   stringGhost,
-				Size:      stringSM,
+				Variant:   "ghost",
+				Size:      "sm",
 				OnClick:   "showAdvancedSearch = !showAdvancedSearch",
 				AriaLabel: "Toggle advanced search",
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
@@ -1135,12 +1135,12 @@ func dataTableBulkActions(props DataTableProps) templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(props.BulkActions) > 0 {
+		if props.Actions != nil && len(props.Actions.BulkActions) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<div class=\"datatable-bulk-actions\" x-show=\"selectedRows.length > 0\" x-transition><div class=\"datatable-bulk-actions-content\"><span class=\"datatable-bulk-actions-count\" x-text=\"`${selectedRows.length} items selected`\"></span><div class=\"datatable-bulk-actions-buttons\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, action := range props.BulkActions {
+			for _, action := range props.Actions.BulkActions {
 				templ_7745c5c3_Err = dataTableBulkAction(action).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1203,7 +1203,7 @@ func dataTableBulkAction(action DataTableBulkAction) templ.Component {
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 			Text:    action.Text,
 			Variant: action.Variant,
-			Size:    stringSM,
+			Size:    "sm",
 			OnClick: utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -1548,8 +1548,8 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant: stringGhost,
-				Size:    stringSM,
+				Variant: "ghost",
+				Size:    "sm",
 				OnClick: fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var35), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -1796,7 +1796,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				} else {
 					templ_7745c5c3_Err = atoms.Badge(atoms.BadgeProps{
 						Text:    strValue,
-						Variant: stringDefault,
+						Variant: "primary",
 						Size:    atoms.BadgeSizeSM,
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
@@ -2075,8 +2075,8 @@ func dataTableRowActions(row DataTableRow, props DataTableProps) templ.Component
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant: stringGhost,
-			Size:    stringSM,
+			Variant: "ghost",
+			Size:    "sm",
 			OnClick: "open = !open",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var56), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -2328,8 +2328,8 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:  stringOutline,
-				Size:     stringSM,
+				Variant:  "outline",
+				Size:     "sm",
 				OnClick:  "previousPage()",
 				Disabled: pagination.CurrentPage <= 1,
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var66), templ_7745c5c3_Buffer)
@@ -2343,8 +2343,8 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 			for i := 1; i <= pagination.TotalPages; i++ {
 				templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 					Text:    strconv.Itoa(i),
-					Variant: utils.IfElse(i == pagination.CurrentPage, stringDefault, stringGhost),
-					Size:    stringSM,
+					Variant: utils.IfElse(i == pagination.CurrentPage, "primary", "ghost"),
+					Size:    "sm",
 					OnClick: fmt.Sprintf("goToPage(%d)", i),
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -2377,8 +2377,8 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:  stringOutline,
-				Size:     stringSM,
+				Variant:  "outline",
+				Size:     "sm",
 				OnClick:  "nextPage()",
 				Disabled: pagination.CurrentPage >= pagination.TotalPages,
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var67), templ_7745c5c3_Buffer)
@@ -2454,7 +2454,7 @@ func dataTableAction(action DataTableAction) templ.Component {
 }
 
 // dataTableExportButton renders the export button
-func dataTableExportButton(export DataTableExport) templ.Component {
+func dataTableExportButton(export *ExportConfig) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -2505,8 +2505,8 @@ func dataTableExportButton(export DataTableExport) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant: stringOutline,
-			Size:    stringSM,
+			Variant: "outline",
+			Size:    "sm",
 			OnClick: "open = !open",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var71), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -2582,8 +2582,8 @@ func dataTableViewOptions(props DataTableProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant:   stringGhost,
-			Size:      stringSM,
+			Variant:   "ghost",
+			Size:      "sm",
 			OnClick:   "open = !open",
 			AriaLabel: "View options",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var73), templ_7745c5c3_Buffer)
@@ -2693,8 +2693,8 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant: stringGhost,
-				Size:    stringSM,
+				Variant: "ghost",
+				Size:    "sm",
 				OnClick: "showExportModal = false",
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var75), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -2706,7 +2706,7 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 			}
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 				Text:    "Cancel",
-				Variant: stringOutline,
+				Variant: "outline",
 				OnClick: "showExportModal = false",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

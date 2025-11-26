@@ -1,0 +1,24 @@
+(!) templ version check: generator v0.3.943 is older than templ version v0.3.960 found in go.mod file, consider upgrading templ CLI
+(✓) Post-generation event received, processing... [ needsRestart=true needsBrowserReload=true ]
+(✗) Error [ error=failed to generate code for "/data/data/com.termux/files/home/project/ruun/views/pages/component_gallery.templ": /data/data/com.termux/files/home/project/ruun/views/pages/component_gallery.templ parsing error: @templates.DashboardLayout(templates.PageLayoutProps{
+		Meta: templates.PageMeta{
+			Title: "Component Gallery - Basecoat Design System",
+			Description: "Comprehensive showcase of all refactored Basecoat-compliant components",
+		},
+		Header: templates.PageHeader{
+			Title: "Component Gallery",
+			Description: "🏆 100% Basecoat Compliant Components",
+		},
+	}): expected nodes, but none were found: line 624, col 8 ]
+(✓) Post-generation event received, processing... [ needsRestart=true needsBrowserReload=true ]
+(✗) Error [ error=failed to generate code for "/data/data/com.termux/files/home/project/ruun/views_backup_20251127_005005/pages/component_gallery.templ": /data/data/com.termux/files/home/project/ruun/views_backup_20251127_005005/pages/component_gallery.templ parsing error: @templates.DashboardLayout(templates.PageLayoutProps{
+		Meta: templates.PageMeta{
+			Title: "Component Gallery - Basecoat Design System",
+			Description: "Comprehensive showcase of all refactored Basecoat-compliant components",
+		},
+		Header: templates.PageHeader{
+			Title: "Component Gallery",
+			Description: "🏆 100% Basecoat Compliant Components",
+		},
+	}): expected nodes, but none were found: line 624, col 8 ]
+(✗) Command failed: generation completed with 2 errors

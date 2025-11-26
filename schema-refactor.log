@@ -42,3 +42,6 @@
 [0;35m[TASK][0m Executing T1.6: Create behavior.go (request behavior)
 [0;34m[INFO][0m Creating behavior.go...
 [0;32m[SUCCESS][0m Task T1.6 completed
+[0;35m[TASK][0m Executing T1.7: Create binding.go (reactive bindings)
+[0;34m[INFO][0m Creating binding.go...
+[0;32m[SUCCESS][0m Task T1.7 completed

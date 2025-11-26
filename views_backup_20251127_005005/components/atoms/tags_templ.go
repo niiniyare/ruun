@@ -238,7 +238,7 @@ func renderTagContent(props TagProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/tags.templ`, Line: 149, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/atoms/tags.templ`, Line: 149, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

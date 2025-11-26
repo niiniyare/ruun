@@ -222,7 +222,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Theme)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 189, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 189, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -257,7 +257,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var3).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -275,7 +275,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AlpineData)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 198, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 198, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -293,7 +293,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getSidebarAlpineData(props.Sidebar.Collapsed))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 200, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 200, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -318,7 +318,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 206, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 206, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -337,7 +337,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 209, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 209, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -380,7 +380,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var9).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -418,7 +418,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var11).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -465,7 +465,7 @@ func PageLayout(props PageLayoutProps, children ...templ.Component) templ.Compon
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var13).String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 1, Col: 0}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 1, Col: 0}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -546,7 +546,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 285, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 285, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -565,7 +565,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 289, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 289, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -584,7 +584,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(meta.Keywords, ", "))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 293, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 293, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -603,7 +603,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(meta.Author)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 297, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 297, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -622,7 +622,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var20 templ.SafeURL
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(meta.Canonical)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 301, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 301, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -641,7 +641,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var21 templ.SafeURL
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(meta.Favicon)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 305, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 305, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -664,7 +664,7 @@ func pageHead(meta PageMeta, customCSS []string) templ.Component {
 			var templ_7745c5c3_Var22 templ.SafeURL
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinURLErrs(cssFile)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 317, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 317, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -717,7 +717,7 @@ func pageHeader(header PageHeader) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(header.Class)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 331, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 331, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -762,7 +762,7 @@ func pageHeader(header PageHeader) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(header.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 354, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 354, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -788,7 +788,7 @@ func pageHeader(header PageHeader) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(header.Badge)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 360, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 360, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -816,7 +816,7 @@ func pageHeader(header PageHeader) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(header.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 365, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 365, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -852,7 +852,7 @@ func pageHeader(header PageHeader) templ.Component {
 					var templ_7745c5c3_Var30 string
 					templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(action.Text)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 386, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 386, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 					if templ_7745c5c3_Err != nil {
@@ -946,7 +946,7 @@ func pageFooter(footer PageFooter) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(footer.Class)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 411, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 411, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -969,7 +969,7 @@ func pageFooter(footer PageFooter) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(footer.Copyright)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 419, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 419, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -993,7 +993,7 @@ func pageFooter(footer PageFooter) templ.Component {
 				var templ_7745c5c3_Var34 templ.SafeURL
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinURLErrs(link.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 425, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 425, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 				if templ_7745c5c3_Err != nil {
@@ -1016,7 +1016,7 @@ func pageFooter(footer PageFooter) templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(link.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 432, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 432, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 				if templ_7745c5c3_Err != nil {
@@ -1049,7 +1049,7 @@ func pageFooter(footer PageFooter) templ.Component {
 				var templ_7745c5c3_Var36 templ.SafeURL
 				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinURLErrs(social.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 444, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 444, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 				if templ_7745c5c3_Err != nil {
@@ -1062,7 +1062,7 @@ func pageFooter(footer PageFooter) templ.Component {
 				var templ_7745c5c3_Var37 string
 				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(social.Text)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 448, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 448, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 				if templ_7745c5c3_Err != nil {
@@ -1176,7 +1176,7 @@ func pageError(errorMsg string) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(errorMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 483, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 483, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -1249,7 +1249,7 @@ func pageScripts(customJS []string) templ.Component {
 			var templ_7745c5c3_Var43 string
 			templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(jsFile)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/pagelayout.templ`, Line: 497, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_005005/components/templates/pagelayout.templ`, Line: 497, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 			if templ_7745c5c3_Err != nil {
