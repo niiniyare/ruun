@@ -121,19 +121,7 @@ const (
 	TransformSlugify    TransformType = "slugify"
 )
 
-// SwapStrategy represents HTMX swap strategies
-type SwapStrategy string
-
-const (
-	SwapInnerHTML   SwapStrategy = "innerHTML"
-	SwapOuterHTML   SwapStrategy = "outerHTML"
-	SwapBeforeBegin SwapStrategy = "beforebegin"
-	SwapAfterBegin  SwapStrategy = "afterbegin"
-	SwapBeforeEnd   SwapStrategy = "beforeend"
-	SwapAfterEnd    SwapStrategy = "afterend"
-	SwapDelete      SwapStrategy = "delete"
-	SwapNone        SwapStrategy = "none"
-)
+// SwapStrategy type moved to behavior.go - this definition is consolidated there
 
 // AggregateType represents different aggregation types
 type AggregateType string
@@ -641,13 +629,7 @@ type SchemaI18n struct {
 	Direction   map[string]string `json:"direction,omitempty"`
 }
 
-// ActionHTMX represents HTMX configuration for actions
-type ActionHTMX struct {
-	Method string `json:"method,omitempty"`
-	URL    string `json:"url,omitempty"`
-	Target string `json:"target,omitempty"`
-	Swap   string `json:"swap,omitempty"`
-}
+// ActionHTMX type moved to behavior.go - this definition is consolidated there
 
 // ActionTheme is deprecated - use the unified Style type from style.go instead
 // This is kept for backward compatibility but will be removed in future versions
@@ -686,16 +668,7 @@ type ActionPermissions struct {
 	Required []string `json:"required,omitempty"`
 }
 
-// Trigger represents an event trigger
-type Trigger struct {
-	Event   string `json:"event,omitempty"`
-	Target  string `json:"target,omitempty"`
-	Filter  string `json:"filter,omitempty"`
-	Delay   int    `json:"delay,omitempty"`
-	Once    bool   `json:"once,omitempty"`
-	Changed bool   `json:"changed,omitempty"`
-	From    string `json:"from,omitempty"`
-}
+// Trigger type moved to behavior.go - this definition is consolidated there
 
 // DataSource represents field data source configuration
 type DataSource struct {
@@ -772,72 +745,16 @@ type ParserStats struct {
 	mu              sync.RWMutex
 }
 
-// Event represents a schema-related event
-type Event struct {
-	Type      string
-	Source    string
-	Timestamp int64
-	Data      map[string]any
-}
+// Event type moved to event.go - this definition is consolidated there
 
 // EventHandler processes events
 // Note: EventHandler moved to interface.go
 
-// BehaviorMetadata describes a behavior's capabilities
-type BehaviorMetadata struct {
-	Name        string
-	Description string
-	Version     string
-	Inputs      map[string]string // Field type names as strings
-	Outputs     map[string]string // Field type names as strings
-	Tags        []string
-}
+// BehaviorMetadata type moved to event.go - this definition is consolidated there
 
-// Events defines lifecycle event handlers
-type Events struct {
-	OnMount         string `json:"onMount,omitempty"`
-	OnUnmount       string `json:"onUnmount,omitempty"`
-	OnSubmit        string `json:"onSubmit,omitempty"`
-	BeforeSubmit    string `json:"beforeSubmit,omitempty"`
-	AfterSubmit     string `json:"afterSubmit,omitempty"`
-	OnSubmitSuccess string `json:"onSubmitSuccess,omitempty"`
-	OnSubmitError   string `json:"onSubmitError,omitempty"`
-	OnReset         string `json:"onReset,omitempty"`
-	OnValidate      string `json:"onValidate,omitempty"`
-	OnChange        string `json:"onChange,omitempty"`
-	OnDirty         string `json:"onDirty,omitempty"`
-	OnPristine      string `json:"onPristine,omitempty"`
-	OnLoad          string `json:"onLoad,omitempty"`
-	OnError         string `json:"onError,omitempty"`
-	OnFieldChange   string `json:"onFieldChange,omitempty"`
-	OnFieldFocus    string `json:"onFieldFocus,omitempty"`
-	OnFieldBlur     string `json:"onFieldBlur,omitempty"`
-	OnFieldValidate string `json:"onFieldValidate,omitempty"`
-}
+// Events type moved to event.go - this definition is consolidated there
 
-// HTMX defines HTMX integration configuration
-type HTMX struct {
-	Enabled   bool              `json:"enabled"`
-	Get       string            `json:"get,omitempty"`
-	Post      string            `json:"post,omitempty"`
-	Put       string            `json:"put,omitempty"`
-	Delete    string            `json:"delete,omitempty"`
-	Patch     string            `json:"patch,omitempty"`
-	Trigger   string            `json:"trigger,omitempty"`
-	Target    string            `json:"target,omitempty"`
-	Swap      string            `json:"swap,omitempty"`
-	Select    string            `json:"select,omitempty"`
-	Indicator string            `json:"indicator,omitempty"`
-	PushURL   string            `json:"pushUrl,omitempty"`
-	Headers   map[string]string `json:"headers,omitempty"`
-	Vals      string            `json:"vals,omitempty"`
-	Confirm   string            `json:"confirm,omitempty"`
-	Boost     bool              `json:"boost,omitempty"`
-	Sync      string            `json:"sync,omitempty"`
-	Validate  bool              `json:"validate,omitempty"`
-	Timeout   int               `json:"timeout,omitempty"`
-	Retry     int               `json:"retry,omitempty"`
-}
+// HTMX type moved to behavior.go - this definition is consolidated there
 
 // DOMEvents represents unified DOM event handlers
 type DOMEvents struct {
@@ -989,47 +906,7 @@ func IsRTLForSchemaI18n(schemaI18n *SchemaI18n, locale string) bool {
 	return rtlLanguages[locale]
 }
 
-// HTMX helper methods
-func (h *HTMX) IsHTMXEnabled() bool {
-	return h != nil && h.Enabled
-}
-
-func (h *HTMX) GetHTTPMethod() string {
-	if h == nil {
-		return "GET"
-	}
-	if h.Post != "" {
-		return "POST"
-	}
-	if h.Put != "" {
-		return "PUT"
-	}
-	if h.Patch != "" {
-		return "PATCH"
-	}
-	if h.Delete != "" {
-		return "DELETE"
-	}
-	return "GET"
-}
-
-func (h *HTMX) GetURL() string {
-	if h == nil {
-		return ""
-	}
-	switch h.GetHTTPMethod() {
-	case "POST":
-		return h.Post
-	case "PUT":
-		return h.Put
-	case "PATCH":
-		return h.Patch
-	case "DELETE":
-		return h.Delete
-	default:
-		return h.Get
-	}
-}
+// HTMX helper methods moved to behavior.go
 
 // String method for ValidationError
 func (ve *ValidationError) String() string {
@@ -1051,10 +928,7 @@ func (tt TransformType) String() string {
 	return string(tt)
 }
 
-// String method for SwapStrategy
-func (ss SwapStrategy) String() string {
-	return string(ss)
-}
+// SwapStrategy String method moved to behavior.go
 
 // String method for AggregateType
 func (at AggregateType) String() string {

@@ -26,7 +26,6 @@ type Action struct {
 	Hidden   bool `json:"hidden,omitempty"`
 
 	// Unified Configuration
-	Behavior     []string         `json:"behavior,omitempty"`
 	Binding      []string         `json:"binding,omitempty"`
 	Conditional  []string         `json:"conditional,omitempty"`
 	Permissions  []string         `json:"permissions,omitempty"`
@@ -36,9 +35,11 @@ type Action struct {
 	Style        *Style             `json:"style,omitempty"`
 	ActionConfig *ActionConfig      `json:"action_config,omitempty"`
 
+	// Behavior and interaction (replaces HTMX/ActionHTMX)
+	Behavior     *Behavior          `json:"behavior,omitempty"` // Replaces old []string behavior
+	
 	// Legacy Support
 	Confirm     *ActionConfirm     `json:"confirm,omitempty"`
-	HTMX        *ActionHTMX        `json:"htmx,omitempty"`
 
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
@@ -47,25 +48,9 @@ type Action struct {
 // Missing type definitions for compatibility
 
 
-// MigrateToBehavior converts legacy ActionHTMX to new Behavior format
-func (h *ActionHTMX) MigrateToBehavior() *Behavior {
-	if h == nil {
-		return nil
-	}
-	
-	behavior := &Behavior{
-		Method: h.Method,
-		URL:    h.URL,
-		Target: h.Target,
-	}
-	
-	// Convert swap strategy to new format
-	if h.Swap != "" {
-		behavior.Swap = SwapStrategy(h.Swap)
-	}
-	
-	return behavior
-}
+// ActionHTMX is a type alias for backward compatibility
+// Use Behavior instead for new code
+type ActionHTMX = Behavior
 
 // ActionTheme defines theme overrides for this action
 
@@ -220,21 +205,13 @@ func (a *Action) IsCustomAction() bool {
 // GetURL returns action URL
 func (a *Action) GetURL() string {
 	// Try new Behavior first (unified approach)
-	if len(a.Behavior) > 0 {
-		// TODO: Implement Behavior lookup from registry
-		// For now, check if it's a direct URL in the behavior string
-		for _, behavior := range a.Behavior {
-			if behavior != "" {
-				// This is a placeholder - in a real implementation,
-				// we would look up the behavior from a registry
-				return behavior
-			}
-		}
+	if a.Behavior != nil && a.Behavior.URL != "" {
+		return a.Behavior.URL
 	}
 	
-	// Try legacy HTMX field
-	if a.HTMX != nil && a.HTMX.URL != "" {
-		return a.HTMX.URL
+	// Try new Behavior field
+	if a.Behavior != nil && a.Behavior.URL != "" {
+		return a.Behavior.URL
 	}
 	
 	// Fall back to Config
@@ -248,9 +225,9 @@ func (a *Action) GetURL() string {
 
 // GetHTTPMethod returns HTTP method
 func (a *Action) GetHTTPMethod() string {
-	// Try legacy HTMX field first for backward compatibility
-	if a.HTMX != nil && a.HTMX.Method != "" {
-		return a.HTMX.Method
+	// Try new Behavior field first
+	if a.Behavior != nil && a.Behavior.Method != "" {
+		return a.Behavior.Method
 	}
 	
 	// Try Config
@@ -344,16 +321,9 @@ func (a *Action) GetConfigMap() map[string]any {
 	return a.Config
 }
 
-// MigrateLegacyHTMXToBehavior migrates legacy HTMX configuration to new Behavior approach
-func (a *Action) MigrateLegacyHTMXToBehavior() {
-	if a.HTMX != nil {
-		behavior := a.HTMX.MigrateToBehavior()
-		if behavior != nil {
-			// For now, we store behaviors as string references
-			// In a full implementation, this would register the behavior and store the ID
-			a.Behavior = []string{behavior.URL}
-		}
-	}
+// HasBehavior returns true if the action has behavior configuration
+func (a *Action) HasBehavior() bool {
+	return a != nil && a.Behavior != nil && !a.Behavior.IsEmpty()
 }
 
 

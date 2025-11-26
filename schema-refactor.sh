@@ -224,7 +224,7 @@ register_all_tasks() {
 
 run_build() {
   local log_file="/tmp/schema_build_$$.log"
-  timeout "$BUILD_TIMEOUT" go build ./schema/... 2>&1 | tee "$log_file"
+  timeout "$BUILD_TIMEOUT" go build ./schema/... && go vet ./schema/... 2>&1 | tee "$log_file"
   local result=${PIPESTATUS[0]}
 
   if [[ $result -eq 0 ]]; then
@@ -249,7 +249,7 @@ run_tests() {
 }
 
 get_build_errors() {
-  go build ./schema/... 2>&1 | grep -E "^\./" | head -30
+  go build ./schema/... && go vet ./schema/... 2>&1 | grep -E "^\./" | head -30
 }
 
 # =============================================================================
@@ -276,7 +276,7 @@ fix_build_errors() {
 
     log_fix "Attempting automatic fix (attempt $attempt)..."
 
-    claude --dangerously-skip-permissions "Fix these Go build errors in the schema package:
+    claude --dangerously-skip-permissions "Fix these Go build and Go vet errors in the schema package:
 
 $errors
 
@@ -472,7 +472,7 @@ DO NOT include (these go in separate files):
 - Field, Action, Schema, Layout (stay in their own files)
 
 After creating, remove these types from their OLD locations to avoid duplicates.
-Run "go build ./schema/..." and fix any errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix any errors.'
 }
 
 task_T1_2() {
@@ -537,7 +537,7 @@ REMOVE duplicate interfaces from:
 - runtime.go (ConditionalEngine)
 - errors.go (keep implementation, move interface here)
 
-Run "go build ./schema/..." and fix any errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix any errors.'
 }
 
 task_T1_3() {
@@ -625,7 +625,7 @@ AFTER CREATING:
 1. Update Field.Conditional to use *Conditional (remove FieldConditional)
 2. Update Layout components to use *Conditional (remove LayoutConditional)
 3. Remove old conditional types from their files
-4. Run "go build ./schema/..." and fix errors'
+4. Run "go build ./schema/... && go vet ./schema/..." and fix errors'
 }
 
 task_T1_4() {
@@ -720,7 +720,7 @@ func (s *Style) Merge(other *Style) *Style {
 AFTER CREATING:
 1. Update all structs that use style types to use *Style
 2. Remove old style types from layout.go, action.go, etc.
-3. Run "go build ./schema/..." and fix errors'
+3. Run "go build ./schema/... && go vet ./schema/..." and fix errors'
 }
 
 task_T1_5() {
@@ -833,7 +833,7 @@ AFTER CREATING:
 1. Remove duplicate Event from types.go and interface.go (keep only this one)
 2. Remove duplicate BehaviorMetadata from types.go and interface.go
 3. Remove old Events from types.go
-4. Run "go build ./schema/..." and fix errors'
+4. Run "go build ./schema/... && go vet ./schema/..." and fix errors'
 }
 
 task_T1_6() {
@@ -957,7 +957,7 @@ AFTER CREATING:
 1. Remove HTMX struct from types.go
 2. Remove ActionHTMX from action.go
 3. Update all HTMX references to use Behavior
-4. Run "go build ./schema/..." and fix errors'
+4. Run "go build ./schema/... && go vet ./schema/..." and fix errors'
 }
 
 task_T1_7() {
@@ -1065,7 +1065,7 @@ func (b *BindingBuilder) Build() *Binding {
 AFTER CREATING:
 1. Remove Alpine-related types from action.go and elsewhere
 2. Update references to use Binding
-3. Run "go build ./schema/..." and fix errors'
+3. Run "go build ./schema/... && go vet ./schema/..." and fix errors'
 }
 
 task_T1_8() {
@@ -1127,7 +1127,7 @@ func NewNotFoundError(resource, id string) SchemaError {
     }
 }
 
-Run "go build ./schema/..." and fix any errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix any errors.'
 }
 
 # =============================================================================
@@ -1175,7 +1175,7 @@ CHANGES NEEDED:
    - FieldI18n struct
    - DataSource struct
 
-Run "go build ./schema/..." and fix ALL errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix ALL errors.'
 }
 
 task_T2_2() {
@@ -1226,7 +1226,7 @@ CHANGES NEEDED:
 
 5. Update ActionBuilder methods for new types
 
-Run "go build ./schema/..." and fix ALL errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix ALL errors.'
 }
 
 task_T2_3() {
@@ -1259,7 +1259,7 @@ CHANGES NEEDED:
    - SchemaInfo interface implementation
    - Schema methods (GetField, GetAction, etc.)
 
-Run "go build ./schema/..." and fix ALL errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix ALL errors.'
 }
 
 task_T2_4() {
@@ -1312,7 +1312,7 @@ CHANGES NEEDED:
 
 9. Update all builder methods for new types
 
-Run "go build ./schema/..." and fix ALL errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix ALL errors.'
 }
 
 task_T2_5() {
@@ -1330,7 +1330,7 @@ CHANGES NEEDED:
 
 3. Update any mixin application logic if needed
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T2_6() {
@@ -1348,7 +1348,7 @@ CHANGES NEEDED:
 
 4. Ensure Aggregate type references AggregateType from types.go (avoid duplicates)
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 # =============================================================================
@@ -1371,7 +1371,7 @@ CHANGES NEEDED:
 
 3. Update any internal type references
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_2() {
@@ -1398,7 +1398,7 @@ CHANGES NEEDED:
 
 5. Use ValidationResult from types.go
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_3() {
@@ -1427,7 +1427,7 @@ CHANGES NEEDED:
 
 4. Import and use interfaces from interface.go
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_4() {
@@ -1447,7 +1447,7 @@ CHANGES NEEDED:
 
 3. Import and use interfaces from interface.go
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_5() {
@@ -1469,7 +1469,7 @@ CHANGES NEEDED:
 
 3. Update to use Validator, Renderer, ConditionalEngine from interface.go
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_6() {
@@ -1492,7 +1492,7 @@ CHANGES NEEDED:
 
 3. Import ParserPlugin from interface.go
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_7() {
@@ -1505,7 +1505,7 @@ Ensure:
 2. I18nManager, I18nConfig, Translation types are properly defined here
 3. Import any shared types from types.go
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T3_8() {
@@ -1518,7 +1518,7 @@ Ensure:
 2. No duplicate types with other files
 3. BusinessRule, BusinessRuleEngine properly defined here
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 # =============================================================================
@@ -1555,7 +1555,7 @@ FROM field.go - REMOVE if still exists:
 FROM action.go - REMOVE if still exists:
 - ActionHTMX, ActionAlpine, ActionTheme, ActionConfig, ActionPermissions
 
-Run "go build ./schema/..." after each file and fix errors before moving to next.'
+Run "go build ./schema/... && go vet ./schema/..." after each file and fix errors before moving to next.'
 }
 
 task_T4_2() {
@@ -1582,7 +1582,7 @@ FROM validator.go - REMOVE (should already be done):
 
 FROM any other files - search and remove duplicate interfaces
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 task_T4_3() {
@@ -1599,7 +1599,7 @@ The file should only contain:
 - Any doc-only examples
 - NO type or interface definitions
 
-Run "go build ./schema/..." and fix errors.'
+Run "go build ./schema/... && go vet ./schema/..." and fix errors.'
 }
 
 # =============================================================================
