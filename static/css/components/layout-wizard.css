@@ -1,0 +1,400 @@
+/**
+ * Wizard Layout Component
+ * Multi-step form layout with progress indicator and navigation
+ */
+
+/* Main wizard container */
+.layout-wizard {
+  @apply min-h-screen bg-background;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wizard header */
+.layout-wizard__header {
+  @apply border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.layout-wizard__header-content {
+  @apply flex items-center justify-between px-6 py-4;
+}
+
+.layout-wizard__header-title {
+  @apply text-lg font-semibold text-foreground;
+}
+
+.layout-wizard__header-actions {
+  @apply flex items-center gap-2;
+}
+
+/* Progress indicator */
+.layout-wizard__progress {
+  @apply px-6 py-4;
+}
+
+.layout-wizard__progress-bar {
+  @apply w-full bg-muted rounded-full h-2;
+}
+
+.layout-wizard__progress-fill {
+  @apply bg-primary h-2 rounded-full transition-all duration-300 ease-in-out;
+}
+
+.layout-wizard__progress-text {
+  @apply text-sm text-muted-foreground mt-2 text-center;
+}
+
+/* Steps navigation */
+.layout-wizard__steps {
+  @apply px-6 py-4 border-b border-border;
+}
+
+.layout-wizard__steps-list {
+  @apply flex items-center justify-center space-x-1 overflow-x-auto;
+}
+
+.layout-wizard__step {
+  @apply flex items-center;
+}
+
+.layout-wizard__step-button {
+  @apply flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors;
+}
+
+.layout-wizard__step--active .layout-wizard__step-button {
+  @apply border-primary bg-primary text-primary-foreground;
+}
+
+.layout-wizard__step--completed .layout-wizard__step-button {
+  @apply border-success bg-success text-success-foreground;
+}
+
+.layout-wizard__step--disabled .layout-wizard__step-button {
+  @apply border-muted bg-muted text-muted-foreground cursor-not-allowed;
+}
+
+.layout-wizard__step:not(:last-child)::after {
+  content: '';
+  @apply w-8 h-0.5 bg-muted mx-2;
+}
+
+.layout-wizard__step--completed:not(:last-child)::after {
+  @apply bg-success;
+}
+
+.layout-wizard__step-label {
+  @apply text-xs text-center mt-2 min-w-0;
+}
+
+.layout-wizard__step--active .layout-wizard__step-label {
+  @apply text-primary font-medium;
+}
+
+/* Main content area */
+.layout-wizard__main {
+  @apply flex-1 flex flex-col items-center justify-start p-6;
+  min-height: 0;
+}
+
+/* Content container */
+.layout-wizard__container {
+  @apply w-full max-w-2xl mx-auto space-y-6;
+}
+
+/* Step content */
+.layout-wizard__step-content {
+  @apply bg-background rounded-lg border border-border shadow-sm p-6;
+}
+
+.layout-wizard__step-header {
+  @apply mb-6 space-y-2;
+}
+
+.layout-wizard__step-title {
+  @apply text-2xl font-bold text-foreground;
+}
+
+.layout-wizard__step-description {
+  @apply text-sm text-muted-foreground;
+}
+
+.layout-wizard__step-form {
+  @apply space-y-4;
+}
+
+/* Navigation controls */
+.layout-wizard__navigation {
+  @apply flex items-center justify-between border-t border-border pt-6;
+}
+
+.layout-wizard__nav-back {
+  @apply flex items-center gap-2;
+}
+
+.layout-wizard__nav-next {
+  @apply flex items-center gap-2;
+}
+
+/* Summary step */
+.layout-wizard__summary {
+  @apply space-y-6;
+}
+
+.layout-wizard__summary-section {
+  @apply border border-border rounded-lg p-4;
+}
+
+.layout-wizard__summary-title {
+  @apply font-medium text-foreground mb-2;
+}
+
+.layout-wizard__summary-content {
+  @apply text-sm text-muted-foreground;
+}
+
+.layout-wizard__summary-edit {
+  @apply text-primary text-xs hover:text-primary/80;
+}
+
+/* Layout variations */
+.layout-wizard--narrow .layout-wizard__container {
+  @apply max-w-md;
+}
+
+.layout-wizard--wide .layout-wizard__container {
+  @apply max-w-4xl;
+}
+
+/* Compact variant */
+.layout-wizard--compact .layout-wizard__step-content {
+  @apply p-4;
+}
+
+.layout-wizard--compact .layout-wizard__steps {
+  @apply py-2;
+}
+
+.layout-wizard--compact .layout-wizard__progress {
+  @apply py-2;
+}
+
+/* Sidebar variant */
+.layout-wizard--sidebar {
+  @apply bg-muted/50;
+}
+
+.layout-wizard--sidebar .layout-wizard__main {
+  @apply p-0;
+}
+
+.layout-wizard--sidebar .layout-wizard__container {
+  @apply max-w-none w-full h-full grid grid-cols-1 lg:grid-cols-4 gap-0;
+}
+
+.layout-wizard--sidebar .layout-wizard__sidebar {
+  @apply lg:col-span-1 bg-background border-r border-border p-6;
+}
+
+.layout-wizard--sidebar .layout-wizard__content {
+  @apply lg:col-span-3;
+}
+
+.layout-wizard--sidebar .layout-wizard__step-content {
+  @apply border-0 shadow-none rounded-none;
+}
+
+.layout-wizard--sidebar .layout-wizard__steps {
+  @apply px-0 py-0 border-b-0;
+}
+
+.layout-wizard--sidebar .layout-wizard__steps-list {
+  @apply flex-col space-x-0 space-y-4 items-start;
+}
+
+.layout-wizard--sidebar .layout-wizard__step {
+  @apply flex-col items-start;
+}
+
+.layout-wizard--sidebar .layout-wizard__step:not(:last-child)::after {
+  content: '';
+  @apply w-0.5 h-8 bg-muted mx-0 my-2;
+  margin-left: 1rem;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .layout-wizard__main {
+    @apply p-4;
+  }
+  
+  .layout-wizard__container {
+    @apply max-w-none;
+  }
+  
+  .layout-wizard__step-content {
+    @apply p-4;
+  }
+  
+  .layout-wizard__step-title {
+    @apply text-xl;
+  }
+  
+  .layout-wizard__steps {
+    @apply px-4;
+  }
+  
+  .layout-wizard__steps-list {
+    @apply justify-start;
+  }
+  
+  .layout-wizard__step-label {
+    display: none;
+  }
+  
+  .layout-wizard__progress {
+    @apply px-4;
+  }
+  
+  .layout-wizard__navigation {
+    @apply flex-col-reverse gap-4;
+  }
+  
+  .layout-wizard__nav-back,
+  .layout-wizard__nav-next {
+    @apply w-full justify-center;
+  }
+  
+  /* Sidebar becomes stacked on mobile */
+  .layout-wizard--sidebar .layout-wizard__container {
+    @apply grid-cols-1;
+  }
+  
+  .layout-wizard--sidebar .layout-wizard__sidebar {
+    @apply border-r-0 border-b;
+  }
+  
+  .layout-wizard--sidebar .layout-wizard__steps-list {
+    @apply flex-row space-x-1 space-y-0 overflow-x-auto;
+  }
+  
+  .layout-wizard--sidebar .layout-wizard__step:not(:last-child)::after {
+    @apply w-8 h-0.5 mx-2 my-0;
+  }
+}
+
+/* Tablet behavior */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layout-wizard__container {
+    @apply max-w-xl;
+  }
+  
+  .layout-wizard--wide .layout-wizard__container {
+    @apply max-w-3xl;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .layout-wizard__main {
+    @apply p-8;
+  }
+  
+  .layout-wizard__container {
+    @apply max-w-3xl;
+  }
+  
+  .layout-wizard--wide .layout-wizard__container {
+    @apply max-w-5xl;
+  }
+}
+
+/* Animation for step transitions */
+@keyframes wizardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes wizardSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-1rem);
+  }
+}
+
+.layout-wizard__step-content {
+  animation: wizardSlideIn 0.3s ease-out;
+}
+
+/* Loading state */
+.layout-wizard--loading {
+  @apply pointer-events-none;
+}
+
+.layout-wizard--loading .layout-wizard__step-content {
+  @apply opacity-50;
+}
+
+/* Validation states */
+.layout-wizard__step--error .layout-wizard__step-button {
+  @apply border-destructive text-destructive;
+}
+
+.layout-wizard__step--warning .layout-wizard__step-button {
+  @apply border-warning text-warning;
+}
+
+/* Focus management */
+.layout-wizard__step-content:focus-within {
+  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .layout-wizard__step-content {
+    animation: none;
+  }
+  
+  .layout-wizard__progress-fill {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .layout-wizard__header {
+    position: static;
+  }
+  
+  .layout-wizard__navigation {
+    display: none;
+  }
+  
+  .layout-wizard__main {
+    @apply min-h-0 p-0;
+  }
+  
+  .layout-wizard__step-content {
+    @apply shadow-none border-0;
+  }
+  
+  .layout-wizard--sidebar .layout-wizard__container {
+    @apply grid-cols-1;
+  }
+  
+  .layout-wizard--sidebar .layout-wizard__sidebar {
+    display: none;
+  }
+}

@@ -1,0 +1,285 @@
+/**
+ * Form Layout Component
+ * Centered form layout with responsive behavior and optional sidebar
+ */
+
+/* Main form container */
+.layout-form {
+  @apply min-h-screen bg-background;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header (optional) */
+.layout-form__header {
+  @apply border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.layout-form__header-content {
+  @apply flex items-center justify-between px-6 py-4;
+}
+
+/* Main content area */
+.layout-form__main {
+  @apply flex-1 flex flex-col items-center justify-start p-6;
+  min-height: calc(100vh - var(--header-height, 0px));
+}
+
+/* Form container */
+.layout-form__container {
+  @apply w-full max-w-2xl mx-auto space-y-6;
+}
+
+/* Form header */
+.layout-form__form-header {
+  @apply text-center space-y-2 mb-8;
+}
+
+.layout-form__title {
+  @apply text-3xl font-bold text-foreground;
+}
+
+.layout-form__subtitle {
+  @apply text-base text-muted-foreground;
+}
+
+.layout-form__description {
+  @apply text-sm text-muted-foreground max-w-lg mx-auto;
+}
+
+/* Form content */
+.layout-form__content {
+  @apply bg-background rounded-lg border border-border shadow-sm;
+}
+
+.layout-form__form {
+  @apply p-6 space-y-6;
+}
+
+/* Form sections */
+.layout-form__section {
+  @apply space-y-4;
+}
+
+.layout-form__section-header {
+  @apply border-b border-border pb-4 mb-6;
+}
+
+.layout-form__section-title {
+  @apply text-lg font-semibold text-foreground;
+}
+
+.layout-form__section-description {
+  @apply text-sm text-muted-foreground mt-1;
+}
+
+/* Form actions */
+.layout-form__actions {
+  @apply flex items-center justify-end gap-3 border-t border-border pt-6;
+}
+
+.layout-form__actions--centered {
+  @apply justify-center;
+}
+
+.layout-form__actions--spread {
+  @apply justify-between;
+}
+
+/* Progress indicator (for multi-step forms) */
+.layout-form__progress {
+  @apply mb-6;
+}
+
+/* Breadcrumbs */
+.layout-form__breadcrumbs {
+  @apply mb-6;
+}
+
+/* Layout variations */
+.layout-form--narrow .layout-form__container {
+  @apply max-w-md;
+}
+
+.layout-form--wide .layout-form__container {
+  @apply max-w-4xl;
+}
+
+.layout-form--full .layout-form__container {
+  @apply max-w-6xl;
+}
+
+/* Centered variant */
+.layout-form--centered .layout-form__main {
+  @apply justify-center;
+}
+
+/* Card variant */
+.layout-form--card .layout-form__content {
+  @apply shadow-lg;
+}
+
+.layout-form--card .layout-form__main {
+  @apply py-12;
+}
+
+/* Split layout variant (form + sidebar) */
+.layout-form--split {
+  @apply bg-muted/50;
+}
+
+.layout-form--split .layout-form__main {
+  @apply p-0;
+}
+
+.layout-form--split .layout-form__container {
+  @apply max-w-none w-full h-full grid grid-cols-1 lg:grid-cols-5 gap-0;
+}
+
+.layout-form--split .layout-form__sidebar {
+  @apply lg:col-span-2 bg-primary text-primary-foreground p-8 flex flex-col justify-center;
+}
+
+.layout-form--split .layout-form__content {
+  @apply lg:col-span-3 rounded-none border-0 shadow-none h-full;
+}
+
+.layout-form--split .layout-form__form {
+  @apply p-8 lg:p-12;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .layout-form__main {
+    @apply p-4;
+  }
+  
+  .layout-form__container {
+    @apply max-w-none;
+  }
+  
+  .layout-form__form {
+    @apply p-4 space-y-4;
+  }
+  
+  .layout-form__form-header {
+    @apply mb-6;
+  }
+  
+  .layout-form__title {
+    @apply text-2xl;
+  }
+  
+  .layout-form__actions {
+    @apply flex-col-reverse gap-2;
+  }
+  
+  .layout-form__actions button {
+    @apply w-full;
+  }
+  
+  /* Split layout on mobile becomes stacked */
+  .layout-form--split .layout-form__container {
+    @apply grid-cols-1;
+  }
+  
+  .layout-form--split .layout-form__sidebar {
+    @apply p-6;
+  }
+  
+  .layout-form--split .layout-form__form {
+    @apply p-6;
+  }
+}
+
+/* Tablet behavior */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layout-form__container {
+    @apply max-w-xl;
+  }
+  
+  .layout-form--wide .layout-form__container {
+    @apply max-w-3xl;
+  }
+  
+  .layout-form--full .layout-form__container {
+    @apply max-w-5xl;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .layout-form__main {
+    @apply p-8;
+  }
+  
+  .layout-form--card .layout-form__main {
+    @apply py-16;
+  }
+  
+  .layout-form__container {
+    @apply max-w-3xl;
+  }
+  
+  .layout-form--wide .layout-form__container {
+    @apply max-w-5xl;
+  }
+  
+  .layout-form--full .layout-form__container {
+    @apply max-w-7xl;
+  }
+}
+
+/* Focus management */
+.layout-form__form:focus-within {
+  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Loading state */
+.layout-form--loading {
+  @apply pointer-events-none;
+}
+
+.layout-form--loading .layout-form__content {
+  @apply opacity-50;
+}
+
+/* Error state */
+.layout-form--error .layout-form__content {
+  @apply border-destructive;
+}
+
+/* Success state */
+.layout-form--success .layout-form__content {
+  @apply border-success;
+}
+
+/* Print styles */
+@media print {
+  .layout-form__header {
+    position: static;
+  }
+  
+  .layout-form__main {
+    @apply min-h-0 p-0;
+  }
+  
+  .layout-form__content {
+    @apply shadow-none border-0;
+  }
+  
+  .layout-form__actions {
+    display: none;
+  }
+  
+  .layout-form--split .layout-form__sidebar {
+    display: none;
+  }
+  
+  .layout-form--split .layout-form__container {
+    @apply grid-cols-1;
+  }
+}

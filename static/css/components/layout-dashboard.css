@@ -1,0 +1,170 @@
+/**
+ * Dashboard Layout Component
+ * Sidebar + main content grid layout with responsive behavior
+ */
+
+/* Main dashboard container */
+.layout-dashboard {
+  @apply min-h-screen bg-background;
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 16rem) 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main";
+}
+
+/* Header area */
+.layout-dashboard__header {
+  grid-area: header;
+  @apply border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.layout-dashboard__header-content {
+  @apply flex items-center justify-between px-6 py-4;
+}
+
+/* Sidebar */
+.layout-dashboard__sidebar {
+  grid-area: sidebar;
+  @apply border-r border-border bg-background;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.layout-dashboard__sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.layout-dashboard__sidebar::-webkit-scrollbar-track {
+  @apply bg-muted/50;
+}
+
+.layout-dashboard__sidebar::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+.layout-dashboard__sidebar::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* Sidebar content */
+.layout-dashboard__sidebar-content {
+  @apply p-4 space-y-4;
+}
+
+/* Main content area */
+.layout-dashboard__main {
+  grid-area: main;
+  @apply overflow-auto;
+  min-height: 0; /* Allows flex children to shrink */
+}
+
+.layout-dashboard__content {
+  @apply p-6 space-y-6;
+}
+
+/* Sidebar states */
+.layout-dashboard--collapsed {
+  --sidebar-width: 4rem;
+}
+
+.layout-dashboard--collapsed .layout-dashboard__sidebar-content {
+  @apply px-2;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .layout-dashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "main";
+  }
+  
+  .layout-dashboard__sidebar {
+    position: static;
+    height: auto;
+    max-height: 200px;
+    @apply border-r-0 border-b;
+  }
+  
+  .layout-dashboard__sidebar-content {
+    @apply flex overflow-x-auto space-y-0 space-x-4 pb-0;
+  }
+  
+  /* Hide sidebar on mobile by default */
+  .layout-dashboard--mobile-hidden .layout-dashboard__sidebar {
+    display: none;
+  }
+  
+  /* Show sidebar when toggled */
+  .layout-dashboard--mobile-sidebar .layout-dashboard__sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 16rem;
+    height: 100vh;
+    z-index: 50;
+    @apply bg-background border-r shadow-lg;
+  }
+  
+  .layout-dashboard--mobile-sidebar::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    @apply bg-black/50;
+    z-index: -1;
+  }
+}
+
+/* Tablet behavior */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layout-dashboard {
+    --sidebar-width: 12rem;
+  }
+  
+  .layout-dashboard--collapsed {
+    --sidebar-width: 3rem;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .layout-dashboard {
+    --sidebar-width: 18rem;
+  }
+  
+  .layout-dashboard__content {
+    @apply p-8 space-y-8 max-w-none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .layout-dashboard__sidebar {
+    display: none;
+  }
+  
+  .layout-dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "main";
+  }
+  
+  .layout-dashboard__header {
+    position: static;
+  }
+}

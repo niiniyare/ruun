@@ -1,0 +1,399 @@
+/**
+ * Kanban Layout Component
+ * Board layout with draggable columns and cards
+ */
+
+/* Main kanban container */
+.layout-kanban {
+  @apply min-h-screen bg-background;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Kanban header */
+.layout-kanban__header {
+  @apply border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.layout-kanban__header-content {
+  @apply flex items-center justify-between px-6 py-4;
+}
+
+.layout-kanban__header-title {
+  @apply text-lg font-semibold text-foreground;
+}
+
+.layout-kanban__header-actions {
+  @apply flex items-center gap-2;
+}
+
+/* Board container */
+.layout-kanban__board {
+  @apply flex-1 overflow-auto;
+  min-height: 0;
+}
+
+/* Board scroll container */
+.layout-kanban__scroll-container {
+  @apply min-h-full;
+  padding: 1.5rem;
+}
+
+/* Columns container */
+.layout-kanban__columns {
+  @apply flex gap-4;
+  min-height: calc(100vh - 8rem);
+  width: fit-content;
+  min-width: 100%;
+}
+
+/* Individual column */
+.layout-kanban__column {
+  @apply flex-shrink-0 bg-muted/50 rounded-lg;
+  width: 20rem;
+  max-height: calc(100vh - 8rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-kanban__column--highlighted {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+.layout-kanban__column--collapsed {
+  width: 3rem;
+}
+
+.layout-kanban__column--collapsed .layout-kanban__column-content {
+  display: none;
+}
+
+.layout-kanban__column--collapsed .layout-kanban__column-header {
+  @apply writing-mode-vertical text-center py-4;
+}
+
+/* Column header */
+.layout-kanban__column-header {
+  @apply flex items-center justify-between p-4 border-b border-border;
+}
+
+.layout-kanban__column-title {
+  @apply font-semibold text-foreground flex items-center gap-2;
+}
+
+.layout-kanban__column-count {
+  @apply text-xs bg-muted-foreground/20 text-muted-foreground px-2 py-0.5 rounded-full;
+}
+
+.layout-kanban__column-actions {
+  @apply flex items-center gap-1;
+}
+
+/* Column content */
+.layout-kanban__column-content {
+  @apply flex-1 overflow-y-auto p-2;
+  scrollbar-width: thin;
+}
+
+.layout-kanban__column-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.layout-kanban__column-content::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.layout-kanban__column-content::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+.layout-kanban__column-content::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* Cards container */
+.layout-kanban__cards {
+  @apply space-y-2;
+}
+
+/* Individual card */
+.layout-kanban__card {
+  @apply bg-background border border-border rounded-md p-3 cursor-pointer transition-all;
+}
+
+.layout-kanban__card:hover {
+  @apply shadow-sm border-border/80;
+}
+
+.layout-kanban__card--dragging {
+  @apply opacity-50 rotate-3 scale-105 shadow-lg;
+}
+
+.layout-kanban__card--selected {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Card content */
+.layout-kanban__card-header {
+  @apply flex items-start justify-between gap-2 mb-2;
+}
+
+.layout-kanban__card-title {
+  @apply text-sm font-medium text-foreground;
+}
+
+.layout-kanban__card-id {
+  @apply text-xs text-muted-foreground font-mono;
+}
+
+.layout-kanban__card-content {
+  @apply text-sm text-muted-foreground mb-2;
+}
+
+.layout-kanban__card-footer {
+  @apply flex items-center justify-between gap-2;
+}
+
+.layout-kanban__card-meta {
+  @apply flex items-center gap-2;
+}
+
+.layout-kanban__card-priority {
+  @apply w-2 h-2 rounded-full;
+}
+
+.layout-kanban__card-priority--high {
+  @apply bg-destructive;
+}
+
+.layout-kanban__card-priority--medium {
+  @apply bg-warning;
+}
+
+.layout-kanban__card-priority--low {
+  @apply bg-success;
+}
+
+.layout-kanban__card-avatar {
+  @apply w-6 h-6 rounded-full;
+}
+
+/* Add card button */
+.layout-kanban__add-card {
+  @apply w-full p-2 border-2 border-dashed border-muted-foreground/30 rounded-md text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors;
+}
+
+/* Add column button */
+.layout-kanban__add-column {
+  @apply flex-shrink-0 bg-muted/50 rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary;
+  width: 16rem;
+  height: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.layout-kanban__add-column-content {
+  @apply text-center space-y-2;
+}
+
+.layout-kanban__add-column-icon {
+  @apply w-8 h-8 mx-auto text-muted-foreground;
+}
+
+.layout-kanban__add-column-text {
+  @apply text-sm text-muted-foreground;
+}
+
+/* Drop zones */
+.layout-kanban__drop-zone {
+  @apply min-h-4 rounded-md transition-colors;
+}
+
+.layout-kanban__drop-zone--active {
+  @apply bg-primary/20 border-2 border-dashed border-primary;
+}
+
+.layout-kanban__drop-zone--invalid {
+  @apply bg-destructive/20 border-2 border-dashed border-destructive;
+}
+
+/* Empty column state */
+.layout-kanban__empty-column {
+  @apply flex flex-col items-center justify-center py-8 text-center space-y-2;
+}
+
+.layout-kanban__empty-column-icon {
+  @apply w-12 h-12 text-muted-foreground/50;
+}
+
+.layout-kanban__empty-column-text {
+  @apply text-sm text-muted-foreground/70;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .layout-kanban__scroll-container {
+    @apply p-4;
+  }
+  
+  .layout-kanban__columns {
+    @apply flex-col gap-4;
+    min-height: auto;
+  }
+  
+  .layout-kanban__column {
+    width: 100%;
+    max-height: 60vh;
+  }
+  
+  .layout-kanban__add-column {
+    width: 100%;
+    height: 6rem;
+  }
+  
+  .layout-kanban__card {
+    @apply p-2;
+  }
+  
+  .layout-kanban__card-title {
+    @apply text-xs;
+  }
+  
+  .layout-kanban__card-content {
+    @apply text-xs;
+  }
+  
+  /* Hide some card details on mobile */
+  .layout-kanban__card-id {
+    display: none;
+  }
+}
+
+/* Tablet behavior */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layout-kanban__column {
+    width: 16rem;
+  }
+  
+  .layout-kanban__add-column {
+    width: 14rem;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .layout-kanban__column {
+    width: 22rem;
+  }
+  
+  .layout-kanban__add-column {
+    width: 18rem;
+  }
+}
+
+/* Animation for card movements */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.layout-kanban__card {
+  animation: cardSlideIn 0.2s ease-out;
+}
+
+/* Drag and drop states */
+.layout-kanban--dragging .layout-kanban__column {
+  transition: background-color 0.2s ease;
+}
+
+.layout-kanban--dragging .layout-kanban__column:hover {
+  @apply bg-muted/70;
+}
+
+/* Loading state */
+.layout-kanban--loading {
+  @apply pointer-events-none;
+}
+
+.layout-kanban--loading .layout-kanban__columns {
+  @apply opacity-50;
+}
+
+/* Filters and search */
+.layout-kanban__filters {
+  @apply px-6 py-4 border-b border-border bg-muted/50;
+}
+
+.layout-kanban__filters-content {
+  @apply flex items-center gap-4;
+}
+
+/* Virtual scrolling for large boards */
+.layout-kanban__virtual-column {
+  @apply flex-shrink-0;
+  width: 20rem;
+}
+
+.layout-kanban__virtual-placeholder {
+  @apply bg-muted/30 rounded-lg animate-pulse;
+  height: 8rem;
+}
+
+/* Accessibility improvements */
+.layout-kanban__card:focus {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+.layout-kanban__column:focus-within {
+  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .layout-kanban__card {
+    animation: none;
+  }
+  
+  .layout-kanban__card--dragging {
+    @apply opacity-70 rotate-0 scale-100;
+  }
+}
+
+/* Print styles */
+@media print {
+  .layout-kanban__header {
+    position: static;
+  }
+  
+  .layout-kanban__columns {
+    @apply flex-col gap-4;
+  }
+  
+  .layout-kanban__column {
+    width: 100%;
+    max-height: none;
+    page-break-inside: avoid;
+  }
+  
+  .layout-kanban__add-column {
+    display: none;
+  }
+  
+  .layout-kanban__header-actions {
+    display: none;
+  }
+  
+  .layout-kanban__column-actions {
+    display: none;
+  }
+}

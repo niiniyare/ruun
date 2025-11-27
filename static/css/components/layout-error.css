@@ -1,0 +1,332 @@
+/**
+ * Error Layout Component
+ * Full-screen error display with various error states and actions
+ */
+
+/* Main error container */
+.layout-error {
+  @apply min-h-screen bg-background flex items-center justify-center p-4;
+}
+
+/* Error content container */
+.layout-error__container {
+  @apply w-full max-w-md text-center space-y-6;
+}
+
+/* Error icon area */
+.layout-error__icon-container {
+  @apply flex justify-center;
+}
+
+.layout-error__icon {
+  @apply w-16 h-16 text-muted-foreground;
+}
+
+.layout-error__icon--destructive {
+  @apply text-destructive;
+}
+
+.layout-error__icon--warning {
+  @apply text-warning;
+}
+
+.layout-error__icon--info {
+  @apply text-primary;
+}
+
+/* Status code */
+.layout-error__code {
+  @apply text-6xl font-bold text-foreground mb-2;
+}
+
+/* Error title and description */
+.layout-error__title {
+  @apply text-2xl font-semibold text-foreground;
+}
+
+.layout-error__description {
+  @apply text-base text-muted-foreground leading-relaxed;
+}
+
+.layout-error__technical {
+  @apply text-sm text-muted-foreground/80 mt-2 font-mono;
+}
+
+/* Actions area */
+.layout-error__actions {
+  @apply flex flex-col sm:flex-row items-center justify-center gap-3;
+}
+
+.layout-error__action {
+  @apply w-full sm:w-auto;
+}
+
+/* Navigation breadcrumbs */
+.layout-error__breadcrumbs {
+  @apply mb-4;
+}
+
+/* Contact info */
+.layout-error__contact {
+  @apply text-sm text-muted-foreground space-y-1;
+}
+
+.layout-error__contact-link {
+  @apply text-primary hover:text-primary/80;
+}
+
+/* Layout variations */
+
+/* Inline variant (for embedded error states) */
+.layout-error--inline {
+  @apply min-h-0 py-8;
+}
+
+.layout-error--inline .layout-error__container {
+  @apply max-w-lg;
+}
+
+.layout-error--inline .layout-error__code {
+  @apply text-4xl;
+}
+
+/* Compact variant */
+.layout-error--compact {
+  @apply min-h-0 py-6;
+}
+
+.layout-error--compact .layout-error__container {
+  @apply max-w-sm space-y-4;
+}
+
+.layout-error--compact .layout-error__icon {
+  @apply w-12 h-12;
+}
+
+.layout-error--compact .layout-error__code {
+  @apply text-4xl;
+}
+
+.layout-error--compact .layout-error__title {
+  @apply text-xl;
+}
+
+.layout-error--compact .layout-error__description {
+  @apply text-sm;
+}
+
+/* Full page variant with header */
+.layout-error--with-header {
+  @apply min-h-0;
+}
+
+.layout-error--with-header .layout-error {
+  @apply pt-16;
+}
+
+/* Specific error type variants */
+.layout-error--404 .layout-error__icon {
+  @apply text-muted-foreground;
+}
+
+.layout-error--500 .layout-error__icon {
+  @apply text-destructive;
+}
+
+.layout-error--403 .layout-error__icon {
+  @apply text-warning;
+}
+
+.layout-error--maintenance .layout-error__icon {
+  @apply text-primary;
+}
+
+/* Background patterns for different error types */
+.layout-error--pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f1f5f9' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Illustration variant */
+.layout-error--illustrated .layout-error__container {
+  @apply max-w-lg;
+}
+
+.layout-error--illustrated .layout-error__illustration {
+  @apply w-64 h-64 mx-auto mb-6 text-muted-foreground;
+}
+
+/* Card variant */
+.layout-error--card .layout-error__container {
+  @apply bg-background rounded-lg border border-border shadow-sm p-6;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .layout-error {
+    @apply p-4;
+  }
+  
+  .layout-error__container {
+    @apply space-y-4;
+  }
+  
+  .layout-error__code {
+    @apply text-4xl;
+  }
+  
+  .layout-error__title {
+    @apply text-xl;
+  }
+  
+  .layout-error__description {
+    @apply text-sm;
+  }
+  
+  .layout-error__actions {
+    @apply flex-col gap-2;
+  }
+  
+  .layout-error__action {
+    @apply w-full;
+  }
+  
+  .layout-error--illustrated .layout-error__illustration {
+    @apply w-48 h-48;
+  }
+}
+
+/* Tablet behavior */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layout-error__container {
+    @apply max-w-lg;
+  }
+  
+  .layout-error--illustrated .layout-error__container {
+    @apply max-w-xl;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .layout-error__container {
+    @apply max-w-lg;
+  }
+  
+  .layout-error__code {
+    @apply text-8xl;
+  }
+  
+  .layout-error__title {
+    @apply text-3xl;
+  }
+  
+  .layout-error__description {
+    @apply text-lg;
+  }
+  
+  .layout-error--illustrated .layout-error__illustration {
+    @apply w-80 h-80;
+  }
+}
+
+/* Animation for error appearance */
+@keyframes errorFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.layout-error__container {
+  animation: errorFadeIn 0.4s ease-out;
+}
+
+/* Loading state for retry actions */
+.layout-error__action--loading {
+  @apply pointer-events-none opacity-75;
+}
+
+/* Retry countdown */
+.layout-error__countdown {
+  @apply text-sm text-muted-foreground mt-2;
+}
+
+.layout-error__countdown-time {
+  @apply font-mono font-medium;
+}
+
+/* Help section */
+.layout-error__help {
+  @apply mt-6 p-4 bg-muted/50 rounded-lg text-left;
+}
+
+.layout-error__help-title {
+  @apply text-sm font-medium text-foreground mb-2;
+}
+
+.layout-error__help-list {
+  @apply text-sm text-muted-foreground space-y-1;
+}
+
+.layout-error__help-item {
+  @apply flex items-start gap-2;
+}
+
+.layout-error__help-item::before {
+  content: '•';
+  @apply text-primary mt-0.5;
+}
+
+/* Debug information (development only) */
+.layout-error__debug {
+  @apply mt-6 p-4 bg-muted rounded-lg text-left;
+}
+
+.layout-error__debug-title {
+  @apply text-sm font-medium text-foreground mb-2;
+}
+
+.layout-error__debug-content {
+  @apply text-xs font-mono text-muted-foreground whitespace-pre-wrap;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .layout-error__container {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .layout-error {
+    @apply min-h-0 p-4;
+  }
+  
+  .layout-error__actions {
+    display: none;
+  }
+  
+  .layout-error__debug {
+    display: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .layout-error--card .layout-error__container {
+    @apply border-2;
+  }
+  
+  .layout-error__icon--destructive {
+    @apply text-red-600;
+  }
+  
+  .layout-error__icon--warning {
+    @apply text-yellow-600;
+  }
+}

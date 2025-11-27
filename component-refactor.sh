@@ -280,7 +280,8 @@ register_task() {
 }
 
 register_all_tasks() {
-  # PHASE 0: Demo Setup
+  # PHASE 0: Demo Setup and Cleanup
+  register_task "T0.0" "PHASE 0: Demo Setup" "Read docs and clean up previous refactoring mess"
   register_task "T0.1" "PHASE 0: Demo Setup" "Create demo server (server.go)"
   register_task "T0.2" "PHASE 0: Demo Setup" "Create demo page template (demo.templ)"
   register_task "T0.3" "PHASE 0: Demo Setup" "Create demo section templates"
@@ -640,6 +641,35 @@ resume_tasks() {
 # =============================================================================
 # PHASE 0: Demo Setup Tasks
 # =============================================================================
+
+task_T0_0() {
+  log_info "Reading component docs and cleaning up refactoring mess..."
+  
+  claude --dangerously-skip-permissions "Read existing component documentation and clean up previous refactoring issues.
+
+TASKS:
+1. Read all component documentation in $VIEWS_DIR/docs/*.md
+2. Understand which components already have docs and patterns defined
+3. Review current state from .component-refactor-state and component-refactor.log
+4. Clean up any conflicting CSS files that were created for Basecoat components
+
+CRITICAL UNDERSTANDING:
+- Components with docs: button, input, card, pagination, etc. - FOLLOW their patterns exactly
+- Basecoat provides: btn, card, field-input, badge, alert, avatar, checkbox, radio, select, etc.
+- Pagination should use btn-ghost/btn-icon-ghost classes as documented
+- Use component composition via templ - reuse atoms → molecules → organisms
+- NO custom CSS for Basecoat components
+- Focus on COMPOSITION not recreation
+
+CLEANUP ACTIONS:
+1. Remove CSS files for components that Basecoat already provides
+2. Update any existing components to follow documented patterns
+3. Prepare for proper component composition approach
+
+Create summary report: $VIEWS_DIR/cleanup-and-docs-review.md"
+  
+  cleanup_conflicting_css
+}
 
 task_T0_1() {
   log_info "Creating demo server..."
@@ -1456,32 +1486,120 @@ Update $REFACTOR_GUIDE"
 }
 
 # =============================================================================
-# PHASE 3: Custom CSS Tasks
+# Documentation and Cleanup Functions
+# =============================================================================
+
+DOCS_DIR="$VIEWS_DIR/docs"
+
+read_component_docs() {
+  local component="$1"
+  local docs_file="$DOCS_DIR/${component}.md"
+  
+  if [[ -f "$docs_file" ]]; then
+    log_info "Reading existing docs: $docs_file"
+    echo "EXISTING_DOCS_FOUND=true"
+    return 0
+  else
+    log_info "No docs found for: $component"
+    echo "EXISTING_DOCS_FOUND=false"
+    return 1
+  fi
+}
+
+check_basecoat_provides() {
+  local component="$1"
+  
+  # Components that Basecoat already provides (don't need custom CSS)
+  local basecoat_components=(
+    "button" "input" "label" "badge" "alert" "avatar" "card" "checkbox" "radio" 
+    "select" "textarea" "switch" "dialog" "dropdown-menu" "popover" "tabs" 
+    "toast" "sidebar" "command" "table" "accordion" "separator" "skeleton" 
+    "progress" "tooltip" "sheet" "scroll-area" "spinner"
+  )
+  
+  for basecoat_comp in "${basecoat_components[@]}"; do
+    if [[ "$component" == "$basecoat_comp" ]]; then
+      log_info "Component '$component' is provided by Basecoat - no custom CSS needed"
+      return 0
+    fi
+  done
+  
+  log_info "Component '$component' needs custom CSS"
+  return 1
+}
+
+cleanup_conflicting_css() {
+  log_info "Cleaning up CSS files that conflict with Basecoat UI..."
+  
+  # Remove CSS files for components that Basecoat provides
+  local files_to_remove=(
+    "$CUSTOM_CSS_DIR/avatar.css"
+    "$CUSTOM_CSS_DIR/progress.css" 
+    "$CUSTOM_CSS_DIR/skeleton.css"
+    "$CUSTOM_CSS_DIR/menu.css"
+  )
+  
+  for file in "${files_to_remove[@]}"; do
+    if [[ -f "$file" ]]; then
+      log_warn "Removing conflicting CSS file: $file"
+      rm -f "$file"
+    fi
+  done
+  
+  log_success "CSS cleanup completed"
+}
+
+# =============================================================================
+# PHASE 3: Custom CSS Tasks (Enhanced)
 # =============================================================================
 
 task_T3_1() {
   log_info "Creating CSS directory structure..."
 
   mkdir -p "$CUSTOM_CSS_DIR"
+  
+  # Clean up any conflicting CSS first
+  cleanup_conflicting_css
 
   claude --dangerously-skip-permissions "Create CSS variables file.
 
+IMPORTANT: Before creating CSS, check if components exist in Basecoat:
+- Read $VIEWS_DIR/docs/*.md files to understand existing component patterns
+- Only create CSS for components NOT provided by Basecoat UI
+- For Basecoat components, use existing classes: btn, card, field-input, badge, etc.
+- For pagination: Follow docs pattern using btn-ghost, btn-icon-ghost classes
+
 Create: $CUSTOM_CSS_DIR/_variables.css
 
-Include variables for:
-- Icon sizes
-- Status colors (active, inactive, pending, approved, rejected, draft)
-- Data table colors
-- Stats card trend colors
-- Wizard step sizes
-- Layout dimensions"
+Include variables for ONLY custom components:
+- Icon sizes (custom)
+- Status colors (active, inactive, pending, approved, rejected, draft) - custom
+- Data table colors (custom enhancement)
+- Stats card trend colors (custom)
+- Wizard step sizes (custom)
+- Layout dimensions (custom)"
 }
 
 generate_css() {
   local component="$1"
   local content="$2"
+  
+  # Check if docs exist first
+  local docs_result=$(read_component_docs "$component")
+  
+  # Check if Basecoat provides this component
+  if check_basecoat_provides "$component"; then
+    log_warn "Skipping CSS generation for '$component' - use Basecoat classes instead"
+    return 0
+  fi
 
   claude --dangerously-skip-permissions "Create CSS for $component component.
+
+CRITICAL INSTRUCTIONS:
+1. FIRST read views/docs/$component.md if it exists to understand the component
+2. If Basecoat provides this component, DO NOT create custom CSS
+3. Follow existing documentation patterns from views/docs/
+4. Use component composition approach - reuse existing component levels
 
 File: $CUSTOM_CSS_DIR/$component.css
 
@@ -1493,7 +1611,13 @@ Follow Basecoat pattern (semantic classes):
 Component spec:
 $content
 
-Create production-ready CSS."
+IMPORTANT NOTES:
+- Pagination should use Basecoat btn-ghost/btn-icon-ghost classes per docs
+- Many components already have docs - follow those patterns
+- Focus on custom components not provided by Basecoat
+- Use templ component composition to reuse atoms/molecules/organisms
+
+Create production-ready CSS only if truly needed."
 }
 
 task_T3_2() { generate_css "icon" "Icon with sizes xs/sm/md/lg/xl, spin animation. Classes: icon, icon-xs, icon-sm, icon-lg, icon-xl, icon-spin"; }
@@ -1546,6 +1670,9 @@ refactor_atom() {
   local file="$ATOMS_DIR/${component}.templ"
   local create="${2:-false}"
 
+  # Read component documentation first
+  read_component_docs "$component"
+
   [[ ! -f "$file" && "$create" != "true" ]] && {
     log_warn "File not found: $file"
     return 0
@@ -1553,15 +1680,34 @@ refactor_atom() {
 
   claude --dangerously-skip-permissions "Refactor/Create atom: $file
 
+CRITICAL INSTRUCTIONS:
+1. FIRST read and understand: $VIEWS_DIR/docs/$component.md (if exists)
+2. Follow EXACTLY the patterns shown in documentation - use the EXACT same classes
+3. Use component composition approach - reuse existing atomic components
+4. Understand current state from component-refactor-state and log
+
+IMPORTANT: Components use BOTH Basecoat classes AND Tailwind utilities:
+
 Use these templ patterns:
 - templ.Classes() + templ.KV() for conditional classes
 - templ.Attributes (Attrs field) for hx-*, aria-*, data-*
-- templ.Component for icon injection
-- Basecoat classes: btn, btn-outline, field-input, badge
-- Tailwind for layout: flex, mr-2, gap-4
+- templ.Component for icon injection and composition
+
+CLASS USAGE PATTERN (from docs):
+- Basecoat semantic classes: btn, btn-outline, btn-ghost, btn-icon, field-input, badge, card, etc.
+- Tailwind utilities for layout/styling: flex, gap-2, justify-end, space-y-4, border-border, etc.
 - NO ClassName string prop
 
-Create complete component for: $component"
+For components with existing docs (button, input, pagination, card):
+- Follow the EXACT CSS classes and patterns documented
+- Button example: "btn-outline", "flex gap-2", "justify-end", "border-border"
+- Pagination: use "btn-ghost", "btn-icon-ghost", "flex gap-1" as shown in docs  
+- Card: use semantic HTML (header, section, footer) + "card", "card-header", etc.
+- Include ALL Tailwind utilities shown in examples: animate-spin, hidden, sm:inline, etc.
+
+KEY POINT: Use the documented classes EXACTLY as shown - both Basecoat AND Tailwind together.
+
+Create complete component for: $component following documented patterns EXACTLY"
 }
 
 task_T4_1() { refactor_atom "button"; }
@@ -1608,17 +1754,34 @@ refactor_molecule() {
   local file="$MOLECULES_DIR/${component}.templ"
   local create="${2:-false}"
 
+  # Read component documentation first
+  read_component_docs "$component"
+
   [[ ! -f "$file" && "$create" != "true" ]] && create="true"
 
   claude --dangerously-skip-permissions "Refactor/Create molecule: $file
 
-Use templ patterns:
-- templ.Classes() + templ.KV()
-- templ.Attributes
-- templ.Component for slots
-- Compose atoms from $ATOMS_DIR
+CRITICAL INSTRUCTIONS:
+1. FIRST read and understand: $VIEWS_DIR/docs/$component.md (if exists)
+2. Follow existing documentation patterns and CSS classes shown in docs
+3. Use component composition - REUSE atoms from $ATOMS_DIR
+4. Follow the Basecoat + templ component composition approach
 
-Create molecule: $component"
+Use templ patterns:
+- templ.Classes() + templ.KV() for conditional classes
+- templ.Attributes for spreading attributes
+- templ.Component for slots and composition
+- Compose atoms from $ATOMS_DIR (Button, Input, Label, etc.)
+
+For documented components:
+- pagination: use btn-ghost/btn-icon-ghost Basecoat classes as per docs
+- card: use semantic HTML (header/section/footer) + Basecoat classes
+- field: combine Label + Input + error/help text molecules
+
+IMPORTANT: Component composition is key - don't recreate what exists.
+Molecules = 2-5 atoms combined for single purpose.
+
+Create molecule: $component following atomic design + docs patterns"
 }
 
 task_T5_1() { refactor_molecule "form_field"; }
@@ -1660,16 +1823,35 @@ refactor_organism() {
   local file="$ORGANISMS_DIR/${component}.templ"
   local create="${2:-false}"
 
+  # Read component documentation first
+  read_component_docs "$component"
+
   [[ ! -f "$file" && "$create" != "true" ]] && create="true"
 
   claude --dangerously-skip-permissions "Refactor/Create organism: $file
 
-Compose molecules and atoms.
-Use templ.Component for flexible slots.
-Use HTMX for server interactions.
-Use Alpine.js for client state.
+CRITICAL INSTRUCTIONS:
+1. FIRST read and understand: $VIEWS_DIR/docs/$component.md (if exists)
+2. Follow existing documentation patterns and CSS classes shown in docs
+3. Use component composition - REUSE molecules and atoms from previous levels
+4. Follow the Basecoat + templ component composition approach
 
-Create organism: $component"
+Component composition approach:
+- Compose molecules from $MOLECULES_DIR (FormField, Card, Pagination, etc.)
+- Compose atoms from $ATOMS_DIR (Button, Input, Badge, etc.)
+- Use templ.Component for flexible slots and composition
+- Use HTMX for server interactions
+- Use Alpine.js for client state
+
+For documented components:
+- table: use existing table Basecoat classes + composition
+- sidebar: use existing Basecoat sidebar classes + navigation molecules
+- breadcrumbs: follow docs pattern with btn-ghost classes
+
+IMPORTANT: Organisms = complex components built from molecules + atoms.
+Focus on composition, not recreation.
+
+Create organism: $component following atomic design + docs patterns"
 }
 
 task_T6_1() { refactor_organism "datatable"; }

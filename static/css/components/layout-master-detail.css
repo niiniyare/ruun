@@ -1,0 +1,256 @@
+/**
+ * Master-Detail Layout Component
+ * Split view with resizable master panel and detail content
+ */
+
+/* Main container */
+.layout-master-detail {
+  @apply min-h-screen bg-background;
+  display: grid;
+  grid-template-columns: var(--master-width, 25rem) 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "header header"
+    "master detail";
+}
+
+/* Header spans full width */
+.layout-master-detail__header {
+  grid-area: header;
+  @apply border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.layout-master-detail__header-content {
+  @apply flex items-center justify-between px-6 py-4;
+}
+
+/* Master panel (left side) */
+.layout-master-detail__master {
+  grid-area: master;
+  @apply border-r border-border bg-background;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - var(--header-height, 4rem));
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.layout-master-detail__master::-webkit-scrollbar {
+  width: 6px;
+}
+
+.layout-master-detail__master::-webkit-scrollbar-track {
+  @apply bg-muted/50;
+}
+
+.layout-master-detail__master::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+.layout-master-detail__master::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* Master content */
+.layout-master-detail__master-content {
+  @apply p-4 space-y-4;
+}
+
+/* Detail panel (right side) */
+.layout-master-detail__detail {
+  grid-area: detail;
+  @apply overflow-auto bg-background;
+  min-height: 0;
+}
+
+.layout-master-detail__detail-content {
+  @apply p-6 space-y-6;
+}
+
+/* Resizer handle */
+.layout-master-detail__resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: 0;
+  width: 4px;
+  @apply bg-transparent hover:bg-primary/20 cursor-col-resize;
+  transition: background-color 0.15s ease;
+  z-index: 10;
+}
+
+.layout-master-detail__resizer:hover::before,
+.layout-master-detail__resizer--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  @apply bg-primary;
+  transform: translateX(-50%);
+}
+
+/* Layout variations */
+.layout-master-detail--narrow {
+  --master-width: 20rem;
+}
+
+.layout-master-detail--wide {
+  --master-width: 30rem;
+}
+
+.layout-master-detail--collapsed {
+  --master-width: 0;
+}
+
+.layout-master-detail--collapsed .layout-master-detail__master {
+  display: none;
+}
+
+/* Detail empty state */
+.layout-master-detail__detail-empty {
+  @apply flex flex-col items-center justify-center h-full text-center p-8 space-y-4;
+}
+
+.layout-master-detail__detail-empty-icon {
+  @apply w-16 h-16 text-muted-foreground;
+}
+
+.layout-master-detail__detail-empty-title {
+  @apply text-lg font-semibold text-foreground;
+}
+
+.layout-master-detail__detail-empty-description {
+  @apply text-sm text-muted-foreground max-w-md;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  .layout-master-detail {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "header"
+      "content";
+  }
+  
+  .layout-master-detail__master,
+  .layout-master-detail__detail {
+    grid-area: content;
+  }
+  
+  /* Stack vertically on mobile */
+  .layout-master-detail--mobile-stack {
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "header"
+      "master"
+      "detail";
+  }
+  
+  .layout-master-detail--mobile-stack .layout-master-detail__master {
+    position: static;
+    height: auto;
+    max-height: 40vh;
+    @apply border-r-0 border-b;
+  }
+  
+  /* Overlay mode on mobile */
+  .layout-master-detail--mobile-overlay .layout-master-detail__master {
+    position: fixed;
+    top: var(--header-height, 4rem);
+    left: 0;
+    bottom: 0;
+    width: 20rem;
+    max-width: 85vw;
+    z-index: 50;
+    @apply bg-background border-r shadow-lg;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .layout-master-detail--mobile-overlay.layout-master-detail--master-open .layout-master-detail__master {
+    transform: translateX(0);
+  }
+  
+  /* Backdrop */
+  .layout-master-detail--mobile-overlay.layout-master-detail--master-open::before {
+    content: '';
+    position: fixed;
+    top: var(--header-height, 4rem);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    @apply bg-black/50;
+    z-index: 40;
+  }
+  
+  .layout-master-detail__resizer {
+    display: none;
+  }
+}
+
+/* Tablet behavior */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layout-master-detail {
+    --master-width: 18rem;
+  }
+  
+  .layout-master-detail--narrow {
+    --master-width: 16rem;
+  }
+  
+  .layout-master-detail--wide {
+    --master-width: 22rem;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+  .layout-master-detail {
+    --master-width: 28rem;
+  }
+  
+  .layout-master-detail--narrow {
+    --master-width: 24rem;
+  }
+  
+  .layout-master-detail--wide {
+    --master-width: 32rem;
+  }
+  
+  .layout-master-detail__detail-content {
+    @apply p-8 space-y-8;
+  }
+}
+
+/* Focus states */
+.layout-master-detail__master:focus-within {
+  @apply ring-2 ring-ring ring-inset;
+}
+
+.layout-master-detail__detail:focus-within {
+  @apply ring-2 ring-ring ring-inset;
+}
+
+/* Print styles */
+@media print {
+  .layout-master-detail {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "detail";
+  }
+  
+  .layout-master-detail__master {
+    display: none;
+  }
+  
+  .layout-master-detail__header {
+    position: static;
+  }
+}
