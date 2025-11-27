@@ -215,3 +215,257 @@ Analysis of `./static/css/basecoat.css` following Basecoat UI patterns:
 8. **Modern CSS Features**: Uses cutting-edge CSS features like `@starting-style`, `field-sizing`, and `calc-size()`.
 
 This analysis provides a complete reference for implementing Basecoat UI components with proper token usage and variant patterns.
+
+---
+
+## JavaScript Behavior Analysis
+
+### Core Architecture
+
+#### 1. Basecoat Registration System (`basecoat.js`)
+
+**Initialization Pattern:**
+- Central registry for all components
+- Auto-initialization on DOM ready
+- MutationObserver for dynamic content
+- Component lifecycle management
+
+**Key APIs:**
+```javascript
+window.basecoat = {
+  register: (name, selector, initFunction) => {},  // Register component
+  init: (componentName) => {},                      // Reinit specific component
+  initAll: () => {},                               // Reinit all components
+  start: () => {},                                 // Start MutationObserver
+  stop: () => {}                                   // Stop MutationObserver
+}
+```
+
+**Registration Pattern:**
+```javascript
+window.basecoat.register('component-name', '.selector:not([data-component-initialized])', initFunction);
+```
+
+#### 2. Event System
+
+**Global Events:**
+- `basecoat:initialized` - Dispatched when component initializes
+- `basecoat:popover` - Close other popovers when one opens
+- `basecoat:sidebar` - Control sidebar state
+- `basecoat:toast` - Create dynamic toasts
+- `basecoat:locationchange` - Custom navigation event
+
+---
+
+### Component Patterns
+
+#### Dropdown Menu (`dropdown-menu.js`)
+
+**Required HTML Structure:**
+```html
+<div class="dropdown-menu">
+  <button aria-expanded="false">Trigger</button>
+  <div data-popover aria-hidden="true">
+    <div role="menu">
+      <button role="menuitem">Item 1</button>
+      <button role="menuitem">Item 2</button>
+    </div>
+  </div>
+</div>
+```
+
+**Behavior:**
+- Click trigger to toggle menu
+- Keyboard navigation (Arrow keys, Home/End, Enter, Escape)
+- Mouse hover highlights items
+- Auto-close on outside click
+- Dispatches `basecoat:popover` to close other dropdowns
+
+#### Sidebar (`sidebar.js`)
+
+**Required HTML Structure:**
+```html
+<aside id="sidebar-id" class="sidebar" 
+       data-initial-open="true" 
+       data-initial-mobile-open="false"
+       data-breakpoint="768">
+  <nav>
+    <a href="/page1">Link 1</a>
+    <a href="/page2" data-ignore-current>Link 2</a>
+    <a href="/page3" data-keep-mobile-sidebar-open>Link 3</a>
+  </nav>
+</aside>
+```
+
+**Behavior:**
+- Responsive open/close based on breakpoint
+- Auto-highlights current page link (`aria-current="page"`)
+- Mobile: closes on link click (unless `data-keep-mobile-sidebar-open`)
+- Patches history API for client-side navigation detection
+- Controlled via `basecoat:sidebar` events
+
+**Control Events:**
+```javascript
+document.dispatchEvent(new CustomEvent('basecoat:sidebar', {
+  detail: { id: 'sidebar-id', action: 'open' | 'close' | 'toggle' }
+}));
+```
+
+#### Tabs (`tabs.js`)
+
+**Required HTML Structure:**
+```html
+<div class="tabs">
+  <div role="tablist">
+    <button role="tab" aria-controls="panel1" aria-selected="true">Tab 1</button>
+    <button role="tab" aria-controls="panel2" aria-selected="false">Tab 2</button>
+  </div>
+  <div id="panel1" role="tabpanel">Content 1</div>
+  <div id="panel2" role="tabpanel" hidden>Content 2</div>
+</div>
+```
+
+**Behavior:**
+- Click to select tab
+- Keyboard navigation (Arrow keys, Home/End)
+- Automatic panel show/hide
+- ARIA attributes management
+
+#### Select (`select.js`)
+
+**Required HTML Structure:**
+```html
+<div class="select" data-value="option1">
+  <button class="trigger">
+    <span class="placeholder">Choose...</span>
+    <span class="value">Option 1</span>
+  </button>
+  <input type="hidden" name="field-name" value="option1">
+  <div data-popover>
+    <div class="filter">
+      <input type="text" placeholder="Filter...">
+    </div>
+    <ul role="listbox">
+      <li role="option" data-value="option1">Option 1</li>
+      <li role="option" data-value="option2">Option 2</li>
+    </ul>
+  </div>
+</div>
+```
+
+**Behavior:**
+- Custom select with hidden input
+- Filterable options
+- Keyboard navigation
+- Dispatches `change` event on value change
+- Programmatic control: `selectComponent.selectByValue(value)`
+
+#### Popover (`popover.js`)
+
+**Required HTML Structure:**
+```html
+<div class="popover">
+  <button>Trigger</button>
+  <div data-popover aria-hidden="true">
+    <div autofocus>Popover content</div>
+  </div>
+</div>
+```
+
+**Behavior:**
+- Simple click toggle
+- Auto-focus elements with `autofocus` attribute
+- Escape to close
+- Outside click to close
+- Closes other popovers via event system
+
+#### Toast (`toast.js`)
+
+**Required HTML Structure:**
+```html
+<div class="toaster" id="toaster"></div>
+```
+
+**Dynamic Toast Creation:**
+```javascript
+document.dispatchEvent(new CustomEvent('basecoat:toast', {
+  detail: {
+    category: 'success' | 'error' | 'info' | 'warning',
+    message: 'Toast message',
+    duration: 3000,  // Optional, ms
+    action: {        // Optional
+      label: 'Undo',
+      href: '/undo'  // or onclick function
+    }
+  }
+}));
+```
+
+**Behavior:**
+- Auto-dismiss after duration
+- Pause on hover
+- Manual dismiss button
+- ARIA live regions for accessibility
+- Category-specific icons
+
+#### Command Palette (`command.js`)
+
+**Required HTML Structure:**
+```html
+<div class="command">
+  <input type="text" placeholder="Search commands..." role="combobox">
+  <ul role="listbox">
+    <li role="option" data-keywords="save file">
+      <a href="/save">Save File</a>
+    </li>
+  </ul>
+</div>
+```
+
+**Behavior:**
+- Real-time filtering by text/keywords
+- Keyboard navigation
+- Auto-close parent dialog on selection
+- Highlights active option
+
+---
+
+### Alpine.js Integration
+
+While Basecoat provides vanilla JavaScript components, they're designed to work alongside Alpine.js:
+
+1. **Non-conflicting**: Components use data attributes that don't interfere with Alpine
+2. **Event-driven**: Can trigger/listen to Basecoat events from Alpine
+3. **Progressive Enhancement**: Alpine can enhance Basecoat components
+
+**Example Integration:**
+```html
+<div x-data="{ customBehavior: false }">
+  <div class="dropdown-menu" @basecoat:initialized="customBehavior = true">
+    <!-- Basecoat handles core dropdown behavior -->
+    <!-- Alpine adds custom enhancements -->
+  </div>
+</div>
+```
+
+---
+
+### Required HTML Patterns Summary
+
+1. **Initialization Flag**: Components check for `data-[component]-initialized` to prevent double init
+2. **ARIA Attributes**: All components require proper ARIA roles and properties
+3. **Nested Structure**: Most components have specific parent-child relationships
+4. **Data Attributes**: Configuration via `data-*` attributes
+5. **Event Targets**: Specific elements for event handling (triggers, menus, panels)
+
+---
+
+### Best Practices
+
+1. **Let Basecoat Initialize**: Don't manually initialize components unless needed
+2. **Use Events for Control**: Communicate with components via custom events
+3. **Maintain Structure**: Keep required HTML structure intact
+4. **Accessibility First**: Don't remove ARIA attributes
+5. **Progressive Enhancement**: Layer additional behavior with Alpine.js
+
+This comprehensive analysis provides the complete reference for implementing and working with Basecoat JavaScript components.
