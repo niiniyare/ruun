@@ -1,0 +1,335 @@
+/* ==========================================================================
+   Stats Card Component
+   ========================================================================== */
+
+/**
+ * Stats card for displaying metrics with icon, value, label, and trend indicator.
+ * 
+ * Structure:
+ * .stats-card
+ *   .stats-card-icon
+ *   .stats-card-value
+ *   .stats-card-label
+ *   .stats-card-trend (.stats-card-trend-up | .stats-card-trend-down)
+ */
+
+/* Base Stats Card
+   ========================================================================== */
+
+.stats-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: box-shadow var(--transition-shadow);
+}
+
+.stats-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Stats Card Icon
+   ========================================================================== */
+
+.stats-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: var(--spacing-3);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+}
+
+.stats-card-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Stats Card Content
+   ========================================================================== */
+
+.stats-card-value {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-foreground);
+}
+
+.stats-card-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-muted-foreground);
+  text-transform: capitalize;
+}
+
+/* Stats Card Trend
+   ========================================================================== */
+
+.stats-card-trend {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+}
+
+.stats-card-trend::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* Trend Up Variant */
+.stats-card-trend-up {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.stats-card-trend-up::before {
+  border-width: 0 4px 6px 4px;
+  border-color: transparent transparent var(--color-success) transparent;
+}
+
+/* Trend Down Variant */
+.stats-card-trend-down {
+  background-color: var(--color-destructive-soft);
+  color: var(--color-destructive);
+}
+
+.stats-card-trend-down::before {
+  border-width: 6px 4px 0 4px;
+  border-color: var(--color-destructive) transparent transparent transparent;
+}
+
+/* Layout Variants
+   ========================================================================== */
+
+/* Horizontal Layout */
+.stats-card-horizontal {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stats-card-horizontal .stats-card-icon {
+  order: 2;
+}
+
+.stats-card-horizontal .stats-card-content {
+  flex: 1;
+}
+
+/* Compact Variant */
+.stats-card-compact {
+  padding: var(--spacing-4);
+  gap: var(--spacing-3);
+}
+
+.stats-card-compact .stats-card-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: var(--spacing-2);
+}
+
+.stats-card-compact .stats-card-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.stats-card-compact .stats-card-value {
+  font-size: var(--font-size-xl);
+}
+
+/* Color Variants
+   ========================================================================== */
+
+.stats-card-primary .stats-card-icon {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.stats-card-secondary .stats-card-icon {
+  background-color: var(--color-secondary-soft);
+  color: var(--color-secondary);
+}
+
+.stats-card-success .stats-card-icon {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.stats-card-warning .stats-card-icon {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.stats-card-destructive .stats-card-icon {
+  background-color: var(--color-destructive-soft);
+  color: var(--color-destructive);
+}
+
+/* State Modifiers
+   ========================================================================== */
+
+/* Loading State */
+.stats-card-loading .stats-card-value,
+.stats-card-loading .stats-card-label,
+.stats-card-loading .stats-card-trend {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-muted);
+  color: transparent;
+  border-radius: var(--radius-sm);
+  user-select: none;
+}
+
+.stats-card-loading .stats-card-value::after,
+.stats-card-loading .stats-card-label::after,
+.stats-card-loading .stats-card-trend::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-muted-foreground-soft),
+    transparent
+  );
+  animation: stats-card-shimmer 1.5s infinite;
+}
+
+@keyframes stats-card-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Interactive States
+   ========================================================================== */
+
+.stats-card-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.stats-card-clickable:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.stats-card-clickable:active {
+  transform: scale(0.98);
+}
+
+/* Focus States */
+.stats-card:focus-within {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Responsive
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .stats-card {
+    padding: var(--spacing-4);
+  }
+  
+  .stats-card-value {
+    font-size: var(--font-size-xl);
+  }
+  
+  .stats-card-trend {
+    position: static;
+    margin-top: var(--spacing-2);
+    align-self: flex-start;
+  }
+}
+
+/* Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .stats-card {
+    background-color: var(--color-card);
+    border-color: var(--color-border);
+  }
+  
+  .stats-card-icon {
+    background-color: var(--color-primary-soft-dark);
+  }
+  
+  .stats-card-loading .stats-card-value,
+  .stats-card-loading .stats-card-label,
+  .stats-card-loading .stats-card-trend {
+    background-color: var(--color-muted-dark);
+  }
+}
+
+/* Accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .stats-card {
+    transition: none;
+  }
+  
+  .stats-card-clickable:active {
+    transform: none;
+  }
+  
+  .stats-card-loading .stats-card-value::after,
+  .stats-card-loading .stats-card-label::after,
+  .stats-card-loading .stats-card-trend::after {
+    animation: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .stats-card {
+    border-width: 2px;
+  }
+  
+  .stats-card-trend-up,
+  .stats-card-trend-down {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+/* Print Styles
+   ========================================================================== */
+
+@media print {
+  .stats-card {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+  
+  .stats-card-clickable {
+    cursor: default;
+  }
+}
