@@ -1,0 +1,720 @@
+package main
+
+import (
+	"context"
+	"io"
+
+	"github.com/a-h/templ"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+)
+
+// DemoPageHTML generates the complete demo page using actual imported components
+func DemoPageHTML(w io.Writer) error {
+	ctx := context.Background()
+	return createDemoPage().Render(ctx, w)
+}
+
+// createDemoPage builds the demo using real components with proper imports
+func createDemoPage() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		// HTML document structure with proper Basecoat layout
+		_, err := w.Write([]byte(`<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Awo ERP - Component Gallery</title>
+	<link rel="stylesheet" href="/static/dist/css/base.min.css">
+	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+	<style>
+		/* Basecoat Layout Patterns */
+		.layout-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+		.topbar { 
+			display: flex; align-items: center; justify-content: space-between; 
+			padding: 1rem 2rem; border-bottom: 1px solid var(--border); 
+			background: var(--background); position: sticky; top: 0; z-index: 50;
+		}
+		.topbar-brand { display: flex; align-items: center; gap: 1rem; }
+		.topbar-brand h1 { font-size: 1.25rem; font-weight: bold; margin: 0; }
+		.topbar-nav { display: flex; gap: 2rem; }
+		.topbar-nav a { text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+		.topbar-nav a:hover { color: var(--primary); }
+		.topbar-actions { display: flex; align-items: center; gap: 1rem; }
+		
+		.content { flex: 1; overflow-y: auto; }
+		.hero { padding: 3rem 2rem; text-align: center; border-bottom: 1px solid var(--border); }
+		.hero h1 { font-size: 2.5rem; font-weight: bold; margin: 0 0 1rem 0; }
+		.hero p { font-size: 1.125rem; margin: 1rem 0; color: var(--muted-foreground); }
+		.hero-badges { display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+		
+		.content-sections { padding: 2rem; max-width: 75rem; margin: 0 auto; }
+		.section { margin-bottom: 3rem; }
+		.section-header { margin-bottom: 2rem; }
+		.section-header h2 { 
+			font-size: 1.875rem; font-weight: bold; margin: 0 0 0.5rem 0; 
+			padding-bottom: 1rem; border-bottom: 1px solid var(--border); 
+		}
+		.section-header p { color: var(--muted-foreground); margin: 1rem 0; }
+		.section-content { display: flex; flex-direction: column; gap: 3rem; }
+		.demo-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+		.demo-group { display: flex; flex-direction: column; gap: 1rem; }
+		.demo-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+		.demo-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+		
+		.footer { 
+			padding: 2rem; text-align: center; border-top: 1px solid var(--border); 
+			background: var(--background); 
+		}
+		
+		/* Theme switcher styling */
+		.theme-switcher .btn-group { display: flex; border-radius: var(--radius); overflow: hidden; }
+		.theme-switcher .btn { 
+			border-radius: 0; border-right: 1px solid var(--border); 
+			min-width: 2.5rem; justify-content: center;
+		}
+		.theme-switcher .btn:last-child { border-right: none; }
+		
+		/* Responsive design */
+		@media (max-width: 768px) {
+			.topbar { flex-direction: column; gap: 1rem; padding: 1rem; }
+			.topbar-nav { flex-wrap: wrap; justify-content: center; }
+			.hero { padding: 2rem 1rem; }
+			.hero h1 { font-size: 2rem; }
+			.content-sections { padding: 1rem; }
+			.demo-grid { grid-template-columns: 1fr; }
+			.demo-columns { grid-template-columns: 1fr; }
+		}
+	</style>
+</head>
+<body>
+	<div class="layout-wrapper">
+		<header class="topbar">
+			<div class="topbar-brand">
+				<h1>Awo ERP</h1>
+				<span>Component Gallery</span>
+			</div>
+			<nav class="topbar-nav">
+				<a href="#atoms">Atoms</a>
+				<a href="#molecules">Molecules</a>
+				<a href="#organisms">Organisms</a>
+				<a href="#templates">Templates</a>
+			</nav>
+			<div class="topbar-actions">
+`))
+		if err != nil {
+			return err
+		}
+
+		// Theme switcher using Alpine.js
+		_, err = w.Write([]byte(`
+				<div x-data="themeSwitcher" class="theme-switcher">
+					<div class="btn-group">
+						<button 
+							class="btn btn-sm"
+							:class="{ 'btn-primary': theme === 'light' }"
+							@click="setTheme('light')"
+							aria-label="Light theme"
+						>🌞</button>
+						<button 
+							class="btn btn-sm"
+							:class="{ 'btn-primary': theme === 'auto' }"
+							@click="setTheme('auto')"
+							aria-label="Auto theme"
+						>🌗</button>
+						<button 
+							class="btn btn-sm"
+							:class="{ 'btn-primary': theme === 'dark' }"
+							@click="setTheme('dark')"
+							aria-label="Dark theme"
+						>🌙</button>
+					</div>
+				</div>
+`))
+		if err != nil {
+			return err
+		}
+
+		_, err = w.Write([]byte(`
+			</div>
+		</header>
+
+		<main class="content">
+			<section class="hero">
+				<h1>Component Gallery</h1>
+				<p>Kitchen sink demo showcasing actual Basecoat components with Atomic Design patterns</p>
+				<div class="hero-badges">
+`))
+		if err != nil {
+			return err
+		}
+
+		// Hero badges using real Badge components
+		badges := []atoms.BadgeProps{
+			{Text: "Basecoat UI", Variant: "primary"},
+			{Text: "HTMX", Variant: "secondary"},
+			{Text: "Alpine.js", Variant: "outline"},
+			{Text: "Templ", Variant: "outline"},
+		}
+
+		for _, badge := range badges {
+			err = atoms.Badge(badge).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`
+				</div>
+			</section>
+
+			<div class="content-sections">
+`))
+		if err != nil {
+			return err
+		}
+
+		// Render sections
+		err = renderAtomsSection(ctx, w)
+		if err != nil {
+			return err
+		}
+
+		err = renderMoleculesSection(ctx, w)
+		if err != nil {
+			return err
+		}
+
+		err = renderOrganismsSection(ctx, w)
+		if err != nil {
+			return err
+		}
+
+		err = renderTemplatesSection(ctx, w)
+		if err != nil {
+			return err
+		}
+
+		// Close document with theme management script
+		_, err = w.Write([]byte(`
+			</div>
+		</main>
+
+		<footer class="footer">
+			<p>Awo ERP Component Library • Built with Basecoat UI + Templ</p>
+		</footer>
+	</div>
+
+	<script>
+		// Theme management with Alpine.js
+		document.addEventListener('alpine:init', () => {
+			Alpine.data('themeSwitcher', () => ({
+				theme: localStorage.getItem('theme') || 'auto',
+				
+				init() { this.applyTheme(); },
+				
+				setTheme(newTheme) {
+					this.theme = newTheme;
+					localStorage.setItem('theme', newTheme);
+					this.applyTheme();
+				},
+				
+				applyTheme() {
+					const html = document.documentElement;
+					if (this.theme === 'auto') {
+						const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+						html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+					} else {
+						html.setAttribute('data-theme', this.theme);
+					}
+				}
+			}));
+		});
+		
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+			const currentTheme = localStorage.getItem('theme') || 'auto';
+			if (currentTheme === 'auto') {
+				document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+			}
+		});
+	</script>
+</body>
+</html>`))
+		return err
+	})
+}
+
+// renderAtomsSection showcases atomic components using real imports
+func renderAtomsSection(ctx context.Context, w io.Writer) error {
+	_, err := w.Write([]byte(`
+		<section id="atoms" class="section">
+			<div class="section-header">
+				<h2>Atoms</h2>
+				<p>Basic building blocks imported from <code>views/components/atoms</code>.</p>
+			</div>
+			<div class="section-content">
+				<div class="demo-grid">
+`))
+	if err != nil {
+		return err
+	}
+
+	// Buttons Demo Card
+	err = renderDemoCard(ctx, w, "Buttons", "Real Button components with proper props", func(ctx context.Context, w io.Writer) error {
+		_, err := w.Write([]byte(`<div class="demo-group">`))
+		if err != nil {
+			return err
+		}
+
+		// Button variants row
+		_, err = w.Write([]byte(`<div class="demo-row">`))
+		if err != nil {
+			return err
+		}
+
+		buttonVariants := []atoms.ButtonProps{
+			{Text: "Primary", Variant: "primary"},
+			{Text: "Secondary", Variant: "secondary"},
+			{Text: "Outline", Variant: "outline"},
+			{Text: "Ghost", Variant: "ghost"},
+			{Text: "Destructive", Variant: "destructive"},
+		}
+
+		for _, btnProps := range buttonVariants {
+			err = atoms.Button(btnProps).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div>`))
+		if err != nil {
+			return err
+		}
+
+		// Button sizes row
+		_, err = w.Write([]byte(`<div class="demo-row">`))
+		if err != nil {
+			return err
+		}
+
+		buttonSizes := []atoms.ButtonProps{
+			{Text: "Small", Variant: "primary", Size: "sm"},
+			{Text: "Medium", Variant: "primary"},
+			{Text: "Large", Variant: "primary", Size: "lg"},
+			{Text: "Disabled", Variant: "primary", Disabled: true},
+		}
+
+		for _, btnProps := range buttonSizes {
+			err = atoms.Button(btnProps).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div></div>`))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	// Badges Demo Card  
+	err = renderDemoCard(ctx, w, "Badges", "Real Badge components with variants", func(ctx context.Context, w io.Writer) error {
+		_, err := w.Write([]byte(`<div class="demo-row">`))
+		if err != nil {
+			return err
+		}
+
+		badgeVariants := []atoms.BadgeProps{
+			{Text: "Primary", Variant: "primary"},
+			{Text: "Secondary", Variant: "secondary"},
+			{Text: "Destructive", Variant: "destructive"},
+			{Text: "Outline", Variant: "outline"},
+		}
+
+		for _, badgeProps := range badgeVariants {
+			err = atoms.Badge(badgeProps).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div>`))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	// Alerts Demo Card
+	err = renderDemoCard(ctx, w, "Alerts", "Real Alert components with semantic variants", func(ctx context.Context, w io.Writer) error {
+		_, err := w.Write([]byte(`<div class="demo-group">`))
+		if err != nil {
+			return err
+		}
+
+		alertVariants := []atoms.AlertProps{
+			{Title: "Info", Description: "This is an informational message."},
+			{Title: "Success", Description: "Operation completed successfully!"},
+			{Title: "Warning", Description: "Please check your input."},
+			{Title: "Error", Description: "Something went wrong.", Variant: "destructive"},
+		}
+
+		for _, alertProps := range alertVariants {
+			err = atoms.Alert(alertProps).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div>`))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write([]byte(`
+				</div>
+			</div>
+		</section>
+`))
+	return err
+}
+
+// renderMoleculesSection showcases molecule components using real imports  
+func renderMoleculesSection(ctx context.Context, w io.Writer) error {
+	_, err := w.Write([]byte(`
+		<section id="molecules" class="section">
+			<div class="section-header">
+				<h2>Molecules</h2>
+				<p>Composed components imported from <code>views/components/molecules</code>.</p>
+			</div>
+			<div class="section-content">
+				<div class="demo-grid">
+`))
+	if err != nil {
+		return err
+	}
+
+	// FormField Demo Card using real FormField component
+	err = renderDemoCard(ctx, w, "FormField Molecule", "Real FormField components with proper type definitions", func(ctx context.Context, w io.Writer) error {
+		_, err := w.Write([]byte(`<div class="demo-columns">`))
+		if err != nil {
+			return err
+		}
+
+		// Basic FormFields column
+		_, err = w.Write([]byte(`<div class="demo-group"><h4>Basic FormFields</h4>`))
+		if err != nil {
+			return err
+		}
+
+		// Use real FormField components with proper props
+		basicFields := []molecules.FormFieldProps{
+			{
+				Name:        "username",
+				Label:       "Username",
+				Type:        molecules.FormFieldText,
+				Placeholder: "Enter your username",
+				Required:    true,
+			},
+			{
+				Name:        "email",
+				Label:       "Email Address",
+				Type:        molecules.FormFieldEmail,
+				Placeholder: "your@email.com",
+				Required:    true,
+			},
+			{
+				Name:        "password",
+				Label:       "Password",
+				Type:        molecules.FormFieldPassword,
+				Placeholder: "Enter password",
+				Required:    true,
+			},
+			{
+				Name:        "phone",
+				Label:       "Phone Number",
+				Type:        molecules.FormFieldText,
+				Placeholder: "+1 (555) 123-4567",
+				Required:    false,
+			},
+		}
+
+		for _, fieldProps := range basicFields {
+			err = molecules.FormField(fieldProps).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Advanced FormFields column
+		_, err = w.Write([]byte(`</div><div class="demo-group"><h4>Advanced FormFields</h4>`))
+		if err != nil {
+			return err
+		}
+
+		advancedFields := []molecules.FormFieldProps{
+			{
+				Name:        "company",
+				Label:       "Company",
+				Type:        molecules.FormFieldText,
+				Placeholder: "Enter company name",
+				HelpText:    "This will appear on your profile",
+				Required:    false,
+			},
+			{
+				Name:        "city",
+				Label:       "City",
+				Type:        molecules.FormFieldText,
+				Placeholder: "Current city",
+				Value:       "San Francisco",
+				Required:    false,
+			},
+			{
+				Name:        "invalid-field",
+				Label:       "Invalid Field",
+				Type:        molecules.FormFieldText,
+				Placeholder: "Wrong input",
+				Value:       "bad-value",
+				Errors:      []string{"This field has an error"},
+				HasError:    true,
+				Required:    true,
+			},
+			{
+				Name:        "readonly-field",
+				Label:       "Read-only Field",
+				Type:        molecules.FormFieldText,
+				Placeholder: "Cannot edit",
+				Value:       "Disabled value",
+				Disabled:    true,
+			},
+		}
+
+		for _, fieldProps := range advancedFields {
+			err = molecules.FormField(fieldProps).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div></div>`))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write([]byte(`
+				</div>
+			</div>
+		</section>
+`))
+	return err
+}
+
+// renderOrganismsSection showcases complex composed components
+func renderOrganismsSection(ctx context.Context, w io.Writer) error {
+	_, err := w.Write([]byte(`
+		<section id="organisms" class="section">
+			<div class="section-header">
+				<h2>Organisms</h2>
+				<p>Complex compositions using real imported components.</p>
+			</div>
+			<div class="section-content">
+`))
+	if err != nil {
+		return err
+	}
+
+	// Contact Form Demo using real components
+	err = renderDemoCard(ctx, w, "Contact Form", "Complete form using real FormField molecules", func(ctx context.Context, w io.Writer) error {
+		_, err := w.Write([]byte(`<form class="demo-group" style="max-width: 32rem;">`))
+		if err != nil {
+			return err
+		}
+
+		// Name row
+		_, err = w.Write([]byte(`<div class="demo-columns">`))
+		if err != nil {
+			return err
+		}
+
+		nameFields := []molecules.FormFieldProps{
+			{Name: "firstname", Label: "First Name", Type: molecules.FormFieldText, Placeholder: "Enter first name", Required: true},
+			{Name: "lastname", Label: "Last Name", Type: molecules.FormFieldText, Placeholder: "Enter last name", Required: true},
+		}
+
+		for _, field := range nameFields {
+			err = molecules.FormField(field).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div>`))
+		if err != nil {
+			return err
+		}
+
+		// Contact fields
+		contactFields := []molecules.FormFieldProps{
+			{Name: "contact-email", Label: "Email", Type: molecules.FormFieldEmail, Placeholder: "your@email.com", Required: true},
+			{Name: "contact-phone", Label: "Phone", Type: molecules.FormFieldText, Placeholder: "+1 (555) 123-4567", Required: false},
+			{Name: "subject", Label: "Subject", Type: molecules.FormFieldText, Placeholder: "What is this about?", Required: true},
+		}
+
+		for _, field := range contactFields {
+			err = molecules.FormField(field).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Message field (custom textarea since we don't have TextareaField yet)
+		_, err = w.Write([]byte(`
+			<div class="field">
+				<label class="label" for="message">Message <span class="text-destructive">*</span></label>
+				<textarea class="textarea" name="message" placeholder="Your message..." required></textarea>
+			</div>
+		`))
+		if err != nil {
+			return err
+		}
+
+		// Form actions using real Button components
+		_, err = w.Write([]byte(`<div class="demo-row" style="justify-content: flex-end; margin-top: 1.5rem;">`))
+		if err != nil {
+			return err
+		}
+
+		actionButtons := []atoms.ButtonProps{
+			{Text: "Cancel", Variant: "outline"},
+			{Text: "Send Message", Variant: "primary", Type: "submit"},
+		}
+
+		for _, btn := range actionButtons {
+			err = atoms.Button(btn).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div></form>`))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write([]byte(`
+			</div>
+		</section>
+`))
+	return err
+}
+
+// renderTemplatesSection showcases layout patterns
+func renderTemplatesSection(ctx context.Context, w io.Writer) error {
+	_, err := w.Write([]byte(`
+		<section id="templates" class="section">
+			<div class="section-header">
+				<h2>Templates</h2>
+				<p>Layout patterns showcasing component composition using real imported components.</p>
+			</div>
+			<div class="section-content">
+`))
+	if err != nil {
+		return err
+	}
+
+	err = renderDemoCard(ctx, w, "Layout Showcase", "Different layout patterns using Basecoat", func(ctx context.Context, w io.Writer) error {
+		_, err := w.Write([]byte(`<div class="demo-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">`))
+		if err != nil {
+			return err
+		}
+
+		layouts := []struct {
+			icon   string
+			title  string
+			desc   string
+			badge  atoms.BadgeProps
+		}{
+			{"📊", "Dashboard", "Sidebar + Main", atoms.BadgeProps{Text: "Available", Variant: "outline"}},
+			{"📝", "Form", "Centered Form", atoms.BadgeProps{Text: "Built", Variant: "secondary"}},
+			{"🔐", "Auth", "Login/Register", atoms.BadgeProps{Text: "Ready", Variant: "primary"}},
+			{"⚠️", "Error", "404/500 Pages", atoms.BadgeProps{Text: "Coming", Variant: "outline"}},
+		}
+
+		for _, layout := range layouts {
+			_, err = w.Write([]byte(`<div class="card" style="padding: 1.5rem; text-align: center;">`))
+			if err != nil {
+				return err
+			}
+			_, err = w.Write([]byte(`<div style="font-size: 2rem; margin-bottom: 0.5rem;">` + layout.icon + `</div>`))
+			if err != nil {
+				return err
+			}
+			_, err = w.Write([]byte(`<div style="font-weight: 500; margin-bottom: 0.25rem;">` + layout.title + `</div>`))
+			if err != nil {
+				return err
+			}
+			_, err = w.Write([]byte(`<div style="font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.5rem;">` + layout.desc + `</div>`))
+			if err != nil {
+				return err
+			}
+			
+			// Use real Badge component
+			err = atoms.Badge(layout.badge).Render(ctx, w)
+			if err != nil {
+				return err
+			}
+			
+			_, err = w.Write([]byte(`</div>`))
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = w.Write([]byte(`</div>`))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write([]byte(`
+			</div>
+		</section>
+`))
+	return err
+}
+
+// renderDemoCard renders a demo card with title and content
+func renderDemoCard(ctx context.Context, w io.Writer, title, description string, contentFunc func(context.Context, io.Writer) error) error {
+	_, err := w.Write([]byte(`
+		<div class="card">
+			<div class="card-header">
+				<h3 class="card-title">` + title + `</h3>
+				<p class="card-description">` + description + `</p>
+			</div>
+			<div class="card-content">
+`))
+	if err != nil {
+		return err
+	}
+
+	err = contentFunc(ctx, w)
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write([]byte(`
+			</div>
+		</div>
+`))
+	return err
+}

@@ -77,7 +77,7 @@ func (suite *ErrorsTestSuite) TestValidationErrorCollection() {
 func (suite *ErrorsTestSuite) TestErrorTypeChecking() {
 	validationErr := NewValidationError("test", "message")
 	notFoundErr := NewNotFoundError("resource", "id123")
-	permissionErr := NewPermissionError("action", "unauthorized")
+	permissionErr := NewPermissionError("unauthorized to perform action")
 	// Test IsErrorType
 	require.True(suite.T(), IsErrorType(validationErr, ErrorTypeValidation))
 	require.False(suite.T(), IsErrorType(validationErr, ErrorTypeNotFound))
@@ -116,7 +116,7 @@ func (suite *ErrorsTestSuite) TestHTTPStatusCode() {
 		{NewValidationError("test", "message"), 400},
 		{NewNotFoundError("resource", "id"), 404},
 		{NewConflictError("resource", "conflict"), 409},
-		{NewPermissionError("action", "denied"), 403},
+		{NewPermissionError("action denied"), 403},
 		{NewInternalError("internal", "error"), 500},
 	}
 	for _, tc := range testCases {

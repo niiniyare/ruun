@@ -12,20 +12,20 @@ import (
 
 // SchemaValidator validates form schemas, themes, and configurations
 type SchemaValidator struct {
-	rules      []SchemaValidationRule
-	engine     *ValidationEngine
-	reporter   *ErrorReporter
+	rules    []SchemaValidationRule
+	engine   *ValidationEngine
+	reporter *ErrorReporter
 }
 
 // SchemaValidationRule defines a rule for schema validation
 type SchemaValidationRule struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Category    SchemaCategory         `json:"category"`
-	Level       ValidationLevel        `json:"level"`
-	Enabled     bool                  `json:"enabled"`
-	Validator   SchemaRuleValidator   `json:"-"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Description string              `json:"description"`
+	Category    SchemaCategory      `json:"category"`
+	Level       ValidationLevel     `json:"level"`
+	Enabled     bool                `json:"enabled"`
+	Validator   SchemaRuleValidator `json:"-"`
 }
 
 // SchemaCategory represents different types of schemas that can be validated
@@ -47,80 +47,80 @@ type SchemaRuleValidator interface {
 
 // SchemaValidationContext provides context for schema validation
 type SchemaValidationContext struct {
-	Path     []string               `json:"path"`
-	Schema   any            `json:"schema"`
-	Parent   any            `json:"parent,omitempty"`
-	Root     any            `json:"root"`
-	Metadata map[string]any `json:"metadata"`
-	Level    ValidationLevel        `json:"level"`
+	Path     []string        `json:"path"`
+	Schema   any             `json:"schema"`
+	Parent   any             `json:"parent,omitempty"`
+	Root     any             `json:"root"`
+	Metadata map[string]any  `json:"metadata"`
+	Level    ValidationLevel `json:"level"`
 }
 
 // SchemaValidationResult represents the result of schema validation
 type SchemaValidationResult struct {
-	Valid       bool                   `json:"valid"`
-	Errors      []SchemaError          `json:"errors,omitempty"`
-	Warnings    []SchemaWarning        `json:"warnings,omitempty"`
-	Suggestions []SchemaSuggestion     `json:"suggestions,omitempty"`
-	Metadata    map[string]any `json:"metadata"`
-	Performance *ValidationMetrics     `json:"performance,omitempty"`
-	Timestamp   time.Time             `json:"timestamp"`
+	Valid       bool               `json:"valid"`
+	Errors      []SchemaError      `json:"errors,omitempty"`
+	Warnings    []SchemaWarning    `json:"warnings,omitempty"`
+	Suggestions []SchemaSuggestion `json:"suggestions,omitempty"`
+	Metadata    map[string]any     `json:"metadata"`
+	Performance *ValidationMetrics `json:"performance,omitempty"`
+	Timestamp   time.Time          `json:"timestamp"`
 }
 
 // SchemaError represents a schema validation error
 type SchemaError struct {
-	Code        string         `json:"code"`
-	Message     string         `json:"message"`
-	Path        string         `json:"path"`
-	Value       any    `json:"value,omitempty"`
-	Expected    any    `json:"expected,omitempty"`
-	Actual      any    `json:"actual,omitempty"`
-	Level       ValidationLevel `json:"level"`
-	Category    SchemaCategory `json:"category"`
-	Rule        string         `json:"rule"`
-	Location    *SourceLocation `json:"location,omitempty"`
-	Context     map[string]any `json:"context,omitempty"`
-	Suggestion  string         `json:"suggestion,omitempty"`
+	Code       string          `json:"code"`
+	Message    string          `json:"message"`
+	Path       string          `json:"path"`
+	Value      any             `json:"value,omitempty"`
+	Expected   any             `json:"expected,omitempty"`
+	Actual     any             `json:"actual,omitempty"`
+	Level      ValidationLevel `json:"level"`
+	Category   SchemaCategory  `json:"category"`
+	Rule       string          `json:"rule"`
+	Location   *SourceLocation `json:"location,omitempty"`
+	Context    map[string]any  `json:"context,omitempty"`
+	Suggestion string          `json:"suggestion,omitempty"`
 }
 
 // SchemaWarning represents a schema validation warning
 type SchemaWarning struct {
-	Code       string                 `json:"code"`
-	Message    string                 `json:"message"`
-	Path       string                 `json:"path"`
-	Value      any            `json:"value,omitempty"`
-	Category   SchemaCategory         `json:"category"`
-	Rule       string                 `json:"rule"`
-	Location   *SourceLocation        `json:"location,omitempty"`
-	Context    map[string]any `json:"context,omitempty"`
-	Suggestion string                 `json:"suggestion,omitempty"`
+	Code       string          `json:"code"`
+	Message    string          `json:"message"`
+	Path       string          `json:"path"`
+	Value      any             `json:"value,omitempty"`
+	Category   SchemaCategory  `json:"category"`
+	Rule       string          `json:"rule"`
+	Location   *SourceLocation `json:"location,omitempty"`
+	Context    map[string]any  `json:"context,omitempty"`
+	Suggestion string          `json:"suggestion,omitempty"`
 }
 
 // SchemaSuggestion represents a suggestion for schema improvement
 type SchemaSuggestion struct {
-	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`
-	Path        string                 `json:"path"`
-	Suggestion  string                 `json:"suggestion"`
-	AutoFix     bool                  `json:"autoFix"`
-	Category    SchemaCategory         `json:"category"`
-	Rule        string                 `json:"rule"`
-	Details     map[string]any `json:"details,omitempty"`
+	Code       string         `json:"code"`
+	Message    string         `json:"message"`
+	Path       string         `json:"path"`
+	Suggestion string         `json:"suggestion"`
+	AutoFix    bool           `json:"autoFix"`
+	Category   SchemaCategory `json:"category"`
+	Rule       string         `json:"rule"`
+	Details    map[string]any `json:"details,omitempty"`
 }
 
 // ValidationMetrics contains performance metrics for validation
 type ValidationMetrics struct {
-	Duration    time.Duration `json:"duration"`
-	RulesRun    int          `json:"rulesRun"`
-	ErrorsFound int          `json:"errorsFound"`
-	WarningsFound int        `json:"warningsFound"`
-	Memory      int64        `json:"memory,omitempty"`
+	Duration      time.Duration `json:"duration"`
+	RulesRun      int           `json:"rulesRun"`
+	ErrorsFound   int           `json:"errorsFound"`
+	WarningsFound int           `json:"warningsFound"`
+	Memory        int64         `json:"memory,omitempty"`
 }
 
 // ErrorReporter provides detailed error reporting with suggestions
 type ErrorReporter struct {
-	format     ReportFormat
+	format      ReportFormat
 	suggestions bool
-	context    bool
+	context     bool
 }
 
 // ReportFormat defines how errors are formatted
@@ -139,10 +139,10 @@ func NewSchemaValidator() *SchemaValidator {
 		rules:    make([]SchemaValidationRule, 0),
 		reporter: NewErrorReporter(ReportFormatHuman, true, true),
 	}
-	
+
 	// Register built-in validation rules
 	validator.registerBuiltinRules()
-	
+
 	return validator
 }
 
@@ -158,7 +158,7 @@ func NewErrorReporter(format ReportFormat, suggestions, context bool) *ErrorRepo
 // ValidateSchema validates a schema with detailed error reporting
 func (sv *SchemaValidator) ValidateSchema(schemaData any) *SchemaValidationResult {
 	start := time.Now()
-	
+
 	result := &SchemaValidationResult{
 		Valid:     true,
 		Timestamp: start,
@@ -174,7 +174,7 @@ func (sv *SchemaValidator) ValidateSchema(schemaData any) *SchemaValidationResul
 	}
 
 	rulesRun := 0
-	
+
 	// Run all enabled validation rules
 	for _, rule := range sv.rules {
 		if !rule.Enabled {
@@ -815,16 +815,16 @@ func (er *ErrorReporter) generateJSONReport(result *SchemaValidationResult) (str
 
 func (er *ErrorReporter) generateHumanReport(result *SchemaValidationResult) (string, error) {
 	var report strings.Builder
-	
+
 	report.WriteString("Schema Validation Report\n")
 	report.WriteString("========================\n\n")
-	
+
 	if result.Valid {
 		report.WriteString("✅ Schema is valid\n\n")
 	} else {
 		report.WriteString("❌ Schema validation failed\n\n")
 	}
-	
+
 	if len(result.Errors) > 0 {
 		report.WriteString("Errors:\n")
 		report.WriteString("-------\n")
@@ -836,7 +836,7 @@ func (er *ErrorReporter) generateHumanReport(result *SchemaValidationResult) (st
 			report.WriteString("\n")
 		}
 	}
-	
+
 	if len(result.Warnings) > 0 {
 		report.WriteString("Warnings:\n")
 		report.WriteString("---------\n")
@@ -848,7 +848,7 @@ func (er *ErrorReporter) generateHumanReport(result *SchemaValidationResult) (st
 			report.WriteString("\n")
 		}
 	}
-	
+
 	if result.Performance != nil {
 		report.WriteString("Performance:\n")
 		report.WriteString("------------\n")
@@ -856,21 +856,21 @@ func (er *ErrorReporter) generateHumanReport(result *SchemaValidationResult) (st
 		report.WriteString(fmt.Sprintf("Rules Run: %d\n", result.Performance.RulesRun))
 		report.WriteString(fmt.Sprintf("Errors: %d, Warnings: %d\n\n", result.Performance.ErrorsFound, result.Performance.WarningsFound))
 	}
-	
+
 	return report.String(), nil
 }
 
 func (er *ErrorReporter) generateMarkdownReport(result *SchemaValidationResult) (string, error) {
 	var report strings.Builder
-	
+
 	report.WriteString("# Schema Validation Report\n\n")
-	
+
 	if result.Valid {
 		report.WriteString("✅ **Schema is valid**\n\n")
 	} else {
 		report.WriteString("❌ **Schema validation failed**\n\n")
 	}
-	
+
 	if len(result.Errors) > 0 {
 		report.WriteString("## Errors\n\n")
 		for _, err := range result.Errors {
@@ -881,7 +881,7 @@ func (er *ErrorReporter) generateMarkdownReport(result *SchemaValidationResult) 
 			report.WriteString("\n")
 		}
 	}
-	
+
 	if len(result.Warnings) > 0 {
 		report.WriteString("## Warnings\n\n")
 		for _, warn := range result.Warnings {
@@ -892,20 +892,20 @@ func (er *ErrorReporter) generateMarkdownReport(result *SchemaValidationResult) 
 			report.WriteString("\n")
 		}
 	}
-	
+
 	return report.String(), nil
 }
 
 func (er *ErrorReporter) generateJUnitReport(result *SchemaValidationResult) (string, error) {
 	// Simplified JUnit XML format
 	var report strings.Builder
-	
+
 	report.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
 	report.WriteString("\n")
 	report.WriteString(fmt.Sprintf(`<testsuite name="SchemaValidation" tests="1" failures="%d" errors="0" time="%.3f">`,
 		len(result.Errors), result.Performance.Duration.Seconds()))
 	report.WriteString("\n")
-	
+
 	if result.Valid {
 		report.WriteString(`  <testcase name="SchemaValidation" classname="validation"/>`)
 	} else {
@@ -918,10 +918,10 @@ func (er *ErrorReporter) generateJUnitReport(result *SchemaValidationResult) (st
 		}
 		report.WriteString(`  </testcase>`)
 	}
-	
+
 	report.WriteString("\n")
 	report.WriteString("</testsuite>")
-	
+
 	return report.String(), nil
 }
 
@@ -938,10 +938,10 @@ func (v *SchemaStructureValidator) Validate(ctx *ValidationContext, value any) *
 	// This is a simplified implementation that would delegate to SchemaValidator
 	schemaValidator := NewSchemaValidator()
 	schemaResult := schemaValidator.ValidateSchema(value)
-	
+
 	// Convert SchemaValidationResult to ValidationResult
 	result.Valid = schemaResult.Valid
-	
+
 	for _, err := range schemaResult.Errors {
 		result.Errors = append(result.Errors, ValidationError{
 			Code:      err.Code,
@@ -952,7 +952,7 @@ func (v *SchemaStructureValidator) Validate(ctx *ValidationContext, value any) *
 			Timestamp: time.Now(),
 		})
 	}
-	
+
 	for _, warn := range schemaResult.Warnings {
 		result.Warnings = append(result.Warnings, ValidationWarning{
 			Code:    warn.Code,

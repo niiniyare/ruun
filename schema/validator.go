@@ -106,7 +106,7 @@ func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data m
 	return nil
 }
 
-// ValidateDataDetailed validates form data against a schema and returns detailed results  
+// ValidateDataDetailed validates form data against a schema and returns detailed results
 func (v *DataValidator) ValidateDataDetailed(ctx context.Context, schema SchemaAccessor, data map[string]any) (*ValidationResult, error) {
 	result := &ValidationResult{
 		Valid:    false,
@@ -192,7 +192,7 @@ func (v *DataValidator) ValidateBusinessRules(ctx context.Context, schema Schema
 	return errors
 }
 
-// ValidateEnrichedSchema validates form data against an enriched schema  
+// ValidateEnrichedSchema validates form data against an enriched schema
 // This method respects field visibility and editability from the enricher
 func (v *DataValidator) ValidateEnrichedSchema(ctx context.Context, schema SchemaAccessor, data map[string]any) (*ValidationResult, error) {
 	result := &ValidationResult{
@@ -234,7 +234,7 @@ func (v *DataValidator) ValidateEnrichedSchema(ctx context.Context, schema Schem
 }
 
 // ValidateWithFieldState validates a field considering its runtime state
-// This method integrates with enricher's permission system  
+// This method integrates with enricher's permission system
 func (v *DataValidator) ValidateWithFieldState(ctx context.Context, field FieldAccessor, value any, exists bool) []string {
 	var errors []string
 	runtime := field.GetRuntime()
@@ -255,7 +255,7 @@ func (v *DataValidator) ValidateWithFieldState(ctx context.Context, field FieldA
 	return v.ValidateField(ctx, field, value, exists)
 }
 
-// ValidateConditionalFields validates fields based on their visibility/editability state  
+// ValidateConditionalFields validates fields based on their visibility/editability state
 // This method supports conditional validation based on enriched permissions
 func (v *DataValidator) ValidateConditionalFields(ctx context.Context, schema SchemaAccessor, data map[string]any) map[string][]string {
 	errors := make(map[string][]string)

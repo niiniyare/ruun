@@ -53,7 +53,6 @@ var (
 
 // Note: SchemaError interface moved to interface.go
 
-
 // BaseError implements the SchemaError interface
 type BaseError struct {
 	code    string

@@ -22,7 +22,6 @@ type Registry struct {
 	mu sync.RWMutex
 }
 
-
 // DefaultRegistryConfig returns default configuration
 func DefaultRegistryConfig() *RegistryConfig {
 	return &RegistryConfig{
@@ -45,7 +44,6 @@ func DefaultRegistryConfig() *RegistryConfig {
 // Note: StorageBackend and CacheBackend interfaces moved to interface.go
 
 // StorageFilter defines filtering criteria
-
 
 // NewRegistry creates a new schema registry
 func NewRegistry(config *RegistryConfig) (*Registry, error) {

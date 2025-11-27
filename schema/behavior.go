@@ -36,18 +36,18 @@ func (ss SwapStrategy) IsValid() bool {
 // Trigger represents an event trigger configuration.
 // This is the SINGLE definition - remove duplicates from other files.
 type Trigger struct {
-	Event   string `json:"event,omitempty"`     // Event to listen for (click, change, etc.)
-	Target  string `json:"target,omitempty"`    // Target selector for the event
-	Filter  string `json:"filter,omitempty"`    // CSS selector to filter events
-	Delay   int    `json:"delay,omitempty"`     // Delay before triggering (ms)
-	Once    bool   `json:"once,omitempty"`      // Trigger only once
-	Changed bool   `json:"changed,omitempty"`   // Only trigger if value changed
-	From    string `json:"from,omitempty"`      // Previous value condition
+	Event   string `json:"event,omitempty"`   // Event to listen for (click, change, etc.)
+	Target  string `json:"target,omitempty"`  // Target selector for the event
+	Filter  string `json:"filter,omitempty"`  // CSS selector to filter events
+	Delay   int    `json:"delay,omitempty"`   // Delay before triggering (ms)
+	Once    bool   `json:"once,omitempty"`    // Trigger only once
+	Changed bool   `json:"changed,omitempty"` // Only trigger if value changed
+	From    string `json:"from,omitempty"`    // Previous value condition
 }
 
 // IsEmpty returns true if the trigger has no configuration
 func (t *Trigger) IsEmpty() bool {
-	return t == nil || (t.Event == "" && t.Target == "" && t.Filter == "" && 
+	return t == nil || (t.Event == "" && t.Target == "" && t.Filter == "" &&
 		t.Delay == 0 && !t.Once && !t.Changed && t.From == "")
 }
 
@@ -56,12 +56,12 @@ func (t *Trigger) IsEmpty() bool {
 // This is the SINGLE definition for all behavior-related functionality.
 type Behavior struct {
 	// HTTP Configuration
-	Method  string `json:"method,omitempty"`  // HTTP method (GET, POST, PUT, DELETE, PATCH)
-	URL     string `json:"url,omitempty"`     // Request URL or endpoint
+	Method  string            `json:"method,omitempty"`  // HTTP method (GET, POST, PUT, DELETE, PATCH)
+	URL     string            `json:"url,omitempty"`     // Request URL or endpoint
 	Headers map[string]string `json:"headers,omitempty"` // Additional HTTP headers
 	Params  map[string]string `json:"params,omitempty"`  // URL parameters or form data
 
-	// DOM Configuration  
+	// DOM Configuration
 	Target    string       `json:"target,omitempty"`    // Target element selector for response
 	Swap      SwapStrategy `json:"swap,omitempty"`      // How to swap content into target
 	Select    string       `json:"select,omitempty"`    // CSS selector to select from response
@@ -93,8 +93,8 @@ type Behavior struct {
 func (b *Behavior) IsEmpty() bool {
 	return b == nil || (b.Method == "" && b.URL == "" && len(b.Headers) == 0 &&
 		len(b.Params) == 0 && b.Target == "" && b.Swap == "" && b.Select == "" &&
-		b.Indicator == "" && b.Trigger.IsEmpty() && b.Debounce == 0 && 
-		b.Throttle == 0 && b.Timeout == 0 && b.Disabled == "" && 
+		b.Indicator == "" && b.Trigger.IsEmpty() && b.Debounce == 0 &&
+		b.Throttle == 0 && b.Timeout == 0 && b.Disabled == "" &&
 		b.Confirm == "" && !b.PushURL && !b.Enabled)
 }
 
@@ -351,7 +351,7 @@ func (bb *BehaviorBuilder) Debounce(delay int) *BehaviorBuilder {
 	return bb
 }
 
-// Throttle sets the throttle delay  
+// Throttle sets the throttle delay
 func (bb *BehaviorBuilder) Throttle(delay int) *BehaviorBuilder {
 	bb.behavior.Throttle = delay
 	return bb
@@ -405,10 +405,10 @@ func HTTPBehavior(method, url string) *Behavior {
 // HTMXBehavior creates an HTMX-style behavior with target and swap
 func HTMXBehavior(method, url, target string, swap SwapStrategy) *Behavior {
 	return &Behavior{
-		Method: method,
-		URL:    url,
-		Target: target,
-		Swap:   swap,
+		Method:  method,
+		URL:     url,
+		Target:  target,
+		Swap:    swap,
 		Enabled: true,
 	}
 }
@@ -423,7 +423,7 @@ func FormSubmitBehavior(url string) *Behavior {
 	}
 }
 
-// ClickBehavior creates a click-triggered behavior  
+// ClickBehavior creates a click-triggered behavior
 func ClickBehavior(url, target string) *Behavior {
 	return &Behavior{
 		Method:  "GET",
@@ -438,7 +438,7 @@ func ClickBehavior(url, target string) *Behavior {
 // SearchBehavior creates a search input behavior with debouncing
 func SearchBehavior(url, target string, debounce int) *Behavior {
 	return &Behavior{
-		Method:   "GET", 
+		Method:   "GET",
 		URL:      url,
 		Target:   target,
 		Swap:     SwapInnerHTML,

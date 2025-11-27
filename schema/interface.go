@@ -9,7 +9,7 @@ import (
 // CONSOLIDATED SCHEMA PACKAGE INTERFACES
 // ==============================================================================
 //
-// This file consolidates ALL interfaces for the schema package to eliminate 
+// This file consolidates ALL interfaces for the schema package to eliminate
 // duplicates and provide a central location for all interface definitions.
 //
 // CONSOLIDATION SUMMARY:
@@ -68,7 +68,7 @@ import (
 // - runtime.go: ConditionalEngine → moved here
 // - registry.go: StorageBackend, CacheBackend → moved here (with correct signatures)
 // - repeatable.go: RepeatableFieldInfo → moved here
-// - errors.go: SchemaError → moved here  
+// - errors.go: SchemaError → moved here
 // - types.go: ValidatorFunc, AsyncValidatorFunc, EventHandler → moved here
 //
 // ==============================================================================
@@ -81,7 +81,7 @@ import (
 type Validator interface {
 	// ValidateSchema validates an entire schema with data
 	ValidateSchema(ctx context.Context, schema Schema, data map[string]any) *ValidationResult
-	// ValidateField validates a single field with its value  
+	// ValidateField validates a single field with its value
 	ValidateField(ctx context.Context, field Field, value any) *ValidationResult
 	// ValidateData validates form data against a schema
 	ValidateData(ctx context.Context, schema *Schema, data map[string]any) error

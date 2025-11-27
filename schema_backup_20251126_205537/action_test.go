@@ -178,7 +178,7 @@ func (suite *ActionTestSuite) TestActionUnifiedConfig() {
 	suite.Require().Len(action.Behavior, 2)
 	suite.Require().Contains(action.Behavior, "debounce")
 	suite.Require().Contains(action.Behavior, "throttle")
-	
+
 	// Test unified binding configuration
 	action.Binding = []string{"click", "submit"}
 	suite.Require().Len(action.Binding, 2)
@@ -430,9 +430,9 @@ func (suite *ActionTestSuite) TestActionCopy() {
 // Test action with conditions
 func (suite *ActionTestSuite) TestActionWithConditions() {
 	action := Action{
-		ID:   "conditional-action",
-		Type: ActionButton,
-		Text: "Conditional Button",
+		ID:          "conditional-action",
+		Type:        ActionButton,
+		Text:        "Conditional Button",
 		Conditional: []string{"user_role=admin"},
 	}
 	// Test with permissions instead of data

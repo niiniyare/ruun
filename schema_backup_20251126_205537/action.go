@@ -26,20 +26,20 @@ type Action struct {
 	Hidden   bool `json:"hidden,omitempty"`
 
 	// Unified Configuration
-	Behavior     []string         `json:"behavior,omitempty"`
-	Binding      []string         `json:"binding,omitempty"`
-	Conditional  []string         `json:"conditional,omitempty"`
-	Style        []string         `json:"style,omitempty"`
-	Permissions  []string         `json:"permissions,omitempty"`
-	Config       map[string]any   `json:"config,omitempty"`
-	
-	// New fields for compatibility 
-	Theme        *ActionTheme       `json:"theme,omitempty"`
-	ActionConfig *ActionConfig      `json:"action_config,omitempty"`
+	Behavior    []string       `json:"behavior,omitempty"`
+	Binding     []string       `json:"binding,omitempty"`
+	Conditional []string       `json:"conditional,omitempty"`
+	Style       []string       `json:"style,omitempty"`
+	Permissions []string       `json:"permissions,omitempty"`
+	Config      map[string]any `json:"config,omitempty"`
+
+	// New fields for compatibility
+	Theme        *ActionTheme  `json:"theme,omitempty"`
+	ActionConfig *ActionConfig `json:"action_config,omitempty"`
 
 	// Legacy Support
-	Confirm     *ActionConfirm     `json:"confirm,omitempty"`
-	HTMX        *ActionHTMX        `json:"htmx,omitempty"`
+	Confirm *ActionConfirm `json:"confirm,omitempty"`
+	HTMX    *ActionHTMX    `json:"htmx,omitempty"`
 
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
@@ -60,18 +60,18 @@ func (h *ActionHTMX) MigrateToBehavior() *Behavior {
 	if h == nil {
 		return nil
 	}
-	
+
 	behavior := &Behavior{
 		Method: h.Method,
 		URL:    h.URL,
 		Target: h.Target,
 	}
-	
+
 	// Convert swap strategy to new format
 	if h.Swap != "" {
 		behavior.Swap = SwapStrategy(h.Swap)
 	}
-	
+
 	return behavior
 }
 
@@ -85,7 +85,7 @@ type ActionTheme struct {
 	CustomCSS    string            `json:"customCSS,omitempty"`
 }
 
-// ActionConfig holds action-specific configuration  
+// ActionConfig holds action-specific configuration
 type ActionConfig struct {
 	URL             string            `json:"url,omitempty"`
 	Target          string            `json:"target,omitempty"`
@@ -100,17 +100,12 @@ type ActionConfig struct {
 	RedirectURL     string            `json:"redirectUrl,omitempty"`
 }
 
-
-
-
-// ActionPermissions controls who can see/use the action  
+// ActionPermissions controls who can see/use the action
 type ActionPermissions struct {
 	View     []string `json:"view,omitempty"`
 	Execute  []string `json:"execute,omitempty"`
 	Required []string `json:"required,omitempty"`
 }
-
-
 
 // ActionType defines the type of action
 type ActionType string
@@ -123,7 +118,6 @@ const (
 	ActionCustom ActionType = "custom"
 )
 
-
 // ActionConfirm defines confirmation dialog
 type ActionConfirm struct {
 	Enabled bool   `json:"enabled"`
@@ -134,11 +128,6 @@ type ActionConfirm struct {
 	Variant string `json:"variant,omitempty"`
 	Icon    string `json:"icon,omitempty"`
 }
-
-
-
-
-
 
 // Core Methods
 
@@ -287,12 +276,12 @@ func (a *Action) GetURL() string {
 			}
 		}
 	}
-	
+
 	// Try legacy HTMX field
 	if a.HTMX != nil && a.HTMX.URL != "" {
 		return a.HTMX.URL
 	}
-	
+
 	// Fall back to Config
 	if a.Type == ActionLink || a.Config != nil {
 		if url, ok := a.Config["url"].(string); ok {
@@ -308,14 +297,14 @@ func (a *Action) GetHTTPMethod() string {
 	if a.HTMX != nil && a.HTMX.Method != "" {
 		return a.HTMX.Method
 	}
-	
+
 	// Try Config
 	if a.Config != nil {
 		if method, ok := a.Config["method"].(string); ok && method != "" {
 			return method
 		}
 	}
-	
+
 	// Default based on action type
 	if a.Type == ActionSubmit {
 		return "POST"
@@ -391,7 +380,6 @@ func (a *Action) RequiresPermission(permission string) bool {
 	return false
 }
 
-
 // GetConfigMap returns the action config map, initializing it if nil
 func (a *Action) GetConfigMap() map[string]any {
 	if a.Config == nil {
@@ -411,8 +399,6 @@ func (a *Action) MigrateLegacyHTMXToBehavior() {
 		}
 	}
 }
-
-
 
 // GetVariantClass returns CSS class based on variant
 func (a *Action) GetVariantClass() string {
@@ -597,8 +583,6 @@ func (b *ActionBuilder) WithPermissions(permissions []string) *ActionBuilder {
 	b.action.Permissions = permissions
 	return b
 }
-
-
 
 func (b *ActionBuilder) WithEvaluator(evaluator *condition.Evaluator) *ActionBuilder {
 	b.evaluator = evaluator

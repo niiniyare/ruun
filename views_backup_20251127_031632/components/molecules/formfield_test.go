@@ -22,37 +22,37 @@ func (s *FormFieldTestSuite) TestFormFieldProps() {
 	s.Run("create basic FormFieldProps", func() {
 		props := FormFieldProps{
 			ID:       "test-field",
-			Name:     "testName", 
+			Name:     "testName",
 			Type:     "text",
 			Value:    "test value",
 			Required: true,
 		}
-		
+
 		require.Equal(s.T(), "test-field", props.ID)
 		require.Equal(s.T(), "testName", props.Name)
 		require.Equal(s.T(), "text", props.Type)
 		require.Equal(s.T(), "test value", props.Value)
 		require.True(s.T(), props.Required)
 	})
-	
+
 	s.Run("create FormFieldProps with options", func() {
 		options := []SelectOption{
 			{Value: "opt1", Label: "Option 1"},
 			{Value: "opt2", Label: "Option 2", Selected: true},
 		}
-		
+
 		props := FormFieldProps{
 			Type:    "select",
 			Options: options,
 		}
-		
+
 		require.Len(s.T(), props.Options, 2)
 		require.Equal(s.T(), "opt1", props.Options[0].Value)
 		require.True(s.T(), props.Options[1].Selected)
 	})
 }
 
-// TestSelectOption tests SelectOption functionality  
+// TestSelectOption tests SelectOption functionality
 func (s *FormFieldTestSuite) TestSelectOption() {
 	s.Run("create basic SelectOption", func() {
 		option := SelectOption{
@@ -61,7 +61,7 @@ func (s *FormFieldTestSuite) TestSelectOption() {
 			Disabled: false,
 			Selected: true,
 		}
-		
+
 		require.Equal(s.T(), "test-value", option.Value)
 		require.Equal(s.T(), "Test Label", option.Label)
 		require.False(s.T(), option.Disabled)
@@ -74,11 +74,11 @@ func (s *FormFieldTestSuite) TestFormFieldClasses() {
 	s.Run("generates form field classes", func() {
 		props := FormFieldProps{
 			Size:     "lg",
-			Variant:  "outline", 
+			Variant:  "outline",
 			Required: true,
 			Disabled: false,
 		}
-		
+
 		classes := getFormFieldClasses(props)
 		require.Contains(s.T(), classes, "form-field")
 		require.Contains(s.T(), classes, "form-field-lg")
@@ -95,7 +95,7 @@ func (s *FormFieldTestSuite) TestLabelClasses() {
 			Required: true,
 			Disabled: false,
 		}
-		
+
 		classes := getLabelClasses(props)
 		require.Contains(s.T(), classes, "form-field-label")
 		require.Contains(s.T(), classes, "form-field-label-md")
@@ -116,7 +116,7 @@ func (s *FormFieldTestSuite) TestValidationStateClasses() {
 			{string(ValidationStateInvalid), "form-field-state-invalid"},
 			{string(ValidationStateWarning), "form-field-state-warning"},
 		}
-		
+
 		for _, tc := range testCases {
 			result := getValidationStateClasses(tc.state)
 			require.Equal(s.T(), tc.expected, result)
@@ -131,13 +131,13 @@ func (s *FormFieldTestSuite) TestPlaceholderMethods() {
 		// Tests will be added when validation is implemented
 		s.T().Skip("Validation methods not implemented")
 	})
-	
+
 	s.Run("normalization methods placeholder", func() {
 		// NormalizeDefaults method not implemented
-		// Tests will be added when normalization is implemented  
+		// Tests will be added when normalization is implemented
 		s.T().Skip("NormalizeDefaults method not implemented")
 	})
-	
+
 	s.Run("selection methods placeholder", func() {
 		// GetSelectedValue, GetSelectedValues methods not implemented
 		// Tests will be added when selection methods are implemented

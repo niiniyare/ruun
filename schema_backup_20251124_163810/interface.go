@@ -97,9 +97,9 @@ type Validator interface {
 
 // Event represents a schema-related event that can be dispatched and handled.
 type Event struct {
-	Type      string                 // Event type identifier
-	Source    string                 // Component or field that triggered the event
-	Timestamp int64                  // Unix timestamp when event occurred
+	Type      string         // Event type identifier
+	Source    string         // Component or field that triggered the event
+	Timestamp int64          // Unix timestamp when event occurred
 	Data      map[string]any // Event-specific data payload
 }
 

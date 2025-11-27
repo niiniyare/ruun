@@ -5,36 +5,37 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
 
 // RuntimeValidator provides runtime validation for user inputs and API calls
 type RuntimeValidator struct {
-	middleware    []ValidationMiddleware
-	interceptors  []ValidationInterceptor
-	config        RuntimeValidationConfig
-	metrics       *RuntimeMetrics
-	cache         *ValidationCache
-	rateLimiter   *RateLimiter
+	middleware   []ValidationMiddleware
+	interceptors []ValidationInterceptor
+	config       RuntimeValidationConfig
+	metrics      *RuntimeMetrics
+	cache        *ValidationCache
+	rateLimiter  *RateLimiter
 }
 
 // RuntimeValidationConfig configures runtime validation
 type RuntimeValidationConfig struct {
-	EnableInputValidation    bool          `json:"enableInputValidation"`
-	EnableAPIValidation      bool          `json:"enableAPIValidation"`
-	EnableSanitization       bool          `json:"enableSanitization"`
-	EnableRateLimit          bool          `json:"enableRateLimit"`
-	EnableCaching            bool          `json:"enableCaching"`
-	ValidateAsync            bool          `json:"validateAsync"`
-	CacheTTL                time.Duration  `json:"cacheTTL"`
-	MaxCacheSize             int           `json:"maxCacheSize"`
-	RateLimitRequests        int           `json:"rateLimitRequests"`
-	RateLimitWindow          time.Duration `json:"rateLimitWindow"`
-	ValidationTimeout        time.Duration `json:"validationTimeout"`
-	StrictMode               bool          `json:"strictMode"`
-	AllowedOrigins          []string       `json:"allowedOrigins"`
-	CSRFProtection          bool           `json:"csrfProtection"`
+	EnableInputValidation bool          `json:"enableInputValidation"`
+	EnableAPIValidation   bool          `json:"enableAPIValidation"`
+	EnableSanitization    bool          `json:"enableSanitization"`
+	EnableRateLimit       bool          `json:"enableRateLimit"`
+	EnableCaching         bool          `json:"enableCaching"`
+	ValidateAsync         bool          `json:"validateAsync"`
+	CacheTTL              time.Duration `json:"cacheTTL"`
+	MaxCacheSize          int           `json:"maxCacheSize"`
+	RateLimitRequests     int           `json:"rateLimitRequests"`
+	RateLimitWindow       time.Duration `json:"rateLimitWindow"`
+	ValidationTimeout     time.Duration `json:"validationTimeout"`
+	StrictMode            bool          `json:"strictMode"`
+	AllowedOrigins        []string      `json:"allowedOrigins"`
+	CSRFProtection        bool          `json:"csrfProtection"`
 }
 
 // ValidationMiddleware interface for HTTP middleware
@@ -53,26 +54,26 @@ type ValidationInterceptor interface {
 
 // RuntimeMetrics contains runtime validation metrics
 type RuntimeMetrics struct {
-	TotalValidations   int64                    `json:"totalValidations"`
-	SuccessfulValidations int64                 `json:"successfulValidations"`
-	FailedValidations  int64                    `json:"failedValidations"`
-	AverageLatency     time.Duration            `json:"averageLatency"`
-	ValidationsByType  map[string]int64         `json:"validationsByType"`
-	ErrorsByType       map[string]int64         `json:"errorsByType"`
-	CacheHitRate       float64                  `json:"cacheHitRate"`
-	RateLimitHits      int64                    `json:"rateLimitHits"`
-	LastUpdated        time.Time                `json:"lastUpdated"`
-	mutex              sync.RWMutex
+	TotalValidations      int64            `json:"totalValidations"`
+	SuccessfulValidations int64            `json:"successfulValidations"`
+	FailedValidations     int64            `json:"failedValidations"`
+	AverageLatency        time.Duration    `json:"averageLatency"`
+	ValidationsByType     map[string]int64 `json:"validationsByType"`
+	ErrorsByType          map[string]int64 `json:"errorsByType"`
+	CacheHitRate          float64          `json:"cacheHitRate"`
+	RateLimitHits         int64            `json:"rateLimitHits"`
+	LastUpdated           time.Time        `json:"lastUpdated"`
+	mutex                 sync.RWMutex
 }
 
 // ValidationCache provides caching for validation results
 type ValidationCache struct {
-	cache     map[string]*CacheEntry
-	mutex     sync.RWMutex
-	maxSize   int
-	ttl       time.Duration
-	hits      int64
-	misses    int64
+	cache   map[string]*CacheEntry
+	mutex   sync.RWMutex
+	maxSize int
+	ttl     time.Duration
+	hits    int64
+	misses  int64
 }
 
 // CacheEntry represents a cached validation result
@@ -92,35 +93,35 @@ type RateLimiter struct {
 
 // RequestCounter tracks requests per client
 type RequestCounter struct {
-	Count     int       `json:"count"`
-	Window    time.Time `json:"window"`
-	Blocked   bool      `json:"blocked"`
+	Count        int       `json:"count"`
+	Window       time.Time `json:"window"`
+	Blocked      bool      `json:"blocked"`
 	BlockedUntil time.Time `json:"blockedUntil"`
 }
 
 // RuntimeValidationRequest represents a validation request
 type RuntimeValidationRequest struct {
-	ID          string                 `json:"id"`
-	Type        string                 `json:"type"` // input, api, form, etc.
-	Data        any            `json:"data"`
-	Schema      any            `json:"schema,omitempty"`
-	Context     map[string]any `json:"context"`
-	ClientID    string                 `json:"clientId,omitempty"`
-	Async       bool                   `json:"async"`
-	Timeout     time.Duration          `json:"timeout,omitempty"`
-	Priority    int                    `json:"priority"`
-	Timestamp   time.Time              `json:"timestamp"`
+	ID        string         `json:"id"`
+	Type      string         `json:"type"` // input, api, form, etc.
+	Data      any            `json:"data"`
+	Schema    any            `json:"schema,omitempty"`
+	Context   map[string]any `json:"context"`
+	ClientID  string         `json:"clientId,omitempty"`
+	Async     bool           `json:"async"`
+	Timeout   time.Duration  `json:"timeout,omitempty"`
+	Priority  int            `json:"priority"`
+	Timestamp time.Time      `json:"timestamp"`
 }
 
 // RuntimeValidationResponse represents a validation response
 type RuntimeValidationResponse struct {
-	ID          string            `json:"id"`
-	Valid       bool              `json:"valid"`
-	Result      *ValidationResult `json:"result"`
-	Sanitized   any       `json:"sanitized,omitempty"`
-	Cached      bool              `json:"cached"`
-	Duration    time.Duration     `json:"duration"`
-	Timestamp   time.Time         `json:"timestamp"`
+	ID        string            `json:"id"`
+	Valid     bool              `json:"valid"`
+	Result    *ValidationResult `json:"result"`
+	Sanitized any               `json:"sanitized,omitempty"`
+	Cached    bool              `json:"cached"`
+	Duration  time.Duration     `json:"duration"`
+	Timestamp time.Time         `json:"timestamp"`
 }
 
 // InputValidationMiddleware validates user inputs
@@ -186,17 +187,17 @@ func NewRuntimeValidator() *RuntimeValidator {
 	config := RuntimeValidationConfig{
 		EnableInputValidation: true,
 		EnableAPIValidation:   true,
-		EnableSanitization:   true,
-		EnableRateLimit:      true,
-		EnableCaching:        true,
-		ValidateAsync:        false,
-		CacheTTL:            time.Minute * 5,
-		MaxCacheSize:        1000,
-		RateLimitRequests:   100,
-		RateLimitWindow:     time.Minute,
-		ValidationTimeout:   time.Second * 5,
-		StrictMode:          false,
-		CSRFProtection:      true,
+		EnableSanitization:    true,
+		EnableRateLimit:       true,
+		EnableCaching:         true,
+		ValidateAsync:         false,
+		CacheTTL:              time.Minute * 5,
+		MaxCacheSize:          1000,
+		RateLimitRequests:     100,
+		RateLimitWindow:       time.Minute,
+		ValidationTimeout:     time.Second * 5,
+		StrictMode:            false,
+		CSRFProtection:        true,
 	}
 
 	return &RuntimeValidator{
@@ -290,7 +291,7 @@ func (rv *RuntimeValidator) ValidateForm(ctx context.Context, formData map[strin
 // processValidationRequest processes a validation request
 func (rv *RuntimeValidator) processValidationRequest(ctx context.Context, request *RuntimeValidationRequest) *RuntimeValidationResponse {
 	start := time.Now()
-	
+
 	response := &RuntimeValidationResponse{
 		ID:        request.ID,
 		Timestamp: start,
@@ -349,7 +350,7 @@ func (rv *RuntimeValidator) processValidationRequest(ctx context.Context, reques
 	// Perform validation based on type
 	var result *ValidationResult
 	var sanitized any
-	
+
 	switch request.Type {
 	case "input":
 		result, sanitized = rv.validateInputData(ctx, processedData, request.Schema)
@@ -409,10 +410,10 @@ func (rv *RuntimeValidator) validateInputData(ctx context.Context, data any, sch
 		engine := NewValidationEngine(ValidationOptions{
 			StrictMode: rv.config.StrictMode,
 		})
-		
+
 		validationCtx := NewValidationContext(ctx, ValidationLevelError, "runtime_input")
 		schemaResult := engine.ValidateSchema(validationCtx, schema)
-		
+
 		if !schemaResult.IsValid() {
 			result.Valid = false
 			result.Errors = append(result.Errors, schemaResult.Errors...)
@@ -547,7 +548,7 @@ func (rv *RuntimeValidator) sanitizeInput(data any) any {
 		}
 		return sanitized
 	}
-	
+
 	return rv.sanitizeValue(data)
 }
 
@@ -559,7 +560,7 @@ func (rv *RuntimeValidator) sanitizeValue(value any) any {
 		str = rv.removeSQLPatterns(str)
 		return str
 	}
-	
+
 	return value
 }
 
@@ -577,12 +578,12 @@ func (rv *RuntimeValidator) escapeHTMLEntities(input string) string {
 		"'":  "&#39;",
 		"\"": "&quot;",
 	}
-	
+
 	result := input
 	for old, new := range replacements {
 		result = strings.ReplaceAll(result, old, new)
 	}
-	
+
 	return result
 }
 
@@ -593,42 +594,42 @@ func (rv *RuntimeValidator) removeSQLPatterns(input string) string {
 		"UNION", "SELECT", "INSERT", "UPDATE", "DELETE",
 		"DROP", "CREATE", "ALTER", "EXEC",
 	}
-	
+
 	result := input
 	for _, pattern := range sqlPatterns {
 		result = strings.ReplaceAll(result, pattern, "")
 		result = strings.ReplaceAll(result, strings.ToLower(pattern), "")
 	}
-	
+
 	return result
 }
 
 func (rv *RuntimeValidator) sanitizeFormData(data map[string]any) map[string]any {
 	sanitized := make(map[string]any)
-	
+
 	for key, value := range data {
 		// Skip sensitive fields from logging
 		if rv.isSensitiveField(key) {
 			sanitized[key] = "[REDACTED]"
 			continue
 		}
-		
+
 		sanitized[key] = rv.sanitizeValue(value)
 	}
-	
+
 	return sanitized
 }
 
 func (rv *RuntimeValidator) isSensitiveField(field string) bool {
 	sensitiveFields := []string{"password", "token", "secret", "key", "auth"}
 	fieldLower := strings.ToLower(field)
-	
+
 	for _, sensitive := range sensitiveFields {
 		if strings.Contains(fieldLower, sensitive) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -648,7 +649,7 @@ func (rv *RuntimeValidator) validateFieldInput(field string, value any) *Validat
 			}
 		}
 	}
-	
+
 	if field == "phone" {
 		if str, ok := value.(string); ok {
 			if !rv.isValidPhone(str) {
@@ -661,7 +662,7 @@ func (rv *RuntimeValidator) validateFieldInput(field string, value any) *Validat
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -679,7 +680,7 @@ func (rv *RuntimeValidator) validateFormField(field string, value any) *Validati
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -707,30 +708,30 @@ func (rv *RuntimeValidator) isAllowedContentType(contentType string) bool {
 		"multipart/form-data",
 		"text/plain",
 	}
-	
+
 	for _, allowed := range allowedTypes {
 		if strings.Contains(contentType, allowed) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
 func (rv *RuntimeValidator) validateOrigin(req *http.Request) bool {
 	origin := req.Header.Get("Origin")
 	referer := req.Header.Get("Referer")
-	
+
 	if len(rv.config.AllowedOrigins) == 0 {
 		return true // No origin restriction
 	}
-	
+
 	for _, allowed := range rv.config.AllowedOrigins {
 		if origin == allowed || strings.HasPrefix(referer, allowed) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -739,20 +740,20 @@ func (rv *RuntimeValidator) validateOrigin(req *http.Request) bool {
 func (vc *ValidationCache) Get(key string) *ValidationResult {
 	vc.mutex.RLock()
 	defer vc.mutex.RUnlock()
-	
+
 	entry, exists := vc.cache[key]
 	if !exists {
 		vc.misses++
 		return nil
 	}
-	
+
 	// Check if entry has expired
 	if time.Since(entry.Timestamp) > entry.TTL {
 		delete(vc.cache, key)
 		vc.misses++
 		return nil
 	}
-	
+
 	vc.hits++
 	return entry.Result
 }
@@ -760,12 +761,12 @@ func (vc *ValidationCache) Get(key string) *ValidationResult {
 func (vc *ValidationCache) Set(key string, result *ValidationResult) {
 	vc.mutex.Lock()
 	defer vc.mutex.Unlock()
-	
+
 	// Remove oldest entries if cache is full
 	if len(vc.cache) >= vc.maxSize {
 		vc.evictOldest()
 	}
-	
+
 	vc.cache[key] = &CacheEntry{
 		Result:    result,
 		Timestamp: time.Now(),
@@ -776,14 +777,14 @@ func (vc *ValidationCache) Set(key string, result *ValidationResult) {
 func (vc *ValidationCache) evictOldest() {
 	oldestKey := ""
 	oldestTime := time.Now()
-	
+
 	for key, entry := range vc.cache {
 		if entry.Timestamp.Before(oldestTime) {
 			oldestTime = entry.Timestamp
 			oldestKey = key
 		}
 	}
-	
+
 	if oldestKey != "" {
 		delete(vc.cache, oldestKey)
 	}
@@ -802,10 +803,10 @@ func (vc *ValidationCache) GetHitRate() float64 {
 func (rl *RateLimiter) Allow(clientID string) bool {
 	rl.mutex.Lock()
 	defer rl.mutex.Unlock()
-	
+
 	now := time.Now()
 	counter, exists := rl.requests[clientID]
-	
+
 	if !exists {
 		rl.requests[clientID] = &RequestCounter{
 			Count:  1,
@@ -813,12 +814,12 @@ func (rl *RateLimiter) Allow(clientID string) bool {
 		}
 		return true
 	}
-	
+
 	// Check if client is currently blocked
 	if counter.Blocked && now.Before(counter.BlockedUntil) {
 		return false
 	}
-	
+
 	// Reset window if expired
 	if now.Sub(counter.Window) > rl.window {
 		counter.Count = 1
@@ -826,14 +827,14 @@ func (rl *RateLimiter) Allow(clientID string) bool {
 		counter.Blocked = false
 		return true
 	}
-	
+
 	// Check if limit is exceeded
 	if counter.Count >= rl.limit {
 		counter.Blocked = true
 		counter.BlockedUntil = now.Add(rl.window)
 		return false
 	}
-	
+
 	counter.Count++
 	return true
 }
@@ -843,17 +844,17 @@ func (rl *RateLimiter) Allow(clientID string) bool {
 func (rm *RuntimeMetrics) RecordValidation(validationType string, success bool, duration time.Duration) {
 	rm.mutex.Lock()
 	defer rm.mutex.Unlock()
-	
+
 	rm.TotalValidations++
 	rm.ValidationsByType[validationType]++
-	
+
 	if success {
 		rm.SuccessfulValidations++
 	} else {
 		rm.FailedValidations++
 		rm.ErrorsByType[validationType]++
 	}
-	
+
 	// Update average latency (simple moving average)
 	if rm.TotalValidations == 1 {
 		rm.AverageLatency = duration
@@ -862,36 +863,36 @@ func (rm *RuntimeMetrics) RecordValidation(validationType string, success bool, 
 			(int64(rm.AverageLatency)*(rm.TotalValidations-1) + int64(duration)) / rm.TotalValidations,
 		)
 	}
-	
+
 	rm.LastUpdated = time.Now()
 }
 
 func (rm *RuntimeMetrics) RecordRateLimitHit() {
 	rm.mutex.Lock()
 	defer rm.mutex.Unlock()
-	
+
 	rm.RateLimitHits++
 }
 
 func (rm *RuntimeMetrics) GetStats() map[string]any {
 	rm.mutex.RLock()
 	defer rm.mutex.RUnlock()
-	
+
 	successRate := 0.0
 	if rm.TotalValidations > 0 {
 		successRate = float64(rm.SuccessfulValidations) / float64(rm.TotalValidations)
 	}
-	
+
 	return map[string]any{
-		"totalValidations":     rm.TotalValidations,
+		"totalValidations":      rm.TotalValidations,
 		"successfulValidations": rm.SuccessfulValidations,
-		"failedValidations":    rm.FailedValidations,
-		"successRate":          successRate,
-		"averageLatency":       rm.AverageLatency.Milliseconds(),
-		"validationsByType":    rm.ValidationsByType,
-		"errorsByType":         rm.ErrorsByType,
-		"rateLimitHits":        rm.RateLimitHits,
-		"lastUpdated":          rm.LastUpdated,
+		"failedValidations":     rm.FailedValidations,
+		"successRate":           successRate,
+		"averageLatency":        rm.AverageLatency.Milliseconds(),
+		"validationsByType":     rm.ValidationsByType,
+		"errorsByType":          rm.ErrorsByType,
+		"rateLimitHits":         rm.RateLimitHits,
+		"lastUpdated":           rm.LastUpdated,
 	}
 }
 
@@ -911,11 +912,11 @@ func (rv *RuntimeValidator) getClientID(req *http.Request) string {
 	if clientID := req.Header.Get("X-Client-ID"); clientID != "" {
 		return clientID
 	}
-	
+
 	if userAgent := req.Header.Get("User-Agent"); userAgent != "" {
 		return fmt.Sprintf("ua_%x", userAgent)
 	}
-	
+
 	return req.RemoteAddr
 }
 
@@ -940,7 +941,7 @@ func (rv *RuntimeValidator) HTTPMiddleware() func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Validate the request
 			response := rv.ValidateAPI(r.Context(), r)
-			
+
 			if !response.Valid {
 				// Return validation error
 				w.Header().Set("Content-Type", "application/json")
@@ -951,7 +952,7 @@ func (rv *RuntimeValidator) HTTPMiddleware() func(http.Handler) http.Handler {
 				})
 				return
 			}
-			
+
 			// Continue to next handler
 			next.ServeHTTP(w, r)
 		})

@@ -18,19 +18,19 @@ import (
 
 // formState holds processed rendering state (internal only)
 type formState struct {
-	props         FormProps
-	id            string
-	config        map[string]any
-	actionGroups  map[string][]Action
+	props           FormProps
+	id              string
+	config          map[string]any
+	actionGroups    map[string][]Action
 	dependencyGraph map[string][]Dependency
-	flags         formFlags
-	
+	flags           formFlags
+
 	// Computed flags for template rendering
-	hasHeader        bool
-	hasProgress      bool
-	hasAutoSave      bool
+	hasHeader         bool
+	hasProgress       bool
+	hasAutoSave       bool
 	hasStorageRestore bool
-	hasDebug         bool
+	hasDebug          bool
 }
 
 // formFlags consolidates feature detection
@@ -53,10 +53,10 @@ type formFlags struct {
 func buildFormState(props FormProps) formState {
 	// Generate ID
 	id := generateFormID(props.ID, props.Title)
-	
+
 	// Detect enabled features
 	flags := detectFeatures(props)
-	
+
 	// Build dependency graph and validate
 	depGraph := buildDependencyGraph(props)
 	if flags.hasDependencies {
@@ -64,25 +64,25 @@ func buildFormState(props FormProps) formState {
 			fmt.Printf("Form dependency validation warning: %v\n", err)
 		}
 	}
-	
+
 	// Group actions by position
 	actionGroups := groupActionsByPosition(props.Actions)
-	
+
 	// Build Alpine.js configuration
 	config := buildAlpineConfig(id, props, flags, depGraph)
-	
+
 	return formState{
-		props:           props,
-		id:              id,
-		config:          config,
-		actionGroups:    actionGroups,
-		dependencyGraph: depGraph,
-		flags:           flags,
-		hasHeader:       props.Title != "" || props.Description != "",
-		hasProgress:     flags.hasProgress && props.Progress != nil && props.Progress.TotalSteps > 1,
-		hasAutoSave:     flags.hasAutoSave && props.AutoSave != nil,
+		props:             props,
+		id:                id,
+		config:            config,
+		actionGroups:      actionGroups,
+		dependencyGraph:   depGraph,
+		flags:             flags,
+		hasHeader:         props.Title != "" || props.Description != "",
+		hasProgress:       flags.hasProgress && props.Progress != nil && props.Progress.TotalSteps > 1,
+		hasAutoSave:       flags.hasAutoSave && props.AutoSave != nil,
 		hasStorageRestore: flags.hasStorage && props.Storage != nil && props.Storage.RestoreOnLoad,
-		hasDebug:        flags.hasDebug && props.Debug != nil && props.Debug.Enabled,
+		hasDebug:          flags.hasDebug && props.Debug != nil && props.Debug.Enabled,
 	}
 }
 
@@ -126,14 +126,14 @@ func detectFeatures(props FormProps) formFlags {
 
 func buildDependencyGraph(props FormProps) map[string][]Dependency {
 	graph := make(map[string][]Dependency)
-	
+
 	// Add dependencies from config
 	if props.Dependencies != nil && props.Dependencies.Graph != nil {
 		for field, deps := range props.Dependencies.Graph {
 			graph[field] = deps
 		}
 	}
-	
+
 	// Add field-level dependencies
 	allFields := collectAllFields(props)
 	for _, field := range allFields {
@@ -141,30 +141,30 @@ func buildDependencyGraph(props FormProps) map[string][]Dependency {
 			graph[field.Name] = append(graph[field.Name], field.Dependencies...)
 		}
 	}
-	
+
 	return graph
 }
 
 func collectAllFields(props FormProps) []Field {
 	var fields []Field
 	fields = append(fields, props.Fields...)
-	
+
 	for _, section := range props.Sections {
 		fields = append(fields, section.Fields...)
 	}
-	
+
 	return fields
 }
 
 func validateDependencyGraph(graph map[string][]Dependency) error {
 	visited := make(map[string]bool)
 	recStack := make(map[string]bool)
-	
+
 	var hasCycle func(string) bool
 	hasCycle = func(field string) bool {
 		visited[field] = true
 		recStack[field] = true
-		
+
 		for _, dep := range graph[field] {
 			target := dep.TargetField
 			if !visited[target] {
@@ -175,11 +175,11 @@ func validateDependencyGraph(graph map[string][]Dependency) error {
 				return true
 			}
 		}
-		
+
 		recStack[field] = false
 		return false
 	}
-	
+
 	for field := range graph {
 		if !visited[field] && hasCycle(field) {
 			return fmt.Errorf("circular dependency detected involving field: %s", field)
@@ -190,7 +190,7 @@ func validateDependencyGraph(graph map[string][]Dependency) error {
 
 func groupActionsByPosition(actions []Action) map[string][]Action {
 	groups := make(map[string][]Action)
-	
+
 	for _, action := range actions {
 		position := action.Position
 		if position == "" {
@@ -198,15 +198,15 @@ func groupActionsByPosition(actions []Action) map[string][]Action {
 		}
 		groups[position] = append(groups[position], action)
 	}
-	
+
 	return groups
 }
 
 func buildAlpineConfig(id string, props FormProps, flags formFlags, depGraph map[string][]Dependency) map[string]any {
 	config := map[string]any{
-		"formId":     id,
+		"formId":      id,
 		"initialData": props.Fields, // This would be processed to extract initial values
-		
+
 		// Feature flags
 		"hasValidation":   flags.hasValidation,
 		"hasAutoSave":     flags.hasAutoSave,
@@ -217,14 +217,14 @@ func buildAlpineConfig(id string, props FormProps, flags formFlags, depGraph map
 		"hasAdvanced":     flags.hasAdvanced,
 		"hasDebug":        flags.hasDebug,
 	}
-	
+
 	// Add validation config
 	if flags.hasValidation {
 		config["validationURL"] = props.Validation.URL
 		config["validationStrategy"] = defaultString(string(props.Validation.Strategy), string(ValidationOnBlur))
 		config["validationDebounce"] = defaultInt(props.Validation.Debounce, 300)
 	}
-	
+
 	// Add auto-save config
 	if flags.hasAutoSave {
 		config["autoSave"] = true
@@ -232,7 +232,7 @@ func buildAlpineConfig(id string, props FormProps, flags formFlags, depGraph map
 		config["autoSaveStrategy"] = defaultString(string(props.AutoSave.Strategy), string(AutoSaveDebounced))
 		config["autoSaveInterval"] = defaultInt(props.AutoSave.Interval, 30)
 	}
-	
+
 	// Add storage config
 	if flags.hasStorage {
 		config["storageStrategy"] = string(props.Storage.Strategy)
@@ -240,28 +240,28 @@ func buildAlpineConfig(id string, props FormProps, flags formFlags, depGraph map
 		config["storageTTL"] = defaultInt(props.Storage.TTL, 86400)
 		config["restoreFromStorage"] = props.Storage.RestoreOnLoad
 	}
-	
+
 	// Add progress config
 	if flags.hasProgress {
 		config["currentStep"] = defaultInt(props.Progress.CurrentStep, 1)
 		config["totalSteps"] = props.Progress.TotalSteps
 	}
-	
+
 	// Add dependency config
 	if flags.hasDependencies {
 		config["dependencyGraph"] = depGraph
 	}
-	
+
 	// Add submission config
 	if props.SubmitURL != "" {
 		config["submitURL"] = props.SubmitURL
 	}
-	
+
 	// Add debug config
 	if flags.hasDebug {
 		config["debug"] = true
 	}
-	
+
 	// Add advanced config
 	if flags.hasAdvanced && props.Advanced != nil {
 		config["hasAdvanced"] = map[string]bool{
@@ -270,7 +270,7 @@ func buildAlpineConfig(id string, props FormProps, flags formFlags, depGraph map
 			"enableOfflineMode":  props.Advanced.EnableOfflineMode,
 		}
 	}
-	
+
 	return config
 }
 
@@ -286,27 +286,27 @@ func buildFormAttributes(state formState) templ.Attributes {
 		"method":     "POST",
 		"novalidate": "true",
 	}
-	
+
 	// Alpine.js store initialization
 	attrs["x-data"] = fmt.Sprintf("formStore_%s()", state.id)
-	
+
 	// Restoration
 	if state.hasStorageRestore {
 		attrs["x-init"] = "init()"
 	}
-	
+
 	// Submission
 	if props.SubmitURL != "" {
 		attrs["action"] = props.SubmitURL
 	}
-	
+
 	// Event handlers
 	if props.OnSubmit != "" {
 		attrs["x-on:submit.prevent"] = props.OnSubmit
 	} else {
 		attrs["x-on:submit.prevent"] = "submitForm($event)"
 	}
-	
+
 	// HTMX
 	if state.flags.hasHTMX && props.HTMX != nil {
 		if props.HTMX.Target != "" {
@@ -322,7 +322,7 @@ func buildFormAttributes(state formState) templ.Attributes {
 			attrs["hx-indicator"] = props.HTMX.Indicator
 		}
 	}
-	
+
 	// Theme overrides
 	if props.Theme != nil && len(props.Theme.TokenOverrides) > 0 {
 		vars := make([]string, 0, len(props.Theme.TokenOverrides))
@@ -331,7 +331,7 @@ func buildFormAttributes(state formState) templ.Attributes {
 		}
 		attrs["style"] = strings.Join(vars, "; ")
 	}
-	
+
 	return attrs
 }
 
@@ -339,16 +339,16 @@ func buildSectionAttributes(section Section) templ.Attributes {
 	attrs := templ.Attributes{
 		"class": buildSectionClasses(section),
 	}
-	
+
 	if section.Conditional != "" {
 		attrs["x-show"] = section.Conditional
 		attrs["x-transition"] = "true"
 	}
-	
+
 	if section.Collapsible {
 		attrs["x-data"] = fmt.Sprintf("{ collapsed: %t }", section.Collapsed)
 	}
-	
+
 	return attrs
 }
 
@@ -356,20 +356,20 @@ func buildFieldContainerAttributes(field Field, state formState) templ.Attribute
 	attrs := templ.Attributes{
 		"class": "form-field-container",
 	}
-	
+
 	if field.Conditional != "" {
 		attrs["x-show"] = field.Conditional
 		attrs["x-transition"] = "true"
 	}
-	
+
 	if field.Name != "" {
 		attrs["aria-describedby"] = fmt.Sprintf("%s-%s-feedback", state.id, field.Name)
 	}
-	
+
 	if len(field.Dependencies) > 0 {
 		attrs["x-effect"] = fmt.Sprintf("handleDependencies('%s')", field.Name)
 	}
-	
+
 	return attrs
 }
 
@@ -384,7 +384,7 @@ func buildFormClasses(state formState) string {
 		fmt.Sprintf("form--%s", defaultString(string(props.Layout), string(FormLayoutVertical))),
 		fmt.Sprintf("form--%s", defaultString(string(props.Size), string(FormSizeMD))),
 	}
-	
+
 	// State classes
 	if props.ReadOnly {
 		classes = append(classes, "form--readonly")
@@ -410,18 +410,18 @@ func buildFormClasses(state formState) string {
 	if state.hasDebug {
 		classes = append(classes, "form--debug")
 	}
-	
+
 	// Custom class
 	if props.ClassName != "" {
 		classes = append(classes, props.ClassName)
 	}
-	
+
 	return strings.Join(classes, " ")
 }
 
 func buildSectionClasses(section Section) string {
 	classes := []string{"form-section"}
-	
+
 	if section.Collapsible {
 		classes = append(classes, "form-section--collapsible")
 	}
@@ -434,28 +434,28 @@ func buildSectionClasses(section Section) string {
 	if section.Layout != "" {
 		classes = append(classes, fmt.Sprintf("form-section--%s", section.Layout))
 	}
-	
+
 	return strings.Join(classes, " ")
 }
 
 func buildFieldsContainerClasses(props FormProps) string {
 	classes := []string{"form-fields"}
-	
+
 	if props.Layout == FormLayoutGrid && len(props.Fields) > 0 {
 		// Could be enhanced to specify grid columns
 		classes = append(classes, "form-fields--grid")
 	}
-	
+
 	return strings.Join(classes, " ")
 }
 
 func buildActionsClasses(position string) string {
 	classes := []string{"form-actions"}
-	
+
 	if position != "" {
 		classes = append(classes, fmt.Sprintf("form-actions--%s", position))
 	}
-	
+
 	return strings.Join(classes, " ")
 }
 
@@ -465,26 +465,26 @@ func buildActionsClasses(position string) string {
 
 func enhanceFieldProps(field Field, state formState) molecules.FormFieldProps {
 	enhanced := field.FormFieldProps
-	
+
 	// Skip if no name
 	if enhanced.Name == "" {
 		return enhanced
 	}
-	
+
 	// Alpine.js model binding
 	// This would need to be added to FormFieldProps or handled differently
-	
+
 	// Add validation attributes based on strategy
 	if state.flags.hasValidation && state.props.Validation != nil {
 		// This would be implemented based on how FormFieldProps supports Alpine.js
 		// For now, we'll assume it supports x-model and x-on attributes
 	}
-	
+
 	// Read-only state
 	if state.props.ReadOnly {
 		enhanced.Readonly = true
 	}
-	
+
 	return enhanced
 }
 
@@ -495,7 +495,7 @@ func enhanceFieldProps(field Field, state formState) molecules.FormFieldProps {
 func mergeButtonProps(custom, defaults atoms.ButtonProps) atoms.ButtonProps {
 	// Start with defaults
 	merged := defaults
-	
+
 	// Override with non-zero custom values
 	if custom.ID != "" {
 		merged.ID = custom.ID
@@ -525,7 +525,7 @@ func mergeButtonProps(custom, defaults atoms.ButtonProps) atoms.ButtonProps {
 	if custom.Disabled {
 		merged.Disabled = custom.Disabled
 	}
-	
+
 	return merged
 }
 
@@ -570,7 +570,7 @@ func Coalesce(values ...string) string {
 	return ""
 }
 
-// Default returns value if non-zero, otherwise defaultValue  
+// Default returns value if non-zero, otherwise defaultValue
 func Default[T comparable](value, defaultValue T) T {
 	var zero T
 	if value == zero {

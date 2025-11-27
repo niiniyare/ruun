@@ -91,7 +91,7 @@ func (bc *BuilderContext) CombinedError() error {
 	if len(errors) == 1 {
 		return errors[0]
 	}
-	
+
 	// Combine multiple errors
 	message := fmt.Sprintf("builder has %d errors:", len(errors))
 	for i, err := range errors {
@@ -113,7 +113,7 @@ func (bc *BuilderContext) ValidateRequired(value any, fieldName, context string)
 		bc.AddErrorf("%s %s is required", context, fieldName)
 		return
 	}
-	
+
 	// Check for empty strings
 	if str, ok := value.(string); ok && str == "" {
 		bc.AddErrorf("%s %s cannot be empty", context, fieldName)
@@ -123,7 +123,7 @@ func (bc *BuilderContext) ValidateRequired(value any, fieldName, context string)
 // ValidateRange validates a numeric value is within range
 func (bc *BuilderContext) ValidateRange(value, min, max int, fieldName, context string) {
 	if value < min || value > max {
-		bc.AddErrorf("%s %s must be between %d and %d (got %d)", 
+		bc.AddErrorf("%s %s must be between %d and %d (got %d)",
 			context, fieldName, min, max, value)
 	}
 }
@@ -135,7 +135,7 @@ func (bc *BuilderContext) ValidateOneOf(value string, allowed []string, fieldNam
 			return
 		}
 	}
-	bc.AddErrorf("%s %s must be one of %v (got %q)", 
+	bc.AddErrorf("%s %s must be one of %v (got %q)",
 		context, fieldName, allowed, value)
 }
 
@@ -155,10 +155,10 @@ func (bv *BuilderValidator) ValidateID(id, builderType string) {
 		bv.context.AddErrorf("%s ID cannot be empty", builderType)
 		return
 	}
-	
+
 	// Basic ID validation (alphanumeric, hyphens, underscores)
 	for _, char := range id {
-		if !((char >= 'a' && char <= 'z') || 
+		if !((char >= 'a' && char <= 'z') ||
 			(char >= 'A' && char <= 'Z') ||
 			(char >= '0' && char <= '9') ||
 			char == '-' || char == '_' || char == '.') {
@@ -173,14 +173,14 @@ func (bv *BuilderValidator) ValidateEnum(value string, validValues []string, fie
 	if value == "" {
 		return // Empty is often acceptable for optional enums
 	}
-	
+
 	for _, valid := range validValues {
 		if value == valid {
 			return
 		}
 	}
-	
-	bv.context.AddErrorf("%s %s must be one of %v (got %q)", 
+
+	bv.context.AddErrorf("%s %s must be one of %v (got %q)",
 		builderType, fieldName, validValues, value)
 }
 
@@ -202,7 +202,7 @@ func NewBuilderMixin() *BuilderMixin {
 // CheckBuild performs final validation before building
 func (bm *BuilderMixin) CheckBuild(builderType string) error {
 	if bm.Context.HasErrors() {
-		return fmt.Errorf("cannot build %s with errors: %w", 
+		return fmt.Errorf("cannot build %s with errors: %w",
 			builderType, bm.Context.CombinedError())
 	}
 	return nil
@@ -211,7 +211,7 @@ func (bm *BuilderMixin) CheckBuild(builderType string) error {
 // SafeBuild safely builds an object, returning an error if there are validation issues
 func SafeBuild[T any](builder BaseBuilder[T], builderType string) (*T, error) {
 	if builder.HasErrors() {
-		return nil, fmt.Errorf("cannot build %s: %s", builderType, 
+		return nil, fmt.Errorf("cannot build %s: %s", builderType,
 			combineErrors(builder.GetErrors()))
 	}
 	return builder.Build()
@@ -225,7 +225,7 @@ func combineErrors(errors []error) string {
 	if len(errors) == 1 {
 		return errors[0].Error()
 	}
-	
+
 	message := fmt.Sprintf("%d errors:", len(errors))
 	for i, err := range errors {
 		message += fmt.Sprintf(" (%d) %v", i+1, err)
@@ -235,10 +235,10 @@ func combineErrors(errors []error) string {
 
 // BuilderStats provides statistics about builder usage (optional)
 type BuilderStats struct {
-	TotalBuilds    int64 `json:"totalBuilds"`
+	TotalBuilds      int64 `json:"totalBuilds"`
 	SuccessfulBuilds int64 `json:"successfulBuilds"`
-	FailedBuilds   int64 `json:"failedBuilds"`
-	mu             sync.RWMutex
+	FailedBuilds     int64 `json:"failedBuilds"`
+	mu               sync.RWMutex
 }
 
 // RecordBuild records a build attempt

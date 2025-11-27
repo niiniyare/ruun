@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -12,12 +11,12 @@ import (
 
 // TestFramework provides comprehensive testing for validation systems
 type TestFramework struct {
-	suites    []TestSuite
-	config    TestFrameworkConfig
-	runner    *TestRunner
-	reporter  *TestReporter
-	fixtures  *TestFixtures
-	mocks     *MockServices
+	suites   []TestSuite
+	config   TestFrameworkConfig
+	runner   *TestRunner
+	reporter *TestReporter
+	fixtures *TestFixtures
+	mocks    *MockServices
 }
 
 // TestFrameworkConfig configures the testing framework
@@ -36,74 +35,74 @@ type TestFrameworkConfig struct {
 
 // TestSuite represents a collection of related tests
 type TestSuite struct {
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Category    TestCategory  `json:"category"`
-	Tests       []TestCase    `json:"tests"`
-	SetupFunc   func() error  `json:"-"`
-	TeardownFunc func() error `json:"-"`
-	Fixtures    TestFixtures  `json:"fixtures"`
-	Timeout     time.Duration `json:"timeout"`
-	Parallel    bool          `json:"parallel"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description"`
+	Category     TestCategory  `json:"category"`
+	Tests        []TestCase    `json:"tests"`
+	SetupFunc    func() error  `json:"-"`
+	TeardownFunc func() error  `json:"-"`
+	Fixtures     TestFixtures  `json:"fixtures"`
+	Timeout      time.Duration `json:"timeout"`
+	Parallel     bool          `json:"parallel"`
 }
 
 // TestCategory represents the type of validation tests
 type TestCategory string
 
 const (
-	TestCategoryComponent    TestCategory = "component"
-	TestCategorySchema       TestCategory = "schema"
+	TestCategoryComponent     TestCategory = "component"
+	TestCategorySchema        TestCategory = "schema"
 	TestCategoryAccessibility TestCategory = "accessibility"
-	TestCategoryPerformance  TestCategory = "performance"
-	TestCategoryTheme        TestCategory = "theme"
-	TestCategoryRuntime      TestCategory = "runtime"
-	TestCategoryIntegration  TestCategory = "integration"
-	TestCategoryRegression   TestCategory = "regression"
+	TestCategoryPerformance   TestCategory = "performance"
+	TestCategoryTheme         TestCategory = "theme"
+	TestCategoryRuntime       TestCategory = "runtime"
+	TestCategoryIntegration   TestCategory = "integration"
+	TestCategoryRegression    TestCategory = "regression"
 )
 
 // TestCase represents a single test case
 type TestCase struct {
-	Name            string                 `json:"name"`
-	Description     string                 `json:"description"`
-	Category        TestCategory           `json:"category"`
-	Input           any            `json:"input"`
-	Expected        ExpectedResult         `json:"expected"`
-	Context         map[string]any `json:"context"`
-	Setup           func() error           `json:"-"`
-	Teardown        func() error           `json:"-"`
-	Skip            bool                   `json:"skip"`
-	SkipReason      string                 `json:"skipReason,omitempty"`
-	Tags            []string               `json:"tags"`
-	Dependencies    []string               `json:"dependencies"`
-	Timeout         time.Duration          `json:"timeout"`
-	RetryCount      int                    `json:"retryCount"`
-	BenchmarkConfig *BenchmarkConfig       `json:"benchmarkConfig,omitempty"`
+	Name            string           `json:"name"`
+	Description     string           `json:"description"`
+	Category        TestCategory     `json:"category"`
+	Input           any              `json:"input"`
+	Expected        ExpectedResult   `json:"expected"`
+	Context         map[string]any   `json:"context"`
+	Setup           func() error     `json:"-"`
+	Teardown        func() error     `json:"-"`
+	Skip            bool             `json:"skip"`
+	SkipReason      string           `json:"skipReason,omitempty"`
+	Tags            []string         `json:"tags"`
+	Dependencies    []string         `json:"dependencies"`
+	Timeout         time.Duration    `json:"timeout"`
+	RetryCount      int              `json:"retryCount"`
+	BenchmarkConfig *BenchmarkConfig `json:"benchmarkConfig,omitempty"`
 }
 
 // ExpectedResult defines what the test expects
 type ExpectedResult struct {
-	Valid          bool                   `json:"valid"`
-	ErrorCount     int                    `json:"errorCount,omitempty"`
-	WarningCount   int                    `json:"warningCount,omitempty"`
-	Errors         []ExpectedError        `json:"errors,omitempty"`
-	Warnings       []ExpectedWarning      `json:"warnings,omitempty"`
-	Score          *float64               `json:"score,omitempty"`
-	MinScore       *float64               `json:"minScore,omitempty"`
-	MaxScore       *float64               `json:"maxScore,omitempty"`
-	Properties     map[string]any `json:"properties,omitempty"`
-	ContainsText   []string               `json:"containsText,omitempty"`
-	ExcludesText   []string               `json:"excludesText,omitempty"`
-	MatchesRegex   []string               `json:"matchesRegex,omitempty"`
-	CustomAsserts  []CustomAssertion      `json:"customAsserts,omitempty"`
+	Valid         bool              `json:"valid"`
+	ErrorCount    int               `json:"errorCount,omitempty"`
+	WarningCount  int               `json:"warningCount,omitempty"`
+	Errors        []ExpectedError   `json:"errors,omitempty"`
+	Warnings      []ExpectedWarning `json:"warnings,omitempty"`
+	Score         *float64          `json:"score,omitempty"`
+	MinScore      *float64          `json:"minScore,omitempty"`
+	MaxScore      *float64          `json:"maxScore,omitempty"`
+	Properties    map[string]any    `json:"properties,omitempty"`
+	ContainsText  []string          `json:"containsText,omitempty"`
+	ExcludesText  []string          `json:"excludesText,omitempty"`
+	MatchesRegex  []string          `json:"matchesRegex,omitempty"`
+	CustomAsserts []CustomAssertion `json:"customAsserts,omitempty"`
 }
 
 // ExpectedError defines an expected validation error
 type ExpectedError struct {
-	Code     string `json:"code"`
-	Message  string `json:"message,omitempty"`
-	Field    string `json:"field,omitempty"`
-	Level    ValidationLevel `json:"level,omitempty"`
-	Partial  bool   `json:"partial"` // Allow partial matching
+	Code    string          `json:"code"`
+	Message string          `json:"message,omitempty"`
+	Field   string          `json:"field,omitempty"`
+	Level   ValidationLevel `json:"level,omitempty"`
+	Partial bool            `json:"partial"` // Allow partial matching
 }
 
 // ExpectedWarning defines an expected validation warning
@@ -116,19 +115,19 @@ type ExpectedWarning struct {
 
 // CustomAssertion defines custom assertion logic
 type CustomAssertion struct {
-	Name     string                                                     `json:"name"`
+	Name     string                                                    `json:"name"`
 	Function func(result *ValidationResult, context *TestContext) bool `json:"-"`
-	Message  string                                                     `json:"message"`
+	Message  string                                                    `json:"message"`
 }
 
 // TestContext provides context for test execution
 type TestContext struct {
-	TestCase    *TestCase              `json:"testCase"`
-	TestSuite   *TestSuite             `json:"testSuite"`
-	Framework   *TestFramework         `json:"framework"`
-	StartTime   time.Time              `json:"startTime"`
-	Metadata    map[string]any `json:"metadata"`
-	Logger      TestLogger             `json:"-"`
+	TestCase  *TestCase      `json:"testCase"`
+	TestSuite *TestSuite     `json:"testSuite"`
+	Framework *TestFramework `json:"framework"`
+	StartTime time.Time      `json:"startTime"`
+	Metadata  map[string]any `json:"metadata"`
+	Logger    TestLogger     `json:"-"`
 }
 
 // TestRunner executes tests
@@ -149,12 +148,12 @@ type TestReporter struct {
 // TestFixtures provides test data and utilities
 type TestFixtures struct {
 	ComponentFixtures     map[string]any `json:"componentFixtures"`
-	SchemaFixtures       map[string]any `json:"schemaFixtures"`
-	ThemeFixtures        map[string]any `json:"themeFixtures"`
+	SchemaFixtures        map[string]any `json:"schemaFixtures"`
+	ThemeFixtures         map[string]any `json:"themeFixtures"`
 	AccessibilityFixtures map[string]any `json:"accessibilityFixtures"`
-	PerformanceFixtures  map[string]any `json:"performanceFixtures"`
-	MockData             map[string]any `json:"mockData"`
-	TestData             map[string]any `json:"testData"`
+	PerformanceFixtures   map[string]any `json:"performanceFixtures"`
+	MockData              map[string]any `json:"mockData"`
+	TestData              map[string]any `json:"testData"`
 }
 
 // MockServices provides mocked services for testing
@@ -168,18 +167,18 @@ type MockServices struct {
 
 // Test result types
 type TestResult struct {
-	TestCase     *TestCase              `json:"testCase"`
-	TestSuite    string                 `json:"testSuite"`
-	Status       TestStatus             `json:"status"`
-	Duration     time.Duration          `json:"duration"`
-	Error        error                  `json:"error,omitempty"`
-	Result       *ValidationResult      `json:"result,omitempty"`
-	Assertions   []AssertionResult      `json:"assertions"`
-	Benchmark    *BenchmarkResult       `json:"benchmark,omitempty"`
-	Coverage     *CoverageResult        `json:"coverage,omitempty"`
-	Metadata     map[string]any `json:"metadata"`
-	StartTime    time.Time              `json:"startTime"`
-	EndTime      time.Time              `json:"endTime"`
+	TestCase   *TestCase         `json:"testCase"`
+	TestSuite  string            `json:"testSuite"`
+	Status     TestStatus        `json:"status"`
+	Duration   time.Duration     `json:"duration"`
+	Error      error             `json:"error,omitempty"`
+	Result     *ValidationResult `json:"result,omitempty"`
+	Assertions []AssertionResult `json:"assertions"`
+	Benchmark  *BenchmarkResult  `json:"benchmark,omitempty"`
+	Coverage   *CoverageResult   `json:"coverage,omitempty"`
+	Metadata   map[string]any    `json:"metadata"`
+	StartTime  time.Time         `json:"startTime"`
+	EndTime    time.Time         `json:"endTime"`
 }
 
 // TestStatus represents the status of a test
@@ -195,11 +194,11 @@ const (
 
 // AssertionResult represents the result of an assertion
 type AssertionResult struct {
-	Name     string      `json:"name"`
-	Passed   bool        `json:"passed"`
-	Expected any `json:"expected"`
-	Actual   any `json:"actual"`
-	Message  string      `json:"message"`
+	Name     string `json:"name"`
+	Passed   bool   `json:"passed"`
+	Expected any    `json:"expected"`
+	Actual   any    `json:"actual"`
+	Message  string `json:"message"`
 }
 
 // BenchmarkConfig configures benchmark tests
@@ -214,15 +213,15 @@ type BenchmarkConfig struct {
 
 // BenchmarkResult contains benchmark test results
 type BenchmarkResult struct {
-	Iterations       int64         `json:"iterations"`
-	Duration         time.Duration `json:"duration"`
-	AvgDuration      time.Duration `json:"avgDuration"`
-	MinDuration      time.Duration `json:"minDuration"`
-	MaxDuration      time.Duration `json:"maxDuration"`
-	MemoryAllocated  int64         `json:"memoryAllocated,omitempty"`
-	MemoryAllocations int64        `json:"memoryAllocations,omitempty"`
-	CPUUsage         float64       `json:"cpuUsage,omitempty"`
-	ThroughputRPS    float64       `json:"throughputRPS"`
+	Iterations        int64         `json:"iterations"`
+	Duration          time.Duration `json:"duration"`
+	AvgDuration       time.Duration `json:"avgDuration"`
+	MinDuration       time.Duration `json:"minDuration"`
+	MaxDuration       time.Duration `json:"maxDuration"`
+	MemoryAllocated   int64         `json:"memoryAllocated,omitempty"`
+	MemoryAllocations int64         `json:"memoryAllocations,omitempty"`
+	CPUUsage          float64       `json:"cpuUsage,omitempty"`
+	ThroughputRPS     float64       `json:"throughputRPS"`
 }
 
 // BenchmarkRunner executes benchmark tests
@@ -232,31 +231,31 @@ type BenchmarkRunner struct {
 
 // CoverageResult contains test coverage information
 type CoverageResult struct {
-	LinesTotal   int     `json:"linesTotal"`
-	LinesCovered int     `json:"linesCovered"`
-	Coverage     float64 `json:"coverage"`
-	BranchTotal  int     `json:"branchTotal"`
-	BranchCovered int    `json:"branchCovered"`
-	BranchCoverage float64 `json:"branchCoverage"`
-	FunctionTotal int     `json:"functionTotal"`
-	FunctionCovered int   `json:"functionCovered"`
+	LinesTotal       int     `json:"linesTotal"`
+	LinesCovered     int     `json:"linesCovered"`
+	Coverage         float64 `json:"coverage"`
+	BranchTotal      int     `json:"branchTotal"`
+	BranchCovered    int     `json:"branchCovered"`
+	BranchCoverage   float64 `json:"branchCoverage"`
+	FunctionTotal    int     `json:"functionTotal"`
+	FunctionCovered  int     `json:"functionCovered"`
 	FunctionCoverage float64 `json:"functionCoverage"`
 }
 
 // TestSummary contains overall test run summary
 type TestSummary struct {
-	TotalTests    int                    `json:"totalTests"`
-	PassedTests   int                    `json:"passedTests"`
-	FailedTests   int                    `json:"failedTests"`
-	SkippedTests  int                    `json:"skippedTests"`
-	ErrorTests    int                    `json:"errorTests"`
-	TimeoutTests  int                    `json:"timeoutTests"`
-	TotalDuration time.Duration          `json:"totalDuration"`
-	SuccessRate   float64                `json:"successRate"`
-	Coverage      *CoverageResult        `json:"coverage,omitempty"`
-	Categories    map[TestCategory]int   `json:"categories"`
-	Tags          map[string]int         `json:"tags"`
-	Metadata      map[string]any `json:"metadata"`
+	TotalTests    int                  `json:"totalTests"`
+	PassedTests   int                  `json:"passedTests"`
+	FailedTests   int                  `json:"failedTests"`
+	SkippedTests  int                  `json:"skippedTests"`
+	ErrorTests    int                  `json:"errorTests"`
+	TimeoutTests  int                  `json:"timeoutTests"`
+	TotalDuration time.Duration        `json:"totalDuration"`
+	SuccessRate   float64              `json:"successRate"`
+	Coverage      *CoverageResult      `json:"coverage,omitempty"`
+	Categories    map[TestCategory]int `json:"categories"`
+	Tags          map[string]int       `json:"tags"`
+	Metadata      map[string]any       `json:"metadata"`
 }
 
 // TestLogger provides logging for tests
@@ -297,10 +296,10 @@ type MockLogger interface {
 }
 
 type LogEntry struct {
-	Level   string      `json:"level"`
-	Message string      `json:"message"`
-	Args    []any `json:"args"`
-	Time    time.Time   `json:"time"`
+	Level   string    `json:"level"`
+	Message string    `json:"message"`
+	Args    []any     `json:"args"`
+	Time    time.Time `json:"time"`
 }
 
 // NewTestFramework creates a new test framework
@@ -350,12 +349,12 @@ func NewTestReporter(config TestFrameworkConfig) *TestReporter {
 func NewTestFixtures() *TestFixtures {
 	return &TestFixtures{
 		ComponentFixtures:     make(map[string]any),
-		SchemaFixtures:       make(map[string]any),
-		ThemeFixtures:        make(map[string]any),
+		SchemaFixtures:        make(map[string]any),
+		ThemeFixtures:         make(map[string]any),
 		AccessibilityFixtures: make(map[string]any),
-		PerformanceFixtures:  make(map[string]any),
-		MockData:             make(map[string]any),
-		TestData:             make(map[string]any),
+		PerformanceFixtures:   make(map[string]any),
+		MockData:              make(map[string]any),
+		TestData:              make(map[string]any),
 	}
 }
 
@@ -374,57 +373,57 @@ func (tf *TestFramework) AddTestSuite(suite TestSuite) {
 // RunTests executes all test suites
 func (tf *TestFramework) RunTests(ctx context.Context) (*TestSummary, error) {
 	start := time.Now()
-	
+
 	tf.reporter.results = make([]TestResult, 0)
-	
+
 	for _, suite := range tf.suites {
 		suiteResults, err := tf.runTestSuite(ctx, &suite)
 		if err != nil && tf.config.FailFast {
 			return nil, fmt.Errorf("test suite %s failed: %w", suite.Name, err)
 		}
-		
+
 		tf.reporter.results = append(tf.reporter.results, suiteResults...)
 	}
-	
+
 	// Generate summary
 	summary := tf.generateTestSummary(time.Since(start))
 	tf.reporter.summary = summary
-	
+
 	return &summary, nil
 }
 
 // runTestSuite executes a single test suite
 func (tf *TestFramework) runTestSuite(ctx context.Context, suite *TestSuite) ([]TestResult, error) {
 	results := make([]TestResult, 0)
-	
+
 	// Run suite setup
 	if suite.SetupFunc != nil {
 		if err := suite.SetupFunc(); err != nil {
 			return nil, fmt.Errorf("suite setup failed: %w", err)
 		}
 	}
-	
+
 	// Run tests
 	if suite.Parallel && tf.config.EnableParallelExecution {
 		results = tf.runTestsParallel(ctx, suite)
 	} else {
 		results = tf.runTestsSequential(ctx, suite)
 	}
-	
+
 	// Run suite teardown
 	if suite.TeardownFunc != nil {
 		if err := suite.TeardownFunc(); err != nil {
 			return results, fmt.Errorf("suite teardown failed: %w", err)
 		}
 	}
-	
+
 	return results, nil
 }
 
 // runTestsSequential runs tests sequentially
 func (tf *TestFramework) runTestsSequential(ctx context.Context, suite *TestSuite) []TestResult {
 	results := make([]TestResult, 0)
-	
+
 	for _, testCase := range suite.Tests {
 		if testCase.Skip {
 			results = append(results, TestResult{
@@ -436,22 +435,22 @@ func (tf *TestFramework) runTestsSequential(ctx context.Context, suite *TestSuit
 			})
 			continue
 		}
-		
+
 		result := tf.runSingleTest(ctx, suite, &testCase)
 		results = append(results, result)
-		
+
 		if tf.config.FailFast && result.Status == TestStatusFailed {
 			break
 		}
 	}
-	
+
 	return results
 }
 
 // runTestsParallel runs tests in parallel
 func (tf *TestFramework) runTestsParallel(ctx context.Context, suite *TestSuite) []TestResult {
 	resultChan := make(chan TestResult, len(suite.Tests))
-	
+
 	for _, testCase := range suite.Tests {
 		go func(tc TestCase) {
 			if tc.Skip {
@@ -464,25 +463,25 @@ func (tf *TestFramework) runTestsParallel(ctx context.Context, suite *TestSuite)
 				}
 				return
 			}
-			
+
 			result := tf.runSingleTest(ctx, suite, &tc)
 			resultChan <- result
 		}(testCase)
 	}
-	
+
 	// Collect results
 	results := make([]TestResult, 0, len(suite.Tests))
 	for i := 0; i < len(suite.Tests); i++ {
 		results = append(results, <-resultChan)
 	}
-	
+
 	return results
 }
 
 // runSingleTest executes a single test case
 func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, testCase *TestCase) TestResult {
 	start := time.Now()
-	
+
 	result := TestResult{
 		TestCase:   testCase,
 		TestSuite:  suite.Name,
@@ -491,7 +490,7 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 		Metadata:   make(map[string]any),
 		StartTime:  start,
 	}
-	
+
 	// Set timeout context
 	timeout := testCase.Timeout
 	if timeout == 0 {
@@ -499,7 +498,7 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 	}
 	testCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	
+
 	// Run test setup
 	if testCase.Setup != nil {
 		if err := testCase.Setup(); err != nil {
@@ -510,7 +509,7 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 			return result
 		}
 	}
-	
+
 	// Execute validation
 	validationResult, err := tf.executeValidation(testCtx, testCase)
 	if err != nil {
@@ -520,9 +519,9 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 		result.Duration = time.Since(start)
 		return result
 	}
-	
+
 	result.Result = validationResult
-	
+
 	// Run assertions
 	testContext := &TestContext{
 		TestCase:  testCase,
@@ -531,10 +530,10 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 		StartTime: start,
 		Metadata:  make(map[string]any),
 	}
-	
+
 	assertions := tf.runAssertions(validationResult, testCase.Expected, testContext)
 	result.Assertions = assertions
-	
+
 	// Check if any assertions failed
 	for _, assertion := range assertions {
 		if !assertion.Passed {
@@ -542,13 +541,13 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 			break
 		}
 	}
-	
+
 	// Run benchmark if configured
 	if testCase.BenchmarkConfig != nil && tf.config.EnableBenchmarking {
 		benchmark := tf.runBenchmark(testCtx, testCase)
 		result.Benchmark = benchmark
 	}
-	
+
 	// Run test teardown
 	if testCase.Teardown != nil {
 		if err := testCase.Teardown(); err != nil {
@@ -558,10 +557,10 @@ func (tf *TestFramework) runSingleTest(ctx context.Context, suite *TestSuite, te
 			}
 		}
 	}
-	
+
 	result.EndTime = time.Now()
 	result.Duration = time.Since(start)
-	
+
 	return result
 }
 
@@ -642,7 +641,7 @@ func (tf *TestFramework) convertSchemaResult(result *SchemaValidationResult) *Va
 		Timestamp: result.Timestamp,
 		Metadata:  result.Metadata,
 	}
-	
+
 	// Convert schema errors to validation errors
 	for _, err := range result.Errors {
 		validationResult.Errors = append(validationResult.Errors, ValidationError{
@@ -652,7 +651,7 @@ func (tf *TestFramework) convertSchemaResult(result *SchemaValidationResult) *Va
 			Level:   err.Level,
 		})
 	}
-	
+
 	return validationResult
 }
 
@@ -662,7 +661,7 @@ func (tf *TestFramework) convertA11yResult(result *AccessibilityResult) *Validat
 		Timestamp: result.Timestamp,
 		Metadata:  map[string]any{"score": result.Score},
 	}
-	
+
 	for _, violation := range result.Violations {
 		validationResult.Errors = append(validationResult.Errors, ValidationError{
 			Code:    violation.Code,
@@ -671,7 +670,7 @@ func (tf *TestFramework) convertA11yResult(result *AccessibilityResult) *Validat
 			Level:   ValidationLevel(violation.Level),
 		})
 	}
-	
+
 	return validationResult
 }
 
@@ -689,7 +688,7 @@ func (tf *TestFramework) convertThemeResult(result *ThemeValidationResult) *Vali
 		Timestamp: result.Timestamp,
 		Metadata:  map[string]any{"score": result.Score},
 	}
-	
+
 	for _, violation := range result.Violations {
 		validationResult.Errors = append(validationResult.Errors, ValidationError{
 			Code:    violation.Code,
@@ -698,14 +697,14 @@ func (tf *TestFramework) convertThemeResult(result *ThemeValidationResult) *Vali
 			Level:   violation.Severity,
 		})
 	}
-	
+
 	return validationResult
 }
 
 // runAssertions executes all assertions for a test case
 func (tf *TestFramework) runAssertions(result *ValidationResult, expected ExpectedResult, ctx *TestContext) []AssertionResult {
 	assertions := make([]AssertionResult, 0)
-	
+
 	// Assert validity
 	assertions = append(assertions, AssertionResult{
 		Name:     "validity",
@@ -714,7 +713,7 @@ func (tf *TestFramework) runAssertions(result *ValidationResult, expected Expect
 		Actual:   result.Valid,
 		Message:  fmt.Sprintf("Expected valid=%v, got valid=%v", expected.Valid, result.Valid),
 	})
-	
+
 	// Assert error count
 	if expected.ErrorCount > 0 {
 		assertions = append(assertions, AssertionResult{
@@ -725,7 +724,7 @@ func (tf *TestFramework) runAssertions(result *ValidationResult, expected Expect
 			Message:  fmt.Sprintf("Expected %d errors, got %d", expected.ErrorCount, len(result.Errors)),
 		})
 	}
-	
+
 	// Assert specific errors
 	for _, expectedError := range expected.Errors {
 		found := tf.findError(result.Errors, expectedError)
@@ -737,7 +736,7 @@ func (tf *TestFramework) runAssertions(result *ValidationResult, expected Expect
 			Message:  fmt.Sprintf("Expected error with code '%s'", expectedError.Code),
 		})
 	}
-	
+
 	// Assert score range
 	if expected.MinScore != nil || expected.MaxScore != nil {
 		score := tf.extractScore(result)
@@ -760,7 +759,7 @@ func (tf *TestFramework) runAssertions(result *ValidationResult, expected Expect
 			})
 		}
 	}
-	
+
 	// Run custom assertions
 	for _, customAssert := range expected.CustomAsserts {
 		passed := customAssert.Function(result, ctx)
@@ -772,7 +771,7 @@ func (tf *TestFramework) runAssertions(result *ValidationResult, expected Expect
 			Message:  customAssert.Message,
 		})
 	}
-	
+
 	return assertions
 }
 
@@ -809,7 +808,7 @@ func (tf *TestFramework) extractScore(result *ValidationResult) float64 {
 func (tf *TestFramework) runBenchmark(ctx context.Context, testCase *TestCase) *BenchmarkResult {
 	config := testCase.BenchmarkConfig
 	result := &BenchmarkResult{}
-	
+
 	// Warmup
 	if config.WarmupDuration > 0 {
 		warmupEnd := time.Now().Add(config.WarmupDuration)
@@ -817,12 +816,12 @@ func (tf *TestFramework) runBenchmark(ctx context.Context, testCase *TestCase) *
 			tf.executeValidation(ctx, testCase)
 		}
 	}
-	
+
 	// Run benchmark
 	start := time.Now()
 	iterations := int64(0)
 	durations := make([]time.Duration, 0)
-	
+
 	if config.Duration > 0 {
 		// Duration-based benchmark
 		end := start.Add(config.Duration)
@@ -843,15 +842,15 @@ func (tf *TestFramework) runBenchmark(ctx context.Context, testCase *TestCase) *
 			iterations++
 		}
 	}
-	
+
 	totalDuration := time.Since(start)
-	
+
 	// Calculate statistics
 	result.Iterations = iterations
 	result.Duration = totalDuration
 	result.AvgDuration = time.Duration(int64(totalDuration) / iterations)
 	result.ThroughputRPS = float64(iterations) / totalDuration.Seconds()
-	
+
 	if len(durations) > 0 {
 		result.MinDuration = durations[0]
 		result.MaxDuration = durations[0]
@@ -864,7 +863,7 @@ func (tf *TestFramework) runBenchmark(ctx context.Context, testCase *TestCase) *
 			}
 		}
 	}
-	
+
 	return result
 }
 
@@ -876,10 +875,10 @@ func (tf *TestFramework) generateTestSummary(duration time.Duration) TestSummary
 		Tags:          make(map[string]int),
 		Metadata:      make(map[string]any),
 	}
-	
+
 	for _, result := range tf.reporter.results {
 		summary.TotalTests++
-		
+
 		switch result.Status {
 		case TestStatusPassed:
 			summary.PassedTests++
@@ -892,21 +891,21 @@ func (tf *TestFramework) generateTestSummary(duration time.Duration) TestSummary
 		case TestStatusTimeout:
 			summary.TimeoutTests++
 		}
-		
+
 		// Count by category
 		summary.Categories[result.TestCase.Category]++
-		
+
 		// Count by tags
 		for _, tag := range result.TestCase.Tags {
 			summary.Tags[tag]++
 		}
 	}
-	
+
 	// Calculate success rate
 	if summary.TotalTests > 0 {
 		summary.SuccessRate = float64(summary.PassedTests) / float64(summary.TotalTests)
 	}
-	
+
 	return summary
 }
 
@@ -933,7 +932,7 @@ func (tr *TestReporter) generateJSONReport() (string, error) {
 		"summary": tr.summary,
 		"results": tr.results,
 	}
-	
+
 	data, err := json.MarshalIndent(report, "", "  ")
 	return string(data), err
 }
@@ -964,7 +963,7 @@ func (tr *TestReporter) generateHTMLReport() (string, error) {
     </div>
 </body>
 </html>`
-	
+
 	return fmt.Sprintf(html,
 		tr.summary.TotalTests,
 		tr.summary.PassedTests,
@@ -980,17 +979,17 @@ func (tr *TestReporter) generateJUnitReport() (string, error) {
 <testsuite name="ValidationTests" tests="%d" failures="%d" errors="%d" time="%.3f">
 %s
 </testsuite>`
-	
+
 	testCases := ""
 	for _, result := range tr.results {
 		status := "passed"
 		failure := ""
-		
+
 		if result.Status == TestStatusFailed {
 			status = "failed"
 			failure = fmt.Sprintf(`<failure message="%s">%v</failure>`, result.Error, result.Assertions)
 		}
-		
+
 		testCase := fmt.Sprintf(`  <testcase name="%s" classname="%s" time="%.3f">%s</testcase>`,
 			result.TestCase.Name,
 			string(result.TestCase.Category),
@@ -999,7 +998,7 @@ func (tr *TestReporter) generateJUnitReport() (string, error) {
 		)
 		testCases += testCase + "\n"
 	}
-	
+
 	return fmt.Sprintf(junit,
 		tr.summary.TotalTests,
 		tr.summary.FailedTests,
@@ -1059,15 +1058,15 @@ func (tf *TestFramework) LoadFixtures(path string) error {
 func (tf *TestFramework) RunGoTests(t *testing.T) {
 	ctx := context.Background()
 	summary, err := tf.RunTests(ctx)
-	
+
 	if err != nil {
 		t.Fatalf("Test framework error: %v", err)
 	}
-	
+
 	if summary.FailedTests > 0 {
 		t.Errorf("Validation tests failed: %d/%d tests failed", summary.FailedTests, summary.TotalTests)
 	}
-	
+
 	t.Logf("Validation test summary: %d passed, %d failed, %d skipped (%.2f%% success rate)",
 		summary.PassedTests, summary.FailedTests, summary.SkippedTests, summary.SuccessRate*100)
 }

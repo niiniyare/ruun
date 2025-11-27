@@ -47,7 +47,7 @@ type Field struct {
 
 	// Layout & Styling
 	Layout *FieldLayout   `json:"layout,omitempty"`
-	Style  *Style    `json:"style,omitempty"`
+	Style  *Style         `json:"style,omitempty"`
 	Config map[string]any `json:"config,omitempty"`
 
 	// Permissions
@@ -266,7 +266,6 @@ type FieldLayout struct {
 	Order   int    `json:"order,omitempty"`
 }
 
-
 // FieldOption represents a selectable option
 type FieldOption struct {
 	Value       string        `json:"value"`
@@ -303,7 +302,6 @@ type FieldI18n struct {
 	Description map[string]string `json:"description,omitempty"`
 	Tooltip     map[string]string `json:"tooltip,omitempty"`
 }
-
 
 // Core Methods
 
@@ -607,16 +605,16 @@ func (f *Field) TextConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	textFields := []string{"maxLength", "minLength", "autocomplete", "prefix", "suffix"}
-	
+
 	for _, field := range textFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 
@@ -625,16 +623,16 @@ func (f *Field) SelectConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	selectFields := []string{"multiple", "searchable", "clearable", "createable", "maxSelections", "placeholder"}
-	
+
 	for _, field := range selectFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 
@@ -643,16 +641,16 @@ func (f *Field) FileConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	fileFields := []string{"accept", "maxSize", "multiple", "previewMode", "autoUpload"}
-	
+
 	for _, field := range fileFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 
@@ -661,16 +659,16 @@ func (f *Field) RelationConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	relationFields := []string{"entity", "displayField", "valueField", "searchField", "targetSchema", "multiple", "createNew"}
-	
+
 	for _, field := range relationFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 

@@ -33,11 +33,11 @@ type MockSchema struct {
 	validation any
 }
 
-func (s *MockSchema) GetID() string               { return s.id }
-func (s *MockSchema) GetType() string             { return s.schemaType }
-func (s *MockSchema) GetTitle() string            { return s.title }
+func (s *MockSchema) GetID() string              { return s.id }
+func (s *MockSchema) GetType() string            { return s.schemaType }
+func (s *MockSchema) GetTitle() string           { return s.title }
 func (s *MockSchema) GetFields() []FieldAccessor { return s.fields }
-func (s *MockSchema) GetValidation() any          { return s.validation }
+func (s *MockSchema) GetValidation() any         { return s.validation }
 func TestNewValidationRegistry(t *testing.T) {
 	registry := NewValidationRegistry()
 	if registry == nil {

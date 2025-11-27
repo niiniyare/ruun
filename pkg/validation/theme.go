@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"math"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
-
-	"github.com/niiniyare/ruun/schema"
 )
 
 // ThemeValidator validates theme definitions and consistency
@@ -20,105 +17,105 @@ type ThemeValidator struct {
 
 // ThemeValidationResult contains theme validation results
 type ThemeValidationResult struct {
-	Valid         bool                      `json:"valid"`
-	Score         float64                   `json:"score"`          // 0-100
-	Consistency   ThemeConsistencyResult   `json:"consistency"`
-	TokenUsage    TokenUsageResult         `json:"tokenUsage"`
-	Completeness  CompletenessResult       `json:"completeness"`
-	Accessibility A11yThemeResult          `json:"accessibility"`
-	Performance   ThemePerformanceResult   `json:"performance"`
-	Violations    []ThemeViolation         `json:"violations"`
-	Warnings      []ThemeWarning           `json:"warnings"`
-	Suggestions   []ThemeSuggestion        `json:"suggestions"`
-	Timestamp     time.Time                `json:"timestamp"`
+	Valid         bool                   `json:"valid"`
+	Score         float64                `json:"score"` // 0-100
+	Consistency   ThemeConsistencyResult `json:"consistency"`
+	TokenUsage    TokenUsageResult       `json:"tokenUsage"`
+	Completeness  CompletenessResult     `json:"completeness"`
+	Accessibility A11yThemeResult        `json:"accessibility"`
+	Performance   ThemePerformanceResult `json:"performance"`
+	Violations    []ThemeViolation       `json:"violations"`
+	Warnings      []ThemeWarning         `json:"warnings"`
+	Suggestions   []ThemeSuggestion      `json:"suggestions"`
+	Timestamp     time.Time              `json:"timestamp"`
 }
 
 // ThemeValidationConfig configures theme validation
 type ThemeValidationConfig struct {
-	RequireConsistency     bool     `json:"requireConsistency"`
-	CheckTokenUsage        bool     `json:"checkTokenUsage"`
-	ValidateCompleteness   bool     `json:"validateCompleteness"`
-	CheckAccessibility     bool     `json:"checkAccessibility"`
-	ValidatePerformance    bool     `json:"validatePerformance"`
-	MinContrastRatio       float64  `json:"minContrastRatio"`
-	MaxTokenCount          int      `json:"maxTokenCount"`
-	RequiredCategories     []string `json:"requiredCategories"`
-	AllowedColorFormats    []string `json:"allowedColorFormats"`
-	StrictMode            bool     `json:"strictMode"`
+	RequireConsistency   bool     `json:"requireConsistency"`
+	CheckTokenUsage      bool     `json:"checkTokenUsage"`
+	ValidateCompleteness bool     `json:"validateCompleteness"`
+	CheckAccessibility   bool     `json:"checkAccessibility"`
+	ValidatePerformance  bool     `json:"validatePerformance"`
+	MinContrastRatio     float64  `json:"minContrastRatio"`
+	MaxTokenCount        int      `json:"maxTokenCount"`
+	RequiredCategories   []string `json:"requiredCategories"`
+	AllowedColorFormats  []string `json:"allowedColorFormats"`
+	StrictMode           bool     `json:"strictMode"`
 }
 
 // ThemeConsistencyResult contains consistency validation results
 type ThemeConsistencyResult struct {
-	Consistent        bool                     `json:"consistent"`
-	Score             float64                  `json:"score"`
-	ColorConsistency  ColorConsistencyResult  `json:"colorConsistency"`
-	SpacingConsistency SpacingConsistencyResult `json:"spacingConsistency"`
+	Consistent            bool                        `json:"consistent"`
+	Score                 float64                     `json:"score"`
+	ColorConsistency      ColorConsistencyResult      `json:"colorConsistency"`
+	SpacingConsistency    SpacingConsistencyResult    `json:"spacingConsistency"`
 	TypographyConsistency TypographyConsistencyResult `json:"typographyConsistency"`
-	Issues            []ConsistencyIssue      `json:"issues"`
+	Issues                []ConsistencyIssue          `json:"issues"`
 }
 
 // TokenUsageResult contains token usage analysis
 type TokenUsageResult struct {
-	TotalTokens       int                      `json:"totalTokens"`
-	UsedTokens        int                      `json:"usedTokens"`
-	UnusedTokens      []string                 `json:"unusedTokens"`
-	MissingTokens     []string                 `json:"missingTokens"`
-	DuplicateTokens   []TokenDuplicate         `json:"duplicateTokens"`
-	UsagePercentage   float64                  `json:"usagePercentage"`
+	TotalTokens       int                           `json:"totalTokens"`
+	UsedTokens        int                           `json:"usedTokens"`
+	UnusedTokens      []string                      `json:"unusedTokens"`
+	MissingTokens     []string                      `json:"missingTokens"`
+	DuplicateTokens   []TokenDuplicate              `json:"duplicateTokens"`
+	UsagePercentage   float64                       `json:"usagePercentage"`
 	CategoryBreakdown map[string]TokenCategoryUsage `json:"categoryBreakdown"`
 }
 
 // CompletenessResult contains theme completeness analysis
 type CompletenessResult struct {
-	Complete            bool                      `json:"complete"`
-	Score               float64                   `json:"score"`
-	MissingCategories   []string                  `json:"missingCategories"`
-	IncompleteCategories []IncompleteCategory     `json:"incompleteCategories"`
-	CoveragePercentage  float64                   `json:"coveragePercentage"`
-	Recommendations     []CompletenessRecommendation `json:"recommendations"`
+	Complete             bool                         `json:"complete"`
+	Score                float64                      `json:"score"`
+	MissingCategories    []string                     `json:"missingCategories"`
+	IncompleteCategories []IncompleteCategory         `json:"incompleteCategories"`
+	CoveragePercentage   float64                      `json:"coveragePercentage"`
+	Recommendations      []CompletenessRecommendation `json:"recommendations"`
 }
 
 // A11yThemeResult contains accessibility analysis for themes
 type A11yThemeResult struct {
-	Accessible       bool               `json:"accessible"`
-	Score            float64            `json:"score"`
-	ContrastIssues   []ContrastIssue    `json:"contrastIssues"`
+	Accessible       bool                 `json:"accessible"`
+	Score            float64              `json:"score"`
+	ContrastIssues   []ContrastIssue      `json:"contrastIssues"`
 	ColorBlindness   ColorBlindnessResult `json:"colorBlindness"`
-	ReadabilityScore float64            `json:"readabilityScore"`
-	Issues           []A11yThemeIssue   `json:"issues"`
+	ReadabilityScore float64              `json:"readabilityScore"`
+	Issues           []A11yThemeIssue     `json:"issues"`
 }
 
 // ThemePerformanceResult contains theme performance analysis
 type ThemePerformanceResult struct {
-	Optimized     bool                    `json:"optimized"`
-	Score         float64                 `json:"score"`
-	BundleSize    int64                   `json:"bundleSize"`
-	ComputedSize  int64                   `json:"computedSize"`
-	TokenCount    int                     `json:"tokenCount"`
-	Complexity    ThemeComplexityMetrics  `json:"complexity"`
+	Optimized     bool                      `json:"optimized"`
+	Score         float64                   `json:"score"`
+	BundleSize    int64                     `json:"bundleSize"`
+	ComputedSize  int64                     `json:"computedSize"`
+	TokenCount    int                       `json:"tokenCount"`
+	Complexity    ThemeComplexityMetrics    `json:"complexity"`
 	Optimizations []PerformanceOptimization `json:"optimizations"`
 }
 
 // Supporting types
 
 type ThemeValidationRule struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
+	ID          string                  `json:"id"`
+	Name        string                  `json:"name"`
+	Description string                  `json:"description"`
 	Category    ThemeValidationCategory `json:"category"`
-	Level       ValidationLevel        `json:"level"`
-	Enabled     bool                   `json:"enabled"`
-	Validator   ThemeRuleValidator     `json:"-"`
+	Level       ValidationLevel         `json:"level"`
+	Enabled     bool                    `json:"enabled"`
+	Validator   ThemeRuleValidator      `json:"-"`
 }
 
 type ThemeValidationCategory string
 
 const (
-	ThemeValidationCategoryConsistency  ThemeValidationCategory = "consistency"
-	ThemeValidationCategoryCompleteness ThemeValidationCategory = "completeness"
+	ThemeValidationCategoryConsistency   ThemeValidationCategory = "consistency"
+	ThemeValidationCategoryCompleteness  ThemeValidationCategory = "completeness"
 	ThemeValidationCategoryAccessibility ThemeValidationCategory = "accessibility"
-	ThemeValidationCategoryPerformance  ThemeValidationCategory = "performance"
-	ThemeValidationCategoryTokens       ThemeValidationCategory = "tokens"
+	ThemeValidationCategoryPerformance   ThemeValidationCategory = "performance"
+	ThemeValidationCategoryTokens        ThemeValidationCategory = "tokens"
 )
 
 type ThemeRuleValidator interface {
@@ -127,92 +124,92 @@ type ThemeRuleValidator interface {
 }
 
 type ThemeValidationContext struct {
-	Theme       any            `json:"theme"`
-	Registry    *TokenRegistry         `json:"registry"`
-	Config      ThemeValidationConfig  `json:"config"`
-	Context     map[string]any `json:"context"`
+	Theme    any                   `json:"theme"`
+	Registry *TokenRegistry        `json:"registry"`
+	Config   ThemeValidationConfig `json:"config"`
+	Context  map[string]any        `json:"context"`
 }
 
 type ThemeRuleResult struct {
-	Passed      bool                   `json:"passed"`
-	Score       float64                `json:"score"`
-	Rule        string                 `json:"rule"`
-	Violations  []ThemeViolation       `json:"violations,omitempty"`
-	Warnings    []ThemeWarning         `json:"warnings,omitempty"`
-	Suggestions []ThemeSuggestion      `json:"suggestions,omitempty"`
-	Metadata    map[string]any `json:"metadata"`
+	Passed      bool              `json:"passed"`
+	Score       float64           `json:"score"`
+	Rule        string            `json:"rule"`
+	Violations  []ThemeViolation  `json:"violations,omitempty"`
+	Warnings    []ThemeWarning    `json:"warnings,omitempty"`
+	Suggestions []ThemeSuggestion `json:"suggestions,omitempty"`
+	Metadata    map[string]any    `json:"metadata"`
 }
 
 type ThemeViolation struct {
-	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`
-	Category    ThemeValidationCategory `json:"category"`
-	Severity    ValidationLevel        `json:"severity"`
-	Token       string                 `json:"token,omitempty"`
-	Value       string                 `json:"value,omitempty"`
-	Expected    string                 `json:"expected,omitempty"`
-	Location    *SourceLocation        `json:"location,omitempty"`
-	Fix         string                 `json:"fix,omitempty"`
-	AutoFix     bool                   `json:"autoFix"`
-	Context     map[string]any `json:"context,omitempty"`
+	Code     string                  `json:"code"`
+	Message  string                  `json:"message"`
+	Category ThemeValidationCategory `json:"category"`
+	Severity ValidationLevel         `json:"severity"`
+	Token    string                  `json:"token,omitempty"`
+	Value    string                  `json:"value,omitempty"`
+	Expected string                  `json:"expected,omitempty"`
+	Location *SourceLocation         `json:"location,omitempty"`
+	Fix      string                  `json:"fix,omitempty"`
+	AutoFix  bool                    `json:"autoFix"`
+	Context  map[string]any          `json:"context,omitempty"`
 }
 
 type ThemeWarning struct {
-	Code      string                 `json:"code"`
-	Message   string                 `json:"message"`
-	Category  ThemeValidationCategory `json:"category"`
-	Token     string                 `json:"token,omitempty"`
-	Value     string                 `json:"value,omitempty"`
-	Location  *SourceLocation        `json:"location,omitempty"`
-	Fix       string                 `json:"fix,omitempty"`
-	Context   map[string]any `json:"context,omitempty"`
+	Code     string                  `json:"code"`
+	Message  string                  `json:"message"`
+	Category ThemeValidationCategory `json:"category"`
+	Token    string                  `json:"token,omitempty"`
+	Value    string                  `json:"value,omitempty"`
+	Location *SourceLocation         `json:"location,omitempty"`
+	Fix      string                  `json:"fix,omitempty"`
+	Context  map[string]any          `json:"context,omitempty"`
 }
 
 type ThemeSuggestion struct {
-	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`
-	Category    ThemeValidationCategory `json:"category"`
-	Priority    string                 `json:"priority"` // high, medium, low
-	Token       string                 `json:"token,omitempty"`
-	Suggestion  string                 `json:"suggestion"`
-	Examples    []string               `json:"examples,omitempty"`
-	Benefits    []string               `json:"benefits,omitempty"`
-	AutoFix     bool                   `json:"autoFix"`
-	Context     map[string]any `json:"context,omitempty"`
+	Code       string                  `json:"code"`
+	Message    string                  `json:"message"`
+	Category   ThemeValidationCategory `json:"category"`
+	Priority   string                  `json:"priority"` // high, medium, low
+	Token      string                  `json:"token,omitempty"`
+	Suggestion string                  `json:"suggestion"`
+	Examples   []string                `json:"examples,omitempty"`
+	Benefits   []string                `json:"benefits,omitempty"`
+	AutoFix    bool                    `json:"autoFix"`
+	Context    map[string]any          `json:"context,omitempty"`
 }
 
 // Consistency types
 type ColorConsistencyResult struct {
-	Consistent    bool                   `json:"consistent"`
-	Score         float64                `json:"score"`
-	Palette       ColorPaletteAnalysis   `json:"palette"`
-	Harmony       ColorHarmonyAnalysis   `json:"harmony"`
-	Issues        []ColorConsistencyIssue `json:"issues"`
+	Consistent bool                    `json:"consistent"`
+	Score      float64                 `json:"score"`
+	Palette    ColorPaletteAnalysis    `json:"palette"`
+	Harmony    ColorHarmonyAnalysis    `json:"harmony"`
+	Issues     []ColorConsistencyIssue `json:"issues"`
 }
 
 type SpacingConsistencyResult struct {
-	Consistent bool                     `json:"consistent"`
-	Score      float64                  `json:"score"`
-	Scale      SpacingScaleAnalysis     `json:"scale"`
-	Rhythm     SpacingRhythmAnalysis    `json:"rhythm"`
+	Consistent bool                      `json:"consistent"`
+	Score      float64                   `json:"score"`
+	Scale      SpacingScaleAnalysis      `json:"scale"`
+	Rhythm     SpacingRhythmAnalysis     `json:"rhythm"`
 	Issues     []SpacingConsistencyIssue `json:"issues"`
 }
 
 type TypographyConsistencyResult struct {
-	Consistent bool                        `json:"consistent"`
-	Score      float64                     `json:"score"`
-	Scale      TypographyScaleAnalysis     `json:"scale"`
-	Hierarchy  TypographyHierarchyAnalysis `json:"hierarchy"`
+	Consistent bool                         `json:"consistent"`
+	Score      float64                      `json:"score"`
+	Scale      TypographyScaleAnalysis      `json:"scale"`
+	Hierarchy  TypographyHierarchyAnalysis  `json:"hierarchy"`
 	Issues     []TypographyConsistencyIssue `json:"issues"`
 }
 
 type ConsistencyIssue struct {
-	Type        string                 `json:"type"`
-	Message     string                 `json:"message"`
-	Tokens      []string               `json:"tokens"`
-	Suggestion  string                 `json:"suggestion"`
-	Severity    ValidationLevel        `json:"severity"`
-	Context     map[string]any `json:"context,omitempty"`
+	Type       string          `json:"type"`
+	Message    string          `json:"message"`
+	Tokens     []string        `json:"tokens"`
+	Suggestion string          `json:"suggestion"`
+	Severity   ValidationLevel `json:"severity"`
+	Context    map[string]any  `json:"context,omitempty"`
 }
 
 // Token usage types
@@ -222,9 +219,9 @@ type TokenDuplicate struct {
 }
 
 type TokenCategoryUsage struct {
-	Total     int     `json:"total"`
-	Used      int     `json:"used"`
-	Unused    int     `json:"unused"`
+	Total      int     `json:"total"`
+	Used       int     `json:"used"`
+	Unused     int     `json:"unused"`
 	Percentage float64 `json:"percentage"`
 }
 
@@ -238,11 +235,11 @@ type IncompleteCategory struct {
 }
 
 type CompletenessRecommendation struct {
-	Category    string   `json:"category"`
-	Message     string   `json:"message"`
-	Priority    string   `json:"priority"`
-	Tokens      []string `json:"tokens"`
-	Examples    []string `json:"examples,omitempty"`
+	Category string   `json:"category"`
+	Message  string   `json:"message"`
+	Priority string   `json:"priority"`
+	Tokens   []string `json:"tokens"`
+	Examples []string `json:"examples,omitempty"`
 }
 
 // Accessibility types
@@ -270,40 +267,40 @@ type ColorBlindnessTest struct {
 }
 
 type A11yThemeIssue struct {
-	Type        string                 `json:"type"`
-	Message     string                 `json:"message"`
-	Severity    ValidationLevel        `json:"severity"`
-	Tokens      []string               `json:"tokens,omitempty"`
-	Fix         string                 `json:"fix,omitempty"`
-	Context     map[string]any `json:"context,omitempty"`
+	Type     string          `json:"type"`
+	Message  string          `json:"message"`
+	Severity ValidationLevel `json:"severity"`
+	Tokens   []string        `json:"tokens,omitempty"`
+	Fix      string          `json:"fix,omitempty"`
+	Context  map[string]any  `json:"context,omitempty"`
 }
 
 // Performance types
 type ThemeComplexityMetrics struct {
-	TokenCount      int     `json:"tokenCount"`
-	NestingDepth    int     `json:"nestingDepth"`
-	ComputedTokens  int     `json:"computedTokens"`
-	CircularRefs    int     `json:"circularRefs"`
-	ComplexityScore int     `json:"complexityScore"`
+	TokenCount      int `json:"tokenCount"`
+	NestingDepth    int `json:"nestingDepth"`
+	ComputedTokens  int `json:"computedTokens"`
+	CircularRefs    int `json:"circularRefs"`
+	ComplexityScore int `json:"complexityScore"`
 }
 
 type PerformanceOptimization struct {
-	Type        string   `json:"type"`
-	Message     string   `json:"message"`
-	Impact      string   `json:"impact"` // high, medium, low
-	Savings     string   `json:"savings,omitempty"`
-	AutoFix     bool     `json:"autoFix"`
-	Examples    []string `json:"examples,omitempty"`
+	Type     string   `json:"type"`
+	Message  string   `json:"message"`
+	Impact   string   `json:"impact"` // high, medium, low
+	Savings  string   `json:"savings,omitempty"`
+	AutoFix  bool     `json:"autoFix"`
+	Examples []string `json:"examples,omitempty"`
 }
 
 // Analysis types
 type ColorPaletteAnalysis struct {
 	PrimaryColors   []string `json:"primaryColors"`
 	SecondaryColors []string `json:"secondaryColors"`
-	GrayScale      []string `json:"grayScale"`
-	AccentColors   []string `json:"accentColors"`
-	TotalColors    int      `json:"totalColors"`
-	Diversity      float64  `json:"diversity"`
+	GrayScale       []string `json:"grayScale"`
+	AccentColors    []string `json:"accentColors"`
+	TotalColors     int      `json:"totalColors"`
+	Diversity       float64  `json:"diversity"`
 }
 
 type ColorHarmonyAnalysis struct {
@@ -314,58 +311,58 @@ type ColorHarmonyAnalysis struct {
 }
 
 type ColorConsistencyIssue struct {
-	Type      string   `json:"type"`
-	Message   string   `json:"message"`
-	Colors    []string `json:"colors"`
-	Tokens    []string `json:"tokens"`
-	Severity  ValidationLevel `json:"severity"`
+	Type     string          `json:"type"`
+	Message  string          `json:"message"`
+	Colors   []string        `json:"colors"`
+	Tokens   []string        `json:"tokens"`
+	Severity ValidationLevel `json:"severity"`
 }
 
 type SpacingScaleAnalysis struct {
-	BaseUnit     string   `json:"baseUnit"`
-	Scale        []string `json:"scale"`
-	Ratio        float64  `json:"ratio"`
-	Consistent   bool     `json:"consistent"`
-	Gaps         []string `json:"gaps,omitempty"`
+	BaseUnit   string   `json:"baseUnit"`
+	Scale      []string `json:"scale"`
+	Ratio      float64  `json:"ratio"`
+	Consistent bool     `json:"consistent"`
+	Gaps       []string `json:"gaps,omitempty"`
 }
 
 type SpacingRhythmAnalysis struct {
-	Rhythmic     bool     `json:"rhythmic"`
-	BaseRhythm   string   `json:"baseRhythm"`
-	Violations   []string `json:"violations,omitempty"`
-	Score        float64  `json:"score"`
+	Rhythmic   bool     `json:"rhythmic"`
+	BaseRhythm string   `json:"baseRhythm"`
+	Violations []string `json:"violations,omitempty"`
+	Score      float64  `json:"score"`
 }
 
 type SpacingConsistencyIssue struct {
-	Type      string   `json:"type"`
-	Message   string   `json:"message"`
-	Values    []string `json:"values"`
-	Tokens    []string `json:"tokens"`
-	Severity  ValidationLevel `json:"severity"`
+	Type     string          `json:"type"`
+	Message  string          `json:"message"`
+	Values   []string        `json:"values"`
+	Tokens   []string        `json:"tokens"`
+	Severity ValidationLevel `json:"severity"`
 }
 
 type TypographyScaleAnalysis struct {
-	BaseSize     string   `json:"baseSize"`
-	Scale        []string `json:"scale"`
-	Ratio        float64  `json:"ratio"`
-	Consistent   bool     `json:"consistent"`
-	Gaps         []string `json:"gaps,omitempty"`
+	BaseSize   string   `json:"baseSize"`
+	Scale      []string `json:"scale"`
+	Ratio      float64  `json:"ratio"`
+	Consistent bool     `json:"consistent"`
+	Gaps       []string `json:"gaps,omitempty"`
 }
 
 type TypographyHierarchyAnalysis struct {
-	Clear        bool     `json:"clear"`
-	Levels       int      `json:"levels"`
-	Progression  []string `json:"progression"`
-	Issues       []string `json:"issues,omitempty"`
-	Score        float64  `json:"score"`
+	Clear       bool     `json:"clear"`
+	Levels      int      `json:"levels"`
+	Progression []string `json:"progression"`
+	Issues      []string `json:"issues,omitempty"`
+	Score       float64  `json:"score"`
 }
 
 type TypographyConsistencyIssue struct {
-	Type      string   `json:"type"`
-	Message   string   `json:"message"`
-	Values    []string `json:"values"`
-	Tokens    []string `json:"tokens"`
-	Severity  ValidationLevel `json:"severity"`
+	Type     string          `json:"type"`
+	Message  string          `json:"message"`
+	Values   []string        `json:"values"`
+	Tokens   []string        `json:"tokens"`
+	Severity ValidationLevel `json:"severity"`
 }
 
 // TokenRegistry manages design token definitions
@@ -387,7 +384,7 @@ func NewThemeValidator() *ThemeValidator {
 		MaxTokenCount:        500,
 		RequiredCategories:   []string{"colors", "spacing", "typography"},
 		AllowedColorFormats:  []string{"hex", "rgb", "hsl", "oklch"},
-		StrictMode:          false,
+		StrictMode:           false,
 	}
 
 	validator := &ThemeValidator{
@@ -412,11 +409,11 @@ func NewTokenRegistry() *TokenRegistry {
 		"primary", "secondary", "background", "surface", "error", "warning", "success", "info",
 		"text-primary", "text-secondary", "text-disabled", "border", "divider",
 	}
-	
+
 	registry.categories["spacing"] = []string{
 		"xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl",
 	}
-	
+
 	registry.categories["typography"] = []string{
 		"font-family-primary", "font-family-secondary", "font-family-mono",
 		"font-size-xs", "font-size-sm", "font-size-md", "font-size-lg", "font-size-xl",
@@ -440,7 +437,7 @@ func NewTokenRegistry() *TokenRegistry {
 // ValidateTheme validates a complete theme
 func (tv *ThemeValidator) ValidateTheme(ctx *ValidationContext, theme any) *ThemeValidationResult {
 	start := time.Now()
-	
+
 	result := &ThemeValidationResult{
 		Valid:     true,
 		Score:     100.0,
@@ -592,8 +589,8 @@ func (tv *ThemeValidator) validateConsistency(theme any, context *ThemeValidatio
 	}
 
 	// Calculate overall consistency score
-	result.Score = (result.ColorConsistency.Score + 
-		result.SpacingConsistency.Score + 
+	result.Score = (result.ColorConsistency.Score +
+		result.SpacingConsistency.Score +
 		result.TypographyConsistency.Score) / 3.0
 
 	return result
@@ -661,10 +658,10 @@ func (tv *ThemeValidator) validateTokenUsage(theme any, context *ThemeValidation
 func (tv *ThemeValidator) validateCompleteness(theme any, context *ThemeValidationContext) CompletenessResult {
 	result := CompletenessResult{
 		Complete:             true,
-		Score:               100.0,
-		MissingCategories:   make([]string, 0),
+		Score:                100.0,
+		MissingCategories:    make([]string, 0),
 		IncompleteCategories: make([]IncompleteCategory, 0),
-		Recommendations:     make([]CompletenessRecommendation, 0),
+		Recommendations:      make([]CompletenessRecommendation, 0),
 	}
 
 	tokens := tv.extractTokens(theme)
@@ -690,7 +687,7 @@ func (tv *ThemeValidator) validateCompleteness(theme any, context *ThemeValidati
 		if len(missing) > 0 {
 			result.Complete = false
 			coverage := float64(present) / float64(len(requiredTokens)) * 100.0
-			
+
 			result.IncompleteCategories = append(result.IncompleteCategories, IncompleteCategory{
 				Category: category,
 				Missing:  missing,
@@ -723,7 +720,7 @@ func (tv *ThemeValidator) validateAccessibility(theme any, context *ThemeValidat
 	}
 
 	colors := tv.extractColorTokens(theme)
-	
+
 	// Check contrast ratios
 	textColors := tv.filterTextColors(colors)
 	backgroundColors := tv.filterBackgroundColors(colors)
@@ -731,7 +728,7 @@ func (tv *ThemeValidator) validateAccessibility(theme any, context *ThemeValidat
 	for textToken, textColor := range textColors {
 		for bgToken, bgColor := range backgroundColors {
 			ratio := tv.calculateContrastRatio(textColor, bgColor)
-			
+
 			if ratio < context.Config.MinContrastRatio {
 				result.Accessible = false
 				result.ContrastIssues = append(result.ContrastIssues, ContrastIssue{
@@ -741,7 +738,7 @@ func (tv *ThemeValidator) validateAccessibility(theme any, context *ThemeValidat
 					BackgroundColor: bgColor,
 					ContrastRatio:   ratio,
 					RequiredRatio:   context.Config.MinContrastRatio,
-					Context:        fmt.Sprintf("Text on background combination"),
+					Context:         fmt.Sprintf("Text on background combination"),
 				})
 			}
 		}
@@ -819,7 +816,7 @@ func (tv *ThemeValidator) validatePerformance(theme any, context *ThemeValidatio
 
 func (tv *ThemeValidator) extractTokens(theme any) map[string]any {
 	tokens := make(map[string]any)
-	
+
 	if themeMap, ok := theme.(map[string]any); ok {
 		if tokensData, exists := themeMap["tokens"]; exists {
 			if tokensMap, ok := tokensData.(map[string]any); ok {
@@ -858,10 +855,10 @@ func (tv *ThemeValidator) extractColorTokens(theme any) map[string]string {
 	colors := make(map[string]string)
 
 	for token, value := range tokens {
-		if strings.Contains(strings.ToLower(token), "color") || 
-		   strings.Contains(strings.ToLower(token), "background") ||
-		   strings.Contains(strings.ToLower(token), "text") ||
-		   strings.Contains(strings.ToLower(token), "border") {
+		if strings.Contains(strings.ToLower(token), "color") ||
+			strings.Contains(strings.ToLower(token), "background") ||
+			strings.Contains(strings.ToLower(token), "text") ||
+			strings.Contains(strings.ToLower(token), "border") {
 			if valueStr, ok := value.(string); ok {
 				if tv.isColorValue(valueStr) {
 					colors[token] = valueStr
@@ -877,19 +874,19 @@ func (tv *ThemeValidator) isColorValue(value string) bool {
 	if tv.tokenRegistry.patterns["color"] != nil {
 		return tv.tokenRegistry.patterns["color"].MatchString(value)
 	}
-	
+
 	// Fallback color detection
-	return strings.HasPrefix(value, "#") || 
-		   strings.HasPrefix(value, "rgb") || 
-		   strings.HasPrefix(value, "hsl") ||
-		   strings.HasPrefix(value, "oklch")
+	return strings.HasPrefix(value, "#") ||
+		strings.HasPrefix(value, "rgb") ||
+		strings.HasPrefix(value, "hsl") ||
+		strings.HasPrefix(value, "oklch")
 }
 
 func (tv *ThemeValidator) filterTextColors(colors map[string]string) map[string]string {
 	textColors := make(map[string]string)
 	for token, color := range colors {
 		if strings.Contains(strings.ToLower(token), "text") ||
-		   strings.Contains(strings.ToLower(token), "foreground") {
+			strings.Contains(strings.ToLower(token), "foreground") {
 			textColors[token] = color
 		}
 	}
@@ -900,7 +897,7 @@ func (tv *ThemeValidator) filterBackgroundColors(colors map[string]string) map[s
 	backgroundColors := make(map[string]string)
 	for token, color := range colors {
 		if strings.Contains(strings.ToLower(token), "background") ||
-		   strings.Contains(strings.ToLower(token), "surface") {
+			strings.Contains(strings.ToLower(token), "surface") {
 			backgroundColors[token] = color
 		}
 	}
@@ -912,10 +909,10 @@ func (tv *ThemeValidator) calculateContrastRatio(color1, color2 string) float64 
 	// In a real implementation, this would properly parse colors and calculate luminance
 	lum1 := tv.getRelativeLuminance(color1)
 	lum2 := tv.getRelativeLuminance(color2)
-	
+
 	lighter := math.Max(lum1, lum2)
 	darker := math.Min(lum1, lum2)
-	
+
 	return (lighter + 0.05) / (darker + 0.05)
 }
 
@@ -925,13 +922,13 @@ func (tv *ThemeValidator) getRelativeLuminance(color string) float64 {
 	if color == "" {
 		return 0.5
 	}
-	
+
 	// Mock calculation based on color string
 	colorValue := 0.0
 	for _, char := range color {
 		colorValue += float64(char)
 	}
-	
+
 	return math.Mod(colorValue, 255) / 255.0
 }
 
@@ -968,13 +965,13 @@ func (tv *ThemeValidator) validateColorConsistency(theme any) ColorConsistencyRe
 	}
 
 	colors := tv.extractColorTokens(theme)
-	
+
 	// Analyze color palette
 	result.Palette = tv.analyzeColorPalette(colors)
-	
+
 	// Analyze color harmony
 	result.Harmony = tv.analyzeColorHarmony(colors)
-	
+
 	if !result.Harmony.Harmonious {
 		result.Consistent = false
 		result.Score -= 30.0
@@ -993,11 +990,11 @@ func (tv *ThemeValidator) validateSpacingConsistency(theme any) SpacingConsisten
 	// Extract spacing tokens
 	tokens := tv.extractTokens(theme)
 	spacingTokens := make(map[string]string)
-	
+
 	for token, value := range tokens {
 		if strings.Contains(strings.ToLower(token), "spacing") ||
-		   strings.Contains(strings.ToLower(token), "margin") ||
-		   strings.Contains(strings.ToLower(token), "padding") {
+			strings.Contains(strings.ToLower(token), "margin") ||
+			strings.Contains(strings.ToLower(token), "padding") {
 			if valueStr, ok := value.(string); ok {
 				spacingTokens[token] = valueStr
 			}
@@ -1006,7 +1003,7 @@ func (tv *ThemeValidator) validateSpacingConsistency(theme any) SpacingConsisten
 
 	// Analyze spacing scale
 	result.Scale = tv.analyzeSpacingScale(spacingTokens)
-	
+
 	// Analyze spacing rhythm
 	result.Rhythm = tv.analyzeSpacingRhythm(spacingTokens)
 
@@ -1028,11 +1025,11 @@ func (tv *ThemeValidator) validateTypographyConsistency(theme any) TypographyCon
 	// Extract typography tokens
 	tokens := tv.extractTokens(theme)
 	typographyTokens := make(map[string]string)
-	
+
 	for token, value := range tokens {
 		if strings.Contains(strings.ToLower(token), "font") ||
-		   strings.Contains(strings.ToLower(token), "typography") ||
-		   strings.Contains(strings.ToLower(token), "text") {
+			strings.Contains(strings.ToLower(token), "typography") ||
+			strings.Contains(strings.ToLower(token), "text") {
 			if valueStr, ok := value.(string); ok {
 				typographyTokens[token] = valueStr
 			}
@@ -1041,7 +1038,7 @@ func (tv *ThemeValidator) validateTypographyConsistency(theme any) TypographyCon
 
 	// Analyze typography scale
 	result.Scale = tv.analyzeTypographyScale(typographyTokens)
-	
+
 	// Analyze typography hierarchy
 	result.Hierarchy = tv.analyzeTypographyHierarchy(typographyTokens)
 
@@ -1116,7 +1113,7 @@ func (tv *ThemeValidator) estimateComputedSize(theme any) int64 {
 
 func (tv *ThemeValidator) calculateThemeComplexity(theme any) ThemeComplexityMetrics {
 	tokens := tv.extractTokens(theme)
-	
+
 	return ThemeComplexityMetrics{
 		TokenCount:      len(tokens),
 		NestingDepth:    tv.calculateNestingDepth(theme),
@@ -1192,7 +1189,7 @@ func (v *TokenFormatValidator) ValidateTheme(theme any, context *ThemeValidation
 	}
 
 	tokens := v.extractTokens(theme)
-	
+
 	for token, value := range tokens {
 		// Validate token naming convention
 		if !v.isValidTokenName(token) {
@@ -1246,7 +1243,7 @@ func (v *TokenFormatValidator) isValidTokenName(name string) bool {
 
 func (v *TokenFormatValidator) isValidTokenValue(token string, value any) bool {
 	valueStr := fmt.Sprintf("%v", value)
-	
+
 	// Determine token type and validate accordingly
 	if strings.Contains(strings.ToLower(token), "color") {
 		return v.registry.patterns["color"].MatchString(valueStr)
@@ -1257,7 +1254,7 @@ func (v *TokenFormatValidator) isValidTokenValue(token string, value any) bool {
 	if strings.Contains(strings.ToLower(token), "font-size") {
 		return v.registry.patterns["font-size"].MatchString(valueStr)
 	}
-	
+
 	return true // Default to valid for unknown types
 }
 

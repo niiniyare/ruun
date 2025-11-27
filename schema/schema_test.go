@@ -80,7 +80,7 @@ func (s *SchemaTestSuite) TestSchemaData() {
 	require.Equal(s.T(), "test@example.com", data["email"])
 }
 func (s *SchemaTestSuite) TestSchemaTypes() {
-	types := []Type{TypeForm, TypeComponent, TypeLayout, TypeWorkflow, TypeTheme, TypePage}
+	types := []Type{TypeForm, TypeTable, TypeWizard, TypeDialog, TypeCard, TypeList, TypeDetail}
 	for _, schemaType := range types {
 		schema := NewSchema("test", schemaType, "Test")
 		require.Equal(s.T(), schemaType, schema.Type)
@@ -174,8 +174,10 @@ func (s *SchemaTestSuite) TestSchemaProperties() {
 func (s *SchemaTestSuite) TestSchemaMetadata() {
 	now := time.Now()
 	s.schema.Meta = &Meta{
-		CreatedAt:  now,
-		UpdatedAt:  now,
+		BaseMetadata: BaseMetadata{
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
 		CreatedBy:  "user123",
 		CustomData: map[string]any{"version": "1.0"},
 	}

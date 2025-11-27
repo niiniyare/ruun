@@ -276,16 +276,16 @@ func (s *RepeatableSimpleTestSuite) testTableRepeaterField() { // Disabled - Tab
 	// TableRepeaterField type not implemented, skipping test
 	s.T().Skip("TableRepeaterField type not implemented")
 	/*
-	field := &TableRepeaterField{
-		RepeatableField: *s.repeatableField,
-		Editable:        true,
-		Footer:          true,
-		Selectable:      true,
-	}
-	require.True(s.T(), field.Editable)
-	require.True(s.T(), field.Footer)
-	require.True(s.T(), field.Selectable)
-	require.Equal(s.T(), "line_items", field.Name) // Inherited from RepeatableField
+		field := &TableRepeaterField{
+			RepeatableField: *s.repeatableField,
+			Editable:        true,
+			Footer:          true,
+			Selectable:      true,
+		}
+		require.True(s.T(), field.Editable)
+		require.True(s.T(), field.Footer)
+		require.True(s.T(), field.Selectable)
+		require.Equal(s.T(), "line_items", field.Name) // Inherited from RepeatableField
 	*/
 }
 

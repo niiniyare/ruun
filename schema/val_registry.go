@@ -9,8 +9,6 @@ import (
 	"github.com/niiniyare/ruun/pkg/condition"
 )
 
-
-
 // ValidationRegistry manages custom validators and provides extensible validation
 type ValidationRegistry struct {
 	validators      map[string]ValidatorFunc
@@ -29,7 +27,6 @@ type AsyncValidator struct {
 	mu       sync.RWMutex
 	cleanup  context.CancelFunc
 }
-
 
 // CrossFieldValidator validates multiple fields together using condition engine
 type CrossFieldValidator struct {

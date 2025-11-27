@@ -41,13 +41,13 @@ type Style struct {
 
 // StateStyles defines styling for different component states.
 type StateStyles struct {
-	Default   map[string]string `json:"default,omitempty"`
-	Hover     map[string]string `json:"hover,omitempty"`
-	Focus     map[string]string `json:"focus,omitempty"`
-	Active    map[string]string `json:"active,omitempty"`
-	Disabled  map[string]string `json:"disabled,omitempty"`
-	Error     map[string]string `json:"error,omitempty"`
-	Success   map[string]string `json:"success,omitempty"`
+	Default  map[string]string `json:"default,omitempty"`
+	Hover    map[string]string `json:"hover,omitempty"`
+	Focus    map[string]string `json:"focus,omitempty"`
+	Active   map[string]string `json:"active,omitempty"`
+	Disabled map[string]string `json:"disabled,omitempty"`
+	Error    map[string]string `json:"error,omitempty"`
+	Success  map[string]string `json:"success,omitempty"`
 	// For tabs/steps
 	Inactive  map[string]string `json:"inactive,omitempty"`
 	Completed map[string]string `json:"completed,omitempty"`

@@ -18,15 +18,15 @@ type AccessibilityValidator struct {
 
 // AccessibilityResult contains accessibility validation results
 type AccessibilityResult struct {
-	Compliant   bool                   `json:"compliant"`
-	Level       A11yLevel             `json:"level"`
-	Score       float64               `json:"score"`         // 0-100 accessibility score
-	Violations  []A11yViolation       `json:"violations"`
-	Warnings    []A11yWarning         `json:"warnings"`
-	Suggestions []A11ySuggestion      `json:"suggestions"`
-	Metrics     A11yMetrics           `json:"metrics"`
-	Standards   []A11yStandardResult  `json:"standards"`
-	Timestamp   time.Time             `json:"timestamp"`
+	Compliant   bool                 `json:"compliant"`
+	Level       A11yLevel            `json:"level"`
+	Score       float64              `json:"score"` // 0-100 accessibility score
+	Violations  []A11yViolation      `json:"violations"`
+	Warnings    []A11yWarning        `json:"warnings"`
+	Suggestions []A11ySuggestion     `json:"suggestions"`
+	Metrics     A11yMetrics          `json:"metrics"`
+	Standards   []A11yStandardResult `json:"standards"`
+	Timestamp   time.Time            `json:"timestamp"`
 }
 
 // A11yLevel represents accessibility conformance level
@@ -42,22 +42,22 @@ const (
 type A11yStandard string
 
 const (
-	A11yStandardWCAG21  A11yStandard = "WCAG2.1"
-	A11yStandardWCAG22  A11yStandard = "WCAG2.2"
+	A11yStandardWCAG21     A11yStandard = "WCAG2.1"
+	A11yStandardWCAG22     A11yStandard = "WCAG2.2"
 	A11yStandardSection508 A11yStandard = "Section508"
-	A11yStandardEN301549 A11yStandard = "EN301549"
+	A11yStandardEN301549   A11yStandard = "EN301549"
 )
 
 // A11yConfig configures accessibility validation
 type A11yConfig struct {
-	Level          A11yLevel       `json:"level"`
-	Standards      []A11yStandard  `json:"standards"`
-	ColorContrast  ContrastConfig  `json:"colorContrast"`
-	KeyboardNav    KeyboardConfig  `json:"keyboardNav"`
-	ScreenReader   ScreenReaderConfig `json:"screenReader"`
-	CustomRules    []string        `json:"customRules"`
-	IgnoreRules    []string        `json:"ignoreRules"`
-	StrictMode     bool            `json:"strictMode"`
+	Level         A11yLevel          `json:"level"`
+	Standards     []A11yStandard     `json:"standards"`
+	ColorContrast ContrastConfig     `json:"colorContrast"`
+	KeyboardNav   KeyboardConfig     `json:"keyboardNav"`
+	ScreenReader  ScreenReaderConfig `json:"screenReader"`
+	CustomRules   []string           `json:"customRules"`
+	IgnoreRules   []string           `json:"ignoreRules"`
+	StrictMode    bool               `json:"strictMode"`
 }
 
 // ContrastConfig configures color contrast validation
@@ -71,30 +71,30 @@ type ContrastConfig struct {
 
 // KeyboardConfig configures keyboard navigation validation
 type KeyboardConfig struct {
-	CheckTabOrder    bool     `json:"checkTabOrder"`
-	CheckFocusVisible bool    `json:"checkFocusVisible"`
-	CheckSkipLinks   bool     `json:"checkSkipLinks"`
-	RequiredKeys     []string `json:"requiredKeys"` // Tab, Enter, Space, Escape
+	CheckTabOrder     bool     `json:"checkTabOrder"`
+	CheckFocusVisible bool     `json:"checkFocusVisible"`
+	CheckSkipLinks    bool     `json:"checkSkipLinks"`
+	RequiredKeys      []string `json:"requiredKeys"` // Tab, Enter, Space, Escape
 }
 
 // ScreenReaderConfig configures screen reader validation
 type ScreenReaderConfig struct {
-	CheckLabels      bool `json:"checkLabels"`
-	CheckHeadings    bool `json:"checkHeadings"`
-	CheckLandmarks   bool `json:"checkLandmarks"`
-	CheckAltText     bool `json:"checkAltText"`
-	CheckAriaLabels  bool `json:"checkAriaLabels"`
+	CheckLabels     bool `json:"checkLabels"`
+	CheckHeadings   bool `json:"checkHeadings"`
+	CheckLandmarks  bool `json:"checkLandmarks"`
+	CheckAltText    bool `json:"checkAltText"`
+	CheckAriaLabels bool `json:"checkAriaLabels"`
 }
 
 // A11yRule represents an accessibility validation rule
 type A11yRule struct {
-	ID          string        `json:"id"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Category    A11yCategory  `json:"category"`
-	Level       A11yLevel     `json:"level"`
-	Standard    A11yStandard  `json:"standard"`
-	Enabled     bool          `json:"enabled"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Category    A11yCategory      `json:"category"`
+	Level       A11yLevel         `json:"level"`
+	Standard    A11yStandard      `json:"standard"`
+	Enabled     bool              `json:"enabled"`
 	Validator   A11yRuleValidator `json:"-"`
 }
 
@@ -102,10 +102,10 @@ type A11yRule struct {
 type A11yCategory string
 
 const (
-	A11yCategoryPerceivable A11yCategory = "perceivable"
-	A11yCategoryOperable    A11yCategory = "operable"
+	A11yCategoryPerceivable    A11yCategory = "perceivable"
+	A11yCategoryOperable       A11yCategory = "operable"
 	A11yCategoryUnderstandable A11yCategory = "understandable"
-	A11yCategoryRobust      A11yCategory = "robust"
+	A11yCategoryRobust         A11yCategory = "robust"
 )
 
 // A11yRuleValidator interface for accessibility rule validators
@@ -116,63 +116,63 @@ type A11yRuleValidator interface {
 
 // A11yValidationContext provides context for accessibility validation
 type A11yValidationContext struct {
-	Element   any            `json:"element"`
-	Parent    any            `json:"parent,omitempty"`
-	Children  []any          `json:"children,omitempty"`
-	Path      []string              `json:"path"`
-	Config    A11yConfig            `json:"config"`
-	Metadata  map[string]any `json:"metadata"`
+	Element  any            `json:"element"`
+	Parent   any            `json:"parent,omitempty"`
+	Children []any          `json:"children,omitempty"`
+	Path     []string       `json:"path"`
+	Config   A11yConfig     `json:"config"`
+	Metadata map[string]any `json:"metadata"`
 }
 
 // A11yRuleResult represents the result of a single accessibility rule
 type A11yRuleResult struct {
-	Passed      bool                   `json:"passed"`
-	Rule        string                 `json:"rule"`
-	Violations  []A11yViolation        `json:"violations,omitempty"`
-	Warnings    []A11yWarning          `json:"warnings,omitempty"`
-	Metadata    map[string]any `json:"metadata"`
+	Passed     bool            `json:"passed"`
+	Rule       string          `json:"rule"`
+	Violations []A11yViolation `json:"violations,omitempty"`
+	Warnings   []A11yWarning   `json:"warnings,omitempty"`
+	Metadata   map[string]any  `json:"metadata"`
 }
 
 // A11yViolation represents an accessibility violation
 type A11yViolation struct {
-	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`
-	Element     string                 `json:"element"`
-	Impact      A11yImpact            `json:"impact"`
-	Category    A11yCategory          `json:"category"`
-	Standard    A11yStandard          `json:"standard"`
-	Level       A11yLevel             `json:"level"`
-	Location    *SourceLocation       `json:"location,omitempty"`
-	Fix         string                `json:"fix,omitempty"`
-	Examples    []string              `json:"examples,omitempty"`
-	Resources   []A11yResource        `json:"resources,omitempty"`
-	Context     map[string]any `json:"context,omitempty"`
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Element   string          `json:"element"`
+	Impact    A11yImpact      `json:"impact"`
+	Category  A11yCategory    `json:"category"`
+	Standard  A11yStandard    `json:"standard"`
+	Level     A11yLevel       `json:"level"`
+	Location  *SourceLocation `json:"location,omitempty"`
+	Fix       string          `json:"fix,omitempty"`
+	Examples  []string        `json:"examples,omitempty"`
+	Resources []A11yResource  `json:"resources,omitempty"`
+	Context   map[string]any  `json:"context,omitempty"`
 }
 
 // A11yWarning represents an accessibility warning
 type A11yWarning struct {
-	Code      string                 `json:"code"`
-	Message   string                 `json:"message"`
-	Element   string                 `json:"element"`
-	Category  A11yCategory          `json:"category"`
-	Level     A11yLevel             `json:"level"`
-	Location  *SourceLocation       `json:"location,omitempty"`
-	Fix       string                `json:"fix,omitempty"`
-	Context   map[string]any `json:"context,omitempty"`
+	Code     string          `json:"code"`
+	Message  string          `json:"message"`
+	Element  string          `json:"element"`
+	Category A11yCategory    `json:"category"`
+	Level    A11yLevel       `json:"level"`
+	Location *SourceLocation `json:"location,omitempty"`
+	Fix      string          `json:"fix,omitempty"`
+	Context  map[string]any  `json:"context,omitempty"`
 }
 
 // A11ySuggestion represents accessibility improvement suggestions
 type A11ySuggestion struct {
-	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`
-	Element     string                 `json:"element"`
-	Priority    A11yPriority          `json:"priority"`
-	Category    A11yCategory          `json:"category"`
-	Fix         string                `json:"fix"`
-	AutoFix     bool                  `json:"autoFix"`
-	Examples    []string              `json:"examples,omitempty"`
-	Benefits    []string              `json:"benefits,omitempty"`
-	Context     map[string]any `json:"context,omitempty"`
+	Code     string         `json:"code"`
+	Message  string         `json:"message"`
+	Element  string         `json:"element"`
+	Priority A11yPriority   `json:"priority"`
+	Category A11yCategory   `json:"category"`
+	Fix      string         `json:"fix"`
+	AutoFix  bool           `json:"autoFix"`
+	Examples []string       `json:"examples,omitempty"`
+	Benefits []string       `json:"benefits,omitempty"`
+	Context  map[string]any `json:"context,omitempty"`
 }
 
 // A11yImpact represents the impact level of accessibility issues
@@ -203,25 +203,25 @@ type A11yResource struct {
 
 // A11yMetrics contains accessibility metrics
 type A11yMetrics struct {
-	TotalElements     int     `json:"totalElements"`
-	ElementsWithIssues int    `json:"elementsWithIssues"`
-	CriticalIssues    int     `json:"criticalIssues"`
-	SeriousIssues     int     `json:"seriousIssues"`
-	ModerateIssues    int     `json:"moderateIssues"`
-	MinorIssues       int     `json:"minorIssues"`
-	ContrastRatio     float64 `json:"contrastRatio,omitempty"`
-	KeyboardScore     float64 `json:"keyboardScore,omitempty"`
-	ScreenReaderScore float64 `json:"screenReaderScore,omitempty"`
+	TotalElements      int     `json:"totalElements"`
+	ElementsWithIssues int     `json:"elementsWithIssues"`
+	CriticalIssues     int     `json:"criticalIssues"`
+	SeriousIssues      int     `json:"seriousIssues"`
+	ModerateIssues     int     `json:"moderateIssues"`
+	MinorIssues        int     `json:"minorIssues"`
+	ContrastRatio      float64 `json:"contrastRatio,omitempty"`
+	KeyboardScore      float64 `json:"keyboardScore,omitempty"`
+	ScreenReaderScore  float64 `json:"screenReaderScore,omitempty"`
 }
 
 // A11yStandardResult represents compliance with a specific standard
 type A11yStandardResult struct {
 	Standard   A11yStandard `json:"standard"`
-	Level      A11yLevel   `json:"level"`
-	Compliant  bool        `json:"compliant"`
-	Score      float64     `json:"score"`
-	Violations int         `json:"violations"`
-	Warnings   int         `json:"warnings"`
+	Level      A11yLevel    `json:"level"`
+	Compliant  bool         `json:"compliant"`
+	Score      float64      `json:"score"`
+	Violations int          `json:"violations"`
+	Warnings   int          `json:"warnings"`
 }
 
 // NewAccessibilityValidator creates a new accessibility validator
@@ -237,10 +237,10 @@ func NewAccessibilityValidator() *AccessibilityValidator {
 			CheckNonText:      true,
 		},
 		KeyboardNav: KeyboardConfig{
-			CheckTabOrder:    true,
+			CheckTabOrder:     true,
 			CheckFocusVisible: true,
-			CheckSkipLinks:   true,
-			RequiredKeys:     []string{"Tab", "Enter", "Space", "Escape"},
+			CheckSkipLinks:    true,
+			RequiredKeys:      []string{"Tab", "Enter", "Space", "Escape"},
 		},
 		ScreenReader: ScreenReaderConfig{
 			CheckLabels:     true,
@@ -262,7 +262,7 @@ func NewAccessibilityValidator() *AccessibilityValidator {
 // ValidateAccessibility validates accessibility for a component or element
 func (av *AccessibilityValidator) ValidateAccessibility(ctx *ValidationContext, value any) *AccessibilityResult {
 	start := time.Now()
-	
+
 	result := &AccessibilityResult{
 		Compliant: true,
 		Level:     av.config.Level,
@@ -308,7 +308,7 @@ func (av *AccessibilityValidator) ValidateAccessibility(ctx *ValidationContext, 
 	for _, standard := range av.config.Standards {
 		standardResult := av.checkStandardCompliance(result, standard)
 		result.Standards = append(result.Standards, standardResult)
-		
+
 		if !standardResult.Compliant {
 			result.Compliant = false
 		}
@@ -488,7 +488,7 @@ func (av *AccessibilityValidator) mergeRuleResult(result *AccessibilityResult, r
 	if !ruleResult.Passed {
 		result.Compliant = false
 		result.Violations = append(result.Violations, ruleResult.Violations...)
-		
+
 		// Update metrics
 		for _, violation := range ruleResult.Violations {
 			result.Metrics.ElementsWithIssues++
@@ -506,7 +506,7 @@ func (av *AccessibilityValidator) mergeRuleResult(result *AccessibilityResult, r
 	}
 
 	result.Warnings = append(result.Warnings, ruleResult.Warnings...)
-	
+
 	return result
 }
 
@@ -517,16 +517,16 @@ func (av *AccessibilityValidator) calculateScore(metrics A11yMetrics) float64 {
 	}
 
 	// Weight different impact levels
-	totalIssues := float64(metrics.CriticalIssues*4 + metrics.SeriousIssues*3 + 
+	totalIssues := float64(metrics.CriticalIssues*4 + metrics.SeriousIssues*3 +
 		metrics.ModerateIssues*2 + metrics.MinorIssues*1)
 	maxPossibleIssues := float64(metrics.TotalElements * 4)
-	
+
 	if maxPossibleIssues == 0 {
 		return 100.0
 	}
-	
+
 	score := 100.0 * (1.0 - (totalIssues / maxPossibleIssues))
-	
+
 	// Ensure score is between 0 and 100
 	if score < 0 {
 		score = 0
@@ -534,7 +534,7 @@ func (av *AccessibilityValidator) calculateScore(metrics A11yMetrics) float64 {
 	if score > 100 {
 		score = 100
 	}
-	
+
 	return score
 }
 
@@ -543,25 +543,25 @@ func (av *AccessibilityValidator) checkStandardCompliance(result *AccessibilityR
 	// Count violations for this standard
 	violations := 0
 	warnings := 0
-	
+
 	for _, violation := range result.Violations {
 		if violation.Standard == standard {
 			violations++
 		}
 	}
-	
+
 	for _, warning := range result.Warnings {
 		// Note: A11yWarning doesn't have Standard field, would need to add it
 		warnings++
 	}
-	
+
 	score := result.Score
 	if violations > 0 {
 		// Reduce score based on violations
 		penalty := float64(violations) * 10.0
 		score = math.Max(0, score-penalty)
 	}
-	
+
 	return A11yStandardResult{
 		Standard:   standard,
 		Level:      av.config.Level,
@@ -587,7 +587,7 @@ func (v *AltTextValidator) ValidateA11y(element any, context *A11yValidationCont
 	// Check if element is an image or has image-like properties
 	if av.isImageElement(element) {
 		altText := av.getAltText(element)
-		
+
 		if altText == "" {
 			result.Passed = false
 			result.Violations = append(result.Violations, A11yViolation{
@@ -674,7 +674,7 @@ func (v *ContrastValidator) ValidateA11y(element any, context *A11yValidationCon
 	colors := v.extractColors(element)
 	if colors.foreground != "" && colors.background != "" {
 		ratio := v.calculateContrastRatio(colors.foreground, colors.background)
-		
+
 		isLargeText := v.isLargeText(element)
 		minRatio := v.config.MinContrastNormal
 		if isLargeText {
@@ -725,7 +725,7 @@ type colorPair struct {
 
 func (v *ContrastValidator) extractColors(element any) colorPair {
 	colors := colorPair{}
-	
+
 	if elementMap, ok := element.(map[string]any); ok {
 		if style, exists := elementMap["style"]; exists {
 			if styleMap, ok := style.(map[string]any); ok {
@@ -742,7 +742,7 @@ func (v *ContrastValidator) extractColors(element any) colorPair {
 			}
 		}
 	}
-	
+
 	return colors
 }
 
@@ -751,10 +751,10 @@ func (v *ContrastValidator) calculateContrastRatio(fg, bg string) float64 {
 	// In a real implementation, this would parse color values and calculate luminance
 	fgLum := v.getRelativeLuminance(fg)
 	bgLum := v.getRelativeLuminance(bg)
-	
+
 	lighter := math.Max(fgLum, bgLum)
 	darker := math.Min(fgLum, bgLum)
-	
+
 	return (lighter + 0.05) / (darker + 0.05)
 }
 
@@ -764,13 +764,13 @@ func (v *ContrastValidator) getRelativeLuminance(color string) float64 {
 	if color == "" {
 		return 0.5
 	}
-	
+
 	// Mock calculation based on color string
 	colorValue := 0.0
 	for _, char := range color {
 		colorValue += float64(char)
 	}
-	
+
 	return math.Mod(colorValue, 255) / 255.0
 }
 
@@ -872,7 +872,7 @@ func (v *KeyboardValidator) isInteractiveElement(element any) bool {
 				}
 			}
 		}
-		
+
 		// Check for click handlers
 		if props, exists := elementMap["props"]; exists {
 			if propsMap, ok := props.(map[string]any); ok {
@@ -900,7 +900,7 @@ func (v *KeyboardValidator) isFocusable(element any) bool {
 			}
 		}
 	}
-	
+
 	// Default focusable elements
 	return v.isNaturallyFocusable(element)
 }

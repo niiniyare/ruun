@@ -23,17 +23,17 @@ type RedisStorage struct {
 func NewRedisStorage(config RedisConfig) (*RedisStorage, error) {
 	// Extract Redis-specific configuration using unified config methods
 	client, prefix, ttl := config.GetRedisConfig()
-	
+
 	if client == nil {
 		return nil, fmt.Errorf("redis client is required")
 	}
-	
+
 	// Type assert to Redis client interface
 	redisClient, ok := client.(redis.Cmdable)
 	if !ok {
 		return nil, fmt.Errorf("invalid Redis client type")
 	}
-	
+
 	return &RedisStorage{
 		client: redisClient,
 		prefix: prefix,

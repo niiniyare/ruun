@@ -999,7 +999,7 @@ func (s *FieldTestSuite) TestConditionGroupConversion() {
 }
 
 func (s *FieldTestSuite) TestConditionGroupConversionOR() {
-	// Test disabled - old ConditionGroup type no longer exists  
+	// Test disabled - old ConditionGroup type no longer exists
 	// This functionality has been replaced with the new condition package
 	s.T().Skip("Test disabled - old condition types no longer supported")
 }

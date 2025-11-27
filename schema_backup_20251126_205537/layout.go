@@ -25,9 +25,9 @@ type LayoutBlock struct {
 	ID   string    `json:"id"`
 
 	// Common fields across all block types
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
+	Title       string   `json:"title,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Icon        string   `json:"icon,omitempty"`
 	Fields      []string `json:"fields"`
 	Order       int      `json:"order,omitempty"`
 
@@ -141,7 +141,6 @@ type BaseStyle struct {
 	BorderRadius string            `json:"borderRadius,omitempty"`
 	CustomCSS    string            `json:"customCSS,omitempty"`
 }
-
 
 // Style unified style for all layout blocks
 type Style struct {
@@ -751,7 +750,7 @@ func (v *layoutValidator) checkDuplicateIDs(layout *Layout, collector *ErrorColl
 type LayoutBuilder struct {
 	layout    Layout
 	evaluator *condition.Evaluator
-	
+
 	// Public fields for direct access (backward compatibility)
 	Type    LayoutType
 	Columns int

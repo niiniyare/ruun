@@ -11,13 +11,13 @@ import (
 type Storage interface {
 	// GetTheme retrieves a theme by ID.
 	GetTheme(ctx context.Context, themeID string) (*Theme, error)
-	
+
 	// SaveTheme stores a theme.
 	SaveTheme(ctx context.Context, theme *Theme) error
-	
+
 	// DeleteTheme removes a theme.
 	DeleteTheme(ctx context.Context, themeID string) error
-	
+
 	// ListThemes returns all stored themes.
 	ListThemes(ctx context.Context) ([]*Theme, error)
 }

@@ -2,6 +2,7 @@ package components
 
 import (
 	"strings"
+
 	"github.com/a-h/templ"
 )
 
@@ -49,20 +50,20 @@ type ComponentState struct {
 
 // HTMXConfig represents HTMX-specific configuration
 type HTMXConfig struct {
-	Post     string // hx-post URL
-	Get      string // hx-get URL
-	Put      string // hx-put URL
-	Patch    string // hx-patch URL
-	Delete   string // hx-delete URL
-	Target   string // hx-target selector
-	Swap     string // hx-swap strategy
-	Trigger  string // hx-trigger event
-	Confirm  string // hx-confirm message
-	Headers  string // hx-headers JSON
-	Vals     string // hx-vals JSON
-	Include  string // hx-include selector
-	Boost    bool   // hx-boost
-	PushURL  string // hx-push-url
+	Post    string // hx-post URL
+	Get     string // hx-get URL
+	Put     string // hx-put URL
+	Patch   string // hx-patch URL
+	Delete  string // hx-delete URL
+	Target  string // hx-target selector
+	Swap    string // hx-swap strategy
+	Trigger string // hx-trigger event
+	Confirm string // hx-confirm message
+	Headers string // hx-headers JSON
+	Vals    string // hx-vals JSON
+	Include string // hx-include selector
+	Boost   bool   // hx-boost
+	PushURL string // hx-push-url
 }
 
 // AccessibilityProps represents ARIA and accessibility attributes
@@ -104,14 +105,14 @@ type EventHandlers struct {
 
 // BaseProps represents properties common to all components
 type BaseProps struct {
-	ID        string              // HTML id attribute
-	ClassName string              // Additional CSS classes
-	Style     string              // Inline styles
-	DataAttrs map[string]string   // data-* attributes
-	State     ComponentState      // Component state
-	HTMX      HTMXConfig          // HTMX configuration
-	A11y      AccessibilityProps  // Accessibility properties
-	Events    EventHandlers       // Event handlers
+	ID        string             // HTML id attribute
+	ClassName string             // Additional CSS classes
+	Style     string             // Inline styles
+	DataAttrs map[string]string  // data-* attributes
+	State     ComponentState     // Component state
+	HTMX      HTMXConfig         // HTMX configuration
+	A11y      AccessibilityProps // Accessibility properties
+	Events    EventHandlers      // Event handlers
 }
 
 // ClassBuilder helps build CSS class strings
@@ -179,7 +180,7 @@ func (cb *ClassBuilder) Build() string {
 	// Remove empty classes and duplicates
 	seen := make(map[string]bool)
 	var result []string
-	
+
 	for _, class := range cb.classes {
 		class = strings.TrimSpace(class)
 		if class != "" && !seen[class] {
@@ -187,7 +188,7 @@ func (cb *ClassBuilder) Build() string {
 			seen[class] = true
 		}
 	}
-	
+
 	return strings.Join(result, " ")
 }
 
@@ -276,7 +277,7 @@ func (h HTMXConfig) GetURL() string {
 // Merge merges another HTMX config, with the other config taking precedence
 func (h HTMXConfig) Merge(other HTMXConfig) HTMXConfig {
 	result := h
-	
+
 	if other.Post != "" {
 		result.Post = other.Post
 	}
@@ -319,20 +320,20 @@ func (h HTMXConfig) Merge(other HTMXConfig) HTMXConfig {
 	if other.PushURL != "" {
 		result.PushURL = other.PushURL
 	}
-	
+
 	return result
 }
 
 // HasAccessibilityAttrs returns true if any accessibility attributes are set
 func (a AccessibilityProps) HasAccessibilityAttrs() bool {
 	return a.AriaLabel != "" || a.AriaDescribedBy != "" || a.AriaLabelledBy != "" ||
-		   a.Role != "" || a.TabIndex != ""
+		a.Role != "" || a.TabIndex != ""
 }
 
 // HasEventHandlers returns true if any event handlers are configured
 func (e EventHandlers) HasEventHandlers() bool {
 	return e.OnClick != "" || e.OnChange != "" || e.OnInput != "" || e.OnFocus != "" ||
-		   e.OnBlur != "" || e.OnSubmit != ""
+		e.OnBlur != "" || e.OnSubmit != ""
 }
 
 // GetDataAttrsString converts data attributes map to HTML attribute string
@@ -340,12 +341,12 @@ func GetDataAttrsString(dataAttrs map[string]string) string {
 	if len(dataAttrs) == 0 {
 		return ""
 	}
-	
+
 	var attrs []string
 	for key, value := range dataAttrs {
 		attrs = append(attrs, `data-`+key+`="`+value+`"`)
 	}
-	
+
 	return strings.Join(attrs, " ")
 }
 
@@ -353,10 +354,10 @@ func GetDataAttrsString(dataAttrs map[string]string) string {
 type ComponentInterface interface {
 	// Validate validates the component props
 	Validate() error
-	
+
 	// GetClasses returns the CSS classes for the component
 	GetClasses() string
-	
+
 	// GetBaseProps returns the base props for the component
 	GetBaseProps() BaseProps
 }
@@ -380,9 +381,9 @@ const (
 
 // ValidationMessage represents a validation message with severity
 type ValidationMessage struct {
-	Message  string              // Message text
-	Severity ValidationSeverity  // Message severity
-	Field    string              // Associated field (optional)
+	Message  string             // Message text
+	Severity ValidationSeverity // Message severity
+	Field    string             // Associated field (optional)
 }
 
 // ValidationSeverity represents the severity of a validation message

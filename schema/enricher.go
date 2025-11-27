@@ -22,7 +22,6 @@ type EnrichConfig struct {
 // EnrichOption is a functional option for enrichment configuration
 type EnrichOption func(*EnrichConfig)
 
-
 // Note: User, TenantProvider, Logger, and Enricher interfaces moved to interface.go
 
 // DefaultEnricher is the production-ready implementation of the Enricher interface

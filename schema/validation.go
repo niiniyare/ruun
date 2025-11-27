@@ -27,7 +27,7 @@ type UnifiedValidation struct {
 	Unique   bool `json:"unique,omitempty"`
 
 	// File validation
-	MaxFileSize  int64    `json:"maxFileSize,omitempty"`
+	MaxFileSize   int64    `json:"maxFileSize,omitempty"`
 	AcceptedTypes []string `json:"acceptedTypes,omitempty"`
 
 	// Cross-field validation (from Validation)
@@ -40,8 +40,8 @@ type UnifiedValidation struct {
 	Required       bool                `json:"required,omitempty"`
 	Messages       *ValidationMessages `json:"messages,omitempty"`
 	CustomFunction string              `json:"customFunction,omitempty"`
-	Custom         string              `json:"custom,omitempty"`       // Backward compatibility alias for CustomFunction
-	Condition      string              `json:"condition,omitempty"`    // When to apply validation
+	Custom         string              `json:"custom,omitempty"`    // Backward compatibility alias for CustomFunction
+	Condition      string              `json:"condition,omitempty"` // When to apply validation
 }
 
 // ValidationMode defines when validation should occur
@@ -231,7 +231,7 @@ func (v *UnifiedValidation) ValidateNumberValue(value float64) []string {
 		if v.Min != nil {
 			remainder = value - *v.Min
 		}
-		if remainder != 0 && int64(remainder/ *v.Step) != int64(remainder/ *v.Step) {
+		if remainder != 0 && int64(remainder / *v.Step) != int64(remainder / *v.Step) {
 			errors = append(errors, fmt.Sprintf("Must be a multiple of %g", *v.Step))
 		}
 	}
@@ -347,7 +347,7 @@ func (v *UnifiedValidation) GetCustom() string {
 	return v.CustomFunction
 }
 
-// SetCustom sets the custom validation function for backward compatibility  
+// SetCustom sets the custom validation function for backward compatibility
 func (v *UnifiedValidation) SetCustom(custom string) {
 	if v != nil {
 		v.Custom = custom

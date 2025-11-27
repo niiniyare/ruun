@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-
-
 // NewRegistryMetrics creates metrics
 func NewRegistryMetrics() *RegistryMetrics {
 	return &RegistryMetrics{

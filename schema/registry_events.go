@@ -4,9 +4,6 @@ import (
 	"sync"
 )
 
-
-
-
 // RegistryEventBus manages event subscriptions
 type RegistryEventBus struct {
 	handlers []RegistryEventHandler

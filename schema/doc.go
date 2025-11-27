@@ -112,7 +112,7 @@ Add reactive behavior with universal binding:
 Implement interfaces to extend functionality:
 	// See interface.go for complete interface definitions including:
 	// - Validator: ValidateSchema, ValidateData, ValidateField
-	// - Renderer: Render, RenderField, Format  
+	// - Renderer: Render, RenderField, Format
 	// - Registry: Register, Get, List, Delete, Exists
 # Error Handling
 The package provides typed errors for better error handling:

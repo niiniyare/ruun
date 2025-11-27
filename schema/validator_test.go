@@ -1015,105 +1015,105 @@ func TestValidator_ValidateEnrichedSchema(t *testing.T) {
 			name: "all fields visible and valid",
 			schema: &MockEnrichedSchema{
 				MockSchema: &MockSchema{
-					id:     "test-schema",
+					id: "test-schema",
 					fields: []FieldAccessor{
-					&MockEnrichedField{
-						MockField: &MockField{
-							name:      "email",
-							fieldType: FieldEmail,
-							required:  true,
+						&MockEnrichedField{
+							MockField: &MockField{
+								name:      "email",
+								fieldType: FieldEmail,
+								required:  true,
+							},
+							runtime: &MockFieldRuntime{
+								visible:  true,
+								editable: true,
+							},
 						},
-						runtime: &MockFieldRuntime{
-							visible:  true,
-							editable: true,
-						},
-					},
-					&MockEnrichedField{
-						MockField: &MockField{
-							name:      "name",
-							fieldType: FieldText,
-							required:  true,
-						},
-						runtime: &MockFieldRuntime{
-							visible:  true,
-							editable: true,
-						},
-					},
-				},
-			},
-			data: map[string]any{
-				"email": "test@example.com",
-				"name":  "Test User",
-			},
-			wantValid:  true,
-			wantErrors: map[string]int{},
-		},
-		{
-			name: "invisible field skipped",
-			schema: &MockEnrichedSchema{
-				enrichedFields: []EnrichedFieldInterface{
-					&MockEnrichedField{
-						MockField: &MockField{
-							name:      "email",
-							fieldType: FieldEmail,
-							required:  true,
-						},
-						runtime: &MockFieldRuntime{
-							visible:  true,
-							editable: true,
-						},
-					},
-					&MockEnrichedField{
-						MockField: &MockField{
-							name:      "secret",
-							fieldType: FieldText,
-							required:  true, // Required but invisible - should be skipped
-						},
-						runtime: &MockFieldRuntime{
-							visible:  false,
-							editable: false,
-							reason:   "permission_required",
+						&MockEnrichedField{
+							MockField: &MockField{
+								name:      "name",
+								fieldType: FieldText,
+								required:  true,
+							},
+							runtime: &MockFieldRuntime{
+								visible:  true,
+								editable: true,
+							},
 						},
 					},
 				},
+				data: map[string]any{
+					"email": "test@example.com",
+					"name":  "Test User",
+				},
+				wantValid:  true,
+				wantErrors: map[string]int{},
 			},
-			data: map[string]any{
-				"email": "test@example.com",
-				// secret field not provided - should not cause error since invisible
-			},
-			wantValid:  true,
-			wantErrors: map[string]int{},
-		},
-		{
-			name: "readonly field validation",
-			schema: &MockEnrichedSchema{
-				enrichedFields: []EnrichedFieldInterface{
-					&MockEnrichedField{
-						MockField: &MockField{
-							name:      "email",
-							fieldType: FieldEmail,
-							required:  true,
+			{
+				name: "invisible field skipped",
+				schema: &MockEnrichedSchema{
+					enrichedFields: []EnrichedFieldInterface{
+						&MockEnrichedField{
+							MockField: &MockField{
+								name:      "email",
+								fieldType: FieldEmail,
+								required:  true,
+							},
+							runtime: &MockFieldRuntime{
+								visible:  true,
+								editable: true,
+							},
 						},
-						runtime: &MockFieldRuntime{
-							visible:  true,
-							editable: false, // Readonly
-							reason:   "system_field",
+						&MockEnrichedField{
+							MockField: &MockField{
+								name:      "secret",
+								fieldType: FieldText,
+								required:  true, // Required but invisible - should be skipped
+							},
+							runtime: &MockFieldRuntime{
+								visible:  false,
+								editable: false,
+								reason:   "permission_required",
+							},
 						},
 					},
 				},
+				data: map[string]any{
+					"email": "test@example.com",
+					// secret field not provided - should not cause error since invisible
+				},
+				wantValid:  true,
+				wantErrors: map[string]int{},
 			},
-			data: map[string]any{
-				"email": "invalid-email",
+			{
+				name: "readonly field validation",
+				schema: &MockEnrichedSchema{
+					enrichedFields: []EnrichedFieldInterface{
+						&MockEnrichedField{
+							MockField: &MockField{
+								name:      "email",
+								fieldType: FieldEmail,
+								required:  true,
+							},
+							runtime: &MockFieldRuntime{
+								visible:  true,
+								editable: false, // Readonly
+								reason:   "system_field",
+							},
+						},
+					},
+				},
+				data: map[string]any{
+					"email": "invalid-email",
+				},
+				wantValid: false,
+				wantErrors: map[string]int{
+					"email": 1, // Should fail format validation
+				},
 			},
-			wantValid: false,
-			wantErrors: map[string]int{
-				"email": 1, // Should fail format validation
-			},
-		},
-		{
-			name: "validation error on editable field",
-			schema: &MockEnrichedSchema{
-				enrichedFields: []EnrichedFieldInterface{
+			{
+				name: "validation error on editable field",
+				schema: &MockEnrichedSchema{
+					enrichedFields: []EnrichedFieldInterface{
 						&MockEnrichedField{
 							MockField: &MockField{
 								name:      "email",

@@ -28,62 +28,62 @@ type ComponentSchema struct {
 
 // PropSchema defines validation for a single prop
 type PropSchema struct {
-	Name         string                 `json:"name"`
-	Type         PropType              `json:"type"`
-	Required     bool                  `json:"required"`
-	Default      any           `json:"default,omitempty"`
-	Description  string                `json:"description"`
-	Deprecated   bool                  `json:"deprecated"`
-	Validation   *PropValidation       `json:"validation,omitempty"`
-	Examples     []any         `json:"examples,omitempty"`
-	Dependencies []string              `json:"dependencies,omitempty"` // Props that must be present if this prop is used
-	Conflicts    []string              `json:"conflicts,omitempty"`    // Props that cannot be used with this prop
+	Name         string          `json:"name"`
+	Type         PropType        `json:"type"`
+	Required     bool            `json:"required"`
+	Default      any             `json:"default,omitempty"`
+	Description  string          `json:"description"`
+	Deprecated   bool            `json:"deprecated"`
+	Validation   *PropValidation `json:"validation,omitempty"`
+	Examples     []any           `json:"examples,omitempty"`
+	Dependencies []string        `json:"dependencies,omitempty"` // Props that must be present if this prop is used
+	Conflicts    []string        `json:"conflicts,omitempty"`    // Props that cannot be used with this prop
 }
 
 // PropType represents the type of a prop
 type PropType struct {
-	Kind        PropKind               `json:"kind"`
-	ElementType *PropType             `json:"elementType,omitempty"` // For arrays
-	Properties  map[string]*PropType  `json:"properties,omitempty"`  // For objects
-	Union       []*PropType           `json:"union,omitempty"`       // For union types
-	Enum        []any         `json:"enum,omitempty"`        // For enum types
+	Kind        PropKind             `json:"kind"`
+	ElementType *PropType            `json:"elementType,omitempty"` // For arrays
+	Properties  map[string]*PropType `json:"properties,omitempty"`  // For objects
+	Union       []*PropType          `json:"union,omitempty"`       // For union types
+	Enum        []any                `json:"enum,omitempty"`        // For enum types
 }
 
 // PropKind represents the kind of prop type
 type PropKind string
 
 const (
-	PropKindString     PropKind = "string"
-	PropKindNumber     PropKind = "number"
-	PropKindBoolean    PropKind = "boolean"
-	PropKindArray      PropKind = "array"
-	PropKindObject     PropKind = "object"
-	PropKindFunction   PropKind = "function"
-	PropKindComponent  PropKind = "component"
-	PropKindUnion      PropKind = "union"
-	PropKindEnum       PropKind = "enum"
-	PropKindAny        PropKind = "any"
+	PropKindString    PropKind = "string"
+	PropKindNumber    PropKind = "number"
+	PropKindBoolean   PropKind = "boolean"
+	PropKindArray     PropKind = "array"
+	PropKindObject    PropKind = "object"
+	PropKindFunction  PropKind = "function"
+	PropKindComponent PropKind = "component"
+	PropKindUnion     PropKind = "union"
+	PropKindEnum      PropKind = "enum"
+	PropKindAny       PropKind = "any"
 )
 
 // PropValidation defines additional validation rules for props
 type PropValidation struct {
-	MinLength *int                   `json:"minLength,omitempty"`
-	MaxLength *int                   `json:"maxLength,omitempty"`
-	Min       *float64               `json:"min,omitempty"`
-	Max       *float64               `json:"max,omitempty"`
-	Pattern   string                 `json:"pattern,omitempty"`
-	Custom    []string               `json:"custom,omitempty"` // Custom validator function names
-	Rules     []ValidationRule       `json:"rules,omitempty"`
+	MinLength *int             `json:"minLength,omitempty"`
+	MaxLength *int             `json:"maxLength,omitempty"`
+	Min       *float64         `json:"min,omitempty"`
+	Max       *float64         `json:"max,omitempty"`
+	Pattern   string           `json:"pattern,omitempty"`
+	Custom    []string         `json:"custom,omitempty"` // Custom validator function names
+	Rules     []ValidationRule `json:"rules,omitempty"`
 }
 
 // ChildrenSchema defines validation for component children
 type ChildrenSchema struct {
-	Required     bool     `json:"required"`
-	Types        []string `json:"types,omitempty"`        // Allowed child component types
-	MaxCount     *int     `json:"maxCount,omitempty"`     // Maximum number of children
-	MinCount     *int     `json:"minCount,omitempty"`     // Minimum number of children
-	AllowText    bool     `json:"allowText"`              // Whether text content is allowed
-	AllowHTML    bool     `json:"allowHTML"`              // Whether HTML content is allowed
+	Required  bool     `json:"required"`
+	Types     []string `json:"types,omitempty"`    // Allowed child component types
+	MaxCount  *int     `json:"maxCount,omitempty"` // Maximum number of children
+	MinCount  *int     `json:"minCount,omitempty"` // Minimum number of children
+	AllowText bool     `json:"allowText"`          // Whether text content is allowed
+	AllowHTML bool     `json:"allowHTML"`          // Whether HTML content is allowed
 }
 
 // CompositionSchema defines how components can be composed
@@ -110,29 +110,29 @@ type RenderSchema struct {
 
 // VariantSchema defines component variants
 type VariantSchema struct {
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	Props       map[string]*PropSchema    `json:"props"`      // Additional props for this variant
-	Required    []string                  `json:"required"`   // Required props for this variant
-	Forbidden   []string                  `json:"forbidden"`  // Forbidden props for this variant
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Props       map[string]*PropSchema `json:"props"`     // Additional props for this variant
+	Required    []string               `json:"required"`  // Required props for this variant
+	Forbidden   []string               `json:"forbidden"` // Forbidden props for this variant
 }
 
 // StateSchema defines component state validation
 type StateSchema struct {
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	Props       map[string]*PropSchema    `json:"props"`      // Props affected by this state
-	Conditions  []string                  `json:"conditions"` // Conditions that trigger this state
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Props       map[string]*PropSchema `json:"props"`      // Props affected by this state
+	Conditions  []string               `json:"conditions"` // Conditions that trigger this state
 }
 
 // ComponentInstance represents an instance of a component being validated
 type ComponentInstance struct {
-	Type      string                 `json:"type"`
-	Props     map[string]any `json:"props"`
-	Children  []ComponentInstance    `json:"children,omitempty"`
-	Slots     map[string]any `json:"slots,omitempty"`
-	Location  *SourceLocation        `json:"location,omitempty"`
-	Metadata  map[string]any `json:"metadata,omitempty"`
+	Type     string              `json:"type"`
+	Props    map[string]any      `json:"props"`
+	Children []ComponentInstance `json:"children,omitempty"`
+	Slots    map[string]any      `json:"slots,omitempty"`
+	Location *SourceLocation     `json:"location,omitempty"`
+	Metadata map[string]any      `json:"metadata,omitempty"`
 }
 
 // NewComponentValidator creates a new component validator
@@ -621,7 +621,7 @@ func (cv *ComponentValidator) validateComposition(instance *ComponentInstance, s
 	if len(schema.Slots) > 0 {
 		for slotName, slotSchema := range schema.Slots {
 			slotContent, exists := instance.Slots[slotName]
-			
+
 			if slotSchema.Required && !exists {
 				result.Errors = append(result.Errors, NewValidationError(
 					"slot.required",
@@ -655,7 +655,7 @@ func (cv *ComponentValidator) validateVariants(instance *ComponentInstance, vari
 	// Determine which variant is being used (simplified logic)
 	for variantName, variantSchema := range variants {
 		isVariant := true
-		
+
 		// Check if all required props for this variant are present
 		for _, requiredProp := range variantSchema.Required {
 			if _, exists := instance.Props[requiredProp]; !exists {
@@ -746,7 +746,7 @@ func (v *PropTypesValidator) Validate(ctx *ValidationContext, value any) *Valida
 
 	// Implementation would be similar to RequiredPropsValidator
 	// but focus on type validation
-	
+
 	return result
 }
 

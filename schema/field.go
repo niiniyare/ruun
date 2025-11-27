@@ -39,15 +39,15 @@ type Field struct {
 	Options []FieldOption `json:"options,omitempty"`
 
 	// Behavior
-	Validation   *FieldValidation  `json:"validation,omitempty"`
-	Transform    *FieldTransform   `json:"transform,omitempty"`
-	Conditional  *Conditional `json:"conditional,omitempty"`
-	DataSource   *DataSource       `json:"dataSource,omitempty"`
-	Dependencies []string          `json:"dependencies,omitempty"`
+	Validation   *FieldValidation `json:"validation,omitempty"`
+	Transform    *FieldTransform  `json:"transform,omitempty"`
+	Conditional  *Conditional     `json:"conditional,omitempty"`
+	DataSource   *DataSource      `json:"dataSource,omitempty"`
+	Dependencies []string         `json:"dependencies,omitempty"`
 
 	// Layout & Styling
 	Layout *FieldLayout   `json:"layout,omitempty"`
-	Style  *Style    `json:"style,omitempty"`
+	Style  *Style         `json:"style,omitempty"`
 	Config map[string]any `json:"config,omitempty"`
 
 	// Permissions
@@ -186,14 +186,11 @@ const (
 
 // DataSource defines where to fetch dynamic options
 
-
 // FieldTransform defines value transformation
 type FieldTransform struct {
 	Type   TransformType  `json:"type"`
 	Params map[string]any `json:"params,omitempty"`
 }
-
-
 
 // FieldLayout controls positioning
 type FieldLayout struct {
@@ -203,8 +200,6 @@ type FieldLayout struct {
 	Width   string `json:"width,omitempty"`
 	Order   int    `json:"order,omitempty"`
 }
-
-
 
 // FieldRuntime holds runtime state from enricher
 type FieldRuntime struct {
@@ -231,7 +226,6 @@ type FieldI18n struct {
 	Description map[string]string `json:"description,omitempty"`
 	Tooltip     map[string]string `json:"tooltip,omitempty"`
 }
-
 
 // Core Methods
 
@@ -535,16 +529,16 @@ func (f *Field) TextConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	textFields := []string{"maxLength", "minLength", "autocomplete", "prefix", "suffix"}
-	
+
 	for _, field := range textFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 
@@ -553,16 +547,16 @@ func (f *Field) SelectConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	selectFields := []string{"multiple", "searchable", "clearable", "createable", "maxSelections", "placeholder"}
-	
+
 	for _, field := range selectFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 
@@ -571,16 +565,16 @@ func (f *Field) FileConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	fileFields := []string{"accept", "maxSize", "multiple", "previewMode", "autoUpload"}
-	
+
 	for _, field := range fileFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 
@@ -589,16 +583,16 @@ func (f *Field) RelationConfig() map[string]any {
 	if f.Config == nil {
 		return make(map[string]any)
 	}
-	
+
 	config := make(map[string]any)
 	relationFields := []string{"entity", "displayField", "valueField", "searchField", "targetSchema", "multiple", "createNew"}
-	
+
 	for _, field := range relationFields {
 		if val, ok := f.Config[field]; ok {
 			config[field] = val
 		}
 	}
-	
+
 	return config
 }
 

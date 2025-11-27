@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -44,27 +43,27 @@ type BuildIntegrationConfig struct {
 
 // BuildPipeline represents a validation pipeline in the build process
 type BuildPipeline struct {
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Stages      []BuildStage       `json:"stages"`
-	Triggers    []BuildTrigger     `json:"triggers"`
-	Environment map[string]string  `json:"environment"`
-	Timeout     time.Duration      `json:"timeout"`
-	Parallel    bool               `json:"parallel"`
-	ContinueOnError bool           `json:"continueOnError"`
+	Name            string            `json:"name"`
+	Description     string            `json:"description"`
+	Stages          []BuildStage      `json:"stages"`
+	Triggers        []BuildTrigger    `json:"triggers"`
+	Environment     map[string]string `json:"environment"`
+	Timeout         time.Duration     `json:"timeout"`
+	Parallel        bool              `json:"parallel"`
+	ContinueOnError bool              `json:"continueOnError"`
 }
 
 // BuildStage represents a stage in the build pipeline
 type BuildStage struct {
-	Name         string           `json:"name"`
-	Description  string           `json:"description"`
-	Type         BuildStageType   `json:"type"`
-	Commands     []BuildCommand   `json:"commands"`
-	Validators   []string         `json:"validators"`
-	Dependencies []string         `json:"dependencies"`
-	Parallel     bool             `json:"parallel"`
-	Optional     bool             `json:"optional"`
-	Timeout      time.Duration    `json:"timeout"`
+	Name         string            `json:"name"`
+	Description  string            `json:"description"`
+	Type         BuildStageType    `json:"type"`
+	Commands     []BuildCommand    `json:"commands"`
+	Validators   []string          `json:"validators"`
+	Dependencies []string          `json:"dependencies"`
+	Parallel     bool              `json:"parallel"`
+	Optional     bool              `json:"optional"`
+	Timeout      time.Duration     `json:"timeout"`
 	Environment  map[string]string `json:"environment"`
 }
 
@@ -142,13 +141,13 @@ const (
 
 // FileWatcher monitors files for changes
 type FileWatcher struct {
-	paths       []string
-	extensions  []string
-	ignore      []string
-	callback    func(string, FileEvent)
-	running     bool
-	stopChan    chan struct{}
-	mutex       sync.RWMutex
+	paths      []string
+	extensions []string
+	ignore     []string
+	callback   func(string, FileEvent)
+	running    bool
+	stopChan   chan struct{}
+	mutex      sync.RWMutex
 }
 
 // FileEvent represents a file system event
@@ -177,37 +176,37 @@ type BuildCache struct {
 
 // BuildCacheEntry represents a cached build artifact
 type BuildCacheEntry struct {
-	Key       string                 `json:"key"`
+	Key       string         `json:"key"`
 	Data      any            `json:"data"`
-	Hash      string                 `json:"hash"`
-	Timestamp time.Time              `json:"timestamp"`
-	TTL       time.Duration          `json:"ttl"`
+	Hash      string         `json:"hash"`
+	Timestamp time.Time      `json:"timestamp"`
+	TTL       time.Duration  `json:"ttl"`
 	Metadata  map[string]any `json:"metadata"`
 }
 
 // BuildReporter generates build reports
 type BuildReporter struct {
-	config   BuildIntegrationConfig
-	results  []BuildResult
-	summary  BuildSummary
-	mutex    sync.RWMutex
+	config  BuildIntegrationConfig
+	results []BuildResult
+	summary BuildSummary
+	mutex   sync.RWMutex
 }
 
 // BuildResult represents the result of a build stage or pipeline
 type BuildResult struct {
-	Pipeline     string                 `json:"pipeline"`
-	Stage        string                 `json:"stage"`
-	Command      string                 `json:"command,omitempty"`
-	Status       BuildStatus            `json:"status"`
-	StartTime    time.Time              `json:"startTime"`
-	EndTime      time.Time              `json:"endTime"`
-	Duration     time.Duration          `json:"duration"`
-	ExitCode     int                    `json:"exitCode"`
-	Output       string                 `json:"output"`
-	Error        string                 `json:"error,omitempty"`
-	Validation   *ValidationResult      `json:"validation,omitempty"`
-	Metadata     map[string]any `json:"metadata"`
-	Artifacts    []BuildArtifact        `json:"artifacts,omitempty"`
+	Pipeline   string            `json:"pipeline"`
+	Stage      string            `json:"stage"`
+	Command    string            `json:"command,omitempty"`
+	Status     BuildStatus       `json:"status"`
+	StartTime  time.Time         `json:"startTime"`
+	EndTime    time.Time         `json:"endTime"`
+	Duration   time.Duration     `json:"duration"`
+	ExitCode   int               `json:"exitCode"`
+	Output     string            `json:"output"`
+	Error      string            `json:"error,omitempty"`
+	Validation *ValidationResult `json:"validation,omitempty"`
+	Metadata   map[string]any    `json:"metadata"`
+	Artifacts  []BuildArtifact   `json:"artifacts,omitempty"`
 }
 
 // BuildStatus represents the status of a build
@@ -224,42 +223,42 @@ const (
 
 // BuildArtifact represents a build artifact
 type BuildArtifact struct {
-	Name     string    `json:"name"`
-	Path     string    `json:"path"`
-	Type     string    `json:"type"`
-	Size     int64     `json:"size"`
-	Hash     string    `json:"hash"`
-	Created  time.Time `json:"created"`
+	Name     string         `json:"name"`
+	Path     string         `json:"path"`
+	Type     string         `json:"type"`
+	Size     int64          `json:"size"`
+	Hash     string         `json:"hash"`
+	Created  time.Time      `json:"created"`
 	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
 // BuildSummary contains overall build summary
 type BuildSummary struct {
-	TotalPipelines  int                        `json:"totalPipelines"`
-	SuccessPipelines int                       `json:"successPipelines"`
-	FailedPipelines int                        `json:"failedPipelines"`
-	TotalStages     int                        `json:"totalStages"`
-	SuccessStages   int                        `json:"successStages"`
-	FailedStages    int                        `json:"failedStages"`
-	TotalDuration   time.Duration              `json:"totalDuration"`
-	SuccessRate     float64                    `json:"successRate"`
-	Validations     ValidationSummary          `json:"validations"`
-	StartTime       time.Time                  `json:"startTime"`
-	EndTime         time.Time                  `json:"endTime"`
-	Metadata        map[string]any     `json:"metadata"`
+	TotalPipelines   int               `json:"totalPipelines"`
+	SuccessPipelines int               `json:"successPipelines"`
+	FailedPipelines  int               `json:"failedPipelines"`
+	TotalStages      int               `json:"totalStages"`
+	SuccessStages    int               `json:"successStages"`
+	FailedStages     int               `json:"failedStages"`
+	TotalDuration    time.Duration     `json:"totalDuration"`
+	SuccessRate      float64           `json:"successRate"`
+	Validations      ValidationSummary `json:"validations"`
+	StartTime        time.Time         `json:"startTime"`
+	EndTime          time.Time         `json:"endTime"`
+	Metadata         map[string]any    `json:"metadata"`
 }
 
 // ValidationSummary contains validation-specific summary
 type ValidationSummary struct {
-	TotalValidations     int                    `json:"totalValidations"`
-	PassedValidations    int                    `json:"passedValidations"`
-	FailedValidations    int                    `json:"failedValidations"`
-	ValidationsByType    map[string]int         `json:"validationsByType"`
-	CriticalIssues       int                    `json:"criticalIssues"`
-	Warnings             int                    `json:"warnings"`
-	AccessibilityScore   float64                `json:"accessibilityScore"`
-	PerformanceScore     float64                `json:"performanceScore"`
-	ThemeConsistencyScore float64               `json:"themeConsistencyScore"`
+	TotalValidations      int            `json:"totalValidations"`
+	PassedValidations     int            `json:"passedValidations"`
+	FailedValidations     int            `json:"failedValidations"`
+	ValidationsByType     map[string]int `json:"validationsByType"`
+	CriticalIssues        int            `json:"criticalIssues"`
+	Warnings              int            `json:"warnings"`
+	AccessibilityScore    float64        `json:"accessibilityScore"`
+	PerformanceScore      float64        `json:"performanceScore"`
+	ThemeConsistencyScore float64        `json:"themeConsistencyScore"`
 }
 
 // NewBuildIntegration creates a new build integration
@@ -275,9 +274,9 @@ func NewBuildIntegration() *BuildIntegration {
 		CacheTTL:              time.Hour * 24,
 		ValidationTimeout:     time.Minute * 10,
 		ConcurrentValidations: 4,
-		ReportPath:           "./validation-reports",
-		ExitOnFailure:        true,
-		Verbose:              false,
+		ReportPath:            "./validation-reports",
+		ExitOnFailure:         true,
+		Verbose:               false,
 	}
 
 	return &BuildIntegration{
@@ -377,7 +376,7 @@ func (bi *BuildIntegration) StartFileWatching() error {
 	for _, dir := range bi.config.WatchDirectories {
 		watcher := NewFileWatcher([]string{dir}, bi.config.WatchFileExtensions, bi.config.IgnorePatterns)
 		watcher.SetCallback(bi.onFileChanged)
-		
+
 		if err := watcher.Start(); err != nil {
 			return fmt.Errorf("failed to start file watcher for %s: %w", dir, err)
 		}
@@ -403,12 +402,12 @@ func (bi *BuildIntegration) onFileChanged(path string, event FileEvent) {
 
 	// Determine which validations to run based on file type
 	validations := bi.determineValidationsForFile(path)
-	
+
 	// Run validations asynchronously
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), bi.config.ValidationTimeout)
 		defer cancel()
-		
+
 		for _, validation := range validations {
 			if err := bi.runValidation(ctx, validation, path); err != nil {
 				fmt.Printf("Validation failed for %s: %v\n", path, err)
@@ -448,8 +447,8 @@ func (bi *BuildIntegration) RunPipeline(ctx context.Context, pipelineName string
 	start := time.Now()
 	summary := &BuildSummary{
 		TotalPipelines: 1,
-		StartTime:     start,
-		Metadata:      make(map[string]any),
+		StartTime:      start,
+		Metadata:       make(map[string]any),
 		Validations: ValidationSummary{
 			ValidationsByType: make(map[string]int),
 		},
@@ -462,7 +461,7 @@ func (bi *BuildIntegration) RunPipeline(ctx context.Context, pipelineName string
 
 	// Execute pipeline stages
 	results := make([]BuildResult, 0)
-	
+
 	if pipeline.Parallel {
 		results = bi.runStagesParallel(ctx, pipeline)
 	} else {
@@ -591,7 +590,7 @@ func (bi *BuildIntegration) runStage(ctx context.Context, pipeline *BuildPipelin
 // runCommand executes a build command
 func (bi *BuildIntegration) runCommand(ctx context.Context, pipeline *BuildPipeline, stage *BuildStage, command *BuildCommand) BuildResult {
 	start := time.Now()
-	
+
 	result := BuildResult{
 		Pipeline:  pipeline.Name,
 		Stage:     stage.Name,
@@ -641,7 +640,7 @@ func (bi *BuildIntegration) runCommand(ctx context.Context, pipeline *BuildPipel
 func (bi *BuildIntegration) runValidationCommand(ctx context.Context, command *BuildCommand, result BuildResult) BuildResult {
 	// Determine validation type from command
 	validationType := bi.getValidationTypeFromCommand(command)
-	
+
 	switch validationType {
 	case "component":
 		return bi.runComponentValidation(ctx, command, result)
@@ -661,7 +660,7 @@ func (bi *BuildIntegration) runValidationCommand(ctx context.Context, command *B
 // runComponentValidation runs component validation
 func (bi *BuildIntegration) runComponentValidation(ctx context.Context, command *BuildCommand, result BuildResult) BuildResult {
 	validator := NewComponentValidator()
-	
+
 	// Load component files from working directory
 	components, err := bi.loadComponentsFromDirectory(command.WorkingDir)
 	if err != nil {
@@ -695,7 +694,7 @@ func (bi *BuildIntegration) runComponentValidation(ctx context.Context, command 
 // runSchemaValidation runs schema validation
 func (bi *BuildIntegration) runSchemaValidation(ctx context.Context, command *BuildCommand, result BuildResult) BuildResult {
 	validator := NewSchemaValidator()
-	
+
 	// Load schema files
 	schemas, err := bi.loadSchemasFromDirectory(command.WorkingDir)
 	if err != nil {
@@ -707,7 +706,7 @@ func (bi *BuildIntegration) runSchemaValidation(ctx context.Context, command *Bu
 	// Validate each schema
 	allValid := true
 	errorCount := 0
-	
+
 	for _, schema := range schemas {
 		schemaResult := validator.ValidateSchema(schema)
 		if !schemaResult.Valid {
@@ -731,7 +730,7 @@ func (bi *BuildIntegration) runSchemaValidation(ctx context.Context, command *Bu
 
 func (bi *BuildIntegration) loadComponentsFromDirectory(dir string) ([]*ComponentInstance, error) {
 	components := make([]*ComponentInstance, 0)
-	
+
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -759,7 +758,7 @@ func (bi *BuildIntegration) loadComponentsFromDirectory(dir string) ([]*Componen
 
 func (bi *BuildIntegration) loadSchemasFromDirectory(dir string) ([]any, error) {
 	schemas := make([]any, 0)
-	
+
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -833,31 +832,31 @@ func (bi *BuildIntegration) shouldIgnoreFile(path string) bool {
 
 func (bi *BuildIntegration) isComponentFile(path string) bool {
 	ext := filepath.Ext(path)
-	return ext == ".templ" || ext == ".tsx" || ext == ".jsx" || 
-		   (ext == ".json" && strings.Contains(path, "component"))
+	return ext == ".templ" || ext == ".tsx" || ext == ".jsx" ||
+		(ext == ".json" && strings.Contains(path, "component"))
 }
 
 func (bi *BuildIntegration) isSchemaFile(path string) bool {
 	ext := filepath.Ext(path)
-	return (ext == ".json" || ext == ".yaml" || ext == ".yml") && 
-		   strings.Contains(strings.ToLower(path), "schema")
+	return (ext == ".json" || ext == ".yaml" || ext == ".yml") &&
+		strings.Contains(strings.ToLower(path), "schema")
 }
 
 func (bi *BuildIntegration) determineValidationsForFile(path string) []string {
 	validations := make([]string, 0)
-	
+
 	if bi.isComponentFile(path) {
 		validations = append(validations, "component", "accessibility")
 	}
-	
+
 	if bi.isSchemaFile(path) {
 		validations = append(validations, "schema")
 	}
-	
+
 	if strings.Contains(path, "theme") {
 		validations = append(validations, "theme")
 	}
-	
+
 	return validations
 }
 
@@ -882,18 +881,18 @@ func (bi *BuildIntegration) validateComponentFile(ctx context.Context, path stri
 	if err != nil {
 		return err
 	}
-	
+
 	if component == nil {
 		return nil // Not a component file
 	}
-	
+
 	validator := NewComponentValidator()
 	result := validator.ValidateComponent(component)
-	
+
 	if !result.Valid {
 		return fmt.Errorf("component validation failed: %d errors", len(result.Errors))
 	}
-	
+
 	return nil
 }
 
@@ -902,14 +901,14 @@ func (bi *BuildIntegration) validateSchemaFile(ctx context.Context, path string)
 	if err != nil {
 		return err
 	}
-	
+
 	validator := NewSchemaValidator()
 	result := validator.ValidateSchema(schema)
-	
+
 	if !result.Valid {
 		return fmt.Errorf("schema validation failed: %d errors", len(result.Errors))
 	}
-	
+
 	return nil
 }
 
@@ -935,20 +934,20 @@ func (bi *BuildIntegration) runTestingCommand(ctx context.Context, command *Buil
 
 func (bi *BuildIntegration) runGenericCommand(ctx context.Context, command *BuildCommand, result BuildResult) BuildResult {
 	cmd := exec.CommandContext(ctx, command.Command, command.Args...)
-	
+
 	if command.WorkingDir != "" {
 		cmd.Dir = command.WorkingDir
 	}
-	
+
 	// Set environment variables
 	cmd.Env = os.Environ()
 	for key, value := range command.Environment {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
 	}
-	
+
 	output, err := cmd.CombinedOutput()
 	result.Output = string(output)
-	
+
 	if err != nil {
 		result.Status = BuildStatusFailed
 		result.Error = err.Error()
@@ -959,7 +958,7 @@ func (bi *BuildIntegration) runGenericCommand(ctx context.Context, command *Buil
 		result.Status = BuildStatusSuccess
 		result.ExitCode = 0
 	}
-	
+
 	return result
 }
 
@@ -1056,7 +1055,7 @@ func (bi *BuildIntegration) generateCacheKey(pipeline, stage string, command *Bu
 func (bi *BuildIntegration) updateSummaryFromResults(summary *BuildSummary, results []BuildResult) {
 	for _, result := range results {
 		summary.TotalStages++
-		
+
 		switch result.Status {
 		case BuildStatusSuccess:
 			summary.SuccessStages++
@@ -1298,8 +1297,8 @@ func (br *BuildReporter) GenerateReport() error {
 
 	// Generate JSON report
 	reportData := map[string]any{
-		"summary": br.summary,
-		"results": br.results,
+		"summary":   br.summary,
+		"results":   br.results,
 		"timestamp": time.Now(),
 	}
 

@@ -392,7 +392,6 @@ func (p *Parser) ParseBatch(ctx context.Context, data [][]byte) []*ParseResult {
 	return results
 }
 
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Validation and Post-Processing
 // ═══════════════════════════════════════════════════════════════════════════
@@ -868,7 +867,6 @@ func (p *Parser) ClearCache() {
 // ═══════════════════════════════════════════════════════════════════════════
 // Metrics and Statistics
 // ═══════════════════════════════════════════════════════════════════════════
-
 
 func newParserStats() *ParserStats {
 	return &ParserStats{}

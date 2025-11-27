@@ -414,7 +414,6 @@ func (rf *RepeatableField) CalculateAggregates(items []map[string]any, aggregate
 	return calculator.Calculate(items, aggregates)
 }
 
-
 // aggregateCalculator calculates aggregate values
 type aggregateCalculator struct{}
 

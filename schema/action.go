@@ -26,22 +26,22 @@ type Action struct {
 	Hidden   bool `json:"hidden,omitempty"`
 
 	// Unified Configuration
-	Binding      *Binding       `json:"binding,omitempty"`
-	Conditional  *Conditional   `json:"conditional,omitempty"`
-	Permissions  []string       `json:"permissions,omitempty"`
-	Config       map[string]any `json:"config,omitempty"`
-	
+	Binding     *Binding       `json:"binding,omitempty"`
+	Conditional *Conditional   `json:"conditional,omitempty"`
+	Permissions []string       `json:"permissions,omitempty"`
+	Config      map[string]any `json:"config,omitempty"`
+
 	// Unified styling (replaces old Style []string and ActionTheme)
-	Style        *Style         `json:"style,omitempty"`
+	Style *Style `json:"style,omitempty"`
 
 	// Behavior and interaction (replaces HTMX/ActionHTMX)
-	Behavior     *Behavior      `json:"behavior,omitempty"`
-	
+	Behavior *Behavior `json:"behavior,omitempty"`
+
 	// Events
-	Events       *Events        `json:"events,omitempty"`
-	
+	Events *Events `json:"events,omitempty"`
+
 	// Legacy Support
-	Confirm     *ActionConfirm     `json:"confirm,omitempty"`
+	Confirm *ActionConfirm `json:"confirm,omitempty"`
 
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
@@ -198,12 +198,12 @@ func (a *Action) GetURL() string {
 	if a.Behavior != nil && a.Behavior.URL != "" {
 		return a.Behavior.URL
 	}
-	
+
 	// Try new Behavior field
 	if a.Behavior != nil && a.Behavior.URL != "" {
 		return a.Behavior.URL
 	}
-	
+
 	// Fall back to Config
 	if a.Type == ActionLink || a.Config != nil {
 		if url, ok := a.Config["url"].(string); ok {
@@ -219,14 +219,14 @@ func (a *Action) GetHTTPMethod() string {
 	if a.Behavior != nil && a.Behavior.Method != "" {
 		return a.Behavior.Method
 	}
-	
+
 	// Try Config
 	if a.Config != nil {
 		if method, ok := a.Config["method"].(string); ok && method != "" {
 			return method
 		}
 	}
-	
+
 	// Default based on action type
 	if a.Type == ActionSubmit {
 		return "POST"
@@ -318,7 +318,6 @@ func (a *Action) SetConfig(key string, value any) {
 	a.Config[key] = value
 }
 
-
 // GetConfigMap returns the action config map, initializing it if nil
 func (a *Action) GetConfigMap() map[string]any {
 	if a.Config == nil {
@@ -331,8 +330,6 @@ func (a *Action) GetConfigMap() map[string]any {
 func (a *Action) HasBehavior() bool {
 	return a != nil && a.Behavior != nil && !a.Behavior.IsEmpty()
 }
-
-
 
 // GetVariantClass returns CSS class based on variant
 func (a *Action) GetVariantClass() string {
@@ -537,8 +534,6 @@ func (b *ActionBuilder) WithPermissions(permissions []string) *ActionBuilder {
 	b.action.Permissions = permissions
 	return b
 }
-
-
 
 func (b *ActionBuilder) WithEvaluator(evaluator *condition.Evaluator) *ActionBuilder {
 	b.evaluator = evaluator

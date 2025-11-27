@@ -26,25 +26,25 @@ type S3Storage struct {
 func NewS3Storage(config S3Config) (*S3Storage, error) {
 	// Extract S3-specific configuration using unified config methods
 	client, bucket, keyPrefix := config.GetS3Config()
-	
+
 	if client == nil {
 		return nil, fmt.Errorf("S3 client is required")
 	}
 	if bucket == "" {
 		return nil, fmt.Errorf("S3 bucket name is required")
 	}
-	
+
 	// Type assert to S3 client
 	s3Client, ok := client.(*s3.Client)
 	if !ok {
 		return nil, fmt.Errorf("invalid S3 client type")
 	}
-	
+
 	// Ensure prefix ends with /
 	if !strings.HasSuffix(keyPrefix, "/") {
 		keyPrefix += "/"
 	}
-	
+
 	return &S3Storage{
 		client:    s3Client,
 		bucket:    bucket,

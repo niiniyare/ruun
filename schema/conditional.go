@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+
 	"github.com/niiniyare/ruun/pkg/condition"
 )
 
@@ -42,7 +43,7 @@ func (c *Conditional) HasStateConditions() bool {
 
 // ConditionalBuilder for fluent construction
 type ConditionalBuilder struct {
-	cond   Conditional
+	cond Conditional
 	*BuilderMixin
 }
 
@@ -95,13 +96,13 @@ func (b *ConditionalBuilder) Build() (*Conditional, error) {
 	if err := b.CheckBuild("Conditional"); err != nil {
 		return nil, err
 	}
-	
+
 	// Validate that at least one condition is set
 	if b.cond.IsEmpty() {
 		b.Context.AddError(fmt.Errorf("conditional must have at least one condition set"))
 		return nil, b.Context.CombinedError()
 	}
-	
+
 	return &b.cond, nil
 }
 
@@ -119,7 +120,7 @@ func (b *ConditionalBuilder) HasErrors() bool {
 	return b.Context.HasErrors()
 }
 
-// GetErrors implements BaseBuilder interface  
+// GetErrors implements BaseBuilder interface
 func (b *ConditionalBuilder) GetErrors() []error {
 	return b.Context.GetErrors()
 }

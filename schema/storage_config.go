@@ -28,25 +28,25 @@ func (sbt StorageBackendType) IsValid() bool {
 // UnifiedStorageConfig provides a comprehensive storage configuration system
 type UnifiedStorageConfig struct {
 	// Backend Configuration
-	Type     StorageBackendType `json:"type" validate:"required"`
-	Enabled  bool               `json:"enabled"`
-	
+	Type    StorageBackendType `json:"type" validate:"required"`
+	Enabled bool               `json:"enabled"`
+
 	// Common Storage Settings
-	KeyPrefix    string        `json:"keyPrefix,omitempty"`
-	TTL          time.Duration `json:"ttl,omitempty"`
-	Timeout      time.Duration `json:"timeout,omitempty"`
-	RetryCount   int           `json:"retryCount,omitempty"`
-	RetryDelay   time.Duration `json:"retryDelay,omitempty"`
-	
+	KeyPrefix  string        `json:"keyPrefix,omitempty"`
+	TTL        time.Duration `json:"ttl,omitempty"`
+	Timeout    time.Duration `json:"timeout,omitempty"`
+	RetryCount int           `json:"retryCount,omitempty"`
+	RetryDelay time.Duration `json:"retryDelay,omitempty"`
+
 	// Caching Configuration
 	Cache *CacheConfig `json:"cache,omitempty"`
-	
+
 	// Backend-specific settings (stored as map for flexibility)
 	BackendSettings map[string]any `json:"backendSettings,omitempty"`
-	
+
 	// Registry Features
 	Features *StorageFeatures `json:"features,omitempty"`
-	
+
 	// Connection and Performance
 	Connection *ConnectionConfig `json:"connection,omitempty"`
 }
@@ -64,26 +64,26 @@ type CacheConfig struct {
 
 // StorageFeatures defines what features are enabled
 type StorageFeatures struct {
-	ValidateOnStore    bool `json:"validateOnStore"`
-	ValidateOnLoad     bool `json:"validateOnLoad"`
-	EnableVersioning   bool `json:"enableVersioning"`
-	MaxVersions        int  `json:"maxVersions,omitempty"`
-	EnableEvents       bool `json:"enableEvents"`
-	EnableMetrics      bool `json:"enableMetrics"`
-	EnableCompression  bool `json:"enableCompression"`
-	EnableEncryption   bool `json:"enableEncryption"`
-	EnableReplication  bool `json:"enableReplication"`
-	EnableSharding     bool `json:"enableSharding"`
+	ValidateOnStore   bool `json:"validateOnStore"`
+	ValidateOnLoad    bool `json:"validateOnLoad"`
+	EnableVersioning  bool `json:"enableVersioning"`
+	MaxVersions       int  `json:"maxVersions,omitempty"`
+	EnableEvents      bool `json:"enableEvents"`
+	EnableMetrics     bool `json:"enableMetrics"`
+	EnableCompression bool `json:"enableCompression"`
+	EnableEncryption  bool `json:"enableEncryption"`
+	EnableReplication bool `json:"enableReplication"`
+	EnableSharding    bool `json:"enableSharding"`
 }
 
 // ConnectionConfig defines connection settings
 type ConnectionConfig struct {
-	MaxConnections     int           `json:"maxConnections,omitempty"`
-	ConnectionTimeout  time.Duration `json:"connectionTimeout,omitempty"`
-	IdleTimeout        time.Duration `json:"idleTimeout,omitempty"`
-	MaxRetries         int           `json:"maxRetries,omitempty"`
+	MaxConnections      int           `json:"maxConnections,omitempty"`
+	ConnectionTimeout   time.Duration `json:"connectionTimeout,omitempty"`
+	IdleTimeout         time.Duration `json:"idleTimeout,omitempty"`
+	MaxRetries          int           `json:"maxRetries,omitempty"`
 	HealthCheckInterval time.Duration `json:"healthCheckInterval,omitempty"`
-	EnablePooling      bool          `json:"enablePooling,omitempty"`
+	EnablePooling       bool          `json:"enablePooling,omitempty"`
 }
 
 // Backend-specific configuration helpers
@@ -167,15 +167,15 @@ func (usc *UnifiedStorageConfig) Validate() error {
 	if !usc.Type.IsValid() {
 		return fmt.Errorf("invalid storage backend type: %s", usc.Type)
 	}
-	
+
 	if usc.RetryCount < 0 {
 		return fmt.Errorf("retry count cannot be negative")
 	}
-	
+
 	if usc.Features != nil && usc.Features.MaxVersions < 0 {
 		return fmt.Errorf("max versions cannot be negative")
 	}
-	
+
 	// Backend-specific validation
 	switch usc.Type {
 	case StorageBackendRedis:
@@ -197,7 +197,7 @@ func (usc *UnifiedStorageConfig) Validate() error {
 			return fmt.Errorf("base path is required for file backend")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -241,9 +241,9 @@ func (usc *UnifiedStorageConfig) Clone() *UnifiedStorageConfig {
 	if usc == nil {
 		return nil
 	}
-	
+
 	clone := *usc
-	
+
 	// Deep copy maps
 	if usc.BackendSettings != nil {
 		clone.BackendSettings = make(map[string]any)
@@ -251,23 +251,23 @@ func (usc *UnifiedStorageConfig) Clone() *UnifiedStorageConfig {
 			clone.BackendSettings[k] = v
 		}
 	}
-	
+
 	// Deep copy nested structs
 	if usc.Cache != nil {
 		cacheCopy := *usc.Cache
 		clone.Cache = &cacheCopy
 	}
-	
+
 	if usc.Features != nil {
 		featuresCopy := *usc.Features
 		clone.Features = &featuresCopy
 	}
-	
+
 	if usc.Connection != nil {
 		connectionCopy := *usc.Connection
 		clone.Connection = &connectionCopy
 	}
-	
+
 	return &clone
 }
 
@@ -367,12 +367,12 @@ func (b *StorageConfigBuilder) Build() (*UnifiedStorageConfig, error) {
 	if err := b.CheckBuild("StorageConfig"); err != nil {
 		return nil, err
 	}
-	
+
 	// Validate the configuration
 	if err := b.config.Validate(); err != nil {
 		return nil, fmt.Errorf("storage config validation failed: %w", err)
 	}
-	
+
 	return b.config.Clone(), nil
 }
 
@@ -430,7 +430,7 @@ func NewFileStorageConfig(basePath string) *StorageConfigBuilder {
 // NewMemoryStorageConfig creates memory storage configuration
 func NewMemoryStorageConfig() *StorageConfigBuilder {
 	return NewStorageConfig(StorageBackendMemory).
-		WithTTL(1 * time.Hour).
+		WithTTL(1*time.Hour).
 		WithCaching(5*time.Minute, 15*time.Minute)
 }
 
@@ -517,7 +517,7 @@ func (usc *UnifiedStorageConfig) EnableStorage() bool {
 
 // StorageType field getter
 func (usc *UnifiedStorageConfig) StorageType() string {
-	return usc.GetStorageType()  
+	return usc.GetStorageType()
 }
 
 // And so on for other fields...
@@ -547,7 +547,7 @@ func (lrc *LegacyRegistryConfig) ToUnifiedConfig() *UnifiedStorageConfig {
 		Type:    StorageBackendType(lrc.StorageType),
 		Enabled: lrc.EnableStorage,
 	}
-	
+
 	if lrc.EnableMemoryCache || lrc.EnableDistributedCache {
 		config.Cache = &CacheConfig{
 			EnableMemoryCache:      lrc.EnableMemoryCache,
@@ -557,9 +557,9 @@ func (lrc *LegacyRegistryConfig) ToUnifiedConfig() *UnifiedStorageConfig {
 			DistributedCacheTTL:    lrc.DistributedCacheTTL,
 		}
 	}
-	
-	if lrc.ValidateOnStore || lrc.ValidateOnLoad || lrc.EnableVersioning || 
-		 lrc.EnableEvents || lrc.EnableMetrics {
+
+	if lrc.ValidateOnStore || lrc.ValidateOnLoad || lrc.EnableVersioning ||
+		lrc.EnableEvents || lrc.EnableMetrics {
 		config.Features = &StorageFeatures{
 			ValidateOnStore:  lrc.ValidateOnStore,
 			ValidateOnLoad:   lrc.ValidateOnLoad,
@@ -569,7 +569,7 @@ func (lrc *LegacyRegistryConfig) ToUnifiedConfig() *UnifiedStorageConfig {
 			EnableMetrics:    lrc.EnableMetrics,
 		}
 	}
-	
+
 	return config
 }
 
@@ -579,7 +579,7 @@ func (usc *UnifiedStorageConfig) ToLegacyConfig() *LegacyRegistryConfig {
 		EnableStorage: usc.Enabled,
 		StorageType:   string(usc.Type),
 	}
-	
+
 	if usc.Cache != nil {
 		legacy.EnableMemoryCache = usc.Cache.EnableMemoryCache
 		legacy.MemoryCacheTTL = usc.Cache.MemoryCacheTTL
@@ -587,7 +587,7 @@ func (usc *UnifiedStorageConfig) ToLegacyConfig() *LegacyRegistryConfig {
 		legacy.EnableDistributedCache = usc.Cache.EnableDistributedCache
 		legacy.DistributedCacheTTL = usc.Cache.DistributedCacheTTL
 	}
-	
+
 	if usc.Features != nil {
 		legacy.ValidateOnStore = usc.Features.ValidateOnStore
 		legacy.ValidateOnLoad = usc.Features.ValidateOnLoad
@@ -596,11 +596,11 @@ func (usc *UnifiedStorageConfig) ToLegacyConfig() *LegacyRegistryConfig {
 		legacy.EnableEvents = usc.Features.EnableEvents
 		legacy.EnableMetrics = usc.Features.EnableMetrics
 	}
-	
+
 	return legacy
 }
 
 // Backward compatibility type aliases
 type RedisConfig = UnifiedStorageConfig
-type S3Config = UnifiedStorageConfig  
+type S3Config = UnifiedStorageConfig
 type RegistryConfig = LegacyRegistryConfig // Use legacy struct for now

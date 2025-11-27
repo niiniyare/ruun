@@ -43,8 +43,8 @@ type Schema struct {
 	I18n       *I18nManager `json:"i18n,omitempty"`
 
 	// Framework Integration
-	Behavior *Behavior `json:"htmx,omitempty"`   // Backward compatibility with 'htmx' json tag
-	Binding  *Binding  `json:"alpine,omitempty"` // Backward compatibility with 'alpine' json tag
+	Behavior *Behavior `json:"behavior,omitempty"` // Unified behavior (HTMX, API, etc.)
+	Binding  *Binding  `json:"binding,omitempty"`  // Unified data binding (Alpine.js, Vue, etc.)
 
 	// Metadata
 	Meta     *Meta    `json:"meta,omitempty"`
@@ -82,6 +82,14 @@ func (s *Schema) AddField(field Field) {
 	s.fieldIndex[field.Name] = len(s.Fields) - 1
 }
 
+// AddAction adds an action to the schema
+func (s *Schema) AddAction(action Action) {
+	s.Actions = append(s.Actions, action)
+	if s.actionIndex == nil {
+		s.actionIndex = make(map[string]int)
+	}
+	s.actionIndex[action.ID] = len(s.Actions) - 1
+}
 
 // )
 // SchemaInfo provides read-only access to schema metadata
@@ -387,20 +395,20 @@ func (s *Schema) ApplySchemaI18nLocalization(schemaI18n *SchemaI18n, locale stri
 	if schemaI18n == nil {
 		return s, nil
 	}
-	
+
 	// Create a copy of the schema to modify
 	localized := *s
-	
+
 	// Apply localized title
 	if title, ok := schemaI18n.Title[locale]; ok && title != "" {
 		localized.Title = title
 	}
-	
+
 	// Apply localized description
 	if desc, ok := schemaI18n.Description[locale]; ok && desc != "" {
 		localized.Description = desc
 	}
-	
+
 	return &localized, nil
 }
 

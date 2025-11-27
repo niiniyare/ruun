@@ -2,7 +2,7 @@
 //
 // This package includes:
 //   - Component validation (props, types, composition)
-//   - Schema validation for forms, themes, and configurations  
+//   - Schema validation for forms, themes, and configurations
 //   - Accessibility validation (ARIA, contrast, keyboard nav)
 //   - Performance validation (bundle size, render time)
 //   - Theme validation (token usage, consistency)
@@ -62,11 +62,11 @@
 //		},
 //	}
 //	buildIntegration.AddPipeline(pipeline)
-//
 package validation
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -76,59 +76,59 @@ const Version = "1.0.0"
 
 // ValidationSuite provides a unified interface for all validation functionality
 type ValidationSuite struct {
-	engine         *ValidationEngine
-	componentValidator *ComponentValidator
-	schemaValidator    *SchemaValidator
-	a11yValidator      *AccessibilityValidator
+	engine               *ValidationEngine
+	componentValidator   *ComponentValidator
+	schemaValidator      *SchemaValidator
+	a11yValidator        *AccessibilityValidator
 	performanceValidator *PerformanceValidator
-	themeValidator     *ThemeValidator
-	runtimeValidator   *RuntimeValidator
-	testFramework      *TestFramework
-	buildIntegration   *BuildIntegration
-	config            ValidationSuiteConfig
+	themeValidator       *ThemeValidator
+	runtimeValidator     *RuntimeValidator
+	testFramework        *TestFramework
+	buildIntegration     *BuildIntegration
+	config               ValidationSuiteConfig
 }
 
 // ValidationSuiteConfig configures the validation suite
 type ValidationSuiteConfig struct {
 	// Core validation options
 	ValidationOptions ValidationOptions `json:"validationOptions"`
-	
+
 	// Component validation
-	EnableComponentValidation bool `json:"enableComponentValidation"`
-	ComponentSchemas         map[string]*ComponentSchema `json:"componentSchemas,omitempty"`
-	
+	EnableComponentValidation bool                        `json:"enableComponentValidation"`
+	ComponentSchemas          map[string]*ComponentSchema `json:"componentSchemas,omitempty"`
+
 	// Schema validation
-	EnableSchemaValidation bool `json:"enableSchemaValidation"`
-	SchemaFormats         []string `json:"schemaFormats,omitempty"`
-	
+	EnableSchemaValidation bool     `json:"enableSchemaValidation"`
+	SchemaFormats          []string `json:"schemaFormats,omitempty"`
+
 	// Accessibility validation
-	EnableA11yValidation bool `json:"enableA11yValidation"`
-	A11yConfig          A11yConfig `json:"a11yConfig"`
-	
+	EnableA11yValidation bool       `json:"enableA11yValidation"`
+	A11yConfig           A11yConfig `json:"a11yConfig"`
+
 	// Performance validation
-	EnablePerformanceValidation bool `json:"enablePerformanceValidation"`
-	PerformanceConfig          PerformanceConfig `json:"performanceConfig"`
-	
+	EnablePerformanceValidation bool              `json:"enablePerformanceValidation"`
+	PerformanceConfig           PerformanceConfig `json:"performanceConfig"`
+
 	// Theme validation
-	EnableThemeValidation bool `json:"enableThemeValidation"`
-	ThemeConfig          ThemeValidationConfig `json:"themeConfig"`
-	
+	EnableThemeValidation bool                  `json:"enableThemeValidation"`
+	ThemeConfig           ThemeValidationConfig `json:"themeConfig"`
+
 	// Runtime validation
-	EnableRuntimeValidation bool `json:"enableRuntimeValidation"`
-	RuntimeConfig          RuntimeValidationConfig `json:"runtimeConfig"`
-	
+	EnableRuntimeValidation bool                    `json:"enableRuntimeValidation"`
+	RuntimeConfig           RuntimeValidationConfig `json:"runtimeConfig"`
+
 	// Testing
-	EnableTesting bool `json:"enableTesting"`
-	TestConfig   TestFrameworkConfig `json:"testConfig"`
-	
+	EnableTesting bool                `json:"enableTesting"`
+	TestConfig    TestFrameworkConfig `json:"testConfig"`
+
 	// Build integration
-	EnableBuildIntegration bool `json:"enableBuildIntegration"`
-	BuildConfig           BuildIntegrationConfig `json:"buildConfig"`
-	
+	EnableBuildIntegration bool                   `json:"enableBuildIntegration"`
+	BuildConfig            BuildIntegrationConfig `json:"buildConfig"`
+
 	// Global settings
-	CacheEnabled   bool          `json:"cacheEnabled"`
+	CacheEnabled  bool          `json:"cacheEnabled"`
 	CacheTTL      time.Duration `json:"cacheTTL"`
-	LogLevel      string        `json:"logLevel"` // debug, info, warn, error
+	LogLevel      string        `json:"logLevel"`      // debug, info, warn, error
 	ReportFormats []string      `json:"reportFormats"` // json, html, junit
 	OutputPath    string        `json:"outputPath"`
 }
@@ -207,7 +207,7 @@ func DefaultValidationSuiteConfig() ValidationSuiteConfig {
 			EnableA11y:        true,
 			EnableTheme:       true,
 			EnablePerformance: true,
-			Timeout:          time.Minute * 5,
+			Timeout:           time.Minute * 5,
 		},
 		EnableComponentValidation:   true,
 		EnableSchemaValidation:      true,
@@ -215,7 +215,7 @@ func DefaultValidationSuiteConfig() ValidationSuiteConfig {
 		EnablePerformanceValidation: true,
 		EnableThemeValidation:       true,
 		EnableRuntimeValidation:     true,
-		EnableTesting:              true,
+		EnableTesting:               true,
 		EnableBuildIntegration:      false, // Disabled by default
 		A11yConfig: A11yConfig{
 			Level:     A11yLevelAA,
@@ -227,10 +227,10 @@ func DefaultValidationSuiteConfig() ValidationSuiteConfig {
 			},
 		},
 		PerformanceConfig: PerformanceConfig{
-			EnableBundleSize:   true,
-			EnableRenderTime:   true,
-			EnableMemoryUsage:  true,
-			EnableComplexity:   true,
+			EnableBundleSize:  true,
+			EnableRenderTime:  true,
+			EnableMemoryUsage: true,
+			EnableComplexity:  true,
 			Thresholds: PerformanceThresholds{
 				MaxBundleSize:  5 * 1024 * 1024, // 5MB
 				MaxRenderTime:  time.Millisecond * 100,
@@ -239,29 +239,29 @@ func DefaultValidationSuiteConfig() ValidationSuiteConfig {
 			},
 		},
 		ThemeConfig: ThemeValidationConfig{
-			RequireConsistency:  true,
-			CheckTokenUsage:     true,
+			RequireConsistency:   true,
+			CheckTokenUsage:      true,
 			ValidateCompleteness: true,
-			CheckAccessibility:  true,
-			ValidatePerformance: true,
-			MinContrastRatio:   4.5,
-			MaxTokenCount:      500,
-			RequiredCategories: []string{"colors", "spacing", "typography"},
+			CheckAccessibility:   true,
+			ValidatePerformance:  true,
+			MinContrastRatio:     4.5,
+			MaxTokenCount:        500,
+			RequiredCategories:   []string{"colors", "spacing", "typography"},
 		},
 		RuntimeConfig: RuntimeValidationConfig{
 			EnableInputValidation: true,
 			EnableAPIValidation:   true,
 			EnableSanitization:    true,
-			EnableRateLimit:      true,
-			EnableCaching:        true,
-			ValidationTimeout:    time.Second * 5,
+			EnableRateLimit:       true,
+			EnableCaching:         true,
+			ValidationTimeout:     time.Second * 5,
 		},
 		TestConfig: TestFrameworkConfig{
 			EnableParallelExecution: true,
 			EnableBenchmarking:      true,
 			EnableCoverage:          true,
-			TestTimeout:            time.Minute * 5,
-			ReportFormat:           "json",
+			TestTimeout:             time.Minute * 5,
+			ReportFormat:            "json",
 		},
 		BuildConfig: BuildIntegrationConfig{
 			EnableFileWatching:   true,
@@ -272,10 +272,10 @@ func DefaultValidationSuiteConfig() ValidationSuiteConfig {
 			ValidationTimeout:    time.Minute * 10,
 		},
 		CacheEnabled:  true,
-		CacheTTL:     time.Hour,
-		LogLevel:     "info",
+		CacheTTL:      time.Hour,
+		LogLevel:      "info",
 		ReportFormats: []string{"json", "html"},
-		OutputPath:   "./validation-reports",
+		OutputPath:    "./validation-reports",
 	}
 }
 
@@ -346,12 +346,12 @@ func (suite *ValidationSuite) ValidateAll(ctx context.Context, data any) (*Compr
 
 // ComprehensiveValidationResult contains results from all validators
 type ComprehensiveValidationResult struct {
-	Overall   bool                            `json:"overall"`
-	Results   map[string]*ValidationResult    `json:"results"`
-	StartTime time.Time                      `json:"startTime"`
-	EndTime   time.Time                      `json:"endTime"`
-	Duration  time.Duration                  `json:"duration"`
-	Metadata  map[string]any         `json:"metadata"`
+	Overall   bool                         `json:"overall"`
+	Results   map[string]*ValidationResult `json:"results"`
+	StartTime time.Time                    `json:"startTime"`
+	EndTime   time.Time                    `json:"endTime"`
+	Duration  time.Duration                `json:"duration"`
+	Metadata  map[string]any               `json:"metadata"`
 }
 
 // ValidateComponent validates a component using the component validator
@@ -607,7 +607,7 @@ func ValidateTheme(ctx context.Context, theme any) (*ThemeValidationResult, erro
 func QuickValidate(ctx context.Context, data any) (*ComprehensiveValidationResult, error) {
 	config := DefaultValidationSuiteConfig()
 	config.EnableBuildIntegration = false // Disable for quick validation
-	
+
 	suite := NewValidationSuite(config)
 	return suite.ValidateAll(ctx, data)
 }

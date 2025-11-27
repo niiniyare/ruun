@@ -184,11 +184,11 @@ func (suite *ActionTestSuite) TestActionUnifiedConfig() {
 	}
 	suite.Require().True(action.Behavior.IsDebounced())
 	suite.Require().True(action.Behavior.IsThrottled())
-	
+
 	// Test unified binding configuration
 	action.Binding = &Binding{
 		On: map[string]string{
-			"click": "handleClick()",
+			"click":  "handleClick()",
 			"submit": "handleSubmit()",
 		},
 	}
@@ -446,9 +446,18 @@ func (suite *ActionTestSuite) TestActionWithConditions() {
 		Text: "Conditional Button",
 		Conditional: &Conditional{
 			Show: &condition.ConditionGroup{
-				Operator: condition.OperatorAnd,
-				Conditions: []*condition.Condition{
-					{Field: "user_role", Operator: condition.OperatorEquals, Value: "admin"},
+				ID:          "show-condition",
+				Conjunction: condition.ConjunctionAnd,
+				Children: []any{
+					&condition.ConditionRule{
+						ID: "user-role-check",
+						Left: condition.Expression{
+							Type:  condition.ValueTypeField,
+							Field: "user_role",
+						},
+						Op:    condition.OpEqual,
+						Right: "admin",
+					},
 				},
 			},
 		},
@@ -692,10 +701,27 @@ func (suite *ActionTestSuite) TestActionBuilder() {
 	// Test WithCondition
 	conditions := &Conditional{
 		Show: &condition.ConditionGroup{
-			Operator: condition.OperatorAnd,
-			Conditions: []*condition.Condition{
-				{Field: "user.role", Operator: condition.OperatorEquals, Value: "admin"},
-				{Field: "user.active", Operator: condition.OperatorEquals, Value: true},
+			ID:          "show-condition",
+			Conjunction: condition.ConjunctionAnd,
+			Children: []any{
+				&condition.ConditionRule{
+					ID: "user-role-check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "user.role",
+					},
+					Op:    condition.OpEqual,
+					Right: "admin",
+				},
+				&condition.ConditionRule{
+					ID: "user-active-check",
+					Left: condition.Expression{
+						Type:  condition.ValueTypeField,
+						Field: "user.active",
+					},
+					Op:    condition.OpEqual,
+					Right: true,
+				},
 			},
 		},
 	}

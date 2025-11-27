@@ -14,7 +14,7 @@ type SchemaBuilder struct {
 	schema            *Schema
 	evaluator         *condition.Evaluator
 	mixins            *MixinRegistry
-	mixinSupport      *MixinRegistry           // Alias for backward compatibility
+	mixinSupport      *MixinRegistry // Alias for backward compatibility
 	ruleEngine        *BusinessRuleEngine
 	validatorRegistry *ValidationRegistry
 	errors            []error

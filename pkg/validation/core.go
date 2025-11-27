@@ -2,11 +2,7 @@ package validation
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"reflect"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -21,40 +17,40 @@ const (
 
 // ValidationResult represents the outcome of a validation operation
 type ValidationResult struct {
-	Valid        bool                       `json:"valid"`
-	Level        ValidationLevel           `json:"level"`
-	Errors       []ValidationError         `json:"errors,omitempty"`
-	Warnings     []ValidationWarning       `json:"warnings,omitempty"`
-	Performance  *PerformanceMetrics       `json:"performance,omitempty"`
-	Accessibility *AccessibilityResult     `json:"accessibility,omitempty"`
-	Theme        *ThemeValidationResult    `json:"theme,omitempty"`
-	Metadata     map[string]any    `json:"metadata,omitempty"`
-	Timestamp    time.Time                 `json:"timestamp"`
+	Valid         bool                   `json:"valid"`
+	Level         ValidationLevel        `json:"level"`
+	Errors        []ValidationError      `json:"errors,omitempty"`
+	Warnings      []ValidationWarning    `json:"warnings,omitempty"`
+	Performance   *PerformanceMetrics    `json:"performance,omitempty"`
+	Accessibility *AccessibilityResult   `json:"accessibility,omitempty"`
+	Theme         *ThemeValidationResult `json:"theme,omitempty"`
+	Metadata      map[string]any         `json:"metadata,omitempty"`
+	Timestamp     time.Time              `json:"timestamp"`
 }
 
 // ValidationError represents a validation error
 type ValidationError struct {
-	Code       string                 `json:"code"`
-	Message    string                 `json:"message"`
-	Field      string                 `json:"field,omitempty"`
-	Component  string                 `json:"component,omitempty"`
-	Level      ValidationLevel        `json:"level"`
-	Source     string                 `json:"source"`
-	Location   *SourceLocation        `json:"location,omitempty"`
-	Suggestion string                 `json:"suggestion,omitempty"`
-	Details    map[string]any `json:"details,omitempty"`
-	Timestamp  time.Time             `json:"timestamp"`
+	Code       string          `json:"code"`
+	Message    string          `json:"message"`
+	Field      string          `json:"field,omitempty"`
+	Component  string          `json:"component,omitempty"`
+	Level      ValidationLevel `json:"level"`
+	Source     string          `json:"source"`
+	Location   *SourceLocation `json:"location,omitempty"`
+	Suggestion string          `json:"suggestion,omitempty"`
+	Details    map[string]any  `json:"details,omitempty"`
+	Timestamp  time.Time       `json:"timestamp"`
 }
 
 // ValidationWarning represents a validation warning
 type ValidationWarning struct {
-	Code      string                 `json:"code"`
-	Message   string                 `json:"message"`
-	Field     string                 `json:"field,omitempty"`
-	Component string                 `json:"component,omitempty"`
-	Source    string                 `json:"source"`
-	Location  *SourceLocation        `json:"location,omitempty"`
-	Details   map[string]any `json:"details,omitempty"`
+	Code      string          `json:"code"`
+	Message   string          `json:"message"`
+	Field     string          `json:"field,omitempty"`
+	Component string          `json:"component,omitempty"`
+	Source    string          `json:"source"`
+	Location  *SourceLocation `json:"location,omitempty"`
+	Details   map[string]any  `json:"details,omitempty"`
 }
 
 // SourceLocation represents the location where validation occurred
@@ -68,37 +64,37 @@ type SourceLocation struct {
 // ValidationContext provides context for validation operations
 type ValidationContext struct {
 	ctx       context.Context
-	Level     ValidationLevel           `json:"level"`
-	Component string                   `json:"component,omitempty"`
-	Source    string                   `json:"source"`
-	Metadata  map[string]any   `json:"metadata,omitempty"`
-	Rules     []ValidationRule         `json:"rules,omitempty"`
-	Options   ValidationOptions        `json:"options"`
+	Level     ValidationLevel   `json:"level"`
+	Component string            `json:"component,omitempty"`
+	Source    string            `json:"source"`
+	Metadata  map[string]any    `json:"metadata,omitempty"`
+	Rules     []ValidationRule  `json:"rules,omitempty"`
+	Options   ValidationOptions `json:"options"`
 }
 
 // ValidationOptions configure validation behavior
 type ValidationOptions struct {
-	StrictMode       bool     `json:"strictMode"`
-	SkipWarnings     bool     `json:"skipWarnings"`
-	EnableMetrics    bool     `json:"enableMetrics"`
-	EnableA11y       bool     `json:"enableA11y"`
-	EnableTheme      bool     `json:"enableTheme"`
-	EnablePerformance bool    `json:"enablePerformance"`
-	CustomRules      []string `json:"customRules,omitempty"`
-	ExcludeRules     []string `json:"excludeRules,omitempty"`
-	Timeout          time.Duration `json:"timeout,omitempty"`
+	StrictMode        bool          `json:"strictMode"`
+	SkipWarnings      bool          `json:"skipWarnings"`
+	EnableMetrics     bool          `json:"enableMetrics"`
+	EnableA11y        bool          `json:"enableA11y"`
+	EnableTheme       bool          `json:"enableTheme"`
+	EnablePerformance bool          `json:"enablePerformance"`
+	CustomRules       []string      `json:"customRules,omitempty"`
+	ExcludeRules      []string      `json:"excludeRules,omitempty"`
+	Timeout           time.Duration `json:"timeout,omitempty"`
 }
 
 // ValidationRule defines a validation rule
 type ValidationRule struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Category    string                 `json:"category"` // component, schema, accessibility, performance, theme
-	Level       ValidationLevel        `json:"level"`
-	Enabled     bool                  `json:"enabled"`
-	Config      map[string]any `json:"config,omitempty"`
-	Validator   Validator             `json:"-"`
+	ID          string          `json:"id"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Category    string          `json:"category"` // component, schema, accessibility, performance, theme
+	Level       ValidationLevel `json:"level"`
+	Enabled     bool            `json:"enabled"`
+	Config      map[string]any  `json:"config,omitempty"`
+	Validator   Validator       `json:"-"`
 }
 
 // Validator interface for custom validation logic
@@ -275,18 +271,18 @@ func (e *ValidationEngine) GetValidationReport() *ValidationReport {
 
 // ValidationReport contains comprehensive validation information
 type ValidationReport struct {
-	Engine    *ValidationEngine    `json:"-"`
-	Timestamp time.Time           `json:"timestamp"`
-	Rules     []ValidationRule    `json:"rules"`
-	Stats     ValidationStats     `json:"stats"`
+	Engine    *ValidationEngine `json:"-"`
+	Timestamp time.Time         `json:"timestamp"`
+	Rules     []ValidationRule  `json:"rules"`
+	Stats     ValidationStats   `json:"stats"`
 }
 
 // ValidationStats contains validation statistics
 type ValidationStats struct {
-	TotalRules    int                    `json:"totalRules"`
-	EnabledRules  int                    `json:"enabledRules"`
-	Categories    map[string]int         `json:"categories"`
-	Levels        map[ValidationLevel]int `json:"levels"`
+	TotalRules   int                     `json:"totalRules"`
+	EnabledRules int                     `json:"enabledRules"`
+	Categories   map[string]int          `json:"categories"`
+	Levels       map[ValidationLevel]int `json:"levels"`
 }
 
 // Helper methods

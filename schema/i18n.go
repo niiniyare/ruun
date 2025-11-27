@@ -14,30 +14,27 @@ import (
 
 // I18nManager manages translations for the application
 type I18nManager struct {
-	config       *I18nConfig
-	translations map[string]*Translation // locale -> translation
+	config        *I18nConfig
+	translations  map[string]*Translation // locale -> translation
 	currentLocale string                  // current active locale
-	mu           sync.RWMutex
+	mu            sync.RWMutex
 
 	// Public fields for backward compatibility
 	Enabled          bool     `json:"enabled"`
 	DefaultLocale    string   `json:"defaultLocale"`
 	SupportedLocales []string `json:"supportedLocales"`
-	
+
 	// Direct message access for testing
 	messages map[string]map[string]string
 }
 
-
 // Translation holds translations for a single locale
 type Translation struct {
-	Locale       string                 `json:"locale"`
+	Locale       string         `json:"locale"`
 	Translations map[string]any `json:"translations"`
 	metadata     *TranslationMetadata
 	mu           sync.RWMutex
 }
-
-
 
 // NewI18nManager creates a new i18n manager
 func NewI18nManager(config *I18nConfig) *I18nManager {
@@ -284,7 +281,7 @@ func (m *I18nManager) GetSupportedLocales() []string {
 func (m *I18nManager) SetLocale(locale string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.currentLocale = locale
 }
 
@@ -292,7 +289,7 @@ func (m *I18nManager) SetLocale(locale string) {
 func (m *I18nManager) GetLocale() string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	if m.currentLocale != "" {
 		return m.currentLocale
 	}
@@ -315,10 +312,10 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 					"ok":     "OK",
 				},
 				"validation": map[string]any{
-					"required":       "{{.field}} is required",
-					"min_length":     "{{.field}} must be at least {{.min}} characters",
-					"invalid_email":  "Please enter a valid email address",
-					"invalid_range":  "{{.field}} must be between {{.min}} and {{.max}}",
+					"required":      "{{.field}} is required",
+					"min_length":    "{{.field}} must be at least {{.min}} characters",
+					"invalid_email": "Please enter a valid email address",
+					"invalid_range": "{{.field}} must be between {{.min}} and {{.max}}",
 				},
 				"actions": map[string]any{
 					"save":   "Save",
@@ -332,7 +329,7 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 					"loading":      "Loading...",
 				},
 			}
-			
+
 			// Add Spanish translations
 			if locale == "es" {
 				translations = map[string]any{
@@ -342,10 +339,10 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 						"ok":     "OK",
 					},
 					"validation": map[string]any{
-						"required":       "{{.field}} es requerido",
-						"min_length":     "{{.field}} debe tener al menos {{.min}} caracteres",
-						"invalid_email":  "Por favor ingresa una dirección de correo válida",
-						"invalid_range":  "{{.field}} debe estar entre {{.min}} y {{.max}}",
+						"required":      "{{.field}} es requerido",
+						"min_length":    "{{.field}} debe tener al menos {{.min}} caracteres",
+						"invalid_email": "Por favor ingresa una dirección de correo válida",
+						"invalid_range": "{{.field}} debe estar entre {{.min}} y {{.max}}",
 					},
 					"actions": map[string]any{
 						"save":   "Guardar",
@@ -360,7 +357,7 @@ func (m *I18nManager) LoadDefaultTranslations() error {
 					},
 				}
 			}
-			
+
 			m.translations[locale] = &Translation{
 				Locale:       locale,
 				Translations: translations,
