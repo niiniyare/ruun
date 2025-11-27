@@ -1,0 +1,219 @@
+/* ==========================================================================
+   Divider Component
+   ========================================================================== */
+
+/**
+ * Divider
+ *
+ * A horizontal or vertical line separator with optional centered label
+ *
+ * Example:
+ *   <div class="divider"></div>
+ *   
+ *   <div class="divider">
+ *     <span class="divider-label">OR</span>
+ *   </div>
+ *   
+ *   <div class="divider divider-vertical"></div>
+ */
+
+/* Base
+   ========================================================================== */
+
+/**
+ * 1. Flex container for label positioning
+ * 2. Full width by default
+ * 3. Ensure minimum height for visibility
+ * 4. Position relative for pseudo-element positioning
+ * 5. Center content
+ */
+
+.divider {
+  display: flex; /* 1 */
+  width: 100%; /* 2 */
+  min-height: 1px; /* 3 */
+  position: relative; /* 4 */
+  align-items: center; /* 5 */
+  justify-content: center; /* 5 */
+  color: var(--color-border);
+}
+
+/**
+ * Horizontal line
+ * 1. Full width pseudo-element creates the line
+ * 2. Position behind content
+ * 3. Use border color from theme
+ */
+
+.divider::before {
+  content: ''; /* 1 */
+  position: absolute; /* 1 */
+  top: 50%; /* 1 */
+  left: 0; /* 1 */
+  right: 0; /* 1 */
+  height: 1px; /* 1 */
+  background-color: currentColor; /* 3 */
+  transform: translateY(-50%); /* 1 */
+}
+
+/* Parts
+   ========================================================================== */
+
+/**
+ * Divider label
+ * 1. Position above the line
+ * 2. Add horizontal padding
+ * 3. Match background to page
+ * 4. Use muted text color
+ * 5. Smaller text size
+ */
+
+.divider-label {
+  position: relative; /* 1 */
+  z-index: 1; /* 1 */
+  padding: 0 1rem; /* 2 */
+  background-color: var(--color-background); /* 3 */
+  color: var(--color-muted-foreground); /* 4 */
+  font-size: 0.875rem; /* 5 */
+  line-height: 1.25rem; /* 5 */
+  white-space: nowrap;
+}
+
+/* Variants
+   ========================================================================== */
+
+/**
+ * Vertical divider
+ * 1. Fixed width, full height
+ * 2. Align to start by default
+ * 3. Adjust pseudo-element for vertical orientation
+ * 4. Inline-flex for inline usage
+ */
+
+.divider-vertical {
+  display: inline-flex; /* 4 */
+  width: 1px; /* 1 */
+  height: 100%; /* 1 */
+  min-height: 1rem; /* 1 */
+  align-self: stretch; /* 2 */
+  margin: 0 0.5rem; /* 2 */
+}
+
+.divider-vertical::before {
+  top: 0; /* 3 */
+  bottom: 0; /* 3 */
+  left: 50%; /* 3 */
+  right: auto; /* 3 */
+  width: 1px; /* 3 */
+  height: auto; /* 3 */
+  transform: translateX(-50%); /* 3 */
+}
+
+/**
+ * Vertical divider doesn't support labels
+ * Hide any labels in vertical mode
+ */
+
+.divider-vertical .divider-label {
+  display: none;
+}
+
+/* States
+   ========================================================================== */
+
+/**
+ * Dashed variant
+ */
+
+.divider-dashed::before {
+  background: none;
+  border-top: 1px dashed currentColor;
+  height: 0;
+}
+
+.divider-vertical.divider-dashed::before {
+  border-top: none;
+  border-left: 1px dashed currentColor;
+  width: 0;
+}
+
+/**
+ * Dotted variant
+ */
+
+.divider-dotted::before {
+  background: none;
+  border-top: 1px dotted currentColor;
+  height: 0;
+}
+
+.divider-vertical.divider-dotted::before {
+  border-top: none;
+  border-left: 1px dotted currentColor;
+  width: 0;
+}
+
+/**
+ * Thick variant
+ */
+
+.divider-thick::before {
+  height: 2px;
+}
+
+.divider-vertical.divider-thick::before {
+  height: auto;
+  width: 2px;
+}
+
+/* Utilities
+   ========================================================================== */
+
+/**
+ * Spacing utilities
+ */
+
+.divider-my-xs { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.divider-my-sm { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+.divider-my-md { margin-top: 1rem; margin-bottom: 1rem; }
+.divider-my-lg { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+.divider-my-xl { margin-top: 2rem; margin-bottom: 2rem; }
+
+.divider-vertical.divider-mx-xs { margin-left: 0.5rem; margin-right: 0.5rem; }
+.divider-vertical.divider-mx-sm { margin-left: 0.75rem; margin-right: 0.75rem; }
+.divider-vertical.divider-mx-md { margin-left: 1rem; margin-right: 1rem; }
+.divider-vertical.divider-mx-lg { margin-left: 1.5rem; margin-right: 1.5rem; }
+.divider-vertical.divider-mx-xl { margin-left: 2rem; margin-right: 2rem; }
+
+/* Context
+   ========================================================================== */
+
+/**
+ * In dark containers
+ */
+
+.dark .divider,
+[data-theme="dark"] .divider {
+  color: var(--color-border);
+}
+
+.dark .divider-label,
+[data-theme="dark"] .divider-label {
+  background-color: var(--color-background);
+}
+
+/**
+ * In cards
+ */
+
+.card .divider-label {
+  background-color: var(--color-card);
+}
+
+/**
+ * In modals
+ */
+
+.modal .divider-label {
+  background-color: var(--color-card);
+}

@@ -127,13 +127,6 @@ type BreakpointConfig struct {
 	ShowFields []string `json:"showFields,omitempty"`
 }
 
-// Legacy style type aliases for backward compatibility
-// These now point to the unified Style type from style.go
-type BaseStyle = Style
-type LayoutStyle = Style
-type SectionStyle = Style
-type TabStyle = Style
-type StepStyle = Style
 
 // Core Methods
 
@@ -875,7 +868,7 @@ func (b *SectionBuilder) WithConditional(conditional *Conditional) *SectionBuild
 	return b
 }
 
-func (b *SectionBuilder) WithStyle(style *SectionStyle) *SectionBuilder {
+func (b *SectionBuilder) WithStyle(style *Style) *SectionBuilder {
 	b.section.Style = style
 	return b
 }
@@ -929,7 +922,7 @@ func (b *GroupBuilder) WithConditional(conditional *Conditional) *GroupBuilder {
 	return b
 }
 
-func (b *GroupBuilder) WithStyle(style *SectionStyle) *GroupBuilder {
+func (b *GroupBuilder) WithStyle(style *Style) *GroupBuilder {
 	b.group.Style = style
 	return b
 }
@@ -988,7 +981,7 @@ func (b *TabBuilder) WithConditional(conditional *Conditional) *TabBuilder {
 	return b
 }
 
-func (b *TabBuilder) WithStyle(style *TabStyle) *TabBuilder {
+func (b *TabBuilder) WithStyle(style *Style) *TabBuilder {
 	b.tab.Style = style
 	return b
 }
@@ -1043,7 +1036,7 @@ func (b *StepBuilder) WithConditional(conditional *Conditional) *StepBuilder {
 	return b
 }
 
-func (b *StepBuilder) WithStyle(style *StepStyle) *StepBuilder {
+func (b *StepBuilder) WithStyle(style *Style) *StepBuilder {
 	b.step.Style = style
 	return b
 }
