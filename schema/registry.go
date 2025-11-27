@@ -41,9 +41,7 @@ func DefaultRegistryConfig() *RegistryConfig {
 	}
 }
 
-// Note: StorageBackend and CacheBackend interfaces moved to interface.go
-
-// StorageFilter defines filtering criteria
+// Note: StorageBackend and CacheBackend interfaces are defined in interface.go
 
 // NewRegistry creates a new schema registry
 func NewRegistry(config *RegistryConfig) (*Registry, error) {
