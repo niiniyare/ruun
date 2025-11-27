@@ -4,34 +4,51 @@
 
 @layer components {
   .menu {
-    @apply bg-popover text-popover-foreground min-w-32 overflow-hidden rounded-md border p-1 shadow-md;
+    background-color: oklch(1 0 0); /* bg-popover */
+    color: oklch(0.129 0.042 265.755); /* popover-foreground */
+    border: 1px solid oklch(0.922 0 0); /* border */
+    @apply min-w-32 overflow-hidden rounded-md p-1 shadow-md;
   }
 
   .menu-item {
     @apply relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors;
-    @apply focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50;
+    
+    /* Base states */
+    &:focus {
+      background-color: oklch(0.968 0.007 247.896); /* accent */
+      color: oklch(0.21 0.034 264.665); /* accent-foreground */
+    }
+    
+    &[data-disabled] {
+      @apply pointer-events-none opacity-50;
+    }
 
     &:hover {
-      @apply bg-accent text-accent-foreground;
+      background-color: oklch(0.968 0.007 247.896); /* accent */
+      color: oklch(0.21 0.034 264.665); /* accent-foreground */
     }
 
     &[aria-current='page'],
     &.menu-item-active {
-      @apply bg-accent text-accent-foreground font-medium;
+      background-color: oklch(0.968 0.007 247.896); /* accent */
+      color: oklch(0.21 0.034 264.665); /* accent-foreground */
+      @apply font-medium;
     }
 
     &[data-destructive='true'],
     &.menu-item-destructive {
-      color: hsl(0 84.2% 60.2%);
+      color: oklch(0.577 0.245 25.723); /* destructive */
+      
       &:focus {
-        background-color: hsl(0 84.2% 60.2%);
-        color: hsl(0 0% 98%);
+        background-color: oklch(0.577 0.245 25.723); /* destructive */
+        color: oklch(0.985 0 0); /* destructive-foreground */
       }
     }
   }
 
   .menu-item-divider {
-    @apply -mx-1 my-1 h-px bg-muted;
+    @apply -mx-1 my-1 h-px;
+    background-color: oklch(0.868 0.005 286.286); /* muted */
   }
 
   .menu-item-content {
@@ -43,7 +60,8 @@
   }
 
   .menu-item-description {
-    @apply text-xs text-muted-foreground;
+    @apply text-xs;
+    color: oklch(0.556 0.013 285.805); /* muted-foreground */
   }
 
   .menu-item-icon {
@@ -75,7 +93,8 @@
     }
 
     .menu-item-checkbox-input:checked + &::after {
-      @apply opacity-100 bg-current;
+      @apply opacity-100;
+      background-color: currentColor;
     }
   }
 
@@ -96,7 +115,8 @@
     }
 
     .menu-item-radio-input:checked + &::after {
-      @apply opacity-100 bg-current;
+      @apply opacity-100;
+      background-color: currentColor;
     }
   }
 
@@ -106,8 +126,10 @@
   }
 
   .menu-item-submenu-dropdown {
-    @apply absolute left-full top-0 ml-1 min-w-32;
-    @apply bg-popover text-popover-foreground overflow-hidden rounded-md border p-1 shadow-md z-50;
+    background-color: oklch(1 0 0); /* bg-popover */
+    color: oklch(0.129 0.042 265.755); /* popover-foreground */
+    border: 1px solid oklch(0.922 0 0); /* border */
+    @apply absolute left-full top-0 ml-1 min-w-32 overflow-hidden rounded-md p-1 shadow-md z-50;
   }
 
   /* Size variants */
@@ -117,5 +139,11 @@
 
   .menu-item-lg {
     @apply px-3 py-2 text-base;
+  }
+
+  /* Empty state icon */
+  .empty-state-icon {
+    @apply h-12 w-12;
+    color: oklch(0.556 0.013 285.805 / 0.5); /* muted-foreground with 50% opacity */
   }
 }

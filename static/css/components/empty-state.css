@@ -9,10 +9,14 @@
     /* Use Basecoat CSS variables */
     color: oklch(var(--muted-foreground));
   }
-  
-  .empty-state-icon {
-    @apply size-12 text-muted-foreground/50;
-  }
+.empty-state-icon {
+  width: 3rem;
+  height: 3rem;
+  color: hsl(var(--muted-foreground) / 0.5);
+}  
+  /* .empty-state-icon { */
+  /*   @apply size-12 text-muted-foreground/50; */
+  /* } */
   
   .empty-state-title {
     @apply text-lg font-semibold;

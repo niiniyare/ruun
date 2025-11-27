@@ -1,8 +1,178 @@
+/* =============================================
+   BASE.CSS - Main Stylesheet Entry Point
+   ============================================= */
+
+/* 
+ * 1. TAILWINDCSS FRAMEWORK
+ * Import Tailwind CSS layers and utilities
+ */
 @import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================
+   2. THEME DEFINITIONS
+   Custom color schemes and design tokens
+   ============================================= */
+
+/* Default theme variables */
+@import "./themes/default.css";
+
+/* =============================================
+   3. BASECOAT UI FRAMEWORK
+   Core component library styles
+   ============================================= */
 @import "./basecoat.css";
+
+/* =============================================
+   4. COMPONENTS
+   Custom components and overrides
+   ============================================= */
 @import "./components/index.css";
 
+/* =============================================
+   5. BASE STYLES & RESETS
+   Global styles, typography, and resets
+   ============================================= */
+@layer base {
+  /* 
+   * CSS Custom Properties & Root Variables
+   * Define global CSS variables for consistent theming
+   */
+  :root {
+    /* Font families */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Fira Code', 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    
+    /* Border radius scale */
+    --radius-sm: 0.25rem;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+  }
+
+  /* 
+   * Global Reset & Base Typography
+   * Ensure consistent baseline across browsers
+   */
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    letter-spacing: var(--tracking-normal, 0.025em);
+  }
+
+  /* 
+   * Focus Management
+   * Accessible focus indicators
+   */
+  :focus-visible {
+    outline: 2px solid oklch(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* 
+   * Selection Styles
+   * Custom text selection colors
+   */
+  ::selection {
+    background-color: oklch(var(--accent) / 0.3);
+    color: oklch(var(--accent-foreground));
+  }
+}
+
+/* =============================================
+   6. UTILITIES & HELPERS
+   Custom utility classes and helper functions
+   ============================================= */
+@layer utilities {
+  /* 
+   * Scrollbar Styling
+   * Custom scrollbars for webkit browsers
+   */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--muted)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted));
+    border-radius: 3px;
+  }
+
+  /* 
+   * Animation Utilities
+   * Reusable animation classes
+   */
+  .animate-in {
+    animation-duration: 150ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .fade-in {
+    animation-name: fadeIn;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* 
+   * Layout Utilities
+   * Additional layout helpers
+   */
+  .content-auto {
+    content-visibility: auto;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+}
+
+/* =============================================
+   7. PRINT STYLES
+   Print-specific optimizations
+   ============================================= */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  /* Hide unnecessary elements in print */
+  .no-print,
+  nav,
+  footer,
+  .sidebar {
+    display: none !important;
+  }
+}

@@ -91,3 +91,11 @@ build: ## 🗄️ Build and minify Static files
 	@echo "$(BLUE)Build and minify Static files ...$(NC)"
 	@cd static && pnpm  build && cd .. 
 	@echo "$(GREEN)✅ Building is complete$(NC)"
+
+
+.PHONY: build-css
+build-css: ## 🗄️ Build and minify css files 
+	@echo "$(BLUE)Build and minify css files ...$(NC)"
+	@cd static && pnpm  build css && cd .. 
+	@echo "$(GREEN)✅ css Building is complete$(NC)"
+
