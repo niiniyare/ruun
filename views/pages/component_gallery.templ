@@ -181,10 +181,10 @@ templ ComponentGallery(props ComponentGalleryProps) {
 						<div class="example-group">
 							<h4>Sizes & Shapes</h4>
 							<div class="example-row">
-								@atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeSM})
-								@atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeMD})
-								@atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeLG})
-								@atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeLG, Shape: atoms.AvatarShapeSquare})
+								@atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeSm})
+								@atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeMd})
+								@atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeLg})
+								@atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeLg, Shape: atoms.AvatarShapeSquare})
 							</div>
 						</div>
 					</div>

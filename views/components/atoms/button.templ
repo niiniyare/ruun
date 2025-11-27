@@ -171,9 +171,6 @@ func buildButtonAttributes(props ButtonProps) templ.Attributes {
 	if props.FormAction != "" {
 		attrs["formaction"] = props.FormAction
 	}
-	if props.FormEncType != "" {
-		attrs["formenctype"] = props.FormEncType
-	}
 	if props.FormMethod != "" {
 		attrs["formmethod"] = props.FormMethod
 	}
@@ -227,9 +224,6 @@ func buildButtonAttributes(props ButtonProps) templ.Attributes {
 	}
 	if props.Base.A11y.AriaExpanded != "" {
 		attrs["aria-expanded"] = props.Base.A11y.AriaExpanded
-	}
-	if props.Base.A11y.AriaHaspopup != "" {
-		attrs["aria-haspopup"] = props.Base.A11y.AriaHaspopup
 	}
 	if props.Base.A11y.AriaPressed != "" {
 		attrs["aria-pressed"] = props.Base.A11y.AriaPressed

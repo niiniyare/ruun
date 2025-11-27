@@ -8,23 +8,9 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/niiniyare/ruun/views/components"
-)
+import "github.com/niiniyare/ruun/views/components"
 
-// AvatarSize represents avatar size variants
-type AvatarSize string
-
-const (
-	AvatarSizeXS AvatarSize = "xs" // size-4 (16px)
-	AvatarSizeSM AvatarSize = "sm" // size-5 (20px)
-	AvatarSizeMD AvatarSize = "md" // size-6 (24px)
-	AvatarSizeLG AvatarSize = "lg" // size-8 (32px)
-	AvatarSizeXL AvatarSize = "xl" // size-10 (40px)
-	AvatarSize2X AvatarSize = "2x" // size-12 (48px)
-)
-
-// AvatarShape represents avatar shape variants
+// AvatarShape represents avatar shape variants (following Basecoat patterns)
 type AvatarShape string
 
 const (
@@ -34,55 +20,73 @@ const (
 	AvatarShapeNone    AvatarShape = "none"    // no rounding
 )
 
+// AvatarStatusColor represents status indicator color variants
+type AvatarStatusColor string
+
+const (
+	AvatarStatusSuccess AvatarStatusColor = "success"
+	AvatarStatusWarning AvatarStatusColor = "warning"
+	AvatarStatusError   AvatarStatusColor = "error"
+	AvatarStatusMuted   AvatarStatusColor = "muted"
+)
+
+// AvatarRingColor represents ring/border color variants
+type AvatarRingColor string
+
+const (
+	AvatarRingPrimary AvatarRingColor = "primary"
+	AvatarRingSuccess AvatarRingColor = "success"
+	AvatarRingWarning AvatarRingColor = "warning"
+	AvatarRingError   AvatarRingColor = "error"
+	AvatarRingMuted   AvatarRingColor = "muted"
+)
+
 // AvatarProps defines properties for the Avatar atom following Basecoat documentation
+// Pure templ component with no dedicated component classes - uses Tailwind utilities
 type AvatarProps struct {
 	// Image properties
 	Src      string `json:"src"`
 	Alt      string `json:"alt"`
 	Initials string `json:"initials,omitempty"` // Fallback text when no image
 
-	// Visual properties
-	Size  AvatarSize  `json:"size,omitempty"`  // Avatar size variant
-	Shape AvatarShape `json:"shape,omitempty"` // Avatar shape variant
+	// Visual properties (using shared types)
+	Size  components.Size `json:"size,omitempty"`  // Avatar size variant
+	Shape AvatarShape     `json:"shape,omitempty"` // Avatar shape variant
 
 	// Status indicator
-	ShowStatus  bool   `json:"showStatus,omitempty"`  // Show status indicator
-	StatusColor string `json:"statusColor,omitempty"` // Status color (success, warning, muted)
+	ShowStatus  bool              `json:"showStatus,omitempty"`  // Show status indicator
+	StatusColor AvatarStatusColor `json:"statusColor,omitempty"` // Status color variant
 
 	// Ring/border
-	HasRing    bool   `json:"hasRing,omitempty"`    // Add ring border
-	RingColor  string `json:"ringColor,omitempty"`  // Ring color (primary, success, etc.)
-	RingOffset bool   `json:"ringOffset,omitempty"` // Add ring offset
+	HasRing    bool            `json:"hasRing,omitempty"`    // Add ring border
+	RingColor  AvatarRingColor `json:"ringColor,omitempty"`  // Ring color variant
+	RingOffset bool            `json:"ringOffset,omitempty"` // Add ring offset
 
 	// Interactive
 	Clickable bool `json:"clickable,omitempty"` // Add hover effects
 
-	// Custom styling
-	ClassName string `json:"className,omitempty"` // Additional CSS classes
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
 
-	// Base component props
-	ID        string            `json:"id,omitempty"`
-	DataAttrs map[string]string `json:"dataAttrs,omitempty"`
-	Attrs     templ.Attributes  `json:"attrs,omitempty"`
+	// Shared component props (includes ID, data attributes)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-// getAvatarSizeClass returns Tailwind size classes based on avatar size
-func getAvatarSizeClass(size AvatarSize) string {
+// getAvatarSizeClass returns Tailwind size classes based on shared Size type
+func getAvatarSizeClass(size components.Size) string {
 	switch size {
-	case AvatarSizeXS:
+	case components.SizeXs:
 		return "size-4" // 16px
-	case AvatarSizeSM:
-		return "size-5" // 20px
-	case AvatarSizeMD:
+	case components.SizeSm:
 		return "size-6" // 24px
-	case AvatarSizeLG:
-		return "size-8" // 32px
-	case AvatarSizeXL:
+	case components.SizeMd:
+		return "size-8" // 32px (default)
+	case components.SizeLg:
 		return "size-10" // 40px
-	case AvatarSize2X:
+	case components.SizeXl:
 		return "size-12" // 48px
 	default:
-		return "size-8" // Default to lg (32px)
+		return "size-8" // Default to md (32px)
 	}
 }
 
@@ -102,174 +106,60 @@ func getAvatarShapeClass(shape AvatarShape) string {
 	}
 }
 
-// getAvatarImageClasses builds complete classes for avatar image
-func getAvatarImageClasses(props AvatarProps) string {
-	classes := components.NewClassBuilder(
-		getAvatarSizeClass(props.Size),
-		"shrink-0",
-		"object-cover",
-		getAvatarShapeClass(props.Shape),
-	)
-
-	// Add ring if specified
-	if props.HasRing {
-		classes.Add("ring-2")
-		if props.RingColor != "" {
-			classes.Add("ring-" + props.RingColor)
-		} else {
-			classes.Add("ring-primary")
-		}
-
-		if props.RingOffset {
-			classes.Add("ring-offset-2", "ring-offset-background")
-		}
-	}
-
-	// Add hover effects if clickable
-	if props.Clickable {
-		classes.Add("hover:ring-2", "hover:ring-primary", "transition-all")
-	}
-
-	// Add custom classes
-	if props.ClassName != "" {
-		classes.Add(props.ClassName)
-	}
-
-	return classes.Build()
-}
-
-// getAvatarFallbackClasses builds complete classes for avatar fallback
-func getAvatarFallbackClasses(props AvatarProps) string {
-	classes := components.NewClassBuilder(
-		getAvatarSizeClass(props.Size),
-		"shrink-0",
-		getAvatarShapeClass(props.Shape),
-		"flex",
-		"items-center",
-		"justify-center",
-		"font-medium",
-	)
-
-	// Background color based on size for text sizing
-	switch props.Size {
-	case AvatarSizeXS, AvatarSizeSM:
-		classes.Add("text-xs", "bg-muted", "text-muted-foreground")
-	case AvatarSizeMD:
-		classes.Add("text-sm", "bg-muted", "text-muted-foreground")
-	case AvatarSizeLG, AvatarSizeXL:
-		classes.Add("text-sm", "bg-primary", "text-primary-foreground")
-	case AvatarSize2X:
-		classes.Add("text-base", "bg-primary", "text-primary-foreground")
+// getAvatarRingColorClass returns ring color class for the specified ring color
+func getAvatarRingColorClass(color AvatarRingColor) string {
+	switch color {
+	case AvatarRingPrimary:
+		return "ring-primary"
+	case AvatarRingSuccess:
+		return "ring-success"
+	case AvatarRingWarning:
+		return "ring-warning"
+	case AvatarRingError:
+		return "ring-error"
+	case AvatarRingMuted:
+		return "ring-muted"
 	default:
-		classes.Add("text-sm", "bg-primary", "text-primary-foreground")
+		return "ring-primary"
 	}
-
-	// Add ring if specified
-	if props.HasRing {
-		classes.Add("ring-2")
-		if props.RingColor != "" {
-			classes.Add("ring-" + props.RingColor)
-		} else {
-			classes.Add("ring-primary")
-		}
-
-		if props.RingOffset {
-			classes.Add("ring-offset-2", "ring-offset-background")
-		}
-	}
-
-	// Add hover effects if clickable
-	if props.Clickable {
-		classes.Add("hover:ring-2", "hover:ring-primary", "transition-all")
-	}
-
-	// Add custom classes
-	if props.ClassName != "" {
-		classes.Add(props.ClassName)
-	}
-
-	return classes.Build()
 }
 
-// buildAvatarAttributes creates img attributes using templ.Attributes pattern
-func buildAvatarAttributes(props AvatarProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getAvatarImageClasses(props),
-		"alt":   props.Alt,
-	}
-
-	if props.ID != "" {
-		attrs["id"] = props.ID
-	}
-	if props.Src != "" {
-		attrs["src"] = props.Src
-	}
-
-	// Data attributes
-	for key, value := range props.DataAttrs {
-		attrs["data-"+key] = value
-	}
-
-	// Merge custom attributes
-	for key, value := range props.Attrs {
-		attrs[key] = value
-	}
-
-	return attrs
-}
-
-// buildFallbackAttributes creates div attributes for fallback elements
-func buildFallbackAttributes(props AvatarProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getAvatarFallbackClasses(props),
-	}
-
-	if props.ID != "" {
-		attrs["id"] = props.ID
-	}
-
-	// Data attributes
-	for key, value := range props.DataAttrs {
-		attrs["data-"+key] = value
-	}
-
-	// Merge custom attributes
-	for key, value := range props.Attrs {
-		attrs[key] = value
-	}
-
-	return attrs
-}
-
-// getStatusClasses returns classes for status indicator
-func getStatusClasses(statusColor string) string {
-	classes := components.NewClassBuilder(
-		"absolute",
-		"bottom-0",
-		"right-0",
-		"size-3",
-		"rounded-full",
-		"ring-2",
-		"ring-background",
-	)
-
-	switch statusColor {
-	case "success":
-		classes.Add("bg-success")
-	case "warning":
-		classes.Add("bg-warning")
-	case "error":
-		classes.Add("bg-error")
-	case "muted":
-		classes.Add("bg-muted")
+// getFallbackTextSizeClass returns text size class based on avatar size
+func getFallbackTextSizeClass(size components.Size) string {
+	switch size {
+	case components.SizeXs:
+		return "text-xs"
+	case components.SizeSm:
+		return "text-xs"
+	case components.SizeMd:
+		return "text-sm"
+	case components.SizeLg:
+		return "text-sm"
+	case components.SizeXl:
+		return "text-base"
 	default:
-		classes.Add("bg-success")
+		return "text-sm"
 	}
+}
 
-	return classes.Build()
+// getStatusColorClass returns background color class for status indicators
+func getStatusColorClass(color AvatarStatusColor) string {
+	switch color {
+	case AvatarStatusSuccess:
+		return "bg-success"
+	case AvatarStatusWarning:
+		return "bg-warning"
+	case AvatarStatusError:
+		return "bg-error"
+	case AvatarStatusMuted:
+		return "bg-muted"
+	default:
+		return "bg-success"
+	}
 }
 
 // Avatar renders an avatar following Basecoat documentation patterns
+// Pure Tailwind implementation with no dedicated component classes
 func Avatar(props AvatarProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -297,95 +187,160 @@ func Avatar(props AvatarProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if props.Src != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<img")
+				var templ_7745c5c3_Var2 = []any{templ.Classes(
+					getAvatarSizeClass(props.Size),
+					"shrink-0",
+					"object-cover",
+					getAvatarShapeClass(props.Shape),
+					templ.KV("ring-2", props.HasRing),
+					templ.KV(getAvatarRingColorClass(props.RingColor), props.HasRing && props.RingColor != ""),
+					templ.KV("ring-primary", props.HasRing && props.RingColor == ""),
+					templ.KV("ring-offset-2 ring-offset-background", props.RingOffset),
+					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
+					props.Base.ClassName,
+				)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildAvatarAttributes(props))
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<img class=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, ">")
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" alt=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Alt)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 173, Col: 19}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Src)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 174, Col: 19}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if props.Base.ID != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var6 string
+					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 176, Col: 23}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, components.BuildDataAttrs(props.Base.DataAttrs))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, ">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else if props.Initials != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <div")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildFallbackAttributes(props))
+				var templ_7745c5c3_Var7 = []any{templ.Classes(
+					getAvatarSizeClass(props.Size),
+					"shrink-0",
+					getAvatarShapeClass(props.Shape),
+					"flex items-center justify-center font-medium",
+					getFallbackTextSizeClass(props.Size),
+					"bg-primary text-primary-foreground",
+					templ.KV("ring-2", props.HasRing),
+					templ.KV(getAvatarRingColorClass(props.RingColor), props.HasRing && props.RingColor != ""),
+					templ.KV("ring-primary", props.HasRing && props.RingColor == ""),
+					templ.KV("ring-offset-2 ring-offset-background", props.RingOffset),
+					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
+					props.Base.ClassName,
+				)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, ">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var2 string
-				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Initials)
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var7).String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 274, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " <div")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildFallbackAttributes(props))
+				if props.Base.ID != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var9 string
+					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 199, Col: 23}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<!-- Status indicator -->")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 = []any{getStatusClasses(props.StatusColor)}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var3).String())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if props.Src != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<img")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildAvatarAttributes(props))
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, components.BuildDataAttrs(props.Base.DataAttrs))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -393,42 +348,360 @@ func Avatar(props AvatarProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-			} else if props.Initials != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " <div")
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Initials)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 204, Col: 20}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildFallbackAttributes(props))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Initials)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 290, Col: 19}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " <div")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildFallbackAttributes(props))
+				var templ_7745c5c3_Var11 = []any{templ.Classes(
+					getAvatarSizeClass(props.Size),
+					"shrink-0",
+					getAvatarShapeClass(props.Shape),
+					"bg-muted",
+					templ.KV("ring-2", props.HasRing),
+					templ.KV(getAvatarRingColorClass(props.RingColor), props.HasRing && props.RingColor != ""),
+					templ.KV("ring-primary", props.HasRing && props.RingColor == ""),
+					templ.KV("ring-offset-2 ring-offset-background", props.RingOffset),
+					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
+					props.Base.ClassName,
+				)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var11...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var12 string
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var11).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if props.Base.ID != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var13 string
+					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 222, Col: 23}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, components.BuildDataAttrs(props.Base.DataAttrs))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			var templ_7745c5c3_Var14 = []any{templ.Classes(
+				"absolute bottom-0 right-0 size-3 rounded-full ring-2 ring-background",
+				getStatusColorClass(props.StatusColor),
+			)}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var14...)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var14).String())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if props.Src != "" {
+				var templ_7745c5c3_Var16 = []any{templ.Classes(
+					getAvatarSizeClass(props.Size),
+					"shrink-0",
+					"object-cover",
+					getAvatarShapeClass(props.Shape),
+					templ.KV("ring-2", props.HasRing),
+					templ.KV(getAvatarRingColorClass(props.RingColor), props.HasRing && props.RingColor != ""),
+					templ.KV("ring-primary", props.HasRing && props.RingColor == ""),
+					templ.KV("ring-offset-2 ring-offset-background", props.RingOffset),
+					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
+					props.Base.ClassName,
+				)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var16...)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<img class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var17 string
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var16).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" alt=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var18 string
+				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(props.Alt)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 250, Col: 18}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var19 string
+				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(props.Src)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 251, Col: 18}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if props.Base.ID != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var20 string
+					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 253, Col: 22}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, components.BuildDataAttrs(props.Base.DataAttrs))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, ">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else if props.Initials != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var21 = []any{templ.Classes(
+					getAvatarSizeClass(props.Size),
+					"shrink-0",
+					getAvatarShapeClass(props.Shape),
+					"flex items-center justify-center font-medium",
+					getFallbackTextSizeClass(props.Size),
+					"bg-primary text-primary-foreground",
+					templ.KV("ring-2", props.HasRing),
+					templ.KV(getAvatarRingColorClass(props.RingColor), props.HasRing && props.RingColor != ""),
+					templ.KV("ring-primary", props.HasRing && props.RingColor == ""),
+					templ.KV("ring-offset-2 ring-offset-background", props.RingOffset),
+					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
+					props.Base.ClassName,
+				)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var21...)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var22 string
+				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var21).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if props.Base.ID != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var23 string
+					templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 276, Col: 22}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, components.BuildDataAttrs(props.Base.DataAttrs))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, ">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var24 string
+				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(props.Initials)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 281, Col: 19}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var25 = []any{templ.Classes(
+					getAvatarSizeClass(props.Size),
+					"shrink-0",
+					getAvatarShapeClass(props.Shape),
+					"bg-muted",
+					templ.KV("ring-2", props.HasRing),
+					templ.KV(getAvatarRingColorClass(props.RingColor), props.HasRing && props.RingColor != ""),
+					templ.KV("ring-primary", props.HasRing && props.RingColor == ""),
+					templ.KV("ring-offset-2 ring-offset-background", props.RingOffset),
+					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
+					props.Base.ClassName,
+				)}
+				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var25...)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var26 string
+				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var25).String())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 1, Col: 0}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if props.Base.ID != "" {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, " id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var27 string
+					templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/avatar.templ`, Line: 299, Col: 22}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, components.BuildDataAttrs(props.Base.DataAttrs))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

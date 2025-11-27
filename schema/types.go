@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/niiniyare/ruun/pkg/condition"
 )
 
@@ -350,6 +351,17 @@ type Config struct {
 	Encoding string            `json:"encoding,omitempty"`
 	Timeout  int               `json:"timeout,omitempty"`
 	Headers  map[string]string `json:"headers,omitempty"`
+}
+
+// EnrichConfig defines enrichment configuration for runtime schema enrichment
+type EnrichConfig struct {
+	User           uuid.UUID         `json:"user"`
+	Environment    string            `json:"environment"`
+	Features       map[string]bool   `json:"features"`
+	FieldFilter    func(*Field) bool `json:"-"`
+	DepthLimit     int               `json:"depth_limit"`
+	SkipValidation bool              `json:"skip_validation"`
+	Extensions     map[string]any    `json:"extensions"`
 }
 
 // Security defines security and access control configuration

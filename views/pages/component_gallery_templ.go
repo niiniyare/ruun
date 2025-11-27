@@ -204,19 +204,19 @@ func ComponentGallery(props ComponentGalleryProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeSM}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeSm}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeMD}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeMd}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeLG}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeLg}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Fallback: "JD", Size: atoms.AvatarSizeLG, Shape: atoms.AvatarShapeSquare}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeLg, Shape: atoms.AvatarShapeSquare}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

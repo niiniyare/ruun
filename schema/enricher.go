@@ -8,21 +8,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// EnrichConfig defines enrichment configuration
-type EnrichConfig struct {
-	User           uuid.UUID
-	Environment    string
-	Features       map[string]bool
-	FieldFilter    func(*Field) bool
-	DepthLimit     int
-	SkipValidation bool
-	Extensions     map[string]any
-}
-
 // EnrichOption is a functional option for enrichment configuration
 type EnrichOption func(*EnrichConfig)
 
-// Note: User, TenantProvider, Logger, and Enricher interfaces moved to interface.go
+// Note: All interfaces (User, TenantProvider, Logger, Enricher) are defined in interface.go
+// EnrichConfig and tenant types are defined in types.go
 
 // DefaultEnricher is the production-ready implementation of the Enricher interface
 type DefaultEnricher struct {
