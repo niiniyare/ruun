@@ -45,10 +45,6 @@ type TableModeConfig struct {
 	Aggregates  map[string]Aggregate `json:"aggregates,omitempty"`
 }
 
-// Aggregate defines column aggregation
-
-// AggregateType defines aggregation functions
-
 // Core Methods
 
 // SetEvaluator sets evaluator on repeatable field and all template fields

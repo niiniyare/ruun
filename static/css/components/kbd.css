@@ -4,197 +4,143 @@
    Keyboard shortcut display component for showing keyboard combinations
    and shortcuts in a visually distinct way.
    
-   Structure:
-   - .kbd              - Single key or shortcut
-   - .kbd-group        - Container for multiple keys (e.g., Ctrl+S)
-   - .kbd-separator    - Separator between keys in a group
+   Based on the Basecoat implementation with additional variants and utilities.
+   
+   Usage Examples:
+   - Single key: <kbd class="kbd">K</kbd>
+   - Symbol keys: <kbd class="kbd">⌘</kbd> <kbd class="kbd">⇧</kbd>
+   - Combinations: <kbd class="kbd">Ctrl + B</kbd>
+   - Key groups: <span class="inline-flex items-center gap-1">
+                   <kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd>
+                 </span>
+   - In buttons: <button>Save <kbd class="kbd">⌘S</kbd></button>
    ============================================================================ */
 
-/* Base
+/* Base (matching Basecoat implementation)
    ============================================================================ */
 
 .kbd {
-  /* Display */
+  /* Core display and layout from Basecoat */
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  pointer-events: none;
   display: inline-flex;
+  height: 1.25rem; /* h-5 */
+  width: fit-content;
+  min-width: 1.25rem; /* min-w-5 */
   align-items: center;
   justify-content: center;
-  
-  /* Spacing */
-  padding: 0.125rem 0.375rem;
-  min-width: 1.5rem;
-  
-  /* Typography */
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-  white-space: nowrap;
-  
-  /* Colors */
-  color: var(--kbd-foreground, var(--foreground));
-  background-color: var(--kbd-background, var(--muted));
-  
-  /* Borders */
-  border: 1px solid var(--kbd-border, var(--border));
-  border-radius: var(--radius-sm);
-  
-  /* Shadow for depth */
-  box-shadow: 
-    0 1px 0 0 var(--kbd-shadow, rgba(0, 0, 0, 0.1)),
-    inset 0 0 0 1px var(--kbd-highlight, rgba(255, 255, 255, 0.1));
-  
-  /* Interaction */
+  gap: 0.25rem; /* gap-1 */
+  border-radius: calc(var(--radius) - 4px); /* rounded-sm */
+  padding-left: 0.25rem; /* px-1 */
+  padding-right: 0.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 500; /* font-medium */
   user-select: none;
+  
+  /* Additional refinements */
+  white-space: nowrap;
+  vertical-align: baseline;
 }
 
-/* Group
+/* Key Groups and Combinations
    ============================================================================ */
 
+/* Use with standard Tailwind flex utilities for key groups:
+   <span class="inline-flex items-center gap-1">
+     <kbd class="kbd">⌘</kbd>
+     <kbd class="kbd">K</kbd>
+   </span>
+   
+   Or with separators:
+   <span class="inline-flex items-center gap-1">
+     <kbd class="kbd">Ctrl</kbd>
+     <span>+</span>
+     <kbd class="kbd">B</kbd>
+   </span>
+*/
+
+/* Optional group container (legacy support) */
 .kbd-group {
-  /* Display */
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  
-  /* Typography */
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  line-height: 1.25rem;
-}
-
-/* Separator
-   ============================================================================ */
-
-.kbd-separator {
-  /* Display */
-  display: inline-flex;
-  align-items: center;
-  
-  /* Spacing */
-  margin: 0 0.125rem;
-  
-  /* Typography */
-  font-size: 0.625rem;
-  color: var(--muted-foreground);
-  
-  /* Default content */
-  content: "+";
-}
-
-/* Common separator symbols */
-.kbd-separator::before {
-  content: "+";
-}
-
-.kbd-separator[data-symbol="-"]::before {
-  content: "-";
-}
-
-.kbd-separator[data-symbol="or"]::before {
-  content: "or";
-  font-size: 0.75rem;
-  margin: 0 0.25rem;
-}
-
-.kbd-separator[data-symbol="/"]::before {
-  content: "/";
 }
 
 /* Size Variants
    ============================================================================ */
 
-/* Small */
+/* Small variant */
 .kbd-sm {
-  padding: 0.0625rem 0.25rem;
-  font-size: 0.625rem;
-  line-height: 1rem;
-  min-width: 1.25rem;
+  height: 1rem; /* h-4 */
+  min-width: 1rem;
+  font-size: 0.625rem; /* text-xs */
+  padding-left: 0.125rem; /* px-0.5 */
+  padding-right: 0.125rem;
 }
 
-/* Large */
+/* Large variant */
 .kbd-lg {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.5rem;
-  min-width: 2rem;
+  height: 1.5rem; /* h-6 */
+  min-width: 1.5rem;
+  font-size: 0.875rem; /* text-sm */
+  padding-left: 0.375rem; /* px-1.5 */
+  padding-right: 0.375rem;
 }
 
 /* Style Variants
    ============================================================================ */
 
-/* Flat style (no depth) */
-.kbd-flat {
-  box-shadow: none;
-  border-color: var(--border);
-}
-
-/* Dark style */
-.kbd-dark {
-  color: var(--background);
-  background-color: var(--foreground);
-  border-color: var(--foreground);
-  box-shadow: 
-    0 1px 0 0 rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-/* Light style */
-.kbd-light {
+/* Outline style (with border) */
+.kbd-outline {
+  border: 1px solid var(--border);
   background-color: var(--background);
-  border-color: var(--muted-foreground);
 }
 
-/* Special Keys
-   ============================================================================ */
-
-/* Modifier keys */
-.kbd-modifier {
-  font-weight: 600;
-  background-color: var(--muted);
+/* Solid style (inverted colors) */
+.kbd-solid {
+  background-color: var(--foreground);
+  color: var(--background);
 }
 
-/* Function keys */
-.kbd-function {
-  background-color: var(--primary-foreground);
-  color: var(--primary);
-  border-color: var(--primary);
+/* Accent style */
+.kbd-accent {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
 }
 
 /* States
    ============================================================================ */
 
-/* Active/pressed state */
-.kbd-active,
-.kbd:active {
-  transform: translateY(1px);
-  box-shadow: 
-    0 0 0 0 var(--kbd-shadow, rgba(0, 0, 0, 0.1)),
-    inset 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+/* Disabled state */
+.kbd-disabled {
+  opacity: 0.5;
 }
 
-/* Disabled state */
-.kbd-disabled,
-.kbd:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Highlighted/active state */
+.kbd-active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 /* Context Modifiers
    ============================================================================ */
 
-/* In prose/text context */
-.prose .kbd,
-p .kbd,
-li .kbd {
-  margin: 0 0.125rem;
-  vertical-align: baseline;
+/* In buttons - make kbd smaller and adjust spacing */
+button .kbd,
+.btn .kbd {
+  height: 1rem; /* h-4 */
+  min-width: 1rem;
+  font-size: 0.625rem; /* text-xs */
+  margin-left: 0.25rem;
 }
 
-/* In code blocks */
-pre .kbd,
-code .kbd {
-  font-size: inherit;
-  padding: 0.0625rem 0.25rem;
+/* In prose/text - add subtle margins */
+p .kbd,
+.prose .kbd {
+  margin-left: 0.125rem;
+  margin-right: 0.125rem;
 }
 
 /* Responsive
@@ -202,98 +148,51 @@ code .kbd {
 
 @media (max-width: 640px) {
   .kbd {
-    font-size: 0.625rem;
-    padding: 0.0625rem 0.25rem;
-    min-width: 1.25rem;
-  }
-  
-  .kbd-group {
-    font-size: 0.625rem;
+    height: 1rem; /* h-4 */
+    min-width: 1rem;
+    font-size: 0.625rem; /* text-2xs */
+    padding-left: 0.125rem; /* px-0.5 */
+    padding-right: 0.125rem;
   }
 }
 
-/* Dark Mode
+/* SVG Icons Support
    ============================================================================ */
 
-@media (prefers-color-scheme: dark) {
-  .kbd {
-    --kbd-background: var(--muted);
-    --kbd-border: var(--muted-foreground);
-    --kbd-shadow: rgba(0, 0, 0, 0.3);
-    --kbd-highlight: rgba(255, 255, 255, 0.05);
-  }
-  
-  .kbd-light {
-    background-color: var(--muted);
-    border-color: var(--border);
-  }
+/* Support for small icons within kbd elements (inherited from Basecoat) */
+.kbd svg:not([class*='size-']) {
+  width: 0.75rem; /* size-3 */
+  height: 0.75rem;
 }
 
-/* Utilities
+/* Common Key Symbols (Optional Utilities)
    ============================================================================ */
 
-/* Common key abbreviations */
-.kbd[data-key="cmd"]::before,
-.kbd[data-key="command"]::before {
-  content: "⌘";
-  font-size: 1em;
-}
+/* Use these data attributes for common symbols to ensure consistency:
+   
+   <kbd class="kbd" data-key="cmd"></kbd>     → ⌘
+   <kbd class="kbd" data-key="shift"></kbd>   → ⇧
+   <kbd class="kbd" data-key="option"></kbd>  → ⌥
+   <kbd class="kbd" data-key="ctrl"></kbd>    → ⌃
+   <kbd class="kbd" data-key="enter"></kbd>   → ⏎
+   <kbd class="kbd" data-key="esc"></kbd>     → Esc
+   
+   Or use the symbols directly: <kbd class="kbd">⌘</kbd>
+*/
 
-.kbd[data-key="ctrl"]::before,
-.kbd[data-key="control"]::before {
-  content: "Ctrl";
-}
-
-.kbd[data-key="alt"]::before,
-.kbd[data-key="option"]::before {
-  content: "⌥";
-  font-size: 1em;
-}
-
-.kbd[data-key="shift"]::before {
-  content: "⇧";
-  font-size: 1em;
-}
-
-.kbd[data-key="enter"]::before,
-.kbd[data-key="return"]::before {
-  content: "↵";
-  font-size: 1em;
-}
-
-.kbd[data-key="tab"]::before {
-  content: "⇥";
-  font-size: 1em;
-}
-
-.kbd[data-key="delete"]::before,
-.kbd[data-key="backspace"]::before {
-  content: "⌫";
-  font-size: 1em;
-}
-
-.kbd[data-key="escape"]::before,
-.kbd[data-key="esc"]::before {
-  content: "Esc";
-}
-
-.kbd[data-key="space"]::before {
-  content: "␣";
-  font-size: 1em;
-}
+.kbd[data-key="cmd"]::before { content: "⌘"; }
+.kbd[data-key="shift"]::before { content: "⇧"; }
+.kbd[data-key="option"]::before,
+.kbd[data-key="alt"]::before { content: "⌥"; }
+.kbd[data-key="ctrl"]::before { content: "⌃"; }
+.kbd[data-key="enter"]::before { content: "⏎"; }
+.kbd[data-key="esc"]::before { content: "Esc"; }
+.kbd[data-key="tab"]::before { content: "⇥"; }
+.kbd[data-key="space"]::before { content: "␣"; }
+.kbd[data-key="delete"]::before { content: "⌫"; }
 
 /* Arrow keys */
 .kbd[data-key="up"]::before { content: "↑"; }
 .kbd[data-key="down"]::before { content: "↓"; }
 .kbd[data-key="left"]::before { content: "←"; }
 .kbd[data-key="right"]::before { content: "→"; }
-
-/* Print-ready styles */
-@media print {
-  .kbd {
-    border: 1px solid #000;
-    box-shadow: none;
-    background-color: #fff;
-    color: #000;
-  }
-}
