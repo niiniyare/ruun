@@ -1,9 +1,10 @@
 /* ==========================================================================
-   Icon Component
+   Icon Component - Lucide Icons
    ========================================================================== */
 
 /**
- * Icon component with size variants and optional spin animation
+ * Icon component optimized for Lucide icons (lucide.dev)
+ * Lucide icons are stroke-based SVGs with consistent sizing and styling
  * 
  * Example usage:
  * <svg class="icon icon-md">...</svg>
@@ -15,10 +16,14 @@
 
 .icon {
   display: inline-block;
-  width: 1em;
-  height: 1em;
+  width: 1rem;
+  height: 1rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
   vertical-align: -0.125em;
-  fill: currentColor;
   flex-shrink: 0;
 }
 
