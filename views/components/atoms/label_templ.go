@@ -8,90 +8,93 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
-
-// Note: Basecoat handles label styling via .field wrapper context
-// No size or state classes needed - styling is contextual
+import "github.com/a-h/templ"
+import "github.com/awo-development/ruun/views/components"
 
 // LabelProps defines all properties for the Label atom
+// Uses Basecoat 'label' class with Tailwind utilities
 type LabelProps struct {
+	// Content
+	Text string `json:"text"`
+
 	// Core HTML attributes
-	For  string `json:"for"`  // Associates with input via id
-	Text string `json:"text"` // Label text content
+	For string `json:"for"` // Associates with form control via id
 
-	// Note: Visual styling handled by Basecoat .field context
-	// No visual props needed
-
-	// Form semantics
-	Required bool `json:"required"` // Shows required indicator
-	Disabled bool `json:"disabled"` // Visual disabled state
-	Optional bool `json:"optional"` // Shows optional indicator
-
-	// Simple indicator customization
+	// State indicators
+	Required     bool   `json:"required"`     // Shows required indicator
+	Optional     bool   `json:"optional"`     // Shows optional indicator
 	RequiredText string `json:"requiredText"` // Custom required text (default "*")
 	OptionalText string `json:"optionalText"` // Custom optional text (default "(optional)")
 
-	// Event handlers (pre-resolved externally)
-	OnClick string `json:"onClick"`
+	// HTML attributes using shared types
+	Base components.BaseProps `json:"base,omitempty"`
 
-	// ARIA accessibility attributes
-	AriaLabel    string `json:"ariaLabel"`
-	AriaHidden   string `json:"ariaHidden"`
-	AriaRequired string `json:"ariaRequired"`
-
-	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
 }
 
-// Basecoat handles label styling contextually via .field wrapper
-// No class generation needed
+// getLabelClasses returns the correct Basecoat label class + Tailwind utilities
+// Following documentation pattern from label.md
+func getLabelClasses(className string) string {
+	// Base Basecoat class as documented
+	base := "label"
+
+	// Combine with Tailwind utilities from props
+	if className != "" {
+		return base + " " + className
+	}
+
+	return base
+}
 
 // buildLabelAttributes creates all HTML attributes for the label
 func buildLabelAttributes(props LabelProps) templ.Attributes {
-	attrs := templ.Attributes{}
+	attrs := templ.Attributes{
+		"class": getLabelClasses(props.Base.ClassName),
+	}
 
 	// Core HTML attributes
 	if props.For != "" {
 		attrs["for"] = props.For
 	}
-
-	// Event handlers
-	if props.OnClick != "" {
-		attrs["onclick"] = props.OnClick
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
 	}
 
-	// ARIA attributes
-	if props.AriaLabel != "" {
-		attrs["aria-label"] = props.AriaLabel
+	// ARIA attributes from shared types
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
 	}
-	if props.AriaHidden != "" {
-		attrs["aria-hidden"] = props.AriaHidden
+	if props.Base.A11y.AriaHidden != "" {
+		attrs["aria-hidden"] = props.Base.A11y.AriaHidden
 	}
-	if props.AriaRequired != "" {
-		attrs["aria-required"] = props.AriaRequired
+	if props.Base.A11y.AriaRequired != "" {
+		attrs["aria-required"] = props.Base.A11y.AriaRequired
 	}
-
-	// Tab index
-	if props.TabIndex != 0 {
-		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	if props.Base.A11y.TabIndex != "" {
+		attrs["tabindex"] = props.Base.A11y.TabIndex
 	}
 
-	// Data attributes
-	for key, value := range props.DataAttrs {
+	// Event handlers from shared types
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Data attributes from shared types
+	for key, value := range props.Base.DataAttrs {
 		attrs["data-"+key] = value
 	}
 
-	// Merge custom attributes (allows override)
-	for key, value := range props.Attributes {
+	// Merge custom attributes (allows override and additional attributes)
+	for key, value := range props.Attrs {
 		attrs[key] = value
 	}
 
 	return attrs
 }
 
-// Label renders a pure presentation label atom
+// Label renders a Basecoat label atom with indicator support
+// Follows documentation pattern: Basecoat 'label' class + Tailwind utilities
 func Label(props LabelProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -128,7 +131,7 @@ func Label(props LabelProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 89, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 92, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -143,7 +146,7 @@ func Label(props LabelProps) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.RequiredText)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 95, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 98, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -169,7 +172,7 @@ func Label(props LabelProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.OptionalText)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 106, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/label.templ`, Line: 109, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {

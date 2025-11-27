@@ -1,113 +1,116 @@
 package atoms
 
-import "strconv"
-
-// Note: Basecoat handles label styling via .field wrapper context
-// No size or state classes needed - styling is contextual
+import "github.com/a-h/templ"
+import "github.com/awo-development/ruun/views/components"
 
 // LabelProps defines all properties for the Label atom
+// Uses Basecoat 'label' class with Tailwind utilities
 type LabelProps struct {
-    // Core HTML attributes
-    For  string `json:"for"`  // Associates with input via id
-    Text string `json:"text"` // Label text content
-    
-    // Note: Visual styling handled by Basecoat .field context
-    // No visual props needed
-    
-    // Form semantics
-    Required bool `json:"required"` // Shows required indicator
-    Disabled bool `json:"disabled"` // Visual disabled state
-    Optional bool `json:"optional"` // Shows optional indicator
-    
-    // Simple indicator customization
-    RequiredText string `json:"requiredText"` // Custom required text (default "*")
-    OptionalText string `json:"optionalText"` // Custom optional text (default "(optional)")
-    
-    // Event handlers (pre-resolved externally)
-    OnClick string `json:"onClick"`
-    
-    // ARIA accessibility attributes
-    AriaLabel    string `json:"ariaLabel"`
-    AriaHidden   string `json:"ariaHidden"`
-    AriaRequired string `json:"ariaRequired"`
-    
-    // Additional HTML attributes
-    TabIndex   int                   `json:"tabIndex"`
-    DataAttrs  map[string]string     `json:"dataAttrs"`
-    Attributes templ.Attributes      `json:"attributes"`
+	// Content
+	Text string `json:"text"`
+	
+	// Core HTML attributes
+	For string `json:"for"` // Associates with form control via id
+	
+	// State indicators
+	Required     bool   `json:"required"`     // Shows required indicator
+	Optional     bool   `json:"optional"`     // Shows optional indicator  
+	RequiredText string `json:"requiredText"` // Custom required text (default "*")
+	OptionalText string `json:"optionalText"` // Custom optional text (default "(optional)")
+	
+	// HTML attributes using shared types
+	Base components.BaseProps `json:"base,omitempty"`
+	
+	// Additional attributes using templ.Attributes for extensibility  
+	Attrs templ.Attributes `json:"attrs,omitempty"`
 }
 
-// Basecoat handles label styling contextually via .field wrapper
-// No class generation needed
+// getLabelClasses returns the correct Basecoat label class + Tailwind utilities
+// Following documentation pattern from label.md
+func getLabelClasses(className string) string {
+	// Base Basecoat class as documented
+	base := "label"
+	
+	// Combine with Tailwind utilities from props
+	if className != "" {
+		return base + " " + className
+	}
+	
+	return base
+}
 
 // buildLabelAttributes creates all HTML attributes for the label
 func buildLabelAttributes(props LabelProps) templ.Attributes {
-    attrs := templ.Attributes{}
-    
-    // Core HTML attributes
-    if props.For != "" {
-        attrs["for"] = props.For
-    }
-    
-    // Event handlers
-    if props.OnClick != "" {
-        attrs["onclick"] = props.OnClick
-    }
-    
-    // ARIA attributes
-    if props.AriaLabel != "" {
-        attrs["aria-label"] = props.AriaLabel
-    }
-    if props.AriaHidden != "" {
-        attrs["aria-hidden"] = props.AriaHidden
-    }
-    if props.AriaRequired != "" {
-        attrs["aria-required"] = props.AriaRequired
-    }
-    
-    // Tab index
-    if props.TabIndex != 0 {
-        attrs["tabindex"] = strconv.Itoa(props.TabIndex)
-    }
-    
-    // Data attributes
-    for key, value := range props.DataAttrs {
-        attrs["data-"+key] = value
-    }
-    
-    // Merge custom attributes (allows override)
-    for key, value := range props.Attributes {
-        attrs[key] = value
-    }
-    
-    return attrs
+	attrs := templ.Attributes{
+		"class": getLabelClasses(props.Base.ClassName),
+	}
+	
+	// Core HTML attributes
+	if props.For != "" {
+		attrs["for"] = props.For
+	}
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+	
+	// ARIA attributes from shared types
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaHidden != "" {
+		attrs["aria-hidden"] = props.Base.A11y.AriaHidden
+	}
+	if props.Base.A11y.AriaRequired != "" {
+		attrs["aria-required"] = props.Base.A11y.AriaRequired
+	}
+	if props.Base.A11y.TabIndex != "" {
+		attrs["tabindex"] = props.Base.A11y.TabIndex
+	}
+	
+	// Event handlers from shared types
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+	
+	// Data attributes from shared types
+	for key, value := range props.Base.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes (allows override and additional attributes)
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+	
+	return attrs
 }
 
-// Label renders a pure presentation label atom
+// Label renders a Basecoat label atom with indicator support
+// Follows documentation pattern: Basecoat 'label' class + Tailwind utilities
 templ Label(props LabelProps) {
-    <label {buildLabelAttributes(props)...}>
-        {props.Text}
-        
-        // Required indicator
-        if props.Required {
-            <span>
-                if props.RequiredText != "" {
-                    {props.RequiredText}
-                } else {
-                    *
-                }
-            </span>
-        }
-        
-        // Optional indicator  
-        if props.Optional {
-            <span>
-                if props.OptionalText != "" {
-                    {props.OptionalText}
-                } else {
-                    (optional)
-                }
-            </span>
-        }
-    </label>
+	<label {buildLabelAttributes(props)...}>
+		{props.Text}
+		
+		// Required indicator as documented
+		if props.Required {
+			<span>
+				if props.RequiredText != "" {
+					{props.RequiredText}
+				} else {
+					*
+				}
+			</span>
+		}
+		
+		// Optional indicator as documented  
+		if props.Optional {
+			<span>
+				if props.OptionalText != "" {
+					{props.OptionalText}
+				} else {
+					(optional)
+				}
+			</span>
+		}
+	</label>
 }
