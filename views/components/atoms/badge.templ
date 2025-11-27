@@ -1,86 +1,193 @@
 package atoms
 
-// BadgeProps defines all properties for the Badge atom using Basecoat classes
+import "github.com/a-h/templ"
+import "github.com/awo-development/ruun/views/components"
+
+// BadgeProps defines all properties for the Badge atom 
+// Combines Basecoat semantic classes with Tailwind utilities
 type BadgeProps struct {
-    // Content
-    Text string `json:"text"`
-    Icon templ.Component `json:"icon,omitempty"`
-    
-    // Basecoat variants
-    Variant string `json:"variant,omitempty"` // "primary", "secondary", "destructive", "outline"
-    
-    // HTML attributes
-    ID string `json:"id,omitempty"`
-    
-    // Interactive features
-    Clickable bool   `json:"clickable,omitempty"`
-    OnClick   string `json:"onClick,omitempty"`
-    
-    // ARIA accessibility
-    AriaLabel       string `json:"ariaLabel,omitempty"`
-    AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
-    AriaPressed     string `json:"ariaPressed,omitempty"`
+	// Content
+	Text string          `json:"text"`
+	Icon templ.Component `json:"icon,omitempty"`
+	
+	// Basecoat variants (using shared types)
+	Variant components.BadgeVariant `json:"variant,omitempty"`
+	Size    components.Size         `json:"size,omitempty"`
+	
+	// Interactive features
+	Clickable bool   `json:"clickable,omitempty"`
+	Href      string `json:"href,omitempty"`
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-// getBadgeClass returns the Basecoat class without dynamic building
-func getBadgeClass(variant string) string {
-    // Static switch - no string concatenation
-    switch variant {
-    case "secondary": return "badge-secondary"
-    case "destructive": return "badge-destructive"  
-    case "outline": return "badge-outline"
-    default: return "badge" // primary/empty
-    }
+// getBadgeClass returns the correct single Basecoat class
+// Uses exact patterns from documentation - no dynamic class building
+func getBadgeClass(variant components.BadgeVariant, size components.Size) string {
+	// Static switch-based approach following documentation exactly
+	switch size {
+	case components.SizeSm:
+		switch variant {
+		case components.BadgeSecondary:
+			return "badge-sm-secondary"
+		case components.BadgeDestructive:
+			return "badge-sm-destructive"
+		case components.BadgeError:
+			return "badge-sm-error"
+		case components.BadgeSuccess:
+			return "badge-sm-success"
+		case components.BadgeWarning:
+			return "badge-sm-warning"
+		case components.BadgeInfo:
+			return "badge-sm-info"
+		default: // BadgePrimary, BadgeDefault, or empty
+			return "badge-sm"
+		}
+	case components.SizeLg:
+		switch variant {
+		case components.BadgeSecondary:
+			return "badge-lg-secondary"
+		case components.BadgeDestructive:
+			return "badge-lg-destructive"
+		case components.BadgeError:
+			return "badge-lg-error"
+		case components.BadgeSuccess:
+			return "badge-lg-success"
+		case components.BadgeWarning:
+			return "badge-lg-warning"
+		case components.BadgeInfo:
+			return "badge-lg-info"
+		default: // BadgePrimary, BadgeDefault, or empty
+			return "badge-lg"
+		}
+	default: // default size
+		switch variant {
+		case components.BadgeSecondary:
+			return "badge-secondary"
+		case components.BadgeDestructive:
+			return "badge-destructive"
+		case components.BadgeError:
+			return "badge-error"
+		case components.BadgeSuccess:
+			return "badge-success"
+		case components.BadgeWarning:
+			return "badge-warning"
+		case components.BadgeInfo:
+			return "badge-info"
+		default: // BadgePrimary, BadgeDefault, or empty - matches doc examples
+			return "badge"
+		}
+	}
 }
 
-// Badge renders a Basecoat badge atom
+// Badge renders a Basecoat badge atom with Tailwind utilities support
+// Follows documentation pattern: Basecoat classes + Tailwind utilities
 templ Badge(props BadgeProps) {
-    if props.Clickable || props.OnClick != "" {
-        <a
-            class={ getBadgeClass(props.Variant) }
-            if props.ID != "" {
-                id={ props.ID }
-            }
-            if props.OnClick != "" {
-                href="#"
-                onclick={ templ.ComponentScript{Call: props.OnClick} }
-            }
-            if props.AriaLabel != "" {
-                aria-label={ props.AriaLabel }
-            }
-            if props.AriaDescribedBy != "" {
-                aria-describedby={ props.AriaDescribedBy }
-            }
-            if props.AriaPressed != "" {
-                aria-pressed={ props.AriaPressed }
-            }
-        >
-            if props.Icon != nil {
-                @props.Icon
-            }
-            if props.Text != "" {
-                { props.Text }
-            }
-        </a>
-    } else {
-        <span
-            class={ getBadgeClass(props.Variant) }
-            if props.ID != "" {
-                id={ props.ID }
-            }
-            if props.AriaLabel != "" {
-                aria-label={ props.AriaLabel }
-            }
-            if props.AriaDescribedBy != "" {
-                aria-describedby={ props.AriaDescribedBy }
-            }
-        >
-            if props.Icon != nil {
-                @props.Icon
-            }
-            if props.Text != "" {
-                { props.Text }
-            }
-        </span>
-    }
+	if props.Clickable || props.Href != "" {
+		<a
+			class={
+				templ.Classes(
+					getBadgeClass(props.Variant, props.Size),
+					props.Base.ClassName, // Tailwind utilities from props (rounded-full, px-1, etc.)
+				)
+			}
+			if props.Href != "" {
+				href={props.Href}
+			} else {
+				href="#"
+			}
+			if props.Base.ID != "" {
+				id={props.Base.ID}
+			}
+			if props.Base.HTMX.Post != "" {
+				hx-post={props.Base.HTMX.Post}
+			}
+			if props.Base.HTMX.Get != "" {
+				hx-get={props.Base.HTMX.Get}
+			}
+			if props.Base.HTMX.Put != "" {
+				hx-put={props.Base.HTMX.Put}
+			}
+			if props.Base.HTMX.Patch != "" {
+				hx-patch={props.Base.HTMX.Patch}
+			}
+			if props.Base.HTMX.Delete != "" {
+				hx-delete={props.Base.HTMX.Delete}
+			}
+			if props.Base.HTMX.Target != "" {
+				hx-target={props.Base.HTMX.Target}
+			}
+			if props.Base.HTMX.Swap != "" {
+				hx-swap={props.Base.HTMX.Swap}
+			}
+			if props.Base.HTMX.Trigger != "" {
+				hx-trigger={props.Base.HTMX.Trigger}
+			}
+			if props.Base.HTMX.Confirm != "" {
+				hx-confirm={props.Base.HTMX.Confirm}
+			}
+			if props.Base.A11y.AriaLabel != "" {
+				aria-label={props.Base.A11y.AriaLabel}
+			}
+			if props.Base.A11y.AriaDescribedBy != "" {
+				aria-describedby={props.Base.A11y.AriaDescribedBy}
+			}
+			if props.Base.A11y.AriaLabelledBy != "" {
+				aria-labelledby={props.Base.A11y.AriaLabelledBy}
+			}
+			if props.Base.A11y.AriaPressed != "" {
+				aria-pressed={props.Base.A11y.AriaPressed}
+			}
+			if props.Base.A11y.Role != "" {
+				role={props.Base.A11y.Role}
+			}
+			if props.Base.Events.OnClick != "" {
+				onclick={props.Base.Events.OnClick}
+			}
+			{props.Attrs...}
+		>
+			if props.Icon != nil {
+				@props.Icon
+			}
+			if props.Text != "" {
+				{props.Text}
+			}
+		</a>
+	} else {
+		<span
+			class={
+				templ.Classes(
+					getBadgeClass(props.Variant, props.Size),
+					props.Base.ClassName, // Tailwind utilities from props (rounded-full, px-1, etc.)
+				)
+			}
+			if props.Base.ID != "" {
+				id={props.Base.ID}
+			}
+			if props.Base.A11y.AriaLabel != "" {
+				aria-label={props.Base.A11y.AriaLabel}
+			}
+			if props.Base.A11y.AriaDescribedBy != "" {
+				aria-describedby={props.Base.A11y.AriaDescribedBy}
+			}
+			if props.Base.A11y.AriaLabelledBy != "" {
+				aria-labelledby={props.Base.A11y.AriaLabelledBy}
+			}
+			if props.Base.A11y.Role != "" {
+				role={props.Base.A11y.Role}
+			}
+			{props.Attrs...}
+		>
+			if props.Icon != nil {
+				@props.Icon
+			}
+			if props.Text != "" {
+				{props.Text}
+			}
+		</span>
+	}
 }
