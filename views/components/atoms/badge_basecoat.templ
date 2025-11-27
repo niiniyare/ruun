@@ -1,0 +1,178 @@
+package atoms
+
+import (
+	"github.com/a-h/templ"
+)
+
+// Badge renders a Basecoat-compatible badge atom
+templ Badge(props BadgeProps) {
+	@badgeElement(props)
+}
+
+// badgeElement handles the actual badge rendering
+templ badgeElement(props BadgeProps) {
+	if props.IsClickable() {
+		@clickableBadge(props)
+	} else {
+		@staticBadge(props)
+	}
+}
+
+// staticBadge renders a non-clickable badge
+templ staticBadge(props BadgeProps) {
+	<span
+		class={GetBadgeClasses(props.Variant) + " " + props.ClassName}
+		if props.GetAriaLabel() != "" {
+			aria-label={props.GetAriaLabel()}
+		}
+		if props.AriaDescribedBy != "" {
+			aria-describedby={props.AriaDescribedBy}
+		}
+		if props.Role != "" {
+			role={props.Role}
+		}
+	>
+		@badgeContent(props)
+	</span>
+}
+
+// clickableBadge renders a clickable badge (link or button)
+templ clickableBadge(props BadgeProps) {
+	if props.Href != "" {
+		<a
+			class={GetBadgeClasses(props.Variant) + " " + props.ClassName}
+			href={props.Href}
+			if props.GetAriaLabel() != "" {
+				aria-label={props.GetAriaLabel()}
+			}
+			if props.AriaDescribedBy != "" {
+				aria-describedby={props.AriaDescribedBy}
+			}
+			if props.Role != "" {
+				role={props.Role}
+			}
+			if props.TabIndex != "" {
+				tabindex={props.TabIndex}
+			}
+			if props.HxPost != "" {
+				hx-post={props.HxPost}
+			}
+			if props.HxGet != "" {
+				hx-get={props.HxGet}
+			}
+			if props.HxTarget != "" {
+				hx-target={props.HxTarget}
+			}
+			if props.HxSwap != "" {
+				hx-swap={props.HxSwap}
+			}
+		>
+			@badgeContent(props)
+		</a>
+	} else {
+		<button
+			class={GetBadgeClasses(props.Variant) + " " + props.ClassName}
+			type="button"
+			if props.OnClick != "" {
+				onclick={templ.ComponentScript{Call: props.OnClick}}
+			}
+			if props.GetAriaLabel() != "" {
+				aria-label={props.GetAriaLabel()}
+			}
+			if props.AriaDescribedBy != "" {
+				aria-describedby={props.AriaDescribedBy}
+			}
+			if props.Role != "" {
+				role={props.Role}
+			}
+			if props.TabIndex != "" {
+				tabindex={props.TabIndex}
+			}
+			if props.HxPost != "" {
+				hx-post={props.HxPost}
+			}
+			if props.HxGet != "" {
+				hx-get={props.HxGet}
+			}
+			if props.HxTarget != "" {
+				hx-target={props.HxTarget}
+			}
+			if props.HxSwap != "" {
+				hx-swap={props.HxSwap}
+			}
+		>
+			@badgeContent(props)
+		</button>
+	}
+}
+
+// badgeContent renders the badge content (icon and label)
+templ badgeContent(props BadgeProps) {
+	if props.HasIcon() {
+		@icon(props.Icon)
+	}
+	if props.Label != "" {
+		{props.Label}
+	}
+}
+
+// Helper components for creating badge variants quickly
+
+// PrimaryBadge creates a primary badge with default settings
+templ PrimaryBadge(label string) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Variant: BadgePrimary,
+	})
+}
+
+// SecondaryBadge creates a secondary badge with default settings
+templ SecondaryBadge(label string) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Variant: BadgeSecondary,
+	})
+}
+
+// DestructiveBadge creates a destructive badge with default settings
+templ DestructiveBadge(label string) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Variant: BadgeDestructive,
+	})
+}
+
+// OutlineBadge creates an outline badge with default settings
+templ OutlineBadge(label string) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Variant: BadgeOutline,
+	})
+}
+
+// IconBadge creates a badge with an icon
+templ IconBadge(label string, iconName string, variant BadgeVariant) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Icon:    iconName,
+		Variant: variant,
+	})
+}
+
+// LinkBadge creates a clickable link badge
+templ LinkBadge(label string, href string, variant BadgeVariant) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Variant: variant,
+		Href:    href,
+	})
+}
+
+// ClickableBadge creates a clickable button badge
+templ ClickableBadge(label string, onClick string, variant BadgeVariant) {
+	@Badge(BadgeProps{
+		Label:   label,
+		Variant: variant,
+		OnClick: onClick,
+	})
+}

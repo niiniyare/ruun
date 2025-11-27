@@ -1,0 +1,111 @@
+package atoms
+
+import (
+	"github.com/a-h/templ"
+)
+
+// Label renders a Basecoat-compatible label atom
+templ Label(props LabelProps) {
+	@labelElement(props)
+}
+
+// labelElement handles the actual label rendering
+templ labelElement(props LabelProps) {
+	<label
+		class={GetLabelClasses() + " " + props.ClassName}
+		if props.For != "" {
+			for={props.For}
+		}
+		if props.ID != "" {
+			id={props.ID}
+		}
+		if props.GetAriaLabel() != "" {
+			aria-label={props.GetAriaLabel()}
+		}
+		if props.AriaDescribedBy != "" {
+			aria-describedby={props.AriaDescribedBy}
+		}
+	>
+		@labelContent(props)
+		@labelIndicators(props)
+	</label>
+	@labelHelpText(props)
+}
+
+// labelContent renders the main label text
+templ labelContent(props LabelProps) {
+	if props.Text != "" {
+		{props.Text}
+	}
+}
+
+// labelIndicators renders required/optional indicators
+templ labelIndicators(props LabelProps) {
+	if props.Required {
+		<span class="label-required" aria-label="required">*</span>
+	}
+	if props.Optional {
+		<span class="label-optional">(optional)</span>
+	}
+}
+
+// labelHelpText renders help text if present
+templ labelHelpText(props LabelProps) {
+	if props.HasHelpText() {
+		<p
+			class="label-help"
+			if props.GetHelpTextID() != "" {
+				id={props.GetHelpTextID()}
+			}
+		>
+			{props.HelpText}
+		</p>
+	}
+}
+
+// Helper components for creating label variants quickly
+
+// SimpleLabel creates a basic label
+templ SimpleLabel(text string, forControl string) {
+	@Label(LabelProps{
+		Text: text,
+		For:  forControl,
+	})
+}
+
+// RequiredLabel creates a required field label
+templ RequiredLabel(text string, forControl string) {
+	@Label(LabelProps{
+		Text:     text,
+		For:      forControl,
+		Required: true,
+	})
+}
+
+// OptionalLabel creates an optional field label
+templ OptionalLabel(text string, forControl string) {
+	@Label(LabelProps{
+		Text:     text,
+		For:      forControl,
+		Optional: true,
+	})
+}
+
+// LabelWithHelp creates a label with help text
+templ LabelWithHelp(text string, forControl string, helpText string) {
+	@Label(LabelProps{
+		Text:     text,
+		For:      forControl,
+		HelpText: helpText,
+	})
+}
+
+// RequiredLabelWithHelp creates a required label with help text
+templ RequiredLabelWithHelp(text string, forControl string, helpText string) {
+	@Label(LabelProps{
+		Text:     text,
+		For:      forControl,
+		Required: true,
+		HelpText: helpText,
+	})
+}

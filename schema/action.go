@@ -26,17 +26,19 @@ type Action struct {
 	Hidden   bool `json:"hidden,omitempty"`
 
 	// Unified Configuration
-	Binding      []string         `json:"binding,omitempty"`
-	Conditional  []string         `json:"conditional,omitempty"`
-	Permissions  []string         `json:"permissions,omitempty"`
-	Config       map[string]any   `json:"config,omitempty"`
+	Binding      *Binding       `json:"binding,omitempty"`
+	Conditional  *Conditional   `json:"conditional,omitempty"`
+	Permissions  []string       `json:"permissions,omitempty"`
+	Config       map[string]any `json:"config,omitempty"`
 	
 	// Unified styling (replaces old Style []string and ActionTheme)
-	Style        *Style             `json:"style,omitempty"`
-	ActionConfig *ActionConfig      `json:"action_config,omitempty"`
+	Style        *Style         `json:"style,omitempty"`
 
 	// Behavior and interaction (replaces HTMX/ActionHTMX)
-	Behavior     *Behavior          `json:"behavior,omitempty"` // Replaces old []string behavior
+	Behavior     *Behavior      `json:"behavior,omitempty"`
+	
+	// Events
+	Events       *Events        `json:"events,omitempty"`
 	
 	// Legacy Support
 	Confirm     *ActionConfirm     `json:"confirm,omitempty"`
@@ -44,28 +46,6 @@ type Action struct {
 	// Internal
 	evaluator *condition.Evaluator `json:"-"`
 }
-
-// Missing type definitions for compatibility
-
-
-// ActionHTMX type has been removed - use Behavior instead
-
-// ActionTheme defines theme overrides for this action
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Core Methods
 
@@ -91,14 +71,23 @@ func (a *Action) IsVisible(ctx context.Context, data map[string]any) (bool, erro
 		return false, nil
 	}
 
-	if len(a.Conditional) == 0 {
+	if a.Conditional == nil || a.Conditional.IsEmpty() {
 		return true, nil
 	}
 
-	// Check conditional expressions
-	for _, cond := range a.Conditional {
-		if cond == "hidden" {
-			return false, nil
+	// Use condition evaluator if available
+	if a.evaluator != nil {
+		if a.Conditional.Show != nil {
+			evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
+			return a.evaluator.Evaluate(ctx, a.Conditional.Show, evalCtx)
+		}
+		if a.Conditional.Hide != nil {
+			evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
+			result, err := a.evaluator.Evaluate(ctx, a.Conditional.Hide, evalCtx)
+			if err != nil {
+				return false, err
+			}
+			return !result, nil
 		}
 	}
 
@@ -111,15 +100,18 @@ func (a *Action) IsEnabled(ctx context.Context, data map[string]any) (bool, erro
 		return false, nil
 	}
 
-	if len(a.Conditional) == 0 {
+	if a.Conditional == nil || a.Conditional.IsEmpty() {
 		return true, nil
 	}
 
-	// Check conditional expressions
-	for _, cond := range a.Conditional {
-		if cond == "disabled" {
-			return false, nil
+	// Use condition evaluator if available
+	if a.evaluator != nil && a.Conditional.Disabled != nil {
+		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
+		result, err := a.evaluator.Evaluate(ctx, a.Conditional.Disabled, evalCtx)
+		if err != nil {
+			return false, err
 		}
+		return !result, nil
 	}
 
 	return true, nil
@@ -310,6 +302,22 @@ func (a *Action) RequiresPermission(permission string) bool {
 	return false
 }
 
+// GetConfig returns a config value by key
+func (a *Action) GetConfig(key string) any {
+	if a.Config == nil {
+		return nil
+	}
+	return a.Config[key]
+}
+
+// SetConfig sets a config value by key
+func (a *Action) SetConfig(key string, value any) {
+	if a.Config == nil {
+		a.Config = make(map[string]any)
+	}
+	a.Config[key] = value
+}
+
 
 // GetConfigMap returns the action config map, initializing it if nil
 func (a *Action) GetConfigMap() map[string]any {
@@ -495,13 +503,33 @@ func (b *ActionBuilder) WithConfirmation(message, title string) *ActionBuilder {
 	return b
 }
 
-func (b *ActionBuilder) WithConditional(conditional []string) *ActionBuilder {
+func (b *ActionBuilder) WithConditional(conditional *Conditional) *ActionBuilder {
 	b.action.Conditional = conditional
 	return b
 }
 
-func (b *ActionBuilder) WithCondition(condition []string) *ActionBuilder {
-	b.action.Conditional = condition
+func (b *ActionBuilder) WithCondition(conditional *Conditional) *ActionBuilder {
+	b.action.Conditional = conditional
+	return b
+}
+
+func (b *ActionBuilder) WithBinding(binding *Binding) *ActionBuilder {
+	b.action.Binding = binding
+	return b
+}
+
+func (b *ActionBuilder) WithBehavior(behavior *Behavior) *ActionBuilder {
+	b.action.Behavior = behavior
+	return b
+}
+
+func (b *ActionBuilder) WithEvents(events *Events) *ActionBuilder {
+	b.action.Events = events
+	return b
+}
+
+func (b *ActionBuilder) WithStyle(style *Style) *ActionBuilder {
+	b.action.Style = style
 	return b
 }
 

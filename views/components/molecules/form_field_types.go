@@ -3,7 +3,25 @@ package molecules
 import (
 	"fmt"
 	"strings"
-	"github.com/your-org/your-project/views/components/atoms"
+)
+
+// InputType defines the HTML input type
+type InputType string
+
+const (
+	InputTypeText         InputType = "text"
+	InputTypeEmail        InputType = "email"
+	InputTypePassword     InputType = "password"
+	InputTypeNumber       InputType = "number"
+	InputTypeFile         InputType = "file"
+	InputTypeTel          InputType = "tel"
+	InputTypeUrl          InputType = "url"
+	InputTypeSearch       InputType = "search"
+	InputTypeDate         InputType = "date"
+	InputTypeDatetimeLocal InputType = "datetime-local"
+	InputTypeMonth        InputType = "month"
+	InputTypeWeek         InputType = "week"
+	InputTypeTime         InputType = "time"
 )
 
 // FormFieldProps defines all properties for a form field molecule
@@ -18,8 +36,8 @@ type FormFieldProps struct {
 	Required bool   // Required field indicator
 	Optional bool   // Optional field indicator
 	
-	// Input properties
-	InputType    atoms.InputType // Type of input
+	// Input properties  
+	InputType    InputType // Type of input
 	Value        string          // Current value
 	Placeholder  string          // Placeholder text
 	Disabled     bool            // Disabled state
@@ -81,7 +99,7 @@ func GetFormFieldClasses(orientation string, hasError bool) string {
 // GetDefaultFormFieldProps returns form field props with sensible defaults
 func GetDefaultFormFieldProps() FormFieldProps {
 	return FormFieldProps{
-		InputType:   atoms.InputTypeText,
+		InputType:   InputTypeText,
 		Required:    false,
 		Optional:    false,
 		Disabled:    false,
@@ -106,7 +124,7 @@ func (p FormFieldProps) WithLabel(label string) FormFieldProps {
 }
 
 // WithInputType returns a copy of props with the specified input type
-func (p FormFieldProps) WithInputType(inputType atoms.InputType) FormFieldProps {
+func (p FormFieldProps) WithInputType(inputType InputType) FormFieldProps {
 	p.InputType = inputType
 	return p
 }
@@ -267,66 +285,49 @@ func (p FormFieldProps) GetAriaDescribedBy() string {
 	return strings.Join(refs, " ")
 }
 
-// ToLabelProps converts field props to label props
-func (p FormFieldProps) ToLabelProps() atoms.LabelProps {
-	labelProps := atoms.GetDefaultLabelProps()
-	labelProps.Text = p.Label
-	labelProps.For = p.GetFieldID()
-	labelProps.Required = p.Required
-	labelProps.Optional = p.Optional
-	
-	if p.HelpText != "" {
-		labelProps = labelProps.WithHelpText(p.HelpText)
+// GetLabelData returns data for creating a label component
+func (p FormFieldProps) GetLabelData() map[string]interface{} {
+	return map[string]interface{}{
+		"text":     p.Label,
+		"for":      p.GetFieldID(),
+		"required": p.Required,
+		"optional": p.Optional,
+		"helpText": p.HelpText,
 	}
-	
-	return labelProps
 }
 
-// ToInputProps converts field props to input props
-func (p FormFieldProps) ToInputProps() atoms.InputProps {
-	inputProps := atoms.GetDefaultInputProps()
-	inputProps.Name = p.Name
-	inputProps.ID = p.GetFieldID()
-	inputProps.Type = p.InputType
-	inputProps.Value = p.Value
-	inputProps.Placeholder = p.Placeholder
-	inputProps.Required = p.Required
-	inputProps.Disabled = p.Disabled
-	inputProps.ReadOnly = p.ReadOnly
-	inputProps.Error = p.ShowError
-	inputProps.ErrorMessage = p.ErrorMessage
-	inputProps.AriaInvalid = p.ShowError
-	
-	// Set constraints
-	inputProps.MinLength = p.MinLength
-	inputProps.MaxLength = p.MaxLength
-	inputProps.Min = p.Min
-	inputProps.Max = p.Max
-	inputProps.Step = p.Step
-	inputProps.Pattern = p.Pattern
-	
-	// Set event handlers
-	inputProps.OnChange = p.OnChange
-	inputProps.OnInput = p.OnInput
-	inputProps.OnFocus = p.OnFocus
-	inputProps.OnBlur = p.OnBlur
-	
-	// Set HTMX
-	inputProps.HxPost = p.HxPost
-	inputProps.HxGet = p.HxGet
-	inputProps.HxTarget = p.HxTarget
-	inputProps.HxTrigger = p.HxTrigger
-	inputProps.HxSwap = p.HxSwap
-	
-	// Set aria-describedby
-	inputProps.AriaDescribedBy = p.GetAriaDescribedBy()
-	
-	// Override aria-label if provided
-	if p.AriaLabel != "" {
-		inputProps.AriaLabel = p.AriaLabel
+// GetInputData returns data for creating an input component
+func (p FormFieldProps) GetInputData() map[string]interface{} {
+	return map[string]interface{}{
+		"name":             p.Name,
+		"id":               p.GetFieldID(),
+		"type":             string(p.InputType),
+		"value":            p.Value,
+		"placeholder":      p.Placeholder,
+		"required":         p.Required,
+		"disabled":         p.Disabled,
+		"readOnly":         p.ReadOnly,
+		"error":            p.ShowError,
+		"errorMessage":     p.ErrorMessage,
+		"ariaInvalid":      p.ShowError,
+		"minLength":        p.MinLength,
+		"maxLength":        p.MaxLength,
+		"min":              p.Min,
+		"max":              p.Max,
+		"step":             p.Step,
+		"pattern":          p.Pattern,
+		"onChange":         p.OnChange,
+		"onInput":          p.OnInput,
+		"onFocus":          p.OnFocus,
+		"onBlur":           p.OnBlur,
+		"hxPost":           p.HxPost,
+		"hxGet":            p.HxGet,
+		"hxTarget":         p.HxTarget,
+		"hxTrigger":        p.HxTrigger,
+		"hxSwap":           p.HxSwap,
+		"ariaDescribedBy":  p.GetAriaDescribedBy(),
+		"ariaLabel":        p.AriaLabel,
 	}
-	
-	return inputProps
 }
 
 // HasHelpText returns true if the field has help text
@@ -359,10 +360,9 @@ func (p FormFieldProps) Validate() error {
 		return fmt.Errorf("form field must have a Label")
 	}
 	
-	// Validate the input props
-	inputProps := p.ToInputProps()
-	if err := inputProps.Validate(); err != nil {
-		return fmt.Errorf("invalid input props: %w", err)
+	// Basic validation
+	if p.InputType == "" {
+		return fmt.Errorf("form field must have an InputType")
 	}
 	
 	return nil

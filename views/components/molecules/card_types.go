@@ -2,16 +2,42 @@ package molecules
 
 import (
 	"strings"
-	"github.com/your-org/your-project/views/components/atoms"
 	"github.com/a-h/templ"
 )
+
+// ButtonVariant defines the visual style of a button (re-exported from atoms)
+type ButtonVariant string
+
+const (
+	ButtonPrimary     ButtonVariant = "primary"
+	ButtonSecondary   ButtonVariant = "secondary"
+	ButtonOutline     ButtonVariant = "outline"
+	ButtonGhost       ButtonVariant = "ghost"
+	ButtonLink        ButtonVariant = "link"
+	ButtonDestructive ButtonVariant = "destructive"
+)
+
+// ButtonSize defines the size of a button (re-exported from atoms)
+type ButtonSize string
+
+const (
+	ButtonSizeSm ButtonSize = "sm"
+	ButtonSizeMd ButtonSize = "md"
+	ButtonSizeLg ButtonSize = "lg"
+)
+
+// BadgeProps simplified for this context
+type BadgeProps struct {
+	Label   string
+	Variant string
+}
 
 // CardProps defines all properties for a card component
 type CardProps struct {
 	// Header content
 	Title       string           // Card title
 	Description string           // Card description/subtitle
-	Badge       *atoms.BadgeProps // Optional badge in header
+	Badge       *BadgeProps // Optional badge in header
 	
 	// Content
 	Content templ.Component // Main card content
@@ -44,9 +70,9 @@ type CardProps struct {
 
 // CardAction represents an action button in the card footer
 type CardAction struct {
-	Label     string               // Button text
-	Variant   atoms.ButtonVariant  // Button style
-	Size      atoms.ButtonSize     // Button size
+	Label     string        // Button text
+	Variant   ButtonVariant // Button style
+	Size      ButtonSize    // Button size
 	Icon      string               // Optional icon
 	OnClick   string               // JavaScript click handler
 	HxPost    string               // HTMX post URL
@@ -96,7 +122,7 @@ func (p CardProps) WithDescription(description string) CardProps {
 }
 
 // WithBadge returns a copy of props with a badge in the header
-func (p CardProps) WithBadge(badge atoms.BadgeProps) CardProps {
+func (p CardProps) WithBadge(badge BadgeProps) CardProps {
 	p.Badge = &badge
 	return p
 }
@@ -232,19 +258,19 @@ func (p CardProps) GetTabIndex() string {
 func NewCardAction(label string) CardAction {
 	return CardAction{
 		Label:   label,
-		Variant: atoms.ButtonSecondary,
-		Size:    atoms.ButtonSizeSm,
+		Variant: ButtonSecondary,
+		Size:    ButtonSizeSm,
 	}
 }
 
 // WithVariant returns a copy of the action with the specified variant
-func (a CardAction) WithVariant(variant atoms.ButtonVariant) CardAction {
+func (a CardAction) WithVariant(variant ButtonVariant) CardAction {
 	a.Variant = variant
 	return a
 }
 
 // WithSize returns a copy of the action with the specified size
-func (a CardAction) WithSize(size atoms.ButtonSize) CardAction {
+func (a CardAction) WithSize(size ButtonSize) CardAction {
 	a.Size = size
 	return a
 }
@@ -268,19 +294,19 @@ func (a CardAction) WithHtmx(method, url, target, swap string) CardAction {
 	return a
 }
 
-// ToButtonProps converts card action to button props
-func (a CardAction) ToButtonProps() atoms.ButtonProps {
-	buttonProps := atoms.GetDefaultButtonProps()
-	buttonProps.Label = a.Label
-	buttonProps.Variant = a.Variant
-	buttonProps.Size = a.Size
-	buttonProps.Icon = a.Icon
-	buttonProps.OnClick = a.OnClick
-	buttonProps.HxPost = a.HxPost
-	buttonProps.HxGet = a.HxGet
-	buttonProps.HxTarget = a.HxTarget
-	buttonProps.HxSwap = a.HxSwap
-	buttonProps.ClassName = a.ClassName
-	
-	return buttonProps
+// ToButtonProps converts card action to a simple button representation
+// Note: This would need to be adapted based on the actual button component interface
+func (a CardAction) GetButtonData() map[string]interface{} {
+	return map[string]interface{}{
+		"label":     a.Label,
+		"variant":   string(a.Variant),
+		"size":      string(a.Size),
+		"icon":      a.Icon,
+		"onClick":   a.OnClick,
+		"hxPost":    a.HxPost,
+		"hxGet":     a.HxGet,
+		"hxTarget":  a.HxTarget,
+		"hxSwap":    a.HxSwap,
+		"className": a.ClassName,
+	}
 }

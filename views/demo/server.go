@@ -21,7 +21,7 @@ func main() {
 	app.Use(recover.New())
 
 	// Serve static assets (CSS, JS)
-	app.Static("/static", "../static")
+	app.Static("/static", "../../static/dist/")
 
 	// Main demo page (kitchen sink)
 	app.Get("/", func(c *fiber.Ctx) error {

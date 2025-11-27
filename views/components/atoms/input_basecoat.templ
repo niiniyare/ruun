@@ -1,0 +1,217 @@
+package atoms
+
+import (
+	"github.com/a-h/templ"
+	"strconv"
+)
+
+// Input renders a Basecoat-compatible input atom
+templ Input(props InputProps) {
+	@inputElement(props)
+}
+
+// inputElement handles the actual input rendering
+templ inputElement(props InputProps) {
+	<input
+		class={GetInputClasses(props.Type, props.Error, props.Disabled, props.ReadOnly) + " " + props.ClassName}
+		type={string(props.Type)}
+		if props.Name != "" {
+			name={props.Name}
+		}
+		if props.ID != "" {
+			id={props.ID}
+		}
+		if props.Value != "" {
+			value={props.Value}
+		}
+		if props.Placeholder != "" {
+			placeholder={props.Placeholder}
+		}
+		if props.Required {
+			required
+		}
+		if props.Disabled {
+			disabled
+		}
+		if props.ReadOnly {
+			readonly
+		}
+		if props.MinLength > 0 {
+			minlength={strconv.Itoa(props.MinLength)}
+		}
+		if props.MaxLength > 0 {
+			maxlength={strconv.Itoa(props.MaxLength)}
+		}
+		if props.Min != "" {
+			min={props.Min}
+		}
+		if props.Max != "" {
+			max={props.Max}
+		}
+		if props.Step != "" {
+			step={props.Step}
+		}
+		if props.Pattern != "" {
+			pattern={props.Pattern}
+		}
+		if props.OnChange != "" {
+			onchange={templ.ComponentScript{Call: props.OnChange}}
+		}
+		if props.OnInput != "" {
+			oninput={templ.ComponentScript{Call: props.OnInput}}
+		}
+		if props.OnFocus != "" {
+			onfocus={templ.ComponentScript{Call: props.OnFocus}}
+		}
+		if props.OnBlur != "" {
+			onblur={templ.ComponentScript{Call: props.OnBlur}}
+		}
+		if props.HxPost != "" {
+			hx-post={props.HxPost}
+		}
+		if props.HxGet != "" {
+			hx-get={props.HxGet}
+		}
+		if props.HxTarget != "" {
+			hx-target={props.HxTarget}
+		}
+		if props.HxTrigger != "" {
+			hx-trigger={props.HxTrigger}
+		}
+		if props.HxSwap != "" {
+			hx-swap={props.HxSwap}
+		}
+		if props.AriaLabel != "" {
+			aria-label={props.AriaLabel}
+		}
+		if props.GetAriaDescribedBy() != "" {
+			aria-describedby={props.GetAriaDescribedBy()}
+		}
+		aria-invalid={strconv.FormatBool(props.AriaInvalid)}
+	/>
+}
+
+// Helper components for creating input variants quickly
+
+// TextInput creates a text input with default settings
+templ TextInput(name string, placeholder string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        InputTypeText,
+		Value:       "",
+		Placeholder: placeholder,
+	})
+}
+
+// EmailInput creates an email input with default settings
+templ EmailInput(name string, placeholder string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        InputTypeEmail,
+		Value:       "",
+		Placeholder: placeholder,
+	})
+}
+
+// PasswordInput creates a password input with default settings
+templ PasswordInput(name string, placeholder string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        InputTypePassword,
+		Value:       "",
+		Placeholder: placeholder,
+	})
+}
+
+// NumberInput creates a number input with default settings
+templ NumberInput(name string, placeholder string, min string, max string, step string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        InputTypeNumber,
+		Value:       "",
+		Placeholder: placeholder,
+		Min:         min,
+		Max:         max,
+		Step:        step,
+	})
+}
+
+// SearchInput creates a search input with default settings
+templ SearchInput(name string, placeholder string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        InputTypeSearch,
+		Value:       "",
+		Placeholder: placeholder,
+	})
+}
+
+// DateInput creates a date input with default settings
+templ DateInput(name string) {
+	@Input(InputProps{
+		Name: name,
+		Type: InputTypeDate,
+	})
+}
+
+// FileInput creates a file input with default settings
+templ FileInput(name string, accept string) {
+	<input
+		class="input"
+		type="file"
+		name={name}
+		if accept != "" {
+			accept={accept}
+		}
+	/>
+}
+
+// RequiredInput creates a required input with validation
+templ RequiredInput(inputType InputType, name string, placeholder string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        inputType,
+		Value:       "",
+		Placeholder: placeholder,
+		Required:    true,
+	})
+}
+
+// InputWithError creates an input in error state
+templ InputWithError(inputType InputType, name string, value string, errorMessage string) {
+	@Input(InputProps{
+		Name:         name,
+		Type:         inputType,
+		Value:        value,
+		Error:        true,
+		ErrorMessage: errorMessage,
+		AriaInvalid:  true,
+	})
+}
+
+// HTMXInput creates an input with HTMX configuration
+templ HTMXInput(inputType InputType, name string, placeholder string, hxGet string, hxTarget string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        inputType,
+		Value:       "",
+		Placeholder: placeholder,
+		HxGet:       hxGet,
+		HxTarget:    hxTarget,
+		HxTrigger:   "keyup changed delay:300ms",
+		HxSwap:      "innerHTML",
+	})
+}
+
+// InputWithConstraints creates an input with validation constraints
+templ InputWithConstraints(name string, placeholder string, minLength int, maxLength int, pattern string) {
+	@Input(InputProps{
+		Name:        name,
+		Type:        InputTypeText,
+		Value:       "",
+		Placeholder: placeholder,
+		MinLength:   minLength,
+		MaxLength:   maxLength,
+		Pattern:     pattern,
+	})
+}

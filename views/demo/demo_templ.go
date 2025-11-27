@@ -30,7 +30,7 @@ func DemoPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Awo ERP - Component Gallery</title><link rel=\"stylesheet\" href=\"/static/css/basecoat.css\"><link rel=\"stylesheet\" href=\"/static/css/components/index.css\"><script src=\"/static/js/htmx.min.js\" defer></script><script src=\"/static/js/alpine.min.js\" defer></script></head><body class=\"min-h-screen bg-background\"><!-- Navigation --><nav class=\"sticky top-0 z-50 border-b bg-background/95 backdrop-blur\"><div class=\"container mx-auto px-4\"><div class=\"flex h-16 items-center justify-between\"><div class=\"flex items-center gap-6\"><a href=\"/\" class=\"text-xl font-bold\">Awo ERP</a> <span class=\"text-muted-foreground\">Component Gallery</span></div><div class=\"flex items-center gap-4\"><a href=\"#atoms\" class=\"text-sm hover:text-primary\">Atoms</a> <a href=\"#molecules\" class=\"text-sm hover:text-primary\">Molecules</a> <a href=\"#organisms\" class=\"text-sm hover:text-primary\">Organisms</a> <a href=\"#templates\" class=\"text-sm hover:text-primary\">Templates</a></div></div></div></nav><!-- Hero --><header class=\"border-b bg-muted/30 py-12\"><div class=\"container mx-auto px-4 text-center\"><h1 class=\"text-4xl font-bold tracking-tight\">Component Gallery</h1><p class=\"mt-4 text-lg text-muted-foreground\">Kitchen sink demo of all UI components following Basecoat + Atomic Design patterns</p><div class=\"mt-6 flex justify-center gap-4\"><span class=\"badge\">Basecoat UI</span> <span class=\"badge badge-secondary\">HTMX</span> <span class=\"badge badge-outline\">Alpine.js</span> <span class=\"badge badge-outline\">Templ</span></div></div></header><!-- Main Content --><main class=\"container mx-auto px-4 py-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Awo ERP - Component Gallery</title><!-- <link rel=\"stylesheet\" href=\"/static/css/basecoat.css\"/> --><link rel=\"stylesheet\" href=\"/static/dist/css/base.min.css\"><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><script src=\"https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js\" integrity=\"sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz\" crossorigin=\"anonymous\"></script></head><body class=\"min-h-screen bg-background\"><!-- Navigation --><nav class=\"sticky top-0 z-50 border-b bg-background/95 backdrop-blur\"><div class=\"container mx-auto px-4\"><div class=\"flex h-16 items-center justify-between\"><div class=\"flex items-center gap-6\"><a href=\"/\" class=\"text-xl font-bold\">Awo ERP</a> <span class=\"text-muted-foreground\">Component Gallery</span></div><div class=\"flex items-center gap-4\"><a href=\"#atoms\" class=\"text-sm hover:text-primary\">Atoms</a> <a href=\"#molecules\" class=\"text-sm hover:text-primary\">Molecules</a> <a href=\"#organisms\" class=\"text-sm hover:text-primary\">Organisms</a> <a href=\"#templates\" class=\"text-sm hover:text-primary\">Templates</a></div></div></div></nav><!-- Hero --><header class=\"border-b bg-muted/30 py-12\"><div class=\"container mx-auto px-4 text-center\"><h1 class=\"text-4xl font-bold tracking-tight\">Component Gallery</h1><p class=\"mt-4 text-lg text-muted-foreground\">Kitchen sink demo of all UI components following Basecoat + Atomic Design patterns</p><div class=\"mt-6 flex justify-center gap-4\"><span class=\"badge\">Basecoat UI</span> <span class=\"badge badge-secondary\">HTMX</span> <span class=\"badge badge-outline\">Alpine.js</span> <span class=\"badge badge-outline\">Templ</span></div></div></header><!-- Main Content --><main class=\"container mx-auto px-4 py-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -701,7 +701,7 @@ func DemoCard(title, classes string) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/demo/demo.templ`, Line: 468, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/demo/demo.templ`, Line: 469, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -714,7 +714,7 @@ func DemoCard(title, classes string) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(classes)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/demo/demo.templ`, Line: 469, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/demo/demo.templ`, Line: 470, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {

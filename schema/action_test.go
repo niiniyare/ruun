@@ -186,10 +186,15 @@ func (suite *ActionTestSuite) TestActionUnifiedConfig() {
 	suite.Require().True(action.Behavior.IsThrottled())
 	
 	// Test unified binding configuration
-	action.Binding = []string{"click", "submit"}
-	suite.Require().Len(action.Binding, 2)
-	suite.Require().Contains(action.Binding, "click")
-	suite.Require().Contains(action.Binding, "submit")
+	action.Binding = &Binding{
+		On: map[string]string{
+			"click": "handleClick()",
+			"submit": "handleSubmit()",
+		},
+	}
+	suite.Require().NotNil(action.Binding)
+	suite.Require().Contains(action.Binding.On, "click")
+	suite.Require().Contains(action.Binding.On, "submit")
 }
 
 // Helper method to create a mock condition evaluator
@@ -439,7 +444,14 @@ func (suite *ActionTestSuite) TestActionWithConditions() {
 		ID:   "conditional-action",
 		Type: ActionButton,
 		Text: "Conditional Button",
-		Conditional: []string{"user_role=admin"},
+		Conditional: &Conditional{
+			Show: &condition.ConditionGroup{
+				Operator: condition.OperatorAnd,
+				Conditions: []*condition.Condition{
+					{Field: "user_role", Operator: condition.OperatorEquals, Value: "admin"},
+				},
+			},
+		},
 	}
 	// Test with permissions instead of data
 	canView := action.CanView([]string{"admin"})
@@ -678,7 +690,15 @@ func (suite *ActionTestSuite) TestActionBuilder() {
 	perms := []string{"admin", "manager"}
 	builder.WithPermissions(perms)
 	// Test WithCondition
-	conditions := []string{"user.role=admin", "user.active=true"}
+	conditions := &Conditional{
+		Show: &condition.ConditionGroup{
+			Operator: condition.OperatorAnd,
+			Conditions: []*condition.Condition{
+				{Field: "user.role", Operator: condition.OperatorEquals, Value: "admin"},
+				{Field: "user.active", Operator: condition.OperatorEquals, Value: true},
+			},
+		},
+	}
 	builder.WithCondition(conditions)
 	// Test WithEvaluator
 	evaluator := suite.createMockConditionEvaluator()
