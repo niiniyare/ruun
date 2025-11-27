@@ -266,6 +266,14 @@ func (b *SchemaBuilder) WithI18n(defaultLocale string, supported ...string) *Sch
 
 // Framework Integration
 
+// WithBehavior sets the behavior configuration for the schema
+func (b *SchemaBuilder) WithBehavior(behavior *Behavior) *SchemaBuilder {
+	b.schema.Behavior = behavior
+	return b
+}
+
+// WithHTMX is deprecated. Use WithBehavior instead.
+// Kept for backward compatibility
 func (b *SchemaBuilder) WithHTMX(post, target string) *SchemaBuilder {
 	b.schema.Behavior = &Behavior{
 		Method: "POST",
