@@ -8,138 +8,199 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
-
-// Note: Icon sizing handled via Basecoat contextual styling
-// Icons inherit size from parent context or use data-size attribute
+import "github.com/a-h/templ"
+import "github.com/awo-development/ruun/views/components"
 
 // IconProps defines all properties for the Icon atom
+// Icon component renders SVG icons with Basecoat contextual sizing
 type IconProps struct {
 	// Core attributes
-	Name  string `json:"name"`
-	Title string `json:"title"`
+	Name string `json:"name"`
 
-	// Basecoat sizing (optional - inherits from context by default)
-	Size string `json:"size,omitempty"` // "sm", "md", "lg" (empty = inherit from context)
+	// Size using shared types (defaults to inherit from context)
+	Size components.Size `json:"size,omitempty"`
 
-	// SVG-specific attributes
-	Fill        string `json:"fill"`
-	Stroke      string `json:"stroke"`
-	StrokeWidth string `json:"strokeWidth"`
-	ViewBox     string `json:"viewBox"`
-
-	// Event handlers (pre-resolved externally)
-	OnClick string `json:"onClick"`
-	OnHover string `json:"onHover"`
-	OnFocus string `json:"onFocus"`
-
-	// ARIA accessibility attributes
-	AriaLabel  string `json:"ariaLabel"`
-	AriaHidden string `json:"ariaHidden"`
-	AriaRole   string `json:"ariaRole"`
-
-	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	// Shared component props
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-// getIconAttributes builds SVG attributes with contextual sizing
-func getIconSize(size string) (string, string) {
+// getIconSize returns width and height based on Size
+func getIconSize(size components.Size) (string, string) {
 	switch size {
-	case "sm":
+	case components.SizeXs:
+		return "12", "12"
+	case components.SizeSm:
 		return "16", "16"
-	case "lg":
+	case components.SizeLg:
 		return "32", "32"
-	case "md", "":
+	case components.SizeXl:
+		return "40", "40"
+	case components.SizeMd, components.SizeDefault, "":
 		return "24", "24"
 	default:
 		return "24", "24"
 	}
 }
 
-// buildIconAttributes creates all HTML attributes for the icon
+// buildIconAttributes builds templ.Attributes for the SVG element
 func buildIconAttributes(props IconProps) templ.Attributes {
 	width, height := getIconSize(props.Size)
 
 	attrs := templ.Attributes{
 		"width":           width,
 		"height":          height,
-		"xmlns":           "http://www.w3.org/2000/svg",
+		"viewBox":         "0 0 24 24",
+		"fill":            "none",
+		"stroke":          "currentColor",
+		"stroke-width":    "2",
 		"stroke-linecap":  "round",
 		"stroke-linejoin": "round",
+		"xmlns":           "http://www.w3.org/2000/svg",
 	}
 
-	// Set defaults or use provided values
-	if props.ViewBox != "" {
-		attrs["viewBox"] = props.ViewBox
-	} else {
-		attrs["viewBox"] = "0 0 24 24"
+	// Add ID if provided
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
 	}
 
-	if props.Fill != "" {
-		attrs["fill"] = props.Fill
-	} else {
-		attrs["fill"] = "none"
+	// Add class if provided
+	if props.Base.ClassName != "" {
+		attrs["class"] = props.Base.ClassName
 	}
 
-	if props.Stroke != "" {
-		attrs["stroke"] = props.Stroke
-	} else {
-		attrs["stroke"] = "currentColor"
+	// Add style if provided
+	if props.Base.Style != "" {
+		attrs["style"] = props.Base.Style
 	}
 
-	if props.StrokeWidth != "" {
-		attrs["stroke-width"] = props.StrokeWidth
-	} else {
-		attrs["stroke-width"] = "2"
-	}
-
-	// Title attribute
-	if props.Title != "" {
-		attrs["title"] = props.Title
-	}
-
-	// Event handlers
-	if props.OnClick != "" {
-		attrs["onclick"] = props.OnClick
-	}
-	if props.OnHover != "" {
-		attrs["onmouseover"] = props.OnHover
-	}
-	if props.OnFocus != "" {
-		attrs["onfocus"] = props.OnFocus
-	}
-
-	// ARIA attributes
-	if props.AriaLabel != "" {
-		attrs["aria-label"] = props.AriaLabel
-	}
-	if props.AriaHidden != "" {
-		attrs["aria-hidden"] = props.AriaHidden
-	}
-	if props.AriaRole != "" {
-		attrs["role"] = props.AriaRole
-	}
-
-	// Tab index
-	if props.TabIndex != 0 {
-		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
-	}
-
-	// Size data attribute for Basecoat context
+	// Add size data attribute for Basecoat context
 	if props.Size != "" {
-		attrs["data-size"] = props.Size
+		attrs["data-size"] = string(props.Size)
 	}
 
-	// Data attributes
-	for key, value := range props.DataAttrs {
+	// Add data attributes
+	for key, value := range props.Base.DataAttrs {
 		attrs["data-"+key] = value
 	}
 
-	// Merge custom attributes (allows override)
-	for key, value := range props.Attributes {
-		attrs[key] = value
+	// Add HTMX attributes
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+	if props.Base.HTMX.Headers != "" {
+		attrs["hx-headers"] = props.Base.HTMX.Headers
+	}
+	if props.Base.HTMX.Vals != "" {
+		attrs["hx-vals"] = props.Base.HTMX.Vals
+	}
+	if props.Base.HTMX.Include != "" {
+		attrs["hx-include"] = props.Base.HTMX.Include
+	}
+	if props.Base.HTMX.Boost {
+		attrs["hx-boost"] = "true"
+	}
+	if props.Base.HTMX.PushURL != "" {
+		attrs["hx-push-url"] = props.Base.HTMX.PushURL
+	}
+
+	// Add accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.AriaExpanded != "" {
+		attrs["aria-expanded"] = props.Base.A11y.AriaExpanded
+	}
+	if props.Base.A11y.AriaPressed != "" {
+		attrs["aria-pressed"] = props.Base.A11y.AriaPressed
+	}
+	if props.Base.A11y.AriaSelected != "" {
+		attrs["aria-selected"] = props.Base.A11y.AriaSelected
+	}
+	if props.Base.A11y.AriaChecked != "" {
+		attrs["aria-checked"] = props.Base.A11y.AriaChecked
+	}
+	if props.Base.A11y.AriaDisabled != "" {
+		attrs["aria-disabled"] = props.Base.A11y.AriaDisabled
+	}
+	if props.Base.A11y.AriaHidden != "" {
+		attrs["aria-hidden"] = props.Base.A11y.AriaHidden
+	}
+	if props.Base.A11y.AriaInvalid != "" {
+		attrs["aria-invalid"] = props.Base.A11y.AriaInvalid
+	}
+	if props.Base.A11y.AriaRequired != "" {
+		attrs["aria-required"] = props.Base.A11y.AriaRequired
+	}
+	if props.Base.A11y.AriaReadOnly != "" {
+		attrs["aria-readonly"] = props.Base.A11y.AriaReadOnly
+	}
+	if props.Base.A11y.AriaLive != "" {
+		attrs["aria-live"] = props.Base.A11y.AriaLive
+	}
+	if props.Base.A11y.AriaAtomic != "" {
+		attrs["aria-atomic"] = props.Base.A11y.AriaAtomic
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+	if props.Base.A11y.TabIndex != "" {
+		attrs["tabindex"] = props.Base.A11y.TabIndex
+	}
+
+	// Add event handlers
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+	if props.Base.Events.OnMouseOver != "" {
+		attrs["onmouseover"] = props.Base.Events.OnMouseOver
+	}
+	if props.Base.Events.OnMouseOut != "" {
+		attrs["onmouseout"] = props.Base.Events.OnMouseOut
+	}
+	if props.Base.Events.OnFocus != "" {
+		attrs["onfocus"] = props.Base.Events.OnFocus
+	}
+	if props.Base.Events.OnBlur != "" {
+		attrs["onblur"] = props.Base.Events.OnBlur
+	}
+	if props.Base.Events.OnKeyDown != "" {
+		attrs["onkeydown"] = props.Base.Events.OnKeyDown
+	}
+	if props.Base.Events.OnKeyUp != "" {
+		attrs["onkeyup"] = props.Base.Events.OnKeyUp
+	}
+	if props.Base.Events.OnKeyPress != "" {
+		attrs["onkeypress"] = props.Base.Events.OnKeyPress
 	}
 
 	return attrs
@@ -179,7 +240,7 @@ func getIconPath(name string) string {
 	case "user":
 		return `<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>`
 	case "users":
-		return `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 21-3.5-3.5"/><circle cx="18" cy="13" r="5"/>`
+		return `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`
 	case "settings", "gear":
 		return `<path d="M12.22 2h-.44a2 2 0 0 0-2 2.18l.18 1.72a2 2 0 0 1-.73 1.73l-1.35.95a2 2 0 0 0-.64 2.46l.22.43a2 2 0 0 0 2.46.64l1.53-.85a2 2 0 0 1 1.92 0l1.53.85a2 2 0 0 0 2.46-.64l.22-.43a2 2 0 0 0-.64-2.46l-1.35-.95A2 2 0 0 1 14.4 5.9l.18-1.72A2 2 0 0 0 12.58 2z"/><circle cx="12" cy="12" r="3"/>`
 	case "home":
