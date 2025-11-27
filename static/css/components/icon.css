@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Icon Component
+   ========================================================================== */
+
+/**
+ * Icon component with size variants and optional spin animation
+ * 
+ * Example usage:
+ * <svg class="icon icon-md">...</svg>
+ * <svg class="icon icon-lg icon-spin">...</svg>
+ */
+
+/* Base
+   ========================================================================== */
+
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* Size Variants
+   ========================================================================== */
+
+.icon-xs {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.icon-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.icon-md {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-lg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.icon-xl {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Animation Variants
+   ========================================================================== */
+
+.icon-spin {
+  animation: icon-spin 2s linear infinite;
+}
+
+@keyframes icon-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* State Modifiers
+   ========================================================================== */
+
+/* Ensure icons maintain aspect ratio */
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Remove default button/link styles when icon is inside */
+button .icon,
+a .icon {
+  pointer-events: none;
+}
+
+/* Accessibility
+   ========================================================================== */
+
+/* Hide decorative icons from screen readers */
+.icon[aria-hidden="true"] {
+  speak: none;
+}
