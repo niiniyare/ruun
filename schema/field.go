@@ -57,6 +57,7 @@ type Field struct {
 	// Framework Integration
 	Behavior *Behavior `json:"behavior,omitempty"`
 	Binding  *Binding  `json:"binding,omitempty"`
+	Events   *Events   `json:"events,omitempty"`
 
 	// Internationalization
 	I18n *FieldI18n `json:"i18n,omitempty"`
@@ -963,6 +964,21 @@ func (b *FieldBuilder) WithPermission(permission string) *FieldBuilder {
 
 func (b *FieldBuilder) WithRoles(roles ...string) *FieldBuilder {
 	b.field.RequireRoles = roles
+	return b
+}
+
+func (b *FieldBuilder) WithBehavior(behavior *Behavior) *FieldBuilder {
+	b.field.Behavior = behavior
+	return b
+}
+
+func (b *FieldBuilder) WithBinding(binding *Binding) *FieldBuilder {
+	b.field.Binding = binding
+	return b
+}
+
+func (b *FieldBuilder) WithEvents(events *Events) *FieldBuilder {
+	b.field.Events = events
 	return b
 }
 
