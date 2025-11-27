@@ -3,8 +3,36 @@
  * These provide components that Basecoat doesn't include natively
  */
 
+/* Variables */
+@import './_variables.css';
+
+/* Base Components */
 @import './avatar.css';
+@import './divider.css';
+@import './empty-state.css';
+@import './icon.css';
+@import './kbd.css';
+@import './link.css';
+@import './menu.css';
 @import './progress.css';
 @import './skeleton.css';
-@import './empty-state.css';
-@import './menu.css';
+
+/* Input Components */
+@import './filter-chip.css';
+@import './input-group.css';
+
+/* Data Components */
+@import './data-table.css';
+@import './stats-card.css';
+
+/* Layout Components */
+@import './layout-auth.css';
+@import './layout-dashboard.css';
+@import './layout-error.css';
+@import './layout-form.css';
+@import './layout-kanban.css';
+@import './layout-master-detail.css';
+@import './layout-wizard.css';
+
+/* Complex Components */
+@import './wizard.css';

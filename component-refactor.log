@@ -175,3 +175,6 @@
 [0;35m[TASK][0m Executing T3.16: Generate layout CSS files
 [0;34m[INFO][0m Generating layout CSS...
 [0;32m[SUCCESS][0m Task T3.16 completed
+[0;35m[TASK][0m Executing T3.17: Create components index.css
+[0;34m[INFO][0m Creating components index.css...
+[0;32m[SUCCESS][0m Task T3.17 completed
