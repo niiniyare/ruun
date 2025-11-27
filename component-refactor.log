@@ -223,3 +223,5 @@
 [0;34m[INFO][0m Reading existing docs: ./views/docs/avatar.md
 [SUCCESS] Task T4.8 completed: Refactor avatar.templ
 [0;32m[SUCCESS][0m Task T4.8 completed
+[0;35m[TASK][0m Executing T4.9: Refactor checkbox.templ
+[0;34m[INFO][0m Reading existing docs: ./views/docs/checkbox.md
