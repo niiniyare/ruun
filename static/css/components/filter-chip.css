@@ -1,0 +1,136 @@
+/* Filter Chip Component - Basecoat Pattern */
+
+/* Base */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-chip:hover {
+  background-color: hsl(var(--muted) / 0.8);
+  border-color: hsl(var(--border) / 0.8);
+}
+
+.filter-chip:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+/* Active variant */
+.filter-chip-active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+
+.filter-chip-active:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  border-color: hsl(var(--primary) / 0.9);
+}
+
+/* Remove button */
+.filter-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.25rem;
+  margin-right: -0.25rem;
+  border-radius: 9999px;
+  transition-property: background-color, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  opacity: 0.7;
+}
+
+.filter-chip-remove:hover {
+  opacity: 1;
+  background-color: hsl(var(--foreground) / 0.1);
+}
+
+.filter-chip-remove:focus {
+  outline: none;
+  opacity: 1;
+}
+
+/* Remove icon */
+.filter-chip-remove::before {
+  content: '×';
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+/* Disabled state */
+.filter-chip:disabled,
+.filter-chip[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Size variants */
+.filter-chip-sm {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.filter-chip-sm .filter-chip-remove {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-right: -0.125rem;
+}
+
+.filter-chip-lg {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.filter-chip-lg .filter-chip-remove {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: -0.375rem;
+}
+
+/* Grouped filter chips */
+.filter-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Animation for removal */
+@keyframes filter-chip-fade-out {
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.filter-chip-removing {
+  animation: filter-chip-fade-out 200ms ease-out forwards;
+}
