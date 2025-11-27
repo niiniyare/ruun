@@ -1,0 +1,182 @@
+/* Link Component
+   ========================================================================== */
+
+/**
+ * Link component with semantic CSS classes following Basecoat methodology.
+ * Provides base link styling and variants for different link types.
+ * 
+ * Structure:
+ * - .link - Base link class
+ * - .link-muted - Muted/secondary link variant
+ * - .link-external - External link variant with indicator
+ */
+
+/* Base Link
+   ========================================================================== */
+
+/**
+ * 1. Remove default underline for cleaner appearance
+ * 2. Smooth color transitions on hover
+ * 3. Inherit font size from parent context
+ * 4. Pointer cursor to indicate interactivity
+ */
+.link {
+  color: var(--color-primary);
+  text-decoration: none; /* 1 */
+  transition: color 150ms ease-in-out, opacity 150ms ease-in-out; /* 2 */
+  font-size: inherit; /* 3 */
+  cursor: pointer; /* 4 */
+  display: inline;
+  position: relative;
+}
+
+/* Hover state */
+.link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* Focus state for accessibility */
+.link:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Active state */
+.link:active {
+  opacity: 0.8;
+}
+
+/* Visited state - subtle difference */
+.link:visited {
+  color: var(--color-primary-visited, var(--color-primary));
+}
+
+/* Link Variants
+   ========================================================================== */
+
+/**
+ * Muted Link
+ * For secondary or less prominent links
+ */
+.link-muted {
+  color: var(--color-text-muted);
+}
+
+.link-muted:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.link-muted:visited {
+  color: var(--color-text-muted);
+}
+
+/**
+ * External Link
+ * 1. Add external icon after text
+ * 2. Icon uses currentColor to match link color
+ * 3. Small gap between text and icon
+ */
+.link-external {
+  padding-right: 1.25em; /* Space for icon */
+}
+
+.link-external::after {
+  content: "";
+  position: absolute;
+  top: 0.125em;
+  right: 0;
+  width: 0.875em;
+  height: 0.875em;
+  margin-left: 0.25em; /* 3 */
+  background-color: currentColor; /* 2 */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'%3E%3C/path%3E%3Cpolyline points='15 3 21 3 21 9'%3E%3C/polyline%3E%3Cline x1='10' y1='14' x2='21' y2='3'%3E%3C/line%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  transition: transform 150ms ease-in-out;
+}
+
+/* Animate external icon on hover */
+.link-external:hover::after {
+  transform: translate(2px, -2px);
+}
+
+/* Link States and Modifiers
+   ========================================================================== */
+
+/* Disabled state */
+.link[disabled],
+.link-disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Link within dark backgrounds */
+.link-light {
+  color: var(--color-white);
+}
+
+.link-light:hover {
+  color: var(--color-gray-100);
+}
+
+.link-light:visited {
+  color: var(--color-gray-200);
+}
+
+/* Utility Classes
+   ========================================================================== */
+
+/* Remove underline on hover */
+.link-no-underline:hover {
+  text-decoration: none;
+}
+
+/* Always show underline */
+.link-underline {
+  text-decoration: underline;
+}
+
+/* Block-level link */
+.link-block {
+  display: block;
+  width: 100%;
+}
+
+/* Responsive Behavior
+   ========================================================================== */
+
+/* Touch-friendly tap targets on mobile */
+@media (max-width: 768px) {
+  .link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Print Styles
+   ========================================================================== */
+
+@media print {
+  .link {
+    color: inherit;
+    text-decoration: underline;
+  }
+  
+  /* Show URLs for external links in print */
+  .link-external::after {
+    content: " (" attr(href) ")";
+    position: static;
+    width: auto;
+    height: auto;
+    background: none;
+    mask-image: none;
+    font-size: 0.875em;
+  }
+}
