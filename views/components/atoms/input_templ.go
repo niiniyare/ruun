@@ -30,9 +30,6 @@ const (
 	InputColor    InputType = "color"
 )
 
-// Note: Basecoat handles input styling via .field wrapper context
-// No size or state classes needed - styling is contextual
-
 // InputProps defines all properties for the Input atom
 type InputProps struct {
 	// Core HTML attributes
@@ -59,16 +56,8 @@ type InputProps struct {
 	Accept    string `json:"accept"`   // For file inputs
 	Multiple  bool   `json:"multiple"` // For file inputs
 
-	// Note: Visual styling handled by Basecoat .field context
-	// No visual props needed
-
-	// Event handlers (pre-resolved externally)
-	OnChange  string `json:"onChange"`
-	OnBlur    string `json:"onBlur"`
-	OnFocus   string `json:"onFocus"`
-	OnInput   string `json:"onInput"`
-	OnKeyDown string `json:"onKeyDown"`
-	OnKeyUp   string `json:"onKeyUp"`
+	// State flags for aria-invalid attribute
+	Invalid bool `json:"invalid"`
 
 	// ARIA accessibility attributes
 	AriaLabel       string `json:"ariaLabel"`
@@ -76,18 +65,20 @@ type InputProps struct {
 	AriaInvalid     string `json:"ariaInvalid"`
 	AriaRequired    string `json:"ariaRequired"`
 
-	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	// Additional HTML attributes for HTMX, Alpine.js, etc.
+	Attrs templ.Attributes `json:"attrs"`
 }
 
-// Basecoat handles input styling contextually via .field wrapper
-// No class generation needed - type attribute determines styling
+// getInputClasses returns the CSS classes for the input following Basecoat + Tailwind pattern
+func getInputClasses() string {
+	// Using Basecoat 'input' class with Tailwind utilities as documented
+	return "input w-full rounded-md border bg-input px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+}
 
 // buildInputAttributes creates all HTML attributes for the input
 func buildInputAttributes(props InputProps) templ.Attributes {
 	attrs := templ.Attributes{
+		"class":       getInputClasses(),
 		"type":        string(props.Type),
 		"value":       props.Value,
 		"placeholder": props.Placeholder,
@@ -144,26 +135,6 @@ func buildInputAttributes(props InputProps) templ.Attributes {
 		attrs["accept"] = props.Accept
 	}
 
-	// Event handlers
-	if props.OnChange != "" {
-		attrs["onchange"] = props.OnChange
-	}
-	if props.OnBlur != "" {
-		attrs["onblur"] = props.OnBlur
-	}
-	if props.OnFocus != "" {
-		attrs["onfocus"] = props.OnFocus
-	}
-	if props.OnInput != "" {
-		attrs["oninput"] = props.OnInput
-	}
-	if props.OnKeyDown != "" {
-		attrs["onkeydown"] = props.OnKeyDown
-	}
-	if props.OnKeyUp != "" {
-		attrs["onkeyup"] = props.OnKeyUp
-	}
-
 	// ARIA attributes
 	if props.AriaLabel != "" {
 		attrs["aria-label"] = props.AriaLabel
@@ -171,32 +142,27 @@ func buildInputAttributes(props InputProps) templ.Attributes {
 	if props.AriaDescribedBy != "" {
 		attrs["aria-describedby"] = props.AriaDescribedBy
 	}
-	if props.AriaInvalid != "" {
+
+	// Handle aria-invalid - can be set via Invalid bool or AriaInvalid string
+	if props.Invalid {
+		attrs["aria-invalid"] = "true"
+	} else if props.AriaInvalid != "" {
 		attrs["aria-invalid"] = props.AriaInvalid
 	}
+
 	if props.AriaRequired != "" {
 		attrs["aria-required"] = props.AriaRequired
 	}
 
-	// Tab index
-	if props.TabIndex != 0 {
-		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
-	}
-
-	// Data attributes
-	for key, value := range props.DataAttrs {
-		attrs["data-"+key] = value
-	}
-
-	// Merge custom attributes (allows override)
-	for key, value := range props.Attributes {
+	// Merge custom attributes (allows HTMX, Alpine.js, data-*, etc.)
+	for key, value := range props.Attrs {
 		attrs[key] = value
 	}
 
 	return attrs
 }
 
-// Input renders a pure presentation input atom
+// Input renders a pure presentation input atom using Basecoat classes
 func Input(props InputProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
