@@ -1,0 +1,287 @@
+/* ==========================================================================
+   Input Group Component
+   
+   Input with addons (prefixes/suffixes) for enhanced form controls.
+   Supports text addons, icons, buttons, and interactive elements.
+   ========================================================================== */
+
+/* Base - Core input group container */
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid oklch(var(--border));
+  background-color: oklch(var(--background));
+  transition: all 150ms ease-in-out;
+  overflow: hidden;
+}
+
+/* Focus state for entire group */
+.input-group:focus-within {
+  border-color: oklch(var(--ring));
+  box-shadow: 0 0 0 2px oklch(var(--ring) / 0.2);
+  outline: none;
+}
+
+/* Error state */
+.input-group:has(input:invalid),
+.input-group[aria-invalid="true"] {
+  border-color: oklch(var(--destructive));
+}
+
+.input-group:has(input:invalid):focus-within,
+.input-group[aria-invalid="true"]:focus-within {
+  border-color: oklch(var(--destructive));
+  box-shadow: 0 0 0 2px oklch(var(--destructive) / 0.2);
+}
+
+/* Disabled state */
+.input-group:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: oklch(var(--muted));
+}
+
+/* Parts - Input element */
+.input-group-input,
+.input-group input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-sm);
+  color: oklch(var(--foreground));
+  min-width: 0; /* Prevent flex overflow */
+}
+
+.input-group-input::placeholder,
+.input-group input::placeholder {
+  color: oklch(var(--muted-foreground));
+}
+
+.input-group-input:disabled,
+.input-group input:disabled {
+  cursor: not-allowed;
+  background: transparent;
+}
+
+/* Parts - Addon elements */
+.input-group-addon {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-sm);
+  color: oklch(var(--muted-foreground));
+  background-color: oklch(var(--muted));
+  border: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* First addon (prefix) */
+.input-group-addon:first-child {
+  border-right: 1px solid oklch(var(--border));
+  border-top-left-radius: calc(var(--radius) - 1px);
+  border-bottom-left-radius: calc(var(--radius) - 1px);
+}
+
+/* Last addon (suffix) */
+.input-group-addon:last-child {
+  border-left: 1px solid oklch(var(--border));
+  border-top-right-radius: calc(var(--radius) - 1px);
+  border-bottom-right-radius: calc(var(--radius) - 1px);
+}
+
+/* Input styling when flanked by addons */
+.input-group-addon:first-child + .input-group-input,
+.input-group-addon:first-child + input {
+  padding-left: 0.75rem;
+}
+
+.input-group .input-group-input + .input-group-addon,
+.input-group input + .input-group-addon {
+  margin-left: 0;
+}
+
+/* Size Variants */
+.input-group-sm {
+  font-size: var(--text-xs);
+  border-radius: calc(var(--radius) * 0.75);
+}
+
+.input-group-sm .input-group-input,
+.input-group-sm input {
+  padding: 0.375rem 0.5rem;
+  font-size: var(--text-xs);
+}
+
+.input-group-sm .input-group-addon {
+  padding: 0.375rem 0.5rem;
+  font-size: var(--text-xs);
+}
+
+.input-group-lg {
+  font-size: var(--text-base);
+  border-radius: calc(var(--radius) * 1.25);
+}
+
+.input-group-lg .input-group-input,
+.input-group-lg input {
+  padding: 0.75rem 1rem;
+  font-size: var(--text-base);
+}
+
+.input-group-lg .input-group-addon {
+  padding: 0.75rem 1rem;
+  font-size: var(--text-base);
+}
+
+/* Style Variants */
+.input-group-ghost {
+  border-color: transparent;
+  background-color: oklch(var(--muted) / 0.5);
+}
+
+.input-group-ghost:focus-within {
+  border-color: oklch(var(--ring));
+  background-color: oklch(var(--background));
+}
+
+.input-group-ghost .input-group-addon {
+  background-color: transparent;
+  border-color: oklch(var(--border) / 0.5);
+}
+
+/* Icon addon styling */
+.input-group-addon-icon {
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.input-group-addon-icon svg,
+.input-group-addon-icon [data-icon] {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: oklch(var(--muted-foreground));
+}
+
+/* Button addon styling */
+.input-group-addon-button {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 150ms ease-in-out;
+}
+
+.input-group-addon-button:hover {
+  background-color: oklch(var(--muted));
+}
+
+.input-group-addon-button:focus {
+  outline: 2px solid oklch(var(--ring));
+  outline-offset: -2px;
+}
+
+.input-group-addon-button button {
+  border: none;
+  background: none;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  color: oklch(var(--muted-foreground));
+  font-size: inherit;
+  transition: color 150ms ease-in-out;
+}
+
+.input-group-addon-button:hover button {
+  color: oklch(var(--foreground));
+}
+
+/* Multiple addon support */
+.input-group > .input-group-addon + .input-group-addon {
+  border-left: 1px solid oklch(var(--border));
+  border-radius: 0;
+}
+
+/* Loading state */
+.input-group-loading {
+  position: relative;
+}
+
+.input-group-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid oklch(var(--muted-foreground));
+  border-radius: 50%;
+  border-top-color: oklch(var(--primary));
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* Accessibility enhancements */
+.input-group:focus-within .input-group-addon {
+  color: oklch(var(--foreground));
+}
+
+/* Screen reader support */
+.input-group [aria-label],
+.input-group [aria-labelledby] {
+  /* Ensure proper labeling for screen readers */
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .input-group {
+    border-width: 2px;
+  }
+  
+  .input-group .input-group-addon {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .input-group,
+  .input-group-addon-button,
+  .input-group-addon-button button {
+    transition: none;
+  }
+  
+  .input-group-loading::after {
+    animation: none;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .input-group-addon {
+  background-color: oklch(var(--muted) / 0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .input-group-addon {
+    padding: 0.5rem;
+    font-size: var(--text-xs);
+  }
+  
+  .input-group-lg .input-group-addon {
+    padding: 0.75rem 0.75rem;
+  }
+}
