@@ -22,3 +22,6 @@
 [0;35m[TASK][0m Executing T1.3: Inventory existing templ components
 [0;34m[INFO][0m Inventorying existing components...
 [0;32m[SUCCESS][0m Task T1.3 completed
+[0;35m[TASK][0m Executing T1.4: Map Basecoat vs Custom components
+[0;34m[INFO][0m Mapping Basecoat vs Custom components...
+[0;32m[SUCCESS][0m Task T1.4 completed
