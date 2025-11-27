@@ -3,6 +3,7 @@ package theme
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -145,7 +146,7 @@ func (c *Condition) Validate() error {
 	if c.Expression == "" {
 		return NewError(ErrCodeValidation, "expression cannot be empty")
 	}
-	if c.Overrides == nil || len(c.Overrides) == 0 {
+	if len(c.Overrides) == 0 {
 		return NewError(ErrCodeValidation, "overrides cannot be empty")
 	}
 
@@ -295,10 +296,8 @@ func (m *ThemeMetadata) Clone() *ThemeMetadata {
 		copy(cloned.Tags, m.Tags)
 	}
 	if m.CustomData != nil {
-		cloned.CustomData = make(map[string]interface{}, len(m.CustomData))
-		for k, v := range m.CustomData {
-			cloned.CustomData[k] = v
-		}
+		cloned.CustomData = make(map[string]any, len(m.CustomData))
+		maps.Copy(cloned.CustomData, m.CustomData)
 	}
 	return cloned
 }

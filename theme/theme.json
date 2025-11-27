@@ -1,0 +1,198 @@
+{
+  "name": "default",
+  "extends": null,
+  "tokens": {
+    "primitives": {
+      "colors": {
+        "white": "oklch(1 0 0)",
+        "black": "oklch(0 0 0)",
+        "gray": {
+          "50": "oklch(0.99 0 0)",
+          "100": "oklch(0.95 0 0)",
+          "200": "oklch(0.90 0 0)",
+          "300": "oklch(0.80 0 0)",
+          "400": "oklch(0.70 0 0)",
+          "500": "oklch(0.55 0 0)",
+          "600": "oklch(0.44 0 0)",
+          "700": "oklch(0.35 0 0)",
+          "800": "oklch(0.26 0 0)",
+          "900": "oklch(0.20 0 0)",
+          "950": "oklch(0.13 0 0)"
+        },
+        "primary": {
+          "50": "oklch(0.97 0.01 160.91)",
+          "100": "oklch(0.94 0.03 160.91)",
+          "200": "oklch(0.90 0.06 160.91)",
+          "300": "oklch(0.83 0.10 160.91)",
+          "400": "oklch(0.74 0.13 160.91)",
+          "500": "oklch(0.64 0.15 160.91)",
+          "600": "oklch(0.54 0.16 160.91)",
+          "700": "oklch(0.44 0.15 160.91)",
+          "800": "oklch(0.35 0.13 160.91)",
+          "900": "oklch(0.26 0.10 160.91)",
+          "950": "oklch(0.18 0.07 160.91)"
+        },
+        "destructive": {
+          "50": "oklch(0.97 0.02 32.73)",
+          "100": "oklch(0.94 0.05 32.73)",
+          "200": "oklch(0.88 0.09 32.73)",
+          "300": "oklch(0.77 0.13 32.73)",
+          "400": "oklch(0.66 0.16 32.73)",
+          "500": "oklch(0.55 0.19 32.73)",
+          "600": "oklch(0.44 0.19 32.73)",
+          "700": "oklch(0.35 0.17 32.73)",
+          "800": "oklch(0.27 0.14 32.73)",
+          "900": "oklch(0.20 0.11 32.73)",
+          "950": "oklch(0.14 0.08 32.73)"
+        }
+      },
+      "spacing": {
+        "0": "0",
+        "1": "0.25rem",
+        "2": "0.5rem",
+        "3": "0.75rem",
+        "4": "1rem",
+        "5": "1.25rem",
+        "6": "1.5rem",
+        "8": "2rem",
+        "10": "2.5rem",
+        "12": "3rem",
+        "16": "4rem"
+      },
+      "radius": {
+        "sm": "0.25rem",
+        "md": "0.5rem",
+        "lg": "0.75rem",
+        "xl": "1rem"
+      },
+      "typography": {
+        "fontSize": {
+          "xs": "0.75rem",
+          "sm": "0.875rem",
+          "base": "1rem",
+          "lg": "1.125rem",
+          "xl": "1.25rem",
+          "2xl": "1.5rem"
+        },
+        "fontFamily": {
+          "sans": "Outfit, sans-serif",
+          "serif": "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
+          "mono": "monospace"
+        },
+        "letterSpacing": {
+          "normal": "0.025em"
+        }
+      },
+      "shadows": {
+        "2xs": "0px 1px 3px 0px hsl(0 0% 0% / 0.09)",
+        "xs": "0px 1px 3px 0px hsl(0 0% 0% / 0.09)",
+        "sm": "0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px hsl(0 0% 0% / 0.17)",
+        "default": "0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px hsl(0 0% 0% / 0.17)",
+        "md": "0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 2px 4px -1px hsl(0 0% 0% / 0.17)",
+        "lg": "0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 4px 6px -1px hsl(0 0% 0% / 0.17)",
+        "xl": "0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 8px 10px -1px hsl(0 0% 0% / 0.17)",
+        "2xl": "0px 1px 3px 0px hsl(0 0% 0% / 0.43)"
+      }
+    },
+    "semantic": {
+      "colors": {
+        "background": "{primitives.colors.gray.50}",
+        "foreground": "{primitives.colors.gray.950}",
+        "card": "{primitives.colors.white}",
+        "card-foreground": "{primitives.colors.gray.950}",
+        "popover": "{primitives.colors.white}",
+        "popover-foreground": "{primitives.colors.gray.400}",
+        "primary": "{primitives.colors.primary.500}",
+        "primary-foreground": "{primitives.colors.primary.50}",
+        "secondary": "{primitives.colors.gray.100}",
+        "secondary-foreground": "{primitives.colors.gray.900}",
+        "muted": "{primitives.colors.gray.100}",
+        "muted-foreground": "{primitives.colors.gray.500}",
+        "accent": "{primitives.colors.gray.100}",
+        "accent-foreground": "{primitives.colors.gray.900}",
+        "destructive": "{primitives.colors.destructive.500}",
+        "destructive-foreground": "{primitives.colors.white}",
+        "border": "{primitives.colors.gray.200}",
+        "input": "{primitives.colors.white}",
+        "ring": "{primitives.colors.primary.500}",
+        "sidebar": "{primitives.colors.white}",
+        "sidebar-foreground": "{primitives.colors.gray.500}",
+        "sidebar-primary": "{primitives.colors.primary.500}",
+        "sidebar-primary-foreground": "{primitives.colors.primary.50}",
+        "sidebar-accent": "{primitives.colors.gray.100}",
+        "sidebar-accent-foreground": "{primitives.colors.gray.900}",
+        "sidebar-border": "{primitives.colors.gray.200}",
+        "sidebar-ring": "{primitives.colors.primary.500}"
+      },
+      "spacing": {
+        "section": "{primitives.spacing.8}",
+        "container": "{primitives.spacing.6}",
+        "element": "{primitives.spacing.3}"
+      },
+      "typography": {
+        "heading": "{primitives.typography.fontFamily.sans}",
+        "body": "{primitives.typography.fontFamily.sans}",
+        "code": "{primitives.typography.fontFamily.mono}"
+      }
+    }
+  },
+  "darkMode": {
+    "enabled": true,
+    "strategy": "class",
+    "darkTokens": {
+      "semantic": {
+        "colors": {
+          "background": "{primitives.colors.gray.950}",
+          "foreground": "{primitives.colors.gray.50}",
+          "card": "{primitives.colors.gray.900}",
+          "card-foreground": "{primitives.colors.gray.50}",
+          "popover": "{primitives.colors.gray.800}",
+          "popover-foreground": "{primitives.colors.gray.200}",
+          "primary": "{primitives.colors.primary.400}",
+          "primary-foreground": "{primitives.colors.primary.950}",
+          "secondary": "{primitives.colors.gray.800}",
+          "secondary-foreground": "{primitives.colors.gray.50}",
+          "muted": "{primitives.colors.gray.800}",
+          "muted-foreground": "{primitives.colors.gray.400}",
+          "accent": "{primitives.colors.gray.800}",
+          "accent-foreground": "{primitives.colors.gray.50}",
+          "destructive": "{primitives.colors.destructive.400}",
+          "destructive-foreground": "{primitives.colors.gray.50}",
+          "border": "{primitives.colors.gray.700}",
+          "input": "{primitives.colors.gray.800}",
+          "ring": "{primitives.colors.primary.400}",
+          "sidebar": "{primitives.colors.gray.950}",
+          "sidebar-foreground": "{primitives.colors.gray.400}",
+          "sidebar-primary": "{primitives.colors.primary.400}",
+          "sidebar-primary-foreground": "{primitives.colors.primary.950}",
+          "sidebar-accent": "{primitives.colors.gray.800}",
+          "sidebar-accent-foreground": "{primitives.colors.gray.50}",
+          "sidebar-border": "{primitives.colors.gray.700}",
+          "sidebar-ring": "{primitives.colors.primary.400}"
+        }
+      }
+    }
+  },
+  "cssOutput": {
+    "variablePrefix": "",
+    "generateBase": true,
+    "generateSemantic": true,
+    "generateComponents": true,
+    "includeShadows": true,
+    "includeTypography": true,
+    "cssProperties": {
+      "border-radius": "{primitives.radius.md}",
+      "font-family-sans": "{primitives.typography.fontFamily.sans}",
+      "font-family-serif": "{primitives.typography.fontFamily.serif}",
+      "font-family-mono": "{primitives.typography.fontFamily.mono}",
+      "letter-spacing": "{primitives.typography.letterSpacing.normal}"
+    },
+    "additionalVariables": {
+      "chart-1": "{primitives.colors.primary.400}",
+      "chart-2": "oklch(0.62 0.19 259.81)",
+      "chart-3": "oklch(0.61 0.22 292.72)",
+      "chart-4": "oklch(0.77 0.16 70.08)",
+      "chart-5": "oklch(0.70 0.15 162.48)"
+    }
+  }
+}
