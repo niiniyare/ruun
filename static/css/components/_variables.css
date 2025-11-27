@@ -1,0 +1,111 @@
+/* Component CSS Variables */
+:root {
+  /* Icon Sizes */
+  --icon-xs: 0.75rem;    /* 12px */
+  --icon-sm: 1rem;       /* 16px */
+  --icon-md: 1.25rem;    /* 20px */
+  --icon-lg: 1.5rem;     /* 24px */
+  --icon-xl: 2rem;       /* 32px */
+  --icon-2xl: 2.5rem;    /* 40px */
+
+  /* Status Colors */
+  --color-status-active: hsl(142, 76%, 36%);         /* Green */
+  --color-status-active-bg: hsl(142, 76%, 95%);
+  --color-status-inactive: hsl(0, 0%, 50%);          /* Gray */
+  --color-status-inactive-bg: hsl(0, 0%, 95%);
+  --color-status-pending: hsl(45, 93%, 47%);         /* Amber */
+  --color-status-pending-bg: hsl(45, 93%, 95%);
+  --color-status-approved: hsl(217, 91%, 60%);       /* Blue */
+  --color-status-approved-bg: hsl(217, 91%, 95%);
+  --color-status-rejected: hsl(0, 84%, 60%);         /* Red */
+  --color-status-rejected-bg: hsl(0, 84%, 95%);
+  --color-status-draft: hsl(280, 5%, 58%);           /* Purple-gray */
+  --color-status-draft-bg: hsl(280, 5%, 95%);
+
+  /* Data Table Colors */
+  --table-header-bg: hsl(0, 0%, 98%);
+  --table-header-text: hsl(0, 0%, 20%);
+  --table-border: hsl(0, 0%, 90%);
+  --table-row-hover: hsl(0, 0%, 97%);
+  --table-row-selected: hsl(217, 91%, 95%);
+  --table-cell-padding-x: 1rem;
+  --table-cell-padding-y: 0.75rem;
+
+  /* Stats Card Trend Colors */
+  --trend-positive: hsl(142, 76%, 36%);
+  --trend-positive-bg: hsl(142, 76%, 95%);
+  --trend-negative: hsl(0, 84%, 60%);
+  --trend-negative-bg: hsl(0, 84%, 95%);
+  --trend-neutral: hsl(0, 0%, 50%);
+  --trend-neutral-bg: hsl(0, 0%, 95%);
+
+  /* Wizard Step Sizes */
+  --wizard-step-size: 2.5rem;           /* 40px */
+  --wizard-step-size-sm: 2rem;          /* 32px */
+  --wizard-connector-height: 2px;
+  --wizard-step-gap: 2rem;
+  --wizard-content-spacing: 2rem;
+
+  /* Layout Dimensions */
+  --layout-header-height: 4rem;         /* 64px */
+  --layout-sidebar-width: 16rem;        /* 256px */
+  --layout-sidebar-collapsed: 4rem;     /* 64px */
+  --layout-content-max-width: 1280px;
+  --layout-content-padding: 1.5rem;
+  --layout-mobile-header: 3.5rem;       /* 56px */
+  
+  /* Component Spacing */
+  --card-padding: 1.5rem;
+  --card-gap: 1rem;
+  --form-gap: 1.5rem;
+  --button-group-gap: 0.5rem;
+  
+  /* Z-index Layers */
+  --z-dropdown: 50;
+  --z-modal-backdrop: 100;
+  --z-modal: 110;
+  --z-notification: 200;
+  --z-tooltip: 300;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] {
+  /* Status Colors - Dark Mode */
+  --color-status-active: hsl(142, 76%, 45%);
+  --color-status-active-bg: hsl(142, 76%, 20%);
+  --color-status-inactive: hsl(0, 0%, 60%);
+  --color-status-inactive-bg: hsl(0, 0%, 20%);
+  --color-status-pending: hsl(45, 93%, 55%);
+  --color-status-pending-bg: hsl(45, 93%, 20%);
+  --color-status-approved: hsl(217, 91%, 70%);
+  --color-status-approved-bg: hsl(217, 91%, 20%);
+  --color-status-rejected: hsl(0, 84%, 70%);
+  --color-status-rejected-bg: hsl(0, 84%, 20%);
+  --color-status-draft: hsl(280, 5%, 65%);
+  --color-status-draft-bg: hsl(280, 5%, 20%);
+
+  /* Data Table Colors - Dark Mode */
+  --table-header-bg: hsl(0, 0%, 15%);
+  --table-header-text: hsl(0, 0%, 90%);
+  --table-border: hsl(0, 0%, 25%);
+  --table-row-hover: hsl(0, 0%, 18%);
+  --table-row-selected: hsl(217, 91%, 25%);
+
+  /* Stats Card Trend Colors - Dark Mode */
+  --trend-positive: hsl(142, 76%, 50%);
+  --trend-positive-bg: hsl(142, 76%, 20%);
+  --trend-negative: hsl(0, 84%, 65%);
+  --trend-negative-bg: hsl(0, 84%, 20%);
+  --trend-neutral: hsl(0, 0%, 60%);
+  --trend-neutral-bg: hsl(0, 0%, 20%);
+}
+
+/* Responsive overrides */
+@media (max-width: 768px) {
+  :root {
+    --layout-content-padding: 1rem;
+    --card-padding: 1rem;
+    --wizard-step-size: 2rem;
+    --wizard-step-gap: 1rem;
+  }
+}
