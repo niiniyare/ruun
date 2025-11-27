@@ -1,50 +1,49 @@
+════════════════════════════════════════════════════════════════════
+  Interactive Mode
+════════════════════════════════════════════════════════════════════
 
-[1m════════════════════════════════════════════════════════════════════[0m
-[1m  Interactive Mode[0m
-[1m════════════════════════════════════════════════════════════════════[0m
-
-[0;34m[INFO][0m Checking prerequisites...
-[0;32m[SUCCESS][0m Prerequisites OK
-[0;34m[INFO][0m Creating backup: ./views_backup_20251127_031632
-[0;34m[INFO][0m Skipping completed: T0.1
-[0;34m[INFO][0m Skipping completed: T0.2
-[0;35m[TASK][0m Executing T0.3: Create demo section templates
-[0;34m[INFO][0m Creating demo section templates...
-[0;32m[SUCCESS][0m Demo setup complete!
-[0;34m[INFO][0m Start demo: ./component-refactor.sh --demo
-[0;32m[SUCCESS][0m Task T0.3 completed
-[0;35m[TASK][0m Executing T1.1: Parse basecoat.css for component classes
-[0;34m[INFO][0m Parsing basecoat.css for component classes...
-[0;32m[SUCCESS][0m Task T1.1 completed
-[0;35m[TASK][0m Executing T1.2: Scan Basecoat JS for behavior patterns
-[0;34m[INFO][0m Scanning Basecoat JS files...
-[0;32m[SUCCESS][0m Task T1.2 completed
-[0;35m[TASK][0m Executing T1.3: Inventory existing templ components
-[0;34m[INFO][0m Inventorying existing components...
-[0;32m[SUCCESS][0m Task T1.3 completed
-[0;35m[TASK][0m Executing T1.4: Map Basecoat vs Custom components
-[0;34m[INFO][0m Mapping Basecoat vs Custom components...
-[0;32m[SUCCESS][0m Task T1.4 completed
-[0;35m[TASK][0m Executing T1.5: Detect anti-patterns
-[0;34m[INFO][0m Detecting anti-patterns...
-[0;32m[SUCCESS][0m Task T1.5 completed
-[0;35m[TASK][0m Executing T1.6: Generate analysis report
-[0;34m[INFO][0m Generating analysis report...
-[0;32m[SUCCESS][0m Task T1.6 completed
-[0;35m[TASK][0m Executing T2.1: Define component API standards
-[0;34m[INFO][0m Defining component API standards...
-[0;32m[SUCCESS][0m Task T2.1 completed
-[0;35m[TASK][0m Executing T2.2: Create shared types (types.go)
-[0;34m[INFO][0m Creating shared types...
-[0;32m[SUCCESS][0m Task T2.2 completed
-[0;35m[TASK][0m Executing T2.3: Update helpers (helpers.go)
-[0;34m[INFO][0m Updating helper functions...
-[0;32m[SUCCESS][0m Task T2.3 completed
-[0;35m[TASK][0m Executing T2.4: Define refactoring priority
-[0;34m[INFO][0m Defining refactoring priority...
-[0;32m[SUCCESS][0m Task T2.4 completed
-[0;35m[TASK][0m Executing T2.5: Generate strategy report
-[0;34m[INFO][0m Generating strategy report...
-[0;32m[SUCCESS][0m Task T2.5 completed
-[0;35m[TASK][0m Executing T3.1: Create CSS directory structure
-[0;34m[INFO][0m Creating CSS directory structure...
+[INFO] Checking prerequisites...
+[SUCCESS] Prerequisites OK
+[INFO] Creating backup: ./views_backup_20251127_031632
+[INFO] Skipping completed: T0.1
+[INFO] Skipping completed: T0.2
+[TASK] Executing T0.3: Create demo section templates
+[INFO] Creating demo section templates...
+[SUCCESS] Demo setup complete!
+[INFO] Start demo: ./component-refactor.sh --demo
+[SUCCESS] Task T0.3 completed
+[TASK] Executing T1.1: Parse basecoat.css for component classes
+[INFO] Parsing basecoat.css for component classes...
+[SUCCESS] Task T1.1 completed
+[TASK] Executing T1.2: Scan Basecoat JS for behavior patterns
+[INFO] Scanning Basecoat JS files...
+[SUCCESS] Task T1.2 completed
+[TASK] Executing T1.3: Inventory existing templ components
+[INFO] Inventorying existing components...
+[SUCCESS] Task T1.3 completed
+[TASK] Executing T1.4: Map Basecoat vs Custom components
+[INFO] Mapping Basecoat vs Custom components...
+[SUCCESS] Task T1.4 completed
+[TASK] Executing T1.5: Detect anti-patterns
+[INFO] Detecting anti-patterns...
+[SUCCESS] Task T1.5 completed
+[TASK] Executing T1.6: Generate analysis report
+[INFO] Generating analysis report...
+[SUCCESS] Task T1.6 completed
+[TASK] Executing T2.1: Define component API standards
+[INFO] Defining component API standards...
+[SUCCESS] Task T2.1 completed
+[TASK] Executing T2.2: Create shared types (types.go)
+[INFO] Creating shared types...
+[SUCCESS] Task T2.2 completed
+[TASK] Executing T2.3: Update helpers (helpers.go)
+[INFO] Updating helper functions...
+[SUCCESS] Task T2.3 completed
+[TASK] Executing T2.4: Define refactoring priority
+[INFO] Defining refactoring priority...
+[SUCCESS] Task T2.4 completed
+[TASK] Executing T2.5: Generate strategy report
+[INFO] Generating strategy report...
+[SUCCESS] Task T2.5 completed
+[TASK] Executing T3.1: Create CSS directory structure
+[INFO] Creating CSS directory structure...[0;32m[SUCCESS][0m Task T3.1 completed
