@@ -61,7 +61,7 @@ PAGES_DIR="${PAGES_DIR:-$VIEWS_DIR/pages}"
 
 # Static assets
 STATIC_DIR="${STATIC_DIR:-./static}"
-CSS_DIR="${CSS_DIR:-$STATIC_DIR/dist/css}"
+CSS_DIR="${CSS_DIR:-$STATIC_DIR/css}"
 CUSTOM_CSS_DIR="${CUSTOM_CSS_DIR:-$CSS_DIR/components}"
 JS_DIR="${JS_DIR:-$STATIC_DIR/js}"
 

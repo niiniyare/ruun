@@ -89,5 +89,5 @@ status: ## 📊 Show project status and configuration
 .PHONY: build
 build: ## 🗄️ Build and minify Static files 
 	@echo "$(BLUE)Build and minify Static files ...$(NC)"
-	@cd static && pnpm  build css && cd .. 
+	@cd static && pnpm  build && cd .. 
 	@echo "$(GREEN)✅ Building is complete$(NC)"

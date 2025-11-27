@@ -701,7 +701,7 @@ func DemoCard(title, classes string) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/demo/demo.templ`, Line: 468, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_031632/demo/demo.templ`, Line: 468, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -714,7 +714,7 @@ func DemoCard(title, classes string) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(classes)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/demo/demo.templ`, Line: 469, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views_backup_20251127_031632/demo/demo.templ`, Line: 469, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {

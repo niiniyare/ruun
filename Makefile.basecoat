@@ -57,7 +57,7 @@ gallery: ## Build and serve component gallery
 	@$(MAKE) generate-components
 	@echo "$(YELLOW)Starting development server...$(NC)"
 	@echo "$(GREEN)🎨 Component gallery available at: http://localhost:8080/gallery$(NC)"
-	@go run main.go
+	@go run ./views/
 
 validate-refactoring: ## Validate the complete refactoring is correct
 	@echo "$(BLUE)🔍 Validating complete Basecoat refactoring...$(NC)"

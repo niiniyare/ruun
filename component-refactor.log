@@ -5,15 +5,11 @@
 
 [0;34m[INFO][0m Checking prerequisites...
 [0;32m[SUCCESS][0m Prerequisites OK
-[0;34m[INFO][0m Creating backup: ./views_backup_20251127_025030
-[0;35m[TASK][0m Executing T0.1: Create demo server (server.go)
-[0;34m[INFO][0m Creating demo server...
-[0;32m[SUCCESS][0m Created: ./views/demo/server.go
-[0;32m[SUCCESS][0m Task T0.1 completed
-[0;35m[TASK][0m Executing T0.2: Create demo page template (demo.templ)
-[0;34m[INFO][0m Creating demo page template...
-[0;32m[SUCCESS][0m Created: ./views/demo/demo.templ
-[0;32m[SUCCESS][0m Task T0.2 completed
+[0;34m[INFO][0m Creating backup: ./views_backup_20251127_031632
+[0;34m[INFO][0m Skipping completed: T0.1
+[0;34m[INFO][0m Skipping completed: T0.2
 [0;35m[TASK][0m Executing T0.3: Create demo section templates
 [0;34m[INFO][0m Creating demo section templates...
-[0;34m[INFO][0m Created: ./views/demo/go.mod
+[0;32m[SUCCESS][0m Demo setup complete!
+[0;34m[INFO][0m Start demo: ./component-refactor.sh --demo
+[0;32m[SUCCESS][0m Task T0.3 completed

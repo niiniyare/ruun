@@ -8,7 +8,7 @@ module.exports = {
   ],
   safelist: [
     // Include all utility classes used in basecoat.css
-    'px-4', 'py-3', 'px-2', 'py-0.5', 'px-3', 'py-2', 'px-1', 'py-1',
+    'px-4', 'py-3', 'px-2','' 'py-0.5', 'px-3', 'py-2', 'px-1', 'py-1',
     'w-full', 'h-full', 'min-h-4', 'max-w-xs', 'max-w-sm', 'max-w-md', 'max-w-lg',
     'text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl',
     'font-medium', 'font-semibold', 'font-bold',
@@ -72,6 +72,10 @@ module.exports = {
         ring: 'oklch(var(--ring))',
         background: 'oklch(var(--background))',
         foreground: 'oklch(var(--foreground))',
+       destructive: {
+          DEFAULT: '#dc2626', // or your destructive color
+          foreground: '#ffffff' // or your foreground color
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -22,7 +22,11 @@
 
     &[data-destructive='true'],
     &.menu-item-destructive {
-      @apply text-destructive focus:bg-destructive focus:text-destructive-foreground;
+      color: hsl(0 84.2% 60.2%);
+      &:focus {
+        background-color: hsl(0 84.2% 60.2%);
+        color: hsl(0 0% 98%);
+      }
     }
   }
 
@@ -70,10 +74,8 @@
       @apply content-[''] h-2 w-2 rounded-sm opacity-0 transition-opacity;
     }
 
-    .menu-item-checkbox-input:checked + & {
-      &::after {
-        @apply opacity-100 bg-current;
-      }
+    .menu-item-checkbox-input:checked + &::after {
+      @apply opacity-100 bg-current;
     }
   }
 
@@ -93,10 +95,8 @@
       @apply content-[''] h-1.5 w-1.5 rounded-full opacity-0 transition-opacity;
     }
 
-    .menu-item-radio-input:checked + & {
-      &::after {
-        @apply opacity-100 bg-current;
-      }
+    .menu-item-radio-input:checked + &::after {
+      @apply opacity-100 bg-current;
     }
   }
 
