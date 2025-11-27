@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 	"github.com/niiniyare/ruun/pkg/utils"
+	"github.com/niiniyare/ruun/views/components"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
 )
@@ -775,10 +776,11 @@ templ dataTableHeaderRow(props DataTableProps) {
 			<th class="datatable-th datatable-th-checkbox">
 				if props.MultiSelect {
 					@atoms.Checkbox(atoms.CheckboxProps{
-						ID:       "select-all",
-						Name:     "select-all",
-						Size:     atoms.CheckboxSizeMD,
-						OnChange: "toggleAllRows()",
+						Base: components.BaseProps{
+							ID: "select-all",
+						},
+						Name:      "select-all",
+						OnChange:  "toggleAllRows()",
 						AriaLabel: "Select all rows",
 					})
 				}
@@ -854,11 +856,12 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 		if props.Selectable {
 			<td class="datatable-td datatable-td-checkbox">
 				@atoms.Checkbox(atoms.CheckboxProps{
-					ID:       fmt.Sprintf("select-%s", row.ID),
+					Base: components.BaseProps{
+						ID: fmt.Sprintf("select-%s", row.ID),
+					},
 					Name:     "row-select",
 					Value:    row.ID,
 					Checked:  row.Selected,
-					Size:     atoms.CheckboxSizeMD,
 					OnChange: fmt.Sprintf("toggleRow('%s')", row.ID),
 				})
 			</td>

@@ -8,28 +8,24 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
-
-// Note: Basecoat handles checkbox styling via .field wrapper context
-// No size or state classes needed - styling is contextual
+import "github.com/niiniyare/ruun/views/components"
 
 // CheckboxProps defines all properties for the Checkbox atom
+// Uses Basecoat 'input' class with Tailwind utilities for layout
 type CheckboxProps struct {
+	// Content
+	Label string `json:"label"`
+
 	// Core HTML attributes
-	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Value   string `json:"value"`
-	Label   string `json:"label"`
 	Checked bool   `json:"checked"`
 
-	// Constraints and validation
+	// Form state (using shared ComponentState)
 	Required  bool `json:"required"`
 	Disabled  bool `json:"disabled"`
 	Readonly  bool `json:"readonly"`
-	AutoFocus bool `json:"autoFocus"`
-
-	// Note: Visual styling handled by Basecoat .field context
-	// No visual props needed
+	AutoFocus bool `json:"autofocus"`
 
 	// Event handlers (pre-resolved externally)
 	OnChange string `json:"onChange"`
@@ -37,31 +33,58 @@ type CheckboxProps struct {
 	OnFocus  string `json:"onFocus"`
 	OnClick  string `json:"onClick"`
 
-	// ARIA accessibility attributes
+	// Accessibility (using shared AccessibilityProps pattern)
 	AriaLabel       string `json:"ariaLabel"`
 	AriaDescribedBy string `json:"ariaDescribedBy"`
 	AriaInvalid     string `json:"ariaInvalid"`
 	AriaRequired    string `json:"ariaRequired"`
 	AriaChecked     string `json:"ariaChecked"`
 
-	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-// Basecoat handles checkbox styling contextually via .field wrapper
-// No class generation needed - type="checkbox" determines styling
+// getCheckboxClasses returns the correct Basecoat 'input' class + Tailwind utilities
+// Following documentation pattern from checkbox.md
+func getCheckboxClasses(className string) string {
+	// Base Basecoat class as documented
+	base := "input"
 
-// buildCheckboxAttributes creates all HTML attributes for the checkbox
+	// Combine with Tailwind utilities from props
+	if className != "" {
+		return base + " " + className
+	}
+
+	return base
+}
+
+// getCheckboxLabelClasses returns Basecoat 'label' class + Tailwind utilities for layout
+// Using gap-3 spacing as documented in checkbox.md
+func getCheckboxLabelClasses(className string) string {
+	// Base classes from documentation
+	base := "label gap-3"
+
+	// Combine with additional Tailwind utilities
+	if className != "" {
+		return base + " " + className
+	}
+
+	return base
+}
+
+// buildCheckboxAttributes creates all HTML attributes for the checkbox input
 func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"type": "checkbox",
+		"type":  "checkbox",
+		"class": getCheckboxClasses(props.Base.ClassName),
 	}
 
 	// Core HTML attributes
-	if props.ID != "" {
-		attrs["id"] = props.ID
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
 	}
 	if props.Name != "" {
 		attrs["name"] = props.Name
@@ -72,19 +95,19 @@ func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 
 	// Boolean attributes
 	if props.Checked {
-		attrs["checked"] = "checked"
+		attrs["checked"] = ""
 	}
 	if props.Required {
-		attrs["required"] = "required"
+		attrs["required"] = ""
 	}
 	if props.Disabled {
-		attrs["disabled"] = "disabled"
+		attrs["disabled"] = ""
 	}
 	if props.Readonly {
-		attrs["readonly"] = "readonly"
+		attrs["readonly"] = ""
 	}
 	if props.AutoFocus {
-		attrs["autofocus"] = "autofocus"
+		attrs["autofocus"] = ""
 	}
 
 	// Event handlers
@@ -118,36 +141,30 @@ func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 		attrs["aria-checked"] = props.AriaChecked
 	}
 
-	// Tab index
-	if props.TabIndex != 0 {
-		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
-	}
-
-	// Data attributes
-	for key, value := range props.DataAttrs {
-		attrs["data-"+key] = value
-	}
-
 	// Merge custom attributes (allows override)
-	for key, value := range props.Attributes {
+	for key, value := range props.Attrs {
 		attrs[key] = value
 	}
 
 	return attrs
 }
 
-// buildCheckboxLabelAttributes creates label attributes (no classes needed)
+// buildCheckboxLabelAttributes creates label attributes with proper classes
 func buildCheckboxLabelAttributes(props CheckboxProps) templ.Attributes {
-	attrs := templ.Attributes{}
+	attrs := templ.Attributes{
+		"class": getCheckboxLabelClasses(""),
+	}
 
-	if props.ID != "" {
-		attrs["for"] = props.ID
+	// Associate label with input
+	if props.Base.ID != "" {
+		attrs["for"] = props.Base.ID
 	}
 
 	return attrs
 }
 
 // Checkbox renders a pure presentation checkbox atom
+// Following documentation patterns from checkbox.md
 func Checkbox(props CheckboxProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -193,7 +210,7 @@ func Checkbox(props CheckboxProps) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 147, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 164, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
