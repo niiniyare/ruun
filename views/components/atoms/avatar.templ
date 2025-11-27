@@ -1,83 +1,192 @@
 package atoms
 
-// AvatarProps defines all properties for the Avatar atom using custom CSS extension
-// Uses /static/css/components/avatar.css following Basecoat conventions
+import (
+	"github.com/niiniyare/ruun/views/components"
+)
+
+// AvatarSize represents avatar size variants
+type AvatarSize string
+
+const (
+	AvatarSizeXS AvatarSize = "xs" // size-4 (16px)
+	AvatarSizeSM AvatarSize = "sm" // size-5 (20px)  
+	AvatarSizeMD AvatarSize = "md" // size-6 (24px)
+	AvatarSizeLG AvatarSize = "lg" // size-8 (32px)
+	AvatarSizeXL AvatarSize = "xl" // size-10 (40px)
+	AvatarSize2X AvatarSize = "2x" // size-12 (48px)
+)
+
+// AvatarShape represents avatar shape variants
+type AvatarShape string
+
+const (
+	AvatarShapeCircle    AvatarShape = "circle"    // rounded-full
+	AvatarShapeRounded   AvatarShape = "rounded"   // rounded-lg
+	AvatarShapeSquare    AvatarShape = "square"    // rounded-md
+	AvatarShapeNone      AvatarShape = "none"      // no rounding
+)
+
+// AvatarProps defines properties for the Avatar atom following Basecoat documentation
 type AvatarProps struct {
 	// Image properties
-	Src       string `json:"src"`
-	Alt       string `json:"alt"`
-	Initials  string `json:"initials,omitempty"`  // Fallback text when no image
+	Src      string `json:"src"`
+	Alt      string `json:"alt"`
+	Initials string `json:"initials,omitempty"` // Fallback text when no image
 	
 	// Visual properties
-	Size   string `json:"size,omitempty"`   // "sm", "md", "lg", "xl" 
-	Shape  string `json:"shape,omitempty"`  // "circle", "square" (default: circle)
+	Size  AvatarSize  `json:"size,omitempty"`  // Avatar size variant
+	Shape AvatarShape `json:"shape,omitempty"` // Avatar shape variant
 	
-	// HTML attributes
-	ID string `json:"id,omitempty"`
+	// Status indicator
+	ShowStatus   bool   `json:"showStatus,omitempty"`   // Show status indicator
+	StatusColor  string `json:"statusColor,omitempty"`  // Status color (success, warning, muted)
 	
-	// Additional attributes
-	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
-	Attributes templ.Attributes  `json:"attributes,omitempty"`
+	// Ring/border
+	HasRing    bool   `json:"hasRing,omitempty"`    // Add ring border
+	RingColor  string `json:"ringColor,omitempty"`  // Ring color (primary, success, etc.)
+	RingOffset bool   `json:"ringOffset,omitempty"` // Add ring offset
+	
+	// Interactive
+	Clickable bool `json:"clickable,omitempty"` // Add hover effects
+	
+	// Custom styling
+	ClassName string `json:"className,omitempty"` // Additional CSS classes
+	
+	// Base component props
+	ID        string             `json:"id,omitempty"`
+	DataAttrs map[string]string  `json:"dataAttrs,omitempty"`
+	Attrs     templ.Attributes   `json:"attrs,omitempty"`
 }
 
-// getAvatarClass returns avatar class without dynamic building
-func getAvatarClass(size, shape string) string {
-	// Complete static approach
+// getAvatarSizeClass returns Tailwind size classes based on avatar size
+func getAvatarSizeClass(size AvatarSize) string {
 	switch size {
-	case "sm":
-		switch shape {
-		case "square": return "avatar-sm avatar-square"
-		default: return "avatar-sm avatar-circle"
-		}
-	case "lg":
-		switch shape {
-		case "square": return "avatar-lg avatar-square"
-		default: return "avatar-lg avatar-circle"
-		}
-	case "xl":
-		switch shape {
-		case "square": return "avatar-xl avatar-square"
-		default: return "avatar-xl avatar-circle"
-		}
-	default: // md or empty
-		switch shape {
-		case "square": return "avatar avatar-square"
-		default: return "avatar avatar-circle"
-		}
+	case AvatarSizeXS:
+		return "size-4" // 16px
+	case AvatarSizeSM:
+		return "size-5" // 20px
+	case AvatarSizeMD:
+		return "size-6" // 24px
+	case AvatarSizeLG:
+		return "size-8" // 32px
+	case AvatarSizeXL:
+		return "size-10" // 40px
+	case AvatarSize2X:
+		return "size-12" // 48px
+	default:
+		return "size-8" // Default to lg (32px)
 	}
 }
 
-// getAvatarClassWithFallback returns avatar class with fallback modifier
-func getAvatarClassWithFallback(size, shape string) string {
-	// Complete static approach for fallback
-	switch size {
-	case "sm":
-		switch shape {
-		case "square": return "avatar-sm avatar-square avatar-fallback"
-		default: return "avatar-sm avatar-circle avatar-fallback"
-		}
-	case "lg":
-		switch shape {
-		case "square": return "avatar-lg avatar-square avatar-fallback"
-		default: return "avatar-lg avatar-circle avatar-fallback"
-		}
-	case "xl":
-		switch shape {
-		case "square": return "avatar-xl avatar-square avatar-fallback"
-		default: return "avatar-xl avatar-circle avatar-fallback"
-		}
-	default: // md or empty
-		switch shape {
-		case "square": return "avatar avatar-square avatar-fallback"
-		default: return "avatar avatar-circle avatar-fallback"
-		}
+// getAvatarShapeClass returns Tailwind border radius classes based on shape
+func getAvatarShapeClass(shape AvatarShape) string {
+	switch shape {
+	case AvatarShapeCircle:
+		return "rounded-full"
+	case AvatarShapeRounded:
+		return "rounded-lg"
+	case AvatarShapeSquare:
+		return "rounded-md"
+	case AvatarShapeNone:
+		return ""
+	default:
+		return "rounded-full" // Default to circle
 	}
 }
 
-// buildAvatarAttributes creates img attributes
+// getAvatarImageClasses builds complete classes for avatar image
+func getAvatarImageClasses(props AvatarProps) string {
+	classes := components.NewClassBuilder(
+		getAvatarSizeClass(props.Size),
+		"shrink-0",
+		"object-cover",
+		getAvatarShapeClass(props.Shape),
+	)
+	
+	// Add ring if specified
+	if props.HasRing {
+		classes.Add("ring-2")
+		if props.RingColor != "" {
+			classes.Add("ring-" + props.RingColor)
+		} else {
+			classes.Add("ring-primary")
+		}
+		
+		if props.RingOffset {
+			classes.Add("ring-offset-2", "ring-offset-background")
+		}
+	}
+	
+	// Add hover effects if clickable
+	if props.Clickable {
+		classes.Add("hover:ring-2", "hover:ring-primary", "transition-all")
+	}
+	
+	// Add custom classes
+	if props.ClassName != "" {
+		classes.Add(props.ClassName)
+	}
+	
+	return classes.Build()
+}
+
+// getAvatarFallbackClasses builds complete classes for avatar fallback
+func getAvatarFallbackClasses(props AvatarProps) string {
+	classes := components.NewClassBuilder(
+		getAvatarSizeClass(props.Size),
+		"shrink-0",
+		getAvatarShapeClass(props.Shape),
+		"flex",
+		"items-center",
+		"justify-center",
+		"font-medium",
+	)
+	
+	// Background color based on size for text sizing
+	switch props.Size {
+	case AvatarSizeXS, AvatarSizeSM:
+		classes.Add("text-xs", "bg-muted", "text-muted-foreground")
+	case AvatarSizeMD:
+		classes.Add("text-sm", "bg-muted", "text-muted-foreground")
+	case AvatarSizeLG, AvatarSizeXL:
+		classes.Add("text-sm", "bg-primary", "text-primary-foreground")
+	case AvatarSize2X:
+		classes.Add("text-base", "bg-primary", "text-primary-foreground")
+	default:
+		classes.Add("text-sm", "bg-primary", "text-primary-foreground")
+	}
+	
+	// Add ring if specified
+	if props.HasRing {
+		classes.Add("ring-2")
+		if props.RingColor != "" {
+			classes.Add("ring-" + props.RingColor)
+		} else {
+			classes.Add("ring-primary")
+		}
+		
+		if props.RingOffset {
+			classes.Add("ring-offset-2", "ring-offset-background")
+		}
+	}
+	
+	// Add hover effects if clickable
+	if props.Clickable {
+		classes.Add("hover:ring-2", "hover:ring-primary", "transition-all")
+	}
+	
+	// Add custom classes
+	if props.ClassName != "" {
+		classes.Add(props.ClassName)
+	}
+	
+	return classes.Build()
+}
+
+// buildAvatarAttributes creates img attributes using templ.Attributes pattern
 func buildAvatarAttributes(props AvatarProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class": getAvatarClass(props.Size, props.Shape),
+		"class": getAvatarImageClasses(props),
 		"alt":   props.Alt,
 	}
 	
@@ -94,35 +203,95 @@ func buildAvatarAttributes(props AvatarProps) templ.Attributes {
 	}
 	
 	// Merge custom attributes
-	for key, value := range props.Attributes {
+	for key, value := range props.Attrs {
 		attrs[key] = value
 	}
 	
 	return attrs
 }
 
-// Avatar renders an avatar using custom CSS extension
+// buildFallbackAttributes creates div attributes for fallback elements
+func buildFallbackAttributes(props AvatarProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": getAvatarFallbackClasses(props),
+	}
+	
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
+// getStatusClasses returns classes for status indicator
+func getStatusClasses(statusColor string) string {
+	classes := components.NewClassBuilder(
+		"absolute",
+		"bottom-0",
+		"right-0",
+		"size-3",
+		"rounded-full",
+		"ring-2",
+		"ring-background",
+	)
+	
+	switch statusColor {
+	case "success":
+		classes.Add("bg-success")
+	case "warning":
+		classes.Add("bg-warning")
+	case "error":
+		classes.Add("bg-error")
+	case "muted":
+		classes.Add("bg-muted")
+	default:
+		classes.Add("bg-success")
+	}
+	
+	return classes.Build()
+}
+
+// Avatar renders an avatar following Basecoat documentation patterns
 templ Avatar(props AvatarProps) {
-	if props.Src != "" {
-		<img {buildAvatarAttributes(props)...} />
-	} else if props.Initials != "" {
-		// Fallback to initials using avatar-fallback class
-		<div 
-			class={getAvatarClassWithFallback(props.Size, props.Shape)}
-			if props.ID != "" {
-				id={props.ID}
+	if props.ShowStatus {
+		// Avatar with status indicator wrapper
+		<div class="relative">
+			if props.Src != "" {
+				<img {buildAvatarAttributes(props)...} />
+			} else if props.Initials != "" {
+				// Fallback to initials
+				<div {buildFallbackAttributes(props)...}>
+					{props.Initials}
+				</div>
+			} else {
+				// Empty placeholder
+				<div {buildFallbackAttributes(props)...}></div>
 			}
-		>
-			{props.Initials}
+			<!-- Status indicator -->
+			<div class={getStatusClasses(props.StatusColor)}></div>
 		</div>
 	} else {
-		// Empty avatar placeholder
-		<div 
-			class={getAvatarClass(props.Size, props.Shape)}
-			if props.ID != "" {
-				id={props.ID}
-			}
-		>
-		</div>
+		// Simple avatar without status
+		if props.Src != "" {
+			<img {buildAvatarAttributes(props)...} />
+		} else if props.Initials != "" {
+			// Fallback to initials
+			<div {buildFallbackAttributes(props)...}>
+				{props.Initials}
+			</div>
+		} else {
+			// Empty placeholder
+			<div {buildFallbackAttributes(props)...}></div>
+		}
 	}
 }

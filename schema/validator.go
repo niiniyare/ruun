@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -22,33 +23,19 @@ type ValidatorOption struct {
 
 // DataValidator provides server-side validation for schema data
 type DataValidator struct {
-	db                  Database            // Optional database for uniqueness checks
-	businessRulesEngine BusinessRulesEngine // Optional business rules engine
+	db                  Database                     // Optional database for uniqueness checks
+	businessRulesEngine BusinessRulesEngine          // Optional business rules engine
+	customRules         map[string]ValidatorFunc     // Custom validation rules
+	mutex               sync.RWMutex                 // Thread-safe access to custom rules
 }
 
-// // ValidationResult contains the results of validation
-//
-//	type ValidationResult struct {
-//		Valid  bool                `json:"valid"`
-//		Errors map[string][]string `json:"errors"` // field -> error messages
-//		Data   map[string]any      `json:"data"`   // validated/cleaned data
-//	}
-//
-// // ValidationError represents a field validation error
-//
-//	type ValidationError struct {
-//		Field   string `json:"field"`
-//		Message string `json:"message"`
-//		Code    string `json:"code"`
-//	}
-func (e ValidationError) Error() string {
-	return fmt.Sprintf("%s: %s", e.Field, e.Message)
-}
+// ValidationError method is already defined in types.go with the Error() method
 
 // NewValidator creates a new validator
 func NewValidator(db Database) *DataValidator {
 	return &DataValidator{
-		db: db,
+		db:          db,
+		customRules: make(map[string]ValidatorFunc),
 	}
 }
 
@@ -57,19 +44,35 @@ func NewValidatorWithBusinessRules(db Database, bre BusinessRulesEngine) *DataVa
 	return &DataValidator{
 		db:                  db,
 		businessRulesEngine: bre,
+		customRules:         make(map[string]ValidatorFunc),
 	}
 }
 
-// ValidateSchema validates schema structure (implements schema.Validator interface)
-func (v *DataValidator) ValidateSchema(ctx context.Context, schema *Schema) error {
-	if schema == nil {
-		return fmt.Errorf("schema cannot be nil")
+// ValidateSchema validates an entire schema with data (implements Validator interface)
+func (v *DataValidator) ValidateSchema(ctx context.Context, schema Schema, data map[string]any) *ValidationResult {
+	result := &ValidationResult{
+		Valid:    true,
+		Warnings: []string{},
+		Errors:   make(map[string][]string),
+		Data:     make(map[string]any),
 	}
-	// Use the existing schema validation method
-	return schema.Validate(ctx)
+
+	// Use schema accessor to get fields
+	for _, field := range schema.Fields {
+		value, exists := data[field.Name]
+		fieldErrors := v.validateFieldInternal(ctx, &field, value, exists)
+		if len(fieldErrors) > 0 {
+			result.Valid = false
+			result.Errors[field.Name] = fieldErrors
+		} else {
+			result.Data[field.Name] = v.cleanValue(&field, value)
+		}
+	}
+
+	return result
 }
 
-// ValidateData validates form data against a schema (implements schema.Validator interface)
+// ValidateData validates form data against a schema (implements Validator interface)
 func (v *DataValidator) ValidateData(ctx context.Context, schema *Schema, data map[string]any) error {
 	if schema == nil {
 		return fmt.Errorf("schema cannot be nil")
@@ -119,7 +122,7 @@ func (v *DataValidator) ValidateDataDetailed(ctx context.Context, schema SchemaA
 	for _, field := range schema.GetFields() {
 		value, exists := data[field.GetName()]
 		// Validate field
-		fieldErrors := v.ValidateField(ctx, field, value, exists)
+		fieldErrors := v.validateFieldInternal(ctx, field, value, exists)
 		if len(fieldErrors) > 0 {
 			result.Valid = false
 			result.Errors[field.GetName()] = fieldErrors
@@ -133,8 +136,25 @@ func (v *DataValidator) ValidateDataDetailed(ctx context.Context, schema SchemaA
 	return result, nil
 }
 
-// ValidateField validates a single field value
-func (v *DataValidator) ValidateField(ctx context.Context, field FieldAccessor, value any, exists bool) []string {
+// ValidateField validates a single field with its value (implements Validator interface)
+func (v *DataValidator) ValidateField(ctx context.Context, field Field, value any) *ValidationResult {
+	fieldErrors := v.validateFieldInternal(ctx, &field, value, value != nil)
+	result := &ValidationResult{
+		Valid:    len(fieldErrors) == 0,
+		Warnings: []string{},
+		Errors:   make(map[string][]string),
+		Data:     make(map[string]any),
+	}
+	if len(fieldErrors) > 0 {
+		result.Errors[field.Name] = fieldErrors
+	} else {
+		result.Data[field.Name] = v.cleanValue(&field, value)
+	}
+	return result
+}
+
+// validateFieldInternal validates a single field value (internal helper)
+func (v *DataValidator) validateFieldInternal(ctx context.Context, field FieldAccessor, value any, exists bool) []string {
 	var errors []string
 	// Check required
 	if field.GetRequired() && (!exists || v.isEmpty(value)) {
@@ -251,8 +271,8 @@ func (v *DataValidator) ValidateWithFieldState(ctx context.Context, field FieldA
 		}
 	}
 	// For editable fields or fields without runtime state, run full validation
-	// Need to call with exists parameter based on the actual ValidateField signature
-	return v.ValidateField(ctx, field, value, exists)
+	// Need to call with exists parameter based on the actual validateFieldInternal signature
+	return v.validateFieldInternal(ctx, field, value, exists)
 }
 
 // ValidateConditionalFields validates fields based on their visibility/editability state
@@ -270,7 +290,7 @@ func (v *DataValidator) ValidateConditionalFields(ctx context.Context, schema Sc
 		if runtime.IsVisible() {
 			if runtime.IsEditable() {
 				// Full validation for editable fields
-				fieldErrors = v.ValidateField(ctx, field, value, exists)
+				fieldErrors = v.validateFieldInternal(ctx, field, value, exists)
 			} else {
 				// Limited validation for readonly fields
 				fieldErrors = v.validateReadOnlyField(field, value, exists)
@@ -737,7 +757,7 @@ func (v *DataValidator) cleanValue(field FieldAccessor, value any) any {
 // ValidateWithRegistry validates a field using the validation registry
 func (v *DataValidator) ValidateWithRegistry(ctx context.Context, field FieldAccessor, value any, registry *ValidationRegistry) []string {
 	// First run standard validation
-	errors := v.ValidateField(ctx, field, value, value != nil)
+	errors := v.validateFieldInternal(ctx, field, value, value != nil)
 	// Then run custom validators if configured
 	validation := field.GetValidation()
 	if validation != nil && validation.Custom != "" {
@@ -839,6 +859,29 @@ func (v *DataValidator) checkUniqueness(field FieldAccessor, value any) error {
 		return fmt.Errorf("value already exists")
 	}
 	return nil
+}
+
+// AddRule adds a custom validation rule (implements Validator interface)
+func (v *DataValidator) AddRule(name string, rule ValidatorFunc) error {
+	if name == "" {
+		return fmt.Errorf("rule name cannot be empty")
+	}
+	if rule == nil {
+		return fmt.Errorf("rule function cannot be nil")
+	}
+	
+	v.mutex.Lock()
+	defer v.mutex.Unlock()
+	v.customRules[name] = rule
+	return nil
+}
+
+// GetRule retrieves a validation rule by name (implements Validator interface)
+func (v *DataValidator) GetRule(name string) (ValidatorFunc, bool) {
+	v.mutex.RLock()
+	defer v.mutex.RUnlock()
+	rule, exists := v.customRules[name]
+	return rule, exists
 }
 
 // Utility function to create a validation error

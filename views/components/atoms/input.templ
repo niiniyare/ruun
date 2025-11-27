@@ -1,25 +1,8 @@
 package atoms
 
-import "strconv"
-
-// InputType defines the HTML input type
-type InputType string
-
-const (
-    InputText     InputType = "text"
-    InputEmail    InputType = "email"
-    InputPassword InputType = "password"
-    InputNumber   InputType = "number"
-    InputTel      InputType = "tel"
-    InputURL      InputType = "url"
-    InputSearch   InputType = "search"
-    InputFile     InputType = "file"
-    InputDate     InputType = "date"
-    InputTime     InputType = "time"
-    InputDatetime InputType = "datetime-local"
-    InputHidden   InputType = "hidden"
-    InputRange    InputType = "range"
-    InputColor    InputType = "color"
+import (
+    "strconv"
+    "github.com/niiniyare/ruun/views/components"
 )
 
 // InputProps defines all properties for the Input atom
@@ -27,7 +10,7 @@ type InputProps struct {
     // Core HTML attributes
     ID          string    `json:"id"`
     Name        string    `json:"name"`
-    Type        InputType `json:"type"`
+    Type        components.InputType `json:"type"`
     Value       string    `json:"value"`
     Placeholder string    `json:"placeholder"`
     

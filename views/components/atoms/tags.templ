@@ -76,10 +76,10 @@ func buildTagAttributes(props TagProps) templ.Attributes {
 	
 	// Event handlers
 	if props.OnClick != "" {
-		attrs["onclick"] = templ.ComponentScript{Call: props.OnClick}
+		attrs["onclick"] = props.OnClick
 	}
 	if props.OnHover != "" {
-		attrs["onmouseover"] = templ.ComponentScript{Call: props.OnHover}
+		attrs["onmouseover"] = props.OnHover
 	}
 	
 	// ARIA attributes

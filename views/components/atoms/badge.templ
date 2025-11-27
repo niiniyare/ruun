@@ -1,7 +1,6 @@
 package atoms
 
-import "github.com/a-h/templ"
-import "github.com/awo-development/ruun/views/components"
+import "github.com/niiniyare/ruun/views/components"
 
 // BadgeProps defines all properties for the Badge atom 
 // Combines Basecoat semantic classes with Tailwind utilities
@@ -84,72 +83,91 @@ func getBadgeClass(variant components.BadgeVariant, size components.Size) string
 	}
 }
 
+// buildBadgeAttributes creates all HTML attributes for the badge element
+func buildBadgeAttributes(props BadgeProps, clickable bool) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getBadgeClass(props.Variant, props.Size),
+			props.Base.ClassName,
+		),
+	}
+
+	// Link attributes
+	if clickable && props.Href != "" {
+		attrs["href"] = props.Href
+	} else if clickable {
+		attrs["href"] = "#"
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+
+	// HTMX attributes
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.AriaPressed != "" {
+		attrs["aria-pressed"] = props.Base.A11y.AriaPressed
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+
+	// Event handlers (as strings for HTML attributes)
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
 // Badge renders a Basecoat badge atom with Tailwind utilities support
 // Follows documentation pattern: Basecoat classes + Tailwind utilities
 templ Badge(props BadgeProps) {
 	if props.Clickable || props.Href != "" {
-		<a
-			class={
-				templ.Classes(
-					getBadgeClass(props.Variant, props.Size),
-					props.Base.ClassName, // Tailwind utilities from props (rounded-full, px-1, etc.)
-				)
-			}
-			if props.Href != "" {
-				href={props.Href}
-			} else {
-				href="#"
-			}
-			if props.Base.ID != "" {
-				id={props.Base.ID}
-			}
-			if props.Base.HTMX.Post != "" {
-				hx-post={props.Base.HTMX.Post}
-			}
-			if props.Base.HTMX.Get != "" {
-				hx-get={props.Base.HTMX.Get}
-			}
-			if props.Base.HTMX.Put != "" {
-				hx-put={props.Base.HTMX.Put}
-			}
-			if props.Base.HTMX.Patch != "" {
-				hx-patch={props.Base.HTMX.Patch}
-			}
-			if props.Base.HTMX.Delete != "" {
-				hx-delete={props.Base.HTMX.Delete}
-			}
-			if props.Base.HTMX.Target != "" {
-				hx-target={props.Base.HTMX.Target}
-			}
-			if props.Base.HTMX.Swap != "" {
-				hx-swap={props.Base.HTMX.Swap}
-			}
-			if props.Base.HTMX.Trigger != "" {
-				hx-trigger={props.Base.HTMX.Trigger}
-			}
-			if props.Base.HTMX.Confirm != "" {
-				hx-confirm={props.Base.HTMX.Confirm}
-			}
-			if props.Base.A11y.AriaLabel != "" {
-				aria-label={props.Base.A11y.AriaLabel}
-			}
-			if props.Base.A11y.AriaDescribedBy != "" {
-				aria-describedby={props.Base.A11y.AriaDescribedBy}
-			}
-			if props.Base.A11y.AriaLabelledBy != "" {
-				aria-labelledby={props.Base.A11y.AriaLabelledBy}
-			}
-			if props.Base.A11y.AriaPressed != "" {
-				aria-pressed={props.Base.A11y.AriaPressed}
-			}
-			if props.Base.A11y.Role != "" {
-				role={props.Base.A11y.Role}
-			}
-			if props.Base.Events.OnClick != "" {
-				onclick={props.Base.Events.OnClick}
-			}
-			{props.Attrs...}
-		>
+		<a {buildBadgeAttributes(props, true)...}>
 			if props.Icon != nil {
 				@props.Icon
 			}
@@ -158,30 +176,7 @@ templ Badge(props BadgeProps) {
 			}
 		</a>
 	} else {
-		<span
-			class={
-				templ.Classes(
-					getBadgeClass(props.Variant, props.Size),
-					props.Base.ClassName, // Tailwind utilities from props (rounded-full, px-1, etc.)
-				)
-			}
-			if props.Base.ID != "" {
-				id={props.Base.ID}
-			}
-			if props.Base.A11y.AriaLabel != "" {
-				aria-label={props.Base.A11y.AriaLabel}
-			}
-			if props.Base.A11y.AriaDescribedBy != "" {
-				aria-describedby={props.Base.A11y.AriaDescribedBy}
-			}
-			if props.Base.A11y.AriaLabelledBy != "" {
-				aria-labelledby={props.Base.A11y.AriaLabelledBy}
-			}
-			if props.Base.A11y.Role != "" {
-				role={props.Base.A11y.Role}
-			}
-			{props.Attrs...}
-		>
+		<span {buildBadgeAttributes(props, false)...}>
 			if props.Icon != nil {
 				@props.Icon
 			}

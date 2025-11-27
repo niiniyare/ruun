@@ -1,7 +1,6 @@
 package atoms
 
-import "github.com/a-h/templ"
-import "github.com/awo-development/ruun/views/components"
+import "github.com/niiniyare/ruun/views/components"
 
 // ButtonProps defines all properties for the Button atom 
 // Combines Basecoat semantic classes with Tailwind utilities
@@ -138,98 +137,127 @@ func getButtonClass(variant components.ButtonVariant, size components.Size, icon
 	}
 }
 
+// buildButtonAttributes creates all HTML attributes for the button element
+func buildButtonAttributes(props ButtonProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getButtonClass(props.Variant, props.Size, props.Icon != nil && props.Text == ""),
+			props.Base.ClassName,
+		),
+	}
+
+	// Button type
+	if props.Type != "" {
+		attrs["type"] = props.Type
+	} else {
+		attrs["type"] = "button"
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+	if props.Name != "" {
+		attrs["name"] = props.Name
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+
+	// Form attributes
+	if props.Form != "" {
+		attrs["form"] = props.Form
+	}
+	if props.FormAction != "" {
+		attrs["formaction"] = props.FormAction
+	}
+	if props.FormEncType != "" {
+		attrs["formenctype"] = props.FormEncType
+	}
+	if props.FormMethod != "" {
+		attrs["formmethod"] = props.FormMethod
+	}
+	if props.FormTarget != "" {
+		attrs["formtarget"] = props.FormTarget
+	}
+
+	// State
+	if props.Base.State.Disabled {
+		attrs["disabled"] = ""
+	}
+
+	// HTMX attributes
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.AriaExpanded != "" {
+		attrs["aria-expanded"] = props.Base.A11y.AriaExpanded
+	}
+	if props.Base.A11y.AriaHaspopup != "" {
+		attrs["aria-haspopup"] = props.Base.A11y.AriaHaspopup
+	}
+	if props.Base.A11y.AriaPressed != "" {
+		attrs["aria-pressed"] = props.Base.A11y.AriaPressed
+	}
+	if props.Base.A11y.AriaSelected != "" {
+		attrs["aria-selected"] = props.Base.A11y.AriaSelected
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+
+	// Event handlers (as strings for HTML attributes)
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
 // Button renders a Basecoat button atom with Tailwind utilities support
 // Follows documentation pattern: Basecoat classes + Tailwind utilities
 templ Button(props ButtonProps) {
-	<button
-		class={
-			templ.Classes(
-				getButtonClass(props.Variant, props.Size, props.Icon != nil && props.Text == ""),
-				props.Base.ClassName, // Tailwind utilities from props (gap-2, rounded-r-none, etc.)
-			)
-		}
-		if props.Type != "" {
-			type={props.Type}
-		} else {
-			type="button"
-		}
-		if props.Base.ID != "" {
-			id={props.Base.ID}
-		}
-		if props.Name != "" {
-			name={props.Name}
-		}
-		if props.Value != "" {
-			value={props.Value}
-		}
-		if props.Form != "" {
-			form={props.Form}
-		}
-		if props.FormAction != "" {
-			formaction={props.FormAction}
-		}
-		if props.FormMethod != "" {
-			formmethod={props.FormMethod}
-		}
-		if props.FormTarget != "" {
-			formtarget={props.FormTarget}
-		}
-		if props.Base.State.Disabled {
-			disabled
-		}
-		if props.Base.HTMX.Post != "" {
-			hx-post={props.Base.HTMX.Post}
-		}
-		if props.Base.HTMX.Get != "" {
-			hx-get={props.Base.HTMX.Get}
-		}
-		if props.Base.HTMX.Put != "" {
-			hx-put={props.Base.HTMX.Put}
-		}
-		if props.Base.HTMX.Patch != "" {
-			hx-patch={props.Base.HTMX.Patch}
-		}
-		if props.Base.HTMX.Delete != "" {
-			hx-delete={props.Base.HTMX.Delete}
-		}
-		if props.Base.HTMX.Target != "" {
-			hx-target={props.Base.HTMX.Target}
-		}
-		if props.Base.HTMX.Swap != "" {
-			hx-swap={props.Base.HTMX.Swap}
-		}
-		if props.Base.HTMX.Trigger != "" {
-			hx-trigger={props.Base.HTMX.Trigger}
-		}
-		if props.Base.HTMX.Confirm != "" {
-			hx-confirm={props.Base.HTMX.Confirm}
-		}
-		if props.Base.A11y.AriaLabel != "" {
-			aria-label={props.Base.A11y.AriaLabel}
-		}
-		if props.Base.A11y.AriaDescribedBy != "" {
-			aria-describedby={props.Base.A11y.AriaDescribedBy}
-		}
-		if props.Base.A11y.AriaLabelledBy != "" {
-			aria-labelledby={props.Base.A11y.AriaLabelledBy}
-		}
-		if props.Base.A11y.AriaPressed != "" {
-			aria-pressed={props.Base.A11y.AriaPressed}
-		}
-		if props.Base.A11y.AriaExpanded != "" {
-			aria-expanded={props.Base.A11y.AriaExpanded}
-		}
-		if props.Base.A11y.AriaSelected != "" {
-			aria-selected={props.Base.A11y.AriaSelected}
-		}
-		if props.Base.A11y.Role != "" {
-			role={props.Base.A11y.Role}
-		}
-		if props.Base.Events.OnClick != "" {
-			onclick={props.Base.Events.OnClick}
-		}
-		{props.Attrs...}
-	>
+	<button {buildButtonAttributes(props)...}>
 		if props.Icon != nil && props.Text != "" {
 			if props.IconPosition == "end" {
 				{props.Text}

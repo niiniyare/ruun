@@ -1038,3 +1038,43 @@ func humanizeFieldID(id string) string {
 	}
 	return strings.Join(words, " ")
 }
+
+// ==============================================================================
+// FIELDACCESSOR IMPLEMENTATION
+// ==============================================================================
+// The following methods implement the FieldAccessor interface for unified validation
+
+// GetName returns field name (implements FieldAccessor interface)
+func (f *Field) GetName() string {
+	return f.Name
+}
+
+// GetType returns field type (implements FieldAccessor interface)
+func (f *Field) GetType() FieldType {
+	return f.Type
+}
+
+// GetRequired returns if field is required (implements FieldAccessor interface)
+func (f *Field) GetRequired() bool {
+	return f.Required
+}
+
+// GetValidation returns field validation config (implements FieldAccessor interface)
+func (f *Field) GetValidation() *FieldValidation {
+	return f.Validation
+}
+
+// GetOptions returns field options (implements FieldAccessor interface)
+func (f *Field) GetOptions() []FieldOption {
+	return f.Options
+}
+
+// GetConfig returns field configuration (implements FieldAccessor interface)
+func (f *Field) GetConfig() map[string]any {
+	return f.Config
+}
+
+// GetRuntime returns runtime state (implements FieldAccessor interface)
+func (f *Field) GetRuntime() *FieldRuntime {
+	return f.Runtime
+}

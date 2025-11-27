@@ -2,6 +2,7 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"sync"
 	"time"
@@ -206,6 +207,14 @@ type ValidationError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
 	Code    string `json:"code"`
+}
+
+// Error implements the error interface
+func (e ValidationError) Error() string {
+	if e.Field != "" {
+		return fmt.Sprintf("%s: %s", e.Field, e.Message)
+	}
+	return e.Message
 }
 
 // ValidationMessages defines custom error messages for validation rules
