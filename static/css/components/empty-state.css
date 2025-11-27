@@ -1,67 +1,156 @@
-/* Empty State Extension for Basecoat CSS
- * Since Basecoat doesn't provide a dedicated Empty State component,
- * this extension follows Basecoat conventions and naming patterns
+/* ==========================================================================
+   Empty State Component
+   ========================================================================== */
+
+/**
+ * Empty state component for displaying when there's no content
+ * 
+ * Structure:
+ * .empty-state
+ *   .empty-state-icon
+ *   .empty-state-title
+ *   .empty-state-description
+ *   .empty-state-actions
  */
 
 @layer components {
+  /* Base
+     ========================================================================== */
+
   .empty-state {
-    @apply flex flex-col items-center justify-center text-center p-8 gap-4;
-    /* Use Basecoat CSS variables */
-    color: oklch(var(--muted-foreground));
+    @apply flex flex-col items-center justify-center text-center;
+    padding: 3rem 1.5rem;
+    min-height: 20rem;
   }
-.empty-state-icon {
-  width: 3rem;
-  height: 3rem;
-  color: hsl(var(--muted-foreground) / 0.5);
-}  
-  /* .empty-state-icon { */
-  /*   @apply size-12 text-muted-foreground/50; */
-  /* } */
-  
+
+  /* Parts
+     ========================================================================== */
+
+  .empty-state-icon {
+    @apply flex items-center justify-center mb-6;
+    width: 4rem;
+    height: 4rem;
+    color: oklch(var(--muted-foreground) / 0.5);
+  }
+
+  .empty-state-icon svg,
+  .empty-state-icon img {
+    @apply w-full h-full;
+  }
+
   .empty-state-title {
-    @apply text-lg font-semibold;
+    @apply text-lg font-semibold mb-2 leading-6;
+    margin: 0 0 0.5rem;
     color: oklch(var(--foreground));
   }
-  
+
   .empty-state-description {
-    @apply text-sm max-w-sm;
+    @apply text-sm leading-6 mb-6;
+    margin: 0 0 1.5rem;
     color: oklch(var(--muted-foreground));
+    max-width: 24rem;
   }
-  
-  .empty-state-action {
-    @apply mt-2;
+
+  .empty-state-actions {
+    @apply flex flex-wrap gap-3 items-center justify-center;
   }
-  
-  /* Size variants following Basecoat pattern */
-  .empty-state-sm {
-    @apply p-4 gap-3;
+
+  /* Variants
+     ========================================================================== */
+
+  /* Compact variant - reduced spacing */
+  .empty-state-compact {
+    padding: 2rem 1rem;
+    min-height: auto;
   }
-  
-  .empty-state-sm .empty-state-icon {
-    @apply size-8;
+
+  .empty-state-compact .empty-state-icon {
+    @apply mb-4;
+    width: 3rem;
+    height: 3rem;
   }
-  
-  .empty-state-sm .empty-state-title {
-    @apply text-base;
+
+  .empty-state-compact .empty-state-title {
+    @apply text-base mb-1;
   }
-  
-  .empty-state-lg {
-    @apply p-12 gap-6;
+
+  .empty-state-compact .empty-state-description {
+    @apply text-sm mb-4;
   }
-  
-  .empty-state-lg .empty-state-icon {
-    @apply size-16;
+
+  /* States
+     ========================================================================== */
+
+  /* When inside containers */
+  .card .empty-state,
+  .panel .empty-state {
+    min-height: 15rem;
   }
-  
-  .empty-state-lg .empty-state-title {
-    @apply text-xl;
+
+  .sidebar .empty-state {
+    padding: 2rem 1rem;
+    min-height: 12rem;
   }
-  
-  /* Card variant */
-  .empty-state-card {
-    /* Use Basecoat CSS variables */
-    background: oklch(var(--card));
-    border: 1px solid oklch(var(--border));
-    border-radius: var(--radius);
+
+  .sidebar .empty-state-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* Animation */
+  .empty-state {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .empty-state-icon {
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Responsive
+     ========================================================================== */
+
+  @media (max-width: 640px) {
+    .empty-state {
+      padding: 2rem 1rem;
+      min-height: 15rem;
+    }
+    
+    .empty-state-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    
+    .empty-state-title {
+      @apply text-base;
+    }
+    
+    .empty-state-description {
+      @apply text-sm;
+    }
+  }
+
+  /* Dark mode support
+     ========================================================================== */
+
+  @media (prefers-color-scheme: dark) {
+    .empty-state-icon {
+      opacity: 0.4;
+    }
   }
 }
