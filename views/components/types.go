@@ -12,11 +12,12 @@ import (
 type Size string
 
 const (
-	SizeXS Size = "xs"
-	SizeSM Size = "sm"
-	SizeMD Size = "md"
-	SizeLG Size = "lg"
-	SizeXL Size = "xl"
+	SizeXs      Size = "xs"
+	SizeSm      Size = "sm"
+	SizeDefault Size = "default"
+	SizeMd      Size = "md"
+	SizeLg      Size = "lg"
+	SizeXl      Size = "xl"
 )
 
 // Variant represents a visual style variant
@@ -33,6 +34,45 @@ const (
 	VariantSuccess     Variant = "success"
 	VariantWarning     Variant = "warning"
 	VariantInfo        Variant = "info"
+)
+
+// ButtonVariant represents button-specific style variations
+type ButtonVariant string
+
+const (
+	ButtonDefault     ButtonVariant = "default"
+	ButtonPrimary     ButtonVariant = "primary" 
+	ButtonSecondary   ButtonVariant = "secondary"
+	ButtonOutline     ButtonVariant = "outline"
+	ButtonDestructive ButtonVariant = "destructive"
+	ButtonGhost       ButtonVariant = "ghost"
+	ButtonLink        ButtonVariant = "link"
+)
+
+// BadgeVariant represents badge style variations
+type BadgeVariant string
+
+const (
+	BadgeDefault     BadgeVariant = "default"
+	BadgePrimary     BadgeVariant = "primary"
+	BadgeSecondary   BadgeVariant = "secondary"
+	BadgeSuccess     BadgeVariant = "success"
+	BadgeWarning     BadgeVariant = "warning"
+	BadgeError       BadgeVariant = "error"
+	BadgeDestructive BadgeVariant = "destructive"
+	BadgeInfo        BadgeVariant = "info"
+)
+
+// AlertVariant represents alert style variations
+type AlertVariant string
+
+const (
+	AlertDefault     AlertVariant = "default"
+	AlertSuccess     AlertVariant = "success"
+	AlertWarning     AlertVariant = "warning"
+	AlertError       AlertVariant = "error"
+	AlertDestructive AlertVariant = "destructive"
+	AlertInfo        AlertVariant = "info"
 )
 
 // ComponentState represents common component states
@@ -153,7 +193,7 @@ func (cb *ClassBuilder) AddVariant(base string, variant Variant) *ClassBuilder {
 
 // AddSize adds a size class with the specified base
 func (cb *ClassBuilder) AddSize(base string, size Size) *ClassBuilder {
-	if size != SizeMD {
+	if size != SizeMd && size != SizeDefault {
 		cb.classes = append(cb.classes, base+"-"+string(size))
 	} else {
 		cb.classes = append(cb.classes, base)
@@ -369,14 +409,64 @@ type Icon struct {
 	ClassName string // Additional CSS classes
 }
 
+// Status represents generic status states
+type Status string
+
+const (
+	StatusActive   Status = "active"
+	StatusInactive Status = "inactive"
+	StatusPending  Status = "pending"
+	StatusApproved Status = "approved"
+	StatusRejected Status = "rejected"
+	StatusDraft    Status = "draft"
+	StatusArchived Status = "archived"
+	StatusDeleted  Status = "deleted"
+)
+
+// InputType represents HTML input types
+type InputType string
+
+const (
+	InputText     InputType = "text"
+	InputEmail    InputType = "email"
+	InputPassword InputType = "password"
+	InputNumber   InputType = "number"
+	InputTel      InputType = "tel"
+	InputUrl      InputType = "url"
+	InputSearch   InputType = "search"
+	InputDate     InputType = "date"
+	InputTime     InputType = "time"
+	InputDateTime InputType = "datetime-local"
+	InputMonth    InputType = "month"
+	InputWeek     InputType = "week"
+	InputColor    InputType = "color"
+	InputFile     InputType = "file"
+	InputHidden   InputType = "hidden"
+)
+
 // Position represents positioning options
 type Position string
 
 const (
-	PositionTop    Position = "top"
-	PositionRight  Position = "right"
-	PositionBottom Position = "bottom"
-	PositionLeft   Position = "left"
+	PositionTop         Position = "top"
+	PositionRight       Position = "right"
+	PositionBottom      Position = "bottom"
+	PositionLeft        Position = "left"
+	PositionTopLeft     Position = "top-left"
+	PositionTopRight    Position = "top-right"
+	PositionBottomLeft  Position = "bottom-left"
+	PositionBottomRight Position = "bottom-right"
+	PositionCenter      Position = "center"
+)
+
+// TrendDirection represents directional trends
+type TrendDirection string
+
+const (
+	TrendUp   TrendDirection = "up"
+	TrendDown TrendDirection = "down"
+	TrendFlat TrendDirection = "flat"
+	TrendNone TrendDirection = "none"
 )
 
 // ValidationMessage represents a validation message with severity
@@ -395,3 +485,17 @@ const (
 	SeverityInfo    ValidationSeverity = "info"
 	SeveritySuccess ValidationSeverity = "success"
 )
+
+// WithIcon provides icon configuration for components
+type WithIcon struct {
+	Icon    templ.Component // Icon component to render
+	IconPos Position        // Position of icon relative to content
+}
+
+// WithSlots provides slot-based composition for complex components
+type WithSlots struct {
+	Header   templ.Component // Header slot content
+	Footer   templ.Component // Footer slot content
+	Leading  templ.Component // Leading content (left side)
+	Trailing templ.Component // Trailing content (right side)
+}
