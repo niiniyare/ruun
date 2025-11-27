@@ -191,3 +191,5 @@
 [0;34m[INFO][0m No docs found for: icon
 ✓ T4.4 - Refactor icon.templ (completed)
 [0;32m[SUCCESS][0m Task T4.4 completed
+[0;35m[TASK][0m Executing T4.5: Refactor badge.templ
+[0;34m[INFO][0m Reading existing docs: ./views/docs/badge.md
