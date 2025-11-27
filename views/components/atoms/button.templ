@@ -1,167 +1,247 @@
 package atoms
 
-// ButtonProps defines all properties for the Button atom using Basecoat classes
+import "github.com/a-h/templ"
+import "github.com/awo-development/ruun/views/components"
+
+// ButtonProps defines all properties for the Button atom 
+// Combines Basecoat semantic classes with Tailwind utilities
 type ButtonProps struct {
-    // Content
-    Text string `json:"text"`
-    Icon templ.Component `json:"icon,omitempty"`
-    
-    // Basecoat variants
-    Variant string `json:"variant,omitempty"` // "primary", "secondary", "outline", "ghost", "link", "destructive"
-    Size    string `json:"size,omitempty"`    // "sm", "lg" (empty = default)
-    
-    // HTML attributes
-    ID       string `json:"id,omitempty"`
-    Type     string `json:"type,omitempty"`     // "button", "submit", "reset"
-    Name     string `json:"name,omitempty"`
-    Value    string `json:"value,omitempty"`
-    Disabled bool   `json:"disabled,omitempty"`
-    
-    // Form attributes
-    Form       string `json:"form,omitempty"`
-    FormAction string `json:"formAction,omitempty"`
-    FormMethod string `json:"formMethod,omitempty"`
-    FormTarget string `json:"formTarget,omitempty"`
-    
-    // Event handlers
-    OnClick string `json:"onClick,omitempty"`
-    
-    // ARIA accessibility
-    AriaLabel       string `json:"ariaLabel,omitempty"`
-    AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
-    AriaPressed     string `json:"ariaPressed,omitempty"`
-    AriaExpanded    string `json:"ariaExpanded,omitempty"`
-    AriaHaspopup    string `json:"ariaHaspopup,omitempty"`
-    AriaControls    string `json:"ariaControls,omitempty"`
+	// Content
+	Text string          `json:"text"`
+	Icon templ.Component `json:"icon,omitempty"`
+	
+	// Basecoat variants (using shared types)
+	Variant components.ButtonVariant `json:"variant,omitempty"`
+	Size    components.Size          `json:"size,omitempty"`
+	
+	// Icon positioning (for Tailwind spacing utilities)
+	IconPosition string `json:"iconPosition,omitempty"` // "start" | "end" (default: "start")
+	
+	// HTML attributes  
+	Type  string `json:"type,omitempty"` // "button", "submit", "reset"
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+	
+	// Form attributes
+	Form       string `json:"form,omitempty"`
+	FormAction string `json:"formAction,omitempty"`
+	FormMethod string `json:"formMethod,omitempty"`
+	FormTarget string `json:"formTarget,omitempty"`
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-// getButtonClass returns the correct single Basecoat class  
-// Uses static lookup to avoid any dynamic class building
-func getButtonClass(variant, size string, iconOnly bool) string {
-    // Static switch-based approach - no string concatenation
-    if iconOnly {
-        switch size {
-        case "sm":
-            switch variant {
-            case "secondary": return "btn-sm-icon-secondary" 
-            case "outline": return "btn-sm-icon-outline"
-            case "ghost": return "btn-sm-icon-ghost"
-            case "link": return "btn-sm-icon-link" 
-            case "destructive": return "btn-sm-icon-destructive"
-            default: return "btn-sm-icon" // primary or empty
-            }
-        case "lg":
-            switch variant {
-            case "secondary": return "btn-lg-icon-secondary"
-            case "outline": return "btn-lg-icon-outline"
-            case "ghost": return "btn-lg-icon-ghost"
-            case "link": return "btn-lg-icon-link"
-            case "destructive": return "btn-lg-icon-destructive" 
-            default: return "btn-lg-icon" // primary or empty
-            }
-        default: // no size or empty
-            switch variant {
-            case "secondary": return "btn-icon-secondary"
-            case "outline": return "btn-icon-outline"
-            case "ghost": return "btn-icon-ghost"
-            case "link": return "btn-icon-link"
-            case "destructive": return "btn-icon-destructive"
-            default: return "btn-icon" // primary or empty
-            }
-        }
-    } else {
-        switch size {
-        case "sm":
-            switch variant {
-            case "secondary": return "btn-sm-secondary"
-            case "outline": return "btn-sm-outline"
-            case "ghost": return "btn-sm-ghost"
-            case "link": return "btn-sm-link"
-            case "destructive": return "btn-sm-destructive"
-            default: return "btn-sm" // primary or empty
-            }
-        case "lg":
-            switch variant {
-            case "secondary": return "btn-lg-secondary"
-            case "outline": return "btn-lg-outline" 
-            case "ghost": return "btn-lg-ghost"
-            case "link": return "btn-lg-link"
-            case "destructive": return "btn-lg-destructive"
-            default: return "btn-lg" // primary or empty
-            }
-        default: // no size or empty
-            switch variant {
-            case "secondary": return "btn-secondary"
-            case "outline": return "btn-outline"
-            case "ghost": return "btn-ghost"
-            case "link": return "btn-link"
-            case "destructive": return "btn-destructive"
-            default: return "btn" // primary or empty  
-            }
-        }
-    }
+// getButtonClass returns the correct single Basecoat class
+// Uses exact patterns from documentation - no dynamic class building
+func getButtonClass(variant components.ButtonVariant, size components.Size, iconOnly bool) string {
+	// Static switch-based approach following documentation exactly
+	if iconOnly {
+		switch size {
+		case components.SizeSm:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-sm-icon-secondary"
+			case components.ButtonOutline:
+				return "btn-sm-icon-outline"
+			case components.ButtonGhost:
+				return "btn-sm-icon-ghost"
+			case components.ButtonLink:
+				return "btn-sm-icon-link"
+			case components.ButtonDestructive:
+				return "btn-sm-icon-destructive"
+			default: // primary, default, or empty
+				return "btn-sm-icon"
+			}
+		case components.SizeLg:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-lg-icon-secondary"
+			case components.ButtonOutline:
+				return "btn-lg-icon-outline" 
+			case components.ButtonGhost:
+				return "btn-lg-icon-ghost"
+			case components.ButtonLink:
+				return "btn-lg-icon-link"
+			case components.ButtonDestructive:
+				return "btn-lg-icon-destructive"
+			default: // primary, default, or empty
+				return "btn-lg-icon"
+			}
+		default: // default size
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-icon-secondary"
+			case components.ButtonOutline:
+				return "btn-icon-outline"
+			case components.ButtonGhost:
+				return "btn-icon-ghost"
+			case components.ButtonLink:
+				return "btn-icon-link"
+			case components.ButtonDestructive:
+				return "btn-icon-destructive"
+			default: // primary, default, or empty
+				return "btn-icon"
+			}
+		}
+	} else {
+		switch size {
+		case components.SizeSm:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-sm-secondary"
+			case components.ButtonOutline:
+				return "btn-sm-outline"
+			case components.ButtonGhost:
+				return "btn-sm-ghost"
+			case components.ButtonLink:
+				return "btn-sm-link"
+			case components.ButtonDestructive:
+				return "btn-sm-destructive"
+			default: // primary, default, or empty
+				return "btn-sm"
+			}
+		case components.SizeLg:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-lg-secondary"
+			case components.ButtonOutline:
+				return "btn-lg-outline"
+			case components.ButtonGhost:
+				return "btn-lg-ghost"
+			case components.ButtonLink:
+				return "btn-lg-link"
+			case components.ButtonDestructive:
+				return "btn-lg-destructive"
+			default: // primary, default, or empty
+				return "btn-lg"
+			}
+		default: // default size
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-secondary"
+			case components.ButtonOutline:
+				return "btn-outline"
+			case components.ButtonGhost:
+				return "btn-ghost"
+			case components.ButtonLink:
+				return "btn-link"
+			case components.ButtonDestructive:
+				return "btn-destructive"
+			default: // primary, default, or empty - matches doc examples
+				return "btn"
+			}
+		}
+	}
 }
 
-// Button renders a Basecoat button atom
+// Button renders a Basecoat button atom with Tailwind utilities support
+// Follows documentation pattern: Basecoat classes + Tailwind utilities
 templ Button(props ButtonProps) {
-    <button
-        class={ getButtonClass(props.Variant, props.Size, props.Icon != nil && props.Text == "") }
-        if props.Type != "" {
-            type={ props.Type }
-        } else {
-            type="button"
-        }
-        if props.ID != "" {
-            id={ props.ID }
-        }
-        if props.Name != "" {
-            name={ props.Name }
-        }
-        if props.Value != "" {
-            value={ props.Value }
-        }
-        if props.Form != "" {
-            form={ props.Form }
-        }
-        if props.FormAction != "" {
-            formaction={ props.FormAction }
-        }
-        if props.FormMethod != "" {
-            formmethod={ props.FormMethod }
-        }
-        if props.FormTarget != "" {
-            formtarget={ props.FormTarget }
-        }
-        if props.Disabled {
-            disabled
-        }
-        if props.OnClick != "" {
-            onclick={ templ.ComponentScript{Call: props.OnClick} }
-        }
-        if props.AriaLabel != "" {
-            aria-label={ props.AriaLabel }
-        }
-        if props.AriaDescribedBy != "" {
-            aria-describedby={ props.AriaDescribedBy }
-        }
-        if props.AriaPressed != "" {
-            aria-pressed={ props.AriaPressed }
-        }
-        if props.AriaExpanded != "" {
-            aria-expanded={ props.AriaExpanded }
-        }
-        if props.AriaHaspopup != "" {
-            aria-haspopup={ props.AriaHaspopup }
-        }
-        if props.AriaControls != "" {
-            aria-controls={ props.AriaControls }
-        }
-    >
-        if props.Icon != nil {
-            @props.Icon
-        }
-        if props.Text != "" {
-            { props.Text }
-        }
-    </button>
+	<button
+		class={
+			templ.Classes(
+				getButtonClass(props.Variant, props.Size, props.Icon != nil && props.Text == ""),
+				props.Base.ClassName, // Tailwind utilities from props (gap-2, rounded-r-none, etc.)
+			)
+		}
+		if props.Type != "" {
+			type={props.Type}
+		} else {
+			type="button"
+		}
+		if props.Base.ID != "" {
+			id={props.Base.ID}
+		}
+		if props.Name != "" {
+			name={props.Name}
+		}
+		if props.Value != "" {
+			value={props.Value}
+		}
+		if props.Form != "" {
+			form={props.Form}
+		}
+		if props.FormAction != "" {
+			formaction={props.FormAction}
+		}
+		if props.FormMethod != "" {
+			formmethod={props.FormMethod}
+		}
+		if props.FormTarget != "" {
+			formtarget={props.FormTarget}
+		}
+		if props.Base.State.Disabled {
+			disabled
+		}
+		if props.Base.HTMX.Post != "" {
+			hx-post={props.Base.HTMX.Post}
+		}
+		if props.Base.HTMX.Get != "" {
+			hx-get={props.Base.HTMX.Get}
+		}
+		if props.Base.HTMX.Put != "" {
+			hx-put={props.Base.HTMX.Put}
+		}
+		if props.Base.HTMX.Patch != "" {
+			hx-patch={props.Base.HTMX.Patch}
+		}
+		if props.Base.HTMX.Delete != "" {
+			hx-delete={props.Base.HTMX.Delete}
+		}
+		if props.Base.HTMX.Target != "" {
+			hx-target={props.Base.HTMX.Target}
+		}
+		if props.Base.HTMX.Swap != "" {
+			hx-swap={props.Base.HTMX.Swap}
+		}
+		if props.Base.HTMX.Trigger != "" {
+			hx-trigger={props.Base.HTMX.Trigger}
+		}
+		if props.Base.HTMX.Confirm != "" {
+			hx-confirm={props.Base.HTMX.Confirm}
+		}
+		if props.Base.A11y.AriaLabel != "" {
+			aria-label={props.Base.A11y.AriaLabel}
+		}
+		if props.Base.A11y.AriaDescribedBy != "" {
+			aria-describedby={props.Base.A11y.AriaDescribedBy}
+		}
+		if props.Base.A11y.AriaLabelledBy != "" {
+			aria-labelledby={props.Base.A11y.AriaLabelledBy}
+		}
+		if props.Base.A11y.AriaPressed != "" {
+			aria-pressed={props.Base.A11y.AriaPressed}
+		}
+		if props.Base.A11y.AriaExpanded != "" {
+			aria-expanded={props.Base.A11y.AriaExpanded}
+		}
+		if props.Base.A11y.AriaSelected != "" {
+			aria-selected={props.Base.A11y.AriaSelected}
+		}
+		if props.Base.A11y.Role != "" {
+			role={props.Base.A11y.Role}
+		}
+		if props.Base.Events.OnClick != "" {
+			onclick={props.Base.Events.OnClick}
+		}
+		{props.Attrs...}
+	>
+		if props.Icon != nil && props.Text != "" {
+			if props.IconPosition == "end" {
+				{props.Text}
+				@props.Icon
+			} else {
+				@props.Icon
+				{props.Text}
+			}
+		} else if props.Icon != nil {
+			@props.Icon
+		} else if props.Text != "" {
+			{props.Text}
+		}
+	</button>
 }

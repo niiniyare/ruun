@@ -1,0 +1,301 @@
+package molecules
+
+import "github.com/a-h/templ"
+import "github.com/awo-development/ruun/views/components"
+
+// ButtonGroupProps defines properties for the ButtonGroup molecule
+// Follows documentation pattern: button-group class + Tailwind utilities
+type ButtonGroupProps struct {
+	// Content - array of buttons to render
+	Buttons []ButtonConfig `json:"buttons"`
+	
+	// Layout behavior
+	Orientation components.LayoutOrientation `json:"orientation,omitempty"` // "horizontal" (default) | "vertical"
+	Size        components.Size              `json:"size,omitempty"`        // affects all buttons in group
+	
+	// Selection behavior (for segmented control style)
+	SelectionMode string `json:"selectionMode,omitempty"` // "" | "single" | "multiple"
+	Selected      []int  `json:"selected,omitempty"`      // indices of selected buttons
+	
+	// Accessibility
+	AriaLabel       string `json:"ariaLabel,omitempty"`       // describes the group purpose
+	AriaLabelledBy  string `json:"ariaLabelledBy,omitempty"`  // references label element
+	Role            string `json:"role,omitempty"`            // "group" (default) | "radiogroup" | "toolbar"
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for additional Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
+}
+
+// ButtonConfig represents individual button configuration within the group
+type ButtonConfig struct {
+	Text         string                   `json:"text"`
+	Icon         templ.Component          `json:"icon,omitempty"`
+	IconPosition string                   `json:"iconPosition,omitempty"` // "start" | "end"
+	Variant      components.ButtonVariant `json:"variant,omitempty"`      // if empty, inherits from group logic
+	Disabled     bool                     `json:"disabled,omitempty"`
+	
+	// Button-specific attributes
+	Type  string `json:"type,omitempty"`  // "button", "submit", "reset"
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+	
+	// HTMX for individual buttons
+	HTMX components.HTMXConfig `json:"htmx,omitempty"`
+	
+	// Accessibility for individual buttons
+	AriaLabel    string `json:"ariaLabel,omitempty"`    // required for icon-only buttons
+	AriaPressed  string `json:"ariaPressed,omitempty"`  // for toggle buttons
+	AriaCurrent  string `json:"ariaCurrent,omitempty"`  // for pagination/navigation
+	AriaExpanded string `json:"ariaExpanded,omitempty"` // for dropdown triggers
+	AriaHaspopup string `json:"ariaHaspopup,omitempty"` // for dropdown triggers
+	
+	// Event handlers
+	OnClick string `json:"onClick,omitempty"`
+	
+	// Additional attributes for individual buttons
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+}
+
+// getButtonGroupClasses returns the CSS classes for the button group container
+// Uses exact documentation pattern: button-group + optional Tailwind utilities
+func getButtonGroupClasses(orientation components.LayoutOrientation, baseClasses string) string {
+	classes := []string{"button-group"}
+	
+	// Add orientation-specific classes if needed
+	if orientation == components.OrientationVertical {
+		classes = append(classes, "flex-col")
+	}
+	
+	// Add custom classes
+	if baseClasses != "" {
+		classes = append(classes, baseClasses)
+	}
+	
+	return templ.Classes(classes...).String()
+}
+
+// getButtonVariantForGroup returns appropriate variant for button based on selection state and group configuration
+func getButtonVariantForGroup(buttonConfig ButtonConfig, index int, groupProps ButtonGroupProps) components.ButtonVariant {
+	// If button has explicit variant, use it
+	if buttonConfig.Variant != "" {
+		return buttonConfig.Variant
+	}
+	
+	// For selection groups, use selection state to determine variant
+	if groupProps.SelectionMode != "" {
+		for _, selectedIndex := range groupProps.Selected {
+			if selectedIndex == index {
+				return components.ButtonPrimary // selected state
+			}
+		}
+		return components.ButtonOutline // unselected state
+	}
+	
+	// Default to outline for groups
+	return components.ButtonOutline
+}
+
+// ButtonGroup renders a group of related buttons with consistent styling
+// Follows documentation pattern: role="group" + button-group class + Tailwind utilities
+templ ButtonGroup(props ButtonGroupProps) {
+	<div
+		class={getButtonGroupClasses(props.Orientation, props.Base.ClassName)}
+		if props.Role != "" {
+			role={props.Role}
+		} else {
+			role="group"
+		}
+		if props.AriaLabel != "" {
+			aria-label={props.AriaLabel}
+		}
+		if props.AriaLabelledBy != "" {
+			aria-labelledby={props.AriaLabelledBy}
+		}
+		if props.Base.ID != "" {
+			id={props.Base.ID}
+		}
+		{props.Attrs...}
+	>
+		for i, buttonConfig := range props.Buttons {
+			<button
+				class={
+					templ.Classes(
+						getButtonClass(
+							getButtonVariantForGroup(buttonConfig, i, props),
+							props.Size,
+							buttonConfig.Icon != nil && buttonConfig.Text == "",
+						),
+					)
+				}
+				if buttonConfig.Type != "" {
+					type={buttonConfig.Type}
+				} else {
+					type="button"
+				}
+				if buttonConfig.Name != "" {
+					name={buttonConfig.Name}
+				}
+				if buttonConfig.Value != "" {
+					value={buttonConfig.Value}
+				}
+				if buttonConfig.Disabled {
+					disabled
+				}
+				if buttonConfig.AriaLabel != "" {
+					aria-label={buttonConfig.AriaLabel}
+				}
+				if buttonConfig.AriaPressed != "" {
+					aria-pressed={buttonConfig.AriaPressed}
+				}
+				if buttonConfig.AriaCurrent != "" {
+					aria-current={buttonConfig.AriaCurrent}
+				}
+				if buttonConfig.AriaExpanded != "" {
+					aria-expanded={buttonConfig.AriaExpanded}
+				}
+				if buttonConfig.AriaHaspopup != "" {
+					aria-haspopup={buttonConfig.AriaHaspopup}
+				}
+				if buttonConfig.HTMX.Post != "" {
+					hx-post={buttonConfig.HTMX.Post}
+				}
+				if buttonConfig.HTMX.Get != "" {
+					hx-get={buttonConfig.HTMX.Get}
+				}
+				if buttonConfig.HTMX.Target != "" {
+					hx-target={buttonConfig.HTMX.Target}
+				}
+				if buttonConfig.HTMX.Swap != "" {
+					hx-swap={buttonConfig.HTMX.Swap}
+				}
+				if buttonConfig.HTMX.Trigger != "" {
+					hx-trigger={buttonConfig.HTMX.Trigger}
+				}
+				if buttonConfig.OnClick != "" {
+					onclick={buttonConfig.OnClick}
+				}
+				{buttonConfig.Attrs...}
+			>
+				if buttonConfig.Icon != nil && buttonConfig.Text != "" {
+					if buttonConfig.IconPosition == "end" {
+						{buttonConfig.Text}
+						@buttonConfig.Icon
+					} else {
+						@buttonConfig.Icon
+						{buttonConfig.Text}
+					}
+				} else if buttonConfig.Icon != nil {
+					@buttonConfig.Icon
+				} else if buttonConfig.Text != "" {
+					{buttonConfig.Text}
+				}
+			</button>
+		}
+	</div>
+}
+
+// getButtonClass is imported from atoms package - need to reference it
+// This is the same function from button.templ that maps variants to Basecoat classes
+func getButtonClass(variant components.ButtonVariant, size components.Size, iconOnly bool) string {
+	// Static switch-based approach following documentation exactly
+	if iconOnly {
+		switch size {
+		case components.SizeSm:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-sm-icon-secondary"
+			case components.ButtonOutline:
+				return "btn-sm-icon-outline"
+			case components.ButtonGhost:
+				return "btn-sm-icon-ghost"
+			case components.ButtonLink:
+				return "btn-sm-icon-link"
+			case components.ButtonDestructive:
+				return "btn-sm-icon-destructive"
+			default: // primary, default, or empty
+				return "btn-sm-icon"
+			}
+		case components.SizeLg:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-lg-icon-secondary"
+			case components.ButtonOutline:
+				return "btn-lg-icon-outline"
+			case components.ButtonGhost:
+				return "btn-lg-icon-ghost"
+			case components.ButtonLink:
+				return "btn-lg-icon-link"
+			case components.ButtonDestructive:
+				return "btn-lg-icon-destructive"
+			default: // primary, default, or empty
+				return "btn-lg-icon"
+			}
+		default: // default size
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-icon-secondary"
+			case components.ButtonOutline:
+				return "btn-icon-outline"
+			case components.ButtonGhost:
+				return "btn-icon-ghost"
+			case components.ButtonLink:
+				return "btn-icon-link"
+			case components.ButtonDestructive:
+				return "btn-icon-destructive"
+			default: // primary, default, or empty
+				return "btn-icon"
+			}
+		}
+	} else {
+		switch size {
+		case components.SizeSm:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-sm-secondary"
+			case components.ButtonOutline:
+				return "btn-sm-outline"
+			case components.ButtonGhost:
+				return "btn-sm-ghost"
+			case components.ButtonLink:
+				return "btn-sm-link"
+			case components.ButtonDestructive:
+				return "btn-sm-destructive"
+			default: // primary, default, or empty
+				return "btn-sm"
+			}
+		case components.SizeLg:
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-lg-secondary"
+			case components.ButtonOutline:
+				return "btn-lg-outline"
+			case components.ButtonGhost:
+				return "btn-lg-ghost"
+			case components.ButtonLink:
+				return "btn-lg-link"
+			case components.ButtonDestructive:
+				return "btn-lg-destructive"
+			default: // primary, default, or empty
+				return "btn-lg"
+			}
+		default: // default size
+			switch variant {
+			case components.ButtonSecondary:
+				return "btn-secondary"
+			case components.ButtonOutline:
+				return "btn-outline"
+			case components.ButtonGhost:
+				return "btn-ghost"
+			case components.ButtonLink:
+				return "btn-link"
+			case components.ButtonDestructive:
+				return "btn-destructive"
+			default: // primary, default, or empty - matches doc examples
+				return "btn"
+			}
+		}
+	}
+}
