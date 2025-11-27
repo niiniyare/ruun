@@ -1,0 +1,364 @@
+/* Wizard Component - Basecoat Pattern */
+
+/* Base */
+.wizard {
+  --wizard-step-size: 2.5rem;
+  --wizard-step-gap: 4rem;
+  --wizard-connector-height: 2px;
+  --wizard-color-completed: var(--color-primary);
+  --wizard-color-active: var(--color-primary);
+  --wizard-color-inactive: var(--color-muted-foreground);
+  --wizard-bg-completed: var(--color-primary);
+  --wizard-bg-active: var(--color-primary);
+  --wizard-bg-inactive: var(--color-muted);
+  
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Steps Container */
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 1rem;
+}
+
+/* Individual Step */
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.wizard-step:hover {
+  opacity: 0.8;
+}
+
+/* Step Circle */
+.wizard-step::before {
+  content: attr(data-step);
+  width: var(--wizard-step-size);
+  height: var(--wizard-step-size);
+  border-radius: 50%;
+  background-color: var(--wizard-bg-inactive);
+  color: var(--wizard-color-inactive);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+  z-index: 2;
+  position: relative;
+}
+
+/* Step Label */
+.wizard-step::after {
+  content: attr(data-label);
+  font-size: 0.875rem;
+  color: var(--wizard-color-inactive);
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+/* Connector Line */
+.wizard-connector {
+  flex: 1;
+  height: var(--wizard-connector-height);
+  background-color: var(--color-border);
+  margin: 0 1rem;
+  position: relative;
+  top: calc(var(--wizard-step-size) / 2);
+}
+
+/* Progress Bar within Connector */
+.wizard-connector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--wizard-bg-completed);
+  transition: width 0.3s ease-out;
+  width: 0%;
+}
+
+/* Active State */
+.wizard-step-active::before {
+  background-color: var(--wizard-bg-active);
+  color: var(--color-background);
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.wizard-step-active::after {
+  color: var(--wizard-color-active);
+  font-weight: 600;
+}
+
+/* Completed State */
+.wizard-step-completed::before {
+  background-color: var(--wizard-bg-completed);
+  color: var(--color-background);
+  content: '✓';
+  font-size: 1.125rem;
+}
+
+.wizard-step-completed::after {
+  color: var(--wizard-color-completed);
+}
+
+/* Completed Connector */
+.wizard-step-completed + .wizard-connector::before {
+  width: 100%;
+}
+
+/* Content Area */
+.wizard-content {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  min-height: 300px;
+}
+
+/* Navigation */
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.wizard-nav button {
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.wizard-nav button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Variants */
+
+/* Vertical Wizard */
+.wizard-vertical {
+  flex-direction: row;
+  gap: 3rem;
+}
+
+.wizard-vertical .wizard-steps {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  min-width: 200px;
+}
+
+.wizard-vertical .wizard-step {
+  flex-direction: row;
+  gap: 1rem;
+  width: 100%;
+}
+
+.wizard-vertical .wizard-step::after {
+  text-align: left;
+  flex: 1;
+}
+
+.wizard-vertical .wizard-connector {
+  width: var(--wizard-connector-height);
+  height: var(--wizard-step-gap);
+  margin: 0.5rem 0;
+  top: 0;
+  left: calc(var(--wizard-step-size) / 2);
+}
+
+.wizard-vertical .wizard-connector::before {
+  width: 100%;
+  height: 0%;
+}
+
+.wizard-vertical .wizard-step-completed + .wizard-connector::before {
+  height: 100%;
+}
+
+/* Small Variant */
+.wizard-small {
+  --wizard-step-size: 2rem;
+  --wizard-step-gap: 3rem;
+}
+
+.wizard-small .wizard-step::before {
+  font-size: 0.75rem;
+}
+
+.wizard-small .wizard-step::after {
+  font-size: 0.75rem;
+}
+
+/* Large Variant */
+.wizard-large {
+  --wizard-step-size: 3rem;
+  --wizard-step-gap: 5rem;
+}
+
+.wizard-large .wizard-step::before {
+  font-size: 1rem;
+}
+
+.wizard-large .wizard-step::after {
+  font-size: 1rem;
+}
+
+/* Compact Variant (No Labels) */
+.wizard-compact .wizard-step::after {
+  display: none;
+}
+
+.wizard-compact .wizard-steps {
+  gap: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .wizard-steps {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  
+  .wizard-step {
+    min-width: max-content;
+  }
+  
+  .wizard-vertical {
+    flex-direction: column;
+  }
+  
+  .wizard-vertical .wizard-steps {
+    flex-direction: row;
+    width: 100%;
+  }
+  
+  .wizard-vertical .wizard-connector {
+    width: auto;
+    height: var(--wizard-connector-height);
+    margin: 0 1rem;
+    left: 0;
+    top: calc(var(--wizard-step-size) / 2);
+  }
+  
+  .wizard-vertical .wizard-step {
+    flex-direction: column;
+  }
+  
+  .wizard-vertical .wizard-connector::before {
+    height: 100%;
+    width: 0%;
+  }
+  
+  .wizard-vertical .wizard-step-completed + .wizard-connector::before {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .wizard-step::before {
+    border: 2px solid transparent;
+  }
+  
+  .wizard-step-active::before {
+    border-color: var(--wizard-bg-active);
+  }
+}
+
+/* Accessibility */
+.wizard-step:focus-visible::before {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(var(--color-primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb), 0);
+  }
+}
+
+.wizard-step-active::before {
+  animation: pulse 2s infinite;
+}
+
+/* Clickable Steps */
+.wizard-clickable .wizard-step-completed,
+.wizard-clickable .wizard-step-active {
+  cursor: pointer;
+}
+
+.wizard-clickable .wizard-step:not(.wizard-step-completed):not(.wizard-step-active) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Icon Support */
+.wizard-step[data-icon]::before {
+  font-family: 'Font Awesome 5 Free', 'Material Icons', sans-serif;
+  content: attr(data-icon);
+}
+
+/* Error State */
+.wizard-step-error::before {
+  background-color: var(--color-destructive);
+  color: var(--color-destructive-foreground);
+  content: '!' !important;
+}
+
+.wizard-step-error::after {
+  color: var(--color-destructive);
+}
+
+/* Loading State */
+.wizard-loading .wizard-step-active::before {
+  position: relative;
+  overflow: hidden;
+}
+
+.wizard-loading .wizard-step-active::before::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}

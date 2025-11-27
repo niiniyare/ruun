@@ -71,3 +71,5 @@
 [0;32m[SUCCESS][0m Task T3.12 completed
 [0;35m[TASK][0m Executing T3.13: Generate stats-card.css
 [0;32m[SUCCESS][0m Task T3.13 completed
+[0;35m[TASK][0m Executing T3.14: Generate wizard.css
+[0;32m[SUCCESS][0m Task T3.14 completed
