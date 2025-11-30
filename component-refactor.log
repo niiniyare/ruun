@@ -283,3 +283,5 @@
 [0;35m[TASK][0m Executing T4.11: Refactor select.templ
 [Sun Nov 30 23:14:13 EAT 2025] T4.11 - Refactor select.templ: COMPLETED
 [0;32m[SUCCESS][0m Task T4.10 completed
+[0;35m[TASK][0m Executing T4.11: Refactor select.templ
+[0;34m[INFO][0m Reading existing docs: ./views/docs/select.md
