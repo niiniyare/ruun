@@ -1,45 +1,52 @@
 package atoms
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/zeiss/supernova/pkg/view/templ/components"
+)
 
 // Note: Basecoat handles radio styling via .field wrapper context
 // No size or state classes needed - styling is contextual
 
 // RadioProps defines all properties for the Radio atom
 type RadioProps struct {
-    // Core HTML attributes
-    ID      string `json:"id"`
-    Name    string `json:"name"`
-    Value   string `json:"value"`
-    Label   string `json:"label"`
-    Checked bool   `json:"checked"`
-    
-    // Constraints and validation
-    Required  bool `json:"required"`
-    Disabled  bool `json:"disabled"`
-    Readonly  bool `json:"readonly"`
-    AutoFocus bool `json:"autoFocus"`
-    
-    // Note: Visual styling handled by Basecoat .field context
-    // No visual props needed
-    
-    // Event handlers (pre-resolved externally)
-    OnChange string `json:"onChange"`
-    OnBlur   string `json:"onBlur"`
-    OnFocus  string `json:"onFocus"`
-    OnClick  string `json:"onClick"`
-    
-    // ARIA accessibility attributes
-    AriaLabel       string `json:"ariaLabel"`
-    AriaDescribedBy string `json:"ariaDescribedBy"`
-    AriaInvalid     string `json:"ariaInvalid"`
-    AriaRequired    string `json:"ariaRequired"`
-    AriaChecked     string `json:"ariaChecked"`
-    
-    // Additional HTML attributes
-    TabIndex     int                   `json:"tabIndex"`
-    DataAttrs    map[string]string     `json:"dataAttrs"`
-    Attributes   templ.Attributes      `json:"attributes"`
+	// Core HTML attributes
+	ID      string // The ID of the radio input
+	Name    string // The name of the radio input (groups radios together)
+	Value   string // The value of the radio input
+	Label   string // The label text for the radio
+	Checked bool   // Whether the radio is checked
+
+	// Constraints and validation
+	Required  bool // Whether the radio is required
+	Disabled  bool // Whether the radio is disabled
+	Readonly  bool // Whether the radio is readonly
+	AutoFocus bool // Whether the radio should autofocus
+
+	// Layout and presentation
+	Description string // Additional description text
+	Horizontal  bool   // Whether to render label and radio horizontally
+
+	// Event handlers
+	OnChange string // JavaScript to execute on change
+	OnBlur   string // JavaScript to execute on blur
+	OnFocus  string // JavaScript to execute on focus
+	OnClick  string // JavaScript to execute on click
+
+	// ARIA accessibility attributes
+	AriaLabel       string // Aria label for the radio
+	AriaDescribedBy string // ID of element describing the radio
+	AriaInvalid     any    // "true", "false", or bool for aria-invalid
+	AriaRequired    string // Aria required attribute
+	AriaChecked     string // Aria checked attribute
+
+	// Base component properties
+	components.BaseProps
+
+	// Additional HTML attributes
+	TabIndex int                 // Tab index for the radio
+	Attrs    components.Attrs    // Additional HTML attributes
 }
 
 // Basecoat handles radio styling contextually via .field wrapper
@@ -64,19 +71,19 @@ func buildRadioAttributes(props RadioProps) templ.Attributes {
     
     // Boolean attributes
     if props.Checked {
-        attrs["checked"] = "checked"
+        attrs["checked"] = ""
     }
     if props.Required {
-        attrs["required"] = "required"
+        attrs["required"] = ""
     }
     if props.Disabled {
-        attrs["disabled"] = "disabled"
+        attrs["disabled"] = ""
     }
     if props.Readonly {
-        attrs["readonly"] = "readonly"
+        attrs["readonly"] = ""
     }
     if props.AutoFocus {
-        attrs["autofocus"] = "autofocus"
+        attrs["autofocus"] = ""
     }
     
     // Event handlers
@@ -100,9 +107,21 @@ func buildRadioAttributes(props RadioProps) templ.Attributes {
     if props.AriaDescribedBy != "" {
         attrs["aria-describedby"] = props.AriaDescribedBy
     }
-    if props.AriaInvalid != "" {
-        attrs["aria-invalid"] = props.AriaInvalid
+    
+    // Handle aria-invalid (supports both bool and string)
+    switch v := props.AriaInvalid.(type) {
+    case bool:
+        if v {
+            attrs["aria-invalid"] = "true"
+        } else {
+            attrs["aria-invalid"] = "false"
+        }
+    case string:
+        if v != "" {
+            attrs["aria-invalid"] = v
+        }
     }
+    
     if props.AriaRequired != "" {
         attrs["aria-required"] = props.AriaRequired
     }
@@ -115,13 +134,40 @@ func buildRadioAttributes(props RadioProps) templ.Attributes {
         attrs["tabindex"] = strconv.Itoa(props.TabIndex)
     }
     
-    // Data attributes
-    for key, value := range props.DataAttrs {
-        attrs["data-"+key] = value
+    // HTMX attributes from BaseProps
+    if props.HxGet != "" {
+        attrs["hx-get"] = props.HxGet
+    }
+    if props.HxPost != "" {
+        attrs["hx-post"] = props.HxPost
+    }
+    if props.HxPut != "" {
+        attrs["hx-put"] = props.HxPut
+    }
+    if props.HxDelete != "" {
+        attrs["hx-delete"] = props.HxDelete
+    }
+    if props.HxPatch != "" {
+        attrs["hx-patch"] = props.HxPatch
+    }
+    if props.HxTarget != "" {
+        attrs["hx-target"] = props.HxTarget
+    }
+    if props.HxSwap != "" {
+        attrs["hx-swap"] = props.HxSwap
+    }
+    if props.HxTrigger != "" {
+        attrs["hx-trigger"] = props.HxTrigger
+    }
+    if props.HxConfirm != "" {
+        attrs["hx-confirm"] = props.HxConfirm
+    }
+    if props.HxIndicator != "" {
+        attrs["hx-indicator"] = props.HxIndicator
     }
     
     // Merge custom attributes (allows override)
-    for key, value := range props.Attributes {
+    for key, value := range props.Attrs {
         attrs[key] = value
     }
     
@@ -139,14 +185,53 @@ func buildRadioLabelAttributes(props RadioProps) templ.Attributes {
     return attrs
 }
 
-// Radio renders a pure presentation radio atom
+// Radio renders a radio input component.
+// The component can render in several ways:
+// 1. Bare input (no label)
+// 2. Input with label wrapper
+// 3. Input with label and description
+// 4. Horizontal layout for complex forms
+//
+// NOTE: Radios in Basecoat are styled based on context. When inside a .field wrapper,
+// they receive proper styling through the parent context.
 templ Radio(props RadioProps) {
-    if props.Label != "" {
-        <label {buildRadioLabelAttributes(props)...}>
-            <input {buildRadioAttributes(props)...} />
-            { props.Label }
-        </label>
-    } else {
-        <input {buildRadioAttributes(props)...} />
-    }
+	if props.Label == "" {
+		// Bare radio input
+		<input { buildRadioAttributes(props)... }/>
+	} else if props.Description == "" && !props.Horizontal {
+		// Radio with simple label wrapper
+		<label { buildRadioLabelAttributes(props)... }>
+			<input { buildRadioAttributes(props)... }/>
+			{ props.Label }
+		</label>
+	} else if props.Horizontal {
+		// Horizontal layout with flex container
+		<div class="flex items-start gap-3">
+			<input { buildRadioAttributes(props)... } class="mt-1"/>
+			<div class="space-y-1">
+				<label
+					if props.ID != "" {
+						for={ props.ID }
+					}
+					class="text-sm font-medium"
+				>
+					{ props.Label }
+				</label>
+				if props.Description != "" {
+					<p class="text-sm text-muted-foreground">{ props.Description }</p>
+				}
+			</div>
+		</div>
+	} else {
+		// Radio with label and description
+		<label { buildRadioLabelAttributes(props)... }>
+			<div class="flex items-start gap-3">
+				<input { buildRadioAttributes(props)... } class="mt-1"/>
+				<div class="space-y-1">
+					<div class="font-medium">{ props.Label }</div>
+					<div class="text-sm text-muted-foreground">{ props.Description }</div>
+				</div>
+			</div>
+		</label>
+	}
 }

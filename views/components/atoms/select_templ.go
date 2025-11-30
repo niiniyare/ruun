@@ -8,7 +8,11 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/zeiss/supernova/pkg/view/templ/components"
+)
 
 // Note: Basecoat handles select styling via .field wrapper or select.select class
 // No size or state classes needed - styling is contextual
@@ -25,39 +29,39 @@ type SelectOption struct {
 // SelectProps defines all properties for the Select atom
 type SelectProps struct {
 	// Core HTML attributes
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Value       string         `json:"value"`
-	Options     []SelectOption `json:"options"`
-	Placeholder string         `json:"placeholder"`
+	ID          string         // The ID of the select element
+	Name        string         // The name of the select element
+	Value       string         // The current value of the select
+	Options     []SelectOption // The list of options
+	Placeholder string         // Placeholder text for empty state
 
 	// Constraints and validation
-	Required  bool `json:"required"`
-	Disabled  bool `json:"disabled"`
-	AutoFocus bool `json:"autoFocus"`
-	Multiple  bool `json:"multiple"`
-	Size      int  `json:"htmlSize"` // HTML size attribute (distinct from design size)
+	Required  bool // Whether the select is required
+	Disabled  bool // Whether the select is disabled
+	Readonly  bool // Whether the select is readonly
+	AutoFocus bool // Whether the select should autofocus
+	Multiple  bool // Whether multiple selections are allowed
+	Size      int  // HTML size attribute (number of visible options)
 
-	// Note: Visual styling handled by Basecoat .field context
-	// No visual props needed
-
-	// Event handlers (pre-resolved externally)
-	OnChange string `json:"onChange"`
-	OnBlur   string `json:"onBlur"`
-	OnFocus  string `json:"onFocus"`
-	OnClick  string `json:"onClick"`
+	// Event handlers
+	OnChange string // JavaScript to execute on change
+	OnBlur   string // JavaScript to execute on blur
+	OnFocus  string // JavaScript to execute on focus
+	OnClick  string // JavaScript to execute on click
 
 	// ARIA accessibility attributes
-	AriaLabel       string `json:"ariaLabel"`
-	AriaDescribedBy string `json:"ariaDescribedBy"`
-	AriaInvalid     string `json:"ariaInvalid"`
-	AriaRequired    string `json:"ariaRequired"`
-	AriaExpanded    string `json:"ariaExpanded"`
+	AriaLabel       string // Aria label for the select
+	AriaDescribedBy string // ID of element describing the select
+	AriaInvalid     any    // "true", "false", or bool for aria-invalid
+	AriaRequired    string // Aria required attribute
+	AriaExpanded    string // Aria expanded attribute for custom selects
+
+	// Base component properties
+	components.BaseProps
 
 	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	TabIndex int              // Tab index for the select
+	Attrs    components.Attrs // Additional HTML attributes
 }
 
 // Basecoat handles select styling contextually via .field wrapper
@@ -79,16 +83,19 @@ func buildSelectAttributes(props SelectProps) templ.Attributes {
 
 	// Boolean attributes
 	if props.Required {
-		attrs["required"] = "required"
+		attrs["required"] = ""
 	}
 	if props.Disabled {
-		attrs["disabled"] = "disabled"
+		attrs["disabled"] = ""
+	}
+	if props.Readonly {
+		attrs["readonly"] = ""
 	}
 	if props.AutoFocus {
-		attrs["autofocus"] = "autofocus"
+		attrs["autofocus"] = ""
 	}
 	if props.Multiple {
-		attrs["multiple"] = "multiple"
+		attrs["multiple"] = ""
 	}
 
 	// Size attribute (HTML size, not design size)
@@ -117,9 +124,21 @@ func buildSelectAttributes(props SelectProps) templ.Attributes {
 	if props.AriaDescribedBy != "" {
 		attrs["aria-describedby"] = props.AriaDescribedBy
 	}
-	if props.AriaInvalid != "" {
-		attrs["aria-invalid"] = props.AriaInvalid
+
+	// Handle aria-invalid (supports both bool and string)
+	switch v := props.AriaInvalid.(type) {
+	case bool:
+		if v {
+			attrs["aria-invalid"] = "true"
+		} else {
+			attrs["aria-invalid"] = "false"
+		}
+	case string:
+		if v != "" {
+			attrs["aria-invalid"] = v
+		}
 	}
+
 	if props.AriaRequired != "" {
 		attrs["aria-required"] = props.AriaRequired
 	}
@@ -132,13 +151,40 @@ func buildSelectAttributes(props SelectProps) templ.Attributes {
 		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
 	}
 
-	// Data attributes
-	for key, value := range props.DataAttrs {
-		attrs["data-"+key] = value
+	// HTMX attributes from BaseProps
+	if props.HxGet != "" {
+		attrs["hx-get"] = props.HxGet
+	}
+	if props.HxPost != "" {
+		attrs["hx-post"] = props.HxPost
+	}
+	if props.HxPut != "" {
+		attrs["hx-put"] = props.HxPut
+	}
+	if props.HxDelete != "" {
+		attrs["hx-delete"] = props.HxDelete
+	}
+	if props.HxPatch != "" {
+		attrs["hx-patch"] = props.HxPatch
+	}
+	if props.HxTarget != "" {
+		attrs["hx-target"] = props.HxTarget
+	}
+	if props.HxSwap != "" {
+		attrs["hx-swap"] = props.HxSwap
+	}
+	if props.HxTrigger != "" {
+		attrs["hx-trigger"] = props.HxTrigger
+	}
+	if props.HxConfirm != "" {
+		attrs["hx-confirm"] = props.HxConfirm
+	}
+	if props.HxIndicator != "" {
+		attrs["hx-indicator"] = props.HxIndicator
 	}
 
 	// Merge custom attributes (allows override)
-	for key, value := range props.Attributes {
+	for key, value := range props.Attrs {
 		attrs[key] = value
 	}
 
@@ -199,7 +245,7 @@ func renderOption(option SelectOption) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(option.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 168, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 214, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -228,7 +274,7 @@ func renderOption(option SelectOption) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(option.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 172, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 218, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -271,7 +317,7 @@ func renderOptGroup(group string, options []SelectOption) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(group)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 178, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 224, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -295,7 +341,7 @@ func renderOptGroup(group string, options []SelectOption) templ.Component {
 	})
 }
 
-// Select renders a pure presentation select atom
+// Select renders a select dropdown component.\n// Supports native HTML select with options and optgroups.\n// Uses Basecoat's .select class for styling.\n// For custom enhanced selects, use the enhanced select molecule.\n//\n// NOTE: Selects in Basecoat are styled based on the .select class\n// or when inside a .field wrapper for form context.
 func Select(props SelectProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -347,7 +393,7 @@ func Select(props SelectProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 191, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/select.templ`, Line: 237, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
