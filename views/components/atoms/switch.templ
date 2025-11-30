@@ -2,7 +2,26 @@ package atoms
 
 import "strconv"
 
-// SwitchProps defines all properties for the Switch atom using Basecoat checkbox styling
+// SwitchVariant defines the switch layout style
+type SwitchVariant string
+
+const (
+	SwitchBasic       SwitchVariant = "basic"       // Basic switch with label
+	SwitchDescription SwitchVariant = "description" // Switch with label and description
+	SwitchCard        SwitchVariant = "card"        // Card-style layout
+	SwitchSimple      SwitchVariant = "simple"      // Just the input element
+)
+
+// SwitchSize defines the switch size
+type SwitchSize string
+
+const (
+	SwitchSM SwitchSize = "sm" // Small switch (scale-75)
+	SwitchMD SwitchSize = "md" // Default switch
+	SwitchLG SwitchSize = "lg" // Large switch (scale-125)
+)
+
+// SwitchProps defines all properties for the Switch atom using Basecoat styling
 type SwitchProps struct {
 	// Core attributes
 	ID      string `json:"id"`
@@ -10,14 +29,17 @@ type SwitchProps struct {
 	Value   string `json:"value,omitempty"`
 	Checked bool   `json:"checked,omitempty"`
 	
+	// Content
+	Label       string `json:"label"`
+	Description string `json:"description,omitempty"`
+	
+	// Styling
+	Variant SwitchVariant `json:"variant"`
+	Size    SwitchSize    `json:"size"`
+	
 	// Form attributes
 	Required bool `json:"required,omitempty"`
 	Disabled bool `json:"disabled,omitempty"`
-	
-	// Event handlers (pre-resolved externally)
-	OnChange string `json:"onChange,omitempty"`
-	OnFocus  string `json:"onFocus,omitempty"`
-	OnBlur   string `json:"onBlur,omitempty"`
 	
 	// ARIA accessibility
 	AriaLabel       string `json:"ariaLabel,omitempty"`
@@ -25,16 +47,17 @@ type SwitchProps struct {
 	AriaRequired    string `json:"ariaRequired,omitempty"`
 	
 	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex,omitempty"`
-	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
-	Attributes templ.Attributes  `json:"attributes,omitempty"`
+	TabIndex   int                `json:"tabIndex,omitempty"`
+	DataAttrs  map[string]string  `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes   `json:"attributes,omitempty"`
 }
 
-// buildSwitchAttributes creates all HTML attributes for the switch
+// buildSwitchAttributes creates all HTML attributes for the switch input
 func buildSwitchAttributes(props SwitchProps) templ.Attributes {
 	attrs := templ.Attributes{
 		"type": "checkbox",
-		"role": "switch",  // This makes Basecoat style it as a switch
+		"role": "switch",  // Makes Basecoat style it as a switch
+		"class": getSwitchInputClasses(props.Size),
 	}
 	
 	// Core HTML attributes
@@ -57,17 +80,6 @@ func buildSwitchAttributes(props SwitchProps) templ.Attributes {
 	}
 	if props.Disabled {
 		attrs["disabled"] = "disabled"
-	}
-	
-	// Event handlers
-	if props.OnChange != "" {
-		attrs["onchange"] = props.OnChange
-	}
-	if props.OnFocus != "" {
-		attrs["onfocus"] = props.OnFocus
-	}
-	if props.OnBlur != "" {
-		attrs["onblur"] = props.OnBlur
 	}
 	
 	// ARIA attributes
@@ -99,7 +111,129 @@ func buildSwitchAttributes(props SwitchProps) templ.Attributes {
 	return attrs
 }
 
-// Switch renders a Basecoat switch (checkbox with role="switch")
+// getSwitchInputClasses returns the appropriate classes for the switch input based on size
+func getSwitchInputClasses(size SwitchSize) string {
+	base := "input"
+	
+	switch size {
+	case SwitchSM:
+		return base + " scale-75"
+	case SwitchLG:
+		return base + " scale-125"
+	default:
+		return base
+	}
+}
+
+// getSwitchContainerClasses returns container classes based on variant
+func getSwitchContainerClasses(variant SwitchVariant, disabled bool) string {
+	switch variant {
+	case SwitchCard:
+		classes := "gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs"
+		if disabled {
+			return classes + " opacity-60"
+		}
+		return classes
+	case SwitchDescription:
+		return "gap-2 flex flex-row items-start justify-between"
+	case SwitchBasic:
+		return "flex items-center justify-between"
+	default:
+		return ""
+	}
+}
+
+// getLabelClasses returns label classes based on variant
+func getLabelClasses(variant SwitchVariant, size SwitchSize) string {
+	switch variant {
+	case SwitchBasic:
+		switch size {
+		case SwitchSM:
+			return "flex items-center gap-2 text-sm"
+		case SwitchLG:
+			return "flex items-center gap-3 text-lg"
+		default:
+			return "label"
+		}
+	default:
+		return "leading-normal"
+	}
+}
+
+// Switch renders a Basecoat switch following documentation patterns
 templ Switch(props SwitchProps) {
-	<input {buildSwitchAttributes(props)...} />
+	switch props.Variant {
+	case SwitchSimple:
+		// Just the input element
+		<input {buildSwitchAttributes(props)...} />
+	
+	case SwitchCard:
+		// Card-style layout with border and padding
+		<div class={getSwitchContainerClasses(props.Variant, props.Disabled)}>
+			<div class="flex flex-col gap-0.5">
+				if props.ID != "" {
+					<label for={props.ID} class={getLabelClasses(props.Variant, props.Size)}>
+						{props.Label}
+					</label>
+				} else {
+					<span class={getLabelClasses(props.Variant, props.Size)}>
+						{props.Label}
+					</span>
+				}
+				if props.Description != "" {
+					<p class="text-muted-foreground text-sm">{props.Description}</p>
+				}
+			</div>
+			<input {buildSwitchAttributes(props)...} />
+		</div>
+	
+	case SwitchDescription:
+		// Layout with description but no card styling
+		<div class={getSwitchContainerClasses(props.Variant, props.Disabled)}>
+			<div class="flex flex-col gap-0.5">
+				if props.ID != "" {
+					<label for={props.ID} class={getLabelClasses(props.Variant, props.Size)}>
+						{props.Label}
+					</label>
+				} else {
+					<span class={getLabelClasses(props.Variant, props.Size)}>
+						{props.Label}
+					</span>
+				}
+				if props.Description != "" {
+					<p class="text-muted-foreground text-sm">{props.Description}</p>
+				}
+			</div>
+			<input {buildSwitchAttributes(props)...} />
+		</div>
+	
+	default:
+		// Basic switch with label
+		if props.Label != "" {
+			if props.ID != "" {
+				<label for={props.ID} class={getLabelClasses(props.Variant, props.Size)}>
+					if props.Variant == SwitchBasic {
+						<input {buildSwitchAttributes(props)...} />
+						{props.Label}
+					} else {
+						<span>{props.Label}</span>
+						<input {buildSwitchAttributes(props)...} />
+					}
+				</label>
+			} else {
+				<label class={getLabelClasses(props.Variant, props.Size)}>
+					if props.Variant == SwitchBasic {
+						<input {buildSwitchAttributes(props)...} />
+						{props.Label}
+					} else {
+						<span>{props.Label}</span>
+						<input {buildSwitchAttributes(props)...} />
+					}
+				</label>
+			}
+		} else {
+			// No label, just the input
+			<input {buildSwitchAttributes(props)...} />
+		}
+	}
 }
