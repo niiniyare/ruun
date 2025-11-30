@@ -8,10 +8,13 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
-// ProgressProps defines all properties for the Progress atom using custom CSS extension
-// Uses /static/css/components/progress.css following Basecoat conventions
+// ProgressProps defines all properties for the Progress atom using pure Tailwind utilities
+// Follows Basecoat documentation: no dedicated Progress component - use pure HTML composition
 type ProgressProps struct {
 	// Core properties
 	ID    string `json:"id,omitempty"`
@@ -19,56 +22,94 @@ type ProgressProps struct {
 	Max   int    `json:"max,omitempty"` // Maximum value (default: 100)
 
 	// Visual properties
-	Size    string `json:"size,omitempty"`    // "sm", "md", "lg", "xl"
-	Variant string `json:"variant,omitempty"` // "", "secondary", "destructive"
+	Size    ProgressSize    `json:"size,omitempty"`    // "sm", "md", "lg", "xl"
+	Variant ProgressVariant `json:"variant,omitempty"` // "default", "success", "warning", "error"
 
 	// Accessibility
 	AriaLabel       string `json:"ariaLabel,omitempty"`
 	AriaLabelledBy  string `json:"ariaLabelledBy,omitempty"`
 	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+
+	// Additional attributes (HTMX, Alpine.js, etc.)
+	Attrs templ.Attributes `json:"attrs,omitempty"`
 }
 
-// getProgressClass returns progress class without any dynamic building
-func getProgressClass(size, variant string) string {
-	// Complete static approach - no concatenation at all
-	switch size {
-	case "sm":
-		switch variant {
-		case "secondary":
-			return "progress-sm progress-secondary"
-		case "destructive":
-			return "progress-sm progress-destructive"
-		default:
-			return "progress-sm"
-		}
-	case "lg":
-		switch variant {
-		case "secondary":
-			return "progress-lg progress-secondary"
-		case "destructive":
-			return "progress-lg progress-destructive"
-		default:
-			return "progress-lg"
-		}
-	case "xl":
-		switch variant {
-		case "secondary":
-			return "progress-xl progress-secondary"
-		case "destructive":
-			return "progress-xl progress-destructive"
-		default:
-			return "progress-xl"
-		}
-	default: // md or empty
-		switch variant {
-		case "secondary":
-			return "progress progress-secondary"
-		case "destructive":
-			return "progress progress-destructive"
-		default:
-			return "progress"
-		}
+// ProgressSize defines type-safe size variants
+type ProgressSize string
+
+const (
+	ProgressSM ProgressSize = "sm"
+	ProgressMD ProgressSize = "md"
+	ProgressLG ProgressSize = "lg"
+	ProgressXL ProgressSize = "xl"
+)
+
+// ProgressVariant defines type-safe color variants
+type ProgressVariant string
+
+const (
+	ProgressDefault ProgressVariant = "default"
+	ProgressSuccess ProgressVariant = "success"
+	ProgressWarning ProgressVariant = "warning"
+	ProgressError   ProgressVariant = "error"
+)
+
+// getProgressTrackClasses returns track container classes using pure Tailwind utilities
+func getProgressTrackClasses(size ProgressSize, variant ProgressVariant) string {
+	// Base track classes - container with background and styling
+	base := "relative w-full overflow-hidden rounded-full"
+
+	// Size-based height classes
+	heightClasses := map[ProgressSize]string{
+		ProgressSM: "h-1", // 4px
+		ProgressMD: "h-2", // 8px (default)
+		ProgressLG: "h-3", // 12px
+		ProgressXL: "h-4", // 16px
 	}
+
+	// Variant-based background classes
+	backgroundClasses := map[ProgressVariant]string{
+		ProgressDefault: "bg-primary/20",
+		ProgressSuccess: "bg-success/20",
+		ProgressWarning: "bg-warning/20",
+		ProgressError:   "bg-error/20",
+	}
+
+	// Default fallbacks
+	height := heightClasses[size]
+	if height == "" {
+		height = "h-2" // default md
+	}
+
+	background := backgroundClasses[variant]
+	if background == "" {
+		background = "bg-primary/20" // default
+	}
+
+	classes := []string{base, height, background}
+	return strings.Join(classes, " ")
+}
+
+// getProgressIndicatorClasses returns indicator (fill) classes using pure Tailwind utilities
+func getProgressIndicatorClasses(variant ProgressVariant) string {
+	// Base indicator classes - full height with transition
+	base := "h-full w-full flex-1 transition-all"
+
+	// Variant-based foreground classes
+	foregroundClasses := map[ProgressVariant]string{
+		ProgressDefault: "bg-primary",
+		ProgressSuccess: "bg-success",
+		ProgressWarning: "bg-warning",
+		ProgressError:   "bg-error",
+	}
+
+	foreground := foregroundClasses[variant]
+	if foreground == "" {
+		foreground = "bg-primary" // default
+	}
+
+	classes := []string{base, foreground}
+	return strings.Join(classes, " ")
 }
 
 // calculateProgressPercentage calculates the progress percentage
@@ -87,7 +128,8 @@ func calculateProgressPercentage(value, max int) string {
 	return strconv.Itoa(percentage) + "%"
 }
 
-// Progress renders a progress bar using custom CSS extension
+// Progress renders a progress bar using pure Tailwind utilities
+// Follows Basecoat documentation pattern: track container + progress indicator
 func Progress(props ProgressProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -109,7 +151,7 @@ func Progress(props ProgressProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{getProgressClass(props.Size, props.Variant)}
+		var templ_7745c5c3_Var2 = []any{getProgressTrackClasses(props.Size, props.Variant)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -139,7 +181,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 75, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 129, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -157,7 +199,7 @@ func Progress(props ProgressProps) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.Value))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 78, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 132, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -175,7 +217,7 @@ func Progress(props ProgressProps) templ.Component {
 			return "100"
 		}())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 85, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 139, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -193,7 +235,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabel)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 87, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 141, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -212,7 +254,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaLabelledBy)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 90, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 144, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -231,7 +273,7 @@ func Progress(props ProgressProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.AriaDescribedBy)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 93, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 147, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -242,20 +284,46 @@ func Progress(props ProgressProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "><div class=\"progress-indicator\" style=\"")
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + calculateProgressPercentage(props.Value, props.Max))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 98, Col: 73}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"></div></div>")
+		var templ_7745c5c3_Var10 = []any{getProgressIndicatorClasses(props.Variant)}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var10).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" style=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("width: " + calculateProgressPercentage(props.Value, props.Max))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/progress.templ`, Line: 153, Col: 73}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

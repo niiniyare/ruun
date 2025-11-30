@@ -1,226 +1,109 @@
 package sections
 
-import (
-	"github.com/niiniyare/ruun/components/atoms"
-	"github.com/niiniyare/ruun/components/molecules"
-	"github.com/niiniyare/ruun/components/organisms"
-	"github.com/niiniyare/ruun/components"
-)
-
 templ HomePage() {
-	@DemoLayout("Overview", "overview") {
-		// Hero Section
-		@atoms.Flex(atoms.FlexProps{
-			Direction: components.FlexCol,
-			Align:     components.AlignCenter,
-			Justify:   components.JustifyCenter,
-			Base: components.BaseProps{
-				ClassName: "text-center py-12",
-			},
-		}) {
-			@atoms.Text(atoms.TextProps{
-				Content: "Ruun UI Components",
-				Variant: components.TextHeading,
-				Size:    components.Text3XL,
-				Weight:  components.WeightBold,
-			})
-			@atoms.Text(atoms.TextProps{
-				Content: "A pure Go/Templ component library. No HTML, no CSS classes - just functions.",
-				Size:    components.TextLg,
-				Color:   components.ColorMuted,
-				Base: components.BaseProps{
-					ClassName: "mt-4 mb-6",
-				},
-			})
-			@atoms.Flex(atoms.FlexProps{
-				Gap: components.Gap2,
-				Wrap: true,
-			}) {
-				@atoms.Badge(atoms.BadgeProps{
-					Content: "Go",
-					Variant: components.BadgePrimary,
-				})
-				@atoms.Badge(atoms.BadgeProps{
-					Content: "Templ",
-					Variant: components.BadgeSecondary,
-				})
-				@atoms.Badge(atoms.BadgeProps{
-					Content: "HTMX",
-					Variant: components.BadgeOutline,
-				})
-				@atoms.Badge(atoms.BadgeProps{
-					Content: "Alpine.js",
-					Variant: components.BadgeOutline,
-				})
-			}
-		}
-		
-		// Stats Grid
-		@atoms.Grid(atoms.GridProps{
-			Columns: 4,
-			Gap:     components.Gap6,
-			Base: components.BaseProps{
-				ClassName: "px-6 mb-8",
-			},
-		}) {
-			@molecules.Card(molecules.CardProps{
-				Base: components.BaseProps{
-					ClassName: "text-center",
-				},
-				Content: statsCardContent("⚛️", "24", "Atoms"),
-			})
-			@molecules.Card(molecules.CardProps{
-				Base: components.BaseProps{
-					ClassName: "text-center",
-				},
-				Content: statsCardContent("🧬", "20", "Molecules"),
-			})
-			@molecules.Card(molecules.CardProps{
-				Base: components.BaseProps{
-					ClassName: "text-center",
-				},
-				Content: statsCardContent("🦠", "18", "Organisms"),
-			})
-			@molecules.Card(molecules.CardProps{
-				Base: components.BaseProps{
-					ClassName: "text-center",
-				},
-				Content: statsCardContent("📐", "12", "Templates"),
-			})
-		}
-		
-		// Quick Preview Section
-		@atoms.Flex(atoms.FlexProps{
-			Direction: components.FlexCol,
-			Gap:       components.Gap8,
-			Base: components.BaseProps{
-				ClassName: "px-6",
-			},
-		}) {
-			@atoms.Text(atoms.TextProps{
-				Content: "Quick Preview",
-				Variant: components.TextHeading,
-				Size:    components.Text2XL,
-				Weight:  components.WeightSemibold,
-			})
-			
-			// Buttons Preview
-			@Section("Buttons") {
-				@atoms.Flex(atoms.FlexProps{
-					Gap:  components.Gap4,
-					Wrap: true,
-				}) {
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Primary",
-						Variant: components.ButtonPrimary,
-					})
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Secondary",
-						Variant: components.ButtonSecondary,
-					})
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Outline",
-						Variant: components.ButtonOutline,
-					})
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Destructive",
-						Variant: components.ButtonDestructive,
-					})
-					@atoms.Button(atoms.ButtonProps{
-						Text:    "Ghost",
-						Variant: components.ButtonGhost,
-					})
-				}
-			}
-			
-			// Cards Preview
-			@Section("Cards") {
-				@atoms.Grid(atoms.GridProps{
-					Columns: 2,
-					Gap:     components.Gap6,
-				}) {
-					@molecules.Card(molecules.CardProps{
-						Title:       "Card Title",
-						Description: "Card description here",
-						Content: cardContent("Card content"),
-					})
-					@molecules.Card(molecules.CardProps{
-						Title:   "Another Card",
-						Content: cardContent("More content"),
-					})
-				}
-			}
-		}
-		
-		// Usage Example Section
-		@Section("How to Use") {
-			@atoms.Grid(atoms.GridProps{
-				Columns: 1,
-				Gap:     components.Gap6,
-			}) {
-				@molecules.Card(molecules.CardProps{
-					Title:   "Installation",
-					Content: codeContent("bash", "go get github.com/niiniyare/ruun"),
-				})
-				
-				@molecules.Card(molecules.CardProps{
-					Title: "Import",
-					Content: codeContent("go", `import (
-    "github.com/niiniyare/ruun/components/atoms"
-    "github.com/niiniyare/ruun/components/molecules"
-    "github.com/niiniyare/ruun/components/organisms"
-)`),
-				})
-				
-				@molecules.Card(molecules.CardProps{
-					Title: "Usage",
-					Content: codeContent("go", `@atoms.Flex(atoms.FlexProps{Gap: components.Gap4}) {
+    @DemoLayout("Overview", "overview") {
+        <div class="p-8">
+            // Hero Section
+            <div class="text-center py-12 mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Ruun UI Components</h1>
+                <p class="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+                    A pure Go/Templ component library. No HTML, no CSS classes - just functions.
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">Go</span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">Templ</span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800">HTMX</span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-800">Alpine.js</span>
+                </div>
+            </div>
+            
+            // Stats Grid
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div class="text-4xl mb-2">⚛️</div>
+                    <h3 class="text-lg font-semibold mb-1">Atoms</h3>
+                    <p class="text-gray-600 text-sm">24 basic components</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div class="text-4xl mb-2">🧬</div>
+                    <h3 class="text-lg font-semibold mb-1">Molecules</h3>
+                    <p class="text-gray-600 text-sm">20 complex components</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div class="text-4xl mb-2">🦠</div>
+                    <h3 class="text-lg font-semibold mb-1">Organisms</h3>
+                    <p class="text-gray-600 text-sm">18 layout components</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div class="text-4xl mb-2">📐</div>
+                    <h3 class="text-lg font-semibold mb-1">Templates</h3>
+                    <p class="text-gray-600 text-sm">12 page layouts</p>
+                </div>
+            </div>
+            
+            // Quick Preview
+            <div class="space-y-8">
+                <h2 class="text-2xl font-semibold text-gray-900">Quick Preview</h2>
+                
+                // Buttons preview
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4">Buttons</h3>
+                    <div class="flex gap-4 flex-wrap">
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Primary</button>
+                        <button class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Secondary</button>
+                        <button class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Outline</button>
+                        <button class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Destructive</button>
+                        <button class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md">Ghost</button>
+                    </div>
+                </div>
+                
+                // Cards preview
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4">Cards</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold mb-2">Card Title</h4>
+                            <p class="text-gray-600 text-sm mb-3">Card description here</p>
+                            <p class="text-gray-800">Card content</p>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold mb-2">Another Card</h4>
+                            <p class="text-gray-800">More content</p>
+                        </div>
+                    </div>
+                </div>
+                
+                // Usage Example
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-6">How to Use</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium mb-2">Installation</h4>
+                            <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto"><code>go get github.com/niiniyare/ruun</code></pre>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium mb-2">Import</h4>
+                            <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto"><code>import (
+    "github.com/niiniyare/ruun/views/components/atoms"
+    "github.com/niiniyare/ruun/views/components/molecules"
+    "github.com/niiniyare/ruun/views/components/organisms"
+)</code></pre>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium mb-2">Usage</h4>
+                            <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto"><code>@atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4}) {
     @atoms.Button(atoms.ButtonProps{Text: "Save"})
     @atoms.Button(atoms.ButtonProps{
         Text: "Cancel",
-        Variant: components.ButtonOutline,
+        Variant: atoms.ButtonOutline,
     })
-}`),
-				})
-			}
-		}
-	}
-}
-
-// Helper components
-templ statsCardContent(icon, value, label string) {
-	@atoms.Flex(atoms.FlexProps{
-		Direction: components.FlexCol,
-		Align:     components.AlignCenter,
-		Gap:       components.Gap4,
-	}) {
-		@atoms.Text(atoms.TextProps{
-			Content: icon,
-			Size:    components.Text4XL,
-		})
-		@atoms.Text(atoms.TextProps{
-			Content: value,
-			Size:    components.Text2XL,
-			Weight:  components.WeightBold,
-		})
-		@atoms.Text(atoms.TextProps{
-			Content: label,
-			Color:   components.ColorMuted,
-			Size:    components.TextSm,
-		})
-	}
-}
-
-templ cardContent(content string) {
-	@atoms.Text(atoms.TextProps{
-		Content: content,
-	})
-}
-
-templ codeContent(lang, code string) {
-	@atoms.Code(atoms.CodeProps{
-		Content: code,
-		Language: lang,
-		Block:   true,
-	})
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 }

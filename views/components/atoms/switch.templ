@@ -143,8 +143,8 @@ func getSwitchContainerClasses(variant SwitchVariant, disabled bool) string {
 	}
 }
 
-// getLabelClasses returns label classes based on variant
-func getLabelClasses(variant SwitchVariant, size SwitchSize) string {
+// getSwitchLabelClasses returns label classes based on variant
+func getSwitchLabelClasses(variant SwitchVariant, size SwitchSize) string {
 	switch variant {
 	case SwitchBasic:
 		switch size {
@@ -172,11 +172,11 @@ templ Switch(props SwitchProps) {
 		<div class={getSwitchContainerClasses(props.Variant, props.Disabled)}>
 			<div class="flex flex-col gap-0.5">
 				if props.ID != "" {
-					<label for={props.ID} class={getLabelClasses(props.Variant, props.Size)}>
+					<label for={props.ID} class={getSwitchLabelClasses(props.Variant, props.Size)}>
 						{props.Label}
 					</label>
 				} else {
-					<span class={getLabelClasses(props.Variant, props.Size)}>
+					<span class={getSwitchLabelClasses(props.Variant, props.Size)}>
 						{props.Label}
 					</span>
 				}
@@ -192,11 +192,11 @@ templ Switch(props SwitchProps) {
 		<div class={getSwitchContainerClasses(props.Variant, props.Disabled)}>
 			<div class="flex flex-col gap-0.5">
 				if props.ID != "" {
-					<label for={props.ID} class={getLabelClasses(props.Variant, props.Size)}>
+					<label for={props.ID} class={getSwitchLabelClasses(props.Variant, props.Size)}>
 						{props.Label}
 					</label>
 				} else {
-					<span class={getLabelClasses(props.Variant, props.Size)}>
+					<span class={getSwitchLabelClasses(props.Variant, props.Size)}>
 						{props.Label}
 					</span>
 				}
@@ -211,7 +211,7 @@ templ Switch(props SwitchProps) {
 		// Basic switch with label
 		if props.Label != "" {
 			if props.ID != "" {
-				<label for={props.ID} class={getLabelClasses(props.Variant, props.Size)}>
+				<label for={props.ID} class={getSwitchLabelClasses(props.Variant, props.Size)}>
 					if props.Variant == SwitchBasic {
 						<input {buildSwitchAttributes(props)...} />
 						{props.Label}
@@ -221,7 +221,7 @@ templ Switch(props SwitchProps) {
 					}
 				</label>
 			} else {
-				<label class={getLabelClasses(props.Variant, props.Size)}>
+				<label class={getSwitchLabelClasses(props.Variant, props.Size)}>
 					if props.Variant == SwitchBasic {
 						<input {buildSwitchAttributes(props)...} />
 						{props.Label}

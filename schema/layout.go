@@ -17,9 +17,11 @@ const (
 	BlockTypeGroup   BlockType = "group"
 	BlockTypeTab     BlockType = "tab"
 	BlockTypeStep    BlockType = "step"
+	BlockTypeCard    BlockType = "card"
+	BlockTypePanel   BlockType = "panel"
 )
 
-// LayoutBlock represents any layout component (Section, Group, Tab, Step)
+// LayoutBlock represents any layout component (Section, Group, Tab, Step, Card, Panel)
 type LayoutBlock struct {
 	Type BlockType `json:"type"`
 	ID   string    `json:"id"`
@@ -28,8 +30,19 @@ type LayoutBlock struct {
 	Title       string   `json:"title,omitempty"`
 	Description string   `json:"description,omitempty"`
 	Icon        string   `json:"icon,omitempty"`
+	Badge       string   `json:"badge,omitempty"`
 	Fields      []string `json:"fields"`
-	Order       int      `json:"order,omitempty"`
+	Blocks      []LayoutBlock `json:"blocks,omitempty"`
+	
+	Order       int  `json:"order,omitempty"`
+	Disabled    bool `json:"disabled,omitempty"`
+	Hidden      bool `json:"hidden,omitempty"`
+	Collapsible bool `json:"collapsible,omitempty"`
+	Collapsed   bool `json:"collapsed,omitempty"`
+	Skippable   bool `json:"skippable,omitempty"`
+	Validation  bool `json:"validation,omitempty"`
+	Columns     int  `json:"columns,omitempty"`
+	Border      bool `json:"border,omitempty"`
 
 	// Conditional visibility
 	Conditional *Conditional `json:"conditional,omitempty"`
@@ -37,23 +50,8 @@ type LayoutBlock struct {
 	// Common styling
 	Style *Style `json:"style,omitempty"`
 
-	// Type-specific fields (union style)
-	// Section-specific
-	Collapsible bool `json:"collapsible,omitempty"`
-	Collapsed   bool `json:"collapsed,omitempty"`
-	Columns     int  `json:"columns,omitempty"`
-
-	// Group-specific
-	Label  string `json:"label,omitempty"`
-	Border bool   `json:"border,omitempty"`
-
-	// Tab-specific
-	Badge    string `json:"badge,omitempty"`
-	Disabled bool   `json:"disabled,omitempty"`
-
-	// Step-specific
-	Skippable  bool `json:"skippable,omitempty"`
-	Validation bool `json:"validation,omitempty"`
+	// Legacy fields for backward compatibility
+	Label string `json:"label,omitempty"`
 }
 
 // Layout defines the visual structure of form elements

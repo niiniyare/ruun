@@ -1,7 +1,9 @@
 package molecules
 
-import "github.com/a-h/templ"
-import "github.com/niiniyare/ruun/views/components"
+import (
+	"github.com/a-h/templ"
+	"github.com/niiniyare/ruun/views/components"
+)
 
 // ButtonGroupProps defines properties for the ButtonGroup molecule
 // Follows documentation pattern: button-group class + Tailwind utilities
@@ -52,8 +54,8 @@ type ButtonConfig struct {
 	AriaExpanded string `json:"ariaExpanded,omitempty"` // for dropdown triggers
 	AriaHaspopup string `json:"ariaHaspopup,omitempty"` // for dropdown triggers
 	
-	// Event handlers
-	OnClick string `json:"onClick,omitempty"`
+	// Event handlers  
+	OnClick templ.ComponentScript `json:"onClick,omitempty"`
 	
 	// Additional attributes for individual buttons
 	Attrs templ.Attributes `json:"attrs,omitempty"`
@@ -74,7 +76,13 @@ func getButtonGroupClasses(orientation components.LayoutOrientation, baseClasses
 		classes = append(classes, baseClasses)
 	}
 	
-	return templ.Classes(classes...).String()
+	// Convert string slice to interface slice for templ.Classes
+	interfaceClasses := make([]any, len(classes))
+	for i, class := range classes {
+		interfaceClasses[i] = class
+	}
+	
+	return templ.Classes(interfaceClasses...).String()
 }
 
 // getButtonVariantForGroup returns appropriate variant for button based on selection state and group configuration
@@ -122,12 +130,10 @@ templ ButtonGroup(props ButtonGroupProps) {
 		for i, buttonConfig := range props.Buttons {
 			<button
 				class={
-					templ.Classes(
-						getButtonClass(
-							getButtonVariantForGroup(buttonConfig, i, props),
-							props.Size,
-							buttonConfig.Icon != nil && buttonConfig.Text == "",
-						),
+					getButtonClass(
+						getButtonVariantForGroup(buttonConfig, i, props),
+						props.Size,
+						buttonConfig.Icon != nil && buttonConfig.Text == "",
 					)
 				}
 				if buttonConfig.Type != "" {
@@ -174,7 +180,7 @@ templ ButtonGroup(props ButtonGroupProps) {
 				if buttonConfig.HTMX.Trigger != "" {
 					hx-trigger={buttonConfig.HTMX.Trigger}
 				}
-				if buttonConfig.OnClick != "" {
+				if buttonConfig.OnClick.Call != "" {
 					onclick={buttonConfig.OnClick}
 				}
 				{buttonConfig.Attrs...}

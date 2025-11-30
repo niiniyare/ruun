@@ -2,6 +2,7 @@ package molecules
 
 import (
     "github.com/niiniyare/ruun/views/components/atoms"
+    "github.com/niiniyare/ruun/views/components"
 )
 
 // FormFieldType defines the input type
@@ -55,6 +56,42 @@ type FormFieldProps struct {
     OnBlur      string
     OnFocus     string
     OnInput     string
+}
+
+// buildEventHandlerAttrs creates a templ.Attributes map with event handlers
+func buildEventHandlerAttrs(props FormFieldProps) templ.Attributes {
+    attrs := templ.Attributes{}
+    
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnInput != "" {
+        attrs["oninput"] = props.OnInput
+    }
+    
+    return attrs
+}
+
+// convertFormFieldTypeToInputType converts FormFieldType to components.InputType
+func convertFormFieldTypeToInputType(fieldType FormFieldType) components.InputType {
+    switch fieldType {
+    case FormFieldText:
+        return components.InputText
+    case FormFieldEmail:
+        return components.InputEmail
+    case FormFieldPassword:
+        return components.InputPassword
+    case FormFieldNumber:
+        return components.InputNumber
+    default:
+        return components.InputText
+    }
 }
 
 // FormField renders a Basecoat .field molecule with label, input, and validation
@@ -112,16 +149,13 @@ templ renderInput(props FormFieldProps) {
         @atoms.Input(atoms.InputProps{
             ID:          props.ID,
             Name:        props.Name,
-            Type:        atoms.InputType(props.Type),
+            Type:        convertFormFieldTypeToInputType(props.Type),
             Value:       props.Value,
             Placeholder: props.Placeholder,
             Required:    props.Required,
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
-            OnChange:    props.OnChange,
-            OnBlur:      props.OnBlur,
-            OnFocus:     props.OnFocus,
-            OnInput:     props.OnInput,
+            Attrs:       buildEventHandlerAttrs(props),
             AriaInvalid: func() string {
                 if props.HasError {
                     return "true"
@@ -270,16 +304,13 @@ templ renderInput(props FormFieldProps) {
         @atoms.Input(atoms.InputProps{
             ID:          props.ID,
             Name:        props.Name,
-            Type:        "text",
+            Type:        components.InputText,
             Value:       props.Value,
             Placeholder: props.Placeholder,
             Required:    props.Required,
             Disabled:    props.Disabled,
             Readonly:    props.Readonly,
-            OnChange:    props.OnChange,
-            OnBlur:      props.OnBlur,
-            OnFocus:     props.OnFocus,
-            OnInput:     props.OnInput,
+            Attrs:       buildEventHandlerAttrs(props),
             AriaInvalid: func() string {
                 if props.HasError {
                     return "true"

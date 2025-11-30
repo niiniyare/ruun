@@ -151,8 +151,8 @@ func getSwitchContainerClasses(variant SwitchVariant, disabled bool) string {
 	}
 }
 
-// getLabelClasses returns label classes based on variant
-func getLabelClasses(variant SwitchVariant, size SwitchSize) string {
+// getSwitchLabelClasses returns label classes based on variant
+func getSwitchLabelClasses(variant SwitchVariant, size SwitchSize) string {
 	switch variant {
 	case SwitchBasic:
 		switch size {
@@ -232,7 +232,7 @@ func Switch(props SwitchProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if props.ID != "" {
-				var templ_7745c5c3_Var4 = []any{getLabelClasses(props.Variant, props.Size)}
+				var templ_7745c5c3_Var4 = []any{getSwitchLabelClasses(props.Variant, props.Size)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -281,7 +281,7 @@ func Switch(props SwitchProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				var templ_7745c5c3_Var8 = []any{getLabelClasses(props.Variant, props.Size)}
+				var templ_7745c5c3_Var8 = []any{getSwitchLabelClasses(props.Variant, props.Size)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -376,7 +376,7 @@ func Switch(props SwitchProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if props.ID != "" {
-				var templ_7745c5c3_Var14 = []any{getLabelClasses(props.Variant, props.Size)}
+				var templ_7745c5c3_Var14 = []any{getSwitchLabelClasses(props.Variant, props.Size)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var14...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -425,7 +425,7 @@ func Switch(props SwitchProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				var templ_7745c5c3_Var18 = []any{getLabelClasses(props.Variant, props.Size)}
+				var templ_7745c5c3_Var18 = []any{getSwitchLabelClasses(props.Variant, props.Size)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var18...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -499,7 +499,7 @@ func Switch(props SwitchProps) templ.Component {
 			}
 			if props.Label != "" {
 				if props.ID != "" {
-					var templ_7745c5c3_Var22 = []any{getLabelClasses(props.Variant, props.Size)}
+					var templ_7745c5c3_Var22 = []any{getSwitchLabelClasses(props.Variant, props.Size)}
 					templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var22...)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -588,7 +588,7 @@ func Switch(props SwitchProps) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					var templ_7745c5c3_Var27 = []any{getLabelClasses(props.Variant, props.Size)}
+					var templ_7745c5c3_Var27 = []any{getSwitchLabelClasses(props.Variant, props.Size)}
 					templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var27...)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

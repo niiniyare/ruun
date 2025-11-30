@@ -225,7 +225,11 @@ templ menuItem(item DropdownMenuItem) {
 			@atoms.Icon(atoms.IconProps{
 				Name: "check",
 				Size: "sm",
-				AriaHidden: "true",
+				Base: components.BaseProps{
+					A11y: components.AccessibilityProps{
+						AriaHidden: "true",
+					},
+				},
 			})
 		}
 		

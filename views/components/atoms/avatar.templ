@@ -150,6 +150,28 @@ func getStatusColorClass(color AvatarStatusColor) string {
 	}
 }
 
+// buildAvatarAttributes creates all HTML attributes for the avatar
+func buildAvatarAttributes(props AvatarProps) templ.Attributes {
+	attrs := templ.Attributes{}
+	
+	// Core HTML attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+	
+	// Data attributes from shared types
+	for key, value := range props.Base.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes (allows override and additional attributes)
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
 // Avatar renders an avatar following Basecoat documentation patterns
 // Pure Tailwind implementation with no dedicated component classes
 templ Avatar(props AvatarProps) {
@@ -172,11 +194,7 @@ templ Avatar(props AvatarProps) {
 					)}
 					alt={props.Alt}
 					src={props.Src}
-					if props.Base.ID != "" {
-						id={props.Base.ID}
-					}
-					{props.Attrs...}
-					{components.BuildDataAttrs(props.Base.DataAttrs)...}
+					{buildAvatarAttributes(props)...}
 				/>
 			} else if props.Initials != "" {
 				// Fallback to initials
@@ -195,11 +213,7 @@ templ Avatar(props AvatarProps) {
 						templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
 						props.Base.ClassName,
 					)}
-					if props.Base.ID != "" {
-						id={props.Base.ID}
-					}
-					{props.Attrs...}
-					{components.BuildDataAttrs(props.Base.DataAttrs)...}
+					{buildAvatarAttributes(props)...}
 				>
 					{props.Initials}
 				</div>
@@ -218,11 +232,7 @@ templ Avatar(props AvatarProps) {
 						templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
 						props.Base.ClassName,
 					)}
-					if props.Base.ID != "" {
-						id={props.Base.ID}
-					}
-					{props.Attrs...}
-					{components.BuildDataAttrs(props.Base.DataAttrs)...}
+					{buildAvatarAttributes(props)...}
 				></div>
 			}
 			// Status indicator
@@ -249,11 +259,7 @@ templ Avatar(props AvatarProps) {
 				)}
 				alt={props.Alt}
 				src={props.Src}
-				if props.Base.ID != "" {
-					id={props.Base.ID}
-				}
-				{props.Attrs...}
-				{components.BuildDataAttrs(props.Base.DataAttrs)...}
+				{buildAvatarAttributes(props)...}
 			/>
 		} else if props.Initials != "" {
 			// Fallback to initials
@@ -272,11 +278,7 @@ templ Avatar(props AvatarProps) {
 					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
 					props.Base.ClassName,
 				)}
-				if props.Base.ID != "" {
-					id={props.Base.ID}
-				}
-				{props.Attrs...}
-				{components.BuildDataAttrs(props.Base.DataAttrs)...}
+				{buildAvatarAttributes(props)...}
 			>
 				{props.Initials}
 			</div>
@@ -295,11 +297,7 @@ templ Avatar(props AvatarProps) {
 					templ.KV("hover:ring-2 hover:ring-primary transition-all", props.Clickable),
 					props.Base.ClassName,
 				)}
-				if props.Base.ID != "" {
-					id={props.Base.ID}
-				}
-				{props.Attrs...}
-				{components.BuildDataAttrs(props.Base.DataAttrs)...}
+				{buildAvatarAttributes(props)...}
 			></div>
 		}
 	}

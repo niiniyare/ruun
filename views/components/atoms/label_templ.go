@@ -32,9 +32,9 @@ type LabelProps struct {
 	Attrs templ.Attributes `json:"attrs,omitempty"`
 }
 
-// getLabelClasses returns the correct Basecoat label class + Tailwind utilities
+// getBaseLabelClasses returns the correct Basecoat label class + Tailwind utilities
 // Following documentation pattern from label.md
-func getLabelClasses(className string) string {
+func getBaseLabelClasses(className string) string {
 	// Base Basecoat class as documented
 	base := "label"
 
@@ -49,7 +49,7 @@ func getLabelClasses(className string) string {
 // buildLabelAttributes creates all HTML attributes for the label
 func buildLabelAttributes(props LabelProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class": getLabelClasses(props.Base.ClassName),
+		"class": getBaseLabelClasses(props.Base.ClassName),
 	}
 
 	// Core HTML attributes

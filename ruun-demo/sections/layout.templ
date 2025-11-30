@@ -1,227 +1,178 @@
 package sections
 
 import (
-	"github.com/niiniyare/ruun/components/atoms"
-	"github.com/niiniyare/ruun/components/molecules"
-	"github.com/niiniyare/ruun/components/templates"
-	"github.com/niiniyare/ruun/components"
+	"github.com/niiniyare/ruun/atoms"
+	"github.com/niiniyare/ruun/molecules" 
+	"github.com/niiniyare/ruun/templates"
 )
 
 // DemoLayout wraps all demo pages with navigation
 templ DemoLayout(title string, activeSection string) {
-	@templates.BaseLayout(templates.BaseLayoutProps{
+	@templates.BaseHTML(templates.BaseHTMLProps{
 		Title: title + " - Ruun Kitchen Sink",
-		Theme: "default",
 	}) {
-		@templates.EnhancedPageLayout(templates.EnhancedPageLayoutProps{
-			Layout: templates.PageLayoutSidebar,
-			Sidebar: demoSidebar(activeSection),
-			TopBar:  demoTopBar(title),
-			Main:    demoMainContent(),
+		@atoms.Flex(atoms.FlexProps{Direction: atoms.Row}) {
+			// Sidebar
+			@DemoSidebar(activeSection)
+			
+			// Main content area
+			@atoms.Box(atoms.BoxProps{Padding: atoms.P8, Flex: atoms.Flex1}) {
+				{ children... }
+			}
+		}
+	}
+}
+
+// DemoSidebar creates the navigation sidebar
+templ DemoSidebar(activeSection string) {
+	@atoms.Box(atoms.BoxProps{
+		Width: atoms.W64,
+		Padding: atoms.P4,
+		Border: true,
+		BorderSide: atoms.BorderRight,
+		BgColor: atoms.BgMuted,
+		MinHeight: atoms.MinHScreen,
+	}) {
+		// Logo/Title
+		@atoms.Stack(atoms.StackProps{Gap: atoms.Gap4, Padding: atoms.P4}) {
+			@atoms.Heading(atoms.HeadingProps{Level: 2, Text: "Ruun UI"})
+			@atoms.Text(atoms.TextProps{Text: "Kitchen Sink", Size: atoms.TextSm, Muted: true})
+		}
+		
+		@atoms.Divider(atoms.DividerProps{})
+		
+		// Navigation
+		@atoms.Stack(atoms.StackProps{Gap: atoms.Gap1, Padding: atoms.P2}) {
+			@NavItem("/", "Overview", "overview", activeSection)
+			@NavItem("/atoms", "Atoms", "atoms", activeSection)
+			@NavItem("/molecules", "Molecules", "molecules", activeSection)
+			@NavItem("/organisms", "Organisms", "organisms", activeSection)
+			@NavItem("/templates", "Templates", "templates", activeSection)
+			@NavItem("/examples", "Examples", "examples", activeSection)
+		}
+	}
+}
+
+// NavItem creates a single navigation link
+templ NavItem(href, label, section, activeSection string) {
+	@atoms.Link(atoms.LinkProps{
+		Href: href,
+		Text: label,
+		Variant: getNavVariant(section, activeSection),
+		Block: true,
+		Padding: atoms.P2,
+		Rounded: atoms.RoundedMd,
+	})
+}
+
+func getNavVariant(section, active string) atoms.LinkVariant {
+	if section == active {
+		return atoms.LinkActive
+	}
+	return atoms.LinkNav
+}
+
+// Section creates a demo section wrapper
+templ Section(title string) {
+	@atoms.Box(atoms.BoxProps{Padding: atoms.P6, Border: true, Rounded: atoms.RoundedLg, Margin: atoms.M4}) {
+		@atoms.Heading(atoms.HeadingProps{Level: 3, Text: title})
+		@atoms.Box(atoms.BoxProps{Padding: atoms.P4}) {
+			{ children... }
+		}
+	}
+}
+
+// ComponentGrid creates a grid layout for component examples
+templ ComponentGrid() {
+	@atoms.Grid(atoms.GridProps{Cols: atoms.Cols3, Gap: atoms.Gap4}) {
+		{ children... }
+	}
+}
+
+// ComponentExample wraps individual component examples
+templ ComponentExample(title string, description string) {
+	@molecules.Card(molecules.CardProps{
+		Title: title,
+		Description: description,
+		Padding: atoms.P4,
+		Border: true,
+		Rounded: atoms.RoundedLg,
+	}) {
+		@atoms.Box(atoms.BoxProps{
+			Padding: atoms.P4,
+			Border: true,
+			BgColor: atoms.BgMuted,
+			Rounded: atoms.RoundedMd,
 		}) {
 			{ children... }
 		}
 	}
 }
 
-// demoSidebar creates the navigation sidebar
-templ demoSidebar(activeSection string) {
-	@molecules.Card(molecules.CardProps{
-		Base: components.BaseProps{
-			ClassName: "h-full border-0 rounded-none",
-		},
-		Header: demoSidebarHeader(),
-		Content: demoSidebarNav(activeSection),
-	})
-}
-
-// demoSidebarHeader creates the sidebar header with logo
-templ demoSidebarHeader() {
-	<div class="space-y-2">
-		<h2 class="text-lg font-semibold">Ruun UI</h2>
-		<p class="text-sm text-muted-foreground">Component Kitchen Sink</p>
-	</div>
-}
-
-// demoSidebarNav creates the navigation menu
-templ demoSidebarNav(activeSection string) {
-	<nav class="space-y-1">
-		@navItem("/", "Overview", "overview", activeSection)
-		@navItem("/atoms", "Atoms", "atoms", activeSection)
-		@navItem("/molecules", "Molecules", "molecules", activeSection)
-		@navItem("/organisms", "Organisms", "organisms", activeSection)
-		@navItem("/templates", "Templates", "templates", activeSection)
-		@navItem("/examples", "Examples", "examples", activeSection)
-	</nav>
-}
-
-// navItem creates a single navigation link
-templ navItem(href, label, section, activeSection string) {
-	@atoms.Button(atoms.ButtonProps{
-		Text:    label,
-		Variant: getNavVariant(section, activeSection),
-		Size:    components.SizeSm,
-		Base: components.BaseProps{
-			ClassName: "w-full justify-start mb-1",
-		},
-		HTMX: components.HTMXProps{
-			Get:    href,
-			Target: "#main-content",
-			Swap:   "innerHTML",
-		},
-	})
-}
-
-// getNavVariant determines the button variant for navigation
-func getNavVariant(section, active string) components.ButtonVariant {
-	if section == active {
-		return components.ButtonPrimary
-	}
-	return components.ButtonGhost
-}
-
-// demoTopBar creates the top navigation bar
-templ demoTopBar(title string) {
-	<header class="flex items-center justify-between px-6 py-3 border-b">
-		<h1 class="text-xl font-semibold">{title}</h1>
-		@demoTopBarActions()
-	</header>
-}
-
-// demoTopBarActions creates the top bar action buttons
-templ demoTopBarActions() {
-	<div class="flex items-center space-x-3">
-		@atoms.Button(atoms.ButtonProps{
-			Text:    "Theme",
-			Variant: components.ButtonOutline,
-			Size:    components.SizeSm,
-			Icon:    sunIcon(),
-		})
-		@atoms.Button(atoms.ButtonProps{
-			Text:    "GitHub",
-			Variant: components.ButtonOutline,
-			Size:    components.SizeSm,
-			Icon:    githubIcon(),
-		})
-	</div>
-}
-
-// demoMainContent wrapper for main content area
-templ demoMainContent() {
-	<main id="main-content" class="flex-1 overflow-auto p-6">
-		{ children... }
-	</main>
-}
-
-// Section creates a demo section wrapper
-templ Section(title string) {
-	@molecules.Card(molecules.CardProps{
-		Title:   title,
-		Content: sectionContent(),
-		Base: components.BaseProps{
-			ClassName: "mb-6",
-		},
-	}) {
-		{ children... }
-	}
-}
-
-// sectionContent creates section content wrapper
-templ sectionContent() {
-	<div class="space-y-4">
-		{ children... }
-	</div>
-}
-
-// ComponentGrid creates a grid layout for component examples
-templ ComponentGrid() {
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-		{ children... }
-	</div>
-}
-
-// ComponentExample wraps individual component examples
-templ ComponentExample(title string, description string) {
-	@molecules.Card(molecules.CardProps{
-		Title:       title,
-		Description: description,
-		Content:     exampleContent(),
-		Base: components.BaseProps{
-			ClassName: "h-full",
-		},
-	}) {
-		{ children... }
-	}
-}
-
-// exampleContent creates example content wrapper
-templ exampleContent() {
-	<div class="flex flex-col space-y-3">
-		<div class="flex-1 border rounded-lg p-4 bg-muted/30">
-			{ children... }
-		</div>
-	</div>
-}
-
 // PropsTable creates a table for displaying component props
 templ PropsTable() {
-	<div class="mt-4">
-		<h4 class="text-sm font-medium mb-2">Props</h4>
-		<div class="border rounded-lg overflow-hidden">
-			<table class="w-full text-sm">
-				<thead class="bg-muted">
-					<tr>
-						<th class="px-3 py-2 text-left font-medium">Prop</th>
-						<th class="px-3 py-2 text-left font-medium">Type</th>
-						<th class="px-3 py-2 text-left font-medium">Default</th>
-						<th class="px-3 py-2 text-left font-medium">Description</th>
-					</tr>
-				</thead>
-				<tbody class="divide-y">
-					{ children... }
-				</tbody>
-			</table>
-		</div>
-	</div>
+	@atoms.Box(atoms.BoxProps{Margin: atoms.MT4}) {
+		@atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Props", Size: atoms.TextSm})
+		@atoms.Box(atoms.BoxProps{
+			Border: true,
+			Rounded: atoms.RoundedLg,
+			Overflow: atoms.OverflowHidden,
+			Margin: atoms.MT2,
+		}) {
+			@atoms.Grid(atoms.GridProps{Cols: atoms.Cols4}) {
+				// Header
+				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
+					@atoms.Text(atoms.TextProps{Text: "Prop", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				}
+				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
+					@atoms.Text(atoms.TextProps{Text: "Type", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				}
+				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
+					@atoms.Text(atoms.TextProps{Text: "Default", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				}
+				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
+					@atoms.Text(atoms.TextProps{Text: "Description", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				}
+				
+				{ children... }
+			}
+		}
+	}
 }
 
 // PropRow creates a table row for component props
 templ PropRow(prop, propType, defaultVal, description string) {
-	<tr>
-		<td class="px-3 py-2 font-mono text-xs">{prop}</td>
-		<td class="px-3 py-2 text-muted-foreground">{propType}</td>
-		<td class="px-3 py-2 font-mono text-xs">{defaultVal}</td>
-		<td class="px-3 py-2">{description}</td>
-	</tr>
+	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
+		@atoms.Text(atoms.TextProps{Text: prop, Font: atoms.FontMono, Size: atoms.TextXs})
+	}
+	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
+		@atoms.Text(atoms.TextProps{Text: propType, Muted: true, Size: atoms.TextSm})
+	}
+	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
+		@atoms.Text(atoms.TextProps{Text: defaultVal, Font: atoms.FontMono, Size: atoms.TextXs})
+	}
+	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
+		@atoms.Text(atoms.TextProps{Text: description, Size: atoms.TextSm})
+	}
 }
 
 // CodeBlock creates a code block for showing component usage
 templ CodeBlock(code string) {
-	<div class="mt-4">
-		<h4 class="text-sm font-medium mb-2">Usage</h4>
-		<div class="border rounded-lg p-4 bg-muted/50">
-			<pre class="text-xs overflow-x-auto"><code>{code}</code></pre>
-		</div>
-	</div>
-}
-
-// Helper icon components (these would normally be from an icon package)
-templ sunIcon() {
-	<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-		<circle cx="12" cy="12" r="5"></circle>
-		<line x1="12" y1="1" x2="12" y2="3"></line>
-		<line x1="12" y1="21" x2="12" y2="23"></line>
-		<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-		<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-		<line x1="1" y1="12" x2="3" y2="12"></line>
-		<line x1="21" y1="12" x2="23" y2="12"></line>
-		<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-		<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-	</svg>
-}
-
-templ githubIcon() {
-	<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-		<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-	</svg>
+	@atoms.Box(atoms.BoxProps{Margin: atoms.MT4}) {
+		@atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Usage", Size: atoms.TextSm})
+		@atoms.Box(atoms.BoxProps{
+			Border: true,
+			Rounded: atoms.RoundedLg,
+			Padding: atoms.P4,
+			BgColor: atoms.BgMuted,
+			Margin: atoms.MT2,
+		}) {
+			@atoms.Text(atoms.TextProps{
+				Text: code,
+				Font: atoms.FontMono,
+				Size: atoms.TextXs,
+				Whitespace: atoms.WhitespacePre,
+			})
+		}
+	}
 }

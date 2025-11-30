@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strconv"
 
-	"github.com/zeiss/supernova/pkg/view/templ/components"
+	"github.com/niiniyare/ruun/views/components"
 )
 
 // Note: Basecoat handles radio styling via .field wrapper context
@@ -54,7 +54,7 @@ type RadioProps struct {
 
 	// Additional HTML attributes
 	TabIndex int              // Tab index for the radio
-	Attrs    components.Attrs // Additional HTML attributes
+	Attrs    templ.Attributes // Additional HTML attributes
 }
 
 // Basecoat handles radio styling contextually via .field wrapper
@@ -143,35 +143,35 @@ func buildRadioAttributes(props RadioProps) templ.Attributes {
 	}
 
 	// HTMX attributes from BaseProps
-	if props.HxGet != "" {
-		attrs["hx-get"] = props.HxGet
+	if props.HTMX.Get != "" {
+		attrs["hx-get"] = props.HTMX.Get
 	}
-	if props.HxPost != "" {
-		attrs["hx-post"] = props.HxPost
+	if props.HTMX.Post != "" {
+		attrs["hx-post"] = props.HTMX.Post
 	}
-	if props.HxPut != "" {
-		attrs["hx-put"] = props.HxPut
+	if props.HTMX.Put != "" {
+		attrs["hx-put"] = props.HTMX.Put
 	}
-	if props.HxDelete != "" {
-		attrs["hx-delete"] = props.HxDelete
+	if props.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.HTMX.Delete
 	}
-	if props.HxPatch != "" {
-		attrs["hx-patch"] = props.HxPatch
+	if props.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.HTMX.Patch
 	}
-	if props.HxTarget != "" {
-		attrs["hx-target"] = props.HxTarget
+	if props.HTMX.Target != "" {
+		attrs["hx-target"] = props.HTMX.Target
 	}
-	if props.HxSwap != "" {
-		attrs["hx-swap"] = props.HxSwap
+	if props.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.HTMX.Swap
 	}
-	if props.HxTrigger != "" {
-		attrs["hx-trigger"] = props.HxTrigger
+	if props.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.HTMX.Trigger
 	}
-	if props.HxConfirm != "" {
-		attrs["hx-confirm"] = props.HxConfirm
+	if props.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.HTMX.Confirm
 	}
-	if props.HxIndicator != "" {
-		attrs["hx-indicator"] = props.HxIndicator
+	if props.HTMX.Headers != "" {
+		attrs["hx-headers"] = props.HTMX.Headers
 	}
 
 	// Merge custom attributes (allows override)
