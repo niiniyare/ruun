@@ -1,0 +1,425 @@
+package sections
+
+import (
+    "github.com/niiniyare/ruun/views/components/atoms"
+    "github.com/niiniyare/ruun/views/components/molecules"
+)
+
+templ MoleculesPage() {
+    @DemoLayout("Molecules", "molecules") {
+        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap8}) {
+            @atoms.Heading(atoms.HeadingProps{Level: 1, Text: "Molecules"})
+            @atoms.Text(atoms.TextProps{
+                Text: "Combinations of atoms working together as a unified component.",
+                Muted: true,
+            })
+            
+            // ════════════════════════════════════════════════════════════
+            // CARD
+            // ════════════════════════════════════════════════════════════
+            @Section("Card") {
+                @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap6}) {
+                    @molecules.Card(molecules.CardProps{
+                        Title: "Basic Card",
+                        Description: "A simple card with title and description",
+                    })
+                    
+                    @molecules.Card(molecules.CardProps{
+                        Title: "Card with Content",
+                        Content: cardContent(),
+                    })
+                    
+                    @molecules.Card(molecules.CardProps{
+                        Title: "Card with Actions",
+                        Description: "Card with header actions",
+                        Content: cardContentSimple(),
+                        HeaderAction: cardActions(),
+                    })
+                    
+                    @molecules.CardWithBorder(molecules.CardProps{
+                        Title: "Border Card",
+                        Description: "Card with border styling",
+                        Content: cardContentSimple(),
+                    })
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // FORM FIELD
+            // ════════════════════════════════════════════════════════════
+            @Section("Form Field") {
+                @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap6}) {
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Email",
+                        Name: "email",
+                        Type: molecules.FormFieldEmail,
+                        Placeholder: "name@example.com",
+                        ID: "field-email",
+                        HelpText: "We'll never share your email",
+                    })
+                    
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Password",
+                        Name: "password",
+                        Type: molecules.FormFieldPassword,
+                        ID: "field-password",
+                        Required: true,
+                    })
+                    
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Country",
+                        Name: "country",
+                        Type: molecules.FormFieldSelect,
+                        ID: "field-country",
+                        Options: []molecules.FormFieldOption{
+                            {Value: "", Label: "Select country", Selected: true},
+                            {Value: "us", Label: "United States"},
+                            {Value: "uk", Label: "United Kingdom"},
+                            {Value: "ca", Label: "Canada"},
+                        },
+                    })
+                    
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Bio",
+                        Name: "bio",
+                        Type: molecules.FormFieldTextarea,
+                        ID: "field-bio",
+                        Placeholder: "Tell us about yourself",
+                        HelpText: "Maximum 500 characters",
+                    })
+                    
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Field with Error",
+                        Name: "error-field",
+                        Type: molecules.FormFieldText,
+                        ID: "field-error",
+                        HasError: true,
+                        Errors: []string{"This field is required"},
+                    })
+                    
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Preferences",
+                        Name: "preferences",
+                        Type: molecules.FormFieldCheckbox,
+                        ID: "field-prefs",
+                        Options: []molecules.FormFieldOption{
+                            {Value: "newsletter", Label: "Email newsletter"},
+                            {Value: "updates", Label: "Product updates", Selected: true},
+                            {Value: "marketing", Label: "Marketing communications"},
+                        },
+                    })
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // SEARCH BOX
+            // ════════════════════════════════════════════════════════════
+            @Section("Search Box") {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                        @molecules.SearchBox(molecules.SearchBoxProps{
+                            ID: "search-basic",
+                            Name: "search",
+                            Placeholder: "Search...",
+                            Size: molecules.SearchBoxSizeMD,
+                        })
+                    }
+                    
+                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                        @molecules.SearchBox(molecules.SearchBoxProps{
+                            ID: "search-suggestions",
+                            Name: "search-with-suggestions",
+                            Placeholder: "Search with suggestions",
+                            Size: molecules.SearchBoxSizeMD,
+                            Suggestions: []molecules.SearchSuggestion{
+                                {Value: "products", Label: "Products", Description: "Search all products", Icon: "package"},
+                                {Value: "users", Label: "Users", Description: "Find users", Icon: "user"},
+                                {Value: "orders", Label: "Orders", Description: "Search orders", Icon: "shopping-bag"},
+                            },
+                        })
+                    }
+                    
+                    @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4}) {
+                        @molecules.SearchBox(molecules.SearchBoxProps{
+                            ID: "search-small",
+                            Name: "search-sm",
+                            Placeholder: "Small search",
+                            Size: molecules.SearchBoxSizeSM,
+                        })
+                        @molecules.SearchBox(molecules.SearchBoxProps{
+                            ID: "search-large",
+                            Name: "search-lg",
+                            Placeholder: "Large search",
+                            Size: molecules.SearchBoxSizeLG,
+                        })
+                    }
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // DROPDOWN MENU
+            // ════════════════════════════════════════════════════════════
+            @Section("Dropdown Menu") {
+                @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Wrap: atoms.Wrap}) {
+                    @molecules.SimpleDropdownMenu(
+                        "basic-dropdown",
+                        "Actions",
+                        []molecules.DropdownMenuItem{
+                            {Text: "Edit", Icon: "edit"},
+                            {Text: "Copy", Icon: "copy"},
+                            {Text: "Delete", Icon: "trash", Disabled: true},
+                        },
+                    )
+                    
+                    @molecules.UserDropdownMenu("user-dropdown", "John Doe")
+                    
+                    @molecules.ActionsDropdownMenu("actions-dropdown", []molecules.DropdownMenuItem{
+                        {Text: "Export", Icon: "download"},
+                        {Text: "Print", Icon: "printer"},
+                        {Text: "Share", Icon: "share"},
+                    })
+                    
+                    @molecules.DropdownMenu(molecules.DropdownMenuProps{
+                        ID: "complex-dropdown",
+                        Trigger: "Complex Menu",
+                        Groups: []molecules.DropdownMenuGroup{
+                            {
+                                Heading: "View Options",
+                                Items: []molecules.DropdownMenuItem{
+                                    {Text: "List View", Type: molecules.DropdownMenuItemRadio, Checked: true},
+                                    {Text: "Grid View", Type: molecules.DropdownMenuItemRadio},
+                                    {Text: "Card View", Type: molecules.DropdownMenuItemRadio},
+                                },
+                            },
+                            {
+                                Heading: "Display",
+                                Items: []molecules.DropdownMenuItem{
+                                    {Text: "Show Sidebar", Type: molecules.DropdownMenuItemCheckbox, Checked: true},
+                                    {Text: "Show Toolbar", Type: molecules.DropdownMenuItemCheckbox},
+                                    {Text: "Full Screen", Type: molecules.DropdownMenuItemCheckbox, Shortcut: "F11"},
+                                },
+                            },
+                        },
+                    })
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // BUTTON GROUP
+            // ════════════════════════════════════════════════════════════
+            @Section("Button Group") {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+                    @atoms.Text(atoms.TextProps{Text: "Horizontal Button Group", Weight: atoms.FontMedium})
+                    @buttonGroupHorizontal()
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Vertical Button Group", Weight: atoms.FontMedium})
+                    @buttonGroupVertical()
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Selection Button Group", Weight: atoms.FontMedium})
+                    @buttonGroupSelection()
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Icon Button Group", Weight: atoms.FontMedium})
+                    @buttonGroupIcons()
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // STATS CARD
+            // ════════════════════════════════════════════════════════════
+            @Section("Stats Card") {
+                @atoms.Grid(atoms.GridProps{Cols: 3, Gap: atoms.Gap6}) {
+                    @molecules.StatsCard(
+                        "Revenue",
+                        "$12,345",
+                        "Total revenue this month",
+                        statsIcon(),
+                        "+12.5%",
+                        true,
+                    )
+                    
+                    @molecules.StatsCard(
+                        "Orders",
+                        "1,234",
+                        "Orders this month",
+                        ordersIcon(),
+                        "+8.2%",
+                        true,
+                    )
+                    
+                    @molecules.StatsCard(
+                        "Returns",
+                        "23",
+                        "Returns this month",
+                        returnsIcon(),
+                        "-2.4%",
+                        false,
+                    )
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // ENHANCED CARDS
+            // ════════════════════════════════════════════════════════════
+            @Section("Enhanced Cards") {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                        @molecules.SimpleCard("Simple Card", simpleCardContent())
+                    }
+                    
+                    @molecules.ActionCard(
+                        "Action Card",
+                        "A card with action buttons",
+                        actionCardContent(),
+                        []atoms.ButtonProps{
+                            {Text: "Edit", Variant: atoms.ButtonOutline},
+                            {Text: "Save", Variant: atoms.ButtonDefault},
+                        },
+                    )
+                    
+                    @molecules.ImageCard(
+                        molecules.CardProps{
+                            Title: "Image Card",
+                            Description: "Card with image content",
+                            Footer: imageCardFooter(),
+                        },
+                        "https://picsum.photos/400/200",
+                        "Sample image",
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Helper components for card content
+templ cardContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap3}) {
+        @atoms.Text(atoms.TextProps{Text: "This is the main content area of the card. You can put any content here."})
+        @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap2}) {
+            @atoms.Badge(atoms.BadgeProps{Text: "New", Variant: atoms.BadgeSecondary})
+            @atoms.Badge(atoms.BadgeProps{Text: "Featured", Variant: atoms.BadgeOutline})
+        }
+    }
+}
+
+templ cardContentSimple() {
+    @atoms.Text(atoms.TextProps{Text: "Simple card content"})
+}
+
+templ cardActions() {
+    @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap2}) {
+        @atoms.Button(atoms.ButtonProps{Text: "Edit", Variant: atoms.ButtonOutline, Size: atoms.SizeSm})
+        @atoms.Button(atoms.ButtonProps{Text: "Delete", Variant: atoms.ButtonDestructive, Size: atoms.SizeSm})
+    }
+}
+
+// Helper components for stats icons
+templ statsIcon() {
+    @atoms.Icon(atoms.IconProps{Name: atoms.IconTrendingUp, Size: atoms.SizeDefault})
+}
+
+templ ordersIcon() {
+    @atoms.Icon(atoms.IconProps{Name: atoms.IconShoppingCart, Size: atoms.SizeDefault})
+}
+
+templ returnsIcon() {
+    @atoms.Icon(atoms.IconProps{Name: atoms.IconRotateCcw, Size: atoms.SizeDefault})
+}
+
+// Helper components for button groups
+templ buttonGroupHorizontal() {
+    @molecules.ButtonGroup(molecules.ButtonGroupProps{
+        Buttons: []molecules.ButtonConfig{
+            {Text: "First", Type: "button"},
+            {Text: "Second", Type: "button"},
+            {Text: "Third", Type: "button"},
+        },
+        AriaLabel: "Horizontal button group",
+    })
+}
+
+templ buttonGroupVertical() {
+    @molecules.ButtonGroup(molecules.ButtonGroupProps{
+        Orientation: "vertical",
+        Buttons: []molecules.ButtonConfig{
+            {Text: "Top", Type: "button"},
+            {Text: "Middle", Type: "button"},
+            {Text: "Bottom", Type: "button"},
+        },
+        AriaLabel: "Vertical button group",
+    })
+}
+
+templ buttonGroupSelection() {
+    @molecules.ButtonGroup(molecules.ButtonGroupProps{
+        SelectionMode: "single",
+        Selected: []int{1},
+        Buttons: []molecules.ButtonConfig{
+            {Text: "Option A", Type: "button"},
+            {Text: "Option B", Type: "button"},
+            {Text: "Option C", Type: "button"},
+        },
+        AriaLabel: "Selection button group",
+        Role: "radiogroup",
+    })
+}
+
+templ buttonGroupIcons() {
+    @molecules.ButtonGroup(molecules.ButtonGroupProps{
+        Buttons: []molecules.ButtonConfig{
+            {Icon: iconBold(), AriaLabel: "Bold", Type: "button"},
+            {Icon: iconItalic(), AriaLabel: "Italic", Type: "button"},
+            {Icon: iconUnderline(), AriaLabel: "Underline", Type: "button"},
+        },
+        AriaLabel: "Text formatting tools",
+        Role: "toolbar",
+    })
+}
+
+// Icon helpers for button groups
+templ iconBold() {
+    @atoms.Icon(atoms.IconProps{Name: atoms.IconBold, Size: atoms.SizeSm})
+}
+
+templ iconItalic() {
+    @atoms.Icon(atoms.IconProps{Name: atoms.IconItalic, Size: atoms.SizeSm})
+}
+
+templ iconUnderline() {
+    @atoms.Icon(atoms.IconProps{Name: atoms.IconUnderline, Size: atoms.SizeSm})
+}
+
+// Helper components for enhanced cards
+templ simpleCardContent() {
+    @atoms.Text(atoms.TextProps{Text: "This is a simple card with just a title and content."})
+}
+
+templ actionCardContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap3}) {
+        @atoms.Text(atoms.TextProps{Text: "This card has action buttons in the header that allow you to interact with the content."})
+        @atoms.Progress(atoms.ProgressProps{Value: 67})
+    }
+}
+
+templ imageCardFooter() {
+    @atoms.Flex(atoms.FlexProps{Justify: atoms.JustifyBetween, Align: atoms.AlignCenter}) {
+        @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap2}) {
+            @atoms.Badge(atoms.BadgeProps{Text: "Image", Variant: atoms.BadgeSecondary})
+        }
+        @atoms.Button(atoms.ButtonProps{Text: "View", Size: atoms.SizeSm})
+    }
+}
+
+// Section helper component (imported from atoms page)
+templ Section(title string) {
+    @atoms.Box(atoms.BoxProps{
+        Border: atoms.Border,
+        Rounded: atoms.RoundedLg,
+        Padding: atoms.P6,
+    }) {
+        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+            @atoms.Heading(atoms.HeadingProps{Level: 3, Text: title})
+            { children... }
+        }
+    }
+}

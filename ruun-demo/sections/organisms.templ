@@ -1,0 +1,485 @@
+package sections
+
+import (
+	"ruun/web/src/components/atoms"
+	"ruun/web/src/components/organisms"
+	"ruun/web/src/components/molecules"
+)
+
+templ OrganismsShowcase() {
+	@atoms.Stack(atoms.StackProps{
+		Spacing: "lg",
+		ClassName: "p-8",
+	}) {
+		// Header
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "sm",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 1,
+				Text: "Organisms Showcase",
+			})
+			@atoms.Text(atoms.TextProps{
+				Text: "Complex components composed of multiple molecules and atoms",
+				Variant: atoms.TextMuted,
+			})
+		}
+
+		// DataTable Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "DataTable",
+			})
+			@organisms.DataTable(organisms.DataTableProps{
+				Columns: []organisms.Column{
+					{Key: "id", Label: "ID", Sortable: true, Width: "80px"},
+					{Key: "name", Label: "Name", Sortable: true},
+					{Key: "email", Label: "Email", Sortable: true},
+					{Key: "status", Label: "Status", Align: "center"},
+					{Key: "amount", Label: "Amount", Align: "right", Format: func(v any) string {
+						return "$" + v.(string)
+					}},
+				},
+				Rows: []map[string]any{
+					{"id": "1", "name": "John Doe", "email": "john@example.com", "status": "Active", "amount": "125.00"},
+					{"id": "2", "name": "Jane Smith", "email": "jane@example.com", "status": "Inactive", "amount": "250.50"},
+					{"id": "3", "name": "Bob Wilson", "email": "bob@example.com", "status": "Active", "amount": "1,000.00"},
+				},
+				Sortable: true,
+				CurrentSort: &organisms.SortConfig{
+					Column: "name",
+					Direction: "asc",
+				},
+				Pagination: &organisms.PaginationConfig{
+					Page: 1,
+					PageSize: 10,
+					Total: 3,
+					HxGet: "/api/data",
+				},
+				HxGet: "/api/data",
+				HxTarget: "#data-table",
+				EmptyMessage: "No data found",
+			})
+		}
+
+		// Dialog Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Dialog",
+			})
+			@atoms.Box(atoms.BoxProps{
+				Attrs: map[string]string{
+					"x-data": "{ open: false }",
+				},
+			}) {
+				@atoms.Button(atoms.ButtonProps{
+					Label: "Open Dialog",
+					Variant: atoms.ButtonPrimary,
+					Attrs: map[string]string{
+						"@click": "open = true",
+					},
+				})
+				@organisms.Dialog(organisms.DialogProps{
+					Title: "Confirm Action",
+					Description: "Are you sure you want to proceed with this action?",
+					Open: true,
+					Attrs: map[string]string{
+						"x-show": "open",
+						"x-cloak": "",
+					},
+					Actions: []organisms.DialogAction{
+						{
+							Label: "Cancel",
+							Variant: atoms.ButtonSecondary,
+							Attrs: map[string]string{
+								"@click": "open = false",
+							},
+						},
+						{
+							Label: "Confirm",
+							Variant: atoms.ButtonPrimary,
+							Attrs: map[string]string{
+								"@click": "open = false",
+							},
+						},
+					},
+				}) {
+					@atoms.Text(atoms.TextProps{
+						Text: "This action cannot be undone. All data will be permanently deleted.",
+					})
+				}
+			}
+		}
+
+		// Form Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Form",
+			})
+			@organisms.Form(organisms.FormProps{
+				Method: "POST",
+				Action: "/api/users",
+				HxPost: "/api/users",
+				HxTarget: "#form-result",
+				Sections: []organisms.FormSection{
+					{
+						Title: "Personal Information",
+						Description: "Basic information about the user",
+						Fields: []templ.Component{
+							molecules.FormField(molecules.FormFieldProps{
+								Label: "Full Name",
+								Name: "fullname",
+								Type: "text",
+								Required: true,
+								Placeholder: "John Doe",
+							}),
+							molecules.FormField(molecules.FormFieldProps{
+								Label: "Email Address",
+								Name: "email",
+								Type: "email",
+								Required: true,
+								Placeholder: "john@example.com",
+							}),
+						},
+					},
+					{
+						Title: "Account Settings",
+						Description: "Configure your account preferences",
+						Fields: []templ.Component{
+							molecules.FormField(molecules.FormFieldProps{
+								Label: "Username",
+								Name: "username",
+								Type: "text",
+								Required: true,
+								HelpText: "Choose a unique username",
+							}),
+							molecules.FormField(molecules.FormFieldProps{
+								Label: "Password",
+								Name: "password",
+								Type: "password",
+								Required: true,
+								HelpText: "Minimum 8 characters",
+							}),
+						},
+					},
+				},
+				Actions: []organisms.FormAction{
+					{
+						Label: "Cancel",
+						Type: "button",
+						Variant: atoms.ButtonSecondary,
+					},
+					{
+						Label: "Create Account",
+						Type: "submit",
+						Variant: atoms.ButtonPrimary,
+					},
+				},
+			})
+		}
+
+		// StatsCard Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Stats Cards",
+			})
+			@atoms.Grid(atoms.GridProps{
+				Cols: 4,
+				Gap: "md",
+			}) {
+				@organisms.StatsCard(organisms.StatsCardProps{
+					Icon: "users",
+					Label: "Total Users",
+					Value: "1,234",
+					Trend: "+12%",
+					TrendPositive: true,
+				})
+				@organisms.StatsCard(organisms.StatsCardProps{
+					Icon: "dollar-sign",
+					Label: "Revenue",
+					Value: "$45,678",
+					Trend: "+25%",
+					TrendPositive: true,
+				})
+				@organisms.StatsCard(organisms.StatsCardProps{
+					Icon: "shopping-cart",
+					Label: "Orders",
+					Value: "89",
+					Trend: "-5%",
+					TrendPositive: false,
+				})
+				@organisms.StatsCard(organisms.StatsCardProps{
+					Icon: "trending-up",
+					Label: "Growth",
+					Value: "23.5%",
+				})
+			}
+		}
+
+		// Breadcrumbs Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Breadcrumbs",
+			})
+			@organisms.Breadcrumbs(organisms.BreadcrumbsProps{
+				Items: []organisms.BreadcrumbItem{
+					{Label: "Home", Href: "/"},
+					{Label: "Products", Href: "/products"},
+					{Label: "Electronics", Href: "/products/electronics"},
+					{Label: "Laptops", Current: true},
+				},
+			})
+		}
+
+		// Wizard Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Wizard",
+			})
+			@atoms.Box(atoms.BoxProps{
+				Attrs: map[string]string{
+					"x-data": "{ step: 1 }",
+				},
+			}) {
+				@organisms.Wizard(organisms.WizardProps{
+					Steps: []organisms.WizardStep{
+						{
+							Number: 1,
+							Label: "Account Info",
+							Status: organisms.StepComplete,
+						},
+						{
+							Number: 2,
+							Label: "Personal Details",
+							Status: organisms.StepActive,
+						},
+						{
+							Number: 3,
+							Label: "Payment",
+							Status: organisms.StepPending,
+						},
+						{
+							Number: 4,
+							Label: "Review",
+							Status: organisms.StepPending,
+						},
+					},
+					CurrentStep: 2,
+				})
+				
+				// Step content
+				@atoms.Box(atoms.BoxProps{
+					ClassName: "mt-8 p-6 border rounded-lg",
+				}) {
+					@atoms.Stack(atoms.StackProps{
+						Spacing: "md",
+					}) {
+						@atoms.Text(atoms.TextProps{
+							Text: "Step 2: Personal Details",
+							Weight: atoms.TextBold,
+						})
+						@atoms.Text(atoms.TextProps{
+							Text: "Please provide your personal information to continue.",
+							Variant: atoms.TextMuted,
+						})
+						@atoms.Flex(atoms.FlexProps{
+							Gap: "sm",
+							Justify: "end",
+							ClassName: "mt-4",
+						}) {
+							@atoms.Button(atoms.ButtonProps{
+								Label: "Previous",
+								Variant: atoms.ButtonSecondary,
+								Attrs: map[string]string{
+									"@click": "step = step > 1 ? step - 1 : step",
+								},
+							})
+							@atoms.Button(atoms.ButtonProps{
+								Label: "Next",
+								Variant: atoms.ButtonPrimary,
+								Attrs: map[string]string{
+									"@click": "step = step < 4 ? step + 1 : step",
+								},
+							})
+						}
+					}
+				}
+			}
+		}
+
+		// Sidebar Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Sidebar",
+			})
+			@atoms.Box(atoms.BoxProps{
+				ClassName: "h-96 border rounded-lg overflow-hidden",
+			}) {
+				@atoms.Flex(atoms.FlexProps{
+					ClassName: "h-full",
+				}) {
+					@organisms.Sidebar(organisms.SidebarProps{
+						Logo: organisms.SidebarLogo{
+							Text: "AWO ERP",
+							Href: "/",
+						},
+						Items: []organisms.SidebarItem{
+							{
+								Icon: "home",
+								Label: "Dashboard",
+								Href: "/dashboard",
+								Active: true,
+							},
+							{
+								Icon: "users",
+								Label: "Customers",
+								Href: "/customers",
+								Badge: "12",
+							},
+							{
+								Icon: "shopping-cart",
+								Label: "Orders",
+								Href: "/orders",
+								Children: []organisms.SidebarSubItem{
+									{Label: "All Orders", Href: "/orders"},
+									{Label: "Pending", Href: "/orders/pending"},
+									{Label: "Completed", Href: "/orders/completed"},
+								},
+							},
+							{
+								Icon: "file-text",
+								Label: "Invoices",
+								Href: "/invoices",
+							},
+							{
+								Icon: "settings",
+								Label: "Settings",
+								Href: "/settings",
+							},
+						},
+						Footer: organisms.SidebarFooter{
+							UserName: "John Doe",
+							UserEmail: "john@example.com",
+							UserAvatar: "/api/avatar/john",
+						},
+					})
+					@atoms.Box(atoms.BoxProps{
+						ClassName: "flex-1 p-6 bg-gray-50",
+					}) {
+						@atoms.Text(atoms.TextProps{
+							Text: "Main content area",
+							Variant: atoms.TextMuted,
+						})
+					}
+				}
+			}
+		}
+
+		// FilterPanel Section
+		@atoms.Stack(atoms.StackProps{
+			Spacing: "md",
+		}) {
+			@atoms.Heading(atoms.HeadingProps{
+				Level: 2,
+				Text: "Filter Panel",
+			})
+			@atoms.Grid(atoms.GridProps{
+				Cols: 3,
+				Gap: "md",
+			}) {
+				@atoms.Box(atoms.BoxProps{
+					ClassName: "col-span-1",
+				}) {
+					@organisms.FilterPanel(organisms.FilterPanelProps{
+						Title: "Filter Products",
+						HxPost: "/api/products/filter",
+						HxTarget: "#product-list",
+						Sections: []organisms.FilterSection{
+							{
+								Title: "Categories",
+								Type: organisms.FilterCheckbox,
+								Options: []organisms.FilterOption{
+									{Value: "electronics", Label: "Electronics", Count: 45},
+									{Value: "clothing", Label: "Clothing", Count: 123},
+									{Value: "books", Label: "Books", Count: 89},
+									{Value: "home", Label: "Home & Garden", Count: 67},
+								},
+							},
+							{
+								Title: "Price Range",
+								Type: organisms.FilterRange,
+								Min: 0,
+								Max: 1000,
+								Step: 10,
+								Unit: "$",
+							},
+							{
+								Title: "Brand",
+								Type: organisms.FilterRadio,
+								Options: []organisms.FilterOption{
+									{Value: "all", Label: "All Brands", Selected: true},
+									{Value: "apple", Label: "Apple"},
+									{Value: "samsung", Label: "Samsung"},
+									{Value: "sony", Label: "Sony"},
+								},
+							},
+							{
+								Title: "Rating",
+								Type: organisms.FilterRating,
+								MaxRating: 5,
+							},
+						},
+						Actions: []organisms.FilterAction{
+							{
+								Label: "Clear All",
+								Variant: atoms.ButtonGhost,
+							},
+							{
+								Label: "Apply Filters",
+								Variant: atoms.ButtonPrimary,
+								Type: "submit",
+							},
+						},
+					})
+				}
+				@atoms.Box(atoms.BoxProps{
+					ClassName: "col-span-2 p-6 border rounded-lg",
+				}) {
+					@atoms.Stack(atoms.StackProps{
+						Spacing: "sm",
+					}) {
+						@atoms.Text(atoms.TextProps{
+							Text: "Filtered Results",
+							Weight: atoms.TextBold,
+						})
+						@atoms.Text(atoms.TextProps{
+							Text: "Products matching your filters will appear here",
+							Variant: atoms.TextMuted,
+						})
+					}
+				}
+			}
+		}
+	}
+}

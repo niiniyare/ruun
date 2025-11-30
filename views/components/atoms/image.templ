@@ -1,0 +1,286 @@
+package atoms
+
+import (
+	"strings"
+	"github.com/niiniyare/ruun/views/components"
+)
+
+// ImageVariant represents image-specific style variations
+type ImageVariant string
+
+const (
+	ImageDefault   ImageVariant = "default"   // Default responsive image
+	ImageAvatar    ImageVariant = "avatar"    // Avatar/profile images  
+	ImageThumbnail ImageVariant = "thumbnail" // Small preview images
+	ImageCover     ImageVariant = "cover"     // Cover/banner images
+	ImageIcon      ImageVariant = "icon"      // Icon-sized images
+)
+
+// ImageProps defines all properties for the Image atom
+// Combines Basecoat semantic classes with Tailwind utilities
+type ImageProps struct {
+	// Core attributes
+	Src string `json:"src"`
+	Alt string `json:"alt"`
+	
+	// Basecoat variants (using shared types)
+	Variant ImageVariant    `json:"variant,omitempty"`
+	Size    components.Size `json:"size,omitempty"`
+	
+	// Image-specific attributes
+	Width     string `json:"width,omitempty"`
+	Height    string `json:"height,omitempty"`
+	Sizes     string `json:"sizes,omitempty"`     // Responsive sizes
+	SrcSet    string `json:"srcSet,omitempty"`    // Responsive sources
+	Loading   string `json:"loading,omitempty"`   // "lazy" | "eager" 
+	Decoding  string `json:"decoding,omitempty"`  // "async" | "sync" | "auto"
+	FetchPrio string `json:"fetchPrio,omitempty"` // "high" | "low" | "auto"
+	
+	// Fallback handling
+	FallbackSrc string `json:"fallbackSrc,omitempty"` // Fallback image URL
+	Placeholder string `json:"placeholder,omitempty"`  // Placeholder content/base64
+	
+	// Layout properties  
+	ObjectFit    string `json:"objectFit,omitempty"`    // CSS object-fit value
+	ObjectPos    string `json:"objectPos,omitempty"`    // CSS object-position value
+	AspectRatio  string `json:"aspectRatio,omitempty"`  // CSS aspect-ratio value
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
+}
+
+// getImageClass returns the correct single Basecoat class
+// Uses exact patterns from documentation - no dynamic class building
+func getImageClass(variant ImageVariant, size components.Size) string {
+	// Base class mapping following Basecoat patterns
+	switch variant {
+	case ImageAvatar:
+		switch size {
+		case components.SizeXs:
+			return "img-avatar-xs"
+		case components.SizeSm:
+			return "img-avatar-sm" 
+		case components.SizeLg:
+			return "img-avatar-lg"
+		case components.SizeXl:
+			return "img-avatar-xl"
+		default: // default size
+			return "img-avatar"
+		}
+	case ImageThumbnail:
+		switch size {
+		case components.SizeXs:
+			return "img-thumbnail-xs"
+		case components.SizeSm:
+			return "img-thumbnail-sm"
+		case components.SizeLg:
+			return "img-thumbnail-lg"
+		case components.SizeXl:
+			return "img-thumbnail-xl"
+		default: // default size
+			return "img-thumbnail"
+		}
+	case ImageCover:
+		return "img-cover" // Cover images don't typically vary by size
+	case ImageIcon:
+		switch size {
+		case components.SizeXs:
+			return "img-icon-xs"
+		case components.SizeSm:
+			return "img-icon-sm"
+		case components.SizeLg:
+			return "img-icon-lg"
+		case components.SizeXl:
+			return "img-icon-xl"
+		default: // default size
+			return "img-icon"
+		}
+	default: // ImageDefault or empty
+		switch size {
+		case components.SizeXs:
+			return "img-xs"
+		case components.SizeSm:
+			return "img-sm"
+		case components.SizeLg:
+			return "img-lg"
+		case components.SizeXl:
+			return "img-xl"
+		default: // default size
+			return "img"
+		}
+	}
+}
+
+// buildImageAttributes creates all HTML attributes for the img element
+func buildImageAttributes(props ImageProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getImageClass(props.Variant, props.Size),
+			props.Base.ClassName,
+		),
+		"src": props.Src,
+		"alt": props.Alt,
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+
+	// Image dimensions
+	if props.Width != "" {
+		attrs["width"] = props.Width
+	}
+	if props.Height != "" {
+		attrs["height"] = props.Height
+	}
+
+	// Responsive image attributes
+	if props.SrcSet != "" {
+		attrs["srcset"] = props.SrcSet
+	}
+	if props.Sizes != "" {
+		attrs["sizes"] = props.Sizes
+	}
+
+	// Loading and performance attributes
+	if props.Loading != "" {
+		attrs["loading"] = props.Loading
+	} else {
+		attrs["loading"] = "lazy" // Default to lazy loading
+	}
+	if props.Decoding != "" {
+		attrs["decoding"] = props.Decoding
+	}
+	if props.FetchPrio != "" {
+		attrs["fetchpriority"] = props.FetchPrio
+	}
+
+	// Layout CSS properties via style attribute
+	var styleProps []string
+	if props.ObjectFit != "" {
+		styleProps = append(styleProps, "object-fit: "+props.ObjectFit)
+	}
+	if props.ObjectPos != "" {
+		styleProps = append(styleProps, "object-position: "+props.ObjectPos)
+	}
+	if props.AspectRatio != "" {
+		styleProps = append(styleProps, "aspect-ratio: "+props.AspectRatio)
+	}
+	
+	// Combine with existing style
+	var finalStyle string
+	if len(styleProps) > 0 {
+		finalStyle = strings.Join(styleProps, "; ")
+	}
+	if props.Base.Style != "" {
+		if finalStyle != "" {
+			finalStyle += "; " + props.Base.Style
+		} else {
+			finalStyle = props.Base.Style
+		}
+	}
+	if finalStyle != "" {
+		attrs["style"] = finalStyle
+	}
+
+	// Data attributes for fallback handling
+	if props.FallbackSrc != "" {
+		attrs["data-fallback"] = props.FallbackSrc
+	}
+
+	// Data attributes
+	for key, value := range props.Base.DataAttrs {
+		attrs["data-"+key] = value
+	}
+
+	// HTMX attributes (for interactive images)
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.AriaHidden != "" {
+		attrs["aria-hidden"] = props.Base.A11y.AriaHidden
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+
+	// Event handlers
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+	if props.Base.Events.OnLoad != "" {
+		attrs["onload"] = props.Base.Events.OnLoad
+	}
+	if props.Base.Events.OnError != "" {
+		attrs["onerror"] = props.Base.Events.OnError
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// Image renders a Basecoat image atom with Tailwind utilities support
+// Follows documentation pattern: Basecoat classes + Tailwind utilities
+templ Image(props ImageProps) {
+	if props.Placeholder != "" && props.Src == "" {
+		// Render placeholder when no source provided
+		<div 
+			class={templ.Classes(
+				getImageClass(props.Variant, props.Size),
+				"placeholder",
+				props.Base.ClassName,
+			)}
+			if props.Base.ID != "" {
+				id={props.Base.ID}
+			}
+		>
+			{props.Placeholder}
+		</div>
+	} else {
+		// Render actual image
+		<img {buildImageAttributes(props)...}/>
+	}
+}
