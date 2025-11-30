@@ -1,0 +1,17 @@
+[0;34m[INFO][0m Checking prerequisites...
+[0;32m[SUCCESS][0m Prerequisites OK
+
+[1m════════════════════════════════════════════════════════════════════[0m
+[1m  Generating Ruun Kitchen Sink Demo[0m
+[1m════════════════════════════════════════════════════════════════════[0m
+
+
+[1m════════════════════════════════════════════════════════════════════[0m
+[1m  Initializing Ruun Demo Project[0m
+[1m════════════════════════════════════════════════════════════════════[0m
+
+[0;32m[SUCCESS][0m Created ./ruun-demo/go.mod
+[0;32m[SUCCESS][0m Created README.md
+[0;35m[TASK][0m Generating layout primitives specification...
+[0;32m[SUCCESS][0m Created LAYOUT_PRIMITIVES.md
+[0;35m[TASK][0m Generating main server...
