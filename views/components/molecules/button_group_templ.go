@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/a-h/templ"
 	"github.com/niiniyare/ruun/views/components"
 )
 

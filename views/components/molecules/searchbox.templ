@@ -110,7 +110,7 @@ func buildSearchInputProps(props SearchBoxProps) atoms.InputProps {
 	return atoms.InputProps{
 		ID:           props.ID,
 		Name:         props.Name,
-		Type:         atoms.InputSearch,
+		Type:         components.InputSearch,
 		Value:        props.Value,
 		Placeholder:  placeholder,
 		Disabled:     props.Disabled,
@@ -139,7 +139,7 @@ templ SearchBox(props SearchBoxProps) {
 				>
 					@atoms.Icon(atoms.IconProps{
 						Name: "x",
-						Size: "sm",
+						Size: components.SizeSm,
 					})
 				</button>
 			}
@@ -148,8 +148,8 @@ templ SearchBox(props SearchBoxProps) {
 			if props.Loading {
 				<div class="search-box-loading-indicator">
 					@atoms.Icon(atoms.IconProps{
-						Name: "loader",
-						Size: "sm",
+						Name: "loader-circle",
+						Size: components.SizeSm,
 					})
 				</div>
 			}

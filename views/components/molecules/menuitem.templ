@@ -129,9 +129,27 @@ func getRadioIndicatorClasses(checked bool) string {
 
 // buildBadgeProps creates badge props from menu item props
 func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
-	variant := props.BadgeVariant
-	if variant == "" {
-		variant = "secondary"
+	variant := components.BadgeSecondary // Default to secondary
+	if props.BadgeVariant != "" {
+		// Convert string to BadgeVariant
+		switch props.BadgeVariant {
+		case "primary":
+			variant = components.BadgePrimary
+		case "secondary":
+			variant = components.BadgeSecondary
+		case "success":
+			variant = components.BadgeSuccess
+		case "warning":
+			variant = components.BadgeWarning
+		case "error":
+			variant = components.BadgeError
+		case "info":
+			variant = components.BadgeInfo
+		case "destructive":
+			variant = components.BadgeDestructive
+		default:
+			variant = components.BadgeSecondary
+		}
 	}
 
 	return atoms.BadgeProps{
@@ -142,9 +160,9 @@ func buildBadgeProps(props MenuItemProps) atoms.BadgeProps {
 
 // buildIconProps creates icon props for menu item icons
 func buildIconProps(name string, position string) atoms.IconProps {
-	size := "sm"
+	size := components.SizeSm
 	if position == "submenu" {
-		size = "sm"  // Keep consistent size
+		size = components.SizeSm  // Keep consistent size
 	}
 
 	return atoms.IconProps{
