@@ -1,0 +1,191 @@
+package atoms
+
+import "github.com/niiniyare/ruun/views/components"
+
+// LinkProps defines all properties for the Link atom
+// Combines Basecoat semantic classes with Tailwind utilities
+type LinkProps struct {
+	// Content
+	Text string          `json:"text"`
+	Icon templ.Component `json:"icon,omitempty"`
+	Href string          `json:"href"`
+	
+	// Basecoat variants (using shared types)
+	Variant LinkVariant `json:"variant,omitempty"`
+	
+	// Icon positioning (for Tailwind spacing utilities)
+	IconPosition string `json:"iconPosition,omitempty"` // "start" | "end" (default: "start")
+	
+	// Link behavior
+	Target    string `json:"target,omitempty"`    // "_blank", "_self", "_parent", "_top"
+	Rel       string `json:"rel,omitempty"`       // "noopener", "noreferrer", etc.
+	Download  string `json:"download,omitempty"`  // Download attribute
+	External  bool   `json:"external,omitempty"`  // Add external link styling
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
+}
+
+// LinkVariant represents link-specific style variations
+type LinkVariant string
+
+const (
+	LinkDefault LinkVariant = "default"
+	LinkMuted   LinkVariant = "muted"
+	LinkLight   LinkVariant = "light"
+)
+
+// getLinkClass returns the correct single Basecoat class
+// Uses exact patterns from documentation - no dynamic class building
+func getLinkClass(variant LinkVariant, external bool) string {
+	// Static switch-based approach following documentation exactly
+	baseClass := "link"
+	
+	if external {
+		switch variant {
+		case LinkMuted:
+			return "link link-muted link-external"
+		case LinkLight:
+			return "link link-light link-external"
+		default: // default or empty
+			return "link link-external"
+		}
+	} else {
+		switch variant {
+		case LinkMuted:
+			return "link link-muted"
+		case LinkLight:
+			return "link link-light"
+		default: // default or empty
+			return baseClass
+		}
+	}
+}
+
+// buildLinkAttributes creates all HTML attributes for the link element
+func buildLinkAttributes(props LinkProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getLinkClass(props.Variant, props.External),
+			props.Base.ClassName,
+		),
+		"href": props.Href,
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+
+	// Link-specific attributes
+	if props.Target != "" {
+		attrs["target"] = props.Target
+	}
+	if props.Rel != "" {
+		attrs["rel"] = props.Rel
+	}
+	if props.Download != "" {
+		attrs["download"] = props.Download
+	}
+
+	// External link defaults
+	if props.External && props.Target == "" {
+		attrs["target"] = "_blank"
+	}
+	if props.External && props.Rel == "" {
+		attrs["rel"] = "noopener noreferrer"
+	}
+
+	// State
+	if props.Base.State.Disabled {
+		attrs["aria-disabled"] = "true"
+		attrs["tabindex"] = "-1"
+	}
+
+	// HTMX attributes
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+	if props.Base.HTMX.Boost {
+		attrs["hx-boost"] = "true"
+	}
+	if props.Base.HTMX.PushURL != "" {
+		attrs["hx-push-url"] = props.Base.HTMX.PushURL
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+	if props.Base.A11y.TabIndex != "" {
+		attrs["tabindex"] = props.Base.A11y.TabIndex
+	}
+
+	// Event handlers (as strings for HTML attributes)
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// Link renders a Basecoat link atom with Tailwind utilities support
+// Follows documentation pattern: Basecoat classes + Tailwind utilities
+templ Link(props LinkProps) {
+	<a {buildLinkAttributes(props)...}>
+		if props.Icon != nil && props.Text != "" {
+			if props.IconPosition == "end" {
+				{props.Text}
+				@props.Icon
+			} else {
+				@props.Icon
+				{props.Text}
+			}
+		} else if props.Icon != nil {
+			@props.Icon
+		} else if props.Text != "" {
+			{props.Text}
+		}
+	</a>
+}
