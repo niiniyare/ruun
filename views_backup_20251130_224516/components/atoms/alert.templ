@@ -1,0 +1,64 @@
+package atoms
+
+// AlertProps defines all properties for the Alert atom using Basecoat classes
+type AlertProps struct {
+	// Core content
+	Title       string          `json:"title"`
+	Description string          `json:"description,omitempty"`
+	Icon        templ.Component `json:"icon,omitempty"`
+	
+	// Basecoat variants
+	Variant string `json:"variant,omitempty"` // "", "destructive"
+	
+	// HTML attributes
+	ID string `json:"id,omitempty"`
+	
+	// ARIA accessibility
+	AriaRole        string `json:"ariaRole,omitempty"`
+	AriaLabel       string `json:"ariaLabel,omitempty"`
+	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+}
+
+// getAlertClass generates the Basecoat alert class
+func getAlertClass(variant string) string {
+	if variant == "destructive" {
+		return "alert-destructive"
+	}
+	return "alert"
+}
+
+// Alert renders a Basecoat alert atom
+templ Alert(props AlertProps) {
+	<div 
+		class={getAlertClass(props.Variant)}
+		if props.ID != "" {
+			id={props.ID}
+		}
+		if props.AriaRole != "" {
+			role={props.AriaRole}
+		}
+		if props.AriaLabel != "" {
+			aria-label={props.AriaLabel}
+		}
+		if props.AriaDescribedBy != "" {
+			aria-describedby={props.AriaDescribedBy}
+		}
+	>
+		// Icon (Basecoat alert supports SVG children)
+		if props.Icon != nil {
+			@props.Icon
+		}
+		
+		// Title (uses h2 per Basecoat structure)
+		if props.Title != "" {
+			<h2>{props.Title}</h2>
+		}
+		
+		// Description (uses section per Basecoat structure)
+		if props.Description != "" {
+			<section>
+				<p>{props.Description}</p>
+			</section>
+		}
+	</div>
+}

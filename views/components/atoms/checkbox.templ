@@ -3,75 +3,54 @@ package atoms
 import "github.com/niiniyare/ruun/views/components"
 
 // CheckboxProps defines all properties for the Checkbox atom
-// Uses Basecoat 'input' class with Tailwind utilities for layout
+// Uses Basecoat 'input' class with 'label' class for wrapper
+// Follows patterns from checkbox.md documentation exactly
 type CheckboxProps struct {
-    // Content
-    Label string `json:"label"`
-    
     // Core HTML attributes
     Name    string `json:"name"`
     Value   string `json:"value"`
     Checked bool   `json:"checked"`
     
-    // Form state (using shared ComponentState)
+    // Label content - optional for labeled variant
+    Label string `json:"label"`
+    
+    // Description text for complex layouts (optional)
+    Description string `json:"description,omitempty"`
+    
+    // Form state
     Required  bool `json:"required"`
     Disabled  bool `json:"disabled"`
     Readonly  bool `json:"readonly"`
     AutoFocus bool `json:"autofocus"`
     
+    // Layout options
+    Horizontal bool `json:"horizontal,omitempty"` // Use horizontal layout with description
+    
     // Event handlers (pre-resolved externally)
-    OnChange string `json:"onChange"`
-    OnBlur   string `json:"onBlur"`
-    OnFocus  string `json:"onFocus"`
-    OnClick  string `json:"onClick"`
+    OnChange string `json:"onChange,omitempty"`
+    OnBlur   string `json:"onBlur,omitempty"`
+    OnFocus  string `json:"onFocus,omitempty"`
+    OnClick  string `json:"onClick,omitempty"`
     
     // Accessibility (using shared AccessibilityProps pattern)
-    AriaLabel       string `json:"ariaLabel"`
-    AriaDescribedBy string `json:"ariaDescribedBy"`
-    AriaInvalid     string `json:"ariaInvalid"`
-    AriaRequired    string `json:"ariaRequired"`
-    AriaChecked     string `json:"ariaChecked"`
+    AriaLabel       string `json:"ariaLabel,omitempty"`
+    AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+    AriaInvalid     string `json:"ariaInvalid,omitempty"`
+    AriaRequired    string `json:"ariaRequired,omitempty"`
+    AriaChecked     string `json:"ariaChecked,omitempty"`
     
     // Additional attributes using templ.Attributes for extensibility
     Attrs templ.Attributes `json:"attrs,omitempty"`
     
-    // Shared component props (includes ClassName for Tailwind utilities)
+    // Shared component props (includes ID for label association)
     Base components.BaseProps `json:"base,omitempty"`
-}
-
-// getCheckboxClasses returns the correct Basecoat 'input' class + Tailwind utilities
-// Following documentation pattern from checkbox.md
-func getCheckboxClasses(className string) string {
-    // Base Basecoat class as documented
-    base := "input"
-    
-    // Combine with Tailwind utilities from props
-    if className != "" {
-        return base + " " + className
-    }
-    
-    return base
-}
-
-// getCheckboxLabelClasses returns Basecoat 'label' class + Tailwind utilities for layout
-// Using gap-3 spacing as documented in checkbox.md
-func getCheckboxLabelClasses(className string) string {
-    // Base classes from documentation
-    base := "label gap-3"
-    
-    // Combine with additional Tailwind utilities
-    if className != "" {
-        return base + " " + className
-    }
-    
-    return base
 }
 
 // buildCheckboxAttributes creates all HTML attributes for the checkbox input
 func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
     attrs := templ.Attributes{
         "type":  "checkbox",
-        "class": getCheckboxClasses(props.Base.ClassName),
+        "class": "input", // Basecoat 'input' class as documented
     }
     
     // Core HTML attributes
@@ -141,29 +120,47 @@ func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
     return attrs
 }
 
-// buildCheckboxLabelAttributes creates label attributes with proper classes
-func buildCheckboxLabelAttributes(props CheckboxProps) templ.Attributes {
-    attrs := templ.Attributes{
-        "class": getCheckboxLabelClasses(""),
-    }
-    
-    // Associate label with input
-    if props.Base.ID != "" {
-        attrs["for"] = props.Base.ID
-    }
-    
-    return attrs
-}
-
 // Checkbox renders a pure presentation checkbox atom
-// Following documentation patterns from checkbox.md
+// Following documentation patterns from checkbox.md exactly
 templ Checkbox(props CheckboxProps) {
-    if props.Label != "" {
-        <label {buildCheckboxLabelAttributes(props)...}>
+    if props.Label == "" && props.Description == "" {
+        // Variant 1: Basic checkbox (no label)
+        <input {buildCheckboxAttributes(props)...} />
+    } else if props.Label != "" && props.Description == "" {
+        // Variant 2: Checkbox with label only
+        <label class="label gap-3">
             <input {buildCheckboxAttributes(props)...} />
             { props.Label }
         </label>
-    } else {
-        <input {buildCheckboxAttributes(props)...} />
+    } else if props.Label != "" && props.Description != "" {
+        // Variant 3: Checkbox with label and description
+        if props.Horizontal {
+            // Horizontal layout with description (from docs example)
+            <div class="flex items-start gap-3">
+                <input {buildCheckboxAttributes(props)...} />
+                <div class="grid gap-2">
+                    <label 
+                        for={ props.Base.ID }
+                        class="label"
+                    >
+                        { props.Label }
+                    </label>
+                    <p class="text-muted-foreground text-sm">
+                        { props.Description }
+                    </p>
+                </div>
+            </div>
+        } else {
+            // Vertical layout with description
+            <label class="label gap-3">
+                <input {buildCheckboxAttributes(props)...} />
+                <div class="space-y-1">
+                    <span>{ props.Label }</span>
+                    <p class="text-muted-foreground text-sm">
+                        { props.Description }
+                    </p>
+                </div>
+            </label>
+        }
     }
 }

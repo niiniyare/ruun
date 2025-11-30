@@ -11,75 +11,54 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/niiniyare/ruun/views/components"
 
 // CheckboxProps defines all properties for the Checkbox atom
-// Uses Basecoat 'input' class with Tailwind utilities for layout
+// Uses Basecoat 'input' class with 'label' class for wrapper
+// Follows patterns from checkbox.md documentation exactly
 type CheckboxProps struct {
-	// Content
-	Label string `json:"label"`
-
 	// Core HTML attributes
 	Name    string `json:"name"`
 	Value   string `json:"value"`
 	Checked bool   `json:"checked"`
 
-	// Form state (using shared ComponentState)
+	// Label content - optional for labeled variant
+	Label string `json:"label"`
+
+	// Description text for complex layouts (optional)
+	Description string `json:"description,omitempty"`
+
+	// Form state
 	Required  bool `json:"required"`
 	Disabled  bool `json:"disabled"`
 	Readonly  bool `json:"readonly"`
 	AutoFocus bool `json:"autofocus"`
 
+	// Layout options
+	Horizontal bool `json:"horizontal,omitempty"` // Use horizontal layout with description
+
 	// Event handlers (pre-resolved externally)
-	OnChange string `json:"onChange"`
-	OnBlur   string `json:"onBlur"`
-	OnFocus  string `json:"onFocus"`
-	OnClick  string `json:"onClick"`
+	OnChange string `json:"onChange,omitempty"`
+	OnBlur   string `json:"onBlur,omitempty"`
+	OnFocus  string `json:"onFocus,omitempty"`
+	OnClick  string `json:"onClick,omitempty"`
 
 	// Accessibility (using shared AccessibilityProps pattern)
-	AriaLabel       string `json:"ariaLabel"`
-	AriaDescribedBy string `json:"ariaDescribedBy"`
-	AriaInvalid     string `json:"ariaInvalid"`
-	AriaRequired    string `json:"ariaRequired"`
-	AriaChecked     string `json:"ariaChecked"`
+	AriaLabel       string `json:"ariaLabel,omitempty"`
+	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+	AriaInvalid     string `json:"ariaInvalid,omitempty"`
+	AriaRequired    string `json:"ariaRequired,omitempty"`
+	AriaChecked     string `json:"ariaChecked,omitempty"`
 
 	// Additional attributes using templ.Attributes for extensibility
 	Attrs templ.Attributes `json:"attrs,omitempty"`
 
-	// Shared component props (includes ClassName for Tailwind utilities)
+	// Shared component props (includes ID for label association)
 	Base components.BaseProps `json:"base,omitempty"`
-}
-
-// getCheckboxClasses returns the correct Basecoat 'input' class + Tailwind utilities
-// Following documentation pattern from checkbox.md
-func getCheckboxClasses(className string) string {
-	// Base Basecoat class as documented
-	base := "input"
-
-	// Combine with Tailwind utilities from props
-	if className != "" {
-		return base + " " + className
-	}
-
-	return base
-}
-
-// getCheckboxLabelClasses returns Basecoat 'label' class + Tailwind utilities for layout
-// Using gap-3 spacing as documented in checkbox.md
-func getCheckboxLabelClasses(className string) string {
-	// Base classes from documentation
-	base := "label gap-3"
-
-	// Combine with additional Tailwind utilities
-	if className != "" {
-		return base + " " + className
-	}
-
-	return base
 }
 
 // buildCheckboxAttributes creates all HTML attributes for the checkbox input
 func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 	attrs := templ.Attributes{
 		"type":  "checkbox",
-		"class": getCheckboxClasses(props.Base.ClassName),
+		"class": "input", // Basecoat 'input' class as documented
 	}
 
 	// Core HTML attributes
@@ -149,22 +128,8 @@ func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
 	return attrs
 }
 
-// buildCheckboxLabelAttributes creates label attributes with proper classes
-func buildCheckboxLabelAttributes(props CheckboxProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getCheckboxLabelClasses(""),
-	}
-
-	// Associate label with input
-	if props.Base.ID != "" {
-		attrs["for"] = props.Base.ID
-	}
-
-	return attrs
-}
-
 // Checkbox renders a pure presentation checkbox atom
-// Following documentation patterns from checkbox.md
+// Following documentation patterns from checkbox.md exactly
 func Checkbox(props CheckboxProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -186,16 +151,8 @@ func Checkbox(props CheckboxProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.Label != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<label")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildCheckboxLabelAttributes(props))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "><input")
+		if props.Label == "" && props.Description == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <input")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -203,35 +160,132 @@ func Checkbox(props CheckboxProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else if props.Label != "" && props.Description == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <label class=\"label gap-3\"><input")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildCheckboxAttributes(props))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 164, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 133, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</label>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</label>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input")
+		} else if props.Label != "" && props.Description != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildCheckboxAttributes(props))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if props.Horizontal {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " <div class=\"flex items-start gap-3\"><input")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildCheckboxAttributes(props))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "><div class=\"grid gap-2\"><label for=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Base.ID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 143, Col: 43}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"label\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 146, Col: 37}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</label><p class=\"text-muted-foreground text-sm\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 149, Col: 43}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</p></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " <label class=\"label gap-3\"><input")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildCheckboxAttributes(props))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "><div class=\"space-y-1\"><span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 158, Col: 39}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span><p class=\"text-muted-foreground text-sm\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/checkbox.templ`, Line: 160, Col: 43}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p></div></label>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
 		return nil

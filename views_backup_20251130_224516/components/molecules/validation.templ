@@ -1,0 +1,269 @@
+package molecules
+
+import (
+	"github.com/niiniyare/ruun/views/components/atoms"
+)
+
+// ValidationMessageType defines the type of validation message
+type ValidationMessageType string
+
+const (
+	ValidationSuccess ValidationMessageType = "success"
+	ValidationWarning ValidationMessageType = "warning"
+	ValidationError   ValidationMessageType = "error"
+	ValidationInfo    ValidationMessageType = "info"
+)
+
+// ValidationMessage represents a single validation message
+type ValidationMessage struct {
+	Type    ValidationMessageType `json:"type"`
+	Message string               `json:"message"`
+	Field   string               `json:"field,omitempty"`
+	Code    string               `json:"code,omitempty"`
+}
+
+// ValidationProps defines properties for validation components using Basecoat patterns
+type ValidationProps struct {
+	// Core properties
+	FieldName    string              `json:"fieldName"`
+	Messages     []ValidationMessage `json:"messages"`
+	
+	// Display options
+	ShowSuccess  bool `json:"showSuccess,omitempty"`
+	ShowWarnings bool `json:"showWarnings,omitempty"`
+	
+	// HTML attributes
+	ID string `json:"id,omitempty"`
+	
+	// HTMX integration
+	HXPost    string `json:"hxPost,omitempty"`
+	HXGet     string `json:"hxGet,omitempty"`
+	HXTarget  string `json:"hxTarget,omitempty"`
+	HXSwap    string `json:"hxSwap,omitempty"`
+	HXTrigger string `json:"hxTrigger,omitempty"`
+	
+	// Alpine.js integration  
+	AlpineData string `json:"alpineData,omitempty"`
+	
+	// Event handlers
+	OnValidate string `json:"onValidate,omitempty"`
+	OnError    string `json:"onError,omitempty"`
+	OnSuccess  string `json:"onSuccess,omitempty"`
+}
+
+// getValidationIcon maps message types to icons
+func getValidationIcon(messageType ValidationMessageType) atoms.IconProps {
+	switch messageType {
+	case ValidationError:
+		return atoms.IconProps{Name: "alert-circle", Size: "sm"}
+	case ValidationWarning:
+		return atoms.IconProps{Name: "alert-triangle", Size: "sm"}
+	case ValidationSuccess:
+		return atoms.IconProps{Name: "check-circle", Size: "sm"}
+	case ValidationInfo:
+		return atoms.IconProps{Name: "info", Size: "sm"}
+	default:
+		return atoms.IconProps{Name: "info", Size: "sm"}
+	}
+}
+
+// shouldShowMessage determines if a message should be displayed
+func shouldShowMessage(message ValidationMessage, props ValidationProps) bool {
+	switch message.Type {
+	case ValidationSuccess:
+		return props.ShowSuccess
+	case ValidationWarning:
+		return props.ShowWarnings
+	case ValidationError:
+		return true // Always show errors
+	case ValidationInfo:
+		return true // Always show info
+	}
+	return false
+}
+
+// getFieldValidationClass returns the appropriate text class for field validation messages
+func getFieldValidationClass(messageType ValidationMessageType) string {
+	switch messageType {
+	case ValidationError:
+		return "text-destructive"
+	case ValidationSuccess:
+		return "text-success"
+	case ValidationWarning:
+		return "text-warning"
+	default:
+		return "text-muted-foreground"
+	}
+}
+
+// ValidationMessages renders validation messages using Basecoat alert components
+templ ValidationMessages(props ValidationProps) {
+	<div
+		if props.ID != "" {
+			id={props.ID}
+		}
+		role="alert"
+		aria-live="polite"
+		if props.AlpineData != "" {
+			x-data={props.AlpineData}
+		}
+		if props.HXPost != "" || props.HXGet != "" {
+			if props.HXPost != "" {
+				hx-post={props.HXPost}
+			}
+			if props.HXGet != "" {
+				hx-get={props.HXGet}
+			}
+			if props.HXTarget != "" {
+				hx-target={props.HXTarget}
+			}
+			if props.HXSwap != "" {
+				hx-swap={props.HXSwap}
+			}
+			if props.HXTrigger != "" {
+				hx-trigger={props.HXTrigger}
+			}
+		}
+	>
+		// Render each message as a Basecoat alert
+		for _, message := range props.Messages {
+			if shouldShowMessage(message, props) {
+				@validationMessage(message)
+			}
+		}
+		
+		// Alpine.js dynamic messages
+		if props.AlpineData != "" {
+			<template x-for="message in validationMessages" x-key="message.code">
+				<div x-show="shouldShowMessage(message)">
+					// Dynamic alert would go here - simplified for this example
+					<div x-bind:class="getAlertVariant(message.type)">
+						<span x-text="message.message"></span>
+					</div>
+				</div>
+			</template>
+		}
+	</div>
+}
+
+// validationMessage renders a single validation message using Basecoat alert
+templ validationMessage(message ValidationMessage) {
+	if message.Type == ValidationError {
+		@atoms.Alert(atoms.AlertProps{
+			Variant:     "destructive",
+			Title:       message.Message,
+			Icon:        atoms.Icon(getValidationIcon(message.Type)),
+		})
+	} else {
+		@atoms.Alert(atoms.AlertProps{
+			Title:       message.Message,
+			Icon:        atoms.Icon(getValidationIcon(message.Type)),
+		})
+	}
+}
+
+// FieldValidationProps for field-level validation
+type FieldValidationProps struct {
+	FieldName   string              `json:"fieldName"`
+	Messages    []ValidationMessage `json:"messages"`
+	ShowIcon    bool                `json:"showIcon,omitempty"`
+	Inline      bool                `json:"inline,omitempty"`
+	ID          string              `json:"id,omitempty"`
+	AlpineData  string              `json:"alpineData,omitempty"`
+}
+
+// FieldValidation renders field-level validation in a more compact form
+templ FieldValidation(props FieldValidationProps) {
+	<div
+		if props.ID != "" {
+			id={props.ID}
+		}
+		role="alert"
+		aria-live="polite"
+		if props.AlpineData != "" {
+			x-data={props.AlpineData}
+		}
+	>
+		for _, message := range props.Messages {
+			<p class={getFieldValidationClass(message.Type)}>
+				if props.ShowIcon {
+					@atoms.Icon(getValidationIcon(message.Type))
+				}
+				{message.Message}
+			</p>
+		}
+		
+		// Alpine.js dynamic messages for field validation
+		if props.AlpineData != "" {
+			<template x-for="message in fieldMessages" x-key="message.code">
+				<p x-bind:class="getFieldMessageClass(message.type)" x-text="message.message" role="alert"></p>
+			</template>
+		}
+	</div>
+}
+
+// ValidationSummaryProps defines properties for validation summaries
+type ValidationSummaryProps struct {
+	Title       string              `json:"title"`
+	Messages    []ValidationMessage `json:"messages"`
+	Collapsible bool                `json:"collapsible,omitempty"`
+	ShowCounts  bool                `json:"showCounts,omitempty"`
+	ID          string              `json:"id,omitempty"`
+	AlpineData  string              `json:"alpineData,omitempty"`
+}
+
+// ValidationSummary renders a summary using Basecoat card component pattern
+templ ValidationSummary(props ValidationSummaryProps) {
+	<div
+		class="card"
+		if props.ID != "" {
+			id={props.ID}
+		}
+		if props.AlpineData != "" {
+			x-data={props.AlpineData}
+		} else {
+			x-data="{ collapsed: false }"
+		}
+	>
+		<header class="border-b">
+			<div class="flex items-center gap-2">
+				@atoms.Icon(atoms.IconProps{Name: "alert-triangle", Size: "sm"})
+				<h2 class="text-destructive">{props.Title}</h2>
+				if props.ShowCounts && props.AlpineData != "" {
+					<span class="text-sm text-muted-foreground" x-text="`(${errorCount} errors)`"></span>
+				}
+			</div>
+			
+			if props.Collapsible {
+				<button
+					class="btn-sm-icon-ghost"
+					x-on:click="collapsed = !collapsed"
+					aria-label="Toggle validation summary"
+				>
+					@atoms.Icon(atoms.IconProps{Name: "chevron-down", Size: "sm"})
+				</button>
+			}
+		</header>
+
+		<section 
+			if props.Collapsible {
+				x-show="!collapsed"
+				x-transition
+			}
+		>
+			if len(props.Messages) > 0 {
+				// Static messages
+				for _, message := range props.Messages {
+					@validationMessage(message)
+				}
+			} else if props.AlpineData != "" {
+				// Dynamic messages via Alpine.js
+				<template x-for="message in summaryMessages" x-key="message.code">
+					<div x-bind:class="getAlertVariant(message.type)">
+						<span x-text="message.message"></span>
+					</div>
+				</template>
+			}
+		</section>
+	</div>
+}

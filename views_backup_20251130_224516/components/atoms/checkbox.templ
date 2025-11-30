@@ -1,0 +1,169 @@
+package atoms
+
+import "github.com/niiniyare/ruun/views/components"
+
+// CheckboxProps defines all properties for the Checkbox atom
+// Uses Basecoat 'input' class with Tailwind utilities for layout
+type CheckboxProps struct {
+    // Content
+    Label string `json:"label"`
+    
+    // Core HTML attributes
+    Name    string `json:"name"`
+    Value   string `json:"value"`
+    Checked bool   `json:"checked"`
+    
+    // Form state (using shared ComponentState)
+    Required  bool `json:"required"`
+    Disabled  bool `json:"disabled"`
+    Readonly  bool `json:"readonly"`
+    AutoFocus bool `json:"autofocus"`
+    
+    // Event handlers (pre-resolved externally)
+    OnChange string `json:"onChange"`
+    OnBlur   string `json:"onBlur"`
+    OnFocus  string `json:"onFocus"`
+    OnClick  string `json:"onClick"`
+    
+    // Accessibility (using shared AccessibilityProps pattern)
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    AriaChecked     string `json:"ariaChecked"`
+    
+    // Additional attributes using templ.Attributes for extensibility
+    Attrs templ.Attributes `json:"attrs,omitempty"`
+    
+    // Shared component props (includes ClassName for Tailwind utilities)
+    Base components.BaseProps `json:"base,omitempty"`
+}
+
+// getCheckboxClasses returns the correct Basecoat 'input' class + Tailwind utilities
+// Following documentation pattern from checkbox.md
+func getCheckboxClasses(className string) string {
+    // Base Basecoat class as documented
+    base := "input"
+    
+    // Combine with Tailwind utilities from props
+    if className != "" {
+        return base + " " + className
+    }
+    
+    return base
+}
+
+// getCheckboxLabelClasses returns Basecoat 'label' class + Tailwind utilities for layout
+// Using gap-3 spacing as documented in checkbox.md
+func getCheckboxLabelClasses(className string) string {
+    // Base classes from documentation
+    base := "label gap-3"
+    
+    // Combine with additional Tailwind utilities
+    if className != "" {
+        return base + " " + className
+    }
+    
+    return base
+}
+
+// buildCheckboxAttributes creates all HTML attributes for the checkbox input
+func buildCheckboxAttributes(props CheckboxProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "type":  "checkbox",
+        "class": getCheckboxClasses(props.Base.ClassName),
+    }
+    
+    // Core HTML attributes
+    if props.Base.ID != "" {
+        attrs["id"] = props.Base.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    if props.Value != "" {
+        attrs["value"] = props.Value
+    }
+    
+    // Boolean attributes
+    if props.Checked {
+        attrs["checked"] = ""
+    }
+    if props.Required {
+        attrs["required"] = ""
+    }
+    if props.Disabled {
+        attrs["disabled"] = ""
+    }
+    if props.Readonly {
+        attrs["readonly"] = ""
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = ""
+    }
+    
+    // Event handlers
+    if props.OnChange != "" {
+        attrs["onchange"] = props.OnChange
+    }
+    if props.OnBlur != "" {
+        attrs["onblur"] = props.OnBlur
+    }
+    if props.OnFocus != "" {
+        attrs["onfocus"] = props.OnFocus
+    }
+    if props.OnClick != "" {
+        attrs["onclick"] = props.OnClick
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    if props.AriaChecked != "" {
+        attrs["aria-checked"] = props.AriaChecked
+    }
+    
+    // Merge custom attributes (allows override)
+    for key, value := range props.Attrs {
+        attrs[key] = value
+    }
+    
+    return attrs
+}
+
+// buildCheckboxLabelAttributes creates label attributes with proper classes
+func buildCheckboxLabelAttributes(props CheckboxProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class": getCheckboxLabelClasses(""),
+    }
+    
+    // Associate label with input
+    if props.Base.ID != "" {
+        attrs["for"] = props.Base.ID
+    }
+    
+    return attrs
+}
+
+// Checkbox renders a pure presentation checkbox atom
+// Following documentation patterns from checkbox.md
+templ Checkbox(props CheckboxProps) {
+    if props.Label != "" {
+        <label {buildCheckboxLabelAttributes(props)...}>
+            <input {buildCheckboxAttributes(props)...} />
+            { props.Label }
+        </label>
+    } else {
+        <input {buildCheckboxAttributes(props)...} />
+    }
+}

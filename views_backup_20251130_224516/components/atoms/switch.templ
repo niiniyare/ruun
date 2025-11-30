@@ -1,0 +1,105 @@
+package atoms
+
+import "strconv"
+
+// SwitchProps defines all properties for the Switch atom using Basecoat checkbox styling
+type SwitchProps struct {
+	// Core attributes
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Value   string `json:"value,omitempty"`
+	Checked bool   `json:"checked,omitempty"`
+	
+	// Form attributes
+	Required bool `json:"required,omitempty"`
+	Disabled bool `json:"disabled,omitempty"`
+	
+	// Event handlers (pre-resolved externally)
+	OnChange string `json:"onChange,omitempty"`
+	OnFocus  string `json:"onFocus,omitempty"`
+	OnBlur   string `json:"onBlur,omitempty"`
+	
+	// ARIA accessibility
+	AriaLabel       string `json:"ariaLabel,omitempty"`
+	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+	AriaRequired    string `json:"ariaRequired,omitempty"`
+	
+	// Additional HTML attributes
+	TabIndex   int               `json:"tabIndex,omitempty"`
+	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
+	Attributes templ.Attributes  `json:"attributes,omitempty"`
+}
+
+// buildSwitchAttributes creates all HTML attributes for the switch
+func buildSwitchAttributes(props SwitchProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"type": "checkbox",
+		"role": "switch",  // This makes Basecoat style it as a switch
+	}
+	
+	// Core HTML attributes
+	if props.ID != "" {
+		attrs["id"] = props.ID
+	}
+	if props.Name != "" {
+		attrs["name"] = props.Name
+	}
+	if props.Value != "" {
+		attrs["value"] = props.Value
+	}
+	
+	// Boolean attributes
+	if props.Checked {
+		attrs["checked"] = "checked"
+	}
+	if props.Required {
+		attrs["required"] = "required"
+	}
+	if props.Disabled {
+		attrs["disabled"] = "disabled"
+	}
+	
+	// Event handlers
+	if props.OnChange != "" {
+		attrs["onchange"] = props.OnChange
+	}
+	if props.OnFocus != "" {
+		attrs["onfocus"] = props.OnFocus
+	}
+	if props.OnBlur != "" {
+		attrs["onblur"] = props.OnBlur
+	}
+	
+	// ARIA attributes
+	if props.AriaLabel != "" {
+		attrs["aria-label"] = props.AriaLabel
+	}
+	if props.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.AriaDescribedBy
+	}
+	if props.AriaRequired != "" {
+		attrs["aria-required"] = props.AriaRequired
+	}
+	
+	// Tab index
+	if props.TabIndex != 0 {
+		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	}
+	
+	// Data attributes
+	for key, value := range props.DataAttrs {
+		attrs["data-"+key] = value
+	}
+	
+	// Merge custom attributes
+	for key, value := range props.Attributes {
+		attrs[key] = value
+	}
+	
+	return attrs
+}
+
+// Switch renders a Basecoat switch (checkbox with role="switch")
+templ Switch(props SwitchProps) {
+	<input {buildSwitchAttributes(props)...} />
+}

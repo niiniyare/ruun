@@ -1,0 +1,282 @@
+package main
+
+import (
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+)
+
+// DemoPage is the main entry point for the component gallery
+templ DemoPage() {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="auto">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Awo ERP - Component Gallery</title>
+			<link rel="stylesheet" href="/static/dist/css/base.min.css"/>
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
+		</head>
+		<body>
+			@ThemeSwitcher()
+			@AtomsSection()
+			@MoleculesSection()
+			@OrganismsSection()
+			@TemplatesSection()
+			@ThemeScript()
+		</body>
+	</html>
+}
+
+// ThemeSwitcher component using Alpine.js
+templ ThemeSwitcher() {
+	<div x-data="themeSwitcher">
+		<button 
+			@click="setTheme('light')"
+			:class="{ 'btn-primary': theme === 'light' }"
+		>Light</button>
+		<button 
+			@click="setTheme('auto')"
+			:class="{ 'btn-primary': theme === 'auto' }"
+		>Auto</button>
+		<button 
+			@click="setTheme('dark')"
+			:class="{ 'btn-primary': theme === 'dark' }"
+		>Dark</button>
+	</div>
+}
+
+// AtomsSection showcases atomic components
+templ AtomsSection() {
+	<section>
+		<h2>Atoms</h2>
+		@ButtonsDemo()
+		@BadgesDemo()
+		@AlertsDemo()
+	</section>
+}
+
+// ButtonsDemo component
+templ ButtonsDemo() {
+	<h3>Buttons</h3>
+	@atoms.Button(atoms.ButtonProps{Text: "Primary", Variant: "primary"})
+	@atoms.Button(atoms.ButtonProps{Text: "Secondary", Variant: "secondary"})
+	@atoms.Button(atoms.ButtonProps{Text: "Outline", Variant: "outline"})
+	@atoms.Button(atoms.ButtonProps{Text: "Ghost", Variant: "ghost"})
+	@atoms.Button(atoms.ButtonProps{Text: "Destructive", Variant: "destructive"})
+	<br/>
+	@atoms.Button(atoms.ButtonProps{Text: "Small", Variant: "primary", Size: "sm"})
+	@atoms.Button(atoms.ButtonProps{Text: "Medium", Variant: "primary"})
+	@atoms.Button(atoms.ButtonProps{Text: "Large", Variant: "primary", Size: "lg"})
+	@atoms.Button(atoms.ButtonProps{Text: "Disabled", Variant: "primary", Disabled: true})
+}
+
+// BadgesDemo component
+templ BadgesDemo() {
+	<h3>Badges</h3>
+	@atoms.Badge(atoms.BadgeProps{Text: "Primary", Variant: "primary"})
+	@atoms.Badge(atoms.BadgeProps{Text: "Secondary", Variant: "secondary"})
+	@atoms.Badge(atoms.BadgeProps{Text: "Destructive", Variant: "destructive"})
+	@atoms.Badge(atoms.BadgeProps{Text: "Outline", Variant: "outline"})
+}
+
+// AlertsDemo component
+templ AlertsDemo() {
+	<h3>Alerts</h3>
+	@atoms.Alert(atoms.AlertProps{Title: "Info", Description: "This is an informational message."})
+	@atoms.Alert(atoms.AlertProps{Title: "Success", Description: "Operation completed successfully!"})
+	@atoms.Alert(atoms.AlertProps{Title: "Warning", Description: "Please check your input."})
+	@atoms.Alert(atoms.AlertProps{Title: "Error", Description: "Something went wrong.", Variant: "destructive"})
+}
+
+// MoleculesSection showcases molecule components
+templ MoleculesSection() {
+	<section>
+		<h2>Molecules</h2>
+		@FormFieldDemo()
+	</section>
+}
+
+// FormFieldDemo component
+templ FormFieldDemo() {
+	<h3>Basic FormFields</h3>
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "username",
+		Label:       "Username",
+		Type:        molecules.FormFieldText,
+		Placeholder: "Enter your username",
+		Required:    true,
+	})
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "email",
+		Label:       "Email Address",
+		Type:        molecules.FormFieldEmail,
+		Placeholder: "your@email.com",
+		Required:    true,
+	})
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "password",
+		Label:       "Password",
+		Type:        molecules.FormFieldPassword,
+		Placeholder: "Enter password",
+		Required:    true,
+	})
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "phone",
+		Label:       "Phone Number",
+		Type:        molecules.FormFieldText,
+		Placeholder: "+1 (555) 123-4567",
+		Required:    false,
+	})
+	<h3>Advanced FormFields</h3>
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "company",
+		Label:       "Company",
+		Type:        molecules.FormFieldText,
+		Placeholder: "Enter company name",
+		HelpText:    "This will appear on your profile",
+		Required:    false,
+	})
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "city",
+		Label:       "City",
+		Type:        molecules.FormFieldText,
+		Placeholder: "Current city",
+		Value:       "San Francisco",
+		Required:    false,
+	})
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "invalid-field",
+		Label:       "Invalid Field",
+		Type:        molecules.FormFieldText,
+		Placeholder: "Wrong input",
+		Value:       "bad-value",
+		Errors:      []string{"This field has an error"},
+		HasError:    true,
+		Required:    true,
+	})
+	@molecules.FormField(molecules.FormFieldProps{
+		Name:        "readonly-field",
+		Label:       "Read-only Field",
+		Type:        molecules.FormFieldText,
+		Placeholder: "Cannot edit",
+		Value:       "Disabled value",
+		Disabled:    true,
+	})
+}
+
+// OrganismsSection showcases complex composed components
+templ OrganismsSection() {
+	<section>
+		<h2>Organisms</h2>
+		@ContactFormDemo()
+	</section>
+}
+
+// ContactFormDemo component
+templ ContactFormDemo() {
+	<h3>Contact Form</h3>
+	<form>
+		@molecules.FormField(molecules.FormFieldProps{
+			Name:        "firstname",
+			Label:       "First Name",
+			Type:        molecules.FormFieldText,
+			Placeholder: "Enter first name",
+			Required:    true,
+		})
+		@molecules.FormField(molecules.FormFieldProps{
+			Name:        "lastname",
+			Label:       "Last Name",
+			Type:        molecules.FormFieldText,
+			Placeholder: "Enter last name",
+			Required:    true,
+		})
+		@molecules.FormField(molecules.FormFieldProps{
+			Name:        "contact-email",
+			Label:       "Email",
+			Type:        molecules.FormFieldEmail,
+			Placeholder: "your@email.com",
+			Required:    true,
+		})
+		@molecules.FormField(molecules.FormFieldProps{
+			Name:        "contact-phone",
+			Label:       "Phone",
+			Type:        molecules.FormFieldText,
+			Placeholder: "+1 (555) 123-4567",
+			Required:    false,
+		})
+		@molecules.FormField(molecules.FormFieldProps{
+			Name:        "subject",
+			Label:       "Subject",
+			Type:        molecules.FormFieldText,
+			Placeholder: "What is this about?",
+			Required:    true,
+		})
+		@atoms.Button(atoms.ButtonProps{Text: "Cancel", Variant: "outline"})
+		@atoms.Button(atoms.ButtonProps{Text: "Send Message", Variant: "primary", Type: "submit"})
+	</form>
+}
+
+// TemplatesSection showcases layout patterns
+templ TemplatesSection() {
+	<section>
+		<h2>Templates</h2>
+		@LayoutShowcase()
+	</section>
+}
+
+// LayoutShowcase component
+templ LayoutShowcase() {
+	<h3>Layout Cards</h3>
+	@LayoutCard("📊", "Dashboard", "Sidebar + Main", atoms.BadgeProps{Text: "Available", Variant: "outline"})
+	@LayoutCard("📝", "Form", "Centered Form", atoms.BadgeProps{Text: "Built", Variant: "secondary"})
+	@LayoutCard("🔐", "Auth", "Login/Register", atoms.BadgeProps{Text: "Ready", Variant: "primary"})
+	@LayoutCard("⚠️", "Error", "404/500 Pages", atoms.BadgeProps{Text: "Coming", Variant: "outline"})
+}
+
+// LayoutCard component
+templ LayoutCard(icon, title, desc string, badge atoms.BadgeProps) {
+	<div>
+		<div>{ icon }</div>
+		<div>{ title }</div>
+		<div>{ desc }</div>
+		@atoms.Badge(badge)
+	</div>
+}
+
+// ThemeScript contains the Alpine.js theme management
+templ ThemeScript() {
+	<script>
+		// Theme management with Alpine.js
+		document.addEventListener('alpine:init', () => {
+			Alpine.data('themeSwitcher', () => ({
+				theme: localStorage.getItem('theme') || 'auto',
+				
+				init() { this.applyTheme(); },
+				
+				setTheme(newTheme) {
+					this.theme = newTheme;
+					localStorage.setItem('theme', newTheme);
+					this.applyTheme();
+				},
+				
+				applyTheme() {
+					const html = document.documentElement;
+					if (this.theme === 'auto') {
+						const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+						html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+					} else {
+						html.setAttribute('data-theme', this.theme);
+					}
+				}
+			}));
+		});
+		
+		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+			const currentTheme = localStorage.getItem('theme') || 'auto';
+			if (currentTheme === 'auto') {
+				document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+			}
+		});
+	</script>
+}

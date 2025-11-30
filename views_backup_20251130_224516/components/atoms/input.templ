@@ -1,0 +1,143 @@
+package atoms
+
+import (
+    "strconv"
+    "github.com/niiniyare/ruun/views/components"
+)
+
+// InputProps defines all properties for the Input atom
+type InputProps struct {
+    // Core HTML attributes
+    ID          string    `json:"id"`
+    Name        string    `json:"name"`
+    Type        components.InputType `json:"type"`
+    Value       string    `json:"value"`
+    Placeholder string    `json:"placeholder"`
+    
+    // Constraints and validation
+    Required    bool   `json:"required"`
+    Disabled    bool   `json:"disabled"`
+    Readonly    bool   `json:"readonly"`
+    AutoFocus   bool   `json:"autoFocus"`
+    AutoComplete string `json:"autoComplete"`
+    
+    // Input-specific constraints
+    MinLength   int    `json:"minLength"`
+    MaxLength   int    `json:"maxLength"`
+    Min         string `json:"min"`
+    Max         string `json:"max"`
+    Step        string `json:"step"`
+    Pattern     string `json:"pattern"`
+    Accept      string `json:"accept"` // For file inputs
+    Multiple    bool   `json:"multiple"` // For file inputs
+    
+    // State flags for aria-invalid attribute
+    Invalid     bool   `json:"invalid"`
+    
+    // ARIA accessibility attributes
+    AriaLabel       string `json:"ariaLabel"`
+    AriaDescribedBy string `json:"ariaDescribedBy"`
+    AriaInvalid     string `json:"ariaInvalid"`
+    AriaRequired    string `json:"ariaRequired"`
+    
+    // Additional HTML attributes for HTMX, Alpine.js, etc.
+    Attrs       templ.Attributes      `json:"attrs"`
+}
+
+// getInputClasses returns the CSS classes for the input following Basecoat + Tailwind pattern
+func getInputClasses() string {
+    // Using Basecoat 'input' class with Tailwind utilities as documented
+    return "input w-full rounded-md border bg-input px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+}
+
+// buildInputAttributes creates all HTML attributes for the input
+func buildInputAttributes(props InputProps) templ.Attributes {
+    attrs := templ.Attributes{
+        "class":       getInputClasses(),
+        "type":        string(props.Type),
+        "value":       props.Value,
+        "placeholder": props.Placeholder,
+    }
+    
+    // Core HTML attributes
+    if props.ID != "" {
+        attrs["id"] = props.ID
+    }
+    if props.Name != "" {
+        attrs["name"] = props.Name
+    }
+    
+    // Boolean attributes
+    if props.Required {
+        attrs["required"] = "required"
+    }
+    if props.Disabled {
+        attrs["disabled"] = "disabled"
+    }
+    if props.Readonly {
+        attrs["readonly"] = "readonly"
+    }
+    if props.AutoFocus {
+        attrs["autofocus"] = "autofocus"
+    }
+    if props.Multiple {
+        attrs["multiple"] = "multiple"
+    }
+    
+    // Constraint attributes
+    if props.AutoComplete != "" {
+        attrs["autocomplete"] = props.AutoComplete
+    }
+    if props.MinLength > 0 {
+        attrs["minlength"] = strconv.Itoa(props.MinLength)
+    }
+    if props.MaxLength > 0 {
+        attrs["maxlength"] = strconv.Itoa(props.MaxLength)
+    }
+    if props.Min != "" {
+        attrs["min"] = props.Min
+    }
+    if props.Max != "" {
+        attrs["max"] = props.Max
+    }
+    if props.Step != "" {
+        attrs["step"] = props.Step
+    }
+    if props.Pattern != "" {
+        attrs["pattern"] = props.Pattern
+    }
+    if props.Accept != "" {
+        attrs["accept"] = props.Accept
+    }
+    
+    // ARIA attributes
+    if props.AriaLabel != "" {
+        attrs["aria-label"] = props.AriaLabel
+    }
+    if props.AriaDescribedBy != "" {
+        attrs["aria-describedby"] = props.AriaDescribedBy
+    }
+    
+    // Handle aria-invalid - can be set via Invalid bool or AriaInvalid string
+    if props.Invalid {
+        attrs["aria-invalid"] = "true"
+    } else if props.AriaInvalid != "" {
+        attrs["aria-invalid"] = props.AriaInvalid
+    }
+    
+    if props.AriaRequired != "" {
+        attrs["aria-required"] = props.AriaRequired
+    }
+    
+    // Merge custom attributes (allows HTMX, Alpine.js, data-*, etc.)
+    for key, value := range props.Attrs {
+        attrs[key] = value
+    }
+    
+    return attrs
+}
+
+// Input renders a pure presentation input atom using Basecoat classes
+templ Input(props InputProps) {
+    <input {buildInputAttributes(props)...} />
+}
