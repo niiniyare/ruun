@@ -8,10 +8,10 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
-
-// Note: Basecoat handles textarea styling via .textarea class
-// Resize behavior is handled via CSS or style attributes
+import (
+	"github.com/niiniyare/ruun/views/components"
+	"strconv"
+)
 
 // TextareaProps defines all properties for the Textarea atom
 type TextareaProps struct {
@@ -35,17 +35,8 @@ type TextareaProps struct {
 	Cols      int    `json:"cols"`
 	Wrap      string `json:"wrap"` // "soft" | "hard" | "off"
 
-	// Note: Visual styling handled by Basecoat .textarea class
-	// No visual props needed
-
-	// Event handlers (pre-resolved externally)
-	OnChange  string `json:"onChange"`
-	OnBlur    string `json:"onBlur"`
-	OnFocus   string `json:"onFocus"`
-	OnInput   string `json:"onInput"`
-	OnKeyDown string `json:"onKeyDown"`
-	OnKeyUp   string `json:"onKeyUp"`
-	OnScroll  string `json:"onScroll"`
+	// State flags for aria-invalid attribute
+	Invalid bool `json:"invalid"`
 
 	// ARIA accessibility attributes
 	AriaLabel       string `json:"ariaLabel"`
@@ -53,19 +44,23 @@ type TextareaProps struct {
 	AriaInvalid     string `json:"ariaInvalid"`
 	AriaRequired    string `json:"ariaRequired"`
 
-	// Additional HTML attributes
-	TabIndex   int               `json:"tabIndex"`
-	DataAttrs  map[string]string `json:"dataAttrs"`
-	Attributes templ.Attributes  `json:"attributes"`
+	// Base component properties for HTMX, data attributes, etc.
+	components.BaseProps
+
+	// Additional HTML attributes for HTMX, Alpine.js, etc.
+	Attrs templ.Attributes `json:"attrs"`
 }
 
-// Basecoat handles textarea styling via .textarea class
-// No class generation needed
+// getTextareaClasses returns the CSS classes for the textarea following Basecoat + Tailwind pattern
+func getTextareaClasses() string {
+	// Using Basecoat 'textarea' class with Tailwind utilities as documented
+	return "textarea w-full rounded-md border bg-input px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 resize-none min-h-[80px]"
+}
 
 // buildTextareaAttributes creates all HTML attributes for the textarea
 func buildTextareaAttributes(props TextareaProps) templ.Attributes {
 	attrs := templ.Attributes{
-		"class":       "textarea", // Use Basecoat's textarea class
+		"class":       getTextareaClasses(),
 		"placeholder": props.Placeholder,
 	}
 
@@ -111,27 +106,9 @@ func buildTextareaAttributes(props TextareaProps) templ.Attributes {
 		attrs["wrap"] = props.Wrap
 	}
 
-	// Event handlers
-	if props.OnChange != "" {
-		attrs["onchange"] = props.OnChange
-	}
-	if props.OnBlur != "" {
-		attrs["onblur"] = props.OnBlur
-	}
-	if props.OnFocus != "" {
-		attrs["onfocus"] = props.OnFocus
-	}
-	if props.OnInput != "" {
-		attrs["oninput"] = props.OnInput
-	}
-	if props.OnKeyDown != "" {
-		attrs["onkeydown"] = props.OnKeyDown
-	}
-	if props.OnKeyUp != "" {
-		attrs["onkeyup"] = props.OnKeyUp
-	}
-	if props.OnScroll != "" {
-		attrs["onscroll"] = props.OnScroll
+	// Set aria-invalid based on Invalid flag if AriaInvalid not explicitly set
+	if props.AriaInvalid == "" && props.Invalid {
+		attrs["aria-invalid"] = "true"
 	}
 
 	// ARIA attributes
@@ -148,25 +125,57 @@ func buildTextareaAttributes(props TextareaProps) templ.Attributes {
 		attrs["aria-required"] = props.AriaRequired
 	}
 
-	// Tab index
-	if props.TabIndex != 0 {
-		attrs["tabindex"] = strconv.Itoa(props.TabIndex)
+	// HTMX attributes from BaseProps
+	if props.HxGet != "" {
+		attrs["hx-get"] = props.HxGet
+	}
+	if props.HxPost != "" {
+		attrs["hx-post"] = props.HxPost
+	}
+	if props.HxPut != "" {
+		attrs["hx-put"] = props.HxPut
+	}
+	if props.HxDelete != "" {
+		attrs["hx-delete"] = props.HxDelete
+	}
+	if props.HxPatch != "" {
+		attrs["hx-patch"] = props.HxPatch
+	}
+	if props.HxTarget != "" {
+		attrs["hx-target"] = props.HxTarget
+	}
+	if props.HxSwap != "" {
+		attrs["hx-swap"] = props.HxSwap
+	}
+	if props.HxTrigger != "" {
+		attrs["hx-trigger"] = props.HxTrigger
+	}
+	if props.HxConfirm != "" {
+		attrs["hx-confirm"] = props.HxConfirm
+	}
+	if props.HxIndicator != "" {
+		attrs["hx-indicator"] = props.HxIndicator
 	}
 
-	// Data attributes
+	// Data attributes from BaseProps
 	for key, value := range props.DataAttrs {
 		attrs["data-"+key] = value
 	}
 
 	// Merge custom attributes (allows override)
-	for key, value := range props.Attributes {
+	for key, value := range props.Attrs {
 		attrs[key] = value
 	}
 
 	return attrs
 }
 
-// Textarea renders a pure presentation textarea atom
+// Textarea renders a multi-line text input component.
+// Supports standard HTML textarea attributes, HTMX integration,
+// accessibility features, and validation states.
+//
+// NOTE: Textareas in Basecoat are styled using the .textarea class
+// with additional Tailwind utilities for consistent form styling.
 func Textarea(props TextareaProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -203,7 +212,7 @@ func Textarea(props TextareaProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/textarea.templ`, Line: 163, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/textarea.templ`, Line: 172, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

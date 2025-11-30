@@ -105,9 +105,9 @@ func (a *Action) IsEnabled(ctx context.Context, data map[string]any) (bool, erro
 	}
 
 	// Use condition evaluator if available
-	if a.evaluator != nil && a.Conditional.Disabled != nil {
+	if a.evaluator != nil && a.Conditional.Disable != nil {
 		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-		result, err := a.evaluator.Evaluate(ctx, a.Conditional.Disabled, evalCtx)
+		result, err := a.evaluator.Evaluate(ctx, a.Conditional.Disable, evalCtx)
 		if err != nil {
 			return false, err
 		}

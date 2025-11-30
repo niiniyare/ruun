@@ -14,8 +14,9 @@ type Conditional struct {
 	Hide *condition.ConditionGroup `json:"hide,omitempty"`
 
 	// State conditions
+	Enable   *condition.ConditionGroup `json:"enable,omitempty"`
+	Disable  *condition.ConditionGroup `json:"disable,omitempty"`
 	Required *condition.ConditionGroup `json:"required,omitempty"`
-	Disabled *condition.ConditionGroup `json:"disabled,omitempty"`
 	Readonly *condition.ConditionGroup `json:"readonly,omitempty"`
 
 	// Validation conditions
@@ -27,8 +28,8 @@ func (c *Conditional) IsEmpty() bool {
 	if c == nil {
 		return true
 	}
-	return c.Show == nil && c.Hide == nil && c.Required == nil &&
-		c.Disabled == nil && c.Readonly == nil && c.Validate == nil
+	return c.Show == nil && c.Hide == nil && c.Enable == nil && 
+		c.Disable == nil && c.Required == nil && c.Readonly == nil && c.Validate == nil
 }
 
 // HasVisibility returns true if visibility conditions are set
@@ -38,7 +39,7 @@ func (c *Conditional) HasVisibility() bool {
 
 // HasStateConditions returns true if state conditions are set
 func (c *Conditional) HasStateConditions() bool {
-	return c != nil && (c.Required != nil || c.Disabled != nil || c.Readonly != nil)
+	return c != nil && (c.Enable != nil || c.Disable != nil || c.Required != nil || c.Readonly != nil)
 }
 
 // ConditionalBuilder for fluent construction
@@ -72,9 +73,21 @@ func (b *ConditionalBuilder) RequiredWhen(cg *condition.ConditionGroup) *Conditi
 	return b
 }
 
-// DisabledWhen sets the disabled condition
+// EnableWhen sets the enable condition
+func (b *ConditionalBuilder) EnableWhen(cg *condition.ConditionGroup) *ConditionalBuilder {
+	b.cond.Enable = cg
+	return b
+}
+
+// DisableWhen sets the disable condition
+func (b *ConditionalBuilder) DisableWhen(cg *condition.ConditionGroup) *ConditionalBuilder {
+	b.cond.Disable = cg
+	return b
+}
+
+// DisabledWhen sets the disable condition (backward compatibility)
 func (b *ConditionalBuilder) DisabledWhen(cg *condition.ConditionGroup) *ConditionalBuilder {
-	b.cond.Disabled = cg
+	b.cond.Disable = cg
 	return b
 }
 

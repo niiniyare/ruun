@@ -313,12 +313,12 @@ func (f *Field) IsDisabled(ctx context.Context, data map[string]any) (bool, erro
 		return true, nil
 	}
 
-	if f.Conditional != nil && f.Conditional.Disabled != nil {
+	if f.Conditional != nil && f.Conditional.Disable != nil {
 		if f.evaluator == nil {
 			return false, nil
 		}
 		evalCtx := condition.NewEvalContext(data, condition.DefaultEvalOptions())
-		disabled, err := f.evaluator.Evaluate(ctx, f.Conditional.Disabled, evalCtx)
+		disabled, err := f.evaluator.Evaluate(ctx, f.Conditional.Disable, evalCtx)
 		if err != nil {
 			return false, fmt.Errorf("evaluate disabled condition: %w", err)
 		}
