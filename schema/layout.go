@@ -27,13 +27,13 @@ type LayoutBlock struct {
 	ID   string    `json:"id"`
 
 	// Common fields across all block types
-	Title       string   `json:"title,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Icon        string   `json:"icon,omitempty"`
-	Badge       string   `json:"badge,omitempty"`
-	Fields      []string `json:"fields"`
+	Title       string        `json:"title,omitempty"`
+	Description string        `json:"description,omitempty"`
+	Icon        string        `json:"icon,omitempty"`
+	Badge       string        `json:"badge,omitempty"`
+	Fields      []string      `json:"fields"`
 	Blocks      []LayoutBlock `json:"blocks,omitempty"`
-	
+
 	Order       int  `json:"order,omitempty"`
 	Disabled    bool `json:"disabled,omitempty"`
 	Hidden      bool `json:"hidden,omitempty"`
@@ -124,7 +124,6 @@ type BreakpointConfig struct {
 	HideFields []string `json:"hideFields,omitempty"`
 	ShowFields []string `json:"showFields,omitempty"`
 }
-
 
 // Core Methods
 

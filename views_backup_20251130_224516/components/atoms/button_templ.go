@@ -5,10 +5,11 @@ package atoms
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
-import "github.com/niiniyare/ruun/views/components"
+import (
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/niiniyare/ruun/views/components"
+)
 
 // ButtonProps defines all properties for the Button atom
 // Combines Basecoat semantic classes with Tailwind utilities

@@ -8,9 +8,9 @@ package sections
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/ruun-io/ruun/views/components/atoms"
-import "github.com/ruun-io/ruun/views/components/molecules"
-import "github.com/ruun-io/ruun/views/components/organisms"
+import "github.com/niiniyare/ruun/views/components/atoms"
+import "github.com/niiniyare/ruun/views/components/molecules"
+import "github.com/niiniyare/ruun/views/components/organisms"
 
 func Templates() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {

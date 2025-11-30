@@ -5,11 +5,11 @@ package molecules
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
-import "github.com/a-h/templ"
-import "github.com/niiniyare/ruun/views/components"
+import (
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/niiniyare/ruun/views/components"
+)
 
 // ButtonGroupProps defines properties for the ButtonGroup molecule
 // Follows documentation pattern: button-group class + Tailwind utilities

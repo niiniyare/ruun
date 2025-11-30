@@ -5,8 +5,10 @@ package atoms
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+)
 
 // SkeletonProps defines all properties for the Skeleton atom using custom CSS extension
 // Uses /static/css/components/skeleton.css following Basecoat conventions

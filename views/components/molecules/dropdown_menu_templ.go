@@ -5,11 +5,12 @@ package molecules
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"fmt"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/niiniyare/ruun/views/components"
 	"github.com/niiniyare/ruun/views/components/atoms"
 )
 
@@ -677,9 +678,13 @@ func menuItem(item DropdownMenuItem) templ.Component {
 		}
 		if item.Type == DropdownMenuItemCheckbox {
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name:       "check",
-				Size:       "sm",
-				AriaHidden: "true",
+				Name: "check",
+				Size: "sm",
+				Base: components.BaseProps{
+					A11y: components.AccessibilityProps{
+						AriaHidden: "true",
+					},
+				},
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -711,7 +716,7 @@ func menuItem(item DropdownMenuItem) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(item.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/dropdown_menu.templ`, Line: 250, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/dropdown_menu.templ`, Line: 254, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -729,7 +734,7 @@ func menuItem(item DropdownMenuItem) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(item.Shortcut)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/dropdown_menu.templ`, Line: 254, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/molecules/dropdown_menu.templ`, Line: 258, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {

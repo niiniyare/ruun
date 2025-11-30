@@ -261,7 +261,7 @@ type BehaviorAdapter interface {
 	GetMetadata() *BehaviorMetadata
 }
 
-// BindingAdapter converts Binding to framework-specific output  
+// BindingAdapter converts Binding to framework-specific output
 type BindingAdapter interface {
 	// Adapt converts binding configuration to framework-specific attributes
 	Adapt(b *Binding) map[string]string

@@ -5,10 +5,12 @@ package atoms
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"strconv"
 
-import "strconv"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+)
 
 // SwitchProps defines all properties for the Switch atom using Basecoat checkbox styling
 type SwitchProps struct {

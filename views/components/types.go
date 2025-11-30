@@ -41,7 +41,7 @@ type ButtonVariant string
 
 const (
 	ButtonDefault     ButtonVariant = "default"
-	ButtonPrimary     ButtonVariant = "primary" 
+	ButtonPrimary     ButtonVariant = "primary"
 	ButtonSecondary   ButtonVariant = "secondary"
 	ButtonOutline     ButtonVariant = "outline"
 	ButtonDestructive ButtonVariant = "destructive"

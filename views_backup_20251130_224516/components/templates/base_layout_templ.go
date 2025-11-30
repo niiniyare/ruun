@@ -5,14 +5,11 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
-	"github.com/niiniyare/ruun/pkg/utils"
-	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/components/organisms"
 	"strings"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 )
 
 // BaseLayoutProps defines properties for the base layout template

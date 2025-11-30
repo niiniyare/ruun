@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/niiniyare/ruun/atoms"
-	"github.com/niiniyare/ruun/molecules"
-	"github.com/niiniyare/ruun/templates"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+	"github.com/niiniyare/ruun/views/components/templates"
 )
 
 // DemoLayout wraps all demo pages with navigation

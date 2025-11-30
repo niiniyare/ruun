@@ -127,7 +127,6 @@ type BreakpointConfig struct {
 	ShowFields []string `json:"showFields,omitempty"`
 }
 
-
 // Core Methods
 
 // SetEvaluator sets the condition evaluator

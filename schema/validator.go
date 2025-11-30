@@ -23,10 +23,10 @@ type ValidatorOption struct {
 
 // DataValidator provides server-side validation for schema data
 type DataValidator struct {
-	db                  Database                     // Optional database for uniqueness checks
-	businessRulesEngine BusinessRulesEngine          // Optional business rules engine
-	customRules         map[string]ValidatorFunc     // Custom validation rules
-	mutex               sync.RWMutex                 // Thread-safe access to custom rules
+	db                  Database                 // Optional database for uniqueness checks
+	businessRulesEngine BusinessRulesEngine      // Optional business rules engine
+	customRules         map[string]ValidatorFunc // Custom validation rules
+	mutex               sync.RWMutex             // Thread-safe access to custom rules
 }
 
 // ValidationError method is already defined in types.go with the Error() method
@@ -869,7 +869,7 @@ func (v *DataValidator) AddRule(name string, rule ValidatorFunc) error {
 	if rule == nil {
 		return fmt.Errorf("rule function cannot be nil")
 	}
-	
+
 	v.mutex.Lock()
 	defer v.mutex.Unlock()
 	v.customRules[name] = rule

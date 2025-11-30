@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"ruun/web/src/components/atoms"
-	"ruun/web/src/components/molecules"
-	"ruun/web/src/components/organisms"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+	"github.com/niiniyare/ruun/views/components/organisms"
 )
 
 func OrganismsShowcase() templ.Component {

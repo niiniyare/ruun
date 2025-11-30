@@ -28,7 +28,7 @@ func (c *Conditional) IsEmpty() bool {
 	if c == nil {
 		return true
 	}
-	return c.Show == nil && c.Hide == nil && c.Enable == nil && 
+	return c.Show == nil && c.Hide == nil && c.Enable == nil &&
 		c.Disable == nil && c.Required == nil && c.Readonly == nil && c.Validate == nil
 }
 
