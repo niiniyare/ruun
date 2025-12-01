@@ -5,12 +5,52 @@ package templates
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
 import (
+	"fmt"
 	"strings"
 
 	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
+	"github.com/niiniyare/ruun/pkg/utils"
 )
+
+// Constants for resource paths
+const (
+	BaseCSSPath     = "/static/css/base.css"
+	ThemeCSSPrefix  = "/static/css/themes/"
+	AlpineJSVersion = "3.14.1"
+	HTMXVersion     = "1.9.10"
+)
+
+// PageMeta defines metadata for the page
+type PageMeta struct {
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Keywords    []string `json:"keywords"`
+	Author      string   `json:"author"`
+	Canonical   string   `json:"canonical"`
+	Favicon     string   `json:"favicon"`
+	CSRFToken   string   `json:"csrfToken"`
+	OGImage     string   `json:"ogImage"`
+	OGType      string   `json:"ogType"`
+}
+
+// ThemeConfig defines theme configuration
+type ThemeConfig struct {
+	ID         string `json:"id"`
+	DarkMode   bool   `json:"darkMode"`
+	SystemSync bool   `json:"systemSync"` // Sync with system preferences
+}
+
+// HTMXConfig defines HTMX configuration
+type HTMXConfig struct {
+	Boost   bool   `json:"boost"`
+	Target  string `json:"target"`
+	Swap    string `json:"swap"`
+	PushURL bool   `json:"pushURL"`
+}
 
 // BaseLayoutProps defines properties for the base layout template
 type BaseLayoutProps struct {
@@ -18,18 +58,15 @@ type BaseLayoutProps struct {
 	Meta PageMeta `json:"meta"`
 
 	// Theme configuration
-	ThemeID    string `json:"themeID"`
-	ThemeClass string `json:"themeClass"`
-	DarkMode   bool   `json:"darkMode"`
+	Theme ThemeConfig `json:"theme"`
 
 	// Core properties
-	ID    string `json:"id"`
-	Class string `json:"class"`
+	ID         string           `json:"id"`
+	Class      string           `json:"class"`
+	Attributes templ.Attributes `json:"attributes"`
 
 	// HTMX configuration
-	HXBoost  bool   `json:"hxBoost"`
-	HXTarget string `json:"hxTarget"`
-	HXSwap   string `json:"hxSwap"`
+	HTMX HTMXConfig `json:"htmx"`
 
 	// Alpine.js configuration
 	AlpineData string `json:"alpineData"`
@@ -39,7 +76,54 @@ type BaseLayoutProps struct {
 	CustomJS  []string `json:"customJS"`
 
 	// Features
-	LoaderHTML string `json:"loaderHTML"`
+	ShowLoader      bool            `json:"showLoader"`
+	LoaderComponent templ.Component `json:"-"` // Custom loader component
+
+	// Additional body attributes
+	BodyAttributes templ.Attributes `json:"bodyAttributes"`
+}
+
+// DefaultBaseLayoutProps returns default props
+func DefaultBaseLayoutProps() BaseLayoutProps {
+	return BaseLayoutProps{
+		Meta: PageMeta{
+			Title:   "Ruun App",
+			Favicon: "/static/favicon.ico",
+		},
+		Theme: ThemeConfig{
+			ID:         "default",
+			SystemSync: true,
+		},
+		HTMX: HTMXConfig{
+			Boost: true,
+			Swap:  "innerHTML",
+		},
+		ShowLoader: true,
+	}
+}
+
+// WithMeta sets the meta information
+func (p BaseLayoutProps) WithMeta(meta PageMeta) BaseLayoutProps {
+	p.Meta = meta
+	return p
+}
+
+// WithTheme sets the theme configuration
+func (p BaseLayoutProps) WithTheme(theme ThemeConfig) BaseLayoutProps {
+	p.Theme = theme
+	return p
+}
+
+// WithClass adds additional classes
+func (p BaseLayoutProps) WithClass(class string) BaseLayoutProps {
+	p.Class = utils.TwMerge(p.Class, class)
+	return p
+}
+
+// WithAttributes adds additional attributes
+func (p BaseLayoutProps) WithAttributes(attrs templ.Attributes) BaseLayoutProps {
+	p.Attributes = utils.MergeAttributes(p.Attributes, attrs)
+	return p
 }
 
 // BaseLayout renders the base HTML structure with theme integration
@@ -68,7 +152,7 @@ func BaseLayout(props BaseLayoutProps, children ...templ.Component) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{getBaseLayoutHTMLClasses(props)}
+		var templ_7745c5c3_Var2 = []any{getHTMLClasses(props)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -91,137 +175,56 @@ func BaseLayout(props BaseLayoutProps, children ...templ.Component) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getBaseLayoutAlpineData(props))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getAlpineData(props))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 46, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 127, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"><head>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-theme=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = renderBaseHead(props).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Theme.ID)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 128, Col: 29}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</head>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 = []any{getBaseLayoutBodyClasses(props)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
+		templ_7745c5c3_Err = BaseHead(props).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<body")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</head><body")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.ID != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 53, Col: 16}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " class=\"")
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, getBodyAttributes(props))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var5).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"")
+		if props.ShowLoader {
+			templ_7745c5c3_Err = PageLoader(props.LoaderComponent).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"app-root\" class=\"min-h-screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
-		}
-		if props.HXBoost {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " hx-boost=\"true\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXTarget != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " hx-target=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXTarget)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 60, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HXSwap != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " hx-swap=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.HXSwap)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 63, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if props.LoaderHTML != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div id=\"page-loader\" class=\"fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(templ.Raw(props.LoaderHTML))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 69, Col: 33}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 		}
 		for _, child := range children {
 			templ_7745c5c3_Err = child.Render(ctx, templ_7745c5c3_Buffer)
@@ -229,11 +232,15 @@ func BaseLayout(props BaseLayoutProps, children ...templ.Component) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = renderBaseScripts(props).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t// Initialize theme\n\t\t\t\tconst theme = Alpine.store('theme');\n\t\t\t\tif (theme) {\n\t\t\t\t\ttheme.init();\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t// Remove loader\n\t\t\t\tconst loader = document.getElementById('page-loader');\n\t\t\t\tif (loader) {\n\t\t\t\t\tloader.style.opacity = '0';\n\t\t\t\t\tsetTimeout(() => loader.remove(), 300);\n\t\t\t\t}\n\t\t\t});\n\t\t</script></body></html>")
+		templ_7745c5c3_Err = BaseScripts(props).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -241,8 +248,8 @@ func BaseLayout(props BaseLayoutProps, children ...templ.Component) templ.Compon
 	})
 }
 
-// renderBaseHead renders the HTML head section with compiled theme support
-func renderBaseHead(props BaseLayoutProps) templ.Component {
+// BaseHead renders the HTML head section
+func BaseHead(props BaseLayoutProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -258,45 +265,141 @@ func renderBaseHead(props BaseLayoutProps) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if props.Meta.Title != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<title>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<title>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Title)
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 109, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 158, Col: 27}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</title>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</title><meta property=\"og:title\" content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Title)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 159, Col: 54}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if props.Meta.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<meta name=\"description\" content=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<meta name=\"description\" content=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Description)
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 113, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 162, Col: 59}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><meta property=\"og:description\" content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Description)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 163, Col: 66}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if len(props.Meta.Keywords) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<meta name=\"keywords\" content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(props.Meta.Keywords, ", "))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 166, Col: 73}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Meta.Author != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<meta name=\"author\" content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Author)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 169, Col: 49}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if props.Meta.Canonical != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<link rel=\"canonical\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 templ.SafeURL
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(props.Meta.Canonical))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 172, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><meta property=\"og:url\" content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var14 string
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Canonical)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 173, Col: 56}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -305,17 +408,17 @@ func renderBaseHead(props BaseLayoutProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if len(props.Meta.Keywords) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<meta name=\"keywords\" content=\"")
+		if props.Meta.OGImage != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<meta property=\"og:image\" content=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Join(props.Meta.Keywords, ", "))
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.OGImage)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 117, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 176, Col: 56}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -324,17 +427,17 @@ func renderBaseHead(props BaseLayoutProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Meta.Author != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<meta name=\"author\" content=\"")
+		if props.Meta.OGType != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<meta property=\"og:type\" content=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.Author)
+			var templ_7745c5c3_Var16 string
+			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.OGType)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 121, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 179, Col: 54}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -342,117 +445,125 @@ func renderBaseHead(props BaseLayoutProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		if props.Meta.Canonical != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<link rel=\"canonical\" href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var16 templ.SafeURL
-			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(props.Meta.Canonical)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 125, Col: 51}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\">")
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<meta property=\"og:type\" content=\"website\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.Meta.Favicon != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<link rel=\"icon\" href=\"")
+		if props.Meta.CSRFToken != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<meta name=\"csrf-token\" content=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var17 templ.SafeURL
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(props.Meta.Favicon)
+			var templ_7745c5c3_Var17 string
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(props.Meta.CSRFToken)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 129, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 185, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<link rel=\"preload\" href=\"/static/css/base.css\" as=\"style\"><link rel=\"preload\" href=\"")
+		if props.Meta.Favicon != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<link rel=\"icon\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var18 templ.SafeURL
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(props.Meta.Favicon))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 189, Col: 55}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<meta name=\"color-scheme\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var18 templ.SafeURL
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(getThemeCSS(props.ThemeID))
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(getColorScheme(props.Theme))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 134, Col: 54}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" as=\"style\"><link rel=\"stylesheet\" href=\"/static/css/base.css\"><link rel=\"stylesheet\" href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var19 templ.SafeURL
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(getThemeCSS(props.ThemeID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 140, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 192, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\"><meta name=\"theme-color\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, cssFile := range props.CustomCSS {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<link rel=\"stylesheet\" href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var20 templ.SafeURL
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(cssFile)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 144, Col: 39}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var20 string
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(getThemeColor(props.Theme))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 193, Col: 62}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><script src=\"https://unpkg.com/htmx.org/dist/ext/json-enc.js\"></script><meta name=\"color-scheme\" content=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(getColorScheme(props))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"><link rel=\"preload\" href=\"")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 155, Col: 58}
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var21 templ.SafeURL
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(BaseCSSPath))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 195, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\"><meta name=\"theme-color\" content=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" as=\"style\"><link rel=\"preload\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(getThemeColor(props))
+		var templ_7745c5c3_Var22 templ.SafeURL
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(getThemeCSS(props.Theme.ID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 158, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 196, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" as=\"style\"><link rel=\"stylesheet\" href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var23 templ.SafeURL
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(BaseCSSPath))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 198, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\"><link rel=\"stylesheet\" href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var24 templ.SafeURL
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(getThemeCSS(props.Theme.ID)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 199, Col: 69}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -460,12 +571,61 @@ func renderBaseHead(props BaseLayoutProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		for _, cssFile := range props.CustomCSS {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<link rel=\"stylesheet\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var25 templ.SafeURL
+			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(cssFile))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 202, Col: 50}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<script defer src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("https://cdn.jsdelivr.net/npm/alpinejs@%s/dist/cdn.min.js", AlpineJSVersion)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 205, Col: 120}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\"></script><script src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var27 string
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("https://unpkg.com/htmx.org@%s", HTMXVersion)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 207, Col: 83}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\"></script><script src=\"https://unpkg.com/htmx.org/dist/ext/json-enc.js\"></script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		return nil
 	})
 }
 
-// renderBaseScripts renders JavaScript resources
-func renderBaseScripts(props BaseLayoutProps) templ.Component {
+// BaseScripts renders JavaScript resources and initialization
+func BaseScripts(props BaseLayoutProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -481,33 +641,112 @@ func renderBaseScripts(props BaseLayoutProps) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var23 == nil {
-			templ_7745c5c3_Var23 = templ.NopComponent
+		templ_7745c5c3_Var28 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var28 == nil {
+			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<script>\n\t\t// Theme store\n\t\tdocument.addEventListener('alpine:init', () => {\n\t\t\tAlpine.store('theme', {\n\t\t\t\tcurrent: { \"'\" + props.ThemeID + \"'\" },\n\t\t\t\tdark: { utils.If(props.DarkMode, \"true\", \"false\") },\n\t\t\t\t\n\t\t\t\tinit() {\n\t\t\t\t\t// Apply saved theme preference\n\t\t\t\t\tconst saved = localStorage.getItem('theme-preference');\n\t\t\t\t\tif (saved) {\n\t\t\t\t\t\tconst pref = JSON.parse(saved);\n\t\t\t\t\t\tthis.current = pref.theme || this.current;\n\t\t\t\t\t\tthis.dark = pref.dark !== undefined ? pref.dark : this.dark;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\t// Apply theme\n\t\t\t\t\tthis.apply();\n\t\t\t\t\t\n\t\t\t\t\t// Watch for system theme changes\n\t\t\t\t\tif (window.matchMedia) {\n\t\t\t\t\t\twindow.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {\n\t\t\t\t\t\t\tif (localStorage.getItem('theme-preference') === null) {\n\t\t\t\t\t\t\t\tthis.dark = e.matches;\n\t\t\t\t\t\t\t\tthis.apply();\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tapply() {\n\t\t\t\t\t// Update HTML classes\n\t\t\t\t\tdocument.documentElement.classList.toggle('dark', this.dark);\n\t\t\t\t\tdocument.documentElement.setAttribute('data-theme', this.current);\n\t\t\t\t\t\n\t\t\t\t\t// Update meta theme-color\n\t\t\t\t\tconst metaTheme = document.querySelector('meta[name=\"theme-color\"]');\n\t\t\t\t\tif (metaTheme) {\n\t\t\t\t\t\tmetaTheme.content = getComputedStyle(document.documentElement)\n\t\t\t\t\t\t\t.getPropertyValue('--color-background').trim();\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\ttoggle() {\n\t\t\t\t\tthis.dark = !this.dark;\n\t\t\t\t\tthis.save();\n\t\t\t\t\tthis.apply();\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tsetTheme(themeID) {\n\t\t\t\t\tthis.current = themeID;\n\t\t\t\t\tthis.save();\n\t\t\t\t\t// Reload to apply new theme CSS\n\t\t\t\t\twindow.location.reload();\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tsave() {\n\t\t\t\t\tlocalStorage.setItem('theme-preference', JSON.stringify({\n\t\t\t\t\t\ttheme: this.current,\n\t\t\t\t\t\tdark: this.dark\n\t\t\t\t\t}));\n\t\t\t\t}\n\t\t\t});\n\t\t\t\n\t\t\t// Global Alpine data\n\t\t\tAlpine.data('baseLayout', () => ({\n\t\t\t\t// Add any global Alpine data here\n\t\t\t}));\n\t\t});\n\t</script><script>\n\t\tdocument.body.addEventListener('htmx:configRequest', (event) => {\n\t\t\t// Add CSRF token to all requests\n\t\t\tconst csrfToken = document.querySelector('meta[name=\"csrf-token\"]');\n\t\t\tif (csrfToken) {\n\t\t\t\tevent.detail.headers['X-CSRF-Token'] = csrfToken.content;\n\t\t\t}\n\t\t});\n\t\t\n\t\t// Global error handler\n\t\tdocument.body.addEventListener('htmx:responseError', (event) => {\n\t\t\tconsole.error('HTMX request failed:', event.detail);\n\t\t\t// Handle errors appropriately\n\t\t});\n\t\t\n\t\t// Loading states\n\t\tdocument.body.addEventListener('htmx:beforeRequest', (event) => {\n\t\t\t// Add loading states\n\t\t});\n\t\t\n\t\tdocument.body.addEventListener('htmx:afterRequest', (event) => {\n\t\t\t// Remove loading states\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<script type=\"text/javascript\">\n\t\t{ templ.Raw(generateThemeStore(props)) }\n\t</script><script type=\"text/javascript\">\n\t\t{ templ.Raw(generateHTMXConfig(props)) }\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, jsFile := range props.CustomJS {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<script src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<script src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var24 string
-			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(jsFile)
+			var templ_7745c5c3_Var29 string
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(jsFile))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 263, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/templates/base_layout.templ`, Line: 223, Col: 33}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\"></script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\"></script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<script type=\"text/javascript\">\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t// Initialize Alpine theme store\n\t\t\tif (window.Alpine && Alpine.store('theme')) {\n\t\t\t\tAlpine.store('theme').init();\n\t\t\t}\n\t\t\t\n\t\t\t// Remove page loader with fade out\n\t\t\tconst loader = document.getElementById('page-loader');\n\t\t\tif (loader) {\n\t\t\t\tloader.style.opacity = '0';\n\t\t\t\tloader.style.transition = 'opacity 0.3s ease-out';\n\t\t\t\tsetTimeout(() => loader.remove(), 300);\n\t\t\t}\n\t\t});\n\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// PageLoader renders the page loading overlay
+func PageLoader(customLoader templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var30 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var30 == nil {
+			templ_7745c5c3_Var30 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<div id=\"page-loader\" class=\"fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center\" style=\"opacity: 1;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if customLoader != nil {
+			templ_7745c5c3_Err = customLoader.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = DefaultLoader().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// DefaultLoader renders a default spinner
+func DefaultLoader() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var31 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var31 == nil {
+			templ_7745c5c3_Var31 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<div class=\"flex flex-col items-center gap-4\"><div class=\"animate-spin rounded-full h-12 w-12 border-b-2 border-primary\"></div><p class=\"text-sm text-muted-foreground\">Loading...</p></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		return nil
 	})
@@ -515,64 +754,250 @@ func renderBaseScripts(props BaseLayoutProps) templ.Component {
 
 // Helper functions
 
-func getBaseLayoutHTMLClasses(props BaseLayoutProps) string {
+// getHTMLClasses returns classes for the html element
+func getHTMLClasses(props BaseLayoutProps) string {
 	classes := []string{}
 
-	if props.DarkMode {
+	if props.Theme.DarkMode {
 		classes = append(classes, "dark")
 	}
 
-	if props.ThemeClass != "" {
-		classes = append(classes, props.ThemeClass)
-	}
-
-	return strings.Join(classes, " ")
+	return utils.TwMerge(classes...)
 }
 
-func getBaseLayoutBodyClasses(props BaseLayoutProps) string {
-	classes := []string{
-		"min-h-screen",
-		"bg-background",
-		"text-foreground",
-		"antialiased",
+// getBodyAttributes returns all body attributes
+func getBodyAttributes(props BaseLayoutProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": utils.TwMerge(
+			"min-h-screen",
+			"bg-background",
+			"text-foreground",
+			"antialiased",
+			"transition-colors",
+			"duration-200",
+			props.Class,
+		),
 	}
 
-	if props.Class != "" {
-		classes = append(classes, props.Class)
+	// Add ID if provided
+	if props.ID != "" {
+		attrs["id"] = props.ID
 	}
 
-	return strings.Join(classes, " ")
+	// HTMX attributes
+	if props.HTMX.Boost {
+		attrs["hx-boost"] = "true"
+	}
+	if props.HTMX.Target != "" {
+		attrs["hx-target"] = props.HTMX.Target
+	}
+	if props.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.HTMX.Swap
+	}
+	if props.HTMX.PushURL {
+		attrs["hx-push-url"] = "true"
+	}
+
+	// Merge with additional body attributes
+	return utils.MergeAttributes(attrs, props.BodyAttributes, props.Attributes)
 }
 
-func getBaseLayoutAlpineData(props BaseLayoutProps) string {
+// getAlpineData returns Alpine.js x-data attribute value
+func getAlpineData(props BaseLayoutProps) string {
 	if props.AlpineData != "" {
 		return props.AlpineData
 	}
-
-	return "baseLayout()"
+	return "{}"
 }
 
+// getThemeCSS returns the theme CSS file path
 func getThemeCSS(themeID string) string {
 	if themeID == "" {
 		themeID = "default"
 	}
-	return "/static/css/themes/" + themeID + ".css"
+	return fmt.Sprintf("%s%s.css?v=%s", ThemeCSSPrefix, themeID, utils.ScriptVersion)
 }
 
-func getColorScheme(props BaseLayoutProps) string {
-	if props.DarkMode {
-		return "dark"
-	}
-	return "light"
+// getColorScheme returns the color scheme meta value
+func getColorScheme(theme ThemeConfig) string {
+	return utils.IfElse(theme.DarkMode, "dark", "light")
 }
 
-func getThemeColor(props BaseLayoutProps) string {
-	// This would be the actual theme color from the compiled theme
-	// For now, return a default
-	if props.DarkMode {
-		return "#0f172a" // Dark background
+// getThemeColor returns the theme color for mobile browsers
+func getThemeColor(theme ThemeConfig) string {
+	return utils.IfElse(theme.DarkMode, "#0f172a", "#ffffff")
+}
+
+// generateThemeStore generates the Alpine.js theme store JavaScript
+func generateThemeStore(props BaseLayoutProps) string {
+	return fmt.Sprintf(`
+document.addEventListener('alpine:init', () => {
+	Alpine.store('theme', {
+		current: '%s',
+		dark: %t,
+		systemSync: %t,
+		
+		init() {
+			// Load saved preferences
+			const saved = localStorage.getItem('theme-preference');
+			if (saved) {
+				try {
+					const pref = JSON.parse(saved);
+					this.current = pref.theme || this.current;
+					this.dark = pref.dark !== undefined ? pref.dark : this.dark;
+					this.systemSync = pref.systemSync !== undefined ? pref.systemSync : this.systemSync;
+				} catch (e) {
+					console.error('Failed to parse theme preference:', e);
+				}
+			} else if (this.systemSync) {
+				// Use system preference if no saved preference
+				this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			}
+			
+			// Apply theme
+			this.apply();
+			
+			// Watch for system theme changes
+			if (this.systemSync && window.matchMedia) {
+				window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+					if (this.systemSync) {
+						this.dark = e.matches;
+						this.apply();
+					}
+				});
+			}
+		},
+		
+		apply() {
+			// Update HTML classes
+			document.documentElement.classList.toggle('dark', this.dark);
+			document.documentElement.setAttribute('data-theme', this.current);
+			
+			// Update theme-color meta tag
+			const metaTheme = document.querySelector('meta[name="theme-color"]');
+			if (metaTheme) {
+				const bgColor = getComputedStyle(document.documentElement)
+					.getPropertyValue('--color-background').trim();
+				if (bgColor) {
+					metaTheme.content = bgColor;
+				}
+			}
+		},
+		
+		toggle() {
+			this.dark = !this.dark;
+			this.systemSync = false; // Disable system sync when manually toggling
+			this.save();
+			this.apply();
+		},
+		
+		setTheme(themeID) {
+			if (this.current !== themeID) {
+				this.current = themeID;
+				this.save();
+				// Dynamically load new theme
+				this.loadThemeCSS(themeID);
+			}
+		},
+		
+		loadThemeCSS(themeID) {
+			const oldLink = document.querySelector('link[href*="/themes/"]');
+			const newLink = document.createElement('link');
+			newLink.rel = 'stylesheet';
+			newLink.href = '%s' + themeID + '.css?v=%s';
+			
+			newLink.onload = () => {
+				if (oldLink) oldLink.remove();
+			};
+			
+			document.head.appendChild(newLink);
+		},
+		
+		enableSystemSync() {
+			this.systemSync = true;
+			this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			this.save();
+			this.apply();
+		},
+		
+		save() {
+			localStorage.setItem('theme-preference', JSON.stringify({
+				theme: this.current,
+				dark: this.dark,
+				systemSync: this.systemSync
+			}));
+		}
+	});
+});
+`, props.Theme.ID, props.Theme.DarkMode, props.Theme.SystemSync, ThemeCSSPrefix, utils.ScriptVersion)
+}
+
+// generateHTMXConfig generates HTMX configuration JavaScript
+func generateHTMXConfig(props BaseLayoutProps) string {
+	csrfSetup := ""
+	if props.Meta.CSRFToken != "" {
+		csrfSetup = `
+	// Add CSRF token to all requests
+	const csrfToken = document.querySelector('meta[name="csrf-token"]');
+	if (csrfToken) {
+		event.detail.headers['X-CSRF-Token'] = csrfToken.content;
+	}`
 	}
-	return "#ffffff" // Light background
+
+	return fmt.Sprintf(`
+// HTMX Configuration
+document.body.addEventListener('htmx:configRequest', (event) => {%s
+});
+
+// Global error handler
+document.body.addEventListener('htmx:responseError', (event) => {
+	console.error('HTMX request failed:', event.detail);
+	
+	// Show user-friendly error message
+	const status = event.detail.xhr.status;
+	let message = 'An error occurred. Please try again.';
+	
+	if (status === 401) {
+		message = 'Your session has expired. Please log in again.';
+	} else if (status === 403) {
+		message = 'You do not have permission to perform this action.';
+	} else if (status === 404) {
+		message = 'The requested resource was not found.';
+	} else if (status >= 500) {
+		message = 'A server error occurred. Please try again later.';
+	}
+	
+	// You can dispatch a custom event to show a toast/notification
+	document.dispatchEvent(new CustomEvent('app:error', { 
+		detail: { message, status } 
+	}));
+});
+
+// Loading indicators
+document.body.addEventListener('htmx:beforeRequest', (event) => {
+	const target = event.detail.target;
+	if (target) {
+		target.classList.add('htmx-loading');
+		target.setAttribute('aria-busy', 'true');
+	}
+});
+
+document.body.addEventListener('htmx:afterRequest', (event) => {
+	const target = event.detail.target;
+	if (target) {
+		target.classList.remove('htmx-loading');
+		target.removeAttribute('aria-busy');
+	}
+});
+
+// Settle animations
+document.body.addEventListener('htmx:afterSettle', (event) => {
+	// Re-initialize any components in the swapped content
+	if (window.Alpine) {
+		Alpine.initTree(event.detail.target);
+	}
+});
+`, csrfSetup)
 }
 
 var _ = templruntime.GeneratedTemplate

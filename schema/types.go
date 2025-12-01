@@ -635,20 +635,9 @@ type SchemaI18n struct {
 // This is kept for backward compatibility but will be removed in future versions
 type ActionTheme = Style
 
-// ActionConfig represents action configuration
-type ActionConfig struct {
-	URL             string            `json:"url,omitempty"`
-	Target          string            `json:"target,omitempty"`
-	Handler         string            `json:"handler,omitempty"`
-	Params          map[string]string `json:"params,omitempty"`
-	Debounce        int               `json:"debounce,omitempty"`
-	Throttle        int               `json:"throttle,omitempty"`
-	PreventDefault  bool              `json:"preventDefault,omitempty"`
-	StopPropagation bool              `json:"stopPropagation,omitempty"`
-	SuccessMessage  string            `json:"successMessage,omitempty"`
-	ErrorMessage    string            `json:"errorMessage,omitempty"`
-	RedirectURL     string            `json:"redirectUrl,omitempty"`
-}
+// ActionConfig is deprecated - use the unified Config map[string]any instead
+// This is kept for backward compatibility but will be removed in future versions
+type ActionConfig = map[string]any
 
 // ActionConfirm represents action confirmation configuration
 type ActionConfirm struct {
@@ -661,12 +650,9 @@ type ActionConfirm struct {
 	Icon    string `json:"icon,omitempty"`
 }
 
-// ActionPermissions represents action permission configuration
-type ActionPermissions struct {
-	View     []string `json:"view,omitempty"`
-	Execute  []string `json:"execute,omitempty"`
-	Required []string `json:"required,omitempty"`
-}
+// ActionPermissions is deprecated - use the unified []string Permissions field instead
+// This is kept for backward compatibility but will be removed in future versions
+type ActionPermissions = []string
 
 // Trigger type moved to behavior.go - this definition is consolidated there
 

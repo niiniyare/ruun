@@ -1,327 +1,513 @@
 package templates
 
 import (
+	"fmt"
 	"strings"
-	"github.com/niiniyare/ruun/views/components/atoms"
-	"github.com/niiniyare/ruun/views/components/organisms"
+
+	"github.com/a-h/templ"
 	"github.com/niiniyare/ruun/pkg/utils"
 )
+
+// Constants for resource paths
+const (
+	BaseCSSPath        = "/static/css/base.css"
+	ThemeCSSPrefix     = "/static/css/themes/"
+	AlpineJSVersion    = "3.14.1"
+	HTMXVersion        = "1.9.10"
+)
+
+// PageMeta defines metadata for the page
+type PageMeta struct {
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Keywords    []string `json:"keywords"`
+	Author      string   `json:"author"`
+	Canonical   string   `json:"canonical"`
+	Favicon     string   `json:"favicon"`
+	CSRFToken   string   `json:"csrfToken"`
+	OGImage     string   `json:"ogImage"`
+	OGType      string   `json:"ogType"`
+}
+
+// ThemeConfig defines theme configuration
+type ThemeConfig struct {
+	ID         string `json:"id"`
+	DarkMode   bool   `json:"darkMode"`
+	SystemSync bool   `json:"systemSync"` // Sync with system preferences
+}
+
+// HTMXConfig defines HTMX configuration
+type HTMXConfig struct {
+	Boost   bool   `json:"boost"`
+	Target  string `json:"target"`
+	Swap    string `json:"swap"`
+	PushURL bool   `json:"pushURL"`
+}
 
 // BaseLayoutProps defines properties for the base layout template
 type BaseLayoutProps struct {
 	// Meta information
-	Meta        PageMeta          `json:"meta"`
-	
+	Meta PageMeta `json:"meta"`
+
 	// Theme configuration
-	ThemeID     string            `json:"themeID"`
-	ThemeClass  string            `json:"themeClass"`
-	DarkMode    bool              `json:"darkMode"`
-	
+	Theme ThemeConfig `json:"theme"`
+
 	// Core properties
-	ID          string            `json:"id"`
-	Class       string            `json:"class"`
-	
+	ID         string            `json:"id"`
+	Class      string            `json:"class"`
+	Attributes templ.Attributes  `json:"attributes"`
+
 	// HTMX configuration
-	HXBoost     bool              `json:"hxBoost"`
-	HXTarget    string            `json:"hxTarget"`
-	HXSwap      string            `json:"hxSwap"`
-	
+	HTMX HTMXConfig `json:"htmx"`
+
 	// Alpine.js configuration
-	AlpineData  string            `json:"alpineData"`
-	
+	AlpineData string `json:"alpineData"`
+
 	// Resources
-	CustomCSS   []string          `json:"customCSS"`
-	CustomJS    []string          `json:"customJS"`
-	
+	CustomCSS []string `json:"customCSS"`
+	CustomJS  []string `json:"customJS"`
+
 	// Features
-	LoaderHTML  string            `json:"loaderHTML"`
+	ShowLoader     bool              `json:"showLoader"`
+	LoaderComponent templ.Component  `json:"-"` // Custom loader component
+	
+	// Additional body attributes
+	BodyAttributes templ.Attributes `json:"bodyAttributes"`
+}
+
+// DefaultBaseLayoutProps returns default props
+func DefaultBaseLayoutProps() BaseLayoutProps {
+	return BaseLayoutProps{
+		Meta: PageMeta{
+			Title:   "Ruun App",
+			Favicon: "/static/favicon.ico",
+		},
+		Theme: ThemeConfig{
+			ID:         "default",
+			SystemSync: true,
+		},
+		HTMX: HTMXConfig{
+			Boost: true,
+			Swap:  "innerHTML",
+		},
+		ShowLoader: true,
+	}
+}
+
+// WithMeta sets the meta information
+func (p BaseLayoutProps) WithMeta(meta PageMeta) BaseLayoutProps {
+	p.Meta = meta
+	return p
+}
+
+// WithTheme sets the theme configuration
+func (p BaseLayoutProps) WithTheme(theme ThemeConfig) BaseLayoutProps {
+	p.Theme = theme
+	return p
+}
+
+// WithClass adds additional classes
+func (p BaseLayoutProps) WithClass(class string) BaseLayoutProps {
+	p.Class = utils.TwMerge(p.Class, class)
+	return p
+}
+
+// WithAttributes adds additional attributes
+func (p BaseLayoutProps) WithAttributes(attrs templ.Attributes) BaseLayoutProps {
+	p.Attributes = utils.MergeAttributes(p.Attributes, attrs)
+	return p
 }
 
 // BaseLayout renders the base HTML structure with theme integration
 templ BaseLayout(props BaseLayoutProps, children ...templ.Component) {
 	<!DOCTYPE html>
-	<html 
+	<html
 		lang="en"
-		class={ getBaseLayoutHTMLClasses(props) }
-		x-data={ getBaseLayoutAlpineData(props) }
+		class={ getHTMLClasses(props) }
+		x-data={ getAlpineData(props) }
+		data-theme={ props.Theme.ID }
 	>
-	<head>
-		@renderBaseHead(props)
-	</head>
-	<body
-		if props.ID != "" {
-			id={ props.ID }
-		}
-		class={ getBaseLayoutBodyClasses(props) }
-		if props.HXBoost {
-			hx-boost="true"
-		}
-		if props.HXTarget != "" {
-			hx-target={ props.HXTarget }
-		}
-		if props.HXSwap != "" {
-			hx-swap={ props.HXSwap }
-		}
-	>
-		// Loader overlay
-		if props.LoaderHTML != "" {
-			<div id="page-loader" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-				{ templ.Raw(props.LoaderHTML) }
+		<head>
+			@BaseHead(props)
+		</head>
+		<body
+			{ getBodyAttributes(props)... }
+		>
+			if props.ShowLoader {
+				@PageLoader(props.LoaderComponent)
+			}
+			// Main content wrapper
+			<div id="app-root" class="min-h-screen">
+				for _, child := range children {
+					@child
+				}
 			</div>
-		}
-		
-		// Main content
-		for _, child := range children {
-			@child
-		}
-		
-		// Scripts
-		@renderBaseScripts(props)
-		
-		// Theme initialization script
-		<script>
-			document.addEventListener('DOMContentLoaded', function() {
-				// Initialize theme
-				const theme = Alpine.store('theme');
-				if (theme) {
-					theme.init();
-				}
-				
-				// Remove loader
-				const loader = document.getElementById('page-loader');
-				if (loader) {
-					loader.style.opacity = '0';
-					setTimeout(() => loader.remove(), 300);
-				}
-			});
-		</script>
-	</body>
+			// Scripts
+			@BaseScripts(props)
+		</body>
 	</html>
 }
 
-// renderBaseHead renders the HTML head section with compiled theme support
-templ renderBaseHead(props BaseLayoutProps) {
+// BaseHead renders the HTML head section
+templ BaseHead(props BaseLayoutProps) {
+	// Character encoding and viewport
 	<meta charset="UTF-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	
 	// Meta tags
 	if props.Meta.Title != "" {
 		<title>{ props.Meta.Title }</title>
+		<meta property="og:title" content={ props.Meta.Title }/>
 	}
-	
 	if props.Meta.Description != "" {
 		<meta name="description" content={ props.Meta.Description }/>
+		<meta property="og:description" content={ props.Meta.Description }/>
 	}
-	
 	if len(props.Meta.Keywords) > 0 {
 		<meta name="keywords" content={ strings.Join(props.Meta.Keywords, ", ") }/>
 	}
-	
 	if props.Meta.Author != "" {
 		<meta name="author" content={ props.Meta.Author }/>
 	}
-	
 	if props.Meta.Canonical != "" {
-		<link rel="canonical" href={ props.Meta.Canonical }/>
+		<link rel="canonical" href={ templ.URL(props.Meta.Canonical) }/>
+		<meta property="og:url" content={ props.Meta.Canonical }/>
 	}
-	
+	if props.Meta.OGImage != "" {
+		<meta property="og:image" content={ props.Meta.OGImage }/>
+	}
+	if props.Meta.OGType != "" {
+		<meta property="og:type" content={ props.Meta.OGType }/>
+	} else {
+		<meta property="og:type" content="website"/>
+	}
+	// CSRF token
+	if props.Meta.CSRFToken != "" {
+		<meta name="csrf-token" content={ props.Meta.CSRFToken }/>
+	}
+	// Favicon
 	if props.Meta.Favicon != "" {
-		<link rel="icon" href={ props.Meta.Favicon }/>
+		<link rel="icon" href={ templ.URL(props.Meta.Favicon) }/>
 	}
-	
+	// Color scheme and theme
+	<meta name="color-scheme" content={ getColorScheme(props.Theme) }/>
+	<meta name="theme-color" content={ getThemeColor(props.Theme) }/>
 	// Preload critical resources
-	<link rel="preload" href="/static/css/base.css" as="style"/>
-	<link rel="preload" href={ getThemeCSS(props.ThemeID) } as="style"/>
-	
-	// Base styles
-	<link rel="stylesheet" href="/static/css/base.css"/>
-	
-	// Theme styles (compiled)
-	<link rel="stylesheet" href={ getThemeCSS(props.ThemeID) }/>
-	
+	<link rel="preload" href={ templ.URL(BaseCSSPath) } as="style"/>
+	<link rel="preload" href={ templ.URL(getThemeCSS(props.Theme.ID)) } as="style"/>
+	// Stylesheets
+	<link rel="stylesheet" href={ templ.URL(BaseCSSPath) }/>
+	<link rel="stylesheet" href={ templ.URL(getThemeCSS(props.Theme.ID)) }/>
 	// Custom CSS
 	for _, cssFile := range props.CustomCSS {
-		<link rel="stylesheet" href={ cssFile }/>
+		<link rel="stylesheet" href={ templ.URL(cssFile) }/>
 	}
-	
-	// Alpine.js (defer)
-	<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-	
+	// Alpine.js (with specific version)
+	<script defer src={ templ.URL(fmt.Sprintf("https://cdn.jsdelivr.net/npm/alpinejs@%s/dist/cdn.min.js", AlpineJSVersion)) }></script>
 	// HTMX
-	<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+	<script src={ templ.URL(fmt.Sprintf("https://unpkg.com/htmx.org@%s", HTMXVersion)) }></script>
 	<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-	
-	// Color scheme meta
-	<meta name="color-scheme" content={ getColorScheme(props) }/>
-	
-	// Theme color for mobile browsers
-	<meta name="theme-color" content={ getThemeColor(props) }/>
 }
 
-// renderBaseScripts renders JavaScript resources
-templ renderBaseScripts(props BaseLayoutProps) {
-	// Alpine.js stores and plugins
-	<script>
-		// Theme store
-		document.addEventListener('alpine:init', () => {
-			Alpine.store('theme', {
-				current: { "'" + props.ThemeID + "'" },
-				dark: { utils.If(props.DarkMode, "true", "false") },
-				
-				init() {
-					// Apply saved theme preference
-					const saved = localStorage.getItem('theme-preference');
-					if (saved) {
-						const pref = JSON.parse(saved);
-						this.current = pref.theme || this.current;
-						this.dark = pref.dark !== undefined ? pref.dark : this.dark;
-					}
-					
-					// Apply theme
-					this.apply();
-					
-					// Watch for system theme changes
-					if (window.matchMedia) {
-						window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-							if (localStorage.getItem('theme-preference') === null) {
-								this.dark = e.matches;
-								this.apply();
-							}
-						});
-					}
-				},
-				
-				apply() {
-					// Update HTML classes
-					document.documentElement.classList.toggle('dark', this.dark);
-					document.documentElement.setAttribute('data-theme', this.current);
-					
-					// Update meta theme-color
-					const metaTheme = document.querySelector('meta[name="theme-color"]');
-					if (metaTheme) {
-						metaTheme.content = getComputedStyle(document.documentElement)
-							.getPropertyValue('--color-background').trim();
-					}
-				},
-				
-				toggle() {
-					this.dark = !this.dark;
-					this.save();
-					this.apply();
-				},
-				
-				setTheme(themeID) {
-					this.current = themeID;
-					this.save();
-					// Reload to apply new theme CSS
-					window.location.reload();
-				},
-				
-				save() {
-					localStorage.setItem('theme-preference', JSON.stringify({
-						theme: this.current,
-						dark: this.dark
-					}));
-				}
-			});
-			
-			// Global Alpine data
-			Alpine.data('baseLayout', () => ({
-				// Add any global Alpine data here
-			}));
-		});
+// BaseScripts renders JavaScript resources and initialization
+templ BaseScripts(props BaseLayoutProps) {
+	// Theme store and Alpine initialization
+	<script type="text/javascript">
+		{ templ.Raw(generateThemeStore(props)) }
 	</script>
-	
 	// HTMX configuration
-	<script>
-		document.body.addEventListener('htmx:configRequest', (event) => {
-			// Add CSRF token to all requests
-			const csrfToken = document.querySelector('meta[name="csrf-token"]');
-			if (csrfToken) {
-				event.detail.headers['X-CSRF-Token'] = csrfToken.content;
-			}
-		});
-		
-		// Global error handler
-		document.body.addEventListener('htmx:responseError', (event) => {
-			console.error('HTMX request failed:', event.detail);
-			// Handle errors appropriately
-		});
-		
-		// Loading states
-		document.body.addEventListener('htmx:beforeRequest', (event) => {
-			// Add loading states
-		});
-		
-		document.body.addEventListener('htmx:afterRequest', (event) => {
-			// Remove loading states
-		});
+	<script type="text/javascript">
+		{ templ.Raw(generateHTMXConfig(props)) }
 	</script>
-	
 	// Custom JavaScript
 	for _, jsFile := range props.CustomJS {
-		<script src={ jsFile }></script>
+		<script src={ templ.URL(jsFile) }></script>
 	}
+	// Initialization script
+	<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', function() {
+			// Initialize Alpine theme store
+			if (window.Alpine && Alpine.store('theme')) {
+				Alpine.store('theme').init();
+			}
+			
+			// Remove page loader with fade out
+			const loader = document.getElementById('page-loader');
+			if (loader) {
+				loader.style.opacity = '0';
+				loader.style.transition = 'opacity 0.3s ease-out';
+				setTimeout(() => loader.remove(), 300);
+			}
+		});
+	</script>
+}
+
+// PageLoader renders the page loading overlay
+templ PageLoader(customLoader templ.Component) {
+	<div
+		id="page-loader"
+		class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center"
+		style="opacity: 1;"
+	>
+		if customLoader != nil {
+			@customLoader
+		} else {
+			@DefaultLoader()
+		}
+	</div>
+}
+
+// DefaultLoader renders a default spinner
+templ DefaultLoader() {
+	<div class="flex flex-col items-center gap-4">
+		<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+		<p class="text-sm text-muted-foreground">Loading...</p>
+	</div>
 }
 
 // Helper functions
 
-func getBaseLayoutHTMLClasses(props BaseLayoutProps) string {
+// getHTMLClasses returns classes for the html element
+func getHTMLClasses(props BaseLayoutProps) string {
 	classes := []string{}
-	
-	if props.DarkMode {
+
+	if props.Theme.DarkMode {
 		classes = append(classes, "dark")
 	}
-	
-	if props.ThemeClass != "" {
-		classes = append(classes, props.ThemeClass)
-	}
-	
-	return strings.Join(classes, " ")
+
+	return utils.TwMerge(classes...)
 }
 
-func getBaseLayoutBodyClasses(props BaseLayoutProps) string {
-	classes := []string{
-		"min-h-screen",
-		"bg-background",
-		"text-foreground",
-		"antialiased",
+// getBodyAttributes returns all body attributes
+func getBodyAttributes(props BaseLayoutProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": utils.TwMerge(
+			"min-h-screen",
+			"bg-background",
+			"text-foreground",
+			"antialiased",
+			"transition-colors",
+			"duration-200",
+			props.Class,
+		),
 	}
-	
-	if props.Class != "" {
-		classes = append(classes, props.Class)
+
+	// Add ID if provided
+	if props.ID != "" {
+		attrs["id"] = props.ID
 	}
-	
-	return strings.Join(classes, " ")
+
+	// HTMX attributes
+	if props.HTMX.Boost {
+		attrs["hx-boost"] = "true"
+	}
+	if props.HTMX.Target != "" {
+		attrs["hx-target"] = props.HTMX.Target
+	}
+	if props.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.HTMX.Swap
+	}
+	if props.HTMX.PushURL {
+		attrs["hx-push-url"] = "true"
+	}
+
+	// Merge with additional body attributes
+	return utils.MergeAttributes(attrs, props.BodyAttributes, props.Attributes)
 }
 
-func getBaseLayoutAlpineData(props BaseLayoutProps) string {
+// getAlpineData returns Alpine.js x-data attribute value
+func getAlpineData(props BaseLayoutProps) string {
 	if props.AlpineData != "" {
 		return props.AlpineData
 	}
-	
-	return "baseLayout()"
+	return "{}"
 }
 
+// getThemeCSS returns the theme CSS file path
 func getThemeCSS(themeID string) string {
 	if themeID == "" {
 		themeID = "default"
 	}
-	return "/static/css/themes/" + themeID + ".css"
+	return fmt.Sprintf("%s%s.css?v=%s", ThemeCSSPrefix, themeID, utils.ScriptVersion)
 }
 
-func getColorScheme(props BaseLayoutProps) string {
-	if props.DarkMode {
-		return "dark"
-	}
-	return "light"
+// getColorScheme returns the color scheme meta value
+func getColorScheme(theme ThemeConfig) string {
+	return utils.IfElse(theme.DarkMode, "dark", "light")
 }
 
-func getThemeColor(props BaseLayoutProps) string {
-	// This would be the actual theme color from the compiled theme
-	// For now, return a default
-	if props.DarkMode {
-		return "#0f172a" // Dark background
+// getThemeColor returns the theme color for mobile browsers
+func getThemeColor(theme ThemeConfig) string {
+	return utils.IfElse(theme.DarkMode, "#0f172a", "#ffffff")
+}
+
+// generateThemeStore generates the Alpine.js theme store JavaScript
+func generateThemeStore(props BaseLayoutProps) string {
+	return fmt.Sprintf(`
+document.addEventListener('alpine:init', () => {
+	Alpine.store('theme', {
+		current: '%s',
+		dark: %t,
+		systemSync: %t,
+		
+		init() {
+			// Load saved preferences
+			const saved = localStorage.getItem('theme-preference');
+			if (saved) {
+				try {
+					const pref = JSON.parse(saved);
+					this.current = pref.theme || this.current;
+					this.dark = pref.dark !== undefined ? pref.dark : this.dark;
+					this.systemSync = pref.systemSync !== undefined ? pref.systemSync : this.systemSync;
+				} catch (e) {
+					console.error('Failed to parse theme preference:', e);
+				}
+			} else if (this.systemSync) {
+				// Use system preference if no saved preference
+				this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			}
+			
+			// Apply theme
+			this.apply();
+			
+			// Watch for system theme changes
+			if (this.systemSync && window.matchMedia) {
+				window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+					if (this.systemSync) {
+						this.dark = e.matches;
+						this.apply();
+					}
+				});
+			}
+		},
+		
+		apply() {
+			// Update HTML classes
+			document.documentElement.classList.toggle('dark', this.dark);
+			document.documentElement.setAttribute('data-theme', this.current);
+			
+			// Update theme-color meta tag
+			const metaTheme = document.querySelector('meta[name="theme-color"]');
+			if (metaTheme) {
+				const bgColor = getComputedStyle(document.documentElement)
+					.getPropertyValue('--color-background').trim();
+				if (bgColor) {
+					metaTheme.content = bgColor;
+				}
+			}
+		},
+		
+		toggle() {
+			this.dark = !this.dark;
+			this.systemSync = false; // Disable system sync when manually toggling
+			this.save();
+			this.apply();
+		},
+		
+		setTheme(themeID) {
+			if (this.current !== themeID) {
+				this.current = themeID;
+				this.save();
+				// Dynamically load new theme
+				this.loadThemeCSS(themeID);
+			}
+		},
+		
+		loadThemeCSS(themeID) {
+			const oldLink = document.querySelector('link[href*="/themes/"]');
+			const newLink = document.createElement('link');
+			newLink.rel = 'stylesheet';
+			newLink.href = '%s' + themeID + '.css?v=%s';
+			
+			newLink.onload = () => {
+				if (oldLink) oldLink.remove();
+			};
+			
+			document.head.appendChild(newLink);
+		},
+		
+		enableSystemSync() {
+			this.systemSync = true;
+			this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			this.save();
+			this.apply();
+		},
+		
+		save() {
+			localStorage.setItem('theme-preference', JSON.stringify({
+				theme: this.current,
+				dark: this.dark,
+				systemSync: this.systemSync
+			}));
+		}
+	});
+});
+`, props.Theme.ID, props.Theme.DarkMode, props.Theme.SystemSync, ThemeCSSPrefix, utils.ScriptVersion)
+}
+
+// generateHTMXConfig generates HTMX configuration JavaScript
+func generateHTMXConfig(props BaseLayoutProps) string {
+	csrfSetup := ""
+	if props.Meta.CSRFToken != "" {
+		csrfSetup = `
+	// Add CSRF token to all requests
+	const csrfToken = document.querySelector('meta[name="csrf-token"]');
+	if (csrfToken) {
+		event.detail.headers['X-CSRF-Token'] = csrfToken.content;
+	}`
 	}
-	return "#ffffff" // Light background
+
+	return fmt.Sprintf(`
+// HTMX Configuration
+document.body.addEventListener('htmx:configRequest', (event) => {%s
+});
+
+// Global error handler
+document.body.addEventListener('htmx:responseError', (event) => {
+	console.error('HTMX request failed:', event.detail);
+	
+	// Show user-friendly error message
+	const status = event.detail.xhr.status;
+	let message = 'An error occurred. Please try again.';
+	
+	if (status === 401) {
+		message = 'Your session has expired. Please log in again.';
+	} else if (status === 403) {
+		message = 'You do not have permission to perform this action.';
+	} else if (status === 404) {
+		message = 'The requested resource was not found.';
+	} else if (status >= 500) {
+		message = 'A server error occurred. Please try again later.';
+	}
+	
+	// You can dispatch a custom event to show a toast/notification
+	document.dispatchEvent(new CustomEvent('app:error', { 
+		detail: { message, status } 
+	}));
+});
+
+// Loading indicators
+document.body.addEventListener('htmx:beforeRequest', (event) => {
+	const target = event.detail.target;
+	if (target) {
+		target.classList.add('htmx-loading');
+		target.setAttribute('aria-busy', 'true');
+	}
+});
+
+document.body.addEventListener('htmx:afterRequest', (event) => {
+	const target = event.detail.target;
+	if (target) {
+		target.classList.remove('htmx-loading');
+		target.removeAttribute('aria-busy');
+	}
+});
+
+// Settle animations
+document.body.addEventListener('htmx:afterSettle', (event) => {
+	// Re-initialize any components in the swapped content
+	if (window.Alpine) {
+		Alpine.initTree(event.detail.target);
+	}
+});
+`, csrfSetup)
 }

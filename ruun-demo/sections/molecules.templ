@@ -1,6 +1,7 @@
 package sections
 
 import (
+    "strings"
     "github.com/niiniyare/ruun/views/components/atoms"
     "github.com/niiniyare/ruun/views/components/molecules"
 )
@@ -258,6 +259,170 @@ templ MoleculesPage() {
             }
             
             // ════════════════════════════════════════════════════════════
+            // VALIDATION
+            // ════════════════════════════════════════════════════════════
+            @Section("Validation") {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+                    @atoms.Text(atoms.TextProps{Text: "Validation Messages", Weight: atoms.FontMedium})
+                    @molecules.ValidationMessages(molecules.ValidationProps{
+                        FieldName: "email",
+                        Messages: []molecules.ValidationMessage{
+                            {
+                                Type:    molecules.ValidationError,
+                                Message: "Email is required",
+                                Field:   "email",
+                                Code:    "REQUIRED",
+                            },
+                            {
+                                Type:    molecules.ValidationWarning,
+                                Message: "Email format seems unusual",
+                                Field:   "email",
+                                Code:    "FORMAT_WARNING",
+                            },
+                        },
+                        ShowWarnings: true,
+                        ID:           "email-validation",
+                    })
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Field Validation", Weight: atoms.FontMedium})
+                    @molecules.FieldValidation(molecules.FieldValidationProps{
+                        FieldName: "password",
+                        Messages: []molecules.ValidationMessage{
+                            {
+                                Type:    molecules.ValidationError,
+                                Message: "Password must be at least 8 characters",
+                                Field:   "password",
+                                Code:    "MIN_LENGTH",
+                            },
+                        },
+                        ShowIcon: true,
+                        ID:       "password-validation",
+                    })
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Success Validation", Weight: atoms.FontMedium})
+                    @molecules.FieldValidation(molecules.FieldValidationProps{
+                        FieldName: "username",
+                        Messages: []molecules.ValidationMessage{
+                            {
+                                Type:    molecules.ValidationSuccess,
+                                Message: "Username is available",
+                                Field:   "username",
+                                Code:    "AVAILABLE",
+                            },
+                        },
+                        ShowIcon: true,
+                        ID:       "username-validation",
+                    })
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Validation Summary", Weight: atoms.FontMedium})
+                    @molecules.ValidationSummary(molecules.ValidationSummaryProps{
+                        Title: "Form Validation Errors",
+                        Messages: []molecules.ValidationMessage{
+                            {
+                                Type:    molecules.ValidationError,
+                                Message: "Email is required",
+                                Field:   "email",
+                                Code:    "REQUIRED",
+                            },
+                            {
+                                Type:    molecules.ValidationError,
+                                Message: "Password is too weak",
+                                Field:   "password",
+                                Code:    "WEAK_PASSWORD",
+                            },
+                        },
+                        Collapsible: true,
+                        ShowCounts:  true,
+                        ID:          "form-validation-summary",
+                    })
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // ERROR HANDLING
+            // ════════════════════════════════════════════════════════════
+            @Section("Error Handling") {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+                    @atoms.Text(atoms.TextProps{Text: "Error Boundary", Weight: atoms.FontMedium})
+                    @molecules.ErrorBoundary(molecules.ErrorBoundaryProps{
+                        Title: "Something went wrong",
+                        Description: "An unexpected error occurred while processing your request",
+                        Errors: []molecules.ErrorDetail{
+                            {
+                                Code:     "NETWORK_ERROR",
+                                Message:  "Unable to connect to server",
+                                Type:     molecules.ErrorNetwork,
+                                Severity: molecules.SeverityHigh,
+                                Retryable: true,
+                                Suggestions: []string{
+                                    "Check your internet connection",
+                                    "Try again in a few moments",
+                                    "Contact support if the problem persists",
+                                },
+                            },
+                        },
+                        ShowDetails: true,
+                        Recoverable: true,
+                        Dismissible: true,
+                        Actions: []molecules.ErrorAction{
+                            {
+                                Text:    "Reload Page",
+                                Variant: "primary",
+                                Action:  "reload",
+                            },
+                            {
+                                Text:    "Go Back",
+                                Variant: "secondary",
+                                Action:  "back",
+                            },
+                        },
+                        ID: "demo-error-boundary",
+                    })
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Notifications", Weight: atoms.FontMedium})
+                    @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap4}) {
+                        @molecules.Notification(molecules.NotificationProps{
+                            Type:        molecules.ErrorValidation,
+                            Title:       "Validation Error",
+                            Message:     "Please check the form fields and try again",
+                            Dismissible: true,
+                            Actions: []molecules.ErrorAction{
+                                {
+                                    Text:    "Fix Issues",
+                                    Variant: "primary",
+                                },
+                            },
+                            ID: "validation-notification",
+                        })
+                        
+                        @molecules.Notification(molecules.NotificationProps{
+                            Type:        molecules.ErrorNetwork,
+                            Title:       "Connection Error",
+                            Message:     "Unable to save changes",
+                            Dismissible: true,
+                            Actions: []molecules.ErrorAction{
+                                {
+                                    Text:    "Retry",
+                                    Variant: "outline",
+                                },
+                            },
+                            ID: "network-notification",
+                        })
+                    }
+                    
+                    @atoms.Text(atoms.TextProps{Text: "Error Types", Weight: atoms.FontMedium})
+                    @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap2, Wrap: atoms.Wrap}) {
+                        @errorTypeExample("Validation", molecules.ErrorValidation, molecules.SeverityMedium)
+                        @errorTypeExample("Network", molecules.ErrorNetwork, molecules.SeverityHigh)
+                        @errorTypeExample("Server", molecules.ErrorServer, molecules.SeverityCritical)
+                        @errorTypeExample("Auth", molecules.ErrorAuth, molecules.SeverityHigh)
+                        @errorTypeExample("Not Found", molecules.ErrorNotFound, molecules.SeverityMedium)
+                        @errorTypeExample("Permission", molecules.ErrorPermission, molecules.SeverityHigh)
+                    }
+                }
+            }
+            
+            // ════════════════════════════════════════════════════════════
             // ENHANCED CARDS
             // ════════════════════════════════════════════════════════════
             @Section("Enhanced Cards") {
@@ -408,6 +573,24 @@ templ imageCardFooter() {
         }
         @atoms.Button(atoms.ButtonProps{Text: "View", Size: atoms.SizeSm})
     }
+}
+
+// Helper component for error type examples
+templ errorTypeExample(label string, errorType molecules.ErrorType, severity molecules.ErrorSeverity) {
+    @molecules.ErrorBoundary(molecules.ErrorBoundaryProps{
+        Title: label + " Error",
+        Errors: []molecules.ErrorDetail{
+            {
+                Code:     string(errorType) + "_ERROR",
+                Message:  "Sample " + strings.ToLower(label) + " error message",
+                Type:     errorType,
+                Severity: severity,
+            },
+        },
+        ShowDetails: false,
+        Dismissible: true,
+        ID:          "error-" + strings.ToLower(label),
+    })
 }
 
 // Section helper component (imported from atoms page)

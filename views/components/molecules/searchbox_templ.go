@@ -5,13 +5,13 @@ package molecules
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
 import (
 	"fmt"
-	"strings"
-
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
 	"github.com/niiniyare/ruun/views/components/atoms"
+	"strings"
 )
 
 // SearchBoxSize defines the size variants for the search box
@@ -118,7 +118,7 @@ func buildSearchInputProps(props SearchBoxProps) atoms.InputProps {
 	return atoms.InputProps{
 		ID:          props.ID,
 		Name:        props.Name,
-		Type:        atoms.InputSearch,
+		Type:        "search",
 		Value:       props.Value,
 		Placeholder: placeholder,
 		Disabled:    props.Disabled,
@@ -209,7 +209,7 @@ func SearchBox(props SearchBoxProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
-				Name: "loader",
+				Name: "loader-circle",
 				Size: "sm",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

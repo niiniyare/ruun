@@ -5,12 +5,10 @@ package atoms
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import (
-	"strconv"
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
 
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
-)
+import "strconv"
 
 // ProgressProps defines all properties for the Progress atom using custom CSS extension
 // Uses /static/css/components/progress.css following Basecoat conventions

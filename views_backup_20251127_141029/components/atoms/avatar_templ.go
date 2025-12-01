@@ -5,10 +5,8 @@ package atoms
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import (
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
-)
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
 
 // AvatarProps defines all properties for the Avatar atom using custom CSS extension
 // Uses /static/css/components/avatar.css following Basecoat conventions

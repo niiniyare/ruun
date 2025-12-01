@@ -310,6 +310,17 @@ func (a *Action) GetConfig(key string) any {
 	return a.Config[key]
 }
 
+// GetConfigString returns a config value as a string
+func (a *Action) GetConfigString(key string) string {
+	if a.Config == nil {
+		return ""
+	}
+	if v, ok := a.Config[key].(string); ok {
+		return v
+	}
+	return ""
+}
+
 // SetConfig sets a config value by key
 func (a *Action) SetConfig(key string, value any) {
 	if a.Config == nil {

@@ -160,8 +160,8 @@ type DataTableAction struct {
 	ID          string              `json:"id"`
 	Text        string              `json:"text"`
 	Icon        string              `json:"icon"`
-	Variant     string `json:"variant"`
-	Size        string    `json:"size"`
+	Variant     components.ButtonVariant `json:"variant"`
+	Size        components.Size          `json:"size"`
 	Position    string              `json:"position"`
 	OnClick     string              `json:"onClick"`
 	HXGet       string              `json:"hxGet"`
@@ -177,7 +177,7 @@ type DataTableBulkAction struct {
 	ID          string              `json:"id"`
 	Text        string              `json:"text"`
 	Icon        string              `json:"icon"`
-	Variant     string `json:"variant"`
+	Variant     components.ButtonVariant `json:"variant"`
 	Destructive bool                `json:"destructive"`
 	Confirm     bool                `json:"confirm"`
 	OnClick     string              `json:"onClick"`
@@ -255,7 +255,7 @@ type SortingConfig struct {
 // FilteringConfig defines filtering and search functionality
 type FilteringConfig struct {
 	Enabled       bool                `json:"enabled"`
-	Search        *SearchConfig       `json:"search"`        // Global search
+	Search        *DataTableSearch    `json:"search"`        // Global search
 	ColumnFilters bool                `json:"columnFilters"` // Per-column filtering
 	Filters       []DataTableFilter   `json:"filters"`       // Active filters
 	Advanced      bool                `json:"advanced"`      // Advanced filter UI
@@ -660,19 +660,21 @@ templ dataTableSearch(filtering *FilteringConfig) {
 		/>
 		@atoms.Icon(atoms.IconProps{
 			Name: "search",
-			Size: atoms.IconSizeSM,
+			Size: components.SizeSm,
 		})
 		
 		if filtering.Search.Advanced {
 			@atoms.Button(atoms.ButtonProps{
-				Variant: "ghost",
-				Size:    "sm",
-				OnClick: "showAdvancedSearch = !showAdvancedSearch",
-				AriaLabel: "Toggle advanced search",
+				Variant: components.ButtonGhost,
+				Size:    components.SizeSm,
+				Attrs: templ.Attributes{
+					"onclick": "showAdvancedSearch = !showAdvancedSearch",
+					"aria-label": "Toggle advanced search",
+				},
 			}) {
 				@atoms.Icon(atoms.IconProps{
 					Name: "filter",
-					Size: atoms.IconSizeSM,
+					Size: components.SizeSm,
 				})
 			}
 		}
@@ -724,14 +726,16 @@ templ dataTableBulkActions(props DataTableProps) {
 templ dataTableBulkAction(action DataTableBulkAction) {
 	@atoms.Button(atoms.ButtonProps{
 		Text:    action.Text,
-		Variant: action.Variant,
-		Size:    "sm",
-		OnClick: utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
+		Variant: components.ButtonVariant(action.Variant),
+		Size:    components.SizeSm,
+		Attrs: templ.Attributes{
+			"onclick": utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
+		},
 	}) {
 		if action.Icon != "" {
 			@atoms.Icon(atoms.IconProps{
 				Name: action.Icon,
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			})
 		}
 	}
@@ -739,7 +743,7 @@ templ dataTableBulkAction(action DataTableBulkAction) {
 
 // dataTableContent renders the main table content
 templ dataTableContent(props DataTableProps) {
-	if props.Virtualized {
+	if props.Performance != nil && props.Performance.Virtualized {
 		@dataTableVirtualized(props)
 	} else {
 		@dataTableStandard(props)
@@ -772,9 +776,9 @@ templ dataTableStandard(props DataTableProps) {
 // dataTableHeaderRow renders the table header row
 templ dataTableHeaderRow(props DataTableProps) {
 	<tr class="datatable-header-row">
-		if props.Selectable {
+		if props.Selection != nil && props.Selection.Enabled {
 			<th class="datatable-th datatable-th-checkbox">
-				if props.MultiSelect {
+				if props.Selection != nil && props.Selection.MultiSelect {
 					@atoms.Checkbox(atoms.CheckboxProps{
 						Base: components.BaseProps{
 							ID: "select-all",
@@ -791,7 +795,7 @@ templ dataTableHeaderRow(props DataTableProps) {
 			@dataTableHeaderCell(column, props)
 		}
 		
-		if len(props.RowActions) > 0 {
+		if props.Actions != nil && len(props.Actions.RowActions) > 0 {
 			<th class="datatable-th datatable-th-actions">Actions</th>
 		}
 	</tr>
@@ -815,24 +819,26 @@ templ dataTableHeaderCell(column DataTableColumn, props DataTableProps) {
 				<div class="datatable-th-sort">
 					@atoms.Icon(atoms.IconProps{
 						Name: "chevron-up",
-						Size: atoms.IconSizeXS,
+						Size: components.SizeXs,
 						})
 					@atoms.Icon(atoms.IconProps{
 						Name: "chevron-down",
-						Size: atoms.IconSizeXS,
+						Size: components.SizeXs,
 						})
 				</div>
 			}
 			
 			if column.Filterable {
 				@atoms.Button(atoms.ButtonProps{
-					Variant: "ghost",
-					Size:    "sm",
-					OnClick: fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
+					Variant: components.ButtonGhost,
+					Size:    components.SizeSm,
+					Attrs: templ.Attributes{
+						"onclick": fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
+					},
 				}) {
 					@atoms.Icon(atoms.IconProps{
 						Name: "filter",
-						Size: atoms.IconSizeXS,
+						Size: components.SizeXs,
 					})
 				}
 			}
@@ -849,11 +855,11 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 	<tr 
 		class="datatable-tr"
 		data-row-id={ row.ID }
-		if props.OnRowClick != "" {
+		if props.Selection != nil && props.Selection.RowClick {
 			x-on:click={ fmt.Sprintf("handleRowClick('%s', $event)", row.ID) }
 		}
 	>
-		if props.Selectable {
+		if props.Selection != nil && props.Selection.Enabled {
 			<td class="datatable-td datatable-td-checkbox">
 				@atoms.Checkbox(atoms.CheckboxProps{
 					Base: components.BaseProps{
@@ -871,7 +877,7 @@ templ dataTableRow(row DataTableRow, props DataTableProps) {
 			@dataTableCell(row, column, props)
 		}
 		
-		if len(props.RowActions) > 0 || len(row.Actions) > 0 {
+		if (props.Actions != nil && len(props.Actions.RowActions) > 0) || len(row.Actions) > 0 {
 			<td class="datatable-td datatable-td-actions">
 				@dataTableRowActions(row, props)
 			</td>
@@ -899,14 +905,14 @@ templ dataTableCellContent(value any, column DataTableColumn) {
 			if variant, exists := column.BadgeMap[strValue]; exists {
 				@atoms.Badge(atoms.BadgeProps{
 					Text:    strValue,
-					Variant: variant,
-					Size:    atoms.BadgeSizeSM,
+					Variant: components.BadgeVariant(variant),
+					Size:    components.SizeSm,
 				})
 			} else {
 				@atoms.Badge(atoms.BadgeProps{
 					Text:    strValue,
-					Variant: "primary",
-					Size:    atoms.BadgeSizeSM,
+					Variant: components.BadgePrimary,
+					Size:    components.SizeSm,
 				})
 			}
 		}
@@ -961,13 +967,15 @@ templ dataTableCellContent(value any, column DataTableColumn) {
 templ dataTableRowActions(row DataTableRow, props DataTableProps) {
 	<div class="datatable-row-actions" x-data="{ open: false }">
 		@atoms.Button(atoms.ButtonProps{
-			Variant: "ghost",
-			Size:    "sm",
-			OnClick: "open = !open",
+			Variant: components.ButtonGhost,
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick": "open = !open",
+			},
 		}) {
 			@atoms.Icon(atoms.IconProps{
 				Name: "more-vertical",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			})
 		}
 		
@@ -990,7 +998,7 @@ templ dataTableRowActions(row DataTableRow, props DataTableProps) {
 				})
 			}
 			
-			for _, action := range props.RowActions {
+			for _, action := range props.Actions.RowActions {
 				@molecules.MenuItem(molecules.MenuItemProps{
 					Type: molecules.MenuItemTypeButton,
 					Text: action.Text,
@@ -1059,14 +1067,20 @@ templ dataTablePagination(pagination *PaginationConfig) {
 			
 			<div class="datatable-pagination-controls">
 				@atoms.Button(atoms.ButtonProps{
-					Variant: "outline",
-					Size:    "sm",
-					OnClick: "previousPage()",
-					Disabled: pagination.CurrentPage <= 1,
+					Variant: components.ButtonOutline,
+					Size:    components.SizeSm,
+					Base: components.BaseProps{
+						State: components.ComponentState{
+							Disabled: pagination.CurrentPage <= 1,
+						},
+					},
+					Attrs: templ.Attributes{
+						"onclick": "previousPage()",
+					},
 				}) {
 					@atoms.Icon(atoms.IconProps{
 						Name: "chevron-left",
-						Size: atoms.IconSizeXS,
+						Size: components.SizeXs,
 					})
 				}
 				
@@ -1074,22 +1088,30 @@ templ dataTablePagination(pagination *PaginationConfig) {
 					for i := 1; i <= pagination.TotalPages; i++ {
 						@atoms.Button(atoms.ButtonProps{
 							Text:    strconv.Itoa(i),
-							Variant: utils.IfElse(i == pagination.CurrentPage, "primary", "ghost"),
-							Size:    "sm",
-							OnClick: fmt.Sprintf("goToPage(%d)", i),
+							Variant: components.ButtonVariant(utils.IfElse(i == pagination.CurrentPage, "primary", "ghost")),
+							Size:    components.SizeSm,
+							Attrs: templ.Attributes{
+								"onclick": fmt.Sprintf("goToPage(%d)", i),
+							},
 						})
 					}
 				</div>
 				
 				@atoms.Button(atoms.ButtonProps{
-					Variant: "outline",
-					Size:    "sm",
-					OnClick: "nextPage()",
-					Disabled: pagination.CurrentPage >= pagination.TotalPages,
+					Variant: components.ButtonOutline,
+					Size:    components.SizeSm,
+					Base: components.BaseProps{
+						State: components.ComponentState{
+							Disabled: pagination.CurrentPage >= pagination.TotalPages,
+						},
+					},
+					Attrs: templ.Attributes{
+						"onclick": "nextPage()",
+					},
 				}) {
 					@atoms.Icon(atoms.IconProps{
 						Name: "chevron-right",
-						Size: atoms.IconSizeXS,
+						Size: components.SizeXs,
 					})
 				}
 			</div>
@@ -1100,16 +1122,20 @@ templ dataTablePagination(pagination *PaginationConfig) {
 // dataTableAction renders a single table action
 templ dataTableAction(action DataTableAction) {
 	@atoms.Button(atoms.ButtonProps{
-		ID:      action.ID,
 		Text:    action.Text,
-		Variant: action.Variant,
+		Variant: components.ButtonVariant(action.Variant),
 		Size:    action.Size,
-		OnClick: action.OnClick,
+		Base: components.BaseProps{
+			ID: action.ID,
+		},
+		Attrs: templ.Attributes{
+			"onclick": action.OnClick,
+		},
 	}) {
 		if action.Icon != "" {
 			@atoms.Icon(atoms.IconProps{
 				Name: action.Icon,
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			})
 		}
 	}
@@ -1119,13 +1145,15 @@ templ dataTableAction(action DataTableAction) {
 templ dataTableExportButton(export *ExportConfig) {
 	<div class="datatable-export" x-data="{ open: false }">
 		@atoms.Button(atoms.ButtonProps{
-			Variant: "outline",
-			Size:    "sm",
-			OnClick: "open = !open",
+			Variant: components.ButtonOutline,
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick": "open = !open",
+			},
 		}) {
 			@atoms.Icon(atoms.IconProps{
 				Name: "download",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			})
 			Export
 		}
@@ -1151,14 +1179,16 @@ templ dataTableExportButton(export *ExportConfig) {
 templ dataTableViewOptions(props DataTableProps) {
 	<div class="datatable-view-options" x-data="{ open: false }">
 		@atoms.Button(atoms.ButtonProps{
-			Variant: "ghost",
-			Size:    "sm",
-			OnClick: "open = !open",
-			AriaLabel: "View options",
+			Variant: components.ButtonGhost,
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick": "open = !open",
+				"aria-label": "View options",
+			},
 		}) {
 			@atoms.Icon(atoms.IconProps{
 				Name: "settings",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			})
 		}
 		
@@ -1217,13 +1247,15 @@ templ dataTableExportModal(props DataTableProps) {
 				<div class="datatable-export-modal-header">
 					<h3>Export Data</h3>
 					@atoms.Button(atoms.ButtonProps{
-						Variant: "ghost",
-						Size:    "sm",
-						OnClick: "showExportModal = false",
+						Variant: components.ButtonGhost,
+						Size:    components.SizeSm,
+						Attrs: templ.Attributes{
+							"onclick": "showExportModal = false",
+						},
 					}) {
 						@atoms.Icon(atoms.IconProps{
 							Name: "x",
-							Size: atoms.IconSizeXS,
+							Size: components.SizeXs,
 						})
 					}
 				</div>
@@ -1235,13 +1267,17 @@ templ dataTableExportModal(props DataTableProps) {
 				<div class="datatable-export-modal-footer">
 					@atoms.Button(atoms.ButtonProps{
 						Text:    "Cancel",
-						Variant: "outline",
-						OnClick: "showExportModal = false",
+						Variant: components.ButtonOutline,
+						Attrs: templ.Attributes{
+							"onclick": "showExportModal = false",
+						},
 					})
 					@atoms.Button(atoms.ButtonProps{
 						Text:    "Export",
-						Variant: stringPrimary,
-						OnClick: "confirmExport()",
+						Variant: components.ButtonPrimary,
+						Attrs: templ.Attributes{
+							"onclick": "confirmExport()",
+						},
 					})
 				</div>
 			</div>
@@ -1339,8 +1375,8 @@ func buildDataTableAlpineDataV2(props DataTableProps) string {
 		"props.rows", // This would be replaced with actual row data
 		props.Pagination.CurrentPage,
 		props.Pagination.PageSize,
-		utils.IfElse(props.StatePersist, "this.loadState();", ""),
-		utils.IfElse(props.Virtualized, `
+		utils.IfElse(props.Storage != nil && props.Storage.Enabled, "this.loadState();", ""),
+		utils.IfElse(props.Performance != nil && props.Performance.Virtualized, `
 		handleVirtualScroll() {
 			// Virtual scrolling implementation
 		},

@@ -206,9 +206,52 @@
 
 ---
 
+---
+
+## ✅ COMPLETED: Action Type Unification
+
+**Task**: Update Action struct to use unified types.
+
+### What was accomplished:
+1. **Verified Action struct already uses unified types**:
+   - `Binding *Binding` ✅ (replaces ActionAlpine)
+   - `Conditional *Conditional` ✅ (replaces ActionConditional) 
+   - `Style *Style` ✅ (replaces ActionTheme)
+   - `Behavior *Behavior` ✅ (replaces ActionHTMX)
+   - `Config map[string]any` ✅ (replaces ActionConfig struct)
+   - `Permissions []string` ✅ (replaces ActionPermissions struct)
+   - `Events *Events` ✅ (already present)
+
+2. **Added missing helper methods**:
+   - `GetConfigString(key string) string` - retrieves config value as string
+   - `HasPermission(perm string) bool` - already existed but verified working
+
+3. **Cleaned up old type definitions in types.go**:
+   - `ActionConfig` → deprecated type alias to `map[string]any`
+   - `ActionPermissions` → deprecated type alias to `[]string`
+   - `ActionTheme` → already aliased to unified `Style`
+
+4. **Verified ActionBuilder methods**:
+   - All builder methods already use unified types correctly
+   - `WithConfig(map[string]any)`, `WithStyle(*Style)`, etc.
+
+### ✅ Verification:
+- `go build github.com/niiniyare/ruun/schema` ✅ succeeds
+- Action struct now fully uses unified types
+- Backward compatibility maintained through type aliases
+- Helper methods provide convenient access patterns
+
+### Benefits:
+- **API Consistency**: Action struct now uses same unified types as Field and Layout
+- **Code Reduction**: Eliminated duplicate type definitions
+- **Maintainability**: Single source of truth for all component types
+- **Future Proof**: Clean foundation for additional Action features
+
+---
+
 ## Next Tasks (Future)
 - Consider creating unified Event/Handler types
-- Builder pattern migration for remaining builders (FieldBuilder, ActionBuilder, etc.)  
+- Builder pattern migration for remaining builders (FieldBuilder, etc.)  
 - Review and consolidate remaining Config struct types
 - types.go cleanup for unused types
 

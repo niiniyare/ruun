@@ -165,30 +165,30 @@ type DataTablePagination struct {
 
 // DataTableAction defines table-level actions
 type DataTableAction struct {
-	ID          string `json:"id"`
-	Text        string `json:"text"`
-	Icon        string `json:"icon"`
-	Variant     string `json:"variant"`
-	Size        string `json:"size"`
-	Position    string `json:"position"`
-	OnClick     string `json:"onClick"`
-	HXGet       string `json:"hxGet"`
-	HXPost      string `json:"hxPost"`
-	HXTarget    string `json:"hxTarget"`
-	HXSwap      string `json:"hxSwap"`
-	AlpineClick string `json:"alpineClick"`
-	Condition   string `json:"condition"`
+	ID          string                   `json:"id"`
+	Text        string                   `json:"text"`
+	Icon        string                   `json:"icon"`
+	Variant     components.ButtonVariant `json:"variant"`
+	Size        components.Size          `json:"size"`
+	Position    string                   `json:"position"`
+	OnClick     string                   `json:"onClick"`
+	HXGet       string                   `json:"hxGet"`
+	HXPost      string                   `json:"hxPost"`
+	HXTarget    string                   `json:"hxTarget"`
+	HXSwap      string                   `json:"hxSwap"`
+	AlpineClick string                   `json:"alpineClick"`
+	Condition   string                   `json:"condition"`
 }
 
 // DataTableBulkAction defines bulk actions for selected rows
 type DataTableBulkAction struct {
-	ID          string `json:"id"`
-	Text        string `json:"text"`
-	Icon        string `json:"icon"`
-	Variant     string `json:"variant"`
-	Destructive bool   `json:"destructive"`
-	Confirm     bool   `json:"confirm"`
-	OnClick     string `json:"onClick"`
+	ID          string                   `json:"id"`
+	Text        string                   `json:"text"`
+	Icon        string                   `json:"icon"`
+	Variant     components.ButtonVariant `json:"variant"`
+	Destructive bool                     `json:"destructive"`
+	Confirm     bool                     `json:"confirm"`
+	OnClick     string                   `json:"onClick"`
 }
 
 // DataTableExport defines export configuration
@@ -263,7 +263,7 @@ type SortingConfig struct {
 // FilteringConfig defines filtering and search functionality
 type FilteringConfig struct {
 	Enabled       bool              `json:"enabled"`
-	Search        *SearchConfig     `json:"search"`        // Global search
+	Search        *DataTableSearch  `json:"search"`        // Global search
 	ColumnFilters bool              `json:"columnFilters"` // Per-column filtering
 	Filters       []DataTableFilter `json:"filters"`       // Active filters
 	Advanced      bool              `json:"advanced"`      // Advanced filter UI
@@ -967,7 +967,7 @@ func dataTableSearch(filtering *FilteringConfig) templ.Component {
 		}
 		templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 			Name: "search",
-			Size: atoms.IconSizeSM,
+			Size: components.SizeSm,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -987,7 +987,7 @@ func dataTableSearch(filtering *FilteringConfig) templ.Component {
 				ctx = templ.InitializeContext(ctx)
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: "filter",
-					Size: atoms.IconSizeSM,
+					Size: components.SizeSm,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -995,10 +995,12 @@ func dataTableSearch(filtering *FilteringConfig) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:   "ghost",
-				Size:      "sm",
-				OnClick:   "showAdvancedSearch = !showAdvancedSearch",
-				AriaLabel: "Toggle advanced search",
+				Variant: components.ButtonGhost,
+				Size:    components.SizeSm,
+				Attrs: templ.Attributes{
+					"onclick":    "showAdvancedSearch = !showAdvancedSearch",
+					"aria-label": "Toggle advanced search",
+				},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1046,7 +1048,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("filters.%s", filter.Column))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 687, Col: 94}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 689, Col: 94}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -1059,7 +1061,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(filter.Column)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 688, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 690, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -1077,7 +1079,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(option)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 690, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 692, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -1090,7 +1092,7 @@ func dataTableFilters(filters []DataTableFilter) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(option)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 690, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 692, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -1193,7 +1195,7 @@ func dataTableBulkAction(action DataTableBulkAction) templ.Component {
 			if action.Icon != "" {
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: action.Icon,
-					Size: atoms.IconSizeXS,
+					Size: components.SizeXs,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1203,9 +1205,11 @@ func dataTableBulkAction(action DataTableBulkAction) templ.Component {
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 			Text:    action.Text,
-			Variant: action.Variant,
-			Size:    "sm",
-			OnClick: utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
+			Variant: components.ButtonVariant(action.Variant),
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick": utils.IfElse(action.Confirm, fmt.Sprintf("confirmBulkAction('%s')", action.ID), action.OnClick),
+			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -1236,7 +1240,7 @@ func dataTableContent(props DataTableProps) templ.Component {
 			templ_7745c5c3_Var24 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.Virtualized {
+		if props.Performance != nil && props.Performance.Virtualized {
 			templ_7745c5c3_Err = dataTableVirtualized(props).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1321,7 +1325,7 @@ func dataTableStandard(props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(props.Columns)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 763, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 767, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -1334,7 +1338,7 @@ func dataTableStandard(props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(props.Pagination.TotalItems))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 764, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 768, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -1379,12 +1383,12 @@ func dataTableHeaderRow(props DataTableProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.Selectable {
+		if props.Selection != nil && props.Selection.Enabled {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "<th class=\"datatable-th datatable-th-checkbox\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.MultiSelect {
+			if props.Selection != nil && props.Selection.MultiSelect {
 				templ_7745c5c3_Err = atoms.Checkbox(atoms.CheckboxProps{
 					Base: components.BaseProps{
 						ID: "select-all",
@@ -1408,7 +1412,7 @@ func dataTableHeaderRow(props DataTableProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if len(props.RowActions) > 0 {
+		if props.Actions != nil && len(props.Actions.RowActions) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "<th class=\"datatable-th datatable-th-actions\">Actions</th>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1456,7 +1460,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %s", column.Width))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 805, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 809, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -1475,7 +1479,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("sortColumn('%s')", column.Key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 808, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 812, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -1493,7 +1497,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(column.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 812, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 816, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -1510,14 +1514,14 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 				Name: "chevron-up",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 				Name: "chevron-down",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1542,7 +1546,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 				ctx = templ.InitializeContext(ctx)
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: "filter",
-					Size: atoms.IconSizeXS,
+					Size: components.SizeXs,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -1550,9 +1554,11 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant: "ghost",
-				Size:    "sm",
-				OnClick: fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
+				Variant: components.ButtonGhost,
+				Size:    components.SizeSm,
+				Attrs: templ.Attributes{
+					"onclick": fmt.Sprintf("toggleColumnFilter('%s')", column.Key),
+				},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var35), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1570,7 +1576,7 @@ func dataTableHeaderCell(column DataTableColumn, props DataTableProps) templ.Com
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("startResize('%s', $event)", column.Key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 842, Col: 106}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 848, Col: 106}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 			if templ_7745c5c3_Err != nil {
@@ -1618,7 +1624,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(row.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 851, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 857, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -1628,7 +1634,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.OnRowClick != "" {
+		if props.Selection != nil && props.Selection.RowClick {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 76, " x-on:click=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1636,7 +1642,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("handleRowClick('%s', $event)", row.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 853, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 859, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -1651,7 +1657,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.Selectable {
+		if props.Selection != nil && props.Selection.Enabled {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<td class=\"datatable-td datatable-td-checkbox\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1679,7 +1685,7 @@ func dataTableRow(row DataTableRow, props DataTableProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if len(props.RowActions) > 0 || len(row.Actions) > 0 {
+		if (props.Actions != nil && len(props.Actions.RowActions) > 0) || len(row.Actions) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "<td class=\"datatable-td datatable-td-actions\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -1735,7 +1741,7 @@ func dataTableCell(row DataTableRow, column DataTableColumn, props DataTableProp
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("handleCellClick('%s', '%s', $event)", row.ID, column.Key))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 887, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 893, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
@@ -1790,8 +1796,8 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				if variant, exists := column.BadgeMap[strValue]; exists {
 					templ_7745c5c3_Err = atoms.Badge(atoms.BadgeProps{
 						Text:    strValue,
-						Variant: variant,
-						Size:    atoms.BadgeSizeSM,
+						Variant: components.BadgeVariant(variant),
+						Size:    components.SizeSm,
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -1799,8 +1805,8 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				} else {
 					templ_7745c5c3_Err = atoms.Badge(atoms.BadgeProps{
 						Text:    strValue,
-						Variant: "primary",
-						Size:    atoms.BadgeSizeSM,
+						Variant: components.BadgePrimary,
+						Size:    components.SizeSm,
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -1816,7 +1822,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var43 string
 				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(utils.IfElse(column.DateFormat != "", timeValue.Format(column.DateFormat), timeValue.Format("2006-01-02")))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 916, Col: 112}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 922, Col: 112}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 				if templ_7745c5c3_Err != nil {
@@ -1834,7 +1840,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var44 string
 				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 919, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 925, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 				if templ_7745c5c3_Err != nil {
@@ -1854,7 +1860,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var45 string
 				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%."+strconv.Itoa(column.Precision)+"f", floatValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 924, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 930, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 				if templ_7745c5c3_Err != nil {
@@ -1872,7 +1878,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var46 string
 				templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(intValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 927, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 933, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 				if templ_7745c5c3_Err != nil {
@@ -1890,7 +1896,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var47 string
 				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 929, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 935, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 				if templ_7745c5c3_Err != nil {
@@ -1910,7 +1916,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var48 string
 				templ_7745c5c3_Var48, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %.1f%%", floatValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 937, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 943, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 				if templ_7745c5c3_Err != nil {
@@ -1923,7 +1929,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var49 string
 				templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f%%", floatValue))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 940, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 946, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 				if templ_7745c5c3_Err != nil {
@@ -1943,7 +1949,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var50 templ.SafeURL
 				templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinURLErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 945, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 951, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 				if templ_7745c5c3_Err != nil {
@@ -1956,7 +1962,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var51 string
 				templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 945, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 951, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 				if templ_7745c5c3_Err != nil {
@@ -1976,7 +1982,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var52 string
 				templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 949, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 955, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 				if templ_7745c5c3_Err != nil {
@@ -1996,7 +2002,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var53 string
 				templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(strValue)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 953, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 959, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 				if templ_7745c5c3_Err != nil {
@@ -2014,7 +2020,7 @@ func dataTableCellContent(value any, column DataTableColumn) templ.Component {
 				var templ_7745c5c3_Var54 string
 				templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 955, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 961, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 				if templ_7745c5c3_Err != nil {
@@ -2070,7 +2076,7 @@ func dataTableRowActions(row DataTableRow, props DataTableProps) templ.Component
 			ctx = templ.InitializeContext(ctx)
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 				Name: "more-vertical",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2078,9 +2084,11 @@ func dataTableRowActions(row DataTableRow, props DataTableProps) templ.Component
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant: "ghost",
-			Size:    "sm",
-			OnClick: "open = !open",
+			Variant: components.ButtonGhost,
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick": "open = !open",
+			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var56), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -2104,7 +2112,7 @@ func dataTableRowActions(row DataTableRow, props DataTableProps) templ.Component
 				return templ_7745c5c3_Err
 			}
 		}
-		for _, action := range props.RowActions {
+		for _, action := range props.Actions.RowActions {
 			templ_7745c5c3_Err = molecules.MenuItem(molecules.MenuItemProps{
 				Type:    molecules.MenuItemTypeButton,
 				Text:    action.Text,
@@ -2252,7 +2260,7 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 					pagination.TotalItems,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1047, Col: 7}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1055, Col: 7}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 				if templ_7745c5c3_Err != nil {
@@ -2276,7 +2284,7 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 					var templ_7745c5c3_Var64 string
 					templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(size))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1054, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1062, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 					if templ_7745c5c3_Err != nil {
@@ -2289,7 +2297,7 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 					var templ_7745c5c3_Var65 string
 					templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(size))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1054, Col: 64}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/organisms/datatable.templ`, Line: 1062, Col: 64}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 					if templ_7745c5c3_Err != nil {
@@ -2323,7 +2331,7 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 				ctx = templ.InitializeContext(ctx)
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: "chevron-left",
-					Size: atoms.IconSizeXS,
+					Size: components.SizeXs,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -2331,10 +2339,16 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:  "outline",
-				Size:     "sm",
-				OnClick:  "previousPage()",
-				Disabled: pagination.CurrentPage <= 1,
+				Variant: components.ButtonOutline,
+				Size:    components.SizeSm,
+				Base: components.BaseProps{
+					State: components.ComponentState{
+						Disabled: pagination.CurrentPage <= 1,
+					},
+				},
+				Attrs: templ.Attributes{
+					"onclick": "previousPage()",
+				},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var66), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2346,9 +2360,11 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 			for i := 1; i <= pagination.TotalPages; i++ {
 				templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 					Text:    strconv.Itoa(i),
-					Variant: utils.IfElse(i == pagination.CurrentPage, "primary", "ghost"),
-					Size:    "sm",
-					OnClick: fmt.Sprintf("goToPage(%d)", i),
+					Variant: components.ButtonVariant(utils.IfElse(i == pagination.CurrentPage, "primary", "ghost")),
+					Size:    components.SizeSm,
+					Attrs: templ.Attributes{
+						"onclick": fmt.Sprintf("goToPage(%d)", i),
+					},
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -2372,7 +2388,7 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 				ctx = templ.InitializeContext(ctx)
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: "chevron-right",
-					Size: atoms.IconSizeXS,
+					Size: components.SizeXs,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -2380,10 +2396,16 @@ func dataTablePagination(pagination *PaginationConfig) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant:  "outline",
-				Size:     "sm",
-				OnClick:  "nextPage()",
-				Disabled: pagination.CurrentPage >= pagination.TotalPages,
+				Variant: components.ButtonOutline,
+				Size:    components.SizeSm,
+				Base: components.BaseProps{
+					State: components.ComponentState{
+						Disabled: pagination.CurrentPage >= pagination.TotalPages,
+					},
+				},
+				Attrs: templ.Attributes{
+					"onclick": "nextPage()",
+				},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var67), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2434,7 +2456,7 @@ func dataTableAction(action DataTableAction) templ.Component {
 			if action.Icon != "" {
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: action.Icon,
-					Size: atoms.IconSizeXS,
+					Size: components.SizeXs,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -2443,11 +2465,15 @@ func dataTableAction(action DataTableAction) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			ID:      action.ID,
 			Text:    action.Text,
-			Variant: action.Variant,
+			Variant: components.ButtonVariant(action.Variant),
 			Size:    action.Size,
-			OnClick: action.OnClick,
+			Base: components.BaseProps{
+				ID: action.ID,
+			},
+			Attrs: templ.Attributes{
+				"onclick": action.OnClick,
+			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var69), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -2496,7 +2522,7 @@ func dataTableExportButton(export *ExportConfig) templ.Component {
 			ctx = templ.InitializeContext(ctx)
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 				Name: "download",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2508,9 +2534,11 @@ func dataTableExportButton(export *ExportConfig) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant: "outline",
-			Size:    "sm",
-			OnClick: "open = !open",
+			Variant: components.ButtonOutline,
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick": "open = !open",
+			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var71), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -2577,7 +2605,7 @@ func dataTableViewOptions(props DataTableProps) templ.Component {
 			ctx = templ.InitializeContext(ctx)
 			templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 				Name: "settings",
-				Size: atoms.IconSizeXS,
+				Size: components.SizeXs,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2585,10 +2613,12 @@ func dataTableViewOptions(props DataTableProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Variant:   "ghost",
-			Size:      "sm",
-			OnClick:   "open = !open",
-			AriaLabel: "View options",
+			Variant: components.ButtonGhost,
+			Size:    components.SizeSm,
+			Attrs: templ.Attributes{
+				"onclick":    "open = !open",
+				"aria-label": "View options",
+			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var73), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -2688,7 +2718,7 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 				ctx = templ.InitializeContext(ctx)
 				templ_7745c5c3_Err = atoms.Icon(atoms.IconProps{
 					Name: "x",
-					Size: atoms.IconSizeXS,
+					Size: components.SizeXs,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -2696,9 +2726,11 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-				Variant: "ghost",
-				Size:    "sm",
-				OnClick: "showExportModal = false",
+				Variant: components.ButtonGhost,
+				Size:    components.SizeSm,
+				Attrs: templ.Attributes{
+					"onclick": "showExportModal = false",
+				},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var75), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2709,16 +2741,20 @@ func dataTableExportModal(props DataTableProps) templ.Component {
 			}
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 				Text:    "Cancel",
-				Variant: "outline",
-				OnClick: "showExportModal = false",
+				Variant: components.ButtonOutline,
+				Attrs: templ.Attributes{
+					"onclick": "showExportModal = false",
+				},
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
 				Text:    "Export",
-				Variant: stringPrimary,
-				OnClick: "confirmExport()",
+				Variant: components.ButtonPrimary,
+				Attrs: templ.Attributes{
+					"onclick": "confirmExport()",
+				},
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2822,8 +2858,8 @@ func buildDataTableAlpineDataV2(props DataTableProps) string {
 		"props.rows", // This would be replaced with actual row data
 		props.Pagination.CurrentPage,
 		props.Pagination.PageSize,
-		utils.IfElse(props.StatePersist, "this.loadState();", ""),
-		utils.IfElse(props.Virtualized, `
+		utils.IfElse(props.Storage != nil && props.Storage.Enabled, "this.loadState();", ""),
+		utils.IfElse(props.Performance != nil && props.Performance.Virtualized, `
 		handleVirtualScroll() {
 			// Virtual scrolling implementation
 		},

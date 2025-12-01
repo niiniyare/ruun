@@ -628,7 +628,7 @@ func (s *FieldTestSuite) TestIsRequiredConditional() {
 func (s *FieldTestSuite) TestIsDisabledConditional() {
 	s.field.SetEvaluator(s.evaluator)
 	s.field.Conditional = &Conditional{
-		Disabled: &condition.ConditionGroup{
+		Disable: &condition.ConditionGroup{
 			Conjunction: condition.ConjunctionOr,
 			Children: []any{
 				&condition.ConditionRule{

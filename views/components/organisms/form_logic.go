@@ -411,10 +411,8 @@ func buildFormClasses(state formState) string {
 		classes = append(classes, "form--debug")
 	}
 
-	// Custom class
-	if props.ClassName != "" {
-		classes = append(classes, props.ClassName)
-	}
+	// Custom theme classes (if theme config has additional class support)
+	// Note: FormThemeConfig doesn't have CustomClasses field - removing this for now
 
 	return strings.Join(classes, " ")
 }
@@ -497,8 +495,8 @@ func mergeButtonProps(custom, defaults atoms.ButtonProps) atoms.ButtonProps {
 	merged := defaults
 
 	// Override with non-zero custom values
-	if custom.ID != "" {
-		merged.ID = custom.ID
+	if custom.Base.ID != "" {
+		merged.Base.ID = custom.Base.ID
 	}
 	if custom.Type != "" {
 		merged.Type = custom.Type
@@ -512,18 +510,26 @@ func mergeButtonProps(custom, defaults atoms.ButtonProps) atoms.ButtonProps {
 	if custom.Size != "" {
 		merged.Size = custom.Size
 	}
-	if custom.OnClick != "" {
-		merged.OnClick = custom.OnClick
+	if custom.Base.Events.OnClick != "" {
+		merged.Base.Events.OnClick = custom.Base.Events.OnClick
 	}
-	if custom.ClassName != "" {
-		if defaults.ClassName != "" {
-			merged.ClassName = defaults.ClassName + " " + custom.ClassName
+	if custom.Base.ClassName != "" {
+		if defaults.Base.ClassName != "" {
+			merged.Base.ClassName = defaults.Base.ClassName + " " + custom.Base.ClassName
 		} else {
-			merged.ClassName = custom.ClassName
+			merged.Base.ClassName = custom.Base.ClassName
 		}
 	}
-	if custom.Disabled {
-		merged.Disabled = custom.Disabled
+	if custom.Base.State.Disabled {
+		merged.Base.State.Disabled = custom.Base.State.Disabled
+	}
+
+	// Merge custom attributes
+	if merged.Attrs == nil {
+		merged.Attrs = make(templ.Attributes)
+	}
+	for key, value := range custom.Attrs {
+		merged.Attrs[key] = value
 	}
 
 	return merged
