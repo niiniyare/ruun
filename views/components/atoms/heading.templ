@@ -1,0 +1,243 @@
+package atoms
+
+import "github.com/niiniyare/ruun/views/components"
+
+// HeadingVariant represents heading visual style variations
+type HeadingVariant string
+
+const (
+	HeadingDefault   HeadingVariant = "default"
+	HeadingPrimary   HeadingVariant = "primary"
+	HeadingSecondary HeadingVariant = "secondary"
+	HeadingMuted     HeadingVariant = "muted"
+	HeadingAccent    HeadingVariant = "accent"
+)
+
+// HeadingWeight represents font weight variations
+type HeadingWeight string
+
+const (
+	WeightNormal    HeadingWeight = "normal"
+	WeightMedium    HeadingWeight = "medium"
+	WeightSemibold  HeadingWeight = "semibold"
+	WeightBold      HeadingWeight = "bold"
+	WeightExtrabold HeadingWeight = "extrabold"
+)
+
+// HeadingAlign represents text alignment options
+type HeadingAlign string
+
+const (
+	AlignLeft   HeadingAlign = "left"
+	AlignCenter HeadingAlign = "center"
+	AlignRight  HeadingAlign = "right"
+)
+
+// HeadingProps defines all properties for the Heading atom
+// Uses custom CSS classes since headings are not provided by Basecoat
+type HeadingProps struct {
+	// Content
+	Level int    `json:"level"`           // 1-6 for h1-h6
+	Text  string `json:"text"`            // Heading text content
+	
+	// Visual styling
+	Variant HeadingVariant `json:"variant,omitempty"` // Color variant
+	Weight  HeadingWeight  `json:"weight,omitempty"`  // Font weight
+	Align   HeadingAlign   `json:"align,omitempty"`   // Text alignment
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for additional styling)
+	Base components.BaseProps `json:"base,omitempty"`
+}
+
+// getHeadingBaseClasses returns the base classes for heading styling
+// Since Basecoat doesn't provide heading classes, we use Tailwind utilities
+func getHeadingBaseClasses(level int) string {
+	switch level {
+	case 1:
+		return "text-4xl leading-tight" // h1: 36px, tight line height
+	case 2:
+		return "text-3xl leading-tight" // h2: 30px
+	case 3:
+		return "text-2xl leading-snug"  // h3: 24px
+	case 4:
+		return "text-xl leading-snug"   // h4: 20px
+	case 5:
+		return "text-lg leading-normal" // h5: 18px
+	case 6:
+		return "text-base leading-normal" // h6: 16px
+	default:
+		return "text-base leading-normal" // fallback
+	}
+}
+
+// getHeadingVariantClasses returns color variant classes
+func getHeadingVariantClasses(variant HeadingVariant) string {
+	switch variant {
+	case HeadingPrimary:
+		return "text-primary"
+	case HeadingSecondary:
+		return "text-secondary"
+	case HeadingMuted:
+		return "text-muted-foreground"
+	case HeadingAccent:
+		return "text-accent-foreground"
+	default: // HeadingDefault
+		return "text-foreground"
+	}
+}
+
+// getHeadingWeightClasses returns font weight classes
+func getHeadingWeightClasses(weight HeadingWeight) string {
+	switch weight {
+	case WeightNormal:
+		return "font-normal"
+	case WeightMedium:
+		return "font-medium"
+	case WeightSemibold:
+		return "font-semibold"
+	case WeightBold:
+		return "font-bold"
+	case WeightExtrabold:
+		return "font-extrabold"
+	default:
+		// Default weights by heading level for good typography hierarchy
+		return "font-semibold" // semibold is good default for headings
+	}
+}
+
+// getHeadingAlignClasses returns text alignment classes
+func getHeadingAlignClasses(align HeadingAlign) string {
+	switch align {
+	case AlignCenter:
+		return "text-center"
+	case AlignRight:
+		return "text-right"
+	default: // AlignLeft or empty
+		return "text-left"
+	}
+}
+
+// buildHeadingAttributes creates all HTML attributes for the heading element
+func buildHeadingAttributes(props HeadingProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getHeadingBaseClasses(props.Level),
+			getHeadingVariantClasses(props.Variant),
+			getHeadingWeightClasses(props.Weight),
+			getHeadingAlignClasses(props.Align),
+			props.Base.ClassName, // Allow additional Tailwind utilities
+		),
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+	
+	if props.Base.Style != "" {
+		attrs["style"] = props.Base.Style
+	}
+
+	// HTMX attributes
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+	if props.Base.A11y.TabIndex != "" {
+		attrs["tabindex"] = props.Base.A11y.TabIndex
+	}
+
+	// Event handlers
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Data attributes
+	for key, value := range props.Base.DataAttrs {
+		attrs["data-"+key] = value
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// Heading renders a heading element (h1-h6) with custom typography styling
+// Since Basecoat doesn't provide heading classes, uses Tailwind utilities for typography
+templ Heading(props HeadingProps) {
+	// Ensure level is valid (1-6)
+	switch props.Level {
+	case 1:
+		<h1 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h1>
+	case 2:
+		<h2 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h2>
+	case 3:
+		<h3 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h3>
+	case 4:
+		<h4 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h4>
+	case 5:
+		<h5 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h5>
+	case 6:
+		<h6 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h6>
+	default:
+		// Fallback to h2 for invalid levels
+		<h2 {buildHeadingAttributes(props)...}>
+			{props.Text}
+		</h2>
+	}
+}

@@ -631,13 +631,6 @@ type SchemaI18n struct {
 
 // ActionHTMX type moved to behavior.go - this definition is consolidated there
 
-// ActionTheme is deprecated - use the unified Style type from style.go instead
-// This is kept for backward compatibility but will be removed in future versions
-type ActionTheme = Style
-
-// ActionConfig is deprecated - use the unified Config map[string]any instead
-// This is kept for backward compatibility but will be removed in future versions
-type ActionConfig = map[string]any
 
 // ActionConfirm represents action confirmation configuration
 type ActionConfirm struct {
@@ -650,9 +643,6 @@ type ActionConfirm struct {
 	Icon    string `json:"icon,omitempty"`
 }
 
-// ActionPermissions is deprecated - use the unified []string Permissions field instead
-// This is kept for backward compatibility but will be removed in future versions
-type ActionPermissions = []string
 
 // Trigger type moved to behavior.go - this definition is consolidated there
 

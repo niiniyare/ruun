@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules"
+  "github.com/niiniyare/ruun/views/components"
 )
 
 // ============================================================================
@@ -383,7 +384,8 @@ templ storageRestoreIndicator() {
 	<div class="form-storage-indicator" x-show="restoredFromStorage" x-transition>
 		@atoms.Icon(atoms.IconProps{
 			Name: "info",
-			Size: atoms.IconSizeXS,
+			Size: components.SizeLg,
+
 			ClassName: "form-storage-icon",
 		})
 		<small>Form data restored from previous session</small>
