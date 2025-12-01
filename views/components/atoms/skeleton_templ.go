@@ -8,159 +8,151 @@ package atoms
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// SkeletonProps defines all properties for the Skeleton atom using custom CSS extension
-// Uses /static/css/components/skeleton.css following Basecoat conventions
+import "strings"
+
+// SkeletonProps defines all properties for the Skeleton atom using Tailwind utilities
+// Follows documentation: no dedicated component, uses animate-pulse + bg-accent + standard utilities
 type SkeletonProps struct {
 	// Core properties
 	ID string `json:"id,omitempty"`
 
-	// Visual properties
-	Shape   string `json:"shape,omitempty"`   // "text", "heading", "avatar", "button", "card"
-	Size    string `json:"size,omitempty"`    // "sm", "md", "lg", "xl"
-	Variant string `json:"variant,omitempty"` // "", "wave"
+	// Shape presets for common patterns
+	Shape string `json:"shape,omitempty"` // "text", "heading", "avatar", "button", "card", "image"
 
-	// Custom dimensions (when not using predefined shapes)
+	// Size variants for predefined shapes
+	Size string `json:"size,omitempty"` // "xs", "sm", "md", "lg", "xl"
+
+	// Custom dimensions (overrides shape/size)
 	Width  string `json:"width,omitempty"`
 	Height string `json:"height,omitempty"`
 
-	// Additional attributes
-	DataAttrs  map[string]string `json:"dataAttrs,omitempty"`
-	Attributes templ.Attributes  `json:"attributes,omitempty"`
+	// Style options
+	Circle  bool `json:"circle,omitempty"`  // Makes avatar/image circular
+	Muted   bool `json:"muted,omitempty"`   // Uses bg-muted instead of bg-accent
+	Animate bool `json:"animate,omitempty"` // Controls animate-pulse (default: true)
+
+	// Additional attributes for HTMX, Alpine.js, etc
+	Attrs templ.Attributes `json:"attrs,omitempty"`
 }
 
-// getSkeletonClass returns skeleton class without dynamic building
-func getSkeletonClass(shape, size, variant string) string {
-	// Complete static approach
-	switch shape {
+// getSkeletonClasses builds Tailwind classes based on shape and size
+func getSkeletonClasses(props SkeletonProps) string {
+	classes := []string{}
+
+	// Base animation and background
+	if props.Animate != false { // default true
+		classes = append(classes, "animate-pulse")
+		// Support reduced motion
+		classes = append(classes, "motion-reduce:animate-none")
+	}
+
+	// Background color
+	if props.Muted {
+		classes = append(classes, "bg-muted")
+	} else {
+		classes = append(classes, "bg-accent")
+	}
+
+	// Shape-specific classes
+	switch props.Shape {
 	case "text":
-		switch size {
+		switch props.Size {
+		case "xs":
+			classes = append(classes, "h-3", "w-16", "rounded-md")
 		case "sm":
-			switch variant {
-			case "wave":
-				return "skeleton-text skeleton-sm skeleton-wave"
-			default:
-				return "skeleton-text skeleton-sm"
-			}
+			classes = append(classes, "h-3", "w-20", "rounded-md")
 		case "lg":
-			switch variant {
-			case "wave":
-				return "skeleton-text skeleton-lg skeleton-wave"
-			default:
-				return "skeleton-text skeleton-lg"
-			}
+			classes = append(classes, "h-4", "w-32", "rounded-md")
 		case "xl":
-			switch variant {
-			case "wave":
-				return "skeleton-text skeleton-xl skeleton-wave"
-			default:
-				return "skeleton-text skeleton-xl"
-			}
-		default: // md or empty
-			switch variant {
-			case "wave":
-				return "skeleton-text skeleton-wave"
-			default:
-				return "skeleton-text"
-			}
+			classes = append(classes, "h-4", "w-40", "rounded-md")
+		default: // md
+			classes = append(classes, "h-4", "w-24", "rounded-md")
 		}
+
 	case "heading":
-		switch variant {
-		case "wave":
-			return "skeleton-heading skeleton-wave"
-		default:
-			return "skeleton-heading"
-		}
-	case "avatar":
-		switch variant {
-		case "wave":
-			return "skeleton-avatar skeleton-wave"
-		default:
-			return "skeleton-avatar"
-		}
-	case "button":
-		switch variant {
-		case "wave":
-			return "skeleton-button skeleton-wave"
-		default:
-			return "skeleton-button"
-		}
-	case "card":
-		switch variant {
-		case "wave":
-			return "skeleton-card skeleton-wave"
-		default:
-			return "skeleton-card"
-		}
-	default: // no shape specified
-		switch size {
+		switch props.Size {
 		case "sm":
-			switch variant {
-			case "wave":
-				return "skeleton skeleton-sm skeleton-wave"
-			default:
-				return "skeleton skeleton-sm"
-			}
+			classes = append(classes, "h-5", "w-32", "rounded-md")
 		case "lg":
-			switch variant {
-			case "wave":
-				return "skeleton skeleton-lg skeleton-wave"
-			default:
-				return "skeleton skeleton-lg"
-			}
+			classes = append(classes, "h-8", "w-48", "rounded-md")
 		case "xl":
-			switch variant {
-			case "wave":
-				return "skeleton skeleton-xl skeleton-wave"
-			default:
-				return "skeleton skeleton-xl"
-			}
-		default: // md or empty
-			switch variant {
-			case "wave":
-				return "skeleton skeleton-wave"
-			default:
-				return "skeleton"
-			}
+			classes = append(classes, "h-10", "w-56", "rounded-md")
+		default: // md
+			classes = append(classes, "h-6", "w-40", "rounded-md")
 		}
+
+	case "avatar":
+		if props.Circle {
+			classes = append(classes, "rounded-full")
+		} else {
+			classes = append(classes, "rounded-lg")
+		}
+		switch props.Size {
+		case "xs":
+			classes = append(classes, "size-6")
+		case "sm":
+			classes = append(classes, "size-8")
+		case "lg":
+			classes = append(classes, "size-12")
+		case "xl":
+			classes = append(classes, "size-16")
+		default: // md
+			classes = append(classes, "size-10")
+		}
+		classes = append(classes, "shrink-0")
+
+	case "button":
+		switch props.Size {
+		case "sm":
+			classes = append(classes, "h-8", "w-20", "rounded-md")
+		case "lg":
+			classes = append(classes, "h-12", "w-32", "rounded-lg")
+		case "xl":
+			classes = append(classes, "h-14", "w-40", "rounded-lg")
+		default: // md
+			classes = append(classes, "h-10", "w-24", "rounded-md")
+		}
+
+	case "card":
+		classes = append(classes, "w-full", "rounded-lg")
+		switch props.Size {
+		case "sm":
+			classes = append(classes, "h-24")
+		case "lg":
+			classes = append(classes, "h-64")
+		case "xl":
+			classes = append(classes, "h-80")
+		default: // md
+			classes = append(classes, "h-48")
+		}
+
+	case "image":
+		if props.Circle {
+			classes = append(classes, "rounded-full")
+		} else {
+			classes = append(classes, "rounded-lg")
+		}
+		switch props.Size {
+		case "sm":
+			classes = append(classes, "w-24", "h-24")
+		case "lg":
+			classes = append(classes, "w-64", "h-64")
+		case "xl":
+			classes = append(classes, "w-80", "h-80")
+		default: // md
+			classes = append(classes, "w-48", "h-48")
+		}
+
+	default:
+		// Generic skeleton - basic rectangle
+		classes = append(classes, "h-4", "w-20", "rounded-md")
 	}
+
+	return strings.Join(classes, " ")
 }
 
-// buildSkeletonAttributes creates div attributes
-func buildSkeletonAttributes(props SkeletonProps) templ.Attributes {
-	attrs := templ.Attributes{
-		"class": getSkeletonClass(props.Shape, props.Size, props.Variant),
-	}
-
-	if props.ID != "" {
-		attrs["id"] = props.ID
-	}
-
-	// Custom dimensions
-	if props.Width != "" || props.Height != "" {
-		style := ""
-		if props.Width != "" {
-			style += "width: " + props.Width + ";"
-		}
-		if props.Height != "" {
-			style += "height: " + props.Height + ";"
-		}
-		attrs["style"] = style
-	}
-
-	// Data attributes
-	for key, value := range props.DataAttrs {
-		attrs["data-"+key] = value
-	}
-
-	// Merge custom attributes
-	for key, value := range props.Attributes {
-		attrs[key] = value
-	}
-
-	return attrs
-}
-
-// Skeleton renders a loading skeleton using custom CSS extension
+// Skeleton renders a loading skeleton using Tailwind utilities
+// No custom CSS classes - follows Basecoat documentation approach
 func Skeleton(props SkeletonProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -182,20 +174,96 @@ func Skeleton(props SkeletonProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		var templ_7745c5c3_Var2 = []any{getSkeletonClasses(props)}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, buildSkeletonAttributes(props))
+		if props.ID != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/skeleton.templ`, Line: 151, Col: 15}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "></div>")
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/skeleton.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.Width != "" || props.Height != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " style=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(templ.SafeCSS(buildInlineStyle(props.Width, props.Height)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/atoms/skeleton.templ`, Line: 155, Col: 68}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " aria-hidden=\"true\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, props.Attrs)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+// buildInlineStyle creates CSS style string for custom dimensions
+func buildInlineStyle(width, height string) string {
+	style := ""
+	if width != "" {
+		style += "width: " + width + ";"
+	}
+	if height != "" {
+		style += "height: " + height + ";"
+	}
+	return style
 }
 
 var _ = templruntime.GeneratedTemplate
