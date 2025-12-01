@@ -1,5 +1,7 @@
 package atoms
 
+import "github.com/niiniyare/ruun/views/components"
+
 // AlertProps defines all properties for the Alert atom using Basecoat classes
 type AlertProps struct {
 	// Core content
@@ -7,42 +9,52 @@ type AlertProps struct {
 	Description string          `json:"description,omitempty"`
 	Icon        templ.Component `json:"icon,omitempty"`
 	
-	// Basecoat variants
-	Variant string `json:"variant,omitempty"` // "", "destructive"
+	// Basecoat variants (using shared types)
+	Variant components.AlertVariant `json:"variant,omitempty"`
 	
-	// HTML attributes
-	ID string `json:"id,omitempty"`
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
 	
-	// ARIA accessibility
-	AriaRole        string `json:"ariaRole,omitempty"`
-	AriaLabel       string `json:"ariaLabel,omitempty"`
-	AriaDescribedBy string `json:"ariaDescribedBy,omitempty"`
+	// Shared component props (includes accessibility, HTMX, etc.)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-// getAlertClass generates the Basecoat alert class
-func getAlertClass(variant string) string {
-	if variant == "destructive" {
+// getAlertClass returns the correct Basecoat class following documentation patterns
+func getAlertClass(variant components.AlertVariant) string {
+	switch variant {
+	case components.AlertDestructive, components.AlertError:
 		return "alert-destructive"
+	default:
+		return "alert"
 	}
-	return "alert"
 }
 
 // Alert renders a Basecoat alert atom
 templ Alert(props AlertProps) {
 	<div 
-		class={getAlertClass(props.Variant)}
-		if props.ID != "" {
-			id={props.ID}
+		class={components.MergeClasses(getAlertClass(props.Variant), props.Base.ClassName)}
+		if props.Base.ID != "" {
+			id={props.Base.ID}
 		}
-		if props.AriaRole != "" {
-			role={props.AriaRole}
+		if props.Base.Style != "" {
+			style={props.Base.Style}
 		}
-		if props.AriaLabel != "" {
-			aria-label={props.AriaLabel}
+		if props.Base.A11y.Role != "" {
+			role={props.Base.A11y.Role}
 		}
-		if props.AriaDescribedBy != "" {
-			aria-describedby={props.AriaDescribedBy}
+		if props.Base.A11y.AriaLabel != "" {
+			aria-label={props.Base.A11y.AriaLabel}
 		}
+		if props.Base.A11y.AriaDescribedBy != "" {
+			aria-describedby={props.Base.A11y.AriaDescribedBy}
+		}
+		if props.Base.A11y.AriaLive != "" {
+			aria-live={props.Base.A11y.AriaLive}
+		}
+		if props.Base.A11y.AriaAtomic != "" {
+			aria-atomic={props.Base.A11y.AriaAtomic}
+		}
+		{ props.Attrs... }
 	>
 		// Icon (Basecoat alert supports SVG children)
 		if props.Icon != nil {

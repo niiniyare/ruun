@@ -522,6 +522,14 @@ func (l *Layout) Clone() *Layout {
 	return &clone
 }
 
+// Conversion Methods for Block Types
+
+// ToBlock converts a LayoutBlock to itself (for backward compatibility and API consistency)
+// Since Section, Group, Tab, Step are all aliases to LayoutBlock, this method works for all types
+func (lb *LayoutBlock) ToBlock() LayoutBlock {
+	return *lb
+}
+
 // layoutValidator validates layout configuration
 type layoutValidator struct{}
 

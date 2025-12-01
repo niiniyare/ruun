@@ -1,0 +1,681 @@
+package sections
+
+import (
+    "github.com/niiniyare/ruun/views/components/atoms"
+    "github.com/niiniyare/ruun/views/components/molecules"
+    "github.com/niiniyare/ruun/views/components/organisms"
+    "github.com/niiniyare/ruun/views/components/templates"
+)
+
+templ ExamplesPage() {
+    @DemoLayout("Examples", "examples") {
+        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap8}) {
+            @atoms.Heading(atoms.HeadingProps{Level: 1, Text: "Real-World Examples"})
+            @atoms.Text(atoms.TextProps{
+                Text: "Complete, production-ready implementations showcasing component combinations.",
+                Muted: true,
+            })
+            
+            // ════════════════════════════════════════════════════════════
+            // INVOICE LIST EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("Invoice Management Dashboard") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "Complete invoice list with filtering, search, and batch actions:",
+                    Muted: true,
+                })
+                
+                @templates.DashboardLayout(templates.DashboardLayoutProps{
+                    Header: invoiceListHeader(),
+                    Sidebar: invoiceListSidebar(),
+                    Content: invoiceListContent(),
+                })
+                
+                @atoms.Code(atoms.CodeProps{
+                    Text: `@templates.DashboardLayout(templates.DashboardLayoutProps{
+    Header: @molecules.Card(molecules.CardProps{
+        Children: @atoms.Flex(atoms.FlexProps{
+            Justify: atoms.JustifyBetween,
+            Align: atoms.AlignCenter,
+            Children: []templ.Component{
+                @atoms.Heading(atoms.HeadingProps{Level: 2, Text: "Invoices"}),
+                @atoms.ButtonGroup(atoms.ButtonGroupProps{
+                    Buttons: []atoms.ButtonProps{
+                        {Label: "Export", Variant: atoms.ButtonOutline},
+                        {Label: "New Invoice", Variant: atoms.ButtonPrimary},
+                    },
+                }),
+            },
+        }),
+    }),
+    Sidebar: @organisms.FilterPanel(organisms.FilterPanelProps{
+        Title: "Filters",
+        Filters: []organisms.FilterProps{
+            {Label: "Status", Options: ["Draft", "Sent", "Paid"]},
+            {Label: "Date Range", Type: "date-range"},
+            {Label: "Amount", Type: "number-range"},
+        },
+    }),
+    Content: @organisms.DataTable(organisms.DataTableProps{
+        Columns: []organisms.ColumnProps{
+            {Key: "number", Label: "Invoice #", Sortable: true},
+            {Key: "customer", Label: "Customer"},
+            {Key: "amount", Label: "Amount", Align: "right"},
+            {Key: "status", Label: "Status"},
+            {Key: "actions", Label: "Actions", Width: "120px"},
+        },
+        Data: invoiceData,
+        Pagination: true,
+        Selection: true,
+    }),
+})`,
+                    Block: true,
+                })
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // LOGIN FORM EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("Authentication Form") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "Clean login form with validation and social auth:",
+                    Muted: true,
+                })
+                
+                @templates.AuthLayout(templates.AuthLayoutProps{
+                    Title: "Sign In",
+                    Subtitle: "Welcome back to your account",
+                    Content: loginFormContent(),
+                })
+                
+                @atoms.Code(atoms.CodeProps{
+                    Text: `@templates.AuthLayout(templates.AuthLayoutProps{
+    Title: "Sign In",
+    Subtitle: "Welcome back to your account",
+    Content: @organisms.Form(organisms.FormProps{
+        Method: "POST",
+        Action: "/auth/login",
+        Children: @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6, Children: []templ.Component{
+            @molecules.FormField(molecules.FormFieldProps{
+                Label: "Email",
+                Required: true,
+                Input: @atoms.Input(atoms.InputProps{
+                    Type: atoms.InputEmail,
+                    Placeholder: "Enter your email",
+                    AutoComplete: "email",
+                }),
+            }),
+            @molecules.FormField(molecules.FormFieldProps{
+                Label: "Password",
+                Required: true,
+                Input: @atoms.Input(atoms.InputProps{
+                    Type: atoms.InputPassword,
+                    Placeholder: "Enter your password",
+                    AutoComplete: "current-password",
+                }),
+            }),
+            @atoms.Flex(atoms.FlexProps{
+                Justify: atoms.JustifyBetween,
+                Align: atoms.AlignCenter,
+                Children: []templ.Component{
+                    @atoms.Checkbox(atoms.CheckboxProps{
+                        Label: "Remember me",
+                        Name: "remember",
+                    }),
+                    @atoms.Link(atoms.LinkProps{
+                        Text: "Forgot password?",
+                        Href: "/auth/forgot",
+                    }),
+                },
+            }),
+            @atoms.Button(atoms.ButtonProps{
+                Label: "Sign In",
+                Type: atoms.ButtonSubmit,
+                Variant: atoms.ButtonPrimary,
+                Size: atoms.SizeLg,
+                FullWidth: true,
+            }),
+            @atoms.Divider(atoms.DividerProps{Text: "or"}),
+            @atoms.ButtonGroup(atoms.ButtonGroupProps{
+                Orientation: atoms.OrientationVertical,
+                Buttons: []atoms.ButtonProps{
+                    {Label: "Continue with Google", Variant: atoms.ButtonOutline},
+                    {Label: "Continue with GitHub", Variant: atoms.ButtonOutline},
+                },
+            }),
+        }}),
+    }),
+})`,
+                    Block: true,
+                })
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // DASHBOARD EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("Executive Dashboard") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "Comprehensive dashboard with stats, charts, and recent activity:",
+                    Muted: true,
+                })
+                
+                @templates.DashboardLayout(templates.DashboardLayoutProps{
+                    Content: dashboardContent(),
+                })
+                
+                @atoms.Code(atoms.CodeProps{
+                    Text: `@templates.DashboardLayout(templates.DashboardLayoutProps{
+    Content: @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6, Children: []templ.Component{
+        // Stats Row
+        @atoms.Grid(atoms.GridProps{
+            Cols: atoms.Cols4,
+            Gap: atoms.Gap4,
+            Children: []templ.Component{
+                @organisms.StatsCard(organisms.StatsCardProps{
+                    Title: "Total Revenue",
+                    Value: "$124,592",
+                    Change: "+12.5%",
+                    Trend: "up",
+                    Icon: "dollar-sign",
+                }),
+                @organisms.StatsCard(organisms.StatsCardProps{
+                    Title: "Active Users",
+                    Value: "1,429",
+                    Change: "+5.2%",
+                    Trend: "up",
+                    Icon: "users",
+                }),
+                @organisms.StatsCard(organisms.StatsCardProps{
+                    Title: "Conversion Rate",
+                    Value: "3.24%",
+                    Change: "-0.8%",
+                    Trend: "down",
+                    Icon: "trending-up",
+                }),
+                @organisms.StatsCard(organisms.StatsCardProps{
+                    Title: "Support Tickets",
+                    Value: "89",
+                    Change: "-23.1%",
+                    Trend: "down",
+                    Icon: "help-circle",
+                }),
+            },
+        }),
+        
+        // Charts and Tables Row
+        @atoms.Grid(atoms.GridProps{
+            Cols: atoms.Cols2,
+            Gap: atoms.Gap6,
+            Children: []templ.Component{
+                @molecules.Card(molecules.CardProps{
+                    Title: "Revenue Trend",
+                    Content: @organisms.Chart(organisms.ChartProps{
+                        Type: "line",
+                        Data: chartData,
+                        Height: "300px",
+                    }),
+                }),
+                @molecules.Card(molecules.CardProps{
+                    Title: "Recent Orders",
+                    Content: @organisms.DataTable(organisms.DataTableProps{
+                        Columns: orderColumns,
+                        Data: recentOrders,
+                        Compact: true,
+                    }),
+                }),
+            },
+        }),
+    }}),
+})`,
+                    Block: true,
+                })
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // SETTINGS FORM EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("User Settings") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "Tabbed settings form with validation and file upload:",
+                    Muted: true,
+                })
+                
+                @templates.PageLayout(templates.PageLayoutProps{
+                    Title: "Account Settings",
+                    Content: settingsContent(),
+                })
+                
+                @atoms.Code(atoms.CodeProps{
+                    Text: `@templates.PageLayout(templates.PageLayoutProps{
+    Title: "Account Settings",
+    Breadcrumbs: []templates.BreadcrumbProps{
+        {Text: "Dashboard", Href: "/dashboard"},
+        {Text: "Settings", Active: true},
+    },
+    Content: @organisms.Tabs(organisms.TabsProps{
+        Tabs: []organisms.TabProps{
+            {
+                Key: "profile",
+                Label: "Profile",
+                Content: @organisms.Form(organisms.FormProps{
+                    Children: @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4, Children: []templ.Component{
+                        @atoms.Grid(atoms.GridProps{
+                            Cols: atoms.Cols2,
+                            Gap: atoms.Gap4,
+                            Children: []templ.Component{
+                                @molecules.FormField(molecules.FormFieldProps{
+                                    Label: "First Name",
+                                    Input: @atoms.Input(atoms.InputProps{
+                                        Placeholder: "Enter first name",
+                                        Value: "John",
+                                    }),
+                                }),
+                                @molecules.FormField(molecules.FormFieldProps{
+                                    Label: "Last Name",
+                                    Input: @atoms.Input(atoms.InputProps{
+                                        Placeholder: "Enter last name",
+                                        Value: "Doe",
+                                    }),
+                                }),
+                            },
+                        }),
+                        @molecules.FormField(molecules.FormFieldProps{
+                            Label: "Profile Picture",
+                            HelpText: "Upload a profile picture (JPG, PNG, max 2MB)",
+                            Input: @atoms.FileUpload(atoms.FileUploadProps{
+                                Accept: "image/*",
+                                MaxSize: "2MB",
+                            }),
+                        }),
+                        @atoms.ButtonGroup(atoms.ButtonGroupProps{
+                            Justify: atoms.JustifyEnd,
+                            Buttons: []atoms.ButtonProps{
+                                {Label: "Cancel", Variant: atoms.ButtonOutline},
+                                {Label: "Save Changes", Variant: atoms.ButtonPrimary},
+                            },
+                        }),
+                    }}),
+                }),
+            },
+            {
+                Key: "security",
+                Label: "Security",
+                Content: @organisms.Form(organisms.FormProps{
+                    Children: @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4, Children: []templ.Component{
+                        @molecules.FormField(molecules.FormFieldProps{
+                            Label: "Current Password",
+                            Input: @atoms.Input(atoms.InputProps{
+                                Type: atoms.InputPassword,
+                                Placeholder: "Enter current password",
+                            }),
+                        }),
+                        @molecules.FormField(molecules.FormFieldProps{
+                            Label: "New Password",
+                            Input: @atoms.Input(atoms.InputProps{
+                                Type: atoms.InputPassword,
+                                Placeholder: "Enter new password",
+                            }),
+                        }),
+                        @atoms.Switch(atoms.SwitchProps{
+                            Label: "Enable two-factor authentication",
+                            Description: "Add an extra layer of security to your account",
+                        }),
+                    }}),
+                }),
+            },
+        },
+        DefaultTab: "profile",
+    }),
+})`,
+                    Block: true,
+                })
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // PRODUCT GRID EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("Product Catalog") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "E-commerce product grid with search, filters, and wishlist:",
+                    Muted: true,
+                })
+                
+                @templates.PageLayout(templates.PageLayoutProps{
+                    Title: "Products",
+                    Content: productGridContent(),
+                })
+                
+                @atoms.Code(atoms.CodeProps{
+                    Text: `@templates.PageLayout(templates.PageLayoutProps{
+    Title: "Products",
+    Content: @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6, Children: []templ.Component{
+        // Search and Filters
+        @atoms.Flex(atoms.FlexProps{
+            Justify: atoms.JustifyBetween,
+            Align: atoms.AlignCenter,
+            Gap: atoms.Gap4,
+            Children: []templ.Component{
+                @molecules.SearchBox(molecules.SearchBoxProps{
+                    Placeholder: "Search products...",
+                    Size: atoms.SizeLg,
+                }),
+                @atoms.ButtonGroup(atoms.ButtonGroupProps{
+                    Buttons: []atoms.ButtonProps{
+                        {Label: "All", Variant: atoms.ButtonPrimary},
+                        {Label: "Electronics", Variant: atoms.ButtonOutline},
+                        {Label: "Clothing", Variant: atoms.ButtonOutline},
+                        {Label: "Home", Variant: atoms.ButtonOutline},
+                    },
+                }),
+            },
+        }),
+        
+        // Product Grid
+        @atoms.Grid(atoms.GridProps{
+            Cols: atoms.Cols4,
+            Gap: atoms.Gap6,
+            Children: []templ.Component{
+                @molecules.ProductCard(molecules.ProductCardProps{
+                    Image: "/images/laptop.jpg",
+                    Title: "MacBook Pro 16\"",
+                    Price: "$2,399",
+                    Rating: 4.8,
+                    Reviews: 128,
+                    Badge: "Best Seller",
+                    OnAddToCart: "addToCart('laptop-001')",
+                    OnAddToWishlist: "addToWishlist('laptop-001')",
+                }),
+                @molecules.ProductCard(molecules.ProductCardProps{
+                    Image: "/images/phone.jpg",
+                    Title: "iPhone 14 Pro",
+                    Price: "$999",
+                    OriginalPrice: "$1,099",
+                    Rating: 4.6,
+                    Reviews: 89,
+                    Badge: "Sale",
+                    OnAddToCart: "addToCart('phone-001')",
+                    OnAddToWishlist: "addToWishlist('phone-001')",
+                }),
+                // ... more products
+            },
+        }),
+        
+        // Pagination
+        @organisms.Pagination(organisms.PaginationProps{
+            CurrentPage: 1,
+            TotalPages: 12,
+            OnPageChange: "loadPage",
+        }),
+    }}),
+})`,
+                    Block: true,
+                })
+            }
+        }
+    }
+}
+
+// Helper components for examples
+
+templ invoiceListHeader() {
+    @atoms.Flex(atoms.FlexProps{
+        Justify: atoms.JustifyBetween,
+        Align: atoms.AlignCenter,
+    }) {
+        @atoms.Heading(atoms.HeadingProps{Level: 2, Text: "Invoices"})
+        @atoms.ButtonGroup(atoms.ButtonGroupProps{
+            Buttons: []atoms.ButtonProps{
+                {Label: "Export", Variant: atoms.ButtonOutline},
+                {Label: "New Invoice", Variant: atoms.ButtonPrimary},
+            },
+        })
+    }
+}
+
+templ invoiceListSidebar() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+        @atoms.Heading(atoms.HeadingProps{Level: 3, Text: "Filters"})
+        @molecules.FormField(molecules.FormFieldProps{
+            Label: "Status",
+            Type: molecules.FormFieldSelect,
+            Options: []molecules.FormFieldOption{
+                {Value: "", Label: "All Status"},
+                {Value: "draft", Label: "Draft"},
+                {Value: "sent", Label: "Sent"},
+                {Value: "paid", Label: "Paid"},
+            },
+        })
+        @molecules.FormField(molecules.FormFieldProps{
+            Label: "Date Range",
+            Type: molecules.FormFieldDate,
+        })
+    }
+}
+
+templ invoiceListContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+        @atoms.Text(atoms.TextProps{Text: "Sample invoices data would go here", Muted: true})
+        
+        @molecules.Card(molecules.CardProps{
+            Title: "INV-001",
+            Description: "Acme Corp - $1,250.00",
+        }) {
+            @atoms.Badge(atoms.BadgeProps{Text: "Paid", Variant: atoms.BadgeSuccess})
+        }
+        
+        @molecules.Card(molecules.CardProps{
+            Title: "INV-002", 
+            Description: "Tech Solutions - $890.50",
+        }) {
+            @atoms.Badge(atoms.BadgeProps{Text: "Sent", Variant: atoms.BadgeWarning})
+        }
+    }
+}
+
+templ loginFormContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+        @molecules.FormField(molecules.FormFieldProps{
+            Label: "Email",
+            Name: "email",
+            Type: molecules.FormFieldEmail,
+            Placeholder: "Enter your email",
+            Required: true,
+        })
+        
+        @molecules.FormField(molecules.FormFieldProps{
+            Label: "Password",
+            Name: "password", 
+            Type: molecules.FormFieldPassword,
+            Placeholder: "Enter your password",
+            Required: true,
+        })
+        
+        @atoms.Flex(atoms.FlexProps{
+            Justify: atoms.JustifyBetween,
+            Align: atoms.AlignCenter,
+        }) {
+            @atoms.Checkbox(atoms.CheckboxProps{
+                Label: "Remember me",
+                Name: "remember",
+            })
+            @atoms.Link(atoms.LinkProps{
+                Text: "Forgot password?",
+                Href: "/auth/forgot",
+            })
+        }
+        
+        @atoms.Button(atoms.ButtonProps{
+            Label: "Sign In",
+            Type: atoms.ButtonSubmit,
+            Variant: atoms.ButtonPrimary,
+            Size: atoms.SizeLg,
+            FullWidth: true,
+        })
+    }
+}
+
+templ dashboardContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+        // Stats Row
+        @atoms.Grid(atoms.GridProps{Cols: 4, Gap: atoms.Gap4}) {
+            @molecules.Card(molecules.CardProps{
+                Title: "Total Revenue",
+                Description: "$124,592",
+            }) {
+                @atoms.Text(atoms.TextProps{Text: "+12.5%", Color: atoms.ColorSuccess})
+            }
+            
+            @molecules.Card(molecules.CardProps{
+                Title: "Active Users",
+                Description: "1,429",
+            }) {
+                @atoms.Text(atoms.TextProps{Text: "+5.2%", Color: atoms.ColorSuccess})
+            }
+            
+            @molecules.Card(molecules.CardProps{
+                Title: "Conversion Rate",
+                Description: "3.24%",
+            }) {
+                @atoms.Text(atoms.TextProps{Text: "-0.8%", Color: atoms.ColorError})
+            }
+            
+            @molecules.Card(molecules.CardProps{
+                Title: "Support Tickets",
+                Description: "89",
+            }) {
+                @atoms.Text(atoms.TextProps{Text: "-23.1%", Color: atoms.ColorSuccess})
+            }
+        }
+        
+        // Charts Row
+        @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap6}) {
+            @molecules.Card(molecules.CardProps{
+                Title: "Revenue Trend",
+            }) {
+                @atoms.Box(atoms.BoxProps{Padding: atoms.P8}) {
+                    @atoms.Text(atoms.TextProps{
+                        Text: "[Chart Component Here]",
+                        Muted: true,
+                        Align: atoms.AlignCenter,
+                    })
+                }
+            }
+            
+            @molecules.Card(molecules.CardProps{
+                Title: "Recent Orders",
+            }) {
+                @atoms.Box(atoms.BoxProps{Padding: atoms.P8}) {
+                    @atoms.Text(atoms.TextProps{
+                        Text: "[DataTable Component Here]",
+                        Muted: true,
+                        Align: atoms.AlignCenter,
+                    })
+                }
+            }
+        }
+    }
+}
+
+templ settingsContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+        @atoms.Text(atoms.TextProps{Text: "Profile Settings", Size: atoms.TextLg, Weight: atoms.WeightBold})
+        
+        @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap4}) {
+            @molecules.FormField(molecules.FormFieldProps{
+                Label: "First Name",
+                Name: "firstName",
+                Type: molecules.FormFieldText,
+                Value: "John",
+            })
+            
+            @molecules.FormField(molecules.FormFieldProps{
+                Label: "Last Name",
+                Name: "lastName",
+                Type: molecules.FormFieldText,
+                Value: "Doe",
+            })
+        }
+        
+        @atoms.Divider(atoms.DividerProps{})
+        
+        @atoms.Text(atoms.TextProps{Text: "Security Settings", Size: atoms.TextLg, Weight: atoms.WeightBold})
+        
+        @molecules.FormField(molecules.FormFieldProps{
+            Label: "Current Password",
+            Name: "currentPassword",
+            Type: molecules.FormFieldPassword,
+            Placeholder: "Enter current password",
+        })
+        
+        @atoms.Switch(atoms.SwitchProps{
+            Label: "Enable two-factor authentication",
+            Description: "Add an extra layer of security to your account",
+        })
+        
+        @atoms.ButtonGroup(atoms.ButtonGroupProps{
+            Buttons: []atoms.ButtonProps{
+                {Label: "Cancel", Variant: atoms.ButtonOutline},
+                {Label: "Save Changes", Variant: atoms.ButtonPrimary},
+            },
+        })
+    }
+}
+
+templ productGridContent() {
+    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
+        // Search and Filters
+        @atoms.Flex(atoms.FlexProps{
+            Justify: atoms.JustifyBetween,
+            Align: atoms.AlignCenter,
+            Gap: atoms.Gap4,
+        }) {
+            @molecules.SearchBox(molecules.SearchBoxProps{
+                Placeholder: "Search products...",
+                Size: molecules.SearchBoxSizeLG,
+            })
+            
+            @atoms.ButtonGroup(atoms.ButtonGroupProps{
+                Buttons: []atoms.ButtonProps{
+                    {Label: "All", Variant: atoms.ButtonPrimary},
+                    {Label: "Electronics", Variant: atoms.ButtonOutline},
+                    {Label: "Clothing", Variant: atoms.ButtonOutline},
+                },
+            })
+        }
+        
+        // Product Grid
+        @atoms.Grid(atoms.GridProps{Cols: 3, Gap: atoms.Gap6}) {
+            @molecules.Card(molecules.CardProps{
+                Title: "MacBook Pro 16\"",
+            }) {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
+                    @atoms.Badge(atoms.BadgeProps{Text: "Best Seller", Variant: atoms.BadgePrimary})
+                    @atoms.Text(atoms.TextProps{Text: "$2,399", Size: atoms.TextLg, Weight: atoms.WeightBold})
+                    @atoms.Text(atoms.TextProps{Text: "⭐ 4.8 (128 reviews)", Size: atoms.TextSm, Muted: true})
+                }
+            }
+            
+            @molecules.Card(molecules.CardProps{
+                Title: "iPhone 14 Pro",
+            }) {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
+                    @atoms.Badge(atoms.BadgeProps{Text: "Sale", Variant: atoms.BadgeError})
+                    @atoms.Flex(atoms.FlexProps{Align: atoms.AlignCenter, Gap: atoms.Gap2}) {
+                        @atoms.Text(atoms.TextProps{Text: "$999", Size: atoms.TextLg, Weight: atoms.WeightBold})
+                        @atoms.Text(atoms.TextProps{Text: "$1,099", Size: atoms.TextSm, Muted: true})
+                    }
+                    @atoms.Text(atoms.TextProps{Text: "⭐ 4.6 (89 reviews)", Size: atoms.TextSm, Muted: true})
+                }
+            }
+            
+            @molecules.Card(molecules.CardProps{
+                Title: "AirPods Pro",
+            }) {
+                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
+                    @atoms.Text(atoms.TextProps{Text: "$249", Size: atoms.TextLg, Weight: atoms.WeightBold})
+                    @atoms.Text(atoms.TextProps{Text: "⭐ 4.7 (203 reviews)", Size: atoms.TextSm, Muted: true})
+                }
+            }
+        }
+    }
+}
