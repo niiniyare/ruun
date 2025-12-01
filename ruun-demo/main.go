@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
-	"github.com/niiniyare/ruun/ruun-demo/sections"
+	"ruun-demo/sections"
 )
 
 func main() {

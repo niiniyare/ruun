@@ -33,7 +33,9 @@ func main() {
 	// Test unified Binding
 	binding := &schema.Binding{
 		Model: "user.name",
-		Event: "input",
+		On: map[string]string{
+			"input": "handleInput",
+		},
 	}
 	
 	// Test unified Conditional

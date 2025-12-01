@@ -1,0 +1,31 @@
+package atoms
+
+import "github.com/a-h/templ"
+
+type CodeProps struct {
+    Text  string
+    Block bool
+    Lang  string
+    Class string
+    Attrs templ.Attributes
+}
+
+templ Code(props CodeProps) {
+    if props.Block {
+        <pre class={ templ.Classes("bg-muted rounded-md p-4 overflow-x-auto", props.Class) } { props.Attrs... }>
+            <code class="text-sm font-mono">
+                { props.Text }
+            </code>
+        </pre>
+    } else {
+        <code
+            class={ templ.Classes(
+                "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm",
+                props.Class,
+            ) }
+            { props.Attrs... }
+        >
+            { props.Text }
+        </code>
+    }
+}

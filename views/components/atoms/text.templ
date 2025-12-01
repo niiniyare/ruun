@@ -1,0 +1,276 @@
+package atoms
+
+import "github.com/niiniyare/ruun/views/components"
+
+// TextVariant represents text visual style variations
+type TextVariant string
+
+const (
+	TextDefault   TextVariant = "default"
+	TextPrimary   TextVariant = "primary"
+	TextSecondary TextVariant = "secondary"
+	TextMuted     TextVariant = "muted"
+	TextAccent    TextVariant = "accent"
+	TextSuccess   TextVariant = "success"
+	TextWarning   TextVariant = "warning"
+	TextError     TextVariant = "error"
+)
+
+// TextSize represents text size variations
+type TextSize string
+
+const (
+	TextXs   TextSize = "xs"   // 12px
+	TextSm   TextSize = "sm"   // 14px
+	TextBase TextSize = "base" // 16px
+	TextLg   TextSize = "lg"   // 18px
+	TextXl   TextSize = "xl"   // 20px
+	Text2xl  TextSize = "2xl"  // 24px
+)
+
+// TextWeight represents font weight variations
+type TextWeight string
+
+const (
+	WeightNormal    TextWeight = "normal"
+	WeightMedium    TextWeight = "medium"
+	WeightSemibold  TextWeight = "semibold"
+	WeightBold      TextWeight = "bold"
+	WeightExtrabold TextWeight = "extrabold"
+)
+
+// TextAlign represents text alignment options
+type TextAlign string
+
+const (
+	AlignLeft    TextAlign = "left"
+	AlignCenter  TextAlign = "center"
+	AlignRight   TextAlign = "right"
+	AlignJustify TextAlign = "justify"
+)
+
+// TextProps defines all properties for the Text atom
+// Uses Tailwind CSS utilities since Basecoat doesn't provide text classes
+type TextProps struct {
+	// Content
+	Text string `json:"text"`
+
+	// Visual styling
+	Variant TextVariant `json:"variant,omitempty"` // Color variant
+	Size    TextSize    `json:"size,omitempty"`    // Font size
+	Weight  TextWeight  `json:"weight,omitempty"`  // Font weight
+	Align   TextAlign   `json:"align,omitempty"`   // Text alignment
+
+	// Typography enhancements
+	Leading   string `json:"leading,omitempty"`   // Line height (leading-tight, leading-normal, etc.)
+	Tracking  string `json:"tracking,omitempty"`  // Letter spacing (tracking-tight, tracking-normal, etc.)
+	Italic    bool   `json:"italic,omitempty"`    // Italic text
+	Underline bool   `json:"underline,omitempty"` // Underlined text
+
+	// Element type
+	Element string `json:"element,omitempty"` // HTML element (p, span, div, etc.) - defaults to "p"
+
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+
+	// Shared component props (includes ClassName for additional styling)
+	Base components.BaseProps `json:"base,omitempty"`
+}
+
+// getTextSizeClasses returns font size classes
+func getTextSizeClasses(size TextSize) string {
+	switch size {
+	case TextXs:
+		return "text-xs"
+	case TextSm:
+		return "text-sm"
+	case TextLg:
+		return "text-lg"
+	case TextXl:
+		return "text-xl"
+	case Text2xl:
+		return "text-2xl"
+	default: // TextBase
+		return "text-base"
+	}
+}
+
+// getTextVariantClasses returns color variant classes
+func getTextVariantClasses(variant TextVariant) string {
+	switch variant {
+	case TextPrimary:
+		return "text-primary"
+	case TextSecondary:
+		return "text-secondary"
+	case TextMuted:
+		return "text-muted-foreground"
+	case TextAccent:
+		return "text-accent-foreground"
+	case TextSuccess:
+		return "text-success"
+	case TextWarning:
+		return "text-warning"
+	case TextError:
+		return "text-error"
+	default: // TextDefault
+		return "text-foreground"
+	}
+}
+
+// getTextWeightClasses returns font weight classes
+func getTextWeightClasses(weight TextWeight) string {
+	switch weight {
+	case WeightNormal:
+		return "font-normal"
+	case WeightMedium:
+		return "font-medium"
+	case WeightSemibold:
+		return "font-semibold"
+	case WeightBold:
+		return "font-bold"
+	case WeightExtrabold:
+		return "font-extrabold"
+	default:
+		return "font-normal" // Normal is good default for body text
+	}
+}
+
+// getTextAlignClasses returns text alignment classes
+func getTextAlignClasses(align TextAlign) string {
+	switch align {
+	case AlignCenter:
+		return "text-center"
+	case AlignRight:
+		return "text-right"
+	case AlignJustify:
+		return "text-justify"
+	default: // AlignLeft or empty
+		return "text-left"
+	}
+}
+
+// buildTextAttributes creates all HTML attributes for the text element
+func buildTextAttributes(props TextProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getTextSizeClasses(props.Size),
+			getTextVariantClasses(props.Variant),
+			getTextWeightClasses(props.Weight),
+			getTextAlignClasses(props.Align),
+			templ.KV("italic", props.Italic),
+			templ.KV("underline", props.Underline),
+			templ.KV(props.Leading, props.Leading != ""),
+			templ.KV(props.Tracking, props.Tracking != ""),
+			props.Base.ClassName, // Allow additional Tailwind utilities
+		),
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+
+	if props.Base.Style != "" {
+		attrs["style"] = props.Base.Style
+	}
+
+	// HTMX attributes
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Put != "" {
+		attrs["hx-put"] = props.Base.HTMX.Put
+	}
+	if props.Base.HTMX.Patch != "" {
+		attrs["hx-patch"] = props.Base.HTMX.Patch
+	}
+	if props.Base.HTMX.Delete != "" {
+		attrs["hx-delete"] = props.Base.HTMX.Delete
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+	if props.Base.HTMX.Confirm != "" {
+		attrs["hx-confirm"] = props.Base.HTMX.Confirm
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLabelledBy != "" {
+		attrs["aria-labelledby"] = props.Base.A11y.AriaLabelledBy
+	}
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+	if props.Base.A11y.TabIndex != "" {
+		attrs["tabindex"] = props.Base.A11y.TabIndex
+	}
+
+	// Event handlers
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Data attributes
+	for key, value := range props.Base.DataAttrs {
+		attrs["data-"+key] = value
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// Text renders a text element with comprehensive typography styling
+// Uses Tailwind utilities for all styling since Basecoat doesn't provide text classes
+templ Text(props TextProps) {
+	// Default to paragraph if no element specified
+	switch props.Element {
+		case "span":
+			<span { buildTextAttributes(props)... }>
+				{ props.Text }
+			</span>
+		case "div":
+			<div { buildTextAttributes(props)... }>
+				{ props.Text }
+			</div>
+		case "small":
+			<small { buildTextAttributes(props)... }>
+				{ props.Text }
+			</small>
+		case "strong":
+			<strong { buildTextAttributes(props)... }>
+				{ props.Text }
+			</strong>
+		case "em":
+			<em { buildTextAttributes(props)... }>
+				{ props.Text }
+			</em>
+		case "code":
+			<code { buildTextAttributes(props)... }>
+				{ props.Text }
+			</code>
+		default:
+			// Default to paragraph
+			<p { buildTextAttributes(props)... }>
+				{ props.Text }
+			</p>
+	}
+}

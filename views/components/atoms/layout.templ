@@ -1,0 +1,394 @@
+package atoms
+
+import "github.com/a-h/templ"
+
+// =============================================================================
+// Spacing and Size Types
+// =============================================================================
+
+type Spacing string
+
+const (
+    Gap0  Spacing = "gap-0"
+    Gap1  Spacing = "gap-1"
+    Gap2  Spacing = "gap-2"
+    Gap3  Spacing = "gap-3"
+    Gap4  Spacing = "gap-4"
+    Gap5  Spacing = "gap-5"
+    Gap6  Spacing = "gap-6"
+    Gap8  Spacing = "gap-8"
+    Gap10 Spacing = "gap-10"
+    Gap12 Spacing = "gap-12"
+)
+
+// Padding constants
+const (
+    P0  Spacing = "p-0"
+    P1  Spacing = "p-1"
+    P2  Spacing = "p-2"
+    P3  Spacing = "p-3"
+    P4  Spacing = "p-4"
+    P5  Spacing = "p-5"
+    P6  Spacing = "p-6"
+    P8  Spacing = "p-8"
+    P10 Spacing = "p-10"
+    P12 Spacing = "p-12"
+)
+
+// Margin constants
+const (
+    M0  Spacing = "m-0"
+    M1  Spacing = "m-1"
+    M2  Spacing = "m-2"
+    M3  Spacing = "m-3"
+    M4  Spacing = "m-4"
+    M5  Spacing = "m-5"
+    M6  Spacing = "m-6"
+    M8  Spacing = "m-8"
+)
+
+type FlexDirection string
+
+const (
+    Row        FlexDirection = "flex-row"
+    Col        FlexDirection = "flex-col"
+    RowReverse FlexDirection = "flex-row-reverse"
+    ColReverse FlexDirection = "flex-col-reverse"
+)
+
+type FlexWrap string
+
+const (
+    NoWrap      FlexWrap = "flex-nowrap"
+    Wrap        FlexWrap = "flex-wrap"
+    WrapReverse FlexWrap = "flex-wrap-reverse"
+)
+
+type Justify string
+
+const (
+    JustifyStart   Justify = "justify-start"
+    JustifyCenter  Justify = "justify-center"
+    JustifyEnd     Justify = "justify-end"
+    JustifyBetween Justify = "justify-between"
+    JustifyAround  Justify = "justify-around"
+    JustifyEvenly  Justify = "justify-evenly"
+)
+
+type Align string
+
+const (
+    AlignStart    Align = "items-start"
+    AlignCenter   Align = "items-center"
+    AlignEnd      Align = "items-end"
+    AlignStretch  Align = "items-stretch"
+    AlignBaseline Align = "items-baseline"
+)
+
+type Rounded string
+
+const (
+    RoundedNone Rounded = "rounded-none"
+    RoundedSm   Rounded = "rounded-sm"
+    RoundedMd   Rounded = "rounded-md"
+    RoundedLg   Rounded = "rounded-lg"
+    RoundedXl   Rounded = "rounded-xl"
+    RoundedFull Rounded = "rounded-full"
+)
+
+type Shadow string
+
+const (
+    ShadowNone Shadow = "shadow-none"
+    ShadowSm   Shadow = "shadow-sm"
+    ShadowMd   Shadow = "shadow-md"
+    ShadowLg   Shadow = "shadow-lg"
+    ShadowXl   Shadow = "shadow-xl"
+)
+
+type BgColor string
+
+const (
+    BgBackground  BgColor = "bg-background"
+    BgMuted       BgColor = "bg-muted"
+    BgCard        BgColor = "bg-card"
+    BgPrimary     BgColor = "bg-primary"
+    BgSecondary   BgColor = "bg-secondary"
+    BgAccent      BgColor = "bg-accent"
+    BgDestructive BgColor = "bg-destructive"
+)
+
+type MaxWidth string
+
+const (
+    MaxWidthXs   MaxWidth = "max-w-xs"
+    MaxWidthSm   MaxWidth = "max-w-sm"
+    MaxWidthMd   MaxWidth = "max-w-md"
+    MaxWidthLg   MaxWidth = "max-w-lg"
+    MaxWidthXl   MaxWidth = "max-w-xl"
+    MaxWidth2xl  MaxWidth = "max-w-2xl"
+    MaxWidthFull MaxWidth = "max-w-full"
+)
+
+type Width string
+
+const (
+    WAuto Width = "w-auto"
+    WFull Width = "w-full"
+    W48   Width = "w-48"
+    W64   Width = "w-64"
+    W96   Width = "w-96"
+)
+
+type Height string
+
+const (
+    HAuto Height = "h-auto"
+    HFull Height = "h-full"
+    H4    Height = "h-4"
+    H8    Height = "h-8"
+    H12   Height = "h-12"
+)
+
+// =============================================================================
+// Flex Component
+// =============================================================================
+
+type FlexProps struct {
+    Direction FlexDirection
+    Wrap      FlexWrap
+    Justify   Justify
+    Align     Align
+    Gap       Spacing
+    Padding   Spacing
+    Class     string
+    Attrs     templ.Attributes
+}
+
+templ Flex(props FlexProps) {
+    <div
+        class={ templ.Classes(
+            "flex",
+            string(props.Direction),
+            string(props.Wrap),
+            string(props.Justify),
+            string(props.Align),
+            string(props.Gap),
+            string(props.Padding),
+            props.Class,
+        ) }
+        { props.Attrs... }
+    >
+        { children... }
+    </div>
+}
+
+// =============================================================================
+// Grid Component
+// =============================================================================
+
+type GridProps struct {
+    Cols    int
+    Rows    int
+    Gap     Spacing
+    Padding Spacing
+    Class   string
+    Attrs   templ.Attributes
+}
+
+func gridColsClass(cols int) string {
+    switch cols {
+    case 1:
+        return "grid-cols-1"
+    case 2:
+        return "grid-cols-2"
+    case 3:
+        return "grid-cols-3"
+    case 4:
+        return "grid-cols-4"
+    case 5:
+        return "grid-cols-5"
+    case 6:
+        return "grid-cols-6"
+    case 12:
+        return "grid-cols-12"
+    default:
+        return "grid-cols-1"
+    }
+}
+
+templ Grid(props GridProps) {
+    <div
+        class={ templ.Classes(
+            "grid",
+            gridColsClass(props.Cols),
+            string(props.Gap),
+            string(props.Padding),
+            props.Class,
+        ) }
+        { props.Attrs... }
+    >
+        { children... }
+    </div>
+}
+
+// =============================================================================
+// Stack Component (simplified Flex - vertical by default)
+// =============================================================================
+
+type StackDirection string
+
+const (
+    Vertical   StackDirection = "flex-col"
+    Horizontal StackDirection = "flex-row"
+)
+
+type StackProps struct {
+    Direction StackDirection
+    Gap       Spacing
+    Align     Align
+    Padding   Spacing
+    Class     string
+    Attrs     templ.Attributes
+}
+
+templ Stack(props StackProps) {
+    <div
+        class={ templ.Classes(
+            "flex",
+            "flex-col",
+            templ.KV(string(props.Direction), props.Direction != "" && props.Direction != Vertical),
+            string(props.Gap),
+            string(props.Align),
+            string(props.Padding),
+            props.Class,
+        ) }
+        { props.Attrs... }
+    >
+        { children... }
+    </div>
+}
+
+// =============================================================================
+// Box Component (generic container)
+// =============================================================================
+
+type BoxProps struct {
+    Padding  Spacing
+    Margin   Spacing
+    BgColor  BgColor
+    Border   bool
+    Rounded  Rounded
+    Shadow   Shadow
+    MaxWidth MaxWidth
+    Width    Width
+    Height   Height
+    Class    string
+    Attrs    templ.Attributes
+}
+
+templ Box(props BoxProps) {
+    <div
+        class={ templ.Classes(
+            string(props.Padding),
+            string(props.Margin),
+            string(props.BgColor),
+            templ.KV("border", props.Border),
+            string(props.Rounded),
+            string(props.Shadow),
+            string(props.MaxWidth),
+            string(props.Width),
+            string(props.Height),
+            props.Class,
+        ) }
+        { props.Attrs... }
+    >
+        { children... }
+    </div>
+}
+
+// =============================================================================
+// Center Component
+// =============================================================================
+
+type CenterProps struct {
+    Padding  Spacing
+    MaxWidth MaxWidth
+    Class    string
+    Attrs    templ.Attributes
+}
+
+templ Center(props CenterProps) {
+    <div
+        class={ templ.Classes(
+            "flex",
+            "items-center",
+            "justify-center",
+            string(props.Padding),
+            string(props.MaxWidth),
+            props.Class,
+        ) }
+        { props.Attrs... }
+    >
+        { children... }
+    </div>
+}
+
+// =============================================================================
+// Spacer Component
+// =============================================================================
+
+type SpacerProps struct {
+    Size  Spacing
+    Grow  bool
+    Class string
+}
+
+templ Spacer(props SpacerProps) {
+    if props.Grow {
+        <div class={ templ.Classes("flex-grow", props.Class) }></div>
+    } else {
+        <div class={ templ.Classes(string(props.Size), props.Class) }></div>
+    }
+}
+
+// =============================================================================
+// Divider/Separator Component
+// =============================================================================
+
+type Orientation string
+
+const (
+    OrientationHorizontal Orientation = "horizontal"
+    OrientationVertical   Orientation = "vertical"
+)
+
+type DividerProps struct {
+    Orientation Orientation
+    Label       string
+    Class       string
+}
+
+templ Divider(props DividerProps) {
+    if props.Label != "" {
+        <div class={ templ.Classes("flex items-center gap-4", props.Class) }>
+            <div class="flex-1 border-t border-border"></div>
+            <span class="text-sm text-muted-foreground">{ props.Label }</span>
+            <div class="flex-1 border-t border-border"></div>
+        </div>
+    } else if props.Orientation == OrientationVertical {
+        <div class={ templ.Classes("w-px bg-border self-stretch", props.Class) }></div>
+    } else {
+        <div class={ templ.Classes("h-px bg-border w-full", props.Class) }></div>
+    }
+}
+
+// Separator is an alias for Divider
+type SeparatorProps struct {
+    Orientation Orientation
+    Class       string
+}
+
+templ Separator(props SeparatorProps) {
+    @Divider(DividerProps{Orientation: props.Orientation, Class: props.Class})
+}
