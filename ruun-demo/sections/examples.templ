@@ -25,11 +25,22 @@ templ ExamplesPage() {
                     Muted: true,
                 })
                 
-                @templates.DashboardLayout(templates.DashboardLayoutProps{
-                    Header: invoiceListHeader(),
-                    Sidebar: invoiceListSidebar(),
-                    Content: invoiceListContent(),
-                })
+                @molecules.Card(molecules.CardProps{
+                    Title: "Invoice Management Dashboard",
+                    Description: "Complete system with filtering and actions",
+                }) {
+                    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                        @invoiceListHeader()
+                        @atoms.Grid(atoms.GridProps{Cols: 4, Gap: atoms.Gap4}) {
+                            @atoms.Box(atoms.BoxProps{Padding: atoms.P4, Border: true}) {
+                                @invoiceListSidebar()
+                            }
+                            @atoms.Box(atoms.BoxProps{Padding: atoms.P4, Border: true, Flex: atoms.Flex1}) {
+                                @invoiceListContent()
+                            }
+                        }
+                    }
+                }
                 
                 @atoms.Code(atoms.CodeProps{
                     Text: `@templates.DashboardLayout(templates.DashboardLayoutProps{
@@ -82,11 +93,12 @@ templ ExamplesPage() {
                     Muted: true,
                 })
                 
-                @templates.AuthLayout(templates.AuthLayoutProps{
+                @molecules.Card(molecules.CardProps{
                     Title: "Sign In",
-                    Subtitle: "Welcome back to your account",
-                    Content: loginFormContent(),
-                })
+                    Description: "Welcome back to your account",
+                }) {
+                    @loginFormContent()
+                }
                 
                 @atoms.Code(atoms.CodeProps{
                     Text: `@templates.AuthLayout(templates.AuthLayoutProps{
@@ -159,9 +171,12 @@ templ ExamplesPage() {
                     Muted: true,
                 })
                 
-                @templates.DashboardLayout(templates.DashboardLayoutProps{
-                    Content: dashboardContent(),
-                })
+                @molecules.Card(molecules.CardProps{
+                    Title: "Executive Dashboard", 
+                    Description: "Key metrics and performance indicators",
+                }) {
+                    @dashboardContent()
+                }
                 
                 @atoms.Code(atoms.CodeProps{
                     Text: `@templates.DashboardLayout(templates.DashboardLayoutProps{
@@ -240,10 +255,12 @@ templ ExamplesPage() {
                     Muted: true,
                 })
                 
-                @templates.PageLayout(templates.PageLayoutProps{
+                @molecules.Card(molecules.CardProps{
                     Title: "Account Settings",
-                    Content: settingsContent(),
-                })
+                    Description: "Manage your profile and security settings",
+                }) {
+                    @settingsContent()
+                }
                 
                 @atoms.Code(atoms.CodeProps{
                     Text: `@templates.PageLayout(templates.PageLayoutProps{
@@ -340,10 +357,12 @@ templ ExamplesPage() {
                     Muted: true,
                 })
                 
-                @templates.PageLayout(templates.PageLayoutProps{
-                    Title: "Products",
-                    Content: productGridContent(),
-                })
+                @molecules.Card(molecules.CardProps{
+                    Title: "Product Catalog",
+                    Description: "Browse our complete product collection",
+                }) {
+                    @productGridContent()
+                }
                 
                 @atoms.Code(atoms.CodeProps{
                     Text: `@templates.PageLayout(templates.PageLayoutProps{

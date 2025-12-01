@@ -29,33 +29,51 @@ func getAlertClass(variant components.AlertVariant) string {
 	}
 }
 
+// buildAlertAttributes creates all HTML attributes for the alert element
+func buildAlertAttributes(props AlertProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getAlertClass(props.Variant),
+			props.Base.ClassName,
+		),
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+	if props.Base.Style != "" {
+		attrs["style"] = props.Base.Style
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+	if props.Base.A11y.AriaLive != "" {
+		attrs["aria-live"] = props.Base.A11y.AriaLive
+	}
+	if props.Base.A11y.AriaAtomic != "" {
+		attrs["aria-atomic"] = props.Base.A11y.AriaAtomic
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
 // Alert renders a Basecoat alert atom
 templ Alert(props AlertProps) {
-	<div 
-		class={components.MergeClasses(getAlertClass(props.Variant), props.Base.ClassName)}
-		if props.Base.ID != "" {
-			id={props.Base.ID}
-		}
-		if props.Base.Style != "" {
-			style={props.Base.Style}
-		}
-		if props.Base.A11y.Role != "" {
-			role={props.Base.A11y.Role}
-		}
-		if props.Base.A11y.AriaLabel != "" {
-			aria-label={props.Base.A11y.AriaLabel}
-		}
-		if props.Base.A11y.AriaDescribedBy != "" {
-			aria-describedby={props.Base.A11y.AriaDescribedBy}
-		}
-		if props.Base.A11y.AriaLive != "" {
-			aria-live={props.Base.A11y.AriaLive}
-		}
-		if props.Base.A11y.AriaAtomic != "" {
-			aria-atomic={props.Base.A11y.AriaAtomic}
-		}
-		{ props.Attrs... }
-	>
+	<div {buildAlertAttributes(props)...}>
 		// Icon (Basecoat alert supports SVG children)
 		if props.Icon != nil {
 			@props.Icon
