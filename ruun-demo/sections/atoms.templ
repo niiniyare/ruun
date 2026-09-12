@@ -1,63 +1,65 @@
 package sections
 
 import (
+    "github.com/a-h/templ"
     "github.com/niiniyare/ruun/views/components/atoms"
     "github.com/niiniyare/ruun/views/components/molecules"
+    "github.com/niiniyare/ruun/views/components"
 )
 
 templ AtomsPage() {
     @DemoLayout("Atoms", "atoms") {
-        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap8}) {
+        <div class="space-y-8">
             @atoms.Heading(atoms.HeadingProps{Level: 1, Text: "Atoms"})
             @atoms.Text(atoms.TextProps{
                 Text: "Basic building blocks. Each atom is a single-purpose component.",
-                Muted: true,
+                Variant: atoms.TextMuted,
             })
             
             // ════════════════════════════════════════════════════════════
             // LAYOUT PRIMITIVES
             // ════════════════════════════════════════════════════════════
             @Section("Layout: Flex") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap6}) {
-                    @atoms.Text(atoms.TextProps{Text: "Row with gap", Weight: atoms.FontMedium})
+                <div class="space-y-6">
+                    @atoms.Text(atoms.TextProps{Text: "Row with gap", Weight: atoms.WeightMedium})
                     @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4}) {
-                        @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                        @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                             @atoms.Text(atoms.TextProps{Text: "Item 1"})
                         }
-                        @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                        @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                             @atoms.Text(atoms.TextProps{Text: "Item 2"})
                         }
-                        @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                        @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                             @atoms.Text(atoms.TextProps{Text: "Item 3"})
                         }
                     }
                     
-                    @atoms.Text(atoms.TextProps{Text: "Justify between", Weight: atoms.FontMedium})
+                    @atoms.Text(atoms.TextProps{Text: "Justify between", Weight: atoms.WeightMedium})
                     @atoms.Flex(atoms.FlexProps{Justify: atoms.JustifyBetween}) {
                         @atoms.Button(atoms.ButtonProps{Text: "Left"})
                         @atoms.Button(atoms.ButtonProps{Text: "Right"})
                     }
                     
-                    @atoms.Text(atoms.TextProps{Text: "Align center", Weight: atoms.FontMedium})
+                    @atoms.Text(atoms.TextProps{Text: "Align center", Weight: atoms.WeightMedium})
                     @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Align: atoms.AlignCenter}) {
-                        @atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: atoms.SizeLg})
-                        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap1}) {
-                            @atoms.Text(atoms.TextProps{Text: "John Doe", Weight: atoms.FontMedium})
-                            @atoms.Text(atoms.TextProps{Text: "john@example.com", Size: atoms.TextSm, Muted: true})
-                        }
+                        @atoms.Avatar(atoms.AvatarProps{Initials: "JD", Size: components.SizeLg})
+                        <div class="space-y-1">
+                            @atoms.Text(atoms.TextProps{Text: "John Doe", Weight: atoms.WeightMedium})
+                            @atoms.Text(atoms.TextProps{Text: "john@example.com", Size: atoms.TextSm, Variant: atoms.TextMuted})
+                        </div>
                     }
-                }
+                </div>
             }
             
             @Section("Layout: Grid") {
                 @atoms.Grid(atoms.GridProps{Cols: 3, Gap: atoms.Gap4}) {
-                    @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                    @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                         @atoms.Text(atoms.TextProps{Text: "Col 1"})
                     }
-                    @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                    @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                         @atoms.Text(atoms.TextProps{Text: "Col 2"})
                     }
-                    @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                    @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                         @atoms.Text(atoms.TextProps{Text: "Col 3"})
                     }
                 }
@@ -72,8 +74,8 @@ templ AtomsPage() {
             }
             
             @Section("Layout: Center") {
-                @atoms.Center(atoms.CenterProps{MaxWidth: atoms.MaxWidthMd}) {
-                    @atoms.Box(atoms.BoxProps{Padding: atoms.P4, BgColor: atoms.BgMuted, Rounded: atoms.RoundedMd}) {
+                @atoms.Center(atoms.CenterProps{Class: "max-w-md"}) {
+                    @atoms.Box(atoms.BoxProps{Class: "p-4 bg-muted rounded-md"}) {
                         @atoms.Text(atoms.TextProps{Text: "Centered content with max width"})
                     }
                 }
@@ -82,23 +84,17 @@ templ AtomsPage() {
             @Section("Layout: Box") {
                 @atoms.Grid(atoms.GridProps{Cols: 3, Gap: atoms.Gap4}) {
                     @atoms.Box(atoms.BoxProps{
-                        Padding: atoms.P4,
-                        Border: atoms.Border,
-                        Rounded: atoms.RoundedLg,
+                        Class: "p-4 border border-border rounded-lg",
                     }) {
                         @atoms.Text(atoms.TextProps{Text: "Border"})
                     }
                     @atoms.Box(atoms.BoxProps{
-                        Padding: atoms.P4,
-                        BgColor: atoms.BgMuted,
-                        Rounded: atoms.RoundedLg,
+                        Class: "p-4 bg-muted rounded-lg",
                     }) {
                         @atoms.Text(atoms.TextProps{Text: "Background"})
                     }
                     @atoms.Box(atoms.BoxProps{
-                        Padding: atoms.P4,
-                        Shadow: atoms.ShadowMd,
-                        Rounded: atoms.RoundedLg,
+                        Class: "p-4 shadow-md rounded-lg",
                     }) {
                         @atoms.Text(atoms.TextProps{Text: "Shadow"})
                     }
@@ -106,9 +102,9 @@ templ AtomsPage() {
             }
             
             @Section("Layout: Spacer") {
-                @atoms.Box(atoms.BoxProps{Border: atoms.Border, Padding: atoms.P4, Rounded: atoms.RoundedMd}) {
+                @atoms.Box(atoms.BoxProps{Class: "border border-border p-4 rounded-md"}) {
                     @atoms.Text(atoms.TextProps{Text: "Top"})
-                    @atoms.Spacer(atoms.SpacerProps{Size: atoms.SpacerLg})
+                    @atoms.Spacer(atoms.SpacerProps{Class: "h-8"})
                     @atoms.Text(atoms.TextProps{Text: "Bottom"})
                 }
             }
@@ -119,26 +115,26 @@ templ AtomsPage() {
             @Section("Button Variants") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Wrap: atoms.Wrap}) {
                     @atoms.Button(atoms.ButtonProps{Text: "Default"})
-                    @atoms.Button(atoms.ButtonProps{Text: "Secondary", Variant: atoms.ButtonSecondary})
-                    @atoms.Button(atoms.ButtonProps{Text: "Outline", Variant: atoms.ButtonOutline})
-                    @atoms.Button(atoms.ButtonProps{Text: "Destructive", Variant: atoms.ButtonDestructive})
-                    @atoms.Button(atoms.ButtonProps{Text: "Ghost", Variant: atoms.ButtonGhost})
-                    @atoms.Button(atoms.ButtonProps{Text: "Link", Variant: atoms.ButtonLink})
+                    @atoms.Button(atoms.ButtonProps{Text: "Secondary", Variant: components.ButtonSecondary})
+                    @atoms.Button(atoms.ButtonProps{Text: "Outline", Variant: components.ButtonOutline})
+                    @atoms.Button(atoms.ButtonProps{Text: "Destructive", Variant: components.ButtonDestructive})
+                    @atoms.Button(atoms.ButtonProps{Text: "Ghost", Variant: components.ButtonGhost})
+                    @atoms.Button(atoms.ButtonProps{Text: "Link", Variant: components.ButtonLink})
                 }
             }
             
             @Section("Button Sizes") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Align: atoms.AlignCenter}) {
-                    @atoms.Button(atoms.ButtonProps{Text: "Small", Size: atoms.SizeSm})
-                    @atoms.Button(atoms.ButtonProps{Text: "Default", Size: atoms.SizeDefault})
-                    @atoms.Button(atoms.ButtonProps{Text: "Large", Size: atoms.SizeLg})
+                    @atoms.Button(atoms.ButtonProps{Text: "Small", Size: components.SizeSm})
+                    @atoms.Button(atoms.ButtonProps{Text: "Default", Size: components.SizeDefault})
+                    @atoms.Button(atoms.ButtonProps{Text: "Large", Size: components.SizeLg})
                 }
             }
             
             @Section("Button States") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4}) {
-                    @atoms.Button(atoms.ButtonProps{Text: "Disabled", Disabled: true})
-                    @atoms.Button(atoms.ButtonProps{Text: "Loading", Loading: true})
+                    @atoms.Button(atoms.ButtonProps{Text: "Disabled", Attrs: templ.Attributes{"disabled": ""}})
+                    @atoms.Button(atoms.ButtonProps{Text: "Loading"})
                 }
             }
             
@@ -146,18 +142,12 @@ templ AtomsPage() {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4}) {
                     @atoms.Button(atoms.ButtonProps{
                         Text: "Settings",
-                        Icon: atoms.IconCog,
-                        IconPosition: atoms.IconLeft,
                     })
                     @atoms.Button(atoms.ButtonProps{
-                        Text: "Next",
-                        Icon: atoms.IconArrowRight,
-                        IconPosition: atoms.IconRight,
+                        Text: "Next", 
                     })
                     @atoms.Button(atoms.ButtonProps{
-                        Icon: atoms.IconPlus,
-                        Variant: atoms.ButtonIcon,
-                        AriaLabel: "Add item",
+                        Text: "Add",
                     })
                 }
             }
@@ -168,35 +158,35 @@ templ AtomsPage() {
             @Section("Input Types") {
                 @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap4}) {
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputText,
+                        Type: components.InputText,
                         Placeholder: "Text input",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputEmail,
+                        Type: components.InputEmail,
                         Placeholder: "Email",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputPassword,
+                        Type: components.InputPassword,
                         Placeholder: "Password",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputNumber,
+                        Type: components.InputNumber,
                         Placeholder: "Number",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputSearch,
+                        Type: components.InputSearch,
                         Placeholder: "Search",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputTel,
+                        Type: components.InputTel,
                         Placeholder: "Phone",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputURL,
+                        Type: components.InputUrl,
                         Placeholder: "URL",
                     })
                     @atoms.Input(atoms.InputProps{
-                        Type: atoms.InputDate,
+                        Type: components.InputDate,
                         Placeholder: "Date",
                     })
                 }
@@ -207,40 +197,40 @@ templ AtomsPage() {
                     @atoms.Input(atoms.InputProps{Placeholder: "Default"})
                     @atoms.Input(atoms.InputProps{Placeholder: "Disabled", Disabled: true})
                     @atoms.Input(atoms.InputProps{Value: "Readonly", Readonly: true})
-                    @atoms.Input(atoms.InputProps{Placeholder: "Error", Error: true})
+                    @atoms.Input(atoms.InputProps{Placeholder: "Error", Invalid: true})
                 }
             }
             
             @Section("Textarea") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                <div class="space-y-4">
+                    @atoms.Box(atoms.BoxProps{Class: "max-w-md"}) {
                         @atoms.Textarea(atoms.TextareaProps{
                             Placeholder: "Default textarea",
                             Rows: 3,
                         })
                     }
-                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                    @atoms.Box(atoms.BoxProps{Class: "max-w-md"}) {
                         @atoms.Textarea(atoms.TextareaProps{
                             Placeholder: "Disabled textarea",
                             Rows: 3,
                             Disabled: true,
                         })
                     }
-                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                    @atoms.Box(atoms.BoxProps{Class: "max-w-md"}) {
                         @atoms.Textarea(atoms.TextareaProps{
                             Placeholder: "Error textarea",
                             Rows: 3,
-                            Error: true,
+                            Invalid: true,
                         })
                     }
-                }
+                </div>
             }
             
             @Section("Select") {
                 @atoms.Grid(atoms.GridProps{Cols: 2, Gap: atoms.Gap4}) {
                     @atoms.Select(atoms.SelectProps{
                         Placeholder: "Select an option",
-                        Options: []atoms.Option{
+                        Options: []atoms.SelectOption{
                             {Value: "1", Label: "Option 1"},
                             {Value: "2", Label: "Option 2"},
                             {Value: "3", Label: "Option 3"},
@@ -248,7 +238,7 @@ templ AtomsPage() {
                     })
                     @atoms.Select(atoms.SelectProps{
                         Placeholder: "Disabled select",
-                        Options: []atoms.Option{
+                        Options: []atoms.SelectOption{
                             {Value: "1", Label: "Option 1"},
                         },
                         Disabled: true,
@@ -257,92 +247,92 @@ templ AtomsPage() {
             }
             
             @Section("Checkbox") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-                    @atoms.Checkbox(atoms.CheckboxProps{ID: "c1", Label: "Unchecked"})
-                    @atoms.Checkbox(atoms.CheckboxProps{ID: "c2", Label: "Checked", Checked: true})
-                    @atoms.Checkbox(atoms.CheckboxProps{ID: "c3", Label: "Disabled", Disabled: true})
-                    @atoms.Checkbox(atoms.CheckboxProps{ID: "c4", Label: "Disabled checked", Disabled: true, Checked: true})
+                <div class="space-y-4">
+                    @atoms.Checkbox(atoms.CheckboxProps{Name: "c1", Label: "Unchecked", Value: "1"})
+                    @atoms.Checkbox(atoms.CheckboxProps{Name: "c2", Label: "Checked", Value: "2", Checked: true})
+                    @atoms.Checkbox(atoms.CheckboxProps{Name: "c3", Label: "Disabled", Value: "3", Disabled: true})
+                    @atoms.Checkbox(atoms.CheckboxProps{Name: "c4", Label: "Disabled checked", Value: "4", Disabled: true, Checked: true})
                     @atoms.Checkbox(atoms.CheckboxProps{
-                        ID: "c5",
+                        Name: "c5",
                         Label: "With description",
+                        Value: "5",
                         Description: "This is helpful text that provides more context",
                     })
-                }
+                </div>
             }
             
             @Section("Radio") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                <div class="space-y-4">
                     @atoms.Radio(atoms.RadioProps{Name: "r", ID: "r1", Label: "Option A", Value: "a"})
                     @atoms.Radio(atoms.RadioProps{Name: "r", ID: "r2", Label: "Option B", Value: "b", Checked: true})
                     @atoms.Radio(atoms.RadioProps{Name: "r", ID: "r3", Label: "Option C", Value: "c"})
                     @atoms.Radio(atoms.RadioProps{Name: "r", ID: "r4", Label: "Disabled", Value: "d", Disabled: true})
-                }
+                </div>
             }
             
             @Section("Switch") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-                    @atoms.Switch(atoms.SwitchProps{ID: "s1", Label: "Off"})
-                    @atoms.Switch(atoms.SwitchProps{ID: "s2", Label: "On", Checked: true})
-                    @atoms.Switch(atoms.SwitchProps{ID: "s3", Label: "Disabled off", Disabled: true})
-                    @atoms.Switch(atoms.SwitchProps{ID: "s4", Label: "Disabled on", Disabled: true, Checked: true})
-                }
+                <div class="space-y-4">
+                    @atoms.Switch(atoms.SwitchProps{ID: "s1", Name: "s1", Label: "Off"})
+                    @atoms.Switch(atoms.SwitchProps{ID: "s2", Name: "s2", Label: "On", Checked: true})
+                    @atoms.Switch(atoms.SwitchProps{ID: "s3", Name: "s3", Label: "Disabled off", Disabled: true})
+                    @atoms.Switch(atoms.SwitchProps{ID: "s4", Name: "s4", Label: "Disabled on", Disabled: true, Checked: true})
+                </div>
             }
             
             // ════════════════════════════════════════════════════════════
             // DISPLAY COMPONENTS
             // ════════════════════════════════════════════════════════════
             @Section("Text Sizes") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
+                <div class="space-y-2">
                     @atoms.Text(atoms.TextProps{Text: "Extra small text", Size: atoms.TextXs})
                     @atoms.Text(atoms.TextProps{Text: "Small text", Size: atoms.TextSm})
                     @atoms.Text(atoms.TextProps{Text: "Base text (default)", Size: atoms.TextBase})
                     @atoms.Text(atoms.TextProps{Text: "Large text", Size: atoms.TextLg})
                     @atoms.Text(atoms.TextProps{Text: "Extra large text", Size: atoms.TextXl})
-                }
+                </div>
             }
             
             @Section("Text Weights") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
-                    @atoms.Text(atoms.TextProps{Text: "Normal weight", Weight: atoms.FontNormal})
-                    @atoms.Text(atoms.TextProps{Text: "Medium weight", Weight: atoms.FontMedium})
-                    @atoms.Text(atoms.TextProps{Text: "Semibold weight", Weight: atoms.FontSemibold})
-                    @atoms.Text(atoms.TextProps{Text: "Bold weight", Weight: atoms.FontBold})
-                }
+                <div class="space-y-2">
+                    @atoms.Text(atoms.TextProps{Text: "Normal weight", Weight: atoms.WeightNormal})
+                    @atoms.Text(atoms.TextProps{Text: "Medium weight", Weight: atoms.WeightMedium})
+                    @atoms.Text(atoms.TextProps{Text: "Semibold weight", Weight: atoms.WeightSemibold})
+                    @atoms.Text(atoms.TextProps{Text: "Bold weight", Weight: atoms.WeightBold})
+                </div>
             }
             
             @Section("Text States") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
+                <div class="space-y-2">
                     @atoms.Text(atoms.TextProps{Text: "Regular text"})
-                    @atoms.Text(atoms.TextProps{Text: "Muted text", Muted: true})
-                    @atoms.Text(atoms.TextProps{Text: "Large muted text", Size: atoms.TextLg, Muted: true})
-                }
+                    @atoms.Text(atoms.TextProps{Text: "Muted text", Variant: atoms.TextMuted})
+                    @atoms.Text(atoms.TextProps{Text: "Large muted text", Size: atoms.TextLg, Variant: atoms.TextMuted})
+                </div>
             }
             
             @Section("Headings") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                <div class="space-y-4">
                     @atoms.Heading(atoms.HeadingProps{Level: 1, Text: "Heading 1"})
                     @atoms.Heading(atoms.HeadingProps{Level: 2, Text: "Heading 2"})
                     @atoms.Heading(atoms.HeadingProps{Level: 3, Text: "Heading 3"})
                     @atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Heading 4"})
                     @atoms.Heading(atoms.HeadingProps{Level: 5, Text: "Heading 5"})
                     @atoms.Heading(atoms.HeadingProps{Level: 6, Text: "Heading 6"})
-                }
+                </div>
             }
             
             @Section("Badge Variants") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Wrap: atoms.Wrap}) {
                     @atoms.Badge(atoms.BadgeProps{Text: "Default"})
-                    @atoms.Badge(atoms.BadgeProps{Text: "Secondary", Variant: atoms.BadgeSecondary})
-                    @atoms.Badge(atoms.BadgeProps{Text: "Outline", Variant: atoms.BadgeOutline})
-                    @atoms.Badge(atoms.BadgeProps{Text: "Destructive", Variant: atoms.BadgeDestructive})
+                    @atoms.Badge(atoms.BadgeProps{Text: "Secondary", Variant: components.BadgeSecondary})
+                    @atoms.Badge(atoms.BadgeProps{Text: "Destructive", Variant: components.BadgeDestructive})
                 }
             }
             
             @Section("Avatar Sizes") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Align: atoms.AlignCenter}) {
-                    @atoms.Avatar(atoms.AvatarProps{Initials: "SM", Size: atoms.SizeSm})
-                    @atoms.Avatar(atoms.AvatarProps{Initials: "MD", Size: atoms.SizeDefault})
-                    @atoms.Avatar(atoms.AvatarProps{Initials: "LG", Size: atoms.SizeLg})
+                    @atoms.Avatar(atoms.AvatarProps{Initials: "SM", Size: components.SizeSm})
+                    @atoms.Avatar(atoms.AvatarProps{Initials: "MD", Size: components.SizeDefault})
+                    @atoms.Avatar(atoms.AvatarProps{Initials: "LG", Size: components.SizeLg})
                 }
             }
             
@@ -351,50 +341,51 @@ templ AtomsPage() {
                     @atoms.Avatar(atoms.AvatarProps{
                         Src: "https://github.com/shadcn.png",
                         Alt: "User with image",
-                        Size: atoms.SizeDefault,
+                        Size: components.SizeDefault,
                     })
                     @atoms.Avatar(atoms.AvatarProps{
                         Initials: "JD",
-                        Size: atoms.SizeDefault,
+                        Size: components.SizeDefault,
                     })
                     @atoms.Avatar(atoms.AvatarProps{
-                        Size: atoms.SizeDefault,
+                        Initials: "?",
+                        Size: components.SizeDefault,
                     })
                 }
             }
             
             @Section("Icons") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Align: atoms.AlignCenter}) {
-                    @atoms.Icon(atoms.IconProps{Name: atoms.IconHome, Size: atoms.SizeSm})
-                    @atoms.Icon(atoms.IconProps{Name: atoms.IconSettings, Size: atoms.SizeDefault})
-                    @atoms.Icon(atoms.IconProps{Name: atoms.IconUser, Size: atoms.SizeLg})
-                    @atoms.Icon(atoms.IconProps{Name: atoms.IconLoader, Size: atoms.SizeDefault, Spin: true})
+                    @atoms.Icon(atoms.IconProps{Name: "home", Size: components.SizeSm})
+                    @atoms.Icon(atoms.IconProps{Name: "settings", Size: components.SizeDefault})
+                    @atoms.Icon(atoms.IconProps{Name: "user", Size: components.SizeLg})
+                    @atoms.Icon(atoms.IconProps{Name: "loader", Size: components.SizeDefault})
                 }
             }
             
             @Section("Code") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-                    @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap2, Align: atoms.AlignCenter}) {
+                <div class="space-y-4">
+                    @atoms.Flex(atoms.FlexProps{Gap: "gap-2", Align: "items-center"}) {
                         @atoms.Text(atoms.TextProps{Text: "Inline code:"})
                         @atoms.Code(atoms.CodeProps{Text: "const x = 42"})
                     }
-                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthMd}) {
+                    @atoms.Box(atoms.BoxProps{Class: "max-w-md"}) {
                         @atoms.Code(atoms.CodeProps{
                             Text: `function hello(name) {
   return "Hello, " + name + "!";
 }`,
-                            Block: true,
+                            Variant: components.CodeBlock,
                         })
                     }
-                }
+                </div>
             }
             
             @Section("Keyboard Shortcuts") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Wrap: atoms.Wrap}) {
-                    @atoms.Kbd(atoms.KbdProps{Keys: []string{"Ctrl", "C"}})
-                    @atoms.Kbd(atoms.KbdProps{Keys: []string{"⌘", "K"}})
-                    @atoms.Kbd(atoms.KbdProps{Keys: []string{"Alt", "Shift", "F"}})
-                    @atoms.Kbd(atoms.KbdProps{Keys: []string{"↑", "↓", "←", "→"}})
+                    @atoms.Kbd(atoms.KbdProps{Text: "Ctrl+C"})
+                    @atoms.Kbd(atoms.KbdProps{Text: "⌘K"})
+                    @atoms.Kbd(atoms.KbdProps{Text: "Alt+Shift+F"})
+                    @atoms.Kbd(atoms.KbdProps{Text: "Arrow Keys"})
                 }
             }
             
@@ -402,131 +393,118 @@ templ AtomsPage() {
             // FEEDBACK COMPONENTS
             // ════════════════════════════════════════════════════════════
             @Section("Alert Variants") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                <div class="space-y-4">
                     @atoms.Alert(atoms.AlertProps{
                         Title: "Default Alert",
                         Description: "This is a default alert with neutral styling.",
                     })
                     @atoms.Alert(atoms.AlertProps{
-                        Title: "Success!",
-                        Description: "Your changes have been saved successfully.",
-                        Variant: atoms.AlertSuccess,
-                    })
-                    @atoms.Alert(atoms.AlertProps{
-                        Title: "Warning",
-                        Description: "Please review your input before proceeding.",
-                        Variant: atoms.AlertWarning,
-                    })
-                    @atoms.Alert(atoms.AlertProps{
                         Title: "Error",
                         Description: "Something went wrong. Please try again.",
-                        Variant: atoms.AlertDestructive,
+                        Variant: components.AlertDestructive,
                     })
-                }
+                </div>
             }
             
             @Section("Progress") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                <div class="space-y-4">
                     @atoms.Progress(atoms.ProgressProps{Value: 0})
                     @atoms.Progress(atoms.ProgressProps{Value: 25})
                     @atoms.Progress(atoms.ProgressProps{Value: 50})
                     @atoms.Progress(atoms.ProgressProps{Value: 75})
                     @atoms.Progress(atoms.ProgressProps{Value: 100})
-                }
+                </div>
             }
             
             @Section("Spinner") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap8, Align: atoms.AlignCenter}) {
-                    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2, Align: atoms.AlignCenter}) {
-                        @atoms.Spinner(atoms.SpinnerProps{Size: atoms.SizeSm})
-                        @atoms.Text(atoms.TextProps{Text: "Small", Size: atoms.TextSm, Muted: true})
-                    }
-                    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2, Align: atoms.AlignCenter}) {
-                        @atoms.Spinner(atoms.SpinnerProps{Size: atoms.SizeDefault})
-                        @atoms.Text(atoms.TextProps{Text: "Default", Size: atoms.TextSm, Muted: true})
-                    }
-                    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2, Align: atoms.AlignCenter}) {
-                        @atoms.Spinner(atoms.SpinnerProps{Size: atoms.SizeLg})
-                        @atoms.Text(atoms.TextProps{Text: "Large", Size: atoms.TextSm, Muted: true})
-                    }
+                    <div class="flex flex-col items-center gap-2">
+                        @atoms.Spinner(atoms.SpinnerProps{Size: components.SizeSm})
+                        @atoms.Text(atoms.TextProps{Text: "Small", Size: atoms.TextSm, Variant: atoms.TextMuted})
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        @atoms.Spinner(atoms.SpinnerProps{Size: components.SizeDefault})
+                        @atoms.Text(atoms.TextProps{Text: "Default", Size: atoms.TextSm, Variant: atoms.TextMuted})
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        @atoms.Spinner(atoms.SpinnerProps{Size: components.SizeLg})
+                        @atoms.Text(atoms.TextProps{Text: "Large", Size: atoms.TextSm, Variant: atoms.TextMuted})
+                    </div>
                 }
             }
             
             @Section("Skeleton") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-                    @atoms.Text(atoms.TextProps{Text: "Text skeleton", Weight: atoms.FontMedium})
-                    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
-                        @atoms.Skeleton(atoms.SkeletonProps{Width: atoms.W64, Height: atoms.H4})
-                        @atoms.Skeleton(atoms.SkeletonProps{Width: atoms.W48, Height: atoms.H4})
-                        @atoms.Skeleton(atoms.SkeletonProps{Width: atoms.W32, Height: atoms.H4})
-                    }
+                <div class="space-y-4">
+                    @atoms.Text(atoms.TextProps{Text: "Text skeleton", Weight: atoms.WeightMedium})
+                    <div class="space-y-2">
+                        @atoms.Skeleton(atoms.SkeletonProps{Width: "16rem", Height: "1rem"})
+                        @atoms.Skeleton(atoms.SkeletonProps{Width: "12rem", Height: "1rem"})
+                        @atoms.Skeleton(atoms.SkeletonProps{Width: "8rem", Height: "1rem"})
+                    </div>
                     
-                    @atoms.Text(atoms.TextProps{Text: "Avatar skeleton", Weight: atoms.FontMedium})
+                    @atoms.Text(atoms.TextProps{Text: "Avatar skeleton", Weight: atoms.WeightMedium})
                     @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4}) {
-                        @atoms.Skeleton(atoms.SkeletonProps{Shape: atoms.SkeletonCircle, Size: atoms.SizeSm})
-                        @atoms.Skeleton(atoms.SkeletonProps{Shape: atoms.SkeletonCircle, Size: atoms.SizeDefault})
-                        @atoms.Skeleton(atoms.SkeletonProps{Shape: atoms.SkeletonCircle, Size: atoms.SizeLg})
+                        @atoms.Skeleton(atoms.SkeletonProps{Shape: "avatar", Size: "sm"})
+                        @atoms.Skeleton(atoms.SkeletonProps{Shape: "avatar", Size: "md"})
+                        @atoms.Skeleton(atoms.SkeletonProps{Shape: "avatar", Size: "lg"})
                     }
                     
-                    @atoms.Text(atoms.TextProps{Text: "Card skeleton", Weight: atoms.FontMedium})
-                    @atoms.Box(atoms.BoxProps{MaxWidth: atoms.MaxWidthSm}) {
-                        @atoms.Skeleton(atoms.SkeletonProps{Width: atoms.WFull, Height: atoms.H48})
+                    @atoms.Text(atoms.TextProps{Text: "Card skeleton", Weight: atoms.WeightMedium})
+                    @atoms.Box(atoms.BoxProps{Class: "max-w-sm"}) {
+                        @atoms.Skeleton(atoms.SkeletonProps{Width: "100%", Height: "12rem"})
                     }
-                }
+                </div>
             }
             
             // ════════════════════════════════════════════════════════════
             // STRUCTURAL COMPONENTS
             // ════════════════════════════════════════════════════════════
             @Section("Separator") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+                <div class="space-y-4">
                     @atoms.Text(atoms.TextProps{Text: "Content above separator"})
                     @atoms.Separator(atoms.SeparatorProps{})
                     @atoms.Text(atoms.TextProps{Text: "Content below separator"})
-                }
+                </div>
             }
             
             @Section("Vertical Separator") {
                 @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap4, Align: atoms.AlignCenter}) {
                     @atoms.Text(atoms.TextProps{Text: "Left"})
-                    @atoms.Separator(atoms.SeparatorProps{Vertical: true})
+                    @atoms.Separator(atoms.SeparatorProps{Class: "h-4 w-px"})
                     @atoms.Text(atoms.TextProps{Text: "Right"})
                 }
             }
             
             @Section("Divider with Label") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-                    @atoms.Divider(atoms.DividerProps{Label: "OR"})
-                    @atoms.Divider(atoms.DividerProps{Label: "CONTINUE WITH"})
-                }
+                <div class="space-y-4">
+                    @atoms.Divider(atoms.DividerProps{Class: "my-4"})
+                    @atoms.Divider(atoms.DividerProps{Class: "my-4"})
+                </div>
             }
             
             @Section("Link Variants") {
-                @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
+                <div class="space-y-2">
                     @atoms.Link(atoms.LinkProps{Href: "#", Text: "Default link"})
                     @atoms.Link(atoms.LinkProps{Href: "#", Text: "Muted link", Variant: atoms.LinkMuted})
-                    @atoms.Link(atoms.LinkProps{Href: "#", Text: "Nav link", Variant: atoms.LinkNav})
                     @atoms.Link(atoms.LinkProps{
                         Href: "https://example.com",
                         Text: "External link",
                         External: true,
                     })
-                }
+                </div>
             }
-        }
+        </div>
     }
 }
 
 // Section helper component
 templ Section(title string) {
     @atoms.Box(atoms.BoxProps{
-        Border: atoms.Border,
-        Rounded: atoms.RoundedLg,
-        Padding: atoms.P6,
+        Class: "border border-border rounded-lg p-6",
     }) {
-        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
+        <div class="space-y-4">
             @atoms.Heading(atoms.HeadingProps{Level: 3, Text: title})
             { children... }
-        }
+        </div>
     }
 }

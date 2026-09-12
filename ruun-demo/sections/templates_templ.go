@@ -8,11 +8,14 @@ package sections
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/niiniyare/ruun/views/components/atoms"
-import "github.com/niiniyare/ruun/views/components/molecules"
-import "github.com/niiniyare/ruun/views/components/organisms"
+import (
+	"github.com/niiniyare/ruun/views/components"
+	"github.com/niiniyare/ruun/views/components/atoms"
+	"github.com/niiniyare/ruun/views/components/molecules"
+	"github.com/niiniyare/ruun/views/components/templates"
+)
 
-func Templates() templ.Component {
+func TemplatesPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -33,102 +36,327 @@ func Templates() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"container mx-auto px-6 py-12\"><div class=\"text-center mb-12\"><h2 class=\"text-3xl font-bold mb-4\">Page Templates</h2><p class=\"text-gray-600 text-lg\">Complete page layouts for different application types</p></div><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Card(organisms.CardProps{
-			Title:       "PageLayout",
-			Description: "Base page layout with multiple layout types",
-			Content:     pageLayoutShowcase(),
-			ClassName:   "h-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Card(organisms.CardProps{
-			Title:       "DashboardLayout",
-			Description: "Advanced dashboard layout with widgets and metrics",
-			Content:     dashboardLayoutShowcase(),
-			ClassName:   "h-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Card(organisms.CardProps{
-			Title:       "BaseLayout",
-			Description: "Foundation HTML layout with theme integration",
-			Content:     baseLayoutShowcase(),
-			ClassName:   "h-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Card(organisms.CardProps{
-			Title:       "AuthLayout",
-			Description: "Centered card layout for authentication pages",
-			Content:     authLayoutShowcase(),
-			ClassName:   "h-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Card(organisms.CardProps{
-			Title:       "FormLayout",
-			Description: "Centered form layout for data entry pages",
-			Content:     formLayoutShowcase(),
-			ClassName:   "h-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Card(organisms.CardProps{
-			Title:       "ErrorLayout",
-			Description: "Error page layout for 404, 500, and other errors",
-			Content:     errorLayoutShowcase(),
-			ClassName:   "h-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"bg-gray-50 rounded-lg p-8\"><h3 class=\"text-2xl font-bold mb-6 text-center\">Template Comparison</h3>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = organisms.Table(organisms.TableProps{
-			Headers: []string{"Template", "Use Case", "Layout Type", "Features", "Status"},
-			Rows: []organisms.TableRow{
-				{
-					Cells:     []string{"PageLayout", "General pages", "Sidebar/Topbar/Combined/Fullscreen", "Navigation, breadcrumbs, actions", "Available"},
-					ClassName: "",
-				},
-				{
-					Cells:     []string{"DashboardLayout", "Analytics & dashboards", "Grid-based with widgets", "Metrics, charts, tables, real-time data", "Available"},
-					ClassName: "",
-				},
-				{
-					Cells:     []string{"BaseLayout", "HTML foundation", "Base HTML structure", "Theme integration, meta tags, scripts", "Available"},
-					ClassName: "",
-				},
-				{
-					Cells:     []string{"AuthLayout", "Authentication", "Centered card", "Login, register, forgot password", "Planned"},
-					ClassName: "opacity-60",
-				},
-				{
-					Cells:     []string{"FormLayout", "Data entry", "Centered form", "Multi-step forms, validation", "Planned"},
-					ClassName: "opacity-60",
-				},
-				{
-					Cells:     []string{"ErrorLayout", "Error pages", "Centered message", "404, 500, custom errors", "Planned"},
-					ClassName: "opacity-60",
-				},
-			},
-			ClassName: "w-full",
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></section>")
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-8\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = atoms.Heading(atoms.HeadingProps{Level: 1, Text: "Templates"}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = atoms.Text(atoms.TextProps{
+				Text:  "Complete page layouts for different application types.",
+				Muted: true,
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+					templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+					templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+					if !templ_7745c5c3_IsBuffer {
+						defer func() {
+							templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err == nil {
+								templ_7745c5c3_Err = templ_7745c5c3_BufErr
+							}
+						}()
+					}
+					ctx = templ.InitializeContext(ctx)
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = molecules.Card(molecules.CardProps{
+						Title:       "Sidebar Layout",
+						Description: "Layout with fixed sidebar navigation",
+						Content:     sidebarLayoutPreview(),
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "  ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = molecules.Card(molecules.CardProps{
+						Title:       "Topbar Layout",
+						Description: "Layout with top navigation bar",
+						Content:     topbarLayoutPreview(),
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "  ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = molecules.Card(molecules.CardProps{
+						Title:       "Combined Layout",
+						Description: "Layout with both sidebar and topbar",
+						Content:     combinedLayoutPreview(),
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "  ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = molecules.Card(molecules.CardProps{
+						Title:       "Fullscreen Layout",
+						Description: "Clean fullscreen layout without chrome",
+						Content:     fullscreenLayoutPreview(),
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					return nil
+				})
+				templ_7745c5c3_Err = atoms.Grid(atoms.GridProps{Cols: 2, Gap: "gap-6"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = Section("Page Layouts").Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Var6 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+					templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+					templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+					if !templ_7745c5c3_IsBuffer {
+						defer func() {
+							templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err == nil {
+								templ_7745c5c3_Err = templ_7745c5c3_BufErr
+							}
+						}()
+					}
+					ctx = templ.InitializeContext(ctx)
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = molecules.Card(molecules.CardProps{
+						Title:       "Analytics Dashboard",
+						Description: "Dashboard focused on metrics and charts",
+						Content:     analyticsDashboardPreview(),
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "  ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = molecules.Card(molecules.CardProps{
+						Title:       "Overview Dashboard",
+						Description: "General overview dashboard layout",
+						Content:     overviewDashboardPreview(),
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					return nil
+				})
+				templ_7745c5c3_Err = atoms.Grid(atoms.GridProps{Cols: 2, Gap: "gap-6"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = Section("Dashboard Layouts").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var7 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"space-y-6\"><div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = atoms.Text(atoms.TextProps{Text: "Sidebar Layout Example", Weight: "font-medium"}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templates.ExampleSidebarLayout().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = atoms.Text(atoms.TextProps{Text: "Analytics Dashboard Example", Weight: "font-medium"}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templates.ExampleAnalyticsDashboard().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div><div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = atoms.Text(atoms.TextProps{Text: "Topbar Layout Example", Weight: "font-medium"}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templates.ExampleTopbarLayout().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = atoms.Text(atoms.TextProps{Text: "Fullscreen Layout Example", Weight: "font-medium"}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templates.ExampleFullscreenLayout().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = Section("Example Implementations").Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var8 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"space-y-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = atoms.Text(atoms.TextProps{
+					Text: "The BaseLayout template provides essential page structure including:",
+				}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<ul class=\"list-disc list-inside space-y-2 text-muted-foreground\"><li>HTML document structure with proper meta tags</li><li>Theme configuration and dark mode support</li><li>HTMX and Alpine.js integration</li><li>Custom CSS and JavaScript resource loading</li><li>Page loader components</li><li>Responsive design foundations</li></ul>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Var9 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+					templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+					templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+					if !templ_7745c5c3_IsBuffer {
+						defer func() {
+							templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err == nil {
+								templ_7745c5c3_Err = templ_7745c5c3_BufErr
+							}
+						}()
+					}
+					ctx = templ.InitializeContext(ctx)
+					templ_7745c5c3_Err = atoms.Code(atoms.CodeProps{
+						Text: `@templates.BaseLayout(templates.BaseLayoutProps{
+	Meta: templates.PageMeta{
+		Title: "My Application",
+		Description: "A powerful web application",
+		Keywords: []string{"web", "app", "golang"},
+	},
+	Theme: templates.ThemeConfig{
+		DarkMode: true,
+		SystemSync: true,
+	},
+}) {
+	// Your page content here
+}`,
+						Variant: components.CodeBlock,
+					}).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					return nil
+				})
+				templ_7745c5c3_Err = atoms.Box(atoms.BoxProps{Class: "mt-6 p-4 bg-muted rounded-lg"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = Section("Base Layout Features").Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = DemoLayout("Templates", "templates").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -136,7 +364,8 @@ func Templates() templ.Component {
 	})
 }
 
-func pageLayoutShowcase() templ.Component {
+// Preview components for different layouts
+func sidebarLayoutPreview() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -152,60 +381,12 @@ func pageLayoutShowcase() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"space-y-4\"><div class=\"grid grid-cols-2 gap-4\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Sidebar",
-			Variant: molecules.BadgeVariantSecondary,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Topbar",
-			Variant: molecules.BadgeVariantSecondary,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Combined",
-			Variant: molecules.BadgeVariantSecondary,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Fullscreen",
-			Variant: molecules.BadgeVariantSecondary,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"text-sm text-gray-600 space-y-2\"><p>• Flexible navigation configuration</p><p>• Breadcrumb and action support</p><p>• HTMX and Alpine.js integration</p><p>• Theme and responsive design</p></div><div class=\"border rounded-md p-3 bg-gray-50\"><div class=\"flex\"><div class=\"w-16 h-12 bg-blue-200 rounded-sm mr-2\"></div><div class=\"flex-1 space-y-1\"><div class=\"h-3 bg-gray-300 rounded w-3/4\"></div><div class=\"h-2 bg-gray-200 rounded w-1/2\"></div></div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Text:    "View Examples",
-			Variant: atoms.ButtonVariantPrimary,
-			Size:    atoms.ButtonSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"bg-muted rounded-md p-4 h-32\"><div class=\"flex h-full\"><div class=\"w-16 bg-background rounded mr-2\"></div><div class=\"flex-1 bg-background rounded\"><div class=\"h-6 bg-muted rounded m-2\"></div><div class=\"h-4 bg-muted rounded m-2 w-3/4\"></div><div class=\"h-4 bg-muted rounded m-2 w-1/2\"></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -213,7 +394,7 @@ func pageLayoutShowcase() templ.Component {
 	})
 }
 
-func dashboardLayoutShowcase() templ.Component {
+func topbarLayoutPreview() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -229,60 +410,12 @@ func dashboardLayoutShowcase() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"space-y-4\"><div class=\"grid grid-cols-2 gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Metrics",
-			Variant: molecules.BadgeVariantSuccess,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Charts",
-			Variant: molecules.BadgeVariantSuccess,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Tables",
-			Variant: molecules.BadgeVariantSuccess,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Real-time",
-			Variant: molecules.BadgeVariantSuccess,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div class=\"text-sm text-gray-600 space-y-2\"><p>• Grid-based widget system</p><p>• Analytics & reporting sections</p><p>• WebSocket integration</p><p>• Export and filtering</p></div><div class=\"border rounded-md p-3 bg-gray-50\"><div class=\"grid grid-cols-2 gap-2 mb-2\"><div class=\"h-6 bg-green-200 rounded-sm\"></div><div class=\"h-6 bg-blue-200 rounded-sm\"></div></div><div class=\"h-8 bg-purple-200 rounded-sm\"></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Text:    "View Dashboard",
-			Variant: atoms.ButtonVariantPrimary,
-			Size:    atoms.ButtonSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"bg-muted rounded-md p-4 h-32\"><div class=\"h-full\"><div class=\"h-8 bg-background rounded mb-2\"></div><div class=\"flex-1 bg-background rounded h-20\"><div class=\"h-6 bg-muted rounded m-2\"></div><div class=\"h-4 bg-muted rounded m-2 w-3/4\"></div><div class=\"h-4 bg-muted rounded m-2 w-1/2\"></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -290,7 +423,7 @@ func dashboardLayoutShowcase() templ.Component {
 	})
 }
 
-func baseLayoutShowcase() templ.Component {
+func combinedLayoutPreview() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -306,60 +439,12 @@ func baseLayoutShowcase() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"space-y-4\"><div class=\"grid grid-cols-2 gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Theme",
-			Variant: molecules.BadgeVariantOutline,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Meta",
-			Variant: molecules.BadgeVariantOutline,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Scripts",
-			Variant: molecules.BadgeVariantOutline,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "HTMX",
-			Variant: molecules.BadgeVariantOutline,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div class=\"text-sm text-gray-600 space-y-2\"><p>• HTML foundation structure</p><p>• Theme system integration</p><p>• Custom CSS/JS loading</p><p>• Dark mode support</p></div><div class=\"border rounded-md p-3 bg-gray-50\"><div class=\"text-xs font-mono text-gray-500\"><div>&lt;html&gt;</div><div class=\"ml-2\">&lt;head&gt;...&lt;/head&gt;</div><div class=\"ml-2\">&lt;body&gt;...&lt;/body&gt;</div><div>&lt;/html&gt;</div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Text:    "View Structure",
-			Variant: atoms.ButtonVariantSecondary,
-			Size:    atoms.ButtonSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"bg-muted rounded-md p-4 h-32\"><div class=\"h-full\"><div class=\"h-6 bg-background rounded mb-2\"></div><div class=\"flex flex-1 h-20\"><div class=\"w-12 bg-background rounded mr-2\"></div><div class=\"flex-1 bg-background rounded\"><div class=\"h-4 bg-muted rounded m-2\"></div><div class=\"h-4 bg-muted rounded m-2 w-2/3\"></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -367,7 +452,7 @@ func baseLayoutShowcase() templ.Component {
 	})
 }
 
-func authLayoutShowcase() templ.Component {
+func fullscreenLayoutPreview() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -383,37 +468,12 @@ func authLayoutShowcase() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"space-y-4\"><div class=\"grid grid-cols-2 gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Coming Soon",
-			Variant: molecules.BadgeVariantWarning,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><div class=\"text-sm text-gray-600 space-y-2\"><p>• Centered card layout</p><p>• Login & registration forms</p><p>• Password recovery flows</p><p>• Social authentication</p></div><div class=\"border rounded-md p-3 bg-gray-50\"><div class=\"flex justify-center\"><div class=\"w-20 h-16 bg-gray-300 rounded border-2 border-dashed border-gray-400\"></div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Text:     "Planned",
-			Variant:  atoms.ButtonVariantSecondary,
-			Size:     atoms.ButtonSizeSmall,
-			Disabled: true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"bg-muted rounded-md p-4 h-32\"><div class=\"h-full bg-background rounded\"><div class=\"h-8 bg-muted rounded m-2\"></div><div class=\"h-4 bg-muted rounded m-2 w-3/4\"></div><div class=\"h-4 bg-muted rounded m-2 w-1/2\"></div><div class=\"h-4 bg-muted rounded m-2 w-5/6\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -421,7 +481,7 @@ func authLayoutShowcase() templ.Component {
 	})
 }
 
-func formLayoutShowcase() templ.Component {
+func analyticsDashboardPreview() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -437,37 +497,12 @@ func formLayoutShowcase() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"space-y-4\"><div class=\"grid grid-cols-2 gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Coming Soon",
-			Variant: molecules.BadgeVariantWarning,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div><div class=\"text-sm text-gray-600 space-y-2\"><p>• Centered form layout</p><p>• Multi-step form support</p><p>• Validation integration</p><p>• Progress indicators</p></div><div class=\"border rounded-md p-3 bg-gray-50\"><div class=\"space-y-2\"><div class=\"h-2 bg-gray-300 rounded w-full\"></div><div class=\"h-2 bg-gray-300 rounded w-3/4\"></div><div class=\"h-2 bg-gray-300 rounded w-1/2\"></div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Text:     "Planned",
-			Variant:  atoms.ButtonVariantSecondary,
-			Size:     atoms.ButtonSizeSmall,
-			Disabled: true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"bg-muted rounded-md p-4 h-32\"><div class=\"grid grid-cols-3 gap-2 h-full\"><div class=\"bg-background rounded\"><div class=\"h-3 bg-muted rounded m-1\"></div><div class=\"h-6 bg-muted rounded m-1\"></div></div><div class=\"bg-background rounded\"><div class=\"h-3 bg-muted rounded m-1\"></div><div class=\"h-6 bg-muted rounded m-1\"></div></div><div class=\"bg-background rounded\"><div class=\"h-3 bg-muted rounded m-1\"></div><div class=\"h-6 bg-muted rounded m-1\"></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -475,7 +510,7 @@ func formLayoutShowcase() templ.Component {
 	})
 }
 
-func errorLayoutShowcase() templ.Component {
+func overviewDashboardPreview() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -491,37 +526,12 @@ func errorLayoutShowcase() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var15 == nil {
+			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"space-y-4\"><div class=\"grid grid-cols-2 gap-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = molecules.Badge(molecules.BadgeProps{
-			Text:    "Coming Soon",
-			Variant: molecules.BadgeVariantWarning,
-			Size:    molecules.BadgeSizeSmall,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div><div class=\"text-sm text-gray-600 space-y-2\"><p>• Error-specific layouts</p><p>• 404, 500 error pages</p><p>• Custom error handling</p><p>• Recovery actions</p></div><div class=\"border rounded-md p-3 bg-gray-50\"><div class=\"text-center\"><div class=\"text-2xl text-red-400\">⚠️</div><div class=\"h-1 bg-red-200 rounded w-16 mx-auto mt-2\"></div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = atoms.Button(atoms.ButtonProps{
-			Text:     "Planned",
-			Variant:  atoms.ButtonVariantSecondary,
-			Size:     atoms.ButtonSizeSmall,
-			Disabled: true,
-		}).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"bg-muted rounded-md p-4 h-32\"><div class=\"h-full\"><div class=\"flex gap-2 mb-2\"><div class=\"w-1/2 h-12 bg-background rounded\"></div><div class=\"w-1/2 h-12 bg-background rounded\"></div></div><div class=\"h-16 bg-background rounded\"><div class=\"h-3 bg-muted rounded m-2\"></div><div class=\"h-3 bg-muted rounded m-2 w-3/4\"></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

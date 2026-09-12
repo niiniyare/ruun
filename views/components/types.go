@@ -75,6 +75,15 @@ const (
 	AlertInfo        AlertVariant = "info"
 )
 
+// CodeVariant represents code style variations
+type CodeVariant string
+
+const (
+	CodeDefault CodeVariant = "default"
+	CodeInline  CodeVariant = "inline"
+	CodeBlock   CodeVariant = "block"
+)
+
 // ComponentState represents common component states
 type ComponentState struct {
 	Disabled bool

@@ -123,7 +123,6 @@ const (
 	TransformSlugify    TransformType = "slugify"
 )
 
-// SwapStrategy type moved to behavior.go - this definition is consolidated there
 
 // AggregateType represents different aggregation types
 type AggregateType string
@@ -629,9 +628,6 @@ type SchemaI18n struct {
 	Direction   map[string]string `json:"direction,omitempty"`
 }
 
-// ActionHTMX type moved to behavior.go - this definition is consolidated there
-
-
 // ActionConfirm represents action confirmation configuration
 type ActionConfirm struct {
 	Enabled bool   `json:"enabled"`
@@ -644,7 +640,6 @@ type ActionConfirm struct {
 }
 
 
-// Trigger type moved to behavior.go - this definition is consolidated there
 
 // DataSource represents field data source configuration
 type DataSource struct {
@@ -700,11 +695,6 @@ type operationMetrics struct {
 // EventHandler processes events
 // Note: EventHandler moved to interface.go
 
-// BehaviorMetadata type moved to event.go - this definition is consolidated there
-
-// Events type moved to event.go - this definition is consolidated there
-
-// HTMX type moved to behavior.go - this definition is consolidated there
 
 // DOMEvents represents unified DOM event handlers
 type DOMEvents struct {
@@ -856,7 +846,6 @@ func IsRTLForSchemaI18n(schemaI18n *SchemaI18n, locale string) bool {
 	return rtlLanguages[locale]
 }
 
-// HTMX helper methods moved to behavior.go
 
 // String method for ValidationError
 func (ve *ValidationError) String() string {
@@ -878,7 +867,6 @@ func (tt TransformType) String() string {
 	return string(tt)
 }
 
-// SwapStrategy String method moved to behavior.go
 
 // String method for AggregateType
 func (at AggregateType) String() string {

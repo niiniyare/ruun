@@ -177,84 +177,72 @@ templ Icon(props IconProps) {
 ### text
 ```go
 type TextProps struct {
-    Text   string
-    Size   TextSize
-    Weight FontWeight
-    Muted  bool
-    Class  string
-    Attrs  templ.Attributes
+	// Content
+	Text string `json:"text"`
+
+	// Visual styling
+	Variant TextVariant `json:"variant,omitempty"` // Color variant
+	Size    TextSize    `json:"size,omitempty"`    // Font size
+	Weight  TextWeight  `json:"weight,omitempty"`  // Font weight
+	Align   TextAlign   `json:"align,omitempty"`   // Text alignment
+
+	// Typography enhancements
+	Leading   string `json:"leading,omitempty"`   // Line height (leading-tight, leading-normal, etc.)
+	Tracking  string `json:"tracking,omitempty"`  // Letter spacing (tracking-tight, tracking-normal, etc.)
+	Italic    bool   `json:"italic,omitempty"`    // Italic text
+	Underline bool   `json:"underline,omitempty"` // Underlined text
+
+	// Element type
+	Element string `json:"element,omitempty"` // HTML element (p, span, div, etc.) - defaults to "p"
+
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+
+	// Shared component props (includes ClassName for additional styling)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
+// getTextSizeClasses returns font size classes
+func getTextSizeClasses(size TextSize) string {
+	switch size {
+	case TextXs:
+		return "text-xs"
 templ Text(props TextProps) {
-    <p
-        class={ templ.Classes(
-            string(props.Size),
-            string(props.Weight),
-            templ.KV("text-muted-foreground", props.Muted),
-            props.Class,
-        ) }
-        { props.Attrs... }
-    >
-        { props.Text }
-    </p>
-}
-
-// Span variant for inline text
-type SpanProps struct {
-    Text   string
-    Size   TextSize
-    Weight FontWeight
-    Muted  bool
-    Class  string
-    Attrs  templ.Attributes
-}
-
-templ Span(props SpanProps) {
-    <span
-        class={ templ.Classes(
-            string(props.Size),
-            string(props.Weight),
-            templ.KV("text-muted-foreground", props.Muted),
-            props.Class,
-        ) }
-        { props.Attrs... }
-    >
-        { props.Text }
-    </span>
-}
-templ Text(props TextProps) {
-templ Span(props SpanProps) {
 ```
 
 ### code
 ```go
 type CodeProps struct {
-    Text  string
-    Block bool
-    Lang  string
-    Class string
-    Attrs templ.Attributes
+	// Content
+	Text string `json:"text"`
+	
+	// Basecoat variants (using shared types)
+	Variant components.CodeVariant `json:"variant,omitempty"`
+	Size    components.Size         `json:"size,omitempty"`
+	
+	// Language for syntax highlighting (optional)
+	Language string `json:"language,omitempty"`
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
-templ Code(props CodeProps) {
-    if props.Block {
-        <pre class={ templ.Classes("bg-muted rounded-md p-4 overflow-x-auto", props.Class) } { props.Attrs... }>
-            <code class="text-sm font-mono">
-                { props.Text }
-            </code>
-        </pre>
-    } else {
-        <code
-            class={ templ.Classes(
-                "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm",
-                props.Class,
-            ) }
-            { props.Attrs... }
-        >
-            { props.Text }
-        </code>
-    }
-}
+// getCodeClass returns the correct Basecoat class based on variant and size
+func getCodeClass(variant components.CodeVariant, size components.Size) string {
+	// For code components, we use different classes based on inline vs block
+	if variant == components.CodeBlock {
+		switch size {
+		case components.SizeSm:
+			return "code-block-sm"
+		case components.SizeLg:
+			return "code-block-lg"
+		default: // default size
+			return "code-block"
+		}
+	} else {
 templ Code(props CodeProps) {
 ```
 

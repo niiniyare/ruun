@@ -4,19 +4,20 @@ import (
 	"github.com/niiniyare/ruun/views/components/atoms"
 	"github.com/niiniyare/ruun/views/components/molecules" 
 	"github.com/niiniyare/ruun/views/components/templates"
+	"github.com/niiniyare/ruun/views/components"
 )
 
 // DemoLayout wraps all demo pages with navigation
 templ DemoLayout(title string, activeSection string) {
-	@templates.BaseHTML(templates.BaseHTMLProps{
-		Title: title + " - Ruun Kitchen Sink",
+	@templates.BaseLayout(templates.BaseLayoutProps{
+		Meta: templates.PageMeta{Title: title + " - Ruun Kitchen Sink"},
 	}) {
-		@atoms.Flex(atoms.FlexProps{Direction: atoms.Row}) {
+		@atoms.Flex(atoms.FlexProps{Direction: "flex-row"}) {
 			// Sidebar
 			@DemoSidebar(activeSection)
 			
 			// Main content area
-			@atoms.Box(atoms.BoxProps{Padding: atoms.P8, Flex: atoms.Flex1}) {
+			@atoms.Box(atoms.BoxProps{Class: "p-8 flex-1"}) {
 				{ children... }
 			}
 		}
@@ -26,30 +27,25 @@ templ DemoLayout(title string, activeSection string) {
 // DemoSidebar creates the navigation sidebar
 templ DemoSidebar(activeSection string) {
 	@atoms.Box(atoms.BoxProps{
-		Width: atoms.W64,
-		Padding: atoms.P4,
-		Border: true,
-		BorderSide: atoms.BorderRight,
-		BgColor: atoms.BgMuted,
-		MinHeight: atoms.MinHScreen,
+		Class: "w-64 p-4 border-r border-border bg-muted min-h-screen",
 	}) {
 		// Logo/Title
-		@atoms.Stack(atoms.StackProps{Gap: atoms.Gap4, Padding: atoms.P4}) {
+		<div class="p-4 space-y-4">
 			@atoms.Heading(atoms.HeadingProps{Level: 2, Text: "Ruun UI"})
-			@atoms.Text(atoms.TextProps{Text: "Kitchen Sink", Size: atoms.TextSm, Muted: true})
-		}
+			@atoms.Text(atoms.TextProps{Text: "Kitchen Sink", Size: "text-sm", Muted: true})
+		</div>
 		
 		@atoms.Divider(atoms.DividerProps{})
 		
 		// Navigation
-		@atoms.Stack(atoms.StackProps{Gap: atoms.Gap1, Padding: atoms.P2}) {
+		<div class="p-2 space-y-1">
 			@NavItem("/", "Overview", "overview", activeSection)
 			@NavItem("/atoms", "Atoms", "atoms", activeSection)
 			@NavItem("/molecules", "Molecules", "molecules", activeSection)
 			@NavItem("/organisms", "Organisms", "organisms", activeSection)
 			@NavItem("/templates", "Templates", "templates", activeSection)
 			@NavItem("/examples", "Examples", "examples", activeSection)
-		}
+		</div>
 	}
 }
 
@@ -59,24 +55,24 @@ templ NavItem(href, label, section, activeSection string) {
 		Href: href,
 		Text: label,
 		Variant: getNavVariant(section, activeSection),
-		Block: true,
-		Padding: atoms.P2,
-		Rounded: atoms.RoundedMd,
+		Base: components.BaseProps{
+			ClassName: "block p-2 rounded-md",
+		},
 	})
 }
 
 func getNavVariant(section, active string) atoms.LinkVariant {
 	if section == active {
-		return atoms.LinkActive
+		return "default"
 	}
-	return atoms.LinkNav
+	return "muted"
 }
 
 // Section creates a demo section wrapper
 templ Section(title string) {
-	@atoms.Box(atoms.BoxProps{Padding: atoms.P6, Border: true, Rounded: atoms.RoundedLg, Margin: atoms.M4}) {
+	@atoms.Box(atoms.BoxProps{Class: "p-6 border border-border rounded-lg m-4"}) {
 		@atoms.Heading(atoms.HeadingProps{Level: 3, Text: title})
-		@atoms.Box(atoms.BoxProps{Padding: atoms.P4}) {
+		@atoms.Box(atoms.BoxProps{Class: "p-4"}) {
 			{ children... }
 		}
 	}
@@ -84,7 +80,7 @@ templ Section(title string) {
 
 // ComponentGrid creates a grid layout for component examples
 templ ComponentGrid() {
-	@atoms.Grid(atoms.GridProps{Cols: atoms.Cols3, Gap: atoms.Gap4}) {
+	@atoms.Grid(atoms.GridProps{Cols: 3, Gap: "gap-4"}) {
 		{ children... }
 	}
 }
@@ -94,15 +90,10 @@ templ ComponentExample(title string, description string) {
 	@molecules.Card(molecules.CardProps{
 		Title: title,
 		Description: description,
-		Padding: atoms.P4,
 		Border: true,
-		Rounded: atoms.RoundedLg,
 	}) {
 		@atoms.Box(atoms.BoxProps{
-			Padding: atoms.P4,
-			Border: true,
-			BgColor: atoms.BgMuted,
-			Rounded: atoms.RoundedMd,
+			Class: "p-4 border border-border bg-muted rounded-md",
 		}) {
 			{ children... }
 		}
@@ -111,27 +102,24 @@ templ ComponentExample(title string, description string) {
 
 // PropsTable creates a table for displaying component props
 templ PropsTable() {
-	@atoms.Box(atoms.BoxProps{Margin: atoms.MT4}) {
-		@atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Props", Size: atoms.TextSm})
+	@atoms.Box(atoms.BoxProps{Class: "mt-4"}) {
+		@atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Props"})
 		@atoms.Box(atoms.BoxProps{
-			Border: true,
-			Rounded: atoms.RoundedLg,
-			Overflow: atoms.OverflowHidden,
-			Margin: atoms.MT2,
+			Class: "border border-border rounded-lg overflow-hidden mt-2",
 		}) {
-			@atoms.Grid(atoms.GridProps{Cols: atoms.Cols4}) {
+			@atoms.Grid(atoms.GridProps{Cols: 4}) {
 				// Header
-				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
-					@atoms.Text(atoms.TextProps{Text: "Prop", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				@atoms.Box(atoms.BoxProps{Class: "p-3 bg-muted"}) {
+					@atoms.Text(atoms.TextProps{Text: "Prop", Weight: "font-medium", Size: "text-sm"})
 				}
-				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
-					@atoms.Text(atoms.TextProps{Text: "Type", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				@atoms.Box(atoms.BoxProps{Class: "p-3 bg-muted"}) {
+					@atoms.Text(atoms.TextProps{Text: "Type", Weight: "font-medium", Size: "text-sm"})
 				}
-				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
-					@atoms.Text(atoms.TextProps{Text: "Default", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				@atoms.Box(atoms.BoxProps{Class: "p-3 bg-muted"}) {
+					@atoms.Text(atoms.TextProps{Text: "Default", Weight: "font-medium", Size: "text-sm"})
 				}
-				@atoms.Box(atoms.BoxProps{Padding: atoms.P3, BgColor: atoms.BgMuted}) {
-					@atoms.Text(atoms.TextProps{Text: "Description", Weight: atoms.FontMedium, Size: atoms.TextSm})
+				@atoms.Box(atoms.BoxProps{Class: "p-3 bg-muted"}) {
+					@atoms.Text(atoms.TextProps{Text: "Description", Weight: "font-medium", Size: "text-sm"})
 				}
 				
 				{ children... }
@@ -142,36 +130,30 @@ templ PropsTable() {
 
 // PropRow creates a table row for component props
 templ PropRow(prop, propType, defaultVal, description string) {
-	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
-		@atoms.Text(atoms.TextProps{Text: prop, Font: atoms.FontMono, Size: atoms.TextXs})
+	@atoms.Box(atoms.BoxProps{Class: "p-3"}) {
+		@atoms.Text(atoms.TextProps{Text: prop, Weight: "font-mono", Size: "text-xs"})
 	}
-	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
-		@atoms.Text(atoms.TextProps{Text: propType, Muted: true, Size: atoms.TextSm})
+	@atoms.Box(atoms.BoxProps{Class: "p-3"}) {
+		@atoms.Text(atoms.TextProps{Text: propType, Muted: true, Size: "text-sm"})
 	}
-	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
-		@atoms.Text(atoms.TextProps{Text: defaultVal, Font: atoms.FontMono, Size: atoms.TextXs})
+	@atoms.Box(atoms.BoxProps{Class: "p-3"}) {
+		@atoms.Text(atoms.TextProps{Text: defaultVal, Weight: "font-mono", Size: "text-xs"})
 	}
-	@atoms.Box(atoms.BoxProps{Padding: atoms.P3}) {
-		@atoms.Text(atoms.TextProps{Text: description, Size: atoms.TextSm})
+	@atoms.Box(atoms.BoxProps{Class: "p-3"}) {
+		@atoms.Text(atoms.TextProps{Text: description, Size: "text-sm"})
 	}
 }
 
 // CodeBlock creates a code block for showing component usage
 templ CodeBlock(code string) {
-	@atoms.Box(atoms.BoxProps{Margin: atoms.MT4}) {
-		@atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Usage", Size: atoms.TextSm})
+	@atoms.Box(atoms.BoxProps{Class: "mt-4"}) {
+		@atoms.Heading(atoms.HeadingProps{Level: 4, Text: "Usage"})
 		@atoms.Box(atoms.BoxProps{
-			Border: true,
-			Rounded: atoms.RoundedLg,
-			Padding: atoms.P4,
-			BgColor: atoms.BgMuted,
-			Margin: atoms.MT2,
+			Class: "border border-border rounded-lg p-4 bg-muted mt-2",
 		}) {
-			@atoms.Text(atoms.TextProps{
+			@atoms.Code(atoms.CodeProps{
 				Text: code,
-				Font: atoms.FontMono,
-				Size: atoms.TextXs,
-				Whitespace: atoms.WhitespacePre,
+				Variant: components.CodeBlock,
 			})
 		}
 	}

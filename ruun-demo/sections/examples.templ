@@ -1,281 +1,242 @@
 package sections
 
 import (
+    "github.com/a-h/templ"
     "github.com/niiniyare/ruun/views/components/atoms"
     "github.com/niiniyare/ruun/views/components/molecules"
+    "github.com/niiniyare/ruun/views/components"
 )
 
 templ ExamplesPage() {
     @DemoLayout("Examples", "examples") {
-        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap8}) {
+        <div class="space-y-8">
             @atoms.Heading(atoms.HeadingProps{Level: 1, Text: "Real-World Examples"})
             @atoms.Text(atoms.TextProps{
                 Text: "Complete, production-ready implementations showcasing component combinations.",
-                Muted: true,
+                Variant: atoms.TextMuted,
             })
             
             // ════════════════════════════════════════════════════════════
-            // INVOICE LIST EXAMPLE  
+            // USER PROFILE EXAMPLE  
             // ════════════════════════════════════════════════════════════
-            @Section("Invoice Management Dashboard") {
+            @Section("User Profile Form") {
                 @atoms.Text(atoms.TextProps{
-                    Text: "Complete invoice list with filtering, search, and batch actions:",
-                    Muted: true,
+                    Text: "Complete user profile form with validation and image upload:",
+                    Variant: atoms.TextMuted,
                 })
                 
-                @invoiceExample()
+                @userProfileExample()
                 
-                @atoms.Code(atoms.CodeProps{
-                    Text: `// Invoice Dashboard Layout
+                @CodeBlock(`// User Profile Form
 @molecules.Card(molecules.CardProps{
-    Title: "Invoice Management",
-    Description: "Complete system with filtering",
-}) {
-    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-        // Header with actions
-        @atoms.Flex(atoms.FlexProps{
-            Justify: atoms.JustifyBetween,
-            Align: atoms.AlignCenter,
-        }) {
-            @atoms.Heading(atoms.HeadingProps{
-                Level: 2, Text: "Invoices"
-            })
-            @atoms.ButtonGroup(atoms.ButtonGroupProps{
-                Buttons: []atoms.ButtonProps{
-                    {Label: "Export", Variant: atoms.ButtonOutline},
-                    {Label: "New Invoice", Variant: atoms.ButtonPrimary},
-                },
-            })
-        }
-        
-        // Invoice list items
-        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
-            @molecules.Card(molecules.CardProps{
-                Title: "INV-001",
-                Description: "Acme Corp - $1,250.00",
-            }) {
-                @atoms.Badge(atoms.BadgeProps{
-                    Text: "Paid", Variant: atoms.BadgeSuccess
-                })
-            }
-        }
-    }
-}`,
-                    Block: true,
-                })
+    Title: "Profile Settings",
+    Description: "Update your personal information",
+    Content: profileForm(),
+})`)
             }
             
             // ════════════════════════════════════════════════════════════
-            // LOGIN FORM EXAMPLE
+            // DASHBOARD STATS EXAMPLE
             // ════════════════════════════════════════════════════════════
-            @Section("Authentication Form") {
+            @Section("Dashboard Statistics") {
                 @atoms.Text(atoms.TextProps{
-                    Text: "Clean login form with validation:",
-                    Muted: true,
+                    Text: "Dashboard with metrics cards and action buttons:",
+                    Variant: atoms.TextMuted,
                 })
                 
-                @loginExample()
+                @dashboardStatsExample()
                 
-                @atoms.Code(atoms.CodeProps{
-                    Text: `// Login Form Layout
+                @CodeBlock(`// Dashboard Stats Layout
+@atoms.Grid(atoms.GridProps{Cols: 4, Gap: "gap-6"}) {
+    @molecules.StatsCard("Total Users", "1,234", "+12%", true)
+    @molecules.StatsCard("Revenue", "$45,678", "+8%", true)
+    @molecules.StatsCard("Orders", "892", "-3%", false)
+    @molecules.StatsCard("Conversion", "3.2%", "+1.1%", true)
+}`)
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // SEARCH AND FILTERS EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("Search & Filter Interface") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "Advanced search with filters and results:",
+                    Variant: atoms.TextMuted,
+                })
+                
+                @searchFiltersExample()
+                
+                @CodeBlock(`// Search Interface
+@atoms.Flex(atoms.FlexProps{Gap: "gap-4"}) {
+    @molecules.SearchBox(molecules.SearchBoxProps{
+        Placeholder: "Search products...",
+        Suggestions: suggestions,
+    })
+    @molecules.DropdownMenu(filterMenu)
+    @atoms.Button(atoms.ButtonProps{
+        Text: "Filter",
+        Variant: components.ButtonSecondary,
+    })
+}`)
+            }
+            
+            // ════════════════════════════════════════════════════════════
+            // NOTIFICATION CENTER EXAMPLE
+            // ════════════════════════════════════════════════════════════
+            @Section("Notification Center") {
+                @atoms.Text(atoms.TextProps{
+                    Text: "Notification management with different types and actions:",
+                    Variant: atoms.TextMuted,
+                })
+                
+                @notificationCenterExample()
+                
+                @CodeBlock(`// Notification Center
 @molecules.Card(molecules.CardProps{
-    Title: "Sign In",
-    Description: "Welcome back to your account",
+    Title: "Notifications",
+    HeaderAction: markAllReadButton(),
 }) {
-    @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-        @molecules.FormField(molecules.FormFieldProps{
-            Label: "Email",
-            Name: "email",
-            Type: molecules.FormFieldEmail,
-            Placeholder: "Enter your email",
-            Required: true,
-        })
-        
-        @molecules.FormField(molecules.FormFieldProps{
-            Label: "Password",
-            Name: "password",
-            Type: molecules.FormFieldPassword,
-            Placeholder: "Enter your password",
-            Required: true,
-        })
-        
-        @atoms.Button(atoms.ButtonProps{
-            Label: "Sign In",
-            Type: atoms.ButtonSubmit,
-            Variant: atoms.ButtonPrimary,
-            FullWidth: true,
-        })
-    }
-}`,
-                    Block: true,
-                })
+    @notificationList(notifications)
+}`)
             }
-            
-            // ════════════════════════════════════════════════════════════
-            // DASHBOARD EXAMPLE
-            // ════════════════════════════════════════════════════════════
-            @Section("Executive Dashboard") {
-                @atoms.Text(atoms.TextProps{
-                    Text: "Dashboard with stats cards and data:",
-                    Muted: true,
-                })
-                
-                @dashboardExample()
-                
-                @atoms.Code(atoms.CodeProps{
-                    Text: `// Dashboard Layout
-@atoms.Grid(atoms.GridProps{Cols: 3, Gap: atoms.Gap4}) {
-    @molecules.Card(molecules.CardProps{
-        Title: "Total Revenue",
-        Description: "$124,592",
-    }) {
-        @atoms.Text(atoms.TextProps{
-            Text: "+12.5%",
-            Color: atoms.ColorSuccess,
-        })
-    }
-    
-    @molecules.Card(molecules.CardProps{
-        Title: "Active Users",
-        Description: "1,429",
-    }) {
-        @atoms.Text(atoms.TextProps{
-            Text: "+5.2%",
-            Color: atoms.ColorSuccess,
-        })
-    }
-    
-    @molecules.Card(molecules.CardProps{
-        Title: "Conversion Rate",
-        Description: "3.24%",
-    }) {
-        @atoms.Text(atoms.TextProps{
-            Text: "-0.8%",
-            Color: atoms.ColorError,
-        })
-    }
-}`,
-                    Block: true,
-                })
-            }
-        }
+        </div>
     }
 }
 
-// Helper components for examples
-
-templ invoiceExample() {
+// Example implementations
+templ userProfileExample() {
     @molecules.Card(molecules.CardProps{
-        Title: "Invoice Management Dashboard",
-        Description: "Complete system with filtering and actions",
+        Title: "Profile Settings",
+        Description: "Update your personal information",
     }) {
-        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-            // Header with actions
-            @atoms.Flex(atoms.FlexProps{
-                Justify: atoms.JustifyBetween,
-                Align: atoms.AlignCenter,
-            }) {
-                @atoms.Heading(atoms.HeadingProps{Level: 2, Text: "Invoices"})
-                @atoms.ButtonGroup(atoms.ButtonGroupProps{
-                    Buttons: []atoms.ButtonProps{
-                        {Label: "Export", Variant: atoms.ButtonOutline},
-                        {Label: "New Invoice", Variant: atoms.ButtonPrimary},
-                    },
+        <div class="space-y-6">
+            @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap6}) {
+                @atoms.Avatar(atoms.AvatarProps{
+                    Src: "https://github.com/shadcn.png",
+                    Alt: "Profile picture",
+                    Size: components.SizeLg,
                 })
+                <div class="flex-1 space-y-4">
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Full Name",
+                        Name: "name",
+                        Type: "text",
+                        Value: "John Doe",
+                        Required: true,
+                    })
+                    @molecules.FormField(molecules.FormFieldProps{
+                        Label: "Email",
+                        Name: "email",
+                        Type: "email",
+                        Value: "john.doe@example.com",
+                        Required: true,
+                    })
+                </div>
             }
             
-            // Invoice list items
-            @atoms.Stack(atoms.StackProps{Gap: atoms.Gap2}) {
-                @molecules.Card(molecules.CardProps{
-                    Title: "INV-001",
-                    Description: "Acme Corp - $1,250.00",
-                }) {
-                    @atoms.Badge(atoms.BadgeProps{Text: "Paid", Variant: atoms.BadgeSuccess})
-                }
-                
-                @molecules.Card(molecules.CardProps{
-                    Title: "INV-002", 
-                    Description: "Tech Solutions - $890.50",
-                }) {
-                    @atoms.Badge(atoms.BadgeProps{Text: "Sent", Variant: atoms.BadgeWarning})
-                }
+            @atoms.Flex(atoms.FlexProps{Gap: atoms.Gap2, Justify: atoms.JustifyEnd}) {
+                @atoms.Button(atoms.ButtonProps{
+                    Text: "Cancel",
+                    Variant: components.ButtonSecondary,
+                })
+                @atoms.Button(atoms.ButtonProps{
+                    Text: "Save Changes",
+                    Variant: components.ButtonPrimary,
+                })
             }
-        }
+        </div>
     }
 }
 
-templ loginExample() {
-    @molecules.Card(molecules.CardProps{
-        Title: "Sign In",
-        Description: "Welcome back to your account",
-    }) {
-        @atoms.Stack(atoms.StackProps{Gap: atoms.Gap4}) {
-            @molecules.FormField(molecules.FormFieldProps{
-                Label: "Email",
-                Name: "email",
-                Type: molecules.FormFieldEmail,
-                Placeholder: "Enter your email",
-                Required: true,
-            })
-            
-            @molecules.FormField(molecules.FormFieldProps{
-                Label: "Password",
-                Name: "password",
-                Type: molecules.FormFieldPassword,
-                Placeholder: "Enter your password",
-                Required: true,
-            })
-            
-            @atoms.Flex(atoms.FlexProps{
-                Justify: atoms.JustifyBetween,
-                Align: atoms.AlignCenter,
-            }) {
-                @atoms.Checkbox(atoms.CheckboxProps{
-                    Label: "Remember me",
-                    Name: "remember",
+templ dashboardStatsExample() {
+    @atoms.Grid(atoms.GridProps{Cols: 4, Gap: "gap-6"}) {
+        @molecules.StatsCard("Total Users", "1,234", "+12%", "users", "", true)
+        @molecules.StatsCard("Revenue", "$45,678", "+8%", "dollar-sign", "", true)
+        @molecules.StatsCard("Orders", "892", "-3%", "shopping-cart", "", false)
+        @molecules.StatsCard("Conversion", "3.2%", "+1.1%", "trending-up", "", true)
+    }
+}
+
+templ searchFiltersExample() {
+    <div class="space-y-4">
+        @atoms.Flex(atoms.FlexProps{Gap: "gap-4", Align: "items-center"}) {
+            <div class="flex-1">
+                @molecules.SearchBox(molecules.SearchBoxProps{
+                    ID: "search",
+                    Name: "search",
+                    Placeholder: "Search products...",
                 })
-                @atoms.Link(atoms.LinkProps{
-                    Text: "Forgot password?",
-                    Href: "/auth/forgot",
-                })
-            }
-            
+            </div>
+            @molecules.SimpleDropdownMenu("filters", "Filters", []molecules.DropdownMenuItem{
+                {Text: "All Categories", Type: "radio", Checked: true},
+                {Text: "Electronics", Type: "radio"},
+                {Text: "Clothing", Type: "radio"},
+                {Text: "Books", Type: "radio"},
+            })
             @atoms.Button(atoms.ButtonProps{
-                Label: "Sign In",
-                Type: atoms.ButtonSubmit,
-                Variant: atoms.ButtonPrimary,
-                FullWidth: true,
+                Text: "Search",
+                Variant: components.ButtonPrimary,
             })
         }
-    }
+        
+        <div class="border border-border rounded-lg p-4">
+            <p class="text-sm text-muted-foreground mb-2">Search Results:</p>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center p-2 hover:bg-muted rounded">
+                    <span>iPhone 13 Pro Max</span>
+                    <span class="text-muted-foreground">$1,099</span>
+                </div>
+                <div class="flex justify-between items-center p-2 hover:bg-muted rounded">
+                    <span>Samsung Galaxy S22</span>
+                    <span class="text-muted-foreground">$799</span>
+                </div>
+                <div class="flex justify-between items-center p-2 hover:bg-muted rounded">
+                    <span>MacBook Pro 14"</span>
+                    <span class="text-muted-foreground">$1,999</span>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
-templ dashboardExample() {
+templ notificationCenterExample() {
     @molecules.Card(molecules.CardProps{
-        Title: "Executive Dashboard",
-        Description: "Key metrics and performance indicators",
+        Title: "Notifications",
+        HeaderAction: atoms.Button(atoms.ButtonProps{
+            Text: "Mark all read",
+            Size: components.SizeSm,
+            Variant: components.ButtonSecondary,
+        }),
     }) {
-        @atoms.Grid(atoms.GridProps{Cols: 3, Gap: atoms.Gap4}) {
-            @molecules.Card(molecules.CardProps{
-                Title: "Total Revenue",
-                Description: "$124,592",
-            }) {
-                @atoms.Text(atoms.TextProps{Text: "+12.5%", Color: atoms.ColorSuccess})
-            }
+        <div class="space-y-3">
+            <div class="flex gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                @atoms.Icon(atoms.IconProps{Name: "mail", Size: components.SizeSm})
+                <div class="flex-1">
+                    <p class="text-sm font-medium">New message from Sarah</p>
+                    <p class="text-xs text-muted-foreground">2 minutes ago</p>
+                </div>
+                @atoms.Button(atoms.ButtonProps{
+                    Text: "Reply",
+                    Size: components.SizeSm,
+                    Variant: components.ButtonSecondary,
+                })
+            </div>
             
-            @molecules.Card(molecules.CardProps{
-                Title: "Active Users",
-                Description: "1,429",
-            }) {
-                @atoms.Text(atoms.TextProps{Text: "+5.2%", Color: atoms.ColorSuccess})
-            }
+            <div class="flex gap-3 p-3 hover:bg-muted rounded-lg">
+                @atoms.Icon(atoms.IconProps{Name: "bell", Size: components.SizeSm})
+                <div class="flex-1">
+                    <p class="text-sm font-medium">Server maintenance scheduled</p>
+                    <p class="text-xs text-muted-foreground">1 hour ago</p>
+                </div>
+            </div>
             
-            @molecules.Card(molecules.CardProps{
-                Title: "Conversion Rate",
-                Description: "3.24%",
-            }) {
-                @atoms.Text(atoms.TextProps{Text: "-0.8%", Color: atoms.ColorError})
-            }
-        }
+            <div class="flex gap-3 p-3 hover:bg-muted rounded-lg">
+                @atoms.Icon(atoms.IconProps{Name: "check-circle", Size: components.SizeSm})
+                <div class="flex-1">
+                    <p class="text-sm font-medium">Deployment completed successfully</p>
+                    <p class="text-xs text-muted-foreground">3 hours ago</p>
+                </div>
+            </div>
+        </div>
     }
 }

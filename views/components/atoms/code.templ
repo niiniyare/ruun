@@ -1,31 +1,136 @@
 package atoms
 
-import "github.com/a-h/templ"
+import "github.com/niiniyare/ruun/views/components"
 
+// CodeProps defines all properties for the Code atom
+// Combines Basecoat semantic classes with Tailwind utilities
 type CodeProps struct {
-    Text  string
-    Block bool
-    Lang  string
-    Class string
-    Attrs templ.Attributes
+	// Content
+	Text string `json:"text"`
+	
+	// Basecoat variants (using shared types)
+	Variant components.CodeVariant `json:"variant,omitempty"`
+	Size    components.Size         `json:"size,omitempty"`
+	
+	// Language for syntax highlighting (optional)
+	Language string `json:"language,omitempty"`
+	
+	// Additional attributes using templ.Attributes for extensibility
+	Attrs templ.Attributes `json:"attrs,omitempty"`
+	
+	// Shared component props (includes ClassName for Tailwind utilities)
+	Base components.BaseProps `json:"base,omitempty"`
 }
 
+// getCodeClass returns the correct Basecoat class based on variant and size
+func getCodeClass(variant components.CodeVariant, size components.Size) string {
+	// For code components, we use different classes based on inline vs block
+	if variant == components.CodeBlock {
+		switch size {
+		case components.SizeSm:
+			return "code-block-sm"
+		case components.SizeLg:
+			return "code-block-lg"
+		default: // default size
+			return "code-block"
+		}
+	} else {
+		// Inline code (default)
+		switch size {
+		case components.SizeSm:
+			return "code-sm"
+		case components.SizeLg:
+			return "code-lg"
+		default: // default size
+			return "code"
+		}
+	}
+}
+
+// buildCodeAttributes creates all HTML attributes for the code element
+func buildCodeAttributes(props CodeProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			getCodeClass(props.Variant, props.Size),
+			props.Base.ClassName,
+		),
+	}
+
+	// Base attributes
+	if props.Base.ID != "" {
+		attrs["id"] = props.Base.ID
+	}
+
+	// Language attribute for syntax highlighting
+	if props.Language != "" {
+		attrs["data-language"] = props.Language
+	}
+
+	// Accessibility attributes
+	if props.Base.A11y.Role != "" {
+		attrs["role"] = props.Base.A11y.Role
+	}
+	if props.Base.A11y.AriaLabel != "" {
+		attrs["aria-label"] = props.Base.A11y.AriaLabel
+	}
+	if props.Base.A11y.AriaDescribedBy != "" {
+		attrs["aria-describedby"] = props.Base.A11y.AriaDescribedBy
+	}
+
+	// Event handlers
+	if props.Base.Events.OnClick != "" {
+		attrs["onclick"] = props.Base.Events.OnClick
+	}
+
+	// Merge custom attributes
+	for key, value := range props.Attrs {
+		attrs[key] = value
+	}
+
+	return attrs
+}
+
+// buildPreAttributes creates attributes for the pre wrapper (block code only)
+func buildPreAttributes(props CodeProps) templ.Attributes {
+	attrs := templ.Attributes{
+		"class": templ.Classes(
+			"pre-code", // Base pre wrapper class
+			props.Base.ClassName,
+		),
+	}
+
+	// HTMX attributes (applied to pre wrapper for block code)
+	if props.Base.HTMX.Post != "" {
+		attrs["hx-post"] = props.Base.HTMX.Post
+	}
+	if props.Base.HTMX.Get != "" {
+		attrs["hx-get"] = props.Base.HTMX.Get
+	}
+	if props.Base.HTMX.Target != "" {
+		attrs["hx-target"] = props.Base.HTMX.Target
+	}
+	if props.Base.HTMX.Swap != "" {
+		attrs["hx-swap"] = props.Base.HTMX.Swap
+	}
+	if props.Base.HTMX.Trigger != "" {
+		attrs["hx-trigger"] = props.Base.HTMX.Trigger
+	}
+
+	return attrs
+}
+
+// Code renders a Basecoat code atom with Tailwind utilities support
+// Supports both inline and block code variants
 templ Code(props CodeProps) {
-    if props.Block {
-        <pre class={ templ.Classes("bg-muted rounded-md p-4 overflow-x-auto", props.Class) } { props.Attrs... }>
-            <code class="text-sm font-mono">
-                { props.Text }
-            </code>
-        </pre>
-    } else {
-        <code
-            class={ templ.Classes(
-                "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm",
-                props.Class,
-            ) }
-            { props.Attrs... }
-        >
-            { props.Text }
-        </code>
-    }
+	if props.Variant == components.CodeBlock {
+		<pre {buildPreAttributes(props)...}>
+			<code {buildCodeAttributes(props)...}>
+				{props.Text}
+			</code>
+		</pre>
+	} else {
+		<code {buildCodeAttributes(props)...}>
+			{props.Text}
+		</code>
+	}
 }

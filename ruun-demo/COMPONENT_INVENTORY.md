@@ -21,7 +21,6 @@ This is an auto-generated inventory of what ACTUALLY exists in the ruun package.
   - Icon()
 - text.templ
   - Text()
-  - Span()
 - code.templ
   - Code()
 - button.templ
@@ -225,6 +224,15 @@ const (
 	AlertError       AlertVariant = "error"
 	AlertDestructive AlertVariant = "destructive"
 	AlertInfo        AlertVariant = "info"
+)
+
+// CodeVariant represents code style variations
+type CodeVariant string
+
+const (
+	CodeDefault CodeVariant = "default"
+	CodeInline  CodeVariant = "inline"
+	CodeBlock   CodeVariant = "block"
 )
 
 // ComponentState represents common component states
